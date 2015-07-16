@@ -1,0 +1,261 @@
+= glslc Manual
+
+:numbered:
+:source-highlighter: pygments
+
+== Name
+
+`glslc` - A command-line GLSL to SPIR-V compiler with Clang-compatible arguments.
+
+== Synopsis
+
+----
+glslc [-c|-S|-E]
+      [-Dmacroname[=value]...]
+      [-std=standard] [-x glsl]
+      [-fshader-stage=...]
+      [-g]
+      [-w] [-Werror]
+      [-o outfile] shader...
+----
+
+== Description
+
+=== Shader stage specification
+
+glslc provides three ways to specify the shader stage of a input shader file:
+`-fshader-stage=<stage>`, `#pragma shader_stage(<stage>)`, and file extension.
+The `-fshader-stage=` option overrules `#pragma shader_stage()`, which then
+overrules the file extension.
+
+Shader stages can be specified by naming a file with an appropriate extension
+as shown in the following table. `-fshader-stage=` and `#pragma shader_stage()`,
+on the other hand, enable you to specify shader stages from the command line
+and within the source file. Possible ``stage``s for them are also listed in
+the following table. Details about `-fshader-stage=` can be found in
+<<option-f-shader-stage,its own section>>.
+
+[[shader-stage-selection]]
+.Shader Stage Selection
+|===
+|Shader Stage |Shader File Extension |`<stage>`
+
+|vertex                 |`.vert` |`vertex`
+|fragment               |`.frag` |`fragment`
+|tesselation control    |`.tesc` |`tesscontrol`
+|tesselation evaluation |`.tese` |`tesseval`
+|geometry               |`.geom` |`geometry`
+|compute                |`.comp` |`compute`
+|===
+
+`#pragma shader_stage()` relies on the `#pragma` preprocessor directive; thus,
+the token inside `shader_stage()` is not subject to preprocessor macro
+expansion. It must be exactly one of the ``stage``s in the above table.
+
+`#pragma shader_stage()` behaves as follows:
+
+* The first `#pragma shader_stage()` directive in a translation unit must
+  precede any non-preprocessor tokens.
+* If there is more than one `#pragma shader_stage()` directive in the same
+  translation unit, all the ``stage``s specified must be the same. Otherwise,
+  glslc will issue an error.
+
+[[output-file-naming]]
+=== Output file naming
+
+If a name is specified via `-o`, the output file will be given that name.
+Otherwise,
+
+* If a compilation stage selection option is given (`-S` or `-c`), there will
+  be one output file generated per input shader file. The generated output file
+  will end with a file extension that matches the compilation stage, which is
+  `.s` for `-S` and `.spv` for `-c`. The name will depend on the original file's
+  name and extension.
+** If the input file has a <<shader-stage-selection,shader stage selection
+   extension>>, the output file will be named as by appending the file extension
+   for the compilation stage to the input file's name. E.g., `glslc -c foo.vert`
+   will generate `foo.vert.spv`, and `glslc -s bar.frag` will generate
+   `bar.frag.s`.
+** Otherwise, the output file will be named as by replacing the input file's
+   file extension, if any, with the file extension for the compilation stage.
+   E.g., `glslc -c foo` will generate `foo.spv`, and `glslc -s bar.glsl` will
+   generate `bar.s`.
+* If no compilation stage is selected, the output file will be named `a.spv`.
+
+== Command Line Options
+
+=== Overall Options
+
+==== `--help`
+
+`--help` tells the glslc compiler to display all available options and exit.
+
+==== `-o`
+
+`-o` lets you specify the output file's name. It cannot be used when there are
+multiple files generated. A filename of `-` represents standard output.
+
+=== Language and Mode Selection Options
+
+[[option-f-shader-stage]]
+==== `-fshader-stage=`
+
+`-fshader-stage=<stage>` lets you specify the shader stage for one or more
+inputs from the command line.
+
+Possible values for ``<stage>`` are listed in the <<shader-stage-selection,
+Shader Stage Selection>> table.
+
+`-fshader-stage=` behaves as follows:
+
+* `-fshader-stage=` sets the shader stage for subsequent input files. It does
+  not affect the stages of any preceding inputs on the command line.
+* When supplying more than one `-fshader-stage=` argument, the most recent
+  argument preceding an input file applies.
+* A shader file not ending with <<shader-stage-selection,known shader file
+  extensions>> must have a `-fshader-stage=` argument ahead of it to specify
+  its stage.
+* If there is a `-fshader-stage=` before a file in which there is a `#pragma
+  shader_stage()` directive, the directive is ignored and the `-fshader-stage=`
+  argument is used instead.
+* If there is a `-fshader-stage=` before a file with a known shader file
+  extension, the file extension is ignored and the `-fshader-stage=` argument
+  is used instead.
+
+==== `-std=`
+
+`-std=<value>` lets you specify a shader version and profile on the command
+line. ``<value>`` can be any valid concatenation of a GLSL version number and
+profile, e.g., `310es`, `450core`, etc. The profile can be omitted as allowed by
+GLSL, e.g., `450`.
+
+`-std=` behaves as follows:
+
+* `-std=` affects the version of all inputs passed to `glslc`.
+* `-std=` overwrites `#version` directives in all input shaders, including those
+  preceding the argument.
+* If a `-std=` argument specifies a different version from a `#version`
+  directive in an input file, `glslc` will issue a warning.
+* If multiple `-std=` arguments are specified on the command line, only the last
+  one takes effect.
+
+==== `-x`
+
+`-x` lets you specify the language of the input shader files. The only accepted
+argument is `glsl`.
+
+=== Compilation Stage Selection Options
+
+==== `-c`
+
+`-c` tells the glslc compiler to run the preprocessing and compiling stage.
+Each input shader file results in a SPIR-V binary file; these SPIR-V binary
+files are named by the rules in the <<output-file-naming,Output File Naming>>
+section.
+
+==== `-E`
+
+`-E` tells the glslc compiler to run only the preprocessing stage. It overrules
+`-c` and `-S`. Preprocessed output is written to standard output, while
+preprocessing errors are written to standard error. If multiple input shader
+files are given, their preprocessed output are all written to standard output,
+in the order specified on the command line.
+
+==== `-S`
+
+`-S` tells the glslc compiler to run the preprocessing, compiling, and then
+disassembling stage. It overrules `-c`. Each input shader file results in a
+SPIR-V assembly file; these SPIR-V assembly files are named by the rules in the
+<<output-file-naming,Output File Naming>> section.
+
+==== No Compilation Stage Selection
+
+If none of the above options is given, the glslc compiler will run
+preprocessing, compiling, and linking stages.
+
+WARNING: Linking of multiple input shader files are not supported yet.
+
+=== Preprocessor Options
+
+==== `-D`
+
+`-Dmacroname[=[value]]` lets you define a preprocessor macro before input shader
+files are preprocessed. If `value` is omitted, the macro is defined with an
+empty value.
+
+=== Code Generation Options
+
+==== `-g`
+
+Requests that the compiler place source-level debug information into the object
+code, such as identifier names and line numbers.
+
+NOTE: Currently this option has no effect.  Full functionality depends on
+glslang support for generating debug info.
+
+=== Warning and Error Options
+
+==== `-w`
+
+`-w` suppresses all warning output from `glslc`. Any warning that would have
+been generated is silently ignored.
+
+==== `-Werror`
+
+`-Werror` forces any warning to be treated as an error in `glslc`. This means
+that all `warning:` messages are shown as `error:` and any warnings will cause
+a non-zero exit code from `glslc`. If `-w` is specified the warnings
+generated are suppressed before they are converted to errors.
+
+== Divergence from and extensions to GLSL specifications
+
+=== Source-filename-based `#line` and `\\__FILE__`
+
+This section describes how the glslc compiler extends the syntax for `#line` and
+`\\__FILE__`.  When the `-fcpp-style-line-directive` option is supplied, this
+extended syntax is generated during emitting a preprocessed output (the `-E`
+option), and is parsed and accepted by the preprocessor.
+
+WARNING: This section is still evolving. Expect changes.
+
+GLSL specifications have a notion of source strings.
+
+[quote, Section 3.2 of both version 3.30 and 4.50]
+____
+The source for a single shader is an array of strings of characters from the
+character set. A single shader is made from the concatenation of these strings.
+____
+
+With the above notion, the second parameter to the `#line` directive should
+be a constant integer expressions representing the source string number. Also
+the `\\__FILE__` macro will "substitute a decimal integer constant that says
+which source string number is currently being processed."
+
+The glslc compiler implements the standard `#line` and `\\__FILE__` syntax. It
+also provides an extension to allow source filenames to be used instead of
+integer source string indices. Specifically, the `#line` directive can have,
+after macro substitution, one of the following three forms:
+
+[source,glsl]
+----
+#line line-number
+#line line-number integer-source-string-index
+#line line-number "source-filename"
+----
+
+where `source-filename` can be any combinations of characters except double
+quotation marks. (Note that according to the GLSL specification, "there are
+no escape sequences or other uses of the backslash beyond use as the
+line-continuation character".)
+
+And if source-filename-based `#line` is used, the `\\__FILE__` macro expands to
+a string whose contents are the filename quoted with double quotation marks.
+The filename is dertermined as the last of
+
+* The filename given to the glslc compiler,
+* The filename argument of the most recent `#line` directive, if any.
+
+Source-filename-based `#line`/`\\__FILE__` is enabled by the
+`-fcpp-style-line-directive` option. It is incompatible with
+source-string-number-based `#line`/`\\__FILE__`; only one can be enabled.
+glslc will issue an error if both are used.
