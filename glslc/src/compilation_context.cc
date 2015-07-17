@@ -58,10 +58,6 @@ bool CompilationContext::CompileShader(const std::string& input_file,
   if (!shaderc_util::ReadFile(input_file, &input_data)) {
     return false;
   }
-  // glslang expects null-terminated strings even though it then uses
-  // data/length internally.
-  // TODO(awoloszyn): Once we add data/length into glslang, fix this.
-  input_data.push_back('\0');
 
   const std::string output_file = GetOutputFileName(input_file);
   string_piece error_output_file_name(input_file);
@@ -107,7 +103,8 @@ bool CompilationContext::CompileShader(const std::string& input_file,
 
   glslang::TShader shader(shader_stage);
   const char* shader_strings = &input_data[0];
-  shader.setStrings(&shader_strings, 1);
+  const int shader_lengths = input_data.size();
+  shader.setStringsWithLengths(&shader_strings, &shader_lengths, 1);
   shader.setPreamble(macro_definitions.c_str());
 
   // TODO(dneto): Generate source-level debug info if requested.
@@ -222,9 +219,9 @@ std::tuple<bool, std::string, std::string> CompilationContext::PreprocessShader(
   // The stage does not matter for preprocessing.
   glslang::TShader shader(EShLangVertex);
   const char* shader_strings = &shader_source[0];
-  shader.setStrings(&shader_strings, 1);
+  const int shader_lengths = shader_source.size();
+  shader.setStringsWithLengths(&shader_strings, &shader_lengths, 1);
   shader.setPreamble(shader_preamble.c_str());
-
   std::string preprocessed_shader;
   const bool success = shader.preprocess(
       &shaderc_util::kDefaultTBuiltInResource, default_version_,
