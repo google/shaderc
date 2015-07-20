@@ -15,6 +15,8 @@
 #ifndef GLSLC_COMPILATION_CONTEXT_H
 #define GLSLC_COMPILATION_CONTEXT_H
 
+#include <functional>
+#include <ostream>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -56,7 +58,9 @@ class CompilationContext {
         total_errors_(0) {}
 
   // Compiles a shader received in input_file, returning true on success and
-  // false otherwise. The shader is assumed to be for the shader_stage stage.
+  // false otherwise. If force_shader_stage is not EShLangCount then the
+  // given shader_stage will be used, otherwise it will be determined
+  // from the source or the file type.
   //
   // Places the compilation output into a new file whose name is derived from
   // input_file according to the rules from glslc/README.asciidoc.
@@ -117,6 +121,30 @@ class CompilationContext {
   void OutputMessages();
 
  private:
+  // Compiles the shader source in the input_source_string parameter.
+  // The compiled SPIR-V is written to output_stream.
+  //
+  // If the forced_shader stage parameter is not EShLangCount then
+  // the shader is assumed to be of the given stage.
+  //
+  // The stage_callback function will be called if a shader_stage has
+  // not been forced and the stage can not be determined
+  // from the shader text. Any #include directives are parsed with the given
+  // includer.
+  //
+  // Any error messages are written as if the file name were error_tag.
+  // Any errors are written to the error_stream parameter.
+  // Returns true if the compilation succeeded and the result could be written
+  // to output, false otherwise.
+  bool DoCompilation(
+      const shaderc_util::string_piece& input_source_string,
+      EShLanguage forced_shader_stage,
+      const shaderc_util::string_piece& error_tag,
+      const std::function<EShLanguage(
+          std::ostream* error_stream,
+          const shaderc_util::string_piece& error_tag)>& stage_callback,
+      const glslang::TShader::Includer& includer, std::ostream* output_stream,
+      std::ostream* error_stream);
   // Preprocesses a shader whose filename is filename and content is
   // shader_source. If preprocessing is successful, returns true, the
   // preprocessed shader, and any warning message as a tuple. Otherwise,
@@ -132,7 +160,7 @@ class CompilationContext {
   // to be default_version_/default_profile_ regardless of the #version
   // directive in the source code.
   std::tuple<bool, std::string, std::string> PreprocessShader(
-      const std::string& filename, const std::vector<char>& shader_source,
+      const shaderc_util::string_piece& shader_source,
       const std::string& shader_preamble);
 
   // Returns the name of the output file, given the input_filename string.
@@ -151,7 +179,8 @@ class CompilationContext {
   // EShLangCount.  If errors occur, the second element in the pair is the
   // error message.  Otherwise, it's an empty string.
   std::pair<EShLanguage, std::string> GetShaderStageFromSourceCode(
-      const std::string& filename, const std::string& preprocessed_shader);
+      const shaderc_util::string_piece& filename,
+      const std::string& preprocessed_shader);
 
   // Determines version and profile from command line, or the source code.
   // Returns the decoded version and profile pair on success. Otherwise,

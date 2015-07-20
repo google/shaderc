@@ -63,33 +63,30 @@ bool ReadFile(const std::string& input_file_name,
   return true;
 }
 
-bool WriteFile(const std::string& output_file_name, string_piece output_data) {
+std::ostream* GetOutputStream(const string_piece& output_filename,
+                              std::ofstream* file_stream) {
   std::ostream* stream = &std::cout;
-  std::ofstream output_file;
-  if (output_file_name != "-") {
-    output_file.open(output_file_name, std::ios_base::binary);
-    stream = &output_file;
-    if (output_file.fail()) {
-      std::cerr << "glslc: error: cannot open output file: '"
-                << output_file_name << "'";
-      if (access(output_file_name.c_str(), W_OK) != 0) {
+  if (output_filename != "-") {
+    file_stream->open(output_filename.str(), std::ios_base::binary);
+    stream = file_stream;
+    if (file_stream->fail()) {
+      std::cerr << "glslc: error: cannot open output file: '" << output_filename
+                << "'";
+      if (access(output_filename.str().c_str(), W_OK) != 0) {
         OutputFileErrorMessage(errno);
-        return false;
+        return nullptr;
       }
       std::cerr << std::endl;
-      return false;
+      return nullptr;
     }
   }
+  return stream;
+}
+
+bool WriteFile(std::ostream* stream, const string_piece& output_data) {
   if (output_data.size() > 0) {
-    stream->write(&output_data[0], output_data.size());
+    stream->write(output_data.data(), output_data.size());
     if (!stream->good()) {
-      if (stream == &std::cout) {
-        std::cerr << "glslc: error: error writing to standard output"
-                  << std::endl;
-      } else {
-        std::cerr << "glslc: error: error writing to output file: '"
-                  << output_file_name << "'" << std::endl;
-      }
       return false;
     }
   }

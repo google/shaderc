@@ -31,7 +31,8 @@ add_shaderc_tests(
   LINK_LIBS glslc shaderc_util
   TEST_NAMES
     file
-    message)
+    message
+    stage)
 
 add_asciidoc(glslc_doc_README README)
 

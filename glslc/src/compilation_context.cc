@@ -15,6 +15,7 @@
 #include "compilation_context.h"
 
 #include <cstdint>
+#include <fstream>
 
 #include "libshaderc_util/format.h"
 #include "libshaderc_util/io.h"
@@ -52,20 +53,55 @@ inline bool LineDirectiveIsForNextLine(int version, EProfile profile) {
 namespace glslc {
 bool CompilationContext::CompileShader(const std::string& input_file,
                                        EShLanguage shader_stage) {
-  GlslInitializer initializer;
-
   std::vector<char> input_data;
   if (!shaderc_util::ReadFile(input_file, &input_data)) {
     return false;
   }
 
-  const std::string output_file = GetOutputFileName(input_file);
-  string_piece error_output_file_name(input_file);
-  if (input_file == "-") {
+  std::string output_name = GetOutputFileName(input_file);
+
+  std::ofstream potential_file_stream;
+  std::ostream* output_stream =
+      shaderc_util::GetOutputStream(output_name, &potential_file_stream);
+  string_piece error_file_name = input_file;
+
+  if (error_file_name == "-") {
     // If the input file was stdin, we want to output errors as <stdin>.
-    error_output_file_name = "<stdin>";
+    error_file_name = "<stdin>";
   }
 
+  string_piece source_string;
+  if (!input_data.empty()) {
+    source_string = string_piece(&(*input_data.begin()),
+                                 &(*input_data.begin()) + input_data.size());
+  }
+  StageDeducer deducer(input_file);
+  bool compilation_success = DoCompilation(
+      source_string, shader_stage, error_file_name, deducer,
+      glslc::FileIncluder(&include_file_finder_), output_stream, &std::cerr);
+
+  if (!compilation_success && output_stream->fail()) {
+    if (output_stream == &std::cout) {
+      std::cerr << "glslc: error: error writing to standard output"
+                << std::endl;
+    } else {
+      std::cerr << "glslc: error: error writing to output file: '"
+                << output_file_name_ << "'" << std::endl;
+    }
+  }
+  return compilation_success;
+}
+
+bool CompilationContext::DoCompilation(
+    const string_piece& input_source_string, EShLanguage forced_shader_stage,
+    const string_piece& error_tag,
+    const std::function<EShLanguage(std::ostream* error_stream,
+                                    const string_piece& error_tag)>&
+        stage_callback,
+    const glslang::TShader::Includer& includer, std::ostream* output_stream,
+    std::ostream* error_stream) {
+  GlslInitializer initializer;
+  EShLanguage used_shader_stage = forced_shader_stage;
   const std::string macro_definitions =
       shaderc_util::format(predefined_macros_, "#define ", " ", "\n");
 
@@ -74,46 +110,51 @@ bool CompilationContext::CompileShader(const std::string& input_file,
   // If it is preprocess_only_, we definitely need to preprocess. Otherwise, if
   // we don't know the stage until now, we need the preprocessed shader to
   // deduce the shader stage.
-  if (preprocess_only_ || shader_stage == EShLangCount) {
+  if (preprocess_only_ || used_shader_stage == EShLangCount) {
     bool success;
     std::string glslang_errors;
     std::tie(success, preprocessed_shader, glslang_errors) =
-        PreprocessShader(input_file, input_data, macro_definitions);
+        PreprocessShader(input_source_string, macro_definitions);
 
-    success &= PrintFilteredErrors(error_output_file_name, warnings_as_errors_,
+    success &= PrintFilteredErrors(error_tag, warnings_as_errors_,
                                    /* suppress_warnings = */ true,
                                    glslang_errors.c_str(), &total_warnings_,
                                    &total_errors_);
     if (!success) return false;
 
     if (preprocess_only_) {
-      return shaderc_util::WriteFile(output_file,
+      return shaderc_util::WriteFile(output_stream,
                                      string_piece(preprocessed_shader));
-    } else {
+    } else if (used_shader_stage == EShLangCount) {
       std::string errors;
-      std::tie(shader_stage, errors) =
-          DeduceShaderStage(input_file, preprocessed_shader);
-
-      if (shader_stage == EShLangCount) {
-        std::cerr << errors;
+      std::tie(used_shader_stage, errors) =
+          GetShaderStageFromSourceCode(error_tag, preprocessed_shader);
+      if (!errors.empty()) {
+        *error_stream << errors;
         return false;
+      }
+      if (used_shader_stage == EShLangCount) {
+        if ((used_shader_stage = stage_callback(error_stream, error_tag)) ==
+            EShLangCount) {
+          return false;
+        }
       }
     }
   }
 
-  glslang::TShader shader(shader_stage);
-  const char* shader_strings = &input_data[0];
-  const int shader_lengths = input_data.size();
+  glslang::TShader shader(used_shader_stage);
+  const char* shader_strings = input_source_string.data();
+  const int shader_lengths = input_source_string.size();
   shader.setStringsWithLengths(&shader_strings, &shader_lengths, 1);
   shader.setPreamble(macro_definitions.c_str());
 
   // TODO(dneto): Generate source-level debug info if requested.
-  bool success = shader.parse(
-      &shaderc_util::kDefaultTBuiltInResource, default_version_,
-      default_profile_, force_version_profile_, kNotForwardCompatible,
-      EShMsgDefault, glslc::FileIncluder(&include_file_finder_));
+  bool success =
+      shader.parse(&shaderc_util::kDefaultTBuiltInResource, default_version_,
+                   default_profile_, force_version_profile_,
+                   kNotForwardCompatible, EShMsgDefault, includer);
 
-  success &= PrintFilteredErrors(error_output_file_name, warnings_as_errors_,
+  success &= PrintFilteredErrors(error_tag, warnings_as_errors_,
                                  suppress_warnings_, shader.getInfoLog(),
                                  &total_warnings_, &total_errors_);
   if (!success) return false;
@@ -121,24 +162,25 @@ bool CompilationContext::CompileShader(const std::string& input_file,
   glslang::TProgram program;
   program.addShader(&shader);
   success = program.link(EShMsgDefault);
-  success &= PrintFilteredErrors(error_output_file_name, warnings_as_errors_,
+  success &= PrintFilteredErrors(error_tag, warnings_as_errors_,
                                  suppress_warnings_, program.getInfoLog(),
                                  &total_warnings_, &total_errors_);
   if (!success) return false;
 
   std::vector<uint32_t> spirv;
-  glslang::GlslangToSpv(*program.getIntermediate(shader_stage), spirv);
+  glslang::GlslangToSpv(*program.getIntermediate(used_shader_stage), spirv);
   if (disassemble_) {
     spv::Parameterize();
     GLSL_STD_450::GetDebugNames(GlslStd450DebugNames);
     std::ostringstream disassembled_spirv;
     spv::Disassemble(disassembled_spirv, spirv);
-    return shaderc_util::WriteFile(output_file, disassembled_spirv.str());
+    return shaderc_util::WriteFile(output_stream, disassembled_spirv.str());
   } else {
     return shaderc_util::WriteFile(
-        output_file, string_piece(reinterpret_cast<const char*>(spirv.data()),
-                                  reinterpret_cast<const char*>(&spirv.back()) +
-                                      sizeof(uint32_t)));
+        output_stream,
+        string_piece(
+            reinterpret_cast<const char*>(spirv.data()),
+            reinterpret_cast<const char*>(&spirv.back()) + sizeof(uint32_t)));
   }
 }
 
@@ -212,16 +254,16 @@ void CompilationContext::OutputMessages() {
 }
 
 std::tuple<bool, std::string, std::string> CompilationContext::PreprocessShader(
-    const std::string& filename, const std::vector<char>& shader_source,
-    const std::string& shader_preamble) {
+    const string_piece& shader_source, const std::string& shader_preamble) {
   const glslc::FileIncluder includer(&include_file_finder_);
 
   // The stage does not matter for preprocessing.
   glslang::TShader shader(EShLangVertex);
-  const char* shader_strings = &shader_source[0];
+  const char* shader_strings = shader_source.data();
   const int shader_lengths = shader_source.size();
   shader.setStringsWithLengths(&shader_strings, &shader_lengths, 1);
   shader.setPreamble(shader_preamble.c_str());
+
   std::string preprocessed_shader;
   const bool success = shader.preprocess(
       &shaderc_util::kDefaultTBuiltInResource, default_version_,
@@ -248,40 +290,9 @@ std::string CompilationContext::GetOutputFileName(std::string input_filename) {
   return output_file;
 }
 
-std::pair<EShLanguage, std::string> CompilationContext::DeduceShaderStage(
-    const std::string& filename, const std::string& preprocessed_shader) {
-  EShLanguage stage;
-  std::string errors;
-  std::string glslang_errors;
-  std::tie(stage, errors) =
-      GetShaderStageFromSourceCode(filename, preprocessed_shader);
-  if (stage == EShLangCount) {
-    if (errors.empty()) {
-      stage = GetShaderStageFromFileName(filename);
-      if (stage == EShLangCount) {
-        errors = "glslc: error: '" + filename + "': ";
-        if (IsGlslFile(filename)) {
-          errors +=
-              ".glsl file encountered but no -fshader-stage specified ahead";
-        } else if (filename == "-") {
-          errors +=
-              "-fshader-stage required when input is from standard input \"-\"";
-        } else {
-          errors += "file not recognized: File format not recognized";
-        }
-        errors += "\n";
-        return std::make_pair(EShLangCount, errors);
-      }
-    } else {
-      return std::make_pair(EShLangCount, errors);
-    }
-  }
-  return std::make_pair(stage, errors);
-}
-
 std::pair<EShLanguage, std::string>
 CompilationContext::GetShaderStageFromSourceCode(
-    const std::string& filename, const std::string& preprocessed_shader) {
+    const string_piece& filename, const std::string& preprocessed_shader) {
   const string_piece kPragmaShaderStageDirective = "#pragma shader_stage";
   const string_piece kLineDirective = "#line";
 
@@ -332,7 +343,7 @@ CompilationContext::GetShaderStageFromSourceCode(
   // support for filenames in #line directives.
 
   if (first_pragma_shader_stage > first_non_pp_line) {
-    error_message += filename + ":" + std::to_string(stages[0].first) +
+    error_message += filename.str() + ":" + std::to_string(stages[0].first) +
                      ": error: '#pragma': the first 'shader_stage' #pragma "
                      "must appear before any non-preprocessing code\n";
   }
@@ -340,18 +351,18 @@ CompilationContext::GetShaderStageFromSourceCode(
   EShLanguage stage = MapStageNameToLanguage(stages[0].second);
   if (stage == EShLangCount) {
     error_message +=
-        filename + ":" + std::to_string(stages[0].first) +
+        filename.str() + ":" + std::to_string(stages[0].first) +
         ": error: '#pragma': invalid stage for 'shader_stage' #pragma: '" +
         stages[0].second.str() + "'\n";
   }
 
   for (size_t i = 1; i < stages.size(); ++i) {
     if (stages[i].second != stages[0].second) {
-      error_message += filename + ":" + std::to_string(stages[i].first) +
+      error_message += filename.str() + ":" + std::to_string(stages[i].first) +
                        ": error: '#pragma': conflicting stages for "
                        "'shader_stage' #pragma: '" +
                        stages[i].second.str() + "' (was '" +
-                       stages[0].second.str() + "' at " + filename + ":" +
+                       stages[0].second.str() + "' at " + filename.str() + ":" +
                        std::to_string(stages[0].first) + ")\n";
     }
   }

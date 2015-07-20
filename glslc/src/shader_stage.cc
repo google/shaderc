@@ -37,20 +37,35 @@ struct LanguageMapping {
 
 namespace glslc {
 
-EShLanguage GetShaderStageFromFileName(const string_piece& filename) {
+EShLanguage StageDeducer::operator()(std::ostream* error_stream,
+                                     const string_piece& error_tag) const {
   // Add new stage types here.
   static const LanguageMapping kStringToStage[] = {
       {"vert", EShLangVertex},      {"frag", EShLangFragment},
       {"tesc", EShLangTessControl}, {"tese", EShLangTessEvaluation},
       {"geom", EShLangGeometry},    {"comp", EShLangCompute}};
 
-  const string_piece extension = glslc::GetFileExtension(filename);
-  if (extension.empty()) return EShLangCount;
+  const string_piece extension = glslc::GetFileExtension(file_name_);
+  EShLanguage stage = EShLangCount;
 
   for (const auto& entry : kStringToStage) {
-    if (extension == entry.id) return entry.language;
+    if (extension == entry.id) stage = entry.language;
   }
-  return EShLangCount;
+
+  if (stage == EShLangCount) {
+    *error_stream << "glslc: error: '" << file_name_ << "': ";
+    if (IsGlslFile(file_name_)) {
+      *error_stream << ".glsl file encountered but no -fshader-stage "
+                       "specified ahead";
+    } else if (file_name_ == "-") {
+      *error_stream << "-fshader-stage required when input is from standard "
+                       "input \"-\"";
+    } else {
+      *error_stream << "file not recognized: File format not recognized";
+    }
+    *error_stream << "\n";
+  }
+  return stage;
 }
 
 EShLanguage MapStageNameToLanguage(const string_piece& stage_name) {

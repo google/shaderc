@@ -15,6 +15,7 @@
 #ifndef GLSLC_SHADER_STAGE_H_
 #define GLSLC_SHADER_STAGE_H_
 
+#include <ostream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -30,15 +31,24 @@ namespace glslc {
 EShLanguage GetShaderStageFromCmdLine(
     const shaderc_util::string_piece& f_shader_stage);
 
-// Returns a glslang EShLanguage from a given filename or EShLangCount
-// if the shader stage could not be determined.
-EShLanguage GetShaderStageFromFileName(
-    const shaderc_util::string_piece& filename);
-
 // Given a string representing a stage, returns the glslang EShLanguage for it.
 // If the stage string is not recognized, returns EShLangCount.
 EShLanguage MapStageNameToLanguage(
     const shaderc_util::string_piece& stage_name);
+
+// A callable class that deduces a shader stage from a file name.
+class StageDeducer {
+ public:
+  StageDeducer(shaderc_util::string_piece file_name) : file_name_(file_name) {}
+  // Returns a glslang EShLanguage from the file_name_ member or EShLangCount
+  // if the shader stage could not be determined.
+  // Any errors are written to error_stream.
+  EShLanguage operator()(std::ostream* error_stream,
+                         const shaderc_util::string_piece& error_tag) const;
+
+ private:
+  shaderc_util::string_piece file_name_;
+};
 
 }  // namespace glslc
 

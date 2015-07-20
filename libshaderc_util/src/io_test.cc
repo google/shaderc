@@ -14,12 +14,15 @@
 
 #include "libshaderc_util/io.h"
 
+#include <fstream>
+
 #include <gmock/gmock.h>
 
 namespace {
 
 using shaderc_util::ReadFile;
 using shaderc_util::WriteFile;
+using shaderc_util::GetOutputStream;
 
 std::string ToString(const std::vector<char>& v) {
   return std::string(v.data(), v.size());
@@ -48,13 +51,29 @@ TEST_F(ReadFileTest, FileNotFound) {
 
 TEST_F(ReadFileTest, EmptyFilename) { EXPECT_FALSE(ReadFile("", &read_data)); }
 
+TEST(WriteFiletest, BadStream) {
+  std::ofstream fstream;
+  std::ostream* output_stream = GetOutputStream(
+      "/this/should/not/be/writable/asdfasdfasdfasdf", &fstream);
+  EXPECT_EQ(nullptr, output_stream);
+  EXPECT_TRUE(fstream.fail());
+}
+
 TEST(WriteFileTest, Roundtrip) {
   const std::string content = "random content 12345";
   const std::string filename = "WriteFileTestOutput.tmp";
-  ASSERT_TRUE(WriteFile(filename, content));
+  std::ofstream fstream;
+  std::ostream* output_stream = GetOutputStream(filename, &fstream);
+  ASSERT_EQ(output_stream, &fstream);
+  ASSERT_TRUE(WriteFile(output_stream, content));
   std::vector<char> read_data;
   ASSERT_TRUE(ReadFile(filename, &read_data));
   EXPECT_EQ(content, ToString(read_data));
 }
 
+TEST(OutputStreamTest, Stdout) {
+  std::ofstream fstream;
+  std::ostream* output_stream = GetOutputStream("-", &fstream);
+  EXPECT_EQ(&std::cout, output_stream);
+}
 }  // anonymous namespace
