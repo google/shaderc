@@ -18,6 +18,13 @@
 #include <sstream>
 #include <unordered_map>
 
+#ifdef NDEBUG
+#define EXPECT_DEBUG_DEATH_IF_SUPPORTED(...)
+#else
+#define EXPECT_DEBUG_DEATH_IF_SUPPORTED(...) \
+  EXPECT_DEATH_IF_SUPPORTED(__VA_ARGS__)
+#endif
+
 namespace {
 
 using shaderc_util::string_piece;
@@ -35,6 +42,16 @@ TEST(string_piece, creation) {
   EXPECT_EQ("c::string", my_c_string_piece);
   EXPECT_EQ("c::", my_partial_c_string_piece);
   EXPECT_EQ("std::string", my_string_piece_string_piece);
+}
+
+TEST(string_piece, creation_with_empty_data) {
+  string_piece my_string_piece(nullptr, nullptr);
+  EXPECT_EQ("", my_string_piece);
+}
+
+TEST(string_piece, creation_causing_assert) {
+  EXPECT_DEBUG_DEATH_IF_SUPPORTED(string_piece("my_cstring", nullptr), ".*");
+  EXPECT_DEBUG_DEATH_IF_SUPPORTED(string_piece(nullptr, "my_cstring"), ".*");
 }
 
 TEST(string_piece, substr) {

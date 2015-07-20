@@ -35,8 +35,8 @@ class string_piece {
   string_piece() {}
 
   string_piece(const char* begin, const char* end) : begin_(begin), end_(end) {
-    assert(begin != nullptr && end != nullptr &&
-           "string_piece must not be initialized with an nullptr");
+    assert((begin == nullptr) == (end == nullptr) &&
+           "either both begin and end must be nullptr or neither must be");
   }
 
   string_piece(const char* string) {
