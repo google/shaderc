@@ -16,6 +16,8 @@
 
 #include <gtest/gtest.h>
 
+#include "death_test.h"
+
 namespace {
 
 using shaderc_util::FileFinder;
@@ -118,7 +120,8 @@ TEST_F(FileFinderTest, AbsoluteFilename) {
 }
 
 TEST(FileFinderDeathTest, EmptyFilename) {
-  EXPECT_DEBUG_DEATH(FileFinder().FindReadableFilepath(""), "Assertion");
+  EXPECT_DEBUG_DEATH_IF_SUPPORTED(FileFinder().FindReadableFilepath(""),
+                                  "Assertion");
 }
 
 }  // anonymous namespace

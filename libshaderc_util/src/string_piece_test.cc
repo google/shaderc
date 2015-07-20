@@ -18,12 +18,7 @@
 #include <sstream>
 #include <unordered_map>
 
-#ifdef NDEBUG
-#define EXPECT_DEBUG_DEATH_IF_SUPPORTED(...)
-#else
-#define EXPECT_DEBUG_DEATH_IF_SUPPORTED(...) \
-  EXPECT_DEATH_IF_SUPPORTED(__VA_ARGS__)
-#endif
+#include "death_test.h"
 
 namespace {
 
