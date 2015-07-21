@@ -55,28 +55,33 @@ class CompilationContext {
         total_warnings_(0),
         total_errors_(0) {}
 
-  // Compiles a shader received in input_file, and places the output
-  // into the file named by output_file_name_ member. The shader is assumed to
-  // be for shader_stage stage.  If force_version_profile_ is set, the shader's
-  // version/profile is forced to be default_version_/default_profile_
-  // regardless of the #version directive in the source code. The
-  // total_warnings_ and total_errors_ members will accumulate the
-  // total number of warnings and errors found in this shader.
-  // Will output errors to std::cerr.
-  // Returns true on success and false otherwise.
+  // Compiles a shader received in input_file, returning true on success and
+  // false otherwise. The shader is assumed to be for the shader_stage stage.
+  //
+  // Places the compilation output into a new file whose name is derived from
+  // input_file according to the rules from glslc/README.asciidoc.
+  //
+  // If version/profile has been forced, the shader's version/profile is set to
+  // that value regardless of the #version directive in the source code.
+  //
+  // Any errors/warnings found in the shader source will be output to std::cerr
+  // and increment the counts reported by OutputMessages().
   bool CompileShader(const std::string& input_file, EShLanguage shader_stage);
 
   // Adds a directory to be searched when processing #include directives.
-  // Add an empty string to allow the resolution of absolute paths as well
-  // as paths relative to the current working directory.
+  //
+  // Best practice: if you add an empty string before any other path, that will
+  // correctly resolve both absolute paths and paths relative to the current
+  // working directory.
   void AddIncludeDirectory(const std::string& path);
 
-  // Adds a macro definition to be used when processing #define directives.
+  // Adds an implicit macro definition obeyed by subsequent CompileShader()
+  // calls.
   void AddMacroDefinition(const shaderc_util::string_piece& macro,
                           const shaderc_util::string_piece& definition);
 
-  // Forces the default version and profile. No sanity check
-  // for default_version_ and default_profile_ is performed.
+  // Forces (without any verification) the default version and profile for
+  // subsequent CompileShader() calls.
   void SetForcedVersionProfile(int version, EProfile profile);
 
   // Sets the output filename. A name of "-" indicates standard output.
@@ -84,20 +89,18 @@ class CompilationContext {
     output_file_name_ = file;
   }
 
-  // When any files are to be compiled, they are compiled individually
-  // and written to separate output files instead of linked together.
+  // When any files are to be compiled, they are compiled individually and
+  // written to separate output files instead of linked together.
   void SetIndividualCompilationMode();
 
-  // Instead of outputting object files, output the disassembled
-  // textual output.
+  // Instead of outputting object files, output the disassembled textual output.
   void SetDisassemblyMode();
 
-  // Instead of outputting object files, output the preprocessed
-  // source files.
+  // Instead of outputting object files, output the preprocessed source files.
   void SetPreprocessingOnlyMode();
 
-  // Requests that the compiler places debug information into
-  // the object code, such as identifier names and line numbers.
+  // Requests that the compiler place debug information into the object code,
+  // such as identifier names and line numbers.
   void SetGenerateDebugInfo();
 
   // When a warning is encountered it treat it as an error.
@@ -106,12 +109,11 @@ class CompilationContext {
   // Any warning message generated is suppressed before it is output.
   void SetSuppressWarnings();
 
-  // Returns false if any options are incompatible.
-  // The num_files parameter represents the number of files that will
-  // be compiled.
+  // Returns false if any options are incompatible.  The num_files parameter
+  // represents the number of files that will be compiled.
   bool ValidateOptions(size_t num_files);
 
-  // Outputs the number of warnings and errors if there are any.
+  // Outputs to std::cerr the number of warnings and errors if there are any.
   void OutputMessages();
 
  private:
