@@ -4,6 +4,7 @@ add_library(shaderc_util STATIC
   include/libshaderc_util/file_finder.h
   include/libshaderc_util/format.h
   include/libshaderc_util/io.h
+  include/libshaderc_util/message.h
   include/libshaderc_util/resources.h
   include/libshaderc_util/string_piece.h
   include/libshaderc_util/universal_unistd.h
@@ -12,7 +13,6 @@ add_library(shaderc_util STATIC
   src/file_finder.cc
   src/io.cc
   src/message.cc
-  src/message.h
   src/resources.cc
   src/shader_stage.cc
   src/version_profile.cc

@@ -23,13 +23,12 @@
 #include "libshaderc_util/shader_stage.h"
 #include "libshaderc_util/string_piece.h"
 #include "libshaderc_util/version_profile.h"
+#include "libshaderc_util/message.h"
 
 #include "SPIRV/disassemble.h"
 #include "SPIRV/doc.h"
 #include "SPIRV/GLSL450Lib.h"
 #include "SPIRV/GlslangToSpv.h"
-
-#include "message.h"
 
 // We must have the following global variable because declared as extern in
 // glslang/SPIRV/disassemble.cpp, which we will need for disassembling.
@@ -63,7 +62,8 @@ bool Compiler::Compile(
                                     const string_piece& error_tag)>&
         stage_callback,
     const Includer& includer, std::ostream* output_stream,
-    std::ostream* error_stream) {
+    std::ostream* error_stream, size_t* total_warnings,
+    size_t* total_errors) const {
   GlslInitializer initializer;
   EShLanguage used_shader_stage = forced_shader_stage;
   const std::string macro_definitions =
@@ -85,8 +85,8 @@ bool Compiler::Compile(
 
     success &= PrintFilteredErrors(error_tag, error_stream, warnings_as_errors_,
                                    /* suppress_warnings = */ true,
-                                   glslang_errors.c_str(), &total_warnings_,
-                                   &total_errors_);
+                                   glslang_errors.c_str(), total_warnings,
+                                   total_errors);
     if (!success) return false;
     // Because of the behavior change of the #line directive, the #line
     // directive introducing each file's content must use the syntax for the
@@ -134,7 +134,7 @@ bool Compiler::Compile(
 
   success &= PrintFilteredErrors(error_tag, error_stream, warnings_as_errors_,
                                  suppress_warnings_, shader.getInfoLog(),
-                                 &total_warnings_, &total_errors_);
+                                 total_warnings, total_errors);
   if (!success) return false;
 
   glslang::TProgram program;
@@ -142,7 +142,7 @@ bool Compiler::Compile(
   success = program.link(EShMsgDefault);
   success &= PrintFilteredErrors(error_tag, error_stream, warnings_as_errors_,
                                  suppress_warnings_, program.getInfoLog(),
-                                 &total_warnings_, &total_errors_);
+                                 total_warnings, total_errors);
   if (!success) return false;
 
   std::vector<uint32_t> spirv;
@@ -173,10 +173,6 @@ void Compiler::SetForcedVersionProfile(int version, EProfile profile) {
   force_version_profile_ = true;
 }
 
-void Compiler::OutputMessages(std::ostream* error_stream) {
-  shaderc_util::OutputMessages(error_stream, total_warnings_, total_errors_);
-}
-
 void Compiler::SetDisassemblyMode() { disassemble_ = true; }
 
 void Compiler::SetPreprocessingOnlyMode() { preprocess_only_ = true; }
@@ -189,7 +185,7 @@ void Compiler::SetSuppressWarnings() { suppress_warnings_ = true; }
 
 std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
     const std::string& error_tag, const string_piece& shader_source,
-    const std::string& shader_preamble, const Includer& includer) {
+    const std::string& shader_preamble, const Includer& includer) const {
   // The stage does not matter for preprocessing.
   glslang::TShader shader(EShLangVertex);
   const char* shader_strings = shader_source.data();
@@ -215,7 +211,7 @@ std::string Compiler::CleanupPreamble(const string_piece& preprocessed_shader,
                                       const string_piece& error_tag,
                                       const string_piece& pound_extension,
                                       int num_include_directives,
-                                      bool is_for_next_line) {
+                                      bool is_for_next_line) const {
   // Those #define directives in preamble will become empty lines after
   // preprocessing. We also injected an #extension directive to turn on #include
   // directive support. In the original preprocessing output from glslang, it
@@ -279,7 +275,8 @@ std::string Compiler::CleanupPreamble(const string_piece& preprocessed_shader,
 }
 
 std::pair<EShLanguage, std::string> Compiler::GetShaderStageFromSourceCode(
-    const string_piece& filename, const std::string& preprocessed_shader) {
+    const string_piece& filename,
+    const std::string& preprocessed_shader) const {
   const string_piece kPragmaShaderStageDirective = "#pragma shader_stage";
   const string_piece kLineDirective = "#line";
 
@@ -359,7 +356,7 @@ std::pair<EShLanguage, std::string> Compiler::GetShaderStageFromSourceCode(
 }
 
 std::pair<int, EProfile> Compiler::DeduceVersionProfile(
-    const std::string& preprocessed_shader) {
+    const std::string& preprocessed_shader) const {
   int version = default_version_;
   EProfile profile = default_profile_;
   if (!force_version_profile_) {
@@ -374,7 +371,7 @@ std::pair<int, EProfile> Compiler::DeduceVersionProfile(
 }
 
 std::pair<int, EProfile> Compiler::GetVersionProfileFromSourceCode(
-    const std::string& preprocessed_shader) {
+    const std::string& preprocessed_shader) const {
   string_piece pound_version = preprocessed_shader;
   const size_t pound_version_loc = pound_version.find("#version");
   if (pound_version_loc == string_piece::npos) {
@@ -397,4 +394,4 @@ std::pair<int, EProfile> Compiler::GetVersionProfileFromSourceCode(
   return std::make_pair(version, profile);
 }
 
-}  // namesapce glslc
+}  // namesapce shaderc_util

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "message.h"
+#include "libshaderc_util/message.h"
 
 #include <algorithm>
 #include <cstring>

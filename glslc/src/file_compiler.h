@@ -24,7 +24,7 @@ namespace glslc {
 // SPIR-V files.
 class FileCompiler : public shaderc_util::Compiler {
  public:
-  FileCompiler() : needs_linking_(true) {}
+  FileCompiler() : needs_linking_(true), total_warnings_(0), total_errors_(0) {}
 
   // Compiles a shader received in input_file, returning true on success and
   // false otherwise. If force_shader_stage is not EShLangCount then the
@@ -82,6 +82,9 @@ class FileCompiler : public shaderc_util::Compiler {
   // type of file being generated.
   std::string file_extension_;
   shaderc_util::string_piece output_file_name_;
+
+  size_t total_warnings_;
+  size_t total_errors_;
 };
 }
 #endif  // GLSLC_FILE_COMPILER_H

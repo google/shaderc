@@ -27,25 +27,25 @@ class SpvModule {
   // Upon creation, the SpvModule takes ownership of the shaderc_spv_module_t.
   // During destruction of the SpvModule, the shaderc_spv_module_t will be
   // released.
-  explicit SpvModule(shaderc_spv_module_t module) : module(module) {}
-  ~SpvModule() { shaderc_module_release(module); }
+  explicit SpvModule(shaderc_spv_module_t module) : module_(module) {}
+  ~SpvModule() { shaderc_module_release(module_); }
 
   SpvModule(SpvModule&& other) {
-    module = other.module;
-    other.module = nullptr;
+    module_ = other.module_;
+    other.module_ = nullptr;
   }
 
   // Returns true if the module was successfully compiled.
   bool GetSuccess() const {
-    return module && shaderc_module_get_success(module);
+    return module_ && shaderc_module_get_success(module_);
   }
 
   // Returns any error message found during compilation.
   std::string GetErrorMessage() const {
-    if (!module) {
+    if (!module_) {
       return "";
     }
-    return shaderc_module_get_error_message(module);
+    return shaderc_module_get_error_message(module_);
   }
 
   // Returns a pointer to the start of the compiled SPIR-V.
@@ -53,65 +53,111 @@ class SpvModule {
   // pointer.
   // This pointer remains valid only until the SpvModule is destroyed.
   const char* GetData() const {
-    if (!module) {
+    if (!module_) {
       return "";
     }
-    return shaderc_module_get_bytes(module);
+    return shaderc_module_get_bytes(module_);
   }
 
   // Returns the number of bytes contained in the compiled SPIR-V.
   size_t GetLength() const {
-    if (!module) {
+    if (!module_) {
       return 0;
     }
-    return shaderc_module_get_length(module);
+    return shaderc_module_get_length(module_);
   }
 
  private:
   SpvModule(const SpvModule& other) = delete;
   SpvModule& operator=(const SpvModule& other) = delete;
 
-  shaderc_spv_module_t module;
+  shaderc_spv_module_t module_;
+};
+
+// Contains any options that can have default values for a compilation.
+class CompileOptions {
+ public:
+  CompileOptions() { options_ = shaderc_compile_options_initialize(); }
+  ~CompileOptions() { shaderc_compile_options_release(options_); }
+  CompileOptions(const CompileOptions& other) {
+    options_ = shaderc_compile_options_clone(other.options_);
+  }
+  CompileOptions(CompileOptions&& other) {
+    options_ = other.options_;
+    other.options_ = nullptr;
+  }
+
+ private:
+  CompileOptions& operator=(const CompileOptions& other) = delete;
+  shaderc_compile_options_t options_;
+
+  friend class Compiler;
 };
 
 // The compilation context for compiling source to SPIR-V.
 class Compiler {
  public:
-  Compiler() : compiler(shaderc_compiler_initialize()) {}
-  ~Compiler() { shaderc_compiler_release(compiler); }
+  Compiler() : compiler_(shaderc_compiler_initialize()) {}
+  ~Compiler() { shaderc_compiler_release(compiler_); }
 
   Compiler(Compiler&& other) {
-    compiler = other.compiler;
-    other.compiler = nullptr;
+    compiler_ = other.compiler_;
+    other.compiler_ = nullptr;
   }
 
-  bool IsValid() { return compiler != nullptr; }
+  bool IsValid() const { return compiler_ != nullptr; }
 
   // Compiles the given source GLSL into a SPIR-V module.
   // The source_text parameter must be a valid pointer.
   // The source_text_size parameter must be the length of the source text.
+  // The compilation is done with default compile options.
   // It is valid for the returned SpvModule object to outlive this compiler
   // object.
-  SpvModule CompileGlslToSpv(const char* source_text, int source_text_size,
+  SpvModule CompileGlslToSpv(const char* source_text, size_t source_text_size,
                              shaderc_shader_kind shader_kind) const {
     shaderc_spv_module_t module = shaderc_compile_into_spv(
-        compiler, source_text, source_text_size, shader_kind, "main");
+        compiler_, source_text, source_text_size, shader_kind, "main", nullptr);
+    return SpvModule(module);
+  }
+
+  // Compiles the given source GLSL into a SPIR-V module.
+  // The source_text parameter must be a valid pointer.
+  // The source_text_size parameter must be the length of the source text.
+  // The compilation is passed any options specified in the CompileOptions
+  // parameter.
+  // It is valid for the returned SpvModule object to outlive this compiler
+  // object.
+  SpvModule CompileGlslToSpv(const char* source_text, size_t source_text_size,
+                             shaderc_shader_kind shader_kind,
+                             const CompileOptions& options) const {
+    shaderc_spv_module_t module =
+        shaderc_compile_into_spv(compiler_, source_text, source_text_size,
+                                 shader_kind, "main", options.options_);
     return SpvModule(module);
   }
 
   // Compiles the given source GLSL into a SPIR-V module by invoking
-  // CompileGlslToSpv(const char*, int, shaderc_shader_kind);
+  // CompileGlslToSpv(const char*, size_t, shaderc_shader_kind);
   SpvModule CompileGlslToSpv(const std::string& source_text,
                              shaderc_shader_kind shader_kind) const {
     return CompileGlslToSpv(source_text.data(), source_text.size(),
                             shader_kind);
   }
 
+  // Compiles the given source GLSL into a SPIR-V module by invoking
+  // CompileGlslToSpv(const char*, size_t, shaderc_shader_kind, options);
+  SpvModule CompileGlslToSpv(const std::string& source_text,
+                             shaderc_shader_kind shader_kind,
+                             const CompileOptions& options) const {
+    return CompileGlslToSpv(source_text.data(), source_text.size(), shader_kind,
+                            options);
+  }
+
  private:
   Compiler(const Compiler&) = delete;
   Compiler& operator=(const Compiler& other) = delete;
 
-  shaderc_compiler_t compiler;
+  shaderc_compiler_t compiler_;
 };
 };
 

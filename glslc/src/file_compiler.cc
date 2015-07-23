@@ -22,6 +22,8 @@
 #include "shader_stage.h"
 
 #include "libshaderc_util/io.h"
+#include "libshaderc_util/message.h"
+
 namespace {
 using shaderc_util::string_piece;
 
@@ -53,9 +55,10 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
                                  &(*input_data.begin()) + input_data.size());
   }
   StageDeducer deducer(input_file);
-  bool compilation_success = Compile(
-      source_string, shader_stage, error_file_name, deducer,
-      glslc::FileIncluder(&include_file_finder_), output_stream, &std::cerr);
+  bool compilation_success =
+      Compile(source_string, shader_stage, error_file_name, deducer,
+              glslc::FileIncluder(&include_file_finder_), output_stream,
+              &std::cerr, &total_warnings_, &total_errors_);
 
   if (!compilation_success && output_stream->fail()) {
     if (output_stream == &std::cout) {
@@ -118,7 +121,9 @@ bool FileCompiler::ValidateOptions(size_t num_files) {
   return true;
 }
 
-void FileCompiler::OutputMessages() { Compiler::OutputMessages(&std::cerr); }
+void FileCompiler::OutputMessages() {
+  shaderc_util::OutputMessages(&std::cerr, total_warnings_, total_errors_);
+}
 
 std::string FileCompiler::GetOutputFileName(std::string input_filename) {
   std::string output_file = "a.spv";

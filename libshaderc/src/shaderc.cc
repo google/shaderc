@@ -18,14 +18,10 @@
 #include <cassert>
 #include <cstdint>
 #include <mutex>
+#include <sstream>
 #include <vector>
 
-#include "SPIRV/GlslangToSpv.h"
-#include "glslang/Include/InfoSink.h"
-#include "glslang/Include/ShHandle.h"
-#include "glslang/MachineIndependent/localintermediate.h"
-#include "glslang/Public/ShaderLang.h"
-
+#include "libshaderc_util/compiler.h"
 #include "libshaderc_util/resources.h"
 
 #if (defined(_MSC_VER) && !defined(_CPPUNWIND)) || !defined(__EXCEPTIONS)
@@ -50,36 +46,6 @@ EShLanguage GetStage(shaderc_shader_kind kind) {
   return EShLangVertex;
 }
 
-// Produces SPIR-V binary when used in ShCompile().
-class SpvGenerator : public TCompiler {
- public:
-  // Captures language and a valid result object that subsequent method calls
-  // will write to.
-  SpvGenerator(EShLanguage language, shaderc_spv_module* result)
-      : TCompiler(language, info_sink_), result_(result) {}
-
-  // Generates SPIR-V for root, adding it to the vector captured by the
-  // constructor.  Always returns true.
-  bool compile(TIntermNode* root, int version = 0,
-               EProfile profile = ENoProfile) override {
-    glslang::TIntermediate intermediate(getLanguage(), version, profile);
-    intermediate.setTreeRoot(root);
-    glslang::GlslangToSpv(intermediate, result_->spirv);
-    return true;  // No failure-reporting mechanism above, so report success.
-  }
-
-  // Adds messages accumulated during ShCompile() to the captured result.  This
-  // can't be done during compile() because some errors will cause early exit
-  // without ever invoking compile().
-  void CaptureMessages() { result_->messages = info_sink_.info.c_str(); }
-
- private:
-  // Where to store the compilation results.
-  shaderc_spv_module* result_;
-  // Collects info & debug messages.
-  TInfoSink info_sink_;
-};
-
 struct {
   // The number of currently initialized compilers.
   int compiler_initialization_count;
@@ -91,7 +57,37 @@ struct {
 
 std::mutex compile_mutex;  // Guards shaderc_compile_*.
 
+class NullIncluder : public shaderc_util::Includer {
+ public:
+  std::pair<std::string, std::string> include(
+      const char* filename) const override {
+    return std::make_pair<std::string, std::string>(
+        "", "unexpected include directive");
+  }
+  int num_include_directives() const override { return 0; }
+};
+
 }  // anonymous namespace
+
+struct shaderc_compile_options {
+  shaderc_util::Compiler compiler;
+};
+
+shaderc_compile_options_t shaderc_compile_options_initialize() {
+  return new (std::nothrow) shaderc_compile_options;
+}
+
+shaderc_compile_options_t shaderc_compile_options_clone(
+    const shaderc_compile_options_t options) {
+  if (!options) {
+    return shaderc_compile_options_initialize();
+  }
+  return new (std::nothrow) shaderc_compile_options(*options);
+}
+
+void shaderc_compile_options_release(shaderc_compile_options_t options) {
+  delete options;
+}
 
 shaderc_compiler_t shaderc_compiler_initialize() {
   std::lock_guard<std::mutex> lock(glsl_state.mutex);
@@ -134,12 +130,13 @@ void shaderc_compiler_release(shaderc_compiler_t compiler) {
   }
 }
 
-shaderc_spv_module_t shaderc_compile_into_spv(shaderc_compiler_t compiler,
-                                              const char* source_text,
-                                              int source_text_size,
-                                              shaderc_shader_kind shader_kind,
-                                              const char* entry_point_name) {
+shaderc_spv_module_t shaderc_compile_into_spv(
+    shaderc_compiler_t compiler, const char* source_text,
+    size_t source_text_size, shaderc_shader_kind shader_kind,
+    const char* entry_point_name,
+    shaderc_compile_options_t additional_options) {
   std::lock_guard<std::mutex> lock(compile_mutex);
+
   shaderc_spv_module_t result = new (std::nothrow) shaderc_spv_module;
   if (!result) {
     return nullptr;
@@ -147,14 +144,35 @@ shaderc_spv_module_t shaderc_compile_into_spv(shaderc_compiler_t compiler,
 
   result->compilation_succeeded = false;  // In case we exit early.
   if (!compiler->initialized) return result;
-  if (source_text_size < 0) return result;
   TRY_IF_EXCEPTIONS_ENABLED {
-    SpvGenerator spv_generator(GetStage(shader_kind), result);
-    result->compilation_succeeded = ShCompile(
-        static_cast<ShHandle>(&spv_generator), &source_text,
-        1 /* only one string */, &source_text_size, EShOptNone,
-        &shaderc_util::kDefaultTBuiltInResource, 0 /* no debug options */);
-    spv_generator.CaptureMessages();
+    std::stringstream output;
+    std::stringstream errors;
+    size_t total_warnings;
+    size_t total_errors;
+    EShLanguage stage = GetStage(shader_kind);
+    shaderc_util::string_piece source_string =
+        shaderc_util::string_piece(source_text, source_text + source_text_size);
+    auto stage_function =
+        [](std::ostream* error_stream,
+           const shaderc_util::string_piece& eror_tag) { return EShLangCount; };
+    if (additional_options) {
+      result->compilation_succeeded = additional_options->compiler.Compile(
+          source_string, stage, "shader", stage_function, NullIncluder(),
+          &output, &errors, &total_warnings, &total_errors);
+    } else {
+      // Compile with default options.
+      result->compilation_succeeded = shaderc_util::Compiler().Compile(
+          source_string, stage, "shader", stage_function, NullIncluder(),
+          &output, &errors, &total_warnings, &total_errors);
+    }
+    result->messages = errors.str();
+    // Get the length of data in the output string.
+    output.seekg(0, std::ios::end);
+    size_t size = output.tellg();
+    output.seekg(0, std::ios::beg);
+    result->spirv.resize((size + sizeof(uint32_t) - 1) / sizeof(uint32_t));
+    output.get(static_cast<char*>(static_cast<void*>(result->spirv.data())),
+               size);
   }
   CATCH_IF_EXCEPTIONS_ENABLED(...) { result->compilation_succeeded = false; }
   return result;
@@ -179,3 +197,4 @@ const char* shaderc_module_get_error_message(
     const shaderc_spv_module_t module) {
   return module->messages.c_str();
 }
+

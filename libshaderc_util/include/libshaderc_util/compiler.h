@@ -53,9 +53,7 @@ class Compiler {
         force_version_profile_(false),
         preprocess_only_(false),
         generate_debug_info_(false),
-        suppress_warnings_(false),
-        total_warnings_(0),
-        total_errors_(0) {}
+        suppress_warnings_(false) {}
 
   // Instead of outputting object files, output the disassembled textual output.
   virtual void SetDisassemblyMode();
@@ -82,10 +80,6 @@ class Compiler {
   // subsequent CompileShader() calls.
   void SetForcedVersionProfile(int version, EProfile profile);
 
-  // Outputs to *error_stream the number of warnings and errors if there are
-  // any.
-  void OutputMessages(std::ostream* error_stream);
-
   // Compiles the shader source in the input_source_string parameter.
   // The compiled SPIR-V is written to output_stream.
   //
@@ -99,6 +93,8 @@ class Compiler {
   //
   // Any error messages are written as if the file name were error_tag.
   // Any errors are written to the error_stream parameter.
+  // total_warnings and total_errors are incremented once for every
+  // warning or error encountered respectively.
   // Returns true if the compilation succeeded and the result could be written
   // to output, false otherwise.
   bool Compile(const shaderc_util::string_piece& input_source_string,
@@ -108,7 +104,8 @@ class Compiler {
                                                const shaderc_util::string_piece&
                                                    error_tag)>& stage_callback,
                const Includer& includer, std::ostream* output_stream,
-               std::ostream* error_stream);
+               std::ostream* error_stream, size_t* total_warnings,
+               size_t* total_errors) const;
 
  protected:
   // Preprocesses a shader whose filename is filename and content is
@@ -130,7 +127,7 @@ class Compiler {
   std::tuple<bool, std::string, std::string> PreprocessShader(
       const std::string& error_tag,
       const shaderc_util::string_piece& shader_source,
-      const std::string& shader_preamble, const Includer& includer);
+      const std::string& shader_preamble, const Includer& includer) const;
 
   // Cleans up the preamble in a given preprocessed shader.
   //
@@ -150,7 +147,13 @@ class Compiler {
       const shaderc_util::string_piece& preprocessed_shader,
       const shaderc_util::string_piece& error_tag,
       const shaderc_util::string_piece& pound_extension,
-      int num_include_directives, bool is_for_next_line);
+      int num_include_directives, bool is_for_next_line) const;
+
+  // Determines version and profile from command line, or the source code.
+  // Returns the decoded version and profile pair on success. Otherwise,
+  // returns (0, ENoProfile).
+  std::pair<int, EProfile> DeduceVersionProfile(
+      const std::string& preprocessed_shader) const;
 
   // Determines the shader stage from pragmas embedded in the source text if
   // possible. In the returned pair, the glslang EShLanguage is the shader
@@ -159,7 +162,7 @@ class Compiler {
   // error message.  Otherwise, it's an empty string.
   std::pair<EShLanguage, std::string> GetShaderStageFromSourceCode(
       const shaderc_util::string_piece& filename,
-      const std::string& preprocessed_shader);
+      const std::string& preprocessed_shader) const;
 
   // Determines version and profile from command line, or the source code.
   // Returns the decoded version and profile pair on success. Otherwise,
@@ -171,7 +174,7 @@ class Compiler {
   // Returns the decoded version and profile pair on success. Otherwise,
   // returns (0, ENoProfile).
   std::pair<int, EProfile> GetVersionProfileFromSourceCode(
-      const std::string& preprocessed_shader);
+      const std::string& preprocessed_shader) const;
 
   // The default version for glsl is 110, or 100 if you are using an
   // es profile. But we want to default to a non-es profile.
@@ -185,8 +188,6 @@ class Compiler {
   bool generate_debug_info_;
   bool suppress_warnings_;
   MacroDictionary predefined_macros_;
-  size_t total_warnings_;
-  size_t total_errors_;
 };
 }  // namespace shaderc_util
 #endif  // LIBSHADERC_UTIL_INC_COMPILER_H

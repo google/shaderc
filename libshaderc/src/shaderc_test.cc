@@ -16,6 +16,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <memory>
 #include <thread>
 
 #include "SPIRV/spirv.h"
@@ -56,9 +57,10 @@ class Compilation {
  public:
   // Compiles shader, keeping the result.
   Compilation(const shaderc_compiler_t compiler, const std::string& shader,
-              shaderc_shader_kind kind)
-      : compiled_result_(shaderc_compile_into_spv(compiler, shader.c_str(),
-                                                  shader.size(), kind, "")) {}
+              shaderc_shader_kind kind,
+              const shaderc_compile_options_t options = nullptr)
+      : compiled_result_(shaderc_compile_into_spv(
+            compiler, shader.c_str(), shader.size(), kind, "", options)) {}
 
   ~Compilation() { shaderc_module_release(compiled_result_); }
 
@@ -67,6 +69,15 @@ class Compilation {
  private:
   shaderc_spv_module_t compiled_result_;
 };
+
+struct CleanupOptions {
+  void operator()(shaderc_compile_options_t options) const {
+    shaderc_compile_options_release(options);
+  }
+};
+
+typedef std::unique_ptr<shaderc_compile_options, CleanupOptions>
+    compile_options_ptr;
 
 // RAII class for shaderc_compiler_t
 class Compiler {
@@ -88,8 +99,9 @@ bool CompilationSuccess(const shaderc_compiler_t compiler,
 
 // Compiles a shader and returns true if the result is valid SPIR-V.
 bool CompilesToValidSpv(const shaderc_compiler_t compiler,
-                        const std::string& shader, shaderc_shader_kind kind) {
-  Compilation comp(compiler, shader, kind);
+                        const std::string& shader, shaderc_shader_kind kind,
+                        const shaderc_compile_options_t options = nullptr) {
+  Compilation comp(compiler, shader, kind, options);
   auto result = comp.result();
   if (!shaderc_module_get_success(result)) return false;
   size_t length = shaderc_module_get_length(result);
@@ -102,19 +114,10 @@ bool CompilesToValidSpv(const shaderc_compiler_t compiler,
 TEST(CompileString, EmptyString) {
   Compiler compiler;
   ASSERT_NE(nullptr, compiler.get_compiler_handle());
-  EXPECT_TRUE(CompilationSuccess(compiler.get_compiler_handle(), "",
-                                 shaderc_glsl_vertex_shader));
-  EXPECT_TRUE(CompilationSuccess(compiler.get_compiler_handle(), "",
-                                 shaderc_glsl_fragment_shader));
-}
-
-TEST(CompileString, FailsWithCleanedUpCompiler) {
-  Compiler compiler;
-  ASSERT_NE(nullptr, compiler.get_compiler_handle());
-  EXPECT_TRUE(CompilationSuccess(compiler.get_compiler_handle(), "",
-                                 shaderc_glsl_vertex_shader));
-  EXPECT_TRUE(CompilationSuccess(compiler.get_compiler_handle(), "",
-                                 shaderc_glsl_fragment_shader));
+  EXPECT_FALSE(CompilationSuccess(compiler.get_compiler_handle(), "",
+                                  shaderc_glsl_vertex_shader));
+  EXPECT_FALSE(CompilationSuccess(compiler.get_compiler_handle(), "",
+                                  shaderc_glsl_fragment_shader));
 }
 
 TEST(CompileString, GarbageString) {
@@ -149,10 +152,33 @@ TEST(CompileString, MinimalShader) {
                                  shaderc_glsl_fragment_shader));
 }
 
+TEST(CompileString, WorksWithCompileOptions) {
+  Compiler compiler;
+  compile_options_ptr options(shaderc_compile_options_initialize());
+  ASSERT_NE(nullptr, compiler.get_compiler_handle());
+  const std::string kMinimalShader = "void main(){}";
+  EXPECT_TRUE(CompilesToValidSpv(compiler.get_compiler_handle(), kMinimalShader,
+                                 shaderc_glsl_vertex_shader, options.get()));
+}
+
+TEST(CompileString, CloneCompilerOptions) {
+  Compiler compiler;
+  compile_options_ptr options(shaderc_compile_options_initialize());
+  ASSERT_NE(nullptr, compiler.get_compiler_handle());
+  const std::string kMinimalShader = "void main(){}";
+  EXPECT_TRUE(CompilesToValidSpv(compiler.get_compiler_handle(), kMinimalShader,
+                                 shaderc_glsl_vertex_shader, options.get()));
+  compile_options_ptr cloned_options(
+      shaderc_compile_options_clone(options.get()));
+  EXPECT_TRUE(CompilesToValidSpv(compiler.get_compiler_handle(), kMinimalShader,
+                                 shaderc_glsl_vertex_shader,
+                                 cloned_options.get()));
+}
+
 TEST(CompileString, ShaderKindRespected) {
   Compiler compiler;
   ASSERT_NE(nullptr, compiler.get_compiler_handle());
-  const std::string kVertexShader = "vec4 foo(){return gl_Position;}";
+  const std::string kVertexShader = "void main(){ gl_Position = vec4(0);}";
   EXPECT_TRUE(CompilationSuccess(compiler.get_compiler_handle(), kVertexShader,
                                  shaderc_glsl_vertex_shader));
   EXPECT_FALSE(CompilationSuccess(compiler.get_compiler_handle(), kVertexShader,

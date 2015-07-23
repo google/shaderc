@@ -68,6 +68,28 @@ shaderc_compiler_t shaderc_compiler_initialize();
 // involving this shaderc_compiler_t.
 void shaderc_compiler_release(shaderc_compiler_t);
 
+// An opaque handle to an object that manages options to a single compilation
+// result.
+typedef struct shaderc_compile_options* shaderc_compile_options_t;
+
+// Returns a default-initialized shaderc_compile_options_t that can be used
+// to modify the functionality of a compiled module.
+// A return of NULL indicates that there was an error initializing the options.
+// Any function operating on shaderc_compile_options_t must offer the
+// basic thread-safety guarantee.
+shaderc_compile_options_t shaderc_compile_options_initialize();
+
+// Returns a copy of the given shaderc_compile_options_t.
+// If NULL is passed as the parameter the call is the same as
+// shaderc_compile_options_init.
+shaderc_compile_options_t shaderc_compile_options_clone(
+    const shaderc_compile_options_t options);
+
+// Releases the compilation options. It is invalid to use the given
+// shaderc_compile_options_t object in any future calls. It is safe to pass
+// NULL to this function, and doing such will have no effect.
+void shaderc_compile_options_release(shaderc_compile_options_t options);
+
 // An opaque handle to the results of a call to shaderc_compile_into_spv().
 typedef struct shaderc_spv_module* shaderc_spv_module_t;
 
@@ -75,13 +97,15 @@ typedef struct shaderc_spv_module* shaderc_spv_module_t;
 // SPIR-V, and returns a shaderc_spv_module that contains the results of the
 // compilation.  The entry_point_name null-terminated string
 // defines the name of the entry point to associate with this GLSL source.
+// If the additional_options parameter is not NULL, then the compilation is
+// modified by any options present.
 // May be safely called from multiple threads without explicit synchronization.
 // If there was failure in allocating the compiler object NULL will be returned.
-shaderc_spv_module_t shaderc_compile_into_spv(const shaderc_compiler_t compiler,
-                                              const char* source_text,
-                                              int source_text_size,
-                                              shaderc_shader_kind shader_kind,
-                                              const char* entry_point_name);
+shaderc_spv_module_t shaderc_compile_into_spv(
+    const shaderc_compiler_t compiler, const char* source_text,
+    size_t source_text_size, shaderc_shader_kind shader_kind,
+    const char* entry_point_name,
+    const shaderc_compile_options_t additional_options);
 
 // The following functions, operating on shaderc_spv_module_t objects, offer
 // only the basic thread-safety guarantee.
