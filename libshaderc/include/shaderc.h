@@ -90,6 +90,17 @@ shaderc_compile_options_t shaderc_compile_options_clone(
 // NULL to this function, and doing such will have no effect.
 void shaderc_compile_options_release(shaderc_compile_options_t options);
 
+// Adds a predefined macro to the compilation options. This has the
+// same effect as passing -Dname=value to the command-line compiler.
+// If value is NULL, it has the effect same as passing -Dname to the
+// command-line compiler. If a macro definition with the same name has
+// previously been added, the value is replaced with the new value.
+// The null-terminated strings that the name and value parameters point to
+// must remain valid for the duration of the call, but can be modified or
+// deleted after this function has returned.
+void shaderc_compile_options_add_macro_definition(
+    shaderc_compile_options_t options, const char* name, const char* value);
+
 // An opaque handle to the results of a call to shaderc_compile_into_spv().
 typedef struct shaderc_spv_module* shaderc_spv_module_t;
 

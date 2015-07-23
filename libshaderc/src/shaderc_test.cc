@@ -161,7 +161,7 @@ TEST(CompileString, WorksWithCompileOptions) {
                                  shaderc_glsl_vertex_shader, options.get()));
 }
 
-TEST(CompileString, CloneCompilerOptions) {
+TEST(CompileStringWithOptions, CloneCompilerOptions) {
   Compiler compiler;
   compile_options_ptr options(shaderc_compile_options_initialize());
   ASSERT_NE(nullptr, compiler.get_compiler_handle());
@@ -173,6 +173,55 @@ TEST(CompileString, CloneCompilerOptions) {
   EXPECT_TRUE(CompilesToValidSpv(compiler.get_compiler_handle(), kMinimalShader,
                                  shaderc_glsl_vertex_shader,
                                  cloned_options.get()));
+}
+
+TEST(CompileStringWithOptions, MacroCompileOptions) {
+  Compiler compiler;
+  compile_options_ptr options(shaderc_compile_options_initialize());
+  shaderc_compile_options_add_macro_definition(options.get(), "E", "main");
+  ASSERT_NE(nullptr, compiler.get_compiler_handle());
+  const std::string kMinimalExpandedShader = "void E(){}";
+  const std::string kMinimalDoubleExpandedShader = "F E(){}";
+  EXPECT_TRUE(CompilesToValidSpv(compiler.get_compiler_handle(),
+                                 kMinimalExpandedShader,
+                                 shaderc_glsl_vertex_shader, options.get()));
+  compile_options_ptr cloned_options(
+      shaderc_compile_options_clone(options.get()));
+  // The simplest should still compile with the cloned options.
+  EXPECT_TRUE(
+      CompilesToValidSpv(compiler.get_compiler_handle(), kMinimalExpandedShader,
+                         shaderc_glsl_vertex_shader, cloned_options.get()));
+  EXPECT_FALSE(CompilesToValidSpv(
+      compiler.get_compiler_handle(), kMinimalDoubleExpandedShader,
+      shaderc_glsl_vertex_shader, cloned_options.get()));
+
+  shaderc_compile_options_add_macro_definition(cloned_options.get(), "F",
+                                               "void");
+  // This should still not work with the original options.
+  EXPECT_FALSE(CompilesToValidSpv(compiler.get_compiler_handle(),
+                                  kMinimalDoubleExpandedShader,
+                                  shaderc_glsl_vertex_shader, options.get()));
+  // This should work with the cloned options that have the additional
+  // parameter.
+  EXPECT_TRUE(CompilesToValidSpv(
+      compiler.get_compiler_handle(), kMinimalDoubleExpandedShader,
+      shaderc_glsl_vertex_shader, cloned_options.get()));
+}
+
+TEST(CompileStringWithOptions, IfDefCompileOption) {
+  Compiler compiler;
+  compile_options_ptr options(shaderc_compile_options_initialize());
+  shaderc_compile_options_add_macro_definition(options.get(), "E", nullptr);
+  ASSERT_NE(nullptr, compiler.get_compiler_handle());
+  const std::string kMinimalExpandedShader =
+      "#ifdef E\n"
+      "void main(){}\n"
+      "#else\n"
+      "garbage string won't compile\n"
+      "#endif";
+  EXPECT_TRUE(CompilesToValidSpv(compiler.get_compiler_handle(),
+                                 kMinimalExpandedShader,
+                                 shaderc_glsl_vertex_shader, options.get()));
 }
 
 TEST(CompileString, ShaderKindRespected) {

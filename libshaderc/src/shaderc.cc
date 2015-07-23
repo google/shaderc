@@ -57,7 +57,7 @@ struct {
 
 std::mutex compile_mutex;  // Guards shaderc_compile_*.
 
-class NullIncluder : public shaderc_util::Includer {
+class ForbidInclude : public shaderc_util::Includer {
  public:
   std::pair<std::string, std::string> include(
       const char* filename) const override {
@@ -87,6 +87,11 @@ shaderc_compile_options_t shaderc_compile_options_clone(
 
 void shaderc_compile_options_release(shaderc_compile_options_t options) {
   delete options;
+}
+
+void shaderc_compile_options_add_macro_definition(
+    shaderc_compile_options_t options, const char* name, const char* value) {
+  options->compiler.AddMacroDefinition(name, value);
 }
 
 shaderc_compiler_t shaderc_compiler_initialize() {
@@ -157,12 +162,12 @@ shaderc_spv_module_t shaderc_compile_into_spv(
            const shaderc_util::string_piece& eror_tag) { return EShLangCount; };
     if (additional_options) {
       result->compilation_succeeded = additional_options->compiler.Compile(
-          source_string, stage, "shader", stage_function, NullIncluder(),
+          source_string, stage, "shader", stage_function, ForbidInclude(),
           &output, &errors, &total_warnings, &total_errors);
     } else {
       // Compile with default options.
       result->compilation_succeeded = shaderc_util::Compiler().Compile(
-          source_string, stage, "shader", stage_function, NullIncluder(),
+          source_string, stage, "shader", stage_function, ForbidInclude(),
           &output, &errors, &total_warnings, &total_errors);
     }
     result->messages = errors.str();
