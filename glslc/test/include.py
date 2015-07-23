@@ -27,7 +27,15 @@ class VerifyIncludeOneSibling(expect.StdoutMatch):
 
     glslc_args = ['-E', 'a.vert']
 
-    expected_stdout = 'content a\ncontent b\n'
+    expected_stdout = \
+"""#extension GL_GOOGLE_include_directive : enable
+#line 0 "a.vert"
+content a
+#line 0 "b"
+ content b
+#line 2 "a.vert"
+
+"""
 
 @inside_glslc_testsuite('Include')
 class VerifyCompileIncludeOneSibling(expect.ValidObjectFile):
@@ -49,7 +57,14 @@ class VerifyIncludeWithoutNewline(expect.StdoutMatch):
 
     glslc_args = ['-E', 'a.vert']
 
-    expected_stdout = 'content b\n'
+    expected_stdout = \
+"""#extension GL_GOOGLE_include_directive : enable
+#line 0 "a.vert"
+#line 0 "b"
+content b
+#line 1 "a.vert"
+
+"""
 
 @inside_glslc_testsuite('Include')
 class VerifyCompileIncludeWithoutNewline(expect.ValidObjectFile):
@@ -78,7 +93,18 @@ class VerifyIncludeTwoSiblings(expect.StdoutMatch):
 
     glslc_args = ['-E', 'b.vert']
 
-    expected_stdout = 'content a\ncontent b\ncontent c\n'
+    expected_stdout = \
+"""#extension GL_GOOGLE_include_directive : enable
+#line 0 "b.vert"
+#line 0 "a"
+content a
+#line 1 "b.vert"
+ content b
+#line 0 "c"
+ content c
+#line 3 "b.vert"
+
+"""
 
 @inside_glslc_testsuite('Include')
 class VerifyCompileIncludeTwoSiblings(expect.ValidObjectFile):
@@ -109,10 +135,17 @@ class VerifyNestedIncludeAmongSiblings(expect.StdoutMatch):
 
     glslc_args = ['-E', 'a.vert']
 
-    # TODO(deki): there should be a newline after "content c".  Fix it after we
-    # start generating #line in included files.  This seems to only affect -E,
-    # though: the actual compilation works as if the newline is there.
-    expected_stdout = 'content b\ncontent c content a\n'
+    expected_stdout = \
+"""#extension GL_GOOGLE_include_directive : enable
+#line 0 "a.vert"
+#line 0 "b"
+content b
+#line 0 "c"
+ content c
+#line 2 "b"
+#line 1 "a.vert"
+ content a
+"""
 
 @inside_glslc_testsuite('Include')
 class VerifyCompileNestedIncludeAmongSiblings(expect.ValidObjectFile):
@@ -145,7 +178,15 @@ class VerifyIncludeSubdir(expect.StdoutMatch):
 
     glslc_args = ['-E', 'a.vert']
 
-    expected_stdout = 'content a1\ncontent suba\ncontent a2\n'
+    expected_stdout = \
+"""#extension GL_GOOGLE_include_directive : enable
+#line 0 "a.vert"
+content a1
+#line 0 "subdir/a"
+ content suba
+#line 2 "a.vert"
+ content a2
+"""
 
 @inside_glslc_testsuite('Include')
 class VerifyCompileIncludeSubdir(expect.ValidObjectFile):
@@ -174,7 +215,15 @@ class VerifyIncludeDeepSubdir(expect.StdoutMatch):
 
     glslc_args = ['-E', 'a.vert']
 
-    expected_stdout = 'content a1\ncontent incl\ncontent a2\n'
+    expected_stdout = \
+"""#extension GL_GOOGLE_include_directive : enable
+#line 0 "a.vert"
+content a1
+#line 0 "dir/subdir/subsubdir/a"
+ content incl
+#line 2 "a.vert"
+ content a2
+"""
 
 @inside_glslc_testsuite('Include')
 class VerifyCompileIncludeDeepSubdir(expect.ValidObjectFile):
@@ -192,3 +241,19 @@ class VerifyCompileIncludeDeepSubdir(expect.ValidObjectFile):
                 Directory('subsubdir', [File('a', 'void main() BODY\n')])])])])
 
     glslc_args = ['a.vert']
+
+
+@inside_glslc_testsuite('Include')
+class TestWrongPoundVersionInIncludingFile(expect.ValidObjectFileWithWarning):
+    """Tests that warning message for #version directive in the including file
+    has the correct filename."""
+
+    environment = Directory('.', [
+        File('a.vert', '#version 100000000\n#include "b.glsl"\n'),
+        File('b.glsl', 'void main() {}\n')])
+    glslc_args = ['-c', 'a.vert']
+
+    expected_warning = [
+        'a.vert: warning: version 100000000 is unknown.\n',
+        '1 warning generated.\n'
+    ]

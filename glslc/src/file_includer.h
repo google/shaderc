@@ -15,6 +15,7 @@
 #ifndef GLSLC_FILE_INCLUDER_H_
 #define GLSLC_FILE_INCLUDER_H_
 
+#include <atomic>
 #include <string>
 #include <utility>
 
@@ -29,15 +30,20 @@ namespace glslc {
 class FileIncluder : public glslang::TShader::Includer {
  public:
   FileIncluder(const shaderc_util::FileFinder* file_finder)
-      : file_finder_(*file_finder) {}
+      : file_finder_(*file_finder), num_include_directives_(0) {}
 
   // Finds filename in search path and returns its contents.  See
   // Includer::include().
-  std::pair<bool, std::string> include(const char* filename) const override;
+  std::pair<std::string, std::string> include(
+      const char* filename) const override;
+
+  int num_include_directives() const { return num_include_directives_.load(); }
 
  private:
   // Used by include() to get the full filepath.
   const shaderc_util::FileFinder& file_finder_;
+  // The number of #include directive encountered.
+  mutable std::atomic_int num_include_directives_;
 };
 
 }  // namespace glslc

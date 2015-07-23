@@ -18,14 +18,18 @@
 
 namespace glslc {
 
-std::pair<bool, std::string> FileIncluder::include(const char* filename) const {
+std::pair<std::string, std::string> FileIncluder::include(
+    const char* filename) const {
+  ++num_include_directives_;
+
   const std::string full_path = file_finder_.FindReadableFilepath(filename);
   std::vector<char> content;
   if (!full_path.empty() && shaderc_util::ReadFile(full_path, &content)) {
-    return std::make_pair(true, std::string(content.begin(), content.end()));
+    return std::make_pair(full_path,
+                          std::string(content.begin(), content.end()));
   } else {
     // TODO(deki): Emit error message.
-    return std::make_pair(false, std::string(""));
+    return std::make_pair("", "");
   }
 }
 

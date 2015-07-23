@@ -124,6 +124,8 @@ class CompilationContext {
   // Compiles the shader source in the input_source_string parameter.
   // The compiled SPIR-V is written to output_stream.
   //
+  // The input_filename parameter is the filename of the input shader.
+  //
   // If the forced_shader stage parameter is not EShLangCount then
   // the shader is assumed to be of the given stage.
   //
@@ -137,6 +139,7 @@ class CompilationContext {
   // Returns true if the compilation succeeded and the result could be written
   // to output, false otherwise.
   bool DoCompilation(
+      const std::string& input_filename,
       const shaderc_util::string_piece& input_source_string,
       EShLanguage forced_shader_stage,
       const shaderc_util::string_piece& error_tag,
@@ -160,8 +163,29 @@ class CompilationContext {
   // to be default_version_/default_profile_ regardless of the #version
   // directive in the source code.
   std::tuple<bool, std::string, std::string> PreprocessShader(
+      const std::string& filename,
       const shaderc_util::string_piece& shader_source,
-      const std::string& shader_preamble);
+      const std::string& shader_preamble, const glslc::FileIncluder& includer);
+
+  // Cleans up the preamble in a given preprocessed shader.
+  //
+  // The main_file parameter is the name of the main source file.
+  // The pound_extension parameter is the #extension directive we prepended to
+  // the original shader source code via preamble.
+  // The num_include_directives parameter is the number of #include directives
+  // appearing in the original shader source code.
+  // The is_for_next_line means whether the #line sets the line number for the
+  // next line.
+  //
+  // If no #include directive is used in the shader source code, we can safely
+  // delete the #extension directive we injected via preamble. Otherwise, we
+  // need to adjust it if there exists a #version directive in the original
+  // shader source code.
+  std::string CleanupPreamble(
+      const shaderc_util::string_piece& preprocessed_shader,
+      const std::string& main_file,
+      const shaderc_util::string_piece& pound_extension,
+      int num_include_directives, bool is_for_next_line);
 
   // Returns the name of the output file, given the input_filename string.
   std::string GetOutputFileName(std::string input_filename);

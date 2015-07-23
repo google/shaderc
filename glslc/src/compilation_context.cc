@@ -42,6 +42,11 @@ using shaderc_util::string_piece;
 // For use with glslang parsing calls.
 const bool kNotForwardCompatible = false;
 
+// Returns a #line directive whose arguments are line and filename.
+inline std::string GetLineDirective(int line, const std::string& filename) {
+  return "#line " + std::to_string(line) + " \"" + filename + "\"\n";
+}
+
 // Returns true if #line directive sets the line number for the next line in the
 // given version and profile.
 inline bool LineDirectiveIsForNextLine(int version, EProfile profile) {
@@ -77,7 +82,7 @@ bool CompilationContext::CompileShader(const std::string& input_file,
   }
   StageDeducer deducer(input_file);
   bool compilation_success = DoCompilation(
-      source_string, shader_stage, error_file_name, deducer,
+      input_file, source_string, shader_stage, error_file_name, deducer,
       glslc::FileIncluder(&include_file_finder_), output_stream, &std::cerr);
 
   if (!compilation_success && output_stream->fail()) {
@@ -93,8 +98,8 @@ bool CompilationContext::CompileShader(const std::string& input_file,
 }
 
 bool CompilationContext::DoCompilation(
-    const string_piece& input_source_string, EShLanguage forced_shader_stage,
-    const string_piece& error_tag,
+    const std::string& input_filename, const string_piece& input_source_string,
+    EShLanguage forced_shader_stage, const string_piece& error_tag,
     const std::function<EShLanguage(std::ostream* error_stream,
                                     const string_piece& error_tag)>&
         stage_callback,
@@ -102,25 +107,41 @@ bool CompilationContext::DoCompilation(
     std::ostream* error_stream) {
   GlslInitializer initializer;
   EShLanguage used_shader_stage = forced_shader_stage;
+  // Preamble to be preprended to the shader soruce string.
   const std::string macro_definitions =
       shaderc_util::format(predefined_macros_, "#define ", " ", "\n");
-
-  std::string preprocessed_shader;
+  const std::string pound_extension =
+      "#extension GL_GOOGLE_include_directive : enable\n";
+  const std::string preamble = macro_definitions + pound_extension;
 
   // If it is preprocess_only_, we definitely need to preprocess. Otherwise, if
   // we don't know the stage until now, we need the preprocessed shader to
   // deduce the shader stage.
   if (preprocess_only_ || used_shader_stage == EShLangCount) {
+    const glslc::FileIncluder includer(&include_file_finder_);
     bool success;
+    std::string preprocessed_shader;
     std::string glslang_errors;
-    std::tie(success, preprocessed_shader, glslang_errors) =
-        PreprocessShader(input_source_string, macro_definitions);
+    std::tie(success, preprocessed_shader, glslang_errors) = PreprocessShader(
+        input_filename, input_source_string, preamble, includer);
 
     success &= PrintFilteredErrors(error_tag, warnings_as_errors_,
                                    /* suppress_warnings = */ true,
                                    glslang_errors.c_str(), &total_warnings_,
                                    &total_errors_);
     if (!success) return false;
+
+    // Because of the behavior change of the #line directive, the #line
+    // directive introducing each file's content must use the syntax for the
+    // specified version. So we need to probe this shader's version and profile.
+    int version;
+    EProfile profile;
+    std::tie(version, profile) = DeduceVersionProfile(preprocessed_shader);
+    const bool is_for_next_line = LineDirectiveIsForNextLine(version, profile);
+
+    preprocessed_shader =
+        CleanupPreamble(preprocessed_shader, input_filename, pound_extension,
+                        includer.num_include_directives(), is_for_next_line);
 
     if (preprocess_only_) {
       return shaderc_util::WriteFile(output_stream,
@@ -146,7 +167,7 @@ bool CompilationContext::DoCompilation(
   const char* shader_strings = input_source_string.data();
   const int shader_lengths = input_source_string.size();
   shader.setStringsWithLengths(&shader_strings, &shader_lengths, 1);
-  shader.setPreamble(macro_definitions.c_str());
+  shader.setPreamble(preamble.c_str());
 
   // TODO(dneto): Generate source-level debug info if requested.
   bool success =
@@ -254,14 +275,15 @@ void CompilationContext::OutputMessages() {
 }
 
 std::tuple<bool, std::string, std::string> CompilationContext::PreprocessShader(
-    const string_piece& shader_source, const std::string& shader_preamble) {
-  const glslc::FileIncluder includer(&include_file_finder_);
-
+    const std::string& filename, const string_piece& shader_source,
+    const std::string& shader_preamble, const glslc::FileIncluder& includer) {
   // The stage does not matter for preprocessing.
   glslang::TShader shader(EShLangVertex);
   const char* shader_strings = shader_source.data();
   const int shader_lengths = shader_source.size();
-  shader.setStringsWithLengths(&shader_strings, &shader_lengths, 1);
+  const char* string_names = filename.c_str();
+  shader.setStringsWithLengthsAndNames(&shader_strings, &shader_lengths,
+                                       &string_names, 1);
   shader.setPreamble(shader_preamble.c_str());
 
   std::string preprocessed_shader;
@@ -274,6 +296,72 @@ std::tuple<bool, std::string, std::string> CompilationContext::PreprocessShader(
     return std::make_tuple(true, preprocessed_shader, shader.getInfoLog());
   }
   return std::make_tuple(false, "", shader.getInfoLog());
+}
+
+std::string CompilationContext::CleanupPreamble(
+    const string_piece& preprocessed_shader, const std::string& main_file,
+    const string_piece& pound_extension, int num_include_directives,
+    bool is_for_next_line) {
+  // Those #define directives in preamble will become empty lines after
+  // preprocessing. We also injected an #extension directive to turn on #include
+  // directive support. In the original preprocessing output from glslang, it
+  // appears before the user source string. We need to do proper adjustment:
+  // * Remove empty lines generated from #define directives in preamble.
+  // * If there is no #include directive in the source code, we do not need to
+  //   output the injected #extension directive. Otherwise,
+  // * If there exists a #version directive in the source code, it should be
+  //   placed at the first line. Its original line will be filled with an empty
+  //   line as placeholder to maintain the code structure.
+
+  const std::vector<string_piece> lines =
+      preprocessed_shader.get_fields('\n', /* keep_delimiter = */ true);
+
+  std::ostringstream output_stream;
+
+  size_t pound_extension_index = lines.size();
+  size_t pound_version_index = lines.size();
+  for (size_t i = 0; i < lines.size(); ++i) {
+    if (lines[i] == pound_extension) {
+      pound_extension_index = std::min(i, pound_extension_index);
+    } else if (lines[i].starts_with("#version")) {
+      // In a preprocessed shader, directives are in a canonical format, so we
+      // can confidently compare to '#version' verbatim, without worrying about
+      // whitespace.
+      pound_version_index = i;
+      if (num_include_directives > 0) output_stream << lines[i];
+      break;
+    }
+  }
+  // We know that #extension directive exists and appears before #version
+  // directive (if any).
+  assert(pound_extension_index < lines.size());
+
+  for (size_t i = 0; i < pound_extension_index; ++i) {
+    // All empty lines before the #line directive we injected are generated by
+    // preprocessing preamble. Do not output them.
+    if (lines[i].strip_whitespace().empty()) continue;
+    output_stream << lines[i];
+  }
+
+  if (num_include_directives > 0) {
+    output_stream << pound_extension;
+    // Also output a #line directive for the main file.
+    output_stream << GetLineDirective(is_for_next_line, main_file);
+  }
+
+  for (size_t i = pound_extension_index + 1; i < lines.size(); ++i) {
+    if (i == pound_version_index) {
+      if (num_include_directives > 0) {
+        output_stream << "\n";
+      } else {
+        output_stream << lines[i];
+      }
+    } else {
+      output_stream << lines[i];
+    }
+  }
+
+  return output_stream.str();
 }
 
 std::string CompilationContext::GetOutputFileName(std::string input_filename) {
