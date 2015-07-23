@@ -1,3 +1,4 @@
+//
 // Copyright 2015 The Shaderc Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef GLSLC_COMPILATION_CONTEXT_H
-#define GLSLC_COMPILATION_CONTEXT_H
+#ifndef LIBSHADERC_UTIL_INC_COMPILER_H
+#define LIBSHADERC_UTIL_INC_COMPILER_H
 
 #include <functional>
 #include <ostream>
@@ -23,12 +24,11 @@
 
 #include "glslang/Public/ShaderLang.h"
 
-#include "libshaderc_util/file_finder.h"
-#include "libshaderc_util/string_piece.h"
+#include "file_finder.h"
+#include "string_piece.h"
+#include "includer.h"
 
-#include "file_includer.h"
-
-namespace glslc {
+namespace shaderc_util {
 
 // Initializes glslang on creation, and destroys it on completion.
 class GlslInitializer {
@@ -42,66 +42,26 @@ class GlslInitializer {
 using MacroDictionary =
     std::unordered_map<shaderc_util::string_piece, shaderc_util::string_piece>;
 
-class CompilationContext {
+// Holds all of the state required to compile source GLSL into SPIR-V.
+class Compiler {
  public:
-  CompilationContext()
+  Compiler()
       : default_version_(110),
         default_profile_(ENoProfile),
         warnings_as_errors_(false),
         disassemble_(false),
         force_version_profile_(false),
         preprocess_only_(false),
-        needs_linking_(true),
         generate_debug_info_(false),
         suppress_warnings_(false),
         total_warnings_(0),
         total_errors_(0) {}
 
-  // Compiles a shader received in input_file, returning true on success and
-  // false otherwise. If force_shader_stage is not EShLangCount then the
-  // given shader_stage will be used, otherwise it will be determined
-  // from the source or the file type.
-  //
-  // Places the compilation output into a new file whose name is derived from
-  // input_file according to the rules from glslc/README.asciidoc.
-  //
-  // If version/profile has been forced, the shader's version/profile is set to
-  // that value regardless of the #version directive in the source code.
-  //
-  // Any errors/warnings found in the shader source will be output to std::cerr
-  // and increment the counts reported by OutputMessages().
-  bool CompileShader(const std::string& input_file, EShLanguage shader_stage);
-
-  // Adds a directory to be searched when processing #include directives.
-  //
-  // Best practice: if you add an empty string before any other path, that will
-  // correctly resolve both absolute paths and paths relative to the current
-  // working directory.
-  void AddIncludeDirectory(const std::string& path);
-
-  // Adds an implicit macro definition obeyed by subsequent CompileShader()
-  // calls.
-  void AddMacroDefinition(const shaderc_util::string_piece& macro,
-                          const shaderc_util::string_piece& definition);
-
-  // Forces (without any verification) the default version and profile for
-  // subsequent CompileShader() calls.
-  void SetForcedVersionProfile(int version, EProfile profile);
-
-  // Sets the output filename. A name of "-" indicates standard output.
-  void SetOutputFileName(const shaderc_util::string_piece& file) {
-    output_file_name_ = file;
-  }
-
-  // When any files are to be compiled, they are compiled individually and
-  // written to separate output files instead of linked together.
-  void SetIndividualCompilationMode();
-
   // Instead of outputting object files, output the disassembled textual output.
-  void SetDisassemblyMode();
+  virtual void SetDisassemblyMode();
 
   // Instead of outputting object files, output the preprocessed source files.
-  void SetPreprocessingOnlyMode();
+  virtual void SetPreprocessingOnlyMode();
 
   // Requests that the compiler place debug information into the object code,
   // such as identifier names and line numbers.
@@ -113,18 +73,21 @@ class CompilationContext {
   // Any warning message generated is suppressed before it is output.
   void SetSuppressWarnings();
 
-  // Returns false if any options are incompatible.  The num_files parameter
-  // represents the number of files that will be compiled.
-  bool ValidateOptions(size_t num_files);
+  // Adds an implicit macro definition obeyed by subsequent CompileShader()
+  // calls.
+  void AddMacroDefinition(const string_piece& macro,
+                          const string_piece& definition);
 
-  // Outputs to std::cerr the number of warnings and errors if there are any.
+  // Forces (without any verification) the default version and profile for
+  // subsequent CompileShader() calls.
+  void SetForcedVersionProfile(int version, EProfile profile);
+
+  // Outputs to std::cerr the number of warnings and errors if there are
+  // any.
   void OutputMessages();
 
- private:
   // Compiles the shader source in the input_source_string parameter.
   // The compiled SPIR-V is written to output_stream.
-  //
-  // The input_filename parameter is the filename of the input shader.
   //
   // If the forced_shader stage parameter is not EShLangCount then
   // the shader is assumed to be of the given stage.
@@ -138,38 +101,40 @@ class CompilationContext {
   // Any errors are written to the error_stream parameter.
   // Returns true if the compilation succeeded and the result could be written
   // to output, false otherwise.
-  bool DoCompilation(
-      const std::string& input_filename,
-      const shaderc_util::string_piece& input_source_string,
-      EShLanguage forced_shader_stage,
-      const shaderc_util::string_piece& error_tag,
-      const std::function<EShLanguage(
-          std::ostream* error_stream,
-          const shaderc_util::string_piece& error_tag)>& stage_callback,
-      const glslang::TShader::Includer& includer, std::ostream* output_stream,
-      std::ostream* error_stream);
+  bool Compile(const shaderc_util::string_piece& input_source_string,
+               EShLanguage forced_shader_stage,
+               const shaderc_util::string_piece& error_tag,
+               const std::function<EShLanguage(std::ostream* error_stream,
+                                               const shaderc_util::string_piece&
+                                                   error_tag)>& stage_callback,
+               const Includer& includer, std::ostream* output_stream,
+               std::ostream* error_stream);
+
+ protected:
   // Preprocesses a shader whose filename is filename and content is
   // shader_source. If preprocessing is successful, returns true, the
   // preprocessed shader, and any warning message as a tuple. Otherwise,
   // returns false, an empty string, and error messages as a tuple.
   //
-  // The filename parameter is the input shader's filename.
+  // The error_tag parameter is the name to use for outputting errors.
   // The shader_source parameter is the input shader's source text.
   // The shader_preamble parameter is a context-specific preamble internally
   // prepended to shader_text without affecting the validity of its #version
   // position.
   //
+  // Any #include directives are processed with the given includer.
+  //
   // If force_version_profile_ is set, the shader's version/profile is forced
   // to be default_version_/default_profile_ regardless of the #version
   // directive in the source code.
   std::tuple<bool, std::string, std::string> PreprocessShader(
-      const std::string& filename,
+      const std::string& error_tag,
       const shaderc_util::string_piece& shader_source,
-      const std::string& shader_preamble, const glslc::FileIncluder& includer);
+      const std::string& shader_preamble, const Includer& includer);
 
   // Cleans up the preamble in a given preprocessed shader.
   //
-  // The main_file parameter is the name of the main source file.
+  // The error_tag parameter is the name to be given for the main file.
   // The pound_extension parameter is the #extension directive we prepended to
   // the original shader source code via preamble.
   // The num_include_directives parameter is the number of #include directives
@@ -183,19 +148,9 @@ class CompilationContext {
   // shader source code.
   std::string CleanupPreamble(
       const shaderc_util::string_piece& preprocessed_shader,
-      const std::string& main_file,
+      const shaderc_util::string_piece& error_tag,
       const shaderc_util::string_piece& pound_extension,
       int num_include_directives, bool is_for_next_line);
-
-  // Returns the name of the output file, given the input_filename string.
-  std::string GetOutputFileName(std::string input_filename);
-
-  // Determines the shader stage from pragmas embedded in the source text or
-  // from the filename extension, if possible. If errors occur, returns an
-  // errors string in the second element of the pair and returns EShLangCount
-  // in the first element.
-  std::pair<EShLanguage, std::string> DeduceShaderStage(
-      const std::string& filename, const std::string& preprocessed_shader);
 
   // Determines the shader stage from pragmas embedded in the source text if
   // possible. In the returned pair, the glslang EShLanguage is the shader
@@ -227,18 +182,11 @@ class CompilationContext {
   bool disassemble_;
   bool force_version_profile_;
   bool preprocess_only_;
-  bool needs_linking_;
   bool generate_debug_info_;
   bool suppress_warnings_;
   MacroDictionary predefined_macros_;
-  shaderc_util::FileFinder include_file_finder_;
-
-  // This is set by the various Set*Mode functions. It is set to reflect the
-  // type of file being generated.
-  std::string file_extension_;
-  shaderc_util::string_piece output_file_name_;
   size_t total_warnings_;
   size_t total_errors_;
 };
-}
-#endif  // GLSLC_COMPILATION_CONTEXT_H
+}  // namespace shaderc_util
+#endif  // LIBSHADERC_UTIL_INC_COMPILER_H

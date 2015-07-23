@@ -14,9 +14,7 @@
 
 #include "shader_stage.h"
 
-#include <algorithm>
-#include <tuple>
-
+#include "libshaderc_util/shader_stage.h"
 #include "libshaderc_util/file_finder.h"
 #include "libshaderc_util/resources.h"
 
@@ -68,22 +66,10 @@ EShLanguage StageDeducer::operator()(std::ostream* error_stream,
   return stage;
 }
 
-EShLanguage MapStageNameToLanguage(const string_piece& stage_name) {
-  const LanguageMapping string_to_stage[] = {
-      {"vertex", EShLangVertex},           {"fragment", EShLangFragment},
-      {"tesscontrol", EShLangTessControl}, {"tesseval", EShLangTessEvaluation},
-      {"geometry", EShLangGeometry},       {"compute", EShLangCompute}};
-
-  for (const auto& entry : string_to_stage) {
-    if (stage_name == entry.id) return entry.language;
-  }
-  return EShLangCount;
-}
-
-EShLanguage GetShaderStageFromCmdLine(const string_piece& f_shader_stage) {
+EShLanguage GetShaderStageFromCmdLine(
+    const shaderc_util::string_piece& f_shader_stage) {
   size_t equal_pos = f_shader_stage.find_first_of("=");
   if (equal_pos == std::string::npos) return EShLangCount;
   return MapStageNameToLanguage(f_shader_stage.substr(equal_pos + 1));
 }
-
 }  // namespace glslc

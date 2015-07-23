@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef GLSLC_VERSION_PROFILE_H_
-#define GLSLC_VERSION_PROFILE_H_
+#ifndef LIBSHADERC_UTIL_INC_VERSION_PROFILE_H_
+#define LIBSHADERC_UTIL_INC_VERSION_PROFILE_H_
 
 #include <string>
 
 #include "glslang/MachineIndependent/Versions.h"
 
-namespace glslc {
+namespace shaderc_util {
 
 // Returns true if the given version is an accepted GLSL (ES) version.
 inline bool IsKnownVersion(int version) {
@@ -32,9 +32,9 @@ inline bool IsKnownVersion(int version) {
 // Given a string version_profile containing both version and profile, decodes
 // it and puts the decoded version in version, decoded profile in profile.
 // Returns true if decoding is successful and version and profile are accepted.
-bool GetVersionProfileFromCmdLine(const std::string& version_profile,
-                                  int* version, EProfile* profile);
+bool ParseVersionProfile(const std::string& version_profile, int* version,
+                         EProfile* profile);
 
-}  // namespace glslc
+}  // namespace shaderc_util
 
-#endif  // GLSLC_VERSION_PROFILE_H_
+#endif  // LIBSHADERC_UTIL_INC_VERSION_PROFILE_H_

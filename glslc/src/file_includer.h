@@ -21,13 +21,14 @@
 
 #include "glslang/Public/ShaderLang.h"
 
+#include "libshaderc_util/includer.h"
 #include "libshaderc_util/file_finder.h"
 
 namespace glslc {
 
 // An Includer for files.  Translates the #include argument into the file's
 // contents, based on a FileFinder.
-class FileIncluder : public glslang::TShader::Includer {
+class FileIncluder : public shaderc_util::Includer {
  public:
   FileIncluder(const shaderc_util::FileFinder* file_finder)
       : file_finder_(*file_finder), num_include_directives_(0) {}
@@ -37,7 +38,9 @@ class FileIncluder : public glslang::TShader::Includer {
   std::pair<std::string, std::string> include(
       const char* filename) const override;
 
-  int num_include_directives() const { return num_include_directives_.load(); }
+  virtual int num_include_directives() const override {
+    return num_include_directives_.load();
+  }
 
  private:
   // Used by include() to get the full filepath.

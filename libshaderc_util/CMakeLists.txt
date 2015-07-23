@@ -7,9 +7,15 @@ add_library(shaderc_util STATIC
   include/libshaderc_util/resources.h
   include/libshaderc_util/string_piece.h
   include/libshaderc_util/universal_unistd.h
+  include/libshaderc_util/version_profile.h
+  src/compiler.cc
   src/file_finder.cc
   src/io.cc
+  src/message.cc
+  src/message.h
   src/resources.cc
+  src/shader_stage.cc
+  src/version_profile.cc
 )
 
 default_compile_options(shaderc_util)
@@ -25,7 +31,8 @@ add_shaderc_tests(
     string_piece
     format
     file_finder
-    io)
+    io
+    message)
 
 # This target copies content of testdata into the build directory.
 add_custom_target(testdata COMMAND

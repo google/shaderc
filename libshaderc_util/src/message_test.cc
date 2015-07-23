@@ -21,8 +21,8 @@
 
 #include <gtest/gtest.h>
 
-using glslc::MessageType;
-using glslc::ParseGlslangOutput;
+using shaderc_util::MessageType;
+using shaderc_util::ParseGlslangOutput;
 using shaderc_util::string_piece;
 
 namespace {
@@ -143,11 +143,11 @@ TEST(ParseGlslangOutputTest, LocationSpecification) {
   EXPECT_EQ("2", line_number.str());
   EXPECT_EQ("'#' : invalid directive: foo", rest.str());
 
-  EXPECT_EQ(
-      MessageType::Warning,
-      ParseGlslangOutput("WARNING: 15:36: The following extension must be "
-                         "enabled to use this feature:",
-                         false, false, &segment_number, &line_number, &rest));
+  EXPECT_EQ(MessageType::Warning,
+            ParseGlslangOutput(
+                "WARNING: 15:36: The following extension must be "
+                "enabled to use this feature:",
+                false, false, &segment_number, &line_number, &rest));
   EXPECT_EQ("15", segment_number.str());
   EXPECT_EQ("36", line_number.str());
   EXPECT_EQ("The following extension must be enabled to use this feature:",

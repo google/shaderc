@@ -19,9 +19,7 @@
 #include <iostream>
 #include <iterator>
 
-namespace glslc {
-
-using shaderc_util::string_piece;
+namespace shaderc_util {
 
 namespace {
 

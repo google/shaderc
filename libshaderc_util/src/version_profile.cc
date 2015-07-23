@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "version_profile.h"
+#include "libshaderc_util/version_profile.h"
 
 #include <cctype>
 
@@ -25,10 +25,10 @@ const int kMinVersionProfileLength = kVersionNumberLength;
 
 }  // anonymous namespace
 
-namespace glslc {
+namespace shaderc_util {
 
-bool GetVersionProfileFromCmdLine(const std::string& version_profile,
-                                  int* version, EProfile* profile) {
+bool ParseVersionProfile(const std::string& version_profile, int* version,
+                         EProfile* profile) {
   if (version_profile.size() < kMinVersionProfileLength ||
       version_profile.size() > kMaxVersionProfileLength ||
       !::isdigit(version_profile.front()))
@@ -55,4 +55,4 @@ bool GetVersionProfileFromCmdLine(const std::string& version_profile,
   return true;
 }
 
-}  // namespace glslc
+}  // namespace shaderc_util

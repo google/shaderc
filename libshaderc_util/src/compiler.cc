@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "compilation_context.h"
+#include "libshaderc_util/compiler.h"
 
 #include <cstdint>
 #include <fstream>
@@ -20,17 +20,16 @@
 #include "libshaderc_util/format.h"
 #include "libshaderc_util/io.h"
 #include "libshaderc_util/resources.h"
+#include "libshaderc_util/shader_stage.h"
 #include "libshaderc_util/string_piece.h"
+#include "libshaderc_util/version_profile.h"
 
 #include "SPIRV/disassemble.h"
 #include "SPIRV/doc.h"
 #include "SPIRV/GLSL450Lib.h"
 #include "SPIRV/GlslangToSpv.h"
 
-#include "file.h"
 #include "message.h"
-#include "shader_stage.h"
-#include "version_profile.h"
 
 // We must have the following global variable because declared as extern in
 // glslang/SPIRV/disassemble.cpp, which we will need for disassembling.
@@ -42,95 +41,53 @@ using shaderc_util::string_piece;
 // For use with glslang parsing calls.
 const bool kNotForwardCompatible = false;
 
-// Returns a #line directive whose arguments are line and filename.
-inline std::string GetLineDirective(int line, const std::string& filename) {
-  return "#line " + std::to_string(line) + " \"" + filename + "\"\n";
-}
-
 // Returns true if #line directive sets the line number for the next line in the
 // given version and profile.
 inline bool LineDirectiveIsForNextLine(int version, EProfile profile) {
   return profile == EEsProfile || version >= 330;
 }
 
-}  // anonymous namespace
-
-namespace glslc {
-bool CompilationContext::CompileShader(const std::string& input_file,
-                                       EShLanguage shader_stage) {
-  std::vector<char> input_data;
-  if (!shaderc_util::ReadFile(input_file, &input_data)) {
-    return false;
-  }
-
-  std::string output_name = GetOutputFileName(input_file);
-
-  std::ofstream potential_file_stream;
-  std::ostream* output_stream =
-      shaderc_util::GetOutputStream(output_name, &potential_file_stream);
-  string_piece error_file_name = input_file;
-
-  if (error_file_name == "-") {
-    // If the input file was stdin, we want to output errors as <stdin>.
-    error_file_name = "<stdin>";
-  }
-
-  string_piece source_string;
-  if (!input_data.empty()) {
-    source_string = string_piece(&(*input_data.begin()),
-                                 &(*input_data.begin()) + input_data.size());
-  }
-  StageDeducer deducer(input_file);
-  bool compilation_success = DoCompilation(
-      input_file, source_string, shader_stage, error_file_name, deducer,
-      glslc::FileIncluder(&include_file_finder_), output_stream, &std::cerr);
-
-  if (!compilation_success && output_stream->fail()) {
-    if (output_stream == &std::cout) {
-      std::cerr << "glslc: error: error writing to standard output"
-                << std::endl;
-    } else {
-      std::cerr << "glslc: error: error writing to output file: '"
-                << output_file_name_ << "'" << std::endl;
-    }
-  }
-  return compilation_success;
+// Returns a #line directive whose arguments are line and filename.
+inline std::string GetLineDirective(int line, const string_piece& filename) {
+  return "#line " + std::to_string(line) + " \"" + filename.str() + "\"\n";
 }
 
-bool CompilationContext::DoCompilation(
-    const std::string& input_filename, const string_piece& input_source_string,
-    EShLanguage forced_shader_stage, const string_piece& error_tag,
+}  // anonymous namespace
+
+namespace shaderc_util {
+
+bool Compiler::Compile(
+    const string_piece& input_source_string, EShLanguage forced_shader_stage,
+    const string_piece& error_tag,
     const std::function<EShLanguage(std::ostream* error_stream,
                                     const string_piece& error_tag)>&
         stage_callback,
-    const glslang::TShader::Includer& includer, std::ostream* output_stream,
+    const Includer& includer, std::ostream* output_stream,
     std::ostream* error_stream) {
   GlslInitializer initializer;
   EShLanguage used_shader_stage = forced_shader_stage;
-  // Preamble to be preprended to the shader soruce string.
   const std::string macro_definitions =
       shaderc_util::format(predefined_macros_, "#define ", " ", "\n");
   const std::string pound_extension =
       "#extension GL_GOOGLE_include_directive : enable\n";
   const std::string preamble = macro_definitions + pound_extension;
 
+  std::string preprocessed_shader;
+
   // If it is preprocess_only_, we definitely need to preprocess. Otherwise, if
   // we don't know the stage until now, we need the preprocessed shader to
   // deduce the shader stage.
   if (preprocess_only_ || used_shader_stage == EShLangCount) {
-    const glslc::FileIncluder includer(&include_file_finder_);
     bool success;
-    std::string preprocessed_shader;
     std::string glslang_errors;
     std::tie(success, preprocessed_shader, glslang_errors) = PreprocessShader(
-        input_filename, input_source_string, preamble, includer);
+        error_tag.str(), input_source_string, preamble, includer);
 
     success &= PrintFilteredErrors(error_tag, warnings_as_errors_,
                                    /* suppress_warnings = */ true,
                                    glslang_errors.c_str(), &total_warnings_,
                                    &total_errors_);
     if (!success) return false;
-
     // Because of the behavior change of the #line directive, the #line
     // directive introducing each file's content must use the syntax for the
     // specified version. So we need to probe this shader's version and profile.
@@ -140,7 +97,7 @@ bool CompilationContext::DoCompilation(
     const bool is_for_next_line = LineDirectiveIsForNextLine(version, profile);
 
     preprocessed_shader =
-        CleanupPreamble(preprocessed_shader, input_filename, pound_extension,
+        CleanupPreamble(preprocessed_shader, error_tag, pound_extension,
                         includer.num_include_directives(), is_for_next_line);
 
     if (preprocess_only_) {
@@ -205,83 +162,38 @@ bool CompilationContext::DoCompilation(
   }
 }
 
-void CompilationContext::AddIncludeDirectory(const std::string& path) {
-  include_file_finder_.search_path().push_back(path);
-}
-
-void CompilationContext::AddMacroDefinition(const string_piece& macro,
-                                            const string_piece& definition) {
+void Compiler::AddMacroDefinition(const string_piece& macro,
+                                  const string_piece& definition) {
   predefined_macros_[macro] = definition;
 }
 
-void CompilationContext::SetForcedVersionProfile(int version,
-                                                 EProfile profile) {
+void Compiler::SetForcedVersionProfile(int version, EProfile profile) {
   default_version_ = version;
   default_profile_ = profile;
   force_version_profile_ = true;
 }
-void CompilationContext::SetIndividualCompilationMode() {
-  if (!disassemble_) {
-    needs_linking_ = false;
-    file_extension_ = ".spv";
-  }
-}
-void CompilationContext::SetDisassemblyMode() {
-  disassemble_ = true;
-  needs_linking_ = false;
-  file_extension_ = ".s";
-}
-void CompilationContext::SetPreprocessingOnlyMode() {
-  preprocess_only_ = true;
-  needs_linking_ = false;
-  if (output_file_name_.empty()) {
-    output_file_name_ = "-";
-  }
-}
-void CompilationContext::SetWarningsAsErrors() { warnings_as_errors_ = true; }
-
-void CompilationContext::SetGenerateDebugInfo() { generate_debug_info_ = true; }
-
-void CompilationContext::SetSuppressWarnings() { suppress_warnings_ = true; }
-
-bool CompilationContext::ValidateOptions(size_t num_files) {
-  if (num_files == 0) {
-    std::cerr << "glslc: error: no input files" << std::endl;
-    return false;
-  }
-
-  if (num_files > 1 && needs_linking_) {
-    std::cerr << "glslc: error: linking multiple files is not supported yet. "
-                 "Use -c to compile files individually."
-              << std::endl;
-    return false;
-  }
-
-  // If we are outputting many object files, we cannot specify -o. Also
-  // if we are preprocessing multiple files they must be to stdout.
-  if (num_files > 1 &&
-      ((!preprocess_only_ && !needs_linking_ && !output_file_name_.empty()) ||
-       (preprocess_only_ && output_file_name_ != "-"))) {
-    std::cerr << "glslc: error: cannot specify -o when generating multiple"
-                 " output files"
-              << std::endl;
-    return false;
-  }
-  return true;
+void Compiler::OutputMessages() {
+  shaderc_util::OutputMessages(total_warnings_, total_errors_);
 }
 
-void CompilationContext::OutputMessages() {
-  glslc::OutputMessages(total_warnings_, total_errors_);
-}
+void Compiler::SetDisassemblyMode() { disassemble_ = true; }
 
-std::tuple<bool, std::string, std::string> CompilationContext::PreprocessShader(
-    const std::string& filename, const string_piece& shader_source,
-    const std::string& shader_preamble, const glslc::FileIncluder& includer) {
+void Compiler::SetPreprocessingOnlyMode() { preprocess_only_ = true; }
+
+void Compiler::SetWarningsAsErrors() { warnings_as_errors_ = true; }
+
+void Compiler::SetGenerateDebugInfo() { generate_debug_info_ = true; }
+
+void Compiler::SetSuppressWarnings() { suppress_warnings_ = true; }
+
+std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
+    const std::string& error_tag, const string_piece& shader_source,
+    const std::string& shader_preamble, const Includer& includer) {
   // The stage does not matter for preprocessing.
   glslang::TShader shader(EShLangVertex);
   const char* shader_strings = shader_source.data();
   const int shader_lengths = shader_source.size();
-  const char* string_names = filename.c_str();
+  const char* string_names = error_tag.c_str();
   shader.setStringsWithLengthsAndNames(&shader_strings, &shader_lengths,
                                        &string_names, 1);
   shader.setPreamble(shader_preamble.c_str());
@@ -298,10 +210,11 @@ std::tuple<bool, std::string, std::string> CompilationContext::PreprocessShader(
   return std::make_tuple(false, "", shader.getInfoLog());
 }
 
-std::string CompilationContext::CleanupPreamble(
-    const string_piece& preprocessed_shader, const std::string& main_file,
-    const string_piece& pound_extension, int num_include_directives,
-    bool is_for_next_line) {
+std::string Compiler::CleanupPreamble(const string_piece& preprocessed_shader,
+                                      const string_piece& error_tag,
+                                      const string_piece& pound_extension,
+                                      int num_include_directives,
+                                      bool is_for_next_line) {
   // Those #define directives in preamble will become empty lines after
   // preprocessing. We also injected an #extension directive to turn on #include
   // directive support. In the original preprocessing output from glslang, it
@@ -346,7 +259,7 @@ std::string CompilationContext::CleanupPreamble(
   if (num_include_directives > 0) {
     output_stream << pound_extension;
     // Also output a #line directive for the main file.
-    output_stream << GetLineDirective(is_for_next_line, main_file);
+    output_stream << GetLineDirective(is_for_next_line, error_tag);
   }
 
   for (size_t i = pound_extension_index + 1; i < lines.size(); ++i) {
@@ -364,22 +277,7 @@ std::string CompilationContext::CleanupPreamble(
   return output_stream.str();
 }
 
-std::string CompilationContext::GetOutputFileName(std::string input_filename) {
-  std::string output_file = "a.spv";
-  if (!needs_linking_) {
-    if (IsStageFile(input_filename)) {
-      output_file = input_filename + file_extension_;
-    } else {
-      output_file = input_filename.substr(0, input_filename.find_last_of('.')) +
-                    file_extension_;
-    }
-  }
-  if (!output_file_name_.empty()) output_file = output_file_name_.str();
-  return output_file;
-}
-
-std::pair<EShLanguage, std::string>
-CompilationContext::GetShaderStageFromSourceCode(
+std::pair<EShLanguage, std::string> Compiler::GetShaderStageFromSourceCode(
     const string_piece& filename, const std::string& preprocessed_shader) {
   const string_piece kPragmaShaderStageDirective = "#pragma shader_stage";
   const string_piece kLineDirective = "#line";
@@ -459,7 +357,7 @@ CompilationContext::GetShaderStageFromSourceCode(
                         error_message);
 }
 
-std::pair<int, EProfile> CompilationContext::DeduceVersionProfile(
+std::pair<int, EProfile> Compiler::DeduceVersionProfile(
     const std::string& preprocessed_shader) {
   int version = default_version_;
   EProfile profile = default_profile_;
@@ -474,7 +372,7 @@ std::pair<int, EProfile> CompilationContext::DeduceVersionProfile(
   return std::make_pair(version, profile);
 }
 
-std::pair<int, EProfile> CompilationContext::GetVersionProfileFromSourceCode(
+std::pair<int, EProfile> Compiler::GetVersionProfileFromSourceCode(
     const std::string& preprocessed_shader) {
   string_piece pound_version = preprocessed_shader;
   const size_t pound_version_loc = pound_version.find("#version");
@@ -492,8 +390,7 @@ std::pair<int, EProfile> CompilationContext::GetVersionProfileFromSourceCode(
 
   int version;
   EProfile profile;
-  if (!glslc::GetVersionProfileFromCmdLine(version_profile, &version,
-                                           &profile)) {
+  if (!ParseVersionProfile(version_profile, &version, &profile)) {
     return std::make_pair(0, ENoProfile);
   }
   return std::make_pair(version, profile);

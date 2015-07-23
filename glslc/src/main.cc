@@ -21,11 +21,11 @@
 #include <utility>
 
 #include "libshaderc_util/string_piece.h"
+#include "libshaderc_util/version_profile.h"
 
-#include "compilation_context.h"
+#include "file_compiler.h"
 #include "file.h"
 #include "shader_stage.h"
-#include "version_profile.h"
 
 using shaderc_util::string_piece;
 
@@ -96,11 +96,11 @@ bool GetOptionArgument(int argc, char** argv, int* index,
 int main(int argc, char** argv) {
   std::vector<std::pair<std::string, EShLanguage>> input_files;
   EShLanguage force_shader_stage = EShLangCount;
-  glslc::CompilationContext context;
+  glslc::FileCompiler compiler;
   bool success = true;
   bool has_stdin_input = false;
 
-  context.AddIncludeDirectory("");
+  compiler.AddIncludeDirectory("");
 
   for (int i = 1; i < argc; ++i) {
     const string_piece arg = argv[i];
@@ -108,17 +108,17 @@ int main(int argc, char** argv) {
       ::PrintHelp(&std::cout);
       return 0;
     } else if (arg == "-c") {
-      context.SetIndividualCompilationMode();
+      compiler.SetIndividualCompilationMode();
     } else if (arg == "-g") {
-      context.SetGenerateDebugInfo();
+      compiler.SetGenerateDebugInfo();
     } else if (arg == "-S") {
-      context.SetDisassemblyMode();
+      compiler.SetDisassemblyMode();
     } else if (arg == "-E") {
-      context.SetPreprocessingOnlyMode();
+      compiler.SetPreprocessingOnlyMode();
     } else if (arg == "-Werror") {
-      context.SetWarningsAsErrors();
+      compiler.SetWarningsAsErrors();
     } else if (arg == "-w") {
-      context.SetSuppressWarnings();
+      compiler.SetSuppressWarnings();
     } else if (arg.starts_with("-o")) {
       string_piece file_name;
       if (!GetOptionArgument(argc, argv, &i, "-o", &file_name)) {
@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
             << std::endl;
         return 1;
       }
-      context.SetOutputFileName(file_name);
+      compiler.SetOutputFileName(file_name);
     } else if (arg.starts_with("-x")) {
       string_piece option_arg;
       if (!GetOptionArgument(argc, argv, &i, "-x", &option_arg)) {
@@ -171,21 +171,21 @@ int main(int argc, char** argv) {
               << arg << std::endl;
         }
         // TODO(deki): check arg for newlines.
-        context.AddMacroDefinition(name, name_length < argument.size()
-                                             ? argument.substr(name_length + 1)
-                                             : "");
+        compiler.AddMacroDefinition(name, name_length < argument.size()
+                                              ? argument.substr(name_length + 1)
+                                              : "");
       }
     } else if (arg.starts_with("-std=")) {
       const string_piece standard = arg.substr(std::strlen("-std="));
       int version;
       EProfile profile;
-      if (!glslc::GetVersionProfileFromCmdLine(standard.str(), &version,
-                                               &profile)) {
+      if (!shaderc_util::ParseVersionProfile(standard.str(), &version,
+                                             &profile)) {
         std::cerr << "glslc: error: invalid value '" << standard
                   << "' in '-std=" << standard << "'" << std::endl;
         return 1;
       }
-      context.SetForcedVersionProfile(version, profile);
+      compiler.SetForcedVersionProfile(version, profile);
     } else if (arg.starts_with("-I")) {
       string_piece option_arg;
       if (!GetOptionArgument(argc, argv, &i, "-I", &option_arg)) {
@@ -194,7 +194,7 @@ int main(int argc, char** argv) {
             << std::endl;
         success = false;
       } else {
-        context.AddIncludeDirectory(option_arg.str());
+        compiler.AddIncludeDirectory(option_arg.str());
       }
     } else if (!(arg == "-") && arg[0] == '-') {
       std::cerr << "glslc: error: "
@@ -214,7 +214,7 @@ int main(int argc, char** argv) {
     }
   }
 
-  if (!context.ValidateOptions(input_files.size())) return 1;
+  if (!compiler.ValidateOptions(input_files.size())) return 1;
 
   if (!success) return 1;
 
@@ -222,9 +222,9 @@ int main(int argc, char** argv) {
     const std::string& name = input_file.first;
     const EShLanguage stage = input_file.second;
 
-    success &= context.CompileShader(name, stage);
+    success &= compiler.CompileShaderFile(name, stage);
   }
 
-  context.OutputMessages();
+  compiler.OutputMessages();
   return success ? 0 : 1;
 }

@@ -1,18 +1,14 @@
 find_package(Threads)
 
 add_library(glslc STATIC
-  src/compilation_context.cc
-  src/compilation_context.h
+  src/file_compiler.cc
+  src/file_compiler.h
   src/file.cc
   src/file.h
   src/file_includer.cc
   src/file_includer.h
-  src/message.cc
-  src/message.h
   src/shader_stage.cc
   src/shader_stage.h
-  src/version_profile.cc
-  src/version_profile.h
 )
 
 default_compile_options(glslc)
@@ -31,7 +27,6 @@ add_shaderc_tests(
   LINK_LIBS glslc shaderc_util
   TEST_NAMES
     file
-    message
     stage)
 
 add_asciidoc(glslc_doc_README README)
