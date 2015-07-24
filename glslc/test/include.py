@@ -257,3 +257,21 @@ class TestWrongPoundVersionInIncludingFile(expect.ValidObjectFileWithWarning):
         'a.vert: warning: version 100000000 is unknown.\n',
         '1 warning generated.\n'
     ]
+
+
+# TODO(antiagainst): now #version in included files results in an error.
+# Fix this after #version in included files are supported.
+@inside_glslc_testsuite('Include')
+class TestWrongPoundVersionInIncludedFile(expect.ErrorMessage):
+    """Tests that warning message for #version directive in the included file
+    has the correct filename."""
+
+    environment = Directory('.', [
+        File('a.vert', '#include "b.glsl"\nvoid main() {}'),
+        File('b.glsl', '#version 10000000\n')])
+    glslc_args = ['-E', 'a.vert']
+
+    expected_error = [
+        "b.glsl:1: error: '#version' : must occur first in shader\n",
+        '1 error generated.\n'
+    ]

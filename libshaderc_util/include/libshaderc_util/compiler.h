@@ -98,8 +98,7 @@ class Compiler {
   // Returns true if the compilation succeeded and the result could be written
   // to output, false otherwise.
   bool Compile(const shaderc_util::string_piece& input_source_string,
-               EShLanguage forced_shader_stage,
-               const shaderc_util::string_piece& error_tag,
+               EShLanguage forced_shader_stage, const std::string& error_tag,
                const std::function<EShLanguage(std::ostream* error_stream,
                                                const shaderc_util::string_piece&
                                                    error_tag)>& stage_callback,
@@ -125,7 +124,7 @@ class Compiler {
   // to be default_version_/default_profile_ regardless of the #version
   // directive in the source code.
   std::tuple<bool, std::string, std::string> PreprocessShader(
-      const shaderc_util::string_piece& error_tag,
+      const std::string& error_tag,
       const shaderc_util::string_piece& shader_source,
       const shaderc_util::string_piece& shader_preamble,
       const Includer& includer) const;

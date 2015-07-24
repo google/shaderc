@@ -100,7 +100,7 @@ class TestPoundVersion310InIncludedFile(expect.ErrorMessage):
     glslc_args = ['-E', 'a.vert']
 
     expected_error = [
-        "a.vert:1: error: '#version' : must occur first in shader\n",
+        "b.glsl:1: error: '#version' : must occur first in shader\n",
         '1 error generated.\n'
     ]
 
@@ -119,7 +119,7 @@ class TestPoundVersion150InIncludedFile(expect.ErrorMessage):
     glslc_args = ['-E', 'a.vert']
 
     expected_error = [
-        "a.vert:1: error: '#version' : must occur first in shader\n",
+        "b.glsl:1: error: '#version' : must occur first in shader\n",
         '1 error generated.\n'
     ]
 

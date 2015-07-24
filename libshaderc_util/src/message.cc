@@ -184,12 +184,18 @@ bool PrintFilteredErrors(const string_piece& file_name,
       string_piece source_name;
       string_piece line_number;
       string_piece rest;
-      switch (MessageType type = ParseGlslangOutput(
-                  message, warnings_as_errors, suppress_warnings, &source_name,
-                  &line_number, &rest)) {
+      const MessageType type =
+          ParseGlslangOutput(message, warnings_as_errors, suppress_warnings,
+                             &source_name, &line_number, &rest);
+      string_piece name = file_name;
+      if (!source_name.empty()) {
+        // -1 is the string number for the preamble injected by us.
+        name = source_name == "-1" ? "<command line>" : source_name;
+      }
+      switch (type) {
         case MessageType::Error:
         case MessageType::Warning:
-          *error_stream << file_name << ":";
+          *error_stream << name << ":";
           assert(!source_name.empty() && !line_number.empty() && !rest.empty());
           *error_stream << line_number << ": "
                         << (type == MessageType::Error ? "error: "
@@ -206,13 +212,13 @@ bool PrintFilteredErrors(const string_piece& file_name,
           assert(!rest.empty());
           *total_errors += type == MessageType::GlobalError;
           *total_warnings += type == MessageType::GlobalWarning;
-          *error_stream << file_name << ": "
+          *error_stream << name << ": "
                         << (type == MessageType::GlobalError ? "error"
                                                              : "warning")
                         << ": " << rest.strip_whitespace() << std::endl;
           break;
         case MessageType::Unknown:
-          *error_stream << file_name << ":";
+          *error_stream << name << ":";
           *error_stream << " " << message << std::endl;
           break;
         case MessageType::Ignored:

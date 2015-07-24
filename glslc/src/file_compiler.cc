@@ -56,7 +56,7 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
   }
   StageDeducer deducer(input_file);
   bool compilation_success =
-      Compile(source_string, shader_stage, error_file_name, deducer,
+      Compile(source_string, shader_stage, error_file_name.str(), deducer,
               glslc::FileIncluder(&include_file_finder_), output_stream,
               &std::cerr, &total_warnings_, &total_errors_);
 
@@ -105,7 +105,8 @@ bool FileCompiler::ValidateOptions(size_t num_files) {
 
   if (num_files > 1 && needs_linking_) {
     std::cerr << "glslc: error: linking multiple files is not supported yet. "
-                 "Use -c to compile files individually." << std::endl;
+                 "Use -c to compile files individually."
+              << std::endl;
     return false;
   }
 
@@ -115,7 +116,8 @@ bool FileCompiler::ValidateOptions(size_t num_files) {
       ((!preprocess_only_ && !needs_linking_ && !output_file_name_.empty()) ||
        (preprocess_only_ && output_file_name_ != "-"))) {
     std::cerr << "glslc: error: cannot specify -o when generating multiple"
-                 " output files" << std::endl;
+                 " output files"
+              << std::endl;
     return false;
   }
   return true;

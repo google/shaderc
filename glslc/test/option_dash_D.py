@@ -64,7 +64,7 @@ class TestDashCapDeq(expect.ErrorMessage):
     # TODO(antiagainst): figure out what should we report as the line number
     # for errors in predefined macros and fix here.
     expected_error = [
-        shader, ":2: error: '#define' : must be followed by macro name\n",
+        "<command line>:2: error: '#define' : must be followed by macro name\n",
         '1 error generated.\n']
 
 

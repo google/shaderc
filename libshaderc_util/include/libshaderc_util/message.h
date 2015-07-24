@@ -66,6 +66,8 @@ MessageType ParseGlslangOutput(const shaderc_util::string_piece& message,
 // takes precedence over warnings_as_errors. Increments total_warnings and
 // total_errors based on the message types.
 // Returns true if no new errors were found when parsing the messages.
+// "<command line>" will substitute "-1" appearing at the string name/number
+// segment.
 bool PrintFilteredErrors(const shaderc_util::string_piece& file_name,
                          std::ostream* error_stream, bool warnings_as_errors,
                          bool suppress_warnings, const char* error_list,
