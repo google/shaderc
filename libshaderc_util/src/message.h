@@ -59,7 +59,7 @@ MessageType ParseGlslangOutput(const shaderc_util::string_piece& message,
                                shaderc_util::string_piece* line_number,
                                shaderc_util::string_piece* rest);
 
-// Filters error_messages received from glslang, and outputs
+// Filters error_messages received from glslang, and outputs, to error_stream,
 // any that are not ignored in a clang like format. If the warnings_as_errors
 // boolean is set, then all warnings will be treated as errors. If the
 // suppress_warnings boolean is set then any warning messages are ignored. This
@@ -67,13 +67,14 @@ MessageType ParseGlslangOutput(const shaderc_util::string_piece& message,
 // total_errors based on the message types.
 // Returns true if no new errors were found when parsing the messages.
 bool PrintFilteredErrors(const shaderc_util::string_piece& file_name,
-                         bool warnings_as_errors, bool suppress_warnings,
-                         const char* error_list, size_t* total_warnings,
-                         size_t* total_errors);
+                         std::ostream* error_stream, bool warnings_as_errors,
+                         bool suppress_warnings, const char* error_list,
+                         size_t* total_warnings, size_t* total_errors);
 
-// Outputs the number of warnings and errors if there are
+// Outputs, to error_stream,  the number of warnings and errors if there are
 // any.
-void OutputMessages(size_t total_warnings, size_t total_errors);
+void OutputMessages(std::ostream* error_stream, size_t total_warnings,
+                    size_t total_errors);
 
 }  // namespace glslc
 

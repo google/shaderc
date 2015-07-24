@@ -82,9 +82,9 @@ class Compiler {
   // subsequent CompileShader() calls.
   void SetForcedVersionProfile(int version, EProfile profile);
 
-  // Outputs to std::cerr the number of warnings and errors if there are
+  // Outputs to *error_stream the number of warnings and errors if there are
   // any.
-  void OutputMessages();
+  void OutputMessages(std::ostream* error_stream);
 
   // Compiles the shader source in the input_source_string parameter.
   // The compiled SPIR-V is written to output_stream.

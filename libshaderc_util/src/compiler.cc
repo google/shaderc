@@ -83,7 +83,7 @@ bool Compiler::Compile(
     std::tie(success, preprocessed_shader, glslang_errors) = PreprocessShader(
         error_tag.str(), input_source_string, preamble, includer);
 
-    success &= PrintFilteredErrors(error_tag, warnings_as_errors_,
+    success &= PrintFilteredErrors(error_tag, error_stream, warnings_as_errors_,
                                    /* suppress_warnings = */ true,
                                    glslang_errors.c_str(), &total_warnings_,
                                    &total_errors_);
@@ -132,7 +132,7 @@ bool Compiler::Compile(
                    default_profile_, force_version_profile_,
                    kNotForwardCompatible, EShMsgDefault, includer);
 
-  success &= PrintFilteredErrors(error_tag, warnings_as_errors_,
+  success &= PrintFilteredErrors(error_tag, error_stream, warnings_as_errors_,
                                  suppress_warnings_, shader.getInfoLog(),
                                  &total_warnings_, &total_errors_);
   if (!success) return false;
@@ -140,7 +140,7 @@ bool Compiler::Compile(
   glslang::TProgram program;
   program.addShader(&shader);
   success = program.link(EShMsgDefault);
-  success &= PrintFilteredErrors(error_tag, warnings_as_errors_,
+  success &= PrintFilteredErrors(error_tag, error_stream, warnings_as_errors_,
                                  suppress_warnings_, program.getInfoLog(),
                                  &total_warnings_, &total_errors_);
   if (!success) return false;
@@ -172,8 +172,9 @@ void Compiler::SetForcedVersionProfile(int version, EProfile profile) {
   default_profile_ = profile;
   force_version_profile_ = true;
 }
-void Compiler::OutputMessages() {
-  shaderc_util::OutputMessages(total_warnings_, total_errors_);
+
+void Compiler::OutputMessages(std::ostream* error_stream) {
+  shaderc_util::OutputMessages(error_stream, total_warnings_, total_errors_);
 }
 
 void Compiler::SetDisassemblyMode() { disassemble_ = true; }

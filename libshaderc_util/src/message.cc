@@ -152,7 +152,8 @@ MessageType ParseGlslangOutput(const string_piece& message,
   return MessageType::Unknown;
 }
 
-bool PrintFilteredErrors(const string_piece& file_name, bool warnings_as_errors,
+bool PrintFilteredErrors(const string_piece& file_name,
+                         std::ostream* error_stream, bool warnings_as_errors,
                          bool suppress_warnings, const char* error_list,
                          size_t* total_warnings, size_t* total_errors) {
   const char* ignored_error_strings[] = {
@@ -188,11 +189,12 @@ bool PrintFilteredErrors(const string_piece& file_name, bool warnings_as_errors,
                   &line_number, &rest)) {
         case MessageType::Error:
         case MessageType::Warning:
-          std::cerr << file_name << ":";
+          *error_stream << file_name << ":";
           assert(!source_name.empty() && !line_number.empty() && !rest.empty());
-          std::cerr << line_number << ": "
-                    << (type == MessageType::Error ? "error: " : "warning: ")
-                    << rest.strip_whitespace() << std::endl;
+          *error_stream << line_number << ": "
+                        << (type == MessageType::Error ? "error: "
+                                                       : "warning: ")
+                        << rest.strip_whitespace() << std::endl;
           *total_errors += type == MessageType::Error;
           *total_warnings += type == MessageType::Warning;
           break;
@@ -204,13 +206,14 @@ bool PrintFilteredErrors(const string_piece& file_name, bool warnings_as_errors,
           assert(!rest.empty());
           *total_errors += type == MessageType::GlobalError;
           *total_warnings += type == MessageType::GlobalWarning;
-          std::cerr << file_name << ": "
-                    << (type == MessageType::GlobalError ? "error" : "warning")
-                    << ": " << rest.strip_whitespace() << std::endl;
+          *error_stream << file_name << ": "
+                        << (type == MessageType::GlobalError ? "error"
+                                                             : "warning")
+                        << ": " << rest.strip_whitespace() << std::endl;
           break;
         case MessageType::Unknown:
-          std::cerr << file_name << ":";
-          std::cerr << " " << message << std::endl;
+          *error_stream << file_name << ":";
+          *error_stream << " " << message << std::endl;
           break;
         case MessageType::Ignored:
           break;
@@ -221,20 +224,21 @@ bool PrintFilteredErrors(const string_piece& file_name, bool warnings_as_errors,
 }
 
 // Outputs the number of warnings and errors if there are any.
-void OutputMessages(size_t total_warnings, size_t total_errors) {
+void OutputMessages(std::ostream* error_stream, size_t total_warnings,
+                    size_t total_errors) {
   if (total_warnings > 0 || total_errors > 0) {
     if (total_warnings > 0 && total_errors > 0) {
-      std::cerr << total_warnings << " warning"
-                << (total_warnings > 1 ? "s" : "") << " and " << total_errors
-                << " error" << (total_errors > 1 ? "s" : "") << " generated."
-                << std::endl;
+      *error_stream << total_warnings << " warning"
+                    << (total_warnings > 1 ? "s" : "") << " and "
+                    << total_errors << " error" << (total_errors > 1 ? "s" : "")
+                    << " generated." << std::endl;
     } else if (total_warnings > 0) {
-      std::cerr << total_warnings << " warning"
-                << (total_warnings > 1 ? "s" : "") << " generated."
-                << std::endl;
+      *error_stream << total_warnings << " warning"
+                    << (total_warnings > 1 ? "s" : "") << " generated."
+                    << std::endl;
     } else if (total_errors > 0) {
-      std::cerr << total_errors << " error" << (total_errors > 1 ? "s" : "")
-                << " generated." << std::endl;
+      *error_stream << total_errors << " error" << (total_errors > 1 ? "s" : "")
+                    << " generated." << std::endl;
     }
   }
 }

@@ -118,7 +118,7 @@ bool FileCompiler::ValidateOptions(size_t num_files) {
   return true;
 }
 
-void FileCompiler::OutputMessages() { Compiler::OutputMessages(); }
+void FileCompiler::OutputMessages() { Compiler::OutputMessages(&std::cerr); }
 
 std::string FileCompiler::GetOutputFileName(std::string input_filename) {
   std::string output_file = "a.spv";
