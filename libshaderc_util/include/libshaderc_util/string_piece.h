@@ -239,6 +239,16 @@ class string_piece {
   // Returns an iterator to one past the last element.
   iterator end() const { return end_; }
 
+  const char& front() const {
+    assert(!empty());
+    return *begin_;
+  }
+
+  const char& back() const {
+    assert(!empty());
+    return *(end_ - 1);
+  }
+
   // Returns true is this string_piece starts with the same
   // characters as other.
   bool starts_with(const string_piece& other) const {

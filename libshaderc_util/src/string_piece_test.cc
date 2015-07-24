@@ -236,6 +236,22 @@ TEST(string_piece, begin_end) {
   }
 }
 
+TEST(string_piece, front_back) {
+  // EXPECT_TURE() is used here because gtest will think we are comparing
+  // between pointer and integer here if EXPECT_EQ() is used.
+  const string_piece one_char("a");
+  EXPECT_TRUE(one_char.front() == 'a');
+  EXPECT_TRUE(one_char.back() == 'a');
+
+  const string_piece two_chars("bc");
+  EXPECT_TRUE(two_chars.front() == 'b');
+  EXPECT_TRUE(two_chars.back() == 'c');
+
+  const string_piece multi_chars("w   vm g gg t\t");
+  EXPECT_TRUE(multi_chars.front() == 'w');
+  EXPECT_TRUE(multi_chars.back() == '\t');
+}
+
 TEST(string_piece, starts_with) {
   EXPECT_TRUE(string_piece("my string").starts_with("my"));
   EXPECT_TRUE(string_piece("my string").starts_with("my s"));
