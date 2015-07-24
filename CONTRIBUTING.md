@@ -1,4 +1,6 @@
-Want to contribute? Great! First, read this page (including the small print at the end).
+Want to contribute?  Great!  First, read this page (including the small print at
+the end).  Then, have a look at DEVELOPMENT.howto.md, which contains useful info
+to guide you along the way.
 
 ## Before you contribute
 
@@ -16,44 +18,6 @@ Before you start working on a larger contribution, you should get in touch with
 us first through the issue tracker with your idea so that we can help out and
 possibly guide you. Coordinating up front makes it much easier to avoid
 frustration later on.
-
-## Coding style
-
-For our C++ files, we use the
-[Google C++ style guide](http://google-styleguide.googlecode.com/svn/trunk/cppguide.html).
-(Conveniently, the formatting rules it specifies can be achieved using
-`clang-format -style=google`.)
-
-For our Python files, we use the
-[Google Python style guide](https://google-styleguide.googlecode.com/svn/trunk/pyguide.html).
-
-## Bug tracking
-
-We use GitHub's issue-tracker mechanism for submitting and resolving bugs in
-Shaderc.
-
-## Code reviews
-
-All submissions, including submissions by project members, require review. We
-use GitHub pull requests for this purpose.
-
-A pull request may be accepted by any one of the package maintainers.  You
-should expect the maintainers to strictly insist on the
-[commenting](http://google-styleguide.googlecode.com/svn/trunk/cppguide.html#Comments)
-guidelines -- in particular, every file, class, method, data member, and global
-will require a comment.  The maintainers will also expect to see test coverage
-for every code change.  _How much_ coverage will be a judgment call on a
-case-by-case basis, balancing the required effort against the incremental
-benefit.  But coverage will be expected.  As a matter of development philosophy,
-we will strive to engineer the code to make writing tests easy.
-
-## Supported platforms
-
-We expect Shaderc to always build and test successfully on the platforms listed
-below.  Please keep that in mind when offering contributions.  This list will
-likely grow over time.
-
-* Linux x86
 
 ## The small print
 

@@ -21,13 +21,13 @@ See also the `AUTHORS` and `CONTRIBUTORS` files.
 - `libshaderc_util/`: a utility library used by multiple shaderc components
 - `third_party/`: third party open source packages; see below
 
-shaderc depends on a fork of the Khronos reference GLSL compiler glslang.
-shaderc also depends on the testing framework googlemock.
+Shaderc depends on a fork of the Khronos reference GLSL compiler glslang.
+Shaderc also depends on the testing framework Google Mock.
 
-In the following example, $SOURCE_DIR is the directory you intend to
-clone shaderc into.
+In the following sections, `$SOURCE_DIR` is the directory you intend to clone
+Shaderc into.
 
-## Get started
+## Getting and building Shaderc
 
 1) Check out the source code:
 
@@ -35,48 +35,44 @@ clone shaderc into.
     cd $SOURCE_DIR/third_party
     svn checkout http://googlemock.googlecode.com/svn/tags/release-1.7.0 \
         gmock-1.7.0
-    git clone https://github.com/google/glslang.git glslang
+    git clone https://github.com/google/glslang glslang
     cd $SOURCE_DIR/
 
-2) Decide where to place the build outputs. In the following steps, we'll
-   call it $BUILD_DIR. Any new directory should work. We recommend building
-   outside the source tree, but it is common to build in a subdirectory of
-   $SOURCE_DIR, such as $SOURCE_DIR/build.
+2) Ensure you have the requisite tools -- see the tools subsection below.
 
-3a) Build without code coverage (Linux, Windows with Ninja):
+3) Decide where to place the build output. In the following steps, we'll call it
+   `$BUILD_DIR`. Any new directory should work. We recommend building outside
+   the source tree, but it is also common to build in a (new) subdirectory of
+   `$SOURCE_DIR`, such as `$SOURCE_DIR/build`.
+
+4a) Build (and test) with Ninja on Linux or Windows:
 
     cd $BUILD_DIR
     cmake -GNinja -DCMAKE_BUILD_TYPE={Debug|Release|RelWithDebInfo} $SOURCE_DIR
     ninja
-    ctest
+    ctest #optional
 
-3b) Build without coverage (Windows with MSVC):
+4b) Or build (and test) with MSVC on Windows:
 
     cd $BUILD_DIR
     cmake $SOURCE_DIR
     cmake --build . --config {Release|Debug|MinSizeRel|RelWithDebInfo}
     ctest -C {Release|Debug|MinSizeRel|RelWithDebInfo}
 
-3c) Build with code coverage (Linux):
+After a successful build, you should have a glslc executable somewhere under the
+`$BUILD_DIR/glslc/` directory, as well as a libshaderc library somewhere under
+the `$BUILD_DIR/libshaderc/` directory.
 
-    cd $BUILD_DIR
-    cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DENABLE_CODE_COVERAGE=ON
-        $SOURCE_DIR
-    ninja
-    ninja report-coverage
+### Tools you'll need
 
-Then the coverage report can be found under the `$BUILD_DIR/coverage-report
-directory.
+For building, testing, and profiling shaderc, the following tools should be
+installed regardless of your OS:
 
-### Tool dependencies
-
-For building, testing, and profiling shaderc, the following common tools
-should be installed:
-
-- [cmake](http://www.cmake.org/): For generating compilation targets.
-- [python](http://www.python.org/): For running the test suite.
+- [cmake](http://www.cmake.org/): for generating compilation targets.
+- [python](http://www.python.org/): for running the test suite.
 
 On Linux, the following tools should be installed:
+
 - [gcov](https://gcc.gnu.org/onlinedocs/gcc/Gcov.html): for testing code
     coverage, provided by the `gcc` package on Ubuntu.
 - [lcov](http://ltp.sourceforge.net/coverage/lcov.php): a graphical frontend for
@@ -85,10 +81,30 @@ On Linux, the following tools should be installed:
     format from lcov output, provided by the `lcov` package on Ubuntu.
 
 On Windows, the following tools should be installed and available on your path.
-   - Visual Studio 2013 Update 4 or later. Previous versions of Visual Studio
-     will likely work but are untested.
-   - git - including the associated tools, bash, diff.
 
-Optional: for all platforms
-   - [asciidoctor](http://asciidoctor.org/): for generating documenation.
-   - [nosetests](https://nose.readthedocs.org): for testing the Python code.
+- Visual Studio 2013 Update 4 or later. Previous versions of Visual Studio
+  will likely work but are untested.
+- git - including the associated tools, bash, diff.
+
+Optionally, the following tools may be installed on any OS:
+
+ - [asciidoctor](http://asciidoctor.org/): for generating documenation.
+ - [nosetests](https://nose.readthedocs.org): for testing the Python code.
+
+## Bug tracking
+
+We track bugs using GitHub -- click on the "Issues" button on
+[github.com/google/shaderc].
+
+## Test coverage
+
+On Linux, you can obtain test coverage as follows:
+
+    cd $BUILD_DIR
+    cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DENABLE_CODE_COVERAGE=ON
+        $SOURCE_DIR
+    ninja
+    ninja report-coverage
+
+Then the coverage report can be found under the `$BUILD_DIR/coverage-report`
+directory.
