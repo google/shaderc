@@ -39,9 +39,10 @@ class string_piece {
            "either both begin and end must be nullptr or neither must be");
   }
 
-  string_piece(const char* string) {
-    begin_ = string;
-    end_ = string + strlen(string);
+  string_piece(const char* string) : begin_(string), end_(string) {
+    if (string) {
+      end_ += strlen(string);
+    }
   }
 
   string_piece(const std::string& str) {

@@ -44,6 +44,11 @@ TEST(string_piece, creation_with_empty_data) {
   EXPECT_EQ("", my_string_piece);
 }
 
+TEST(string_piece, creation_with_nullptr) {
+  string_piece my_string_piece(nullptr);
+  EXPECT_EQ("", my_string_piece);
+}
+
 TEST(string_piece, creation_causing_assert) {
   EXPECT_DEBUG_DEATH_IF_SUPPORTED(string_piece("my_cstring", nullptr), ".*");
   EXPECT_DEBUG_DEATH_IF_SUPPORTED(string_piece(nullptr, "my_cstring"), ".*");
