@@ -80,8 +80,8 @@ bool Compiler::Compile(
   if (preprocess_only_ || used_shader_stage == EShLangCount) {
     bool success;
     std::string glslang_errors;
-    std::tie(success, preprocessed_shader, glslang_errors) = PreprocessShader(
-        error_tag.str(), input_source_string, preamble, includer);
+    std::tie(success, preprocessed_shader, glslang_errors) =
+        PreprocessShader(error_tag, input_source_string, preamble, includer);
 
     success &= PrintFilteredErrors(error_tag, error_stream, warnings_as_errors_,
                                    /* suppress_warnings = */ true,
@@ -184,16 +184,16 @@ void Compiler::SetGenerateDebugInfo() { generate_debug_info_ = true; }
 void Compiler::SetSuppressWarnings() { suppress_warnings_ = true; }
 
 std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
-    const std::string& error_tag, const string_piece& shader_source,
-    const std::string& shader_preamble, const Includer& includer) const {
+    const string_piece& error_tag, const string_piece& shader_source,
+    const string_piece& shader_preamble, const Includer& includer) const {
   // The stage does not matter for preprocessing.
   glslang::TShader shader(EShLangVertex);
   const char* shader_strings = shader_source.data();
   const int shader_lengths = shader_source.size();
-  const char* string_names = error_tag.c_str();
+  const char* string_names = error_tag.data();
   shader.setStringsWithLengthsAndNames(&shader_strings, &shader_lengths,
                                        &string_names, 1);
-  shader.setPreamble(shader_preamble.c_str());
+  shader.setPreamble(shader_preamble.data());
 
   std::string preprocessed_shader;
   const bool success = shader.preprocess(

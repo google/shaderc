@@ -125,9 +125,10 @@ class Compiler {
   // to be default_version_/default_profile_ regardless of the #version
   // directive in the source code.
   std::tuple<bool, std::string, std::string> PreprocessShader(
-      const std::string& error_tag,
+      const shaderc_util::string_piece& error_tag,
       const shaderc_util::string_piece& shader_source,
-      const std::string& shader_preamble, const Includer& includer) const;
+      const shaderc_util::string_piece& shader_preamble,
+      const Includer& includer) const;
 
   // Cleans up the preamble in a given preprocessed shader.
   //
