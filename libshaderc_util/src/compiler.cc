@@ -61,7 +61,7 @@ bool Compiler::Compile(
     const std::function<EShLanguage(std::ostream* error_stream,
                                     const string_piece& error_tag)>&
         stage_callback,
-    const Includer& includer, std::ostream* output_stream,
+    const CountingIncluder& includer, std::ostream* output_stream,
     std::ostream* error_stream, size_t* total_warnings,
     size_t* total_errors) const {
   GlslInitializer initializer;
@@ -187,7 +187,8 @@ void Compiler::SetSuppressWarnings() { suppress_warnings_ = true; }
 
 std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
     const std::string& error_tag, const string_piece& shader_source,
-    const string_piece& shader_preamble, const Includer& includer) const {
+    const string_piece& shader_preamble,
+    const CountingIncluder& includer) const {
   // The stage does not matter for preprocessing.
   glslang::TShader shader(EShLangVertex);
   const char* shader_strings = shader_source.data();

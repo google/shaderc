@@ -57,14 +57,15 @@ struct {
 
 std::mutex compile_mutex;  // Guards shaderc_compile_*.
 
-class ForbidInclude : public shaderc_util::Includer {
- public:
-  std::pair<std::string, std::string> include(
+// Rejects #include directives.
+class ForbidInclude : public shaderc_util::CountingIncluder {
+ private:
+  // Returns empty contents and an error message.  See base-class version.
+  std::pair<std::string, std::string> include_delegate(
       const char* filename) const override {
     return std::make_pair<std::string, std::string>(
         "", "unexpected include directive");
   }
-  int num_include_directives() const override { return 0; }
 };
 
 }  // anonymous namespace
@@ -157,9 +158,10 @@ shaderc_spv_module_t shaderc_compile_into_spv(
     EShLanguage stage = GetStage(shader_kind);
     shaderc_util::string_piece source_string =
         shaderc_util::string_piece(source_text, source_text + source_text_size);
-    auto stage_function =
-        [](std::ostream* error_stream,
-           const shaderc_util::string_piece& eror_tag) { return EShLangCount; };
+    auto stage_function = [](std::ostream* error_stream,
+                             const shaderc_util::string_piece& eror_tag) {
+      return EShLangCount;
+    };
     if (additional_options) {
       result->compilation_succeeded = additional_options->compiler.Compile(
           source_string, stage, "shader", stage_function, ForbidInclude(),
@@ -202,4 +204,3 @@ const char* shaderc_module_get_error_message(
     const shaderc_spv_module_t module) {
   return module->messages.c_str();
 }
-

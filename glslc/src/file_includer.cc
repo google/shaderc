@@ -18,10 +18,8 @@
 
 namespace glslc {
 
-std::pair<std::string, std::string> FileIncluder::include(
+std::pair<std::string, std::string> FileIncluder::include_delegate(
     const char* filename) const {
-  ++num_include_directives_;
-
   const std::string full_path = file_finder_.FindReadableFilepath(filename);
   std::vector<char> content;
   if (!full_path.empty() && shaderc_util::ReadFile(full_path, &content)) {

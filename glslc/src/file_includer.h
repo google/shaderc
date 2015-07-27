@@ -15,38 +15,30 @@
 #ifndef GLSLC_FILE_INCLUDER_H_
 #define GLSLC_FILE_INCLUDER_H_
 
-#include <atomic>
 #include <string>
 #include <utility>
 
 #include "glslang/Public/ShaderLang.h"
 
-#include "libshaderc_util/includer.h"
+#include "libshaderc_util/counting_includer.h"
 #include "libshaderc_util/file_finder.h"
 
 namespace glslc {
 
-// An Includer for files.  Translates the #include argument into the file's
-// contents, based on a FileFinder.
-class FileIncluder : public shaderc_util::Includer {
+// A CountingIncluder for files.  Translates the #include argument into the
+// file's contents, based on a FileFinder.
+class FileIncluder : public shaderc_util::CountingIncluder {
  public:
   FileIncluder(const shaderc_util::FileFinder* file_finder)
-      : file_finder_(*file_finder), num_include_directives_(0) {}
-
-  // Finds filename in search path and returns its contents.  See
-  // Includer::include().
-  std::pair<std::string, std::string> include(
-      const char* filename) const override;
-
-  virtual int num_include_directives() const override {
-    return num_include_directives_.load();
-  }
+      : file_finder_(*file_finder) {}
 
  private:
+  // Finds filename in search path and returns its contents.
+  std::pair<std::string, std::string> include_delegate(
+      const char* filename) const override;
+
   // Used by include() to get the full filepath.
   const shaderc_util::FileFinder& file_finder_;
-  // The number of #include directive encountered.
-  mutable std::atomic_int num_include_directives_;
 };
 
 }  // namespace glslc

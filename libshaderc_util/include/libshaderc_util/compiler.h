@@ -24,9 +24,9 @@
 
 #include "glslang/Public/ShaderLang.h"
 
+#include "counting_includer.h"
 #include "file_finder.h"
 #include "string_piece.h"
-#include "includer.h"
 
 namespace shaderc_util {
 
@@ -102,7 +102,7 @@ class Compiler {
                const std::function<EShLanguage(std::ostream* error_stream,
                                                const shaderc_util::string_piece&
                                                    error_tag)>& stage_callback,
-               const Includer& includer, std::ostream* output_stream,
+               const CountingIncluder& includer, std::ostream* output_stream,
                std::ostream* error_stream, size_t* total_warnings,
                size_t* total_errors) const;
 
@@ -127,7 +127,7 @@ class Compiler {
       const std::string& error_tag,
       const shaderc_util::string_piece& shader_source,
       const shaderc_util::string_piece& shader_preamble,
-      const Includer& includer) const;
+      const CountingIncluder& includer) const;
 
   // Cleans up the preamble in a given preprocessed shader.
   //

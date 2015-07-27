@@ -1,6 +1,7 @@
 project(libshaderc_util)
 
 add_library(shaderc_util STATIC
+  include/libshaderc_util/counting_includer.h
   include/libshaderc_util/file_finder.h
   include/libshaderc_util/format.h
   include/libshaderc_util/io.h
@@ -28,11 +29,14 @@ add_shaderc_tests(
   TEST_PREFIX shaderc_util
   LINK_LIBS shaderc_util
   TEST_NAMES
+    counting_includer
     string_piece
     format
     file_finder
     io
     message)
+
+target_include_directories(shaderc_util_counting_includer_test PRIVATE ${glslang_SOURCE_DIR})
 
 # This target copies content of testdata into the build directory.
 add_custom_target(testdata COMMAND
