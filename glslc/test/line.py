@@ -168,3 +168,72 @@ void main(){ }
 #line 2 "a.vert"
 
 """
+
+
+@inside_glslc_testsuite('#line')
+class TestPoundLineWithForcedVersion310(
+    expect.ReturnCodeIsZero, expect.StdoutMatch, expect.StderrMatch):
+    """Tests that #line directives follows the behavior for the version
+    specified via command-line."""
+
+    environment = Directory('.', [
+        File('a.vert', '#include "b.glsl"\n'),
+        File('b.glsl', 'void main() {}\n')])
+    glslc_args = ['-E', '-std=310es', 'a.vert']
+
+    expected_stderr = ''
+    expected_stdout = \
+"""#extension GL_GOOGLE_include_directive : enable
+#line 1 "a.vert"
+#line 1 "b.glsl"
+void main(){ }
+#line 2 "a.vert"
+
+"""
+
+
+@inside_glslc_testsuite('#line')
+class TestPoundLineWithForcedVersion150(
+    expect.ReturnCodeIsZero, expect.StdoutMatch, expect.StderrMatch):
+    """Tests that #line directives follows the behavior for the version
+    specified via command-line."""
+
+    environment = Directory('.', [
+        File('a.vert', '#include "b.glsl"\n'),
+        File('b.glsl', 'void main() {}\n')])
+    glslc_args = ['-E', '-std=150', 'a.vert']
+
+    expected_stderr = ''
+    expected_stdout = \
+"""#extension GL_GOOGLE_include_directive : enable
+#line 0 "a.vert"
+#line 0 "b.glsl"
+void main(){ }
+#line 1 "a.vert"
+
+"""
+
+
+@inside_glslc_testsuite('#line')
+class TestPoundLineWithForcedDifferentVersion(
+    expect.ReturnCodeIsZero, expect.StdoutMatch, expect.StderrMatch):
+    """Tests that #line directives follows the behavior for the version
+    specified via command-line, even if there is a version specification
+    in the source code."""
+
+    environment = Directory('.', [
+        File('a.vert', '#version 150\n#include "b.glsl"\n'),
+        File('b.glsl', 'void main() {}\n')])
+    glslc_args = ['-E', '-std=310es', 'a.vert']
+
+    expected_stderr = ''
+    expected_stdout = \
+"""#version 150
+#extension GL_GOOGLE_include_directive : enable
+#line 1 "a.vert"
+
+#line 1 "b.glsl"
+void main(){ }
+#line 3 "a.vert"
+
+"""
