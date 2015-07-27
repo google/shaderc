@@ -49,9 +49,23 @@ TEST(string_piece, creation_with_nullptr) {
   EXPECT_EQ("", my_string_piece);
 }
 
-TEST(string_piece, creation_causing_assert) {
+TEST(string_pieceDeathTest, creation_causing_assert) {
   EXPECT_DEBUG_DEATH_IF_SUPPORTED(string_piece("my_cstring", nullptr), ".*");
   EXPECT_DEBUG_DEATH_IF_SUPPORTED(string_piece(nullptr, "my_cstring"), ".*");
+}
+
+TEST(string_pieceDeathTest, front) {
+  EXPECT_DEBUG_DEATH_IF_SUPPORTED(string_piece(nullptr).front(), "Assertion");
+  EXPECT_DEBUG_DEATH_IF_SUPPORTED(string_piece(nullptr, nullptr).front(),
+                                  "Assertion");
+  EXPECT_DEBUG_DEATH_IF_SUPPORTED(string_piece("").front(), "Assertion");
+}
+
+TEST(string_pieceDeathTest, back) {
+  EXPECT_DEBUG_DEATH_IF_SUPPORTED(string_piece(nullptr).back(), "Assertion");
+  EXPECT_DEBUG_DEATH_IF_SUPPORTED(string_piece(nullptr, nullptr).back(),
+                                  "Assertion");
+  EXPECT_DEBUG_DEATH_IF_SUPPORTED(string_piece("").back(), "Assertion");
 }
 
 TEST(string_piece, substr) {
