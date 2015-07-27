@@ -161,7 +161,7 @@ class Compiler {
   // EShLangCount.  If errors occur, the second element in the pair is the
   // error message.  Otherwise, it's an empty string.
   std::pair<EShLanguage, std::string> GetShaderStageFromSourceCode(
-      const shaderc_util::string_piece& filename,
+      shaderc_util::string_piece filename,
       const std::string& preprocessed_shader) const;
 
   // Determines version and profile from command line, or the source code.

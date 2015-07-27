@@ -16,6 +16,7 @@
 
 #include <cstdint>
 #include <fstream>
+#include <tuple>
 
 #include "libshaderc_util/format.h"
 #include "libshaderc_util/io.h"
@@ -49,6 +50,26 @@ inline bool LineDirectiveIsForNextLine(int version, EProfile profile) {
 // Returns a #line directive whose arguments are line and filename.
 inline std::string GetLineDirective(int line, const string_piece& filename) {
   return "#line " + std::to_string(line) + " \"" + filename.str() + "\"\n";
+}
+
+// Given a canonicalized #line directive (starting exactly with "#line", using
+// single spaces to separate different components, and having an optional
+// newline at the end), returns the line number and string name/number. If no
+// string name/number is provided, the second element in the returned pair is an
+// empty string_piece. Behavior is undefined if the directive parameter is not a
+// canonicalized #line directive.
+std::pair<int, string_piece> DecodeLineDirective(string_piece directive) {
+  const string_piece kLineDirective = "#line ";
+  assert(directive.starts_with(kLineDirective));
+  directive = directive.substr(kLineDirective.size());
+
+  const int line = std::atoi(directive.data());
+  const size_t space_loc = directive.find_first_of(' ');
+  if (space_loc == string_piece::npos) return std::make_pair(line, "");
+
+  directive = directive.substr(space_loc);
+  directive = directive.strip("\" \n");
+  return std::make_pair(line, directive);
 }
 
 }  // anonymous namespace
@@ -278,8 +299,7 @@ std::string Compiler::CleanupPreamble(const string_piece& preprocessed_shader,
 }
 
 std::pair<EShLanguage, std::string> Compiler::GetShaderStageFromSourceCode(
-    const string_piece& filename,
-    const std::string& preprocessed_shader) const {
+    string_piece filename, const std::string& preprocessed_shader) const {
   const string_piece kPragmaShaderStageDirective = "#pragma shader_stage";
   const string_piece kLineDirective = "#line";
 
@@ -290,12 +310,12 @@ std::pair<EShLanguage, std::string> Compiler::GetShaderStageFromSourceCode(
 
   std::vector<string_piece> lines =
       string_piece(preprocessed_shader).get_fields('\n');
-  // The logical line number, which starts from 1 and is sensitive to #line
-  // directives, and stage value for #pragma shader_stage() directives.
-  std::vector<std::pair<size_t, string_piece>> stages;
+  // The filename, logical line number (which starts from 1 and is sensitive to
+  // #line directives), and stage value for #pragma shader_stage() directives.
+  std::vector<std::tuple<string_piece, size_t, string_piece>> stages;
   // The physical line numbers of the first #pragma shader_stage() line and
   // first non-preprocessing line in the preprocessed shader text.
-  size_t first_pragma_shader_stage = lines.size() + 1;
+  size_t first_pragma_physical_line = lines.size() + 1;
   size_t first_non_pp_line = lines.size() + 1;
 
   for (size_t i = 0, logical_line_no = 1; i < lines.size(); ++i) {
@@ -303,21 +323,22 @@ std::pair<EShLanguage, std::string> Compiler::GetShaderStageFromSourceCode(
     if (current_line.starts_with(kPragmaShaderStageDirective)) {
       const string_piece stage_value =
           current_line.substr(kPragmaShaderStageDirective.size()).strip("()");
-      stages.emplace_back(logical_line_no, stage_value);
-      first_pragma_shader_stage = std::min(first_pragma_shader_stage, i + 1);
+      stages.emplace_back(filename, logical_line_no, stage_value);
+      first_pragma_physical_line = std::min(first_pragma_physical_line, i + 1);
     } else if (!current_line.empty() && !current_line.starts_with("#")) {
       first_non_pp_line = std::min(first_non_pp_line, i + 1);
     }
 
     // Update logical line number for the next line.
     if (current_line.starts_with(kLineDirective)) {
+      string_piece name;
+      std::tie(logical_line_no, name) = DecodeLineDirective(current_line);
+      if (!name.empty()) filename = name;
       // Note that for core profile, the meaning of #line changed since version
       // 330. The line number given by #line used to mean the logical line
       // number of the #line line. Now it means the logical line number of the
       // next line after the #line line.
-      logical_line_no =
-          std::atoi(current_line.substr(kLineDirective.size()).data()) +
-          (is_for_next_line ? 0 : 1);
+      if (!is_for_next_line) ++logical_line_no;
     } else {
       ++logical_line_no;
     }
@@ -326,31 +347,36 @@ std::pair<EShLanguage, std::string> Compiler::GetShaderStageFromSourceCode(
 
   std::string error_message;
 
-  // TODO(antiagainst): #line could change the effective filename once we add
-  // support for filenames in #line directives.
+  const string_piece& first_pragma_filename = std::get<0>(stages[0]);
+  const std::string first_pragma_line = std::to_string(std::get<1>(stages[0]));
+  const string_piece& first_pragma_stage = std::get<2>(stages[0]);
 
-  if (first_pragma_shader_stage > first_non_pp_line) {
-    error_message += filename.str() + ":" + std::to_string(stages[0].first) +
+  if (first_pragma_physical_line > first_non_pp_line) {
+    error_message += first_pragma_filename.str() + ":" + first_pragma_line +
                      ": error: '#pragma': the first 'shader_stage' #pragma "
                      "must appear before any non-preprocessing code\n";
   }
 
-  EShLanguage stage = MapStageNameToLanguage(stages[0].second);
+  EShLanguage stage = MapStageNameToLanguage(first_pragma_stage);
   if (stage == EShLangCount) {
     error_message +=
-        filename.str() + ":" + std::to_string(stages[0].first) +
+        first_pragma_filename.str() + ":" + first_pragma_line +
         ": error: '#pragma': invalid stage for 'shader_stage' #pragma: '" +
-        stages[0].second.str() + "'\n";
+        first_pragma_stage.str() + "'\n";
   }
 
   for (size_t i = 1; i < stages.size(); ++i) {
-    if (stages[i].second != stages[0].second) {
-      error_message += filename.str() + ":" + std::to_string(stages[i].first) +
+    const string_piece& current_stage = std::get<2>(stages[i]);
+    if (current_stage != first_pragma_stage) {
+      const string_piece& current_filename = std::get<0>(stages[i]);
+      const std::string current_line = std::to_string(std::get<1>(stages[i]));
+      error_message += current_filename.str() + ":" + current_line +
                        ": error: '#pragma': conflicting stages for "
                        "'shader_stage' #pragma: '" +
-                       stages[i].second.str() + "' (was '" +
-                       stages[0].second.str() + "' at " + filename.str() + ":" +
-                       std::to_string(stages[0].first) + ")\n";
+                       current_stage.str() + "' (was '" +
+                       first_pragma_stage.str() + "' at " +
+                       first_pragma_filename.str() + ":" + first_pragma_line +
+                       ")\n";
     }
   }
 

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import expect
+from environment import Directory, File
 from glslc_test_framework import inside_glslc_testsuite
 from placeholder import FileShader, StdinShader
 
@@ -339,7 +340,7 @@ class TestPSSWithPoundLine310(expect.ErrorMessage):
         #pragma shader_stage(unknown)
         #line 42
         #pragma shader_stage(google)
-        #line 100 0
+        #line 100
         #pragma shader_stage(elgoog)
         void main() {
             gl_Position = vec4(1.);
@@ -369,7 +370,7 @@ class TestPSSWithPoundLine150(expect.ErrorMessage):
         #pragma shader_stage(unknown)
         #line 42
         #pragma shader_stage(google)
-        #line 100 0
+        #line 100
         #pragma shader_stage(elgoog)
         void main() {
             gl_Position = vec4(1.);
@@ -402,3 +403,58 @@ class ErrorBeforePragma(expect.ErrorMessage):
     expected_error = [shader, ':2: error: \'#\' : invalid directive:',
                       ' something\n'
                       '1 error generated.\n']
+
+
+@inside_glslc_testsuite('PragmaShaderStage')
+class TestPSSfromIncludedFile(expect.ValidObjectFile):
+    """Tests that #pragma shader_stage() from included files works."""
+
+    environment = Directory('.', [
+        File('a.glsl', '#include "b.glsl"\n'
+             'void main() { gl_Position = vec4(1.); }\n'),
+        File('b.glsl', '#pragma shader_stage(vertex)')])
+    glslc_args = ['-c', 'a.glsl']
+
+
+@inside_glslc_testsuite('PragmaShaderStage')
+class TestConflictingPSSfromIncludingAndIncludedFile(expect.ErrorMessage):
+    """Tests that conflicting #pragma shader_stage() from including and
+    included files results in an error with the correct location spec."""
+
+    environment = Directory('.', [
+        File('a.vert',
+             '#pragma shader_stage(fragment)\n'
+             'void main() { gl_Position = vec4(1.); }\n'
+             '#include "b.glsl"\n'),
+        File('b.glsl', '#pragma shader_stage(vertex)')])
+    glslc_args = ['-c', 'a.vert']
+
+    expected_error = [
+        "b.glsl:1: error: '#pragma': conflicting stages for 'shader_stage' "
+        "#pragma: 'vertex' (was 'fragment' at a.vert:1)\n"]
+
+
+@inside_glslc_testsuite('PragmaShaderStage')
+class TestPSSWithFileNameBasedPoundLine(expect.ErrorMessage):
+    """Tests that #pragma shader_stage() works with filename-based #line."""
+
+    shader = FileShader(
+        """#version 310 es
+        #pragma shader_stage(unknown)
+        #line 42 "abc"
+        #pragma shader_stage(google)
+        #line 100 "def"
+        #pragma shader_stage(elgoog)
+        void main() {
+            gl_Position = vec4(1.);
+        }
+        """, '.glsl')
+    glslc_args = ['-c', shader]
+
+    expected_error = [
+        shader, ":2: error: '#pragma': invalid stage for 'shader_stage' "
+        "#pragma: 'unknown'\n",
+        "abc:42: error: '#pragma': conflicting stages for 'shader_stage' "
+        "#pragma: 'google' (was 'unknown' at ", shader, ':2)\n',
+        "def:100: error: '#pragma': conflicting stages for 'shader_stage' "
+        "#pragma: 'elgoog' (was 'unknown' at ", shader, ':2)\n']
