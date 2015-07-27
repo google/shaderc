@@ -237,7 +237,7 @@ TEST(string_piece, begin_end) {
 }
 
 TEST(string_piece, front_back) {
-  // EXPECT_TURE() is used here because gtest will think we are comparing
+  // EXPECT_TRUE() is used here because gtest will think we are comparing
   // between pointer and integer here if EXPECT_EQ() is used.
   const string_piece one_char("a");
   EXPECT_TRUE(one_char.front() == 'a');
