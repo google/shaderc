@@ -15,7 +15,7 @@
 #ifndef LIBSHADERC_UTIL_STRING_PIECE_H_
 #define LIBSHADERC_UTIL_STRING_PIECE_H_
 
-#include <assert.h>
+#include <cassert>
 #include <cstring>
 #include <ostream>
 #include <vector>
