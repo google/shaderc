@@ -237,3 +237,28 @@ void main(){ }
 #line 3 "a.vert"
 
 """
+
+
+@inside_glslc_testsuite('#line')
+class TestErrorsFromMultipleFiles(expect.ErrorMessage):
+    """Tests that errors from different files have the correct error message
+    filename specification."""
+    including_file = '''#version 310 es
+#include "error.glsl"
+int no_return() {}
+#include "main.glsl"'''
+
+    environment = Directory('.', [
+        File('a.vert', including_file),
+        File('error.glsl', 'int unknown_identifier(int) { return a; }'),
+        File('main.glsl', 'void main() {\n  int b = 1.5;\n}')])
+    glslc_args = ['-c', 'a.vert']
+
+    expected_error = [
+        "error.glsl:1: error: 'a' : undeclared identifier\n",
+        "error.glsl:1: error: 'return' : type does not match, or is not "
+        "convertible to, the function's return type\n",
+        "a.vert:3: error: '' : function does not return a value: no_return\n",
+        "main.glsl:2: error: '=' :  cannot convert from 'const float' to "
+        "'temp highp int'\n",
+        "4 errors generated.\n"]
