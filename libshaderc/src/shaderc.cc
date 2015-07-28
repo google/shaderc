@@ -173,13 +173,7 @@ shaderc_spv_module_t shaderc_compile_into_spv(
           &output, &errors, &total_warnings, &total_errors);
     }
     result->messages = errors.str();
-    // Get the length of data in the output string.
-    output.seekg(0, std::ios::end);
-    size_t size = output.tellg();
-    output.seekg(0, std::ios::beg);
-    result->spirv.resize((size + sizeof(uint32_t) - 1) / sizeof(uint32_t));
-    output.get(static_cast<char*>(static_cast<void*>(result->spirv.data())),
-               size);
+    result->spirv = output.str();
   }
   CATCH_IF_EXCEPTIONS_ENABLED(...) { result->compilation_succeeded = false; }
   return result;
@@ -190,12 +184,11 @@ bool shaderc_module_get_success(const shaderc_spv_module_t module) {
 }
 
 size_t shaderc_module_get_length(const shaderc_spv_module_t module) {
-  return module->spirv.size() * sizeof(module->spirv.front());
+  return module->spirv.size();
 }
 
 const char* shaderc_module_get_bytes(const shaderc_spv_module_t module) {
-  return static_cast<const char*>(
-      static_cast<const void*>(module->spirv.data()));
+  return module->spirv.c_str();
 }
 
 void shaderc_module_release(shaderc_spv_module_t module) { delete module; }

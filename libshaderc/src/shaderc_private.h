@@ -26,7 +26,7 @@ struct shaderc_spv_module {
   // Whether compilation succeeded.
   bool compilation_succeeded;
   // SPIR-V binary.
-  std::vector<uint32_t> spirv;
+  std::string spirv;
   // Compilation messages.
   std::string messages;
 };
