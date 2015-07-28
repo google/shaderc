@@ -87,6 +87,23 @@ class CompileOptions {
     other.options_ = nullptr;
   }
 
+  // Adds a predefined macro to the compilation options.
+  // For further details refer to shaderc_compile_options_add_macro_definition
+  // in shaderc.h
+  void AddMacroDefinition(const char* name, const char* value) {
+    shaderc_compile_options_add_macro_definition(options_, name, value);
+  }
+
+  // Adds a valueless predefined macro to the compilation options.
+  void AddMacroDefinition(const std::string& name) {
+    AddMacroDefinition(name.c_str(), nullptr);
+  }
+
+  // Adds a predefined macro to the compilation options.
+  void AddMacroDefinition(const std::string& name, const std::string& value) {
+    AddMacroDefinition(name.c_str(), value.c_str());
+  }
+
  private:
   CompileOptions& operator=(const CompileOptions& other) = delete;
   shaderc_compile_options_t options_;

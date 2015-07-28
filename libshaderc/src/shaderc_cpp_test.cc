@@ -227,4 +227,36 @@ TEST(CppInterface, AccessorsOnNullModule) {
   EXPECT_EQ(0u, result.GetLength());
 }
 
+TEST(CppInterface, MacroCompileOptions) {
+  shaderc::Compiler compiler;
+  shaderc::CompileOptions options;
+  options.AddMacroDefinition("E", "main");
+  const std::string kMinimalExpandedShader = "void E(){}";
+  const std::string kMinimalDoubleExpandedShader = "F E(){}";
+  EXPECT_TRUE(compiler.CompileGlslToSpv(kMinimalExpandedShader,
+                                        shaderc_glsl_vertex_shader,
+                                        options).GetSuccess());
+
+  shaderc::CompileOptions cloned_options(options);
+  // The simplest should still compile with the cloned options.
+  EXPECT_TRUE(compiler.CompileGlslToSpv(kMinimalExpandedShader,
+                                        shaderc_glsl_vertex_shader,
+                                        cloned_options).GetSuccess());
+
+  EXPECT_FALSE(compiler.CompileGlslToSpv(kMinimalDoubleExpandedShader,
+                                         shaderc_glsl_vertex_shader,
+                                         cloned_options).GetSuccess());
+
+  cloned_options.AddMacroDefinition("F", "void");
+  // This should still not work with the original options.
+  EXPECT_FALSE(compiler.CompileGlslToSpv(kMinimalDoubleExpandedShader,
+                                         shaderc_glsl_vertex_shader,
+                                         options).GetSuccess());
+  // This should work with the cloned options that have the additional
+  // parameter.
+  EXPECT_TRUE(compiler.CompileGlslToSpv(kMinimalDoubleExpandedShader,
+                                        shaderc_glsl_vertex_shader,
+                                        cloned_options).GetSuccess());
+}
+
 }  // anonymous namespace
