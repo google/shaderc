@@ -22,10 +22,10 @@ extern "C" {
 #include <stddef.h>
 #include <stdbool.h>
 
-enum shaderc_shader_kind {
+typedef enum {
   shaderc_glsl_vertex_shader,
   shaderc_glsl_fragment_shader
-};
+} shaderc_shader_kind;
 
 // Usage examples:
 //

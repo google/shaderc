@@ -137,10 +137,10 @@ void shaderc_compiler_release(shaderc_compiler_t compiler) {
 }
 
 shaderc_spv_module_t shaderc_compile_into_spv(
-    shaderc_compiler_t compiler, const char* source_text,
+    const shaderc_compiler_t compiler, const char* source_text,
     size_t source_text_size, shaderc_shader_kind shader_kind,
     const char* entry_point_name,
-    shaderc_compile_options_t additional_options) {
+    const shaderc_compile_options_t additional_options) {
   std::lock_guard<std::mutex> lock(compile_mutex);
 
   shaderc_spv_module_t result = new (std::nothrow) shaderc_spv_module;
