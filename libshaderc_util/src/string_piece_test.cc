@@ -59,6 +59,9 @@ TEST(string_pieceDeathTest, front) {
   EXPECT_DEBUG_DEATH_IF_SUPPORTED(string_piece(nullptr, nullptr).front(),
                                   "Assertion");
   EXPECT_DEBUG_DEATH_IF_SUPPORTED(string_piece("").front(), "Assertion");
+  string_piece s("nonempty");
+  s.clear();
+  EXPECT_DEBUG_DEATH_IF_SUPPORTED(s.front(), "Assertion");
 }
 
 TEST(string_pieceDeathTest, back) {
@@ -66,6 +69,9 @@ TEST(string_pieceDeathTest, back) {
   EXPECT_DEBUG_DEATH_IF_SUPPORTED(string_piece(nullptr, nullptr).back(),
                                   "Assertion");
   EXPECT_DEBUG_DEATH_IF_SUPPORTED(string_piece("").back(), "Assertion");
+  string_piece s("nonempty");
+  s.clear();
+  EXPECT_DEBUG_DEATH_IF_SUPPORTED(s.back(), "Assertion");
 }
 
 TEST(string_piece, substr) {
