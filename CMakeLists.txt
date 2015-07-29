@@ -5,7 +5,7 @@ enable_testing()
 include(cmake/setup_build.cmake)
 include(cmake/utils.cmake)
 
-add_custom_target(check-copyright
+add_custom_target(check-copyright ALL
   ${PYTHON_EXE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/add_copyright.py --check
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -20,5 +20,3 @@ add_subdirectory(third_party)
 add_subdirectory(libshaderc_util)
 add_subdirectory(libshaderc)
 add_subdirectory(glslc)
-
-
