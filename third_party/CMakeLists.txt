@@ -1,8 +1,18 @@
-add_subdirectory(gmock-1.7.0)
+if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/gmock-1.7.0)
+  add_subdirectory(gmock-1.7.0)
+endif()
+if (NOT TARGET gmock)
+  message(FATAL_ERROR "gmock was not found - required for tests")
+endif()
 
 set(OLD_PLATFORM_TOOLSET ${CMAKE_GENERATOR_TOOLSET})
 # Configure third party projects.
-add_subdirectory(glslang)
+if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/glslang)
+  add_subdirectory(glslang)
+endif()
+if (NOT TARGET glslang)
+  message(FATAL_ERROR "glslang was not found - required for compilation")
+endif()
 if(WIN32)
     # This is unfortunate but glslang forces our
     # platform toolset to be v110, which we may not even have
@@ -46,4 +56,3 @@ else()
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test-glslang/
   )
 endif()
-
