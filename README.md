@@ -101,8 +101,7 @@ We track bugs using GitHub -- click on the "Issues" button on
 On Linux, you can obtain test coverage as follows:
 
     cd $BUILD_DIR
-    cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DENABLE_CODE_COVERAGE=ON
-        $SOURCE_DIR
+    cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DENABLE_CODE_COVERAGE=ON $SOURCE_DIR
     ninja
     ninja report-coverage
 
