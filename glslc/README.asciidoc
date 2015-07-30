@@ -139,10 +139,17 @@ GLSL, e.g., `450`.
 * If multiple `-std=` arguments are specified on the command line, only the last
   one takes effect.
 
+CAUTION: `-std=` does not affect the `#version` directive in the preprocessed
+output. That is, when `-std=` specifies a version different from the shader
+source code, the `#version` directive in preprocessed output will still be the
+one in the source code. But `-std=` does affect the behavior of `#line`
+directives in the preprocessed output. Behavior of `#line` directives will
+follow the version specified by `-std=`.
+
 ==== `-x`
 
-`-x` lets you specify the language of the input shader files. The only accepted
-argument is `glsl`.
+`-x` lets you specify the language of the input shader files. Right now, the
+only accepted argument is `glsl`.
 
 === Compilation Stage Selection Options
 
