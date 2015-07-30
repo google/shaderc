@@ -218,10 +218,10 @@ generated are suppressed before they are converted to errors.
 
 === Source-filename-based `#line` and `\\__FILE__`
 
-This section describes how the glslc compiler extends the syntax for `#line` and
-`\\__FILE__`.  When the `-fcpp-style-line-directive` option is supplied, this
-extended syntax is generated during emitting a preprocessed output (the `-E`
-option), and is parsed and accepted by the preprocessor.
+This section describes how the glslc compiler extends the syntax for the `#line`
+directive and the `\\__FILE__` macro. By default, the glslc compiler enables
+the `GL_GOOGLE_cpp_style_line_directive` extension. It will generate this
+extended syntax in the preprocessed output (obtained via the `-E` option).
 
 WARNING: This section is still evolving. Expect changes.
 
@@ -239,9 +239,10 @@ the `\\__FILE__` macro will "substitute a decimal integer constant that says
 which source string number is currently being processed."
 
 The glslc compiler implements the standard `#line` and `\\__FILE__` syntax. It
-also provides an extension to allow source filenames to be used instead of
-integer source string indices. Specifically, the `#line` directive can have,
-after macro substitution, one of the following three forms:
+also provides an extension, `GL_GOOGLE_cpp_style_line_directive`, to allow
+source filenames to be used instead of integer source string indices.
+Specifically, the `#line` directive can have, after macro substitution, one of
+the following three forms:
 
 [source,glsl]
 ----
@@ -262,7 +263,20 @@ The filename is dertermined as the last of
 * The filename given to the glslc compiler,
 * The filename argument of the most recent `#line` directive, if any.
 
-Source-filename-based `#line`/`\\__FILE__` is enabled by the
-`-fcpp-style-line-directive` option. It is incompatible with
-source-string-number-based `#line`/`\\__FILE__`; only one can be enabled.
-glslc will issue an error if both are used.
+[[include-directive]]
+=== `#include`
+
+The glslc compiler extends GLSL with the include syntax by turning on the
+`GL_GOOGLE_include_directive` extension. It will preprocess and substitute
+`#include` directives properly with the following behaviors.
+
+WARNING: This section is still evolving. Expect changes.
+
+TODO: Expected behaviors of the `#include` directive.
+
+If `#include` directives are used in a shader, there will be an `#extension
+GL_GOOGLE_include_directive : enable` line generated into the preprocessed
+output.
+
+The `GL_GOOGLE_cpp_style_line_directive` extension is implicitly turned on by
+the `GL_GOOGLE_include_directive` extension.
