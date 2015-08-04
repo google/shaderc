@@ -23,10 +23,10 @@ glslc [-c|-S|-E]
 
 === Shader stage specification
 
-glslc provides three ways to specify the shader stage of a input shader file:
+glslc provides three ways to specify the shader stage of an input shader file:
 `-fshader-stage=<stage>`, `#pragma shader_stage(<stage>)`, and file extension.
-The `-fshader-stage=` option overrules `#pragma shader_stage()`, which then
-overrules the file extension.
+The `-fshader-stage=` option overrides `#pragma shader_stage()`, which overrides
+the file extension.
 
 Shader stages can be specified by naming a file with an appropriate extension
 as shown in the following table. `-fshader-stage=` and `#pragma shader_stage()`,
@@ -162,7 +162,7 @@ section.
 
 ==== `-E`
 
-`-E` tells the glslc compiler to run only the preprocessing stage. It overrules
+`-E` tells the glslc compiler to run only the preprocessing stage. It overrides
 `-c` and `-S`. Preprocessed output is written to standard output, while
 preprocessing errors are written to standard error. If multiple input shader
 files are given, their preprocessed output are all written to standard output,
@@ -171,7 +171,7 @@ in the order specified on the command line.
 ==== `-S`
 
 `-S` tells the glslc compiler to run the preprocessing, compiling, and then
-disassembling stage. It overrules `-c`. Each input shader file results in a
+disassembling stage. It overrides `-c`. Each input shader file results in a
 SPIR-V assembly file; these SPIR-V assembly files are named by the rules in the
 <<output-file-naming,Output File Naming>> section.
 
