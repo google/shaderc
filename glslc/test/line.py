@@ -262,3 +262,43 @@ int no_return() {}
         "main.glsl:2: error: '=' :  cannot convert from 'const float' to "
         "'temp highp int'\n",
         "4 errors generated.\n"]
+
+
+@inside_glslc_testsuite('#line')
+class TestExplicitPoundLineWithPoundInclude(
+    expect.ReturnCodeIsZero, expect.StdoutMatch, expect.StderrMatch):
+    """Tests that #line works correctly in the presence of #include (which
+    itself will generate some #line directives."""
+    including_file = '''#version 310 es
+#line 10000 "injected.glsl"
+int plus1(int a) { return a + 1; }
+#include "inc.glsl"
+int plus2(int a) { return a + 2; }
+#line 55555
+#include "main.glsl"'''
+
+    environment = Directory('.', [
+        File('a.vert', including_file),
+        File('inc.glsl', 'int inc(int a) { return a + 1; }'),
+        File('main.glsl', 'void main() {\n  gl_Position = vec4(1.);\n}')])
+    glslc_args = ['-E', 'a.vert']
+
+    expected_stderr = ''
+    expected_stdout = '''#version 310 es
+#extension GL_GOOGLE_include_directive : enable
+#line 1 "a.vert"
+
+#line 10000 "injected.glsl"
+int plus1(int a){ return a + 1;}
+#line 1 "inc.glsl"
+ int inc(int a){ return a + 1;}
+#line 10002 "injected.glsl"
+ int plus2(int a){ return a + 2;}
+#line 55555
+#line 1 "main.glsl"
+ void main(){
+  gl_Position = vec4(1.);
+}
+#line 55556 "injected.glsl"
+
+'''
