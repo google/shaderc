@@ -26,6 +26,8 @@ namespace {
 using testing::Each;
 using testing::HasSubstr;
 
+const char kMinimalShader[] = "void main(){}";
+
 TEST(CppInterface, MultipleCalls) {
   shaderc::Compiler compiler1, compiler2, compiler3;
   EXPECT_TRUE(compiler1.IsValid());
@@ -67,7 +69,8 @@ bool CompilationSuccess(const shaderc::Compiler& compiler,
                         const std::string& shader, shaderc_shader_kind kind,
                         const shaderc::CompileOptions& options) {
   return compiler.CompileGlslToSpv(shader.c_str(), shader.length(), kind,
-                                   options).GetSuccess();
+                                   options)
+      .GetSuccess();
 }
 
 // Compiles a shader and returns true if the result is valid SPIR-V.
@@ -115,7 +118,7 @@ TEST(CppInterface, ModuleMoves) {
   shaderc::Compiler compiler;
   ASSERT_TRUE(compiler.IsValid());
   shaderc::SpvModule result =
-      compiler.CompileGlslToSpv("void main() {}", shaderc_glsl_vertex_shader);
+      compiler.CompileGlslToSpv(kMinimalShader, shaderc_glsl_vertex_shader);
   EXPECT_TRUE(result.GetSuccess());
   shaderc::SpvModule result2(std::move(result));
   EXPECT_FALSE(result.GetSuccess());
@@ -134,7 +137,6 @@ TEST(CppInterface, GarbageString) {
 TEST(CppInterface, MinimalShader) {
   shaderc::Compiler compiler;
   ASSERT_TRUE(compiler.IsValid());
-  const std::string kMinimalShader = "void main(){}";
   EXPECT_TRUE(
       CompilesToValidSpv(compiler, kMinimalShader, shaderc_glsl_vertex_shader));
   EXPECT_TRUE(CompilesToValidSpv(compiler, kMinimalShader,
@@ -145,7 +147,6 @@ TEST(CppInterface, BasicOptions) {
   shaderc::Compiler compiler;
   shaderc::CompileOptions options;
   ASSERT_TRUE(compiler.IsValid());
-  const std::string kMinimalShader = "void main(){}";
   EXPECT_TRUE(CompilesToValidSpv(compiler, kMinimalShader,
                                  shaderc_glsl_vertex_shader, options));
   EXPECT_TRUE(CompilesToValidSpv(compiler, kMinimalShader,
@@ -156,7 +157,6 @@ TEST(CppInterface, CopiedOptions) {
   shaderc::Compiler compiler;
   shaderc::CompileOptions options;
   ASSERT_TRUE(compiler.IsValid());
-  const std::string kMinimalShader = "void main(){}";
   EXPECT_TRUE(CompilesToValidSpv(compiler, kMinimalShader,
                                  shaderc_glsl_vertex_shader, options));
   shaderc::CompileOptions copied_options(options);
@@ -168,7 +168,6 @@ TEST(CppInterface, MovedOptions) {
   shaderc::Compiler compiler;
   shaderc::CompileOptions options;
   ASSERT_TRUE(compiler.IsValid());
-  const std::string kMinimalShader = "void main(){}";
   EXPECT_TRUE(CompilesToValidSpv(compiler, kMinimalShader,
                                  shaderc_glsl_vertex_shader, options));
   shaderc::CompileOptions copied_options(std::move(options));
@@ -179,7 +178,6 @@ TEST(CppInterface, MovedOptions) {
 TEST(CppInterface, StdAndCString) {
   shaderc::Compiler compiler;
   ASSERT_TRUE(compiler.IsValid());
-  const char* kMinimalShader = "void main(){}";
   shaderc::SpvModule result1 = compiler.CompileGlslToSpv(
       kMinimalShader, strlen(kMinimalShader), shaderc_glsl_fragment_shader);
   shaderc::SpvModule result2 = compiler.CompileGlslToSpv(
@@ -209,7 +207,7 @@ TEST(CppInterface, MultipleThreadsCalling) {
   std::vector<std::thread> threads;
   for (auto& r : results) {
     threads.emplace_back([&compiler, &r]() {
-      r = CompilationSuccess(compiler, "void main(){}",
+      r = CompilationSuccess(compiler, kMinimalShader,
                              shaderc_glsl_vertex_shader);
     });
   }
@@ -234,29 +232,32 @@ TEST(CppInterface, MacroCompileOptions) {
   const std::string kMinimalExpandedShader = "void E(){}";
   const std::string kMinimalDoubleExpandedShader = "F E(){}";
   EXPECT_TRUE(compiler.CompileGlslToSpv(kMinimalExpandedShader,
-                                        shaderc_glsl_vertex_shader,
-                                        options).GetSuccess());
+                                        shaderc_glsl_vertex_shader, options)
+                  .GetSuccess());
 
   shaderc::CompileOptions cloned_options(options);
   // The simplest should still compile with the cloned options.
   EXPECT_TRUE(compiler.CompileGlslToSpv(kMinimalExpandedShader,
                                         shaderc_glsl_vertex_shader,
-                                        cloned_options).GetSuccess());
+                                        cloned_options)
+                  .GetSuccess());
 
   EXPECT_FALSE(compiler.CompileGlslToSpv(kMinimalDoubleExpandedShader,
                                          shaderc_glsl_vertex_shader,
-                                         cloned_options).GetSuccess());
+                                         cloned_options)
+                   .GetSuccess());
 
   cloned_options.AddMacroDefinition("F", "void");
   // This should still not work with the original options.
   EXPECT_FALSE(compiler.CompileGlslToSpv(kMinimalDoubleExpandedShader,
-                                         shaderc_glsl_vertex_shader,
-                                         options).GetSuccess());
+                                         shaderc_glsl_vertex_shader, options)
+                   .GetSuccess());
   // This should work with the cloned options that have the additional
   // parameter.
   EXPECT_TRUE(compiler.CompileGlslToSpv(kMinimalDoubleExpandedShader,
                                         shaderc_glsl_vertex_shader,
-                                        cloned_options).GetSuccess());
+                                        cloned_options)
+                  .GetSuccess());
 }
 
 }  // anonymous namespace
