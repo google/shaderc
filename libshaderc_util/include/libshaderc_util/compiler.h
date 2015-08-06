@@ -46,6 +46,8 @@ using MacroDictionary =
 class Compiler {
  public:
   Compiler()
+      // The default version for glsl is 110, or 100 if you are using an es
+      // profile. But we want to default to a non-es profile.
       : default_version_(110),
         default_profile_(ENoProfile),
         warnings_as_errors_(false),
@@ -176,18 +178,34 @@ class Compiler {
   std::pair<int, EProfile> GetVersionProfileFromSourceCode(
       const std::string& preprocessed_shader) const;
 
-  // The default version for glsl is 110, or 100 if you are using an
-  // es profile. But we want to default to a non-es profile.
+  // Version to use when force_version_profile_ is true.
   int default_version_;
 
+  // Profile to use when force_version_profile_ is true.
   EProfile default_profile_;
+
+  // When true, treat warnings as errors.
   bool warnings_as_errors_;
+
+  // When true, compilation output will be disassembled SPIR-V.
   bool disassemble_;
+
+  // When true, use the default version and profile from eponymous data members.
   bool force_version_profile_;
+
+  // When true, compilation output will be preprocessed source.
   bool preprocess_only_;
+
+  // When true, compilation will generate debug info with the binary SPIR-V
+  // output.
   bool generate_debug_info_;
+
+  // Supress warnings when true.
   bool suppress_warnings_;
+
+  // Macro definitions that must be available to reference in the shader source.
   MacroDictionary predefined_macros_;
 };
+
 }  // namespace shaderc_util
 #endif  // LIBSHADERC_UTIL_INC_COMPILER_H

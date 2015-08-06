@@ -78,12 +78,16 @@ class FileCompiler : public shaderc_util::Compiler {
   bool needs_linking_;
   shaderc_util::FileFinder include_file_finder_;
 
-  // This is set by the various Set*Mode functions. It is set to reflect the
-  // type of file being generated.
+  // Reflects the type of file being generated.
   std::string file_extension_;
+
+  // Name of the file where the compilation output will go.
   shaderc_util::string_piece output_file_name_;
 
+  // Counts warnings encountered in compilation.
   size_t total_warnings_;
+
+  // Counts errors encountered in compilation.
   size_t total_errors_;
 };
 }
