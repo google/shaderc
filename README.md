@@ -1,4 +1,4 @@
-# shaderc
+# Shaderc
 
 A collection of tools, libraries and tests for shader compilation.
 
@@ -80,7 +80,7 @@ On Linux, the following tools should be installed:
 - [genhtml](http://linux.die.net/man/1/genhtml): for creating reports in html
     format from lcov output, provided by the `lcov` package on Ubuntu.
 
-On Windows, the following tools should be installed and available on your path.
+On Windows, the following tools should be installed and available on your path:
 
 - Visual Studio 2013 Update 4 or later. Previous versions of Visual Studio
   will likely work but are untested.
@@ -94,7 +94,7 @@ Optionally, the following tools may be installed on any OS:
 ## Bug tracking
 
 We track bugs using GitHub -- click on the "Issues" button on
-[github.com/google/shaderc].
+[the project's GitHub page](https://github.com/google/shaderc).
 
 ## Test coverage
 
