@@ -107,18 +107,6 @@ int main(int argc, char** argv) {
     if (arg == "--help") {
       ::PrintHelp(&std::cout);
       return 0;
-    } else if (arg == "-c") {
-      compiler.SetIndividualCompilationMode();
-    } else if (arg == "-g") {
-      compiler.SetGenerateDebugInfo();
-    } else if (arg == "-S") {
-      compiler.SetDisassemblyMode();
-    } else if (arg == "-E") {
-      compiler.SetPreprocessingOnlyMode();
-    } else if (arg == "-Werror") {
-      compiler.SetWarningsAsErrors();
-    } else if (arg == "-w") {
-      compiler.SetSuppressWarnings();
     } else if (arg.starts_with("-o")) {
       string_piece file_name;
       if (!GetOptionArgument(argc, argv, &i, "-o", &file_name)) {
@@ -128,6 +116,25 @@ int main(int argc, char** argv) {
         return 1;
       }
       compiler.SetOutputFileName(file_name);
+    } else if (arg.starts_with("-fshader-stage=")) {
+      const string_piece stage = arg.substr(std::strlen("-fshader-stage="));
+      force_shader_stage = glslc::GetShaderStageFromCmdLine(arg);
+      if (force_shader_stage == EShLangCount) {
+        std::cerr << "glslc: error: stage not recognized: '" << stage << "'"
+                  << std::endl;
+        return 1;
+      }
+    } else if (arg.starts_with("-std=")) {
+      const string_piece standard = arg.substr(std::strlen("-std="));
+      int version;
+      EProfile profile;
+      if (!shaderc_util::ParseVersionProfile(standard.str(), &version,
+                                             &profile)) {
+        std::cerr << "glslc: error: invalid value '" << standard
+                  << "' in '-std=" << standard << "'" << std::endl;
+        return 1;
+      }
+      compiler.SetForcedVersionProfile(version, profile);
     } else if (arg.starts_with("-x")) {
       string_piece option_arg;
       if (!GetOptionArgument(argc, argv, &i, "-x", &option_arg)) {
@@ -142,14 +149,12 @@ int main(int argc, char** argv) {
           return 1;
         }
       }
-    } else if (arg.starts_with("-fshader-stage=")) {
-      const string_piece stage = arg.substr(std::strlen("-fshader-stage="));
-      force_shader_stage = glslc::GetShaderStageFromCmdLine(arg);
-      if (force_shader_stage == EShLangCount) {
-        std::cerr << "glslc: error: stage not recognized: '" << stage << "'"
-                  << std::endl;
-        return 1;
-      }
+    } else if (arg == "-c") {
+      compiler.SetIndividualCompilationMode();
+    } else if (arg == "-E") {
+      compiler.SetPreprocessingOnlyMode();
+    } else if (arg == "-S") {
+      compiler.SetDisassemblyMode();
     } else if (arg.starts_with("-D")) {
       const size_t length = arg.size();
       if (length <= 2) {
@@ -175,17 +180,6 @@ int main(int argc, char** argv) {
                                               ? argument.substr(name_length + 1)
                                               : "");
       }
-    } else if (arg.starts_with("-std=")) {
-      const string_piece standard = arg.substr(std::strlen("-std="));
-      int version;
-      EProfile profile;
-      if (!shaderc_util::ParseVersionProfile(standard.str(), &version,
-                                             &profile)) {
-        std::cerr << "glslc: error: invalid value '" << standard
-                  << "' in '-std=" << standard << "'" << std::endl;
-        return 1;
-      }
-      compiler.SetForcedVersionProfile(version, profile);
     } else if (arg.starts_with("-I")) {
       string_piece option_arg;
       if (!GetOptionArgument(argc, argv, &i, "-I", &option_arg)) {
@@ -196,6 +190,12 @@ int main(int argc, char** argv) {
       } else {
         compiler.AddIncludeDirectory(option_arg.str());
       }
+    } else if (arg == "-g") {
+      compiler.SetGenerateDebugInfo();
+    } else if (arg == "-w") {
+      compiler.SetSuppressWarnings();
+    } else if (arg == "-Werror") {
+      compiler.SetWarningsAsErrors();
     } else if (!(arg == "-") && arg[0] == '-') {
       std::cerr << "glslc: error: "
                 << (arg[1] == '-' ? "unsupported option" : "unknown argument")

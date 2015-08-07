@@ -190,6 +190,10 @@ WARNING: Linking of multiple input shader files are not supported yet.
 files are preprocessed. If `value` is omitted, the macro is defined with an
 empty value.
 
+==== `-I`
+
+`-I` adds the specified directory to the search path for include files.
+
 === Code Generation Options
 
 ==== `-g`

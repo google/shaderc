@@ -56,7 +56,7 @@ cd $SOURCE_DIR/
 cd $BUILD_DIR
 cmake -GNinja -DCMAKE_BUILD_TYPE={Debug|Release|RelWithDebInfo} $SOURCE_DIR
 ninja
-ctest #optional
+ctest # optional
 ```
 
 4b) Or build (and test) with MSVC on Windows:
