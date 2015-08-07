@@ -50,12 +50,12 @@ class Compiler {
       // profile. But we want to default to a non-es profile.
       : default_version_(110),
         default_profile_(ENoProfile),
-        warnings_as_errors_(false),
-        disassemble_(false),
         force_version_profile_(false),
         preprocess_only_(false),
-        generate_debug_info_(false),
-        suppress_warnings_(false) {}
+        disassemble_(false),
+        warnings_as_errors_(false),
+        suppress_warnings_(false),
+        generate_debug_info_(false) {}
 
   // Instead of outputting object files, output the disassembled textual output.
   virtual void SetDisassemblyMode();
@@ -180,31 +180,27 @@ class Compiler {
 
   // Version to use when force_version_profile_ is true.
   int default_version_;
-
   // Profile to use when force_version_profile_ is true.
   EProfile default_profile_;
-
-  // When true, treat warnings as errors.
-  bool warnings_as_errors_;
-
-  // When true, compilation output will be disassembled SPIR-V.
-  bool disassemble_;
-
   // When true, use the default version and profile from eponymous data members.
   bool force_version_profile_;
 
   // When true, compilation output will be preprocessed source.
   bool preprocess_only_;
+  // When true, compilation output will be disassembled SPIR-V.
+  bool disassemble_;
+
+  // Macro definitions that must be available to reference in the shader source.
+  MacroDictionary predefined_macros_;
+
+  // When true, treat warnings as errors.
+  bool warnings_as_errors_;
+  // Supress warnings when true.
+  bool suppress_warnings_;
 
   // When true, compilation will generate debug info with the binary SPIR-V
   // output.
   bool generate_debug_info_;
-
-  // Supress warnings when true.
-  bool suppress_warnings_;
-
-  // Macro definitions that must be available to reference in the shader source.
-  MacroDictionary predefined_macros_;
 };
 
 }  // namespace shaderc_util

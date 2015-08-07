@@ -75,18 +75,19 @@ class FileCompiler : public shaderc_util::Compiler {
   // Returns the name of the output file, given the input_filename string.
   std::string GetOutputFileName(std::string input_filename);
 
-  bool needs_linking_;
+  // A FileFinder used to substitute #include directives in the source code.
   shaderc_util::FileFinder include_file_finder_;
+
+  // Indicates whether linking is needed to generate the final output.
+  bool needs_linking_;
 
   // Reflects the type of file being generated.
   std::string file_extension_;
-
   // Name of the file where the compilation output will go.
   shaderc_util::string_piece output_file_name_;
 
   // Counts warnings encountered in compilation.
   size_t total_warnings_;
-
   // Counts errors encountered in compilation.
   size_t total_errors_;
 };
