@@ -42,6 +42,9 @@ class FileCompiler : public shaderc_util::Compiler {
   bool CompileShaderFile(const std::string& input_file,
                          EShLanguage shader_stage);
 
+  // Sets the working directory for the compilation.
+  void SetWorkingDirectory(const std::string& dir);
+
   // Adds a directory to be searched when processing #include directives.
   //
   // Best practice: if you add an empty string before any other path, that will
@@ -74,6 +77,10 @@ class FileCompiler : public shaderc_util::Compiler {
  private:
   // Returns the name of the output file, given the input_filename string.
   std::string GetOutputFileName(std::string input_filename);
+
+  // Resolves relative paths against this working directory. Must always end
+  // in '/'.
+  std::string workdir_;
 
   // A FileFinder used to substitute #include directives in the source code.
   shaderc_util::FileFinder include_file_finder_;

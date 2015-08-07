@@ -21,9 +21,11 @@ methods in the mixin classes.
 import os.path
 from glslc_test_framework import GlslCTest
 
+
 def convert_to_unix_line_endings(source):
     """Converts all line endings in source to be unix line endings."""
     return source.replace('\r\n', '\n').replace('\r', '\n')
+
 
 def substitute_file_extension(filename, extension):
     """Substitutes file extension, respecting known shader extensions.
@@ -189,24 +191,42 @@ class ValidObjectFile(SuccessfulReturn, CorrectObjectFilePreamble):
                 return False, message
         return True, ''
 
-class ValidFileContents(GlslCTest):
-  """Mixin class to test that a specific file contains specific text
-  To mix in this class, subclasses need to provide expected_file_contents as
-  the contents of the file and target_filename to determine the location."""
 
-  def check_file(self, status):
-      target_filename = os.path.join(status.directory, self.target_filename)
-      if not os.path.isfile(target_filename):
-          return False, 'Cannot find file: ' + target_filename
-      with open(target_filename, 'r') as target_file:
-          file_contents = target_file.read()
-          if file_contents == self.expected_file_contents:
-            return True, ''
-          return False, ('Incorrect file output: \n{act}\nExpected:\n{exp}'
-                         ''.format(act=file_contents,
-                                   exp=self.expected_file_contents))
-      return False, ('Could not open target file ' + target_filename +
-                     ' for reading')
+class ValidNamedObjectFile(SuccessfulReturn, CorrectObjectFilePreamble):
+    """Mixin class for checking that a list of object files with the given
+    names are correctly generated, and there is no output on stdout/stderr.
+
+    To mix in this class, subclasses need to provide expected_object_filenames
+    as the expected object filenames.
+    """
+
+    def check_object_file_preamble(self, status):
+        for object_filename in self.expected_object_filenames:
+            success, message = self.verify_object_file_preamble(
+                os.path.join(status.directory, object_filename))
+            if not success:
+                return False, message
+        return True, ''
+
+
+class ValidFileContents(GlslCTest):
+    """Mixin class to test that a specific file contains specific text
+    To mix in this class, subclasses need to provide expected_file_contents as
+    the contents of the file and target_filename to determine the location."""
+
+    def check_file(self, status):
+        target_filename = os.path.join(status.directory, self.target_filename)
+        if not os.path.isfile(target_filename):
+            return False, 'Cannot find file: ' + target_filename
+        with open(target_filename, 'r') as target_file:
+            file_contents = target_file.read()
+            if file_contents == self.expected_file_contents:
+                return True, ''
+            return False, ('Incorrect file output: \n{act}\nExpected:\n{exp}'
+                           ''.format(act=file_contents,
+                                     exp=self.expected_file_contents))
+        return False, ('Could not open target file ' + target_filename +
+                       ' for reading')
 
 
 class ValidAssemblyFile(SuccessfulReturn, CorrectAssemblyFilePreamble):
@@ -314,7 +334,8 @@ class StdoutMatch(GlslCTest):
             if not status.stdout:
                 return False, 'Expected something on stdout'
         else:
-            if self.expected_stdout != convert_to_unix_line_endings(status.stdout):
+            if self.expected_stdout != convert_to_unix_line_endings(
+                status.stdout):
                 return False, ('Incorrect stdout output:\n{ac}\n'
                                'Expected:\n{ex}'.format(
                                    ac=status.stdout, ex=self.expected_stdout))
@@ -339,7 +360,8 @@ class StderrMatch(GlslCTest):
             if not status.stderr:
                 return False, 'Expected something on stderr'
         else:
-            if self.expected_stderr != convert_to_unix_line_endings(status.stderr):
+            if self.expected_stderr != convert_to_unix_line_endings(
+                status.stderr):
                 return False, ('Incorrect stderr output:\n{ac}\n'
                                'Expected:\n{ex}'.format(
                                    ac=status.stderr, ex=self.expected_stderr))

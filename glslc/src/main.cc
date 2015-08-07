@@ -62,6 +62,9 @@ void PrintHelp(std::ostream* out) {
        << "  -S                Only run preprocess and compilation steps.\n"
        << "  -w                Suppresses all warning messages.\n"
        << "  -Werror           Treat all warnings as errors.\n"
+       << "  -working-directory <dir>\n"
+       << "                    Resolve file paths relative to the specified "
+       << "directory.\n"
        << "  -x <language>     Treat subsequent input files as having type "
        << "<language>.\n"
        << "                    The only supported language is glsl."
@@ -116,6 +119,18 @@ int main(int argc, char** argv) {
         return 1;
       }
       compiler.SetOutputFileName(file_name);
+    } else if (arg.starts_with("-working-directory")) {
+      // Following Clang, both -working-directory and -working-directory= are
+      // accepted.
+      std::string option = "-working-directory";
+      if (arg[option.size()] == '=') option = "-working-directory=";
+      string_piece workdir;
+      if (!GetOptionArgument(argc, argv, &i, option, &workdir)) {
+        std::cerr << "glslc: error: argument to '-working-directory' is "
+                     "missing (expected 1 value)"
+                  << std::endl;
+      }
+      compiler.SetWorkingDirectory(workdir.str());
     } else if (arg.starts_with("-fshader-stage=")) {
       const string_piece stage = arg.substr(std::strlen("-fshader-stage="));
       force_shader_stage = glslc::GetShaderStageFromCmdLine(arg);

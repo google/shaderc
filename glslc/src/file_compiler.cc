@@ -33,7 +33,11 @@ namespace glslc {
 bool FileCompiler::CompileShaderFile(const std::string& input_file,
                                      EShLanguage shader_stage) {
   std::vector<char> input_data;
-  if (!shaderc_util::ReadFile(input_file, &input_data)) {
+  std::string path = input_file;
+  if (!workdir_.empty() && !shaderc_util::IsAbsolutePath(path)) {
+    path = workdir_ + path;
+  }
+  if (!shaderc_util::ReadFile(path, &input_data)) {
     return false;
   }
 
@@ -70,6 +74,11 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
     }
   }
   return compilation_success;
+}
+
+void FileCompiler::SetWorkingDirectory(const std::string& dir) {
+  workdir_ = dir;
+  if (!dir.empty() && dir.back() != '/') workdir_.push_back('/');
 }
 
 void FileCompiler::AddIncludeDirectory(const std::string& path) {
@@ -138,6 +147,10 @@ std::string FileCompiler::GetOutputFileName(std::string input_filename) {
     }
   }
   if (!output_file_name_.empty()) output_file = output_file_name_.str();
+  if (!needs_linking_ && !workdir_.empty() &&
+      !shaderc_util::IsAbsolutePath(input_filename)) {
+    output_file = workdir_ + output_file;
+  }
   return output_file;
 }
 
