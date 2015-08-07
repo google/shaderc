@@ -68,11 +68,10 @@ void PrintHelp(std::ostream* out) {
        << std::endl;
 }
 
-// Parses the argument for the option at index in argv. On success, returns
-// true and writes the parsed argument into option_argument. Returns false
-// if any error occurs. option is the expected option at argv[index].
-// After calling this function, index will be at the last command line
-// argument consumed.
+// Gets the option argument for the option at *index in argv in a way consistent
+// with clang/gcc. On success, returns true and writes the parsed argument into
+// *option_argument. Returns false if any errors occur. After calling this
+// function, *index will the index of the last command line argument consumed.
 bool GetOptionArgument(int argc, char** argv, int* index,
                        const std::string& option,
                        string_piece* option_argument) {
@@ -82,12 +81,13 @@ bool GetOptionArgument(int argc, char** argv, int* index,
     *option_argument = arg.substr(option.size());
     return true;
   } else {
-    if (++(*index) >= argc) {
-      return false;
-    } else {
-      *option_argument = argv[*index];
+    if (option.back() == '=') {
+      *option_argument = "";
       return true;
     }
+    if (++(*index) >= argc) return false;
+    *option_argument = argv[*index];
+    return true;
   }
 }
 

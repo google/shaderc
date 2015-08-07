@@ -29,6 +29,30 @@ def core_frag_shader_without_version():
 
 
 @inside_glslc_testsuite('OptionStd')
+class TestStdNoArg(expect.ErrorMessage):
+    """Tests -std alone."""
+
+    glslc_args = ['-std']
+    expected_error = ["glslc: error: unknown argument: '-std'\n"]
+
+
+@inside_glslc_testsuite('OptionStd')
+class TestStdEqNoArg(expect.ErrorMessage):
+    """Tests -std= with no argument."""
+
+    glslc_args = ['-std=']
+    expected_error = ["glslc: error: invalid value '' in '-std='\n"]
+
+
+@inside_glslc_testsuite('OptionStd')
+class TestStdEqSpaceArg(expect.ErrorMessage):
+    """Tests -std= <version-profile>."""
+
+    shader = FileShader(core_frag_shader_without_version(), '.frag')
+    glslc_args = ['-c', '-std=', '450core', shader]
+    expected_error = ["glslc: error: invalid value '' in '-std='\n"]
+
+@inside_glslc_testsuite('OptionStd')
 class TestMissingVersionAndStd(expect.ErrorMessage):
     """Tests that missing both #version and -std results in errors."""
 
