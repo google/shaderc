@@ -22,6 +22,9 @@
 
 namespace shaderc_util {
 
+// Returns true if the given path is an absolute path.
+bool IsAbsolutePath(const std::string& path);
+
 // Reads all of the characters in a given file into input_data.  Outputs an
 // error message to std::cerr if the file could not be read and returns false if
 // there was an error.  If the input_file is "-", then input is read from

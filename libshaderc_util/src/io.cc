@@ -40,6 +40,11 @@ void OutputFileErrorMessage(int errno_value) {
 
 namespace shaderc_util {
 
+bool IsAbsolutePath(const std::string& path) {
+  // TODO(antiagainst): add support for Windows.
+  return !path.empty() && path.front() == '/';
+}
+
 bool ReadFile(const std::string& input_file_name,
               std::vector<char>* input_data) {
   std::istream* stream = &std::cin;

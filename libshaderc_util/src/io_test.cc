@@ -20,6 +20,7 @@
 
 namespace {
 
+using shaderc_util::IsAbsolutePath;
 using shaderc_util::ReadFile;
 using shaderc_util::WriteFile;
 using shaderc_util::GetOutputStream;
@@ -33,6 +34,24 @@ class ReadFileTest : public testing::Test {
   // A vector to pass to ReadFile.
   std::vector<char> read_data;
 };
+
+TEST(IsAbsolutePathTest, Linux) {
+  EXPECT_FALSE(IsAbsolutePath(""));
+  EXPECT_TRUE(IsAbsolutePath("/"));
+  EXPECT_FALSE(IsAbsolutePath("."));
+  EXPECT_FALSE(IsAbsolutePath(".."));
+  EXPECT_TRUE(IsAbsolutePath("/bin/echo"));
+  EXPECT_TRUE(IsAbsolutePath("//etc/shadow"));
+  EXPECT_TRUE(IsAbsolutePath("/../../../lib"));
+  EXPECT_FALSE(IsAbsolutePath("./something"));
+  EXPECT_FALSE(IsAbsolutePath("input"));
+  EXPECT_FALSE(IsAbsolutePath("../test"));
+  EXPECT_FALSE(IsAbsolutePath(" /abc"));
+  EXPECT_TRUE(IsAbsolutePath("/abc def/ttt"));
+  EXPECT_FALSE(IsAbsolutePath("❤"));
+  EXPECT_TRUE(IsAbsolutePath("/☯"));
+  EXPECT_TRUE(IsAbsolutePath("/☢/g o/ogle"));
+}
 
 TEST_F(ReadFileTest, CorrectContent) {
   ASSERT_TRUE(ReadFile("include_file.1", &read_data));
