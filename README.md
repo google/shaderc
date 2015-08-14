@@ -6,13 +6,14 @@ A collection of tools, libraries and tests for shader compilation.
 
 Shaderc is experimental, and subject to significant incompatible changes.
 
-For licensing terms, please see the `LICENSE` file.  If interested in
-contributing to this project, please see `CONTRIBUTING.md`.
+For licensing terms, please see the [`LICENSE`](LICENSE) file.  If interested in
+contributing to this project, please see [`CONTRIBUTING.md`](CONTRIBUTING.md)
 
 This is not an official Google product (experimental or otherwise), it is just
 code that happens to be owned by Google.  That may change if Shaderc gains
-contributions from others.  See the `CONTRIBUTING.md` file for more information.
-See also the `AUTHORS` and `CONTRIBUTORS` files.
+contributions from others.  See the [`CONTRIBUTING.md`](CONTRIBUTING.md) file
+for more information. See also the [`AUTHORS`](AUTHORS) and
+[`CONTRIBUTORS`](CONTRIBUTORS) files.
 
 ## File organization
 

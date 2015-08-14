@@ -1,11 +1,11 @@
 Thank you for considering Shaderc development!  Please make sure you review
-CONTRIBUTING.md for important preliminary info.
+[`CONTRIBUTING.md`](CONTRIBUTING.md) for important preliminary info.
 
 ## Building
 
-Instructions for first-time building can be found in README.md.  Incremental
-build after a source change can be done using `ninja` (or `cmake --build`) and
-`ctest` exactly as in the first-time procedure.
+Instructions for first-time building can be found in [`README.md`](README.md).
+Incremental build after a source change can be done using `ninja` (or
+`cmake --build`) and `ctest` exactly as in the first-time procedure.
 
 ## Code reviews
 
@@ -62,13 +62,13 @@ master.
 Changes made to glslang in the course of Shaderc development must build and test
 correctly on their own, independently of Shaderc code, so they don't break other
 users of glslang when sent upstream.  We will periodically upstream the content
-of our fork's master to the official glslang master, so all the contributions we
-accept will find their way to glslang.
+of our fork's `master` branch to the official glslang `master` branch, so all
+the contributions we accept will find their way to glslang.
 
 We aim to keep our fork up to date with the official glslang by pulling their
-changes frequently and merging them into our master.
+changes frequently and merging them into our `master` branch.
 
 <hr><small>\*: with one small exception: if a Shaderc and glslang pull requests
-need each other and are simultaneously cherry-picked, then a HEADs inconsistency
-will be tolerated for the short moment that one has landed while the other
-hasn't.
+need each other and are simultaneously cherry-picked, then a `HEAD`s
+inconsistency will be tolerated for the short moment that one has landed while
+the other hasn't.

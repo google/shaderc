@@ -1,6 +1,6 @@
 Want to contribute?  Great!  First, read this page (including the small print at
-the end).  Then, have a look at DEVELOPMENT.howto.md, which contains useful info
-to guide you along the way.
+the end).  Then, have a look at [`DEVELOPMENT.howto.md`](DEVELOPMENT.howto.md),
+which contains useful info to guide you along the way.
 
 ## Before you contribute
 
