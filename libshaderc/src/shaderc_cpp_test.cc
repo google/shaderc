@@ -63,16 +63,6 @@ bool CompilationSuccess(const shaderc::Compiler& compiler,
       .GetSuccess();
 }
 
-// Compiles a shader with the given options and returns true on success, false
-// on failure.
-bool CompilationSuccess(const shaderc::Compiler& compiler,
-                        const std::string& shader, shaderc_shader_kind kind,
-                        const shaderc::CompileOptions& options) {
-  return compiler.CompileGlslToSpv(shader.c_str(), shader.length(), kind,
-                                   options)
-      .GetSuccess();
-}
-
 // Compiles a shader and returns true if the result is valid SPIR-V.
 bool CompilesToValidSpv(const shaderc::Compiler& compiler,
                         const std::string& shader, shaderc_shader_kind kind) {
