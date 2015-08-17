@@ -79,9 +79,8 @@ class TestMissingVersionAndWrongStd(expect.ErrorMessage):
     shader = FileShader(core_frag_shader_without_version(), '.frag')
     glslc_args = ['-c', '-std=310es', shader]
     expected_error = [
-        shader, ":1: error: 'gl_SampleID' : undeclared identifier\n",
-        shader, ":1: error: '=' :  cannot convert from 'temp float' to ",
-        "'temp mediump int'\n2 errors generated.\n"]
+        shader, ":1: error: 'gl_SampleID' : required extension not requested: "
+        'GL_OES_sample_variables\n1 error generated.\n']
 
 
 @inside_glslc_testsuite('OptionStd')
