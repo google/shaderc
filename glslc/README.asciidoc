@@ -111,6 +111,8 @@ Output files will be generated into the current working directory if no
 <<compilation-stage-selection-options,compilation stage selection option>> is
 given.
 
+WARNING: Interaction with `#include` and `-I` is not implemented yet.
+
 === Language and Mode Selection Options
 
 [[option-f-shader-stage]]
@@ -210,6 +212,8 @@ empty value.
 ==== `-I`
 
 `-I` adds the specified directory to the search path for include files.
+
+WARNING: Implementation is not complete yet.
 
 === Code Generation Options
 
