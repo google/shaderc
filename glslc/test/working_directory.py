@@ -53,6 +53,30 @@ class TestWorkDirEqNoArgCompileFile(expect.ValidNamedObjectFile):
 
 
 @inside_glslc_testsuite('WorkDir')
+class TestMultipleWorkDir(expect.ValidNamedObjectFile):
+    """Tests that if there are multiple -working-directory=<dir> specified,
+    only the last one takes effect."""
+
+    environment = Directory('.', [EMPTY_SHADER_IN_SUBDIR])
+    glslc_args = ['-c', '-working-directory=i-dont-exist',
+                  '-working-directory', 'i-think/me-neither',
+                  '-working-directory=subdir', 'shader.vert']
+    # Output file should be generated into subdir/.
+    expected_object_filenames = ('subdir/shader.vert.spv',)
+
+
+@inside_glslc_testsuite('WorkDir')
+class TestWorkDirPosition(expect.ValidNamedObjectFile):
+    """Tests that -working-directory=<dir> affects all files including the
+    one before it."""
+
+    environment = Directory('.', [EMPTY_SHADER_IN_SUBDIR])
+    glslc_args = ['-c', 'shader.vert', '-working-directory=subdir']
+    # Output file should be generated into subdir/.
+    expected_object_filenames = ('subdir/shader.vert.spv',)
+
+
+@inside_glslc_testsuite('WorkDir')
 class TestWorkDirCompileFile(expect.ValidNamedObjectFile):
     """Tests -working-directory=<dir> when compiling input file."""
 
