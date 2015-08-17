@@ -1,6 +1,10 @@
 # Shaderc
 
 A collection of tools, libraries and tests for shader compilation.
+At the moment it includes:
+
+- `glslc`, a command line compiler for GLSL to SPIR-V, and
+- `libshaderc` a library API for doing the same.
 
 ## Status
 
@@ -24,9 +28,17 @@ for more information. See also the [`AUTHORS`](AUTHORS) and
 - `third_party/`: third party open source packages; see below
 - `utils/`: utility scripts for Shaderc
 
-Shaderc depends on a [fork](https://github.com/google/glslang) of the Khronos
-reference GLSL compiler glslang. Shaderc also depends on the testing framework
-[Google Mock](https://code.google.com/p/googlemock/).
+Shaderc depends on `glslang`, the Khronos reference compiler for GLSL.
+Sometimes a change updates both Shaderc and glslang.  In that case the
+glslang change will appear in [google/glslang](https://github.com/google/glslang)
+before it appears upstream in
+[KhronosGroup/glslang](https://github.com/KhronosGroup/glslang).
+We intend to upstream all changes to glslang. We maintain the separate
+copy only to stage those changes for review, and to provide something for
+Shaderc to build against in the meantime.
+
+Shaderc also depends on the
+[Google Mock](https://code.google.com/p/googlemock/) testing framework.
 
 In the following sections, `$SOURCE_DIR` is the directory you intend to clone
 Shaderc into.
