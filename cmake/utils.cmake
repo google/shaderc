@@ -90,3 +90,57 @@ function(add_shaderc_tests)
       COMMAND ${TEST_NAME})
   endforeach()
 endfunction(add_shaderc_tests)
+
+# Finds all transitive static library dependencies of a given target.
+# This will skip libraries that were statically linked that were not
+# built by CMake, for example -lpthread.
+macro(get_transitive_libs target out_list)
+  if (TARGET ${target})
+    get_target_property(libtype ${target} TYPE)
+    # If this target is a static library, get anything it depends on.
+    if ("${libtype}" STREQUAL "STATIC_LIBRARY")
+      get_target_property(libs ${target} LINK_LIBRARIES)
+      if (libs)
+        foreach(lib ${libs})
+          get_transitive_libs(${lib} ${out_list})
+        endforeach()
+      endif()
+    endif()
+  endif()
+  get_target_property(libname ${target} LOCATION)
+  # If we know the location (i.e. if it was made with CMake) then we
+  # can add it to our list.
+  if (libname)
+    list(INSERT ${out_list} 0 "${libname}")
+  endif()
+  LIST(REMOVE_DUPLICATES ${out_list})
+endmacro()
+
+# Combines the static library "target" with all of it's transitive static
+# library dependencies into a single static library "new_target".
+function(combine_static_lib new_target target)
+  if ("${MSVC}")
+    message(FATAL_ERROR "MSVC does not yet support merging static libraries")
+  endif()
+
+  set(all_libs "")
+  get_transitive_libs(${target} all_libs)
+  string(REPLACE ";" "\\\\naddlib " all_libs_string "${all_libs}")
+
+  set(ar_script
+    "create lib${new_target}.a\\\\naddlib ${all_libs_string}\\\\nsave\\\\n end")
+
+  add_custom_command(OUTPUT lib${new_target}.a
+    DEPENDS ${all_libs}
+    COMMAND echo -e ${ar_script} | ${CMAKE_AR} -M)
+  add_custom_target(${new_target}_genfile ALL
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/lib${new_target}.a)
+
+  # CMake needs to be able to see this as another normal library,
+  # so import the newly created library as an imported library,
+  # and set up the dependencies on the custom target.
+  add_library(${new_target} STATIC IMPORTED)
+  set_target_properties(${new_target}
+    PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/lib${new_target}.a)
+  add_dependencies(${new_target} ${new_target}_genfile)
+endfunction()
