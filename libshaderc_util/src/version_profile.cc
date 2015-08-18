@@ -15,6 +15,7 @@
 #include "libshaderc_util/version_profile.h"
 
 #include <cctype>
+#include <sstream>
 
 namespace {
 
@@ -34,12 +35,12 @@ bool ParseVersionProfile(const std::string& version_profile, int* version,
       !::isdigit(version_profile.front()))
     return false;
 
-  size_t split_point;
-  int version_number = std::stoi(version_profile, &split_point);
-  if (!IsKnownVersion(version_number)) return false;
-  *version = version_number;
+  std::string profile_string;
+  std::istringstream(version_profile) >> *version >> profile_string;
 
-  const std::string profile_string = version_profile.substr(split_point);
+  if (!IsKnownVersion(*version)) {
+    return false;
+  }
   if (profile_string.empty()) {
     *profile = ENoProfile;
   } else if (profile_string == "core") {
