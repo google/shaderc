@@ -53,16 +53,6 @@ class TestWorkDirEqNoArgCompileFile(expect.ValidNamedObjectFile):
 
 
 @inside_glslc_testsuite('WorkDir')
-class TestWorkDirEqNoArgLinkFile(expect.ValidNamedObjectFile):
-    """Tests -working-directory=<empty> when linking input file."""
-
-    environment = Directory('.', [EMPTY_SHADER_IN_SUBDIR])
-    glslc_args = ['-working-directory=', 'subdir/shader.vert']
-    # Output file should be generated into the current directory, not
-    # subdir/, where the source is.
-    expected_object_filenames = ('a.spv',)
-
-@inside_glslc_testsuite('WorkDir')
 class TestWorkDirCompileFile(expect.ValidNamedObjectFile):
     """Tests -working-directory=<dir> when compiling input file."""
 
@@ -70,17 +60,6 @@ class TestWorkDirCompileFile(expect.ValidNamedObjectFile):
     glslc_args = ['-c', '-working-directory=subdir', 'shader.vert']
     # Output file should be generated into subdir/.
     expected_object_filenames = ('subdir/shader.vert.spv',)
-
-
-@inside_glslc_testsuite('WorkDir')
-class TestWorkDirLinkFile(expect.ValidNamedObjectFile):
-    """Tests -working-directory=<dir> when linking input file."""
-
-    environment = Directory('.', [EMPTY_SHADER_IN_SUBDIR])
-    glslc_args = ['-working-directory=subdir', 'shader.vert']
-    # Output file should be generated into the current directory, not
-    # subdir/, where the source is.
-    expected_object_filenames = ('a.spv',)
 
 
 @inside_glslc_testsuite('WorkDir')
@@ -98,34 +77,6 @@ class TestWorkDirCompileFileOutput(expect.ValidNamedObjectFile):
                   'shader.vert']
     # Output file should be generated into subdir/bin/.
     expected_object_filenames = ('subdir/bin/spv',)
-
-
-@inside_glslc_testsuite('WorkDir')
-class TestWorkDirLinkFileOutput(expect.ValidNamedObjectFile):
-    """Tests -working-directory=<dir> when linking input file and specifying
-    output filename."""
-
-    environment = Directory('.', [
-        EMPTY_SHADER_IN_SUBDIR,
-        Directory('bin', [])
-    ])
-    glslc_args = ['-o', 'bin/spv', '-working-directory=subdir',
-                  'shader.vert']
-    # Output file should be generated into bin/, not subdir/bin/.
-    expected_object_filenames = ('bin/spv',)
-
-
-@inside_glslc_testsuite('WorkDir')
-class TestWorkDirLinkFileOutputNotExist(expect.ErrorMessage):
-    """Tests -working-directory=<dir> when linking input file and specifying
-    filename in non-existing directory."""
-
-    environment = Directory('.', [EMPTY_SHADER_IN_SUBDIR])
-    glslc_args = ['-o', 'bin/spv', '-working-directory=subdir',
-                  'shader.vert']
-    # Output file should be generated into bin/, which does not exist.
-    expected_error = ['glslc: error: cannot open output file: ',
-                      "'bin/spv': No such file or directory\n"]
 
 
 @inside_glslc_testsuite('WorkDir')
@@ -157,11 +108,63 @@ class TestWorkDirCompileFileAbsolutePath(expect.ValidObjectFile):
     glslc_args = ['-c', '-working-directory=subdir', shader]
 
 
-@inside_glslc_testsuite('WorkDir')
-class TestWorkDirLinkFileAbsolutePath(expect.ValidNamedObjectFile):
-    """Tests -working-directory=<dir> when linking input file with absolute
-    path."""
+# The -working-directory flag should not affect the placement of the link file.
+# The following tests ensure that.
 
-    shader = FileShader('void main() {}', '.vert')
-    glslc_args = ['-working-directory=subdir', shader]
+class WorkDirDoesntAffectLinkedFile(expect.ValidNamedObjectFile):
+    """A base class for tests asserting that -workind-directory has no impact
+    on the location of the output link file.
+    """
+    environment = Directory('.', [
+        Directory('subdir', [
+            File('shader.vert', 'void main(){}'),
+            # This bin/ is in the wrong location, so glslc should ignore it.
+            Directory('bin', [])]),
+        File('shader.vert', "fake file, doesn't compile."),
+        Directory('bin', [])])
+
+
+@inside_glslc_testsuite('WorkDir')
+class TestWorkDirLinkFileDefaultLocation(WorkDirDoesntAffectLinkedFile):
+    """Tests that -working-directory doesn't impact the default link-file
+    location.
+    """
+    glslc_args = ['-working-directory=subdir', 'shader.vert']
     expected_object_filenames = ('a.spv',)
+
+
+@inside_glslc_testsuite('WorkDir')
+class TestWorkDirLinkFileExplicit(WorkDirDoesntAffectLinkedFile):
+    """Tests that -working-directory doesn't impact the named link-file
+    location.
+    """
+    glslc_args = ['-o', 'b.spv', '-working-directory=subdir', 'shader.vert']
+    expected_object_filenames = ('b.spv',)
+
+
+@inside_glslc_testsuite('WorkDir')
+class TestWorkDirLinkFileInSubdir(WorkDirDoesntAffectLinkedFile):
+    """Tests that -working-directory doesn't impact the link-file sent into an
+    existing subdirectory.
+    """
+    glslc_args = ['-o', 'bin/spv', '-working-directory=subdir', 'shader.vert']
+    expected_object_filenames = ('bin/spv',)
+
+
+@inside_glslc_testsuite('WorkDir')
+class TestWorkDirLinkFileInvalidPath(expect.ErrorMessage):
+    """Tests that -working-directory doesn't impact the error generated for an
+    invalid -o path.
+    """
+
+    environment = Directory('.', [
+        Directory('subdir', [
+            File('shader.vert', 'void main(){}'),
+            Directory('missing', [])]),  # Present here, but missing in parent.
+        File('shader.vert', "fake file, doesn't compile.")])
+
+    glslc_args = [
+        '-o', 'missing/spv', '-working-directory=subdir', 'shader.vert']
+
+    expected_error = ['glslc: error: cannot open output file: ',
+                      "'missing/spv': No such file or directory\n"]
