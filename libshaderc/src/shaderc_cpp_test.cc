@@ -27,7 +27,6 @@ using testing::Each;
 using testing::HasSubstr;
 
 const char kMinimalShader[] = "void main(){}";
-
 TEST(CppInterface, MultipleCalls) {
   shaderc::Compiler compiler1, compiler2, compiler3;
   EXPECT_TRUE(compiler1.IsValid());

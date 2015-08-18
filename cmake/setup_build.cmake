@@ -21,7 +21,15 @@ if(WIN32)
   set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 endif(WIN32)
 
+if (ANDROID)
+# For android let's preemptively find the correct packages so that
+# child projects (glslang, googletest) do not fail to find them.
+find_host_program(PYTHON_EXE python REQUIRED)
+find_host_package(PythonInterp)
+find_host_package(BISON)
+else()
 find_program(PYTHON_EXE python REQUIRED)
+endif()
 
 option(ENABLE_CODE_COVERAGE "Enable collecting code coverage." OFF)
 if (ENABLE_CODE_COVERAGE)

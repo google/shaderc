@@ -21,6 +21,7 @@ for more information. See also the [`AUTHORS`](AUTHORS) and
 
 ## File organization
 
+- `android_test/` : a small Android application to verify compilation
 - `cmake/`: CMake utility functions and configuration for Shaderc
 - `glslc/`: an executable to compile GLSL to SPIR-V
 - `libshaderc/`: a library for compiling shader strings into SPIR-V
