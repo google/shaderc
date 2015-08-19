@@ -161,7 +161,7 @@ class TestWorkDirCompileFileAbsolutePath(expect.ValidObjectFile):
 # The following tests ensure that.
 
 class WorkDirDoesntAffectLinkedFile(expect.ValidNamedObjectFile):
-    """A base class for tests asserting that -workind-directory has no impact
+    """A base class for tests asserting that -working-directory has no impact
     on the location of the output link file.
     """
     environment = Directory('.', [
