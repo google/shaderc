@@ -167,7 +167,8 @@ class WorkDirDoesntAffectLinkedFile(expect.ValidNamedObjectFile):
     environment = Directory('.', [
         Directory('subdir', [
             File('shader.vert', 'void main(){}'),
-            # This bin/ is in the wrong location, so glslc should ignore it.
+            # Try to fake glslc into putting the linked file here, though it
+            # shouldn't (because -working-directory doesn't impact -o).
             Directory('bin', [])]),
         File('shader.vert', "fake file, doesn't compile."),
         Directory('bin', [])])
