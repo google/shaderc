@@ -78,13 +78,38 @@ class TestMultipleWorkDir(expect.ValidNamedObjectFile):
 
 @inside_glslc_testsuite('WorkDir')
 class TestWorkDirPosition(expect.ValidNamedObjectFile):
-    """Tests that -working-directory=<dir> affects all files including the
-    one before it."""
+    """Tests that -working-directory=<dir> affects all files before and after
+    it on the command line."""
 
-    environment = Directory('.', [EMPTY_SHADER_IN_SUBDIR])
-    glslc_args = ['-c', 'shader.vert', '-working-directory=subdir']
+    environment = Directory('subdir', [
+        File('shader.vert', 'void main() {}'),
+        File('cool.frag', 'void main() {}'),
+        File('bla.vert', 'void main() {}')
+    ])
+    glslc_args = ['-c', 'shader.vert', 'bla.vert',
+                  '-working-directory=subdir', 'cool.frag']
     # Output file should be generated into subdir/.
-    expected_object_filenames = ('subdir/shader.vert.spv',)
+    expected_object_filenames = (
+        'subdir/shader.vert.spv', 'subdir/cool.frag.spv', 'subdir/bla.vert.spv')
+
+
+@inside_glslc_testsuite('WorkDir')
+class TestWorkDirDeepDir(expect.ValidNamedObjectFile):
+    """Tests that -working-directory=<dir> works with directory hierarchies."""
+
+    environment = Directory('subdir', [
+        Directory('subsubdir', [
+            File('one.vert', 'void main() {}'),
+            File('two.frag', 'void main() {}')
+        ]),
+        File('zero.vert', 'void main() {}')
+    ])
+    glslc_args = ['-c', 'zero.vert', 'subsubdir/one.vert',
+                  'subsubdir/two.frag', '-working-directory=subdir']
+    # Output file should be generated into subdir/.
+    expected_object_filenames = (
+        'subdir/zero.vert.spv', 'subdir/subsubdir/one.vert.spv',
+        'subdir/subsubdir/two.frag.spv')
 
 
 @inside_glslc_testsuite('WorkDir')
