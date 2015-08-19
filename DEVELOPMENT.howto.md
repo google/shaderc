@@ -53,11 +53,11 @@ procedures.  At the same time, we would like to have those changes available to
 all Shaderc developers immediately upon passing our code review.  Currently this
 is best done by maintaining
 [our own GitHub fork](https://github.com/google/glslang) of glslang, landing
-Shaderc-supporting changes there, building Shaderc against it, and generating
-pull requests from there to the glslang's original GitHub repository.  Although
-a separate repository, this should be treated as essentially a part of Shaderc:
-the Shaderc master should always<sup>\*</sup> build against our glslang fork's
-master.
+Shaderc-supporting changes there<sup>\*</sup>, building Shaderc against it, and
+generating pull requests from there to the glslang's original GitHub repository.
+Although a separate repository, this should be treated as essentially a part of
+Shaderc: the Shaderc master should always<sup>\**</sup> build against our
+glslang fork's master.
 
 Changes made to glslang in the course of Shaderc development must build and test
 correctly on their own, independently of Shaderc code, so they don't break other
@@ -68,7 +68,17 @@ the contributions we accept will find their way to glslang.
 We aim to keep our fork up to date with the official glslang by pulling their
 changes frequently and merging them into our `master` branch.
 
-<hr><small>\*: with one small exception: if a Shaderc and glslang pull requests
-need each other and are simultaneously cherry-picked, then a `HEAD`s
-inconsistency will be tolerated for the short moment that one has landed while
-the other hasn't.
+<hr><small>
+
+\*: Please note that GitHub uses the term "fork" as a routine part of
+[contributing to another project](https://help.github.com/articles/using-pull-requests/#types-of-collaborative-development-models),
+_not_ in the sense of scary open-source schism.  This is why you'll hear us
+speak of "our fork" and see "forked from KhronosGroup/glslang" atop the
+[google/glslang](https://github.com/google/glslang) GitHub page.  It does _not_
+mean that we're divorcing our glslang development from the original -- quite the
+opposite.  As stated above, we intend to upstream all our work to the original
+glslang repository.
+
+\*\*: with one small exception: if a Shaderc and glslang pull requests need each
+other and are simultaneously cherry-picked, then a `HEAD`s inconsistency will be
+tolerated for the short moment that one has landed while the other hasn't.

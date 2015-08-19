@@ -36,7 +36,8 @@ before it appears upstream in
 [KhronosGroup/glslang](https://github.com/KhronosGroup/glslang).
 We intend to upstream all changes to glslang. We maintain the separate
 copy only to stage those changes for review, and to provide something for
-Shaderc to build against in the meantime.
+Shaderc to build against in the meantime.  Please see
+[DEVELOPMENT.howto.md](DEVELOPMENT.howto.md) for more details.
 
 Shaderc also depends on the
 [Google Mock](https://code.google.com/p/googlemock/) testing framework.
