@@ -33,6 +33,7 @@ endif()
 
 option(ENABLE_CODE_COVERAGE "Enable collecting code coverage." OFF)
 if (ENABLE_CODE_COVERAGE)
+  message(STATUS "Shaderc: code coverage report is on.")
   if (NOT UNIX)
     message(FATAL_ERROR "Code coverage on non-UNIX system not supported yet.")
   endif()

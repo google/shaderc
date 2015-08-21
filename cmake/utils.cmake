@@ -128,11 +128,11 @@ function(combine_static_lib new_target target)
   string(REPLACE ";" "\\\\naddlib " all_libs_string "${all_libs}")
 
   set(ar_script
-    "create lib${new_target}.a\\\\naddlib ${all_libs_string}\\\\nsave\\\\n end")
+    "create lib${new_target}.a\\\\naddlib ${all_libs_string}\\\\nsave\\\\nend")
 
   add_custom_command(OUTPUT lib${new_target}.a
     DEPENDS ${all_libs}
-    COMMAND echo -e ${ar_script} | ${CMAKE_AR} -M)
+    COMMAND /bin/echo -e ${ar_script} | ${CMAKE_AR} -M)
   add_custom_target(${new_target}_genfile ALL
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/lib${new_target}.a)
 

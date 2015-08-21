@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8.12)
 project(shaderc)
 enable_testing()
 
+message(STATUS "Shaderc: build type is \"${CMAKE_BUILD_TYPE}\".")
+
 include(cmake/setup_build.cmake)
 include(cmake/utils.cmake)
 
