@@ -12,6 +12,7 @@ env:
     - SHADERC_BUILD_TYPE=Debug SHADERC_CODE_COVERAGE=ON
 
 compiler:
+  - clang
   - gcc
 
 cache:
@@ -23,14 +24,22 @@ branches:
 
 install:
   # Travis CI is powered with Ubuntu 12.04, whose toolchain is outdated.
-  # Update to CMake 2.8.12 and GCC 4.8 here.
   - sudo add-apt-repository --yes ppa:smspillaz/cmake-2.8.12
   - sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
+  - if [ "$CC" = "clang" ]; then wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -; fi
+  - if [ "$CC" = "clang" ]; then sudo add-apt-repository --yes 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.6 main'; fi
   - sudo apt-get update -qq
 
-  - sudo apt-get install cmake cmake-data g++-4.8 ninja-build lcov
-  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 90
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
+  # Update to CMake 2.8.12 and install required packages.
+  - sudo apt-get install cmake cmake-data lcov ninja-build
+  # Also update to GCC 4.8 if we are building using GCC.
+  - if [ "$CC" = "gcc"   ]; then sudo apt-get install g++-4.8; fi
+  - if [ "$CC" = "gcc"   ]; then sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 90; fi
+  - if [ "$CC" = "gcc"   ]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90; fi
+  # Also update to Clang 3.6 if we are building using Clang.
+  - if [ "$CC" = "clang" ]; then sudo apt-get install clang-3.6; fi
+  - if [ "$CC" = "clang" ]; then sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.6 90; fi
+  - if [ "$CC" = "clang" ]; then sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.6 90; fi
 
   - sudo pip install nose
 
@@ -40,6 +49,7 @@ before_script:
   - git clone https://github.com/google/glslang.git third_party/glslang
 
 script:
+  - if [ "$CC" = "clang" ]; then export PATH=/usr/bin:$PATH; fi  # Make sure that clang-3.6 is selected.
   - mkdir build && cd build
   - cmake -GNinja -DCMAKE_BUILD_TYPE=${SHADERC_BUILD_TYPE} -DENABLE_CODE_COVERAGE=${SHADERC_CODE_COVERAGE} ..
   - ninja && ctest -j`nproc` --output-on-failure
