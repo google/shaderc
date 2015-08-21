@@ -1,5 +1,7 @@
 # Shaderc
 
+[![Build Status](https://travis-ci.org/google/shaderc.svg)](https://travis-ci.org/google/shaderc)
+
 A collection of tools, libraries and tests for shader compilation.
 At the moment it includes:
 

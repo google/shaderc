@@ -1,0 +1,48 @@
+language: cpp
+
+os:
+  - linux
+
+env:
+  matrix:
+    # Each line is a set of environment variables set before a build.
+    # Thus each line represents a different build configuration.
+    - SHADERC_BUILD_TYPE=Release SHADERC_CODE_COVERAGE=OFF
+    - SHADERC_BUILD_TYPE=Debug SHADERC_CODE_COVERAGE=OFF
+    - SHADERC_BUILD_TYPE=Debug SHADERC_CODE_COVERAGE=ON
+
+compiler:
+  - gcc
+
+cache:
+  apt: true
+
+branches:
+  only:
+    - master
+
+install:
+  # Travis CI is powered with Ubuntu 12.04, whose toolchain is outdated.
+  # Update to CMake 2.8.12 and GCC 4.8 here.
+  - sudo add-apt-repository --yes ppa:smspillaz/cmake-2.8.12
+  - sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
+  - sudo apt-get update -qq
+
+  - sudo apt-get install cmake cmake-data g++-4.8 ninja-build lcov
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 90
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
+
+  - sudo pip install nose
+
+before_script:
+  - svn checkout http://googlemock.googlecode.com/svn/tags/release-1.7.0 third_party/gmock-1.7.0
+  - git clone https://github.com/google/glslang.git third_party/glslang
+
+script:
+  - mkdir build && cd build
+  - cmake -GNinja -DCMAKE_BUILD_TYPE=${SHADERC_BUILD_TYPE} -DENABLE_CODE_COVERAGE=${SHADERC_CODE_COVERAGE} ..
+  - ninja && ctest -j`nproc` --output-on-failure
+
+notifications:
+  email:
+    - shaderc@noreply.github.com
