@@ -132,7 +132,7 @@ function(combine_static_lib new_target target)
 
   add_custom_command(OUTPUT lib${new_target}.a
     DEPENDS ${all_libs}
-    COMMAND /bin/echo -e ${ar_script} | ${CMAKE_AR} -M)
+    COMMAND ${ECHO_EXE} -e ${ar_script} | ${CMAKE_AR} -M)
   add_custom_target(${new_target}_genfile ALL
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/lib${new_target}.a)
 

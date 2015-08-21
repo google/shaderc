@@ -31,6 +31,8 @@ else()
 find_program(PYTHON_EXE python REQUIRED)
 endif()
 
+find_program(ECHO_EXE echo REQUIRED)
+
 option(ENABLE_CODE_COVERAGE "Enable collecting code coverage." OFF)
 if (ENABLE_CODE_COVERAGE)
   message(STATUS "Shaderc: code coverage report is on.")
