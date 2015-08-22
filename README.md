@@ -1,6 +1,6 @@
 # Shaderc
 
-[![Build Status](https://travis-ci.org/google/shaderc.svg)](https://travis-ci.org/google/shaderc)
+[![Linux Build Status](https://travis-ci.org/google/shaderc.svg)](https://travis-ci.org/google/shaderc "Linux Build Status") [![Windows Build status](https://ci.appveyor.com/api/projects/status/xcxci2mekggib1an?svg=true)](https://ci.appveyor.com/project/antiagainst/shaderc "Windows Build Status")
 
 A collection of tools, libraries and tests for shader compilation.
 At the moment it includes:

@@ -1,6 +1,6 @@
 # Find nosetests; see add_nosetests() from utils.cmake for opting in to
 # nosetests in a specific directory.
-find_program(NOSETESTS_EXE NAMES nosetests)
+find_program(NOSETESTS_EXE NAMES nosetests PATHS $ENV{PYTHON_PACKAGE_PATH})
 if (NOT NOSETESTS_EXE)
   message(STATUS "nosetests was not found - python code will not be tested")
 endif()

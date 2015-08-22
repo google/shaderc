@@ -1,0 +1,43 @@
+# Windows Build Configuration for AppVeyor
+# http://www.appveyor.com/docs/appveyor-yml
+
+# version format
+version: "{build}"
+
+platform:
+  - x64
+
+environment:
+  PYTHON_PATH: "C:/Python27"
+  PYTHON_PACKAGE_PATH: "C:/Python27/Scripts"
+
+configuration:
+  - Debug
+  - Release
+
+branches:
+  only:
+    - master
+
+# scripts that are called at very beginning, before repo cloning
+init:
+  - ps: (new-object net.webclient).DownloadFile('https://raw.github.com/pypa/pip/master/contrib/get-pip.py', 'C:/get-pip.py')
+  - "%PYTHON_PATH%/python.exe C:/get-pip.py"
+  - "%PYTHON_PACKAGE_PATH%/pip.exe install nose"
+
+# scripts that run after cloning repository
+install:
+  - svn checkout http://googlemock.googlecode.com/svn/tags/release-1.7.0 third_party/gmock-1.7.0
+  - git clone https://github.com/google/glslang third_party/glslang
+
+build:
+  parallel: true  # enable MSBuild parallel builds
+  verbosity: minimal
+
+build_script:
+  - mkdir build && cd build
+  - cmake ..
+  - cmake --build . --config %CONFIGURATION%
+
+test_script:
+  - ctest -C %CONFIGURATION% --output-on-failure
