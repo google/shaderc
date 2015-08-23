@@ -53,6 +53,17 @@ TEST(IsAbsolutePathTest, Linux) {
   EXPECT_TRUE(IsAbsolutePath("/☢/g o/ogle"));
 }
 
+TEST(IsAbsolutePathTest, Windows) {
+  EXPECT_TRUE(IsAbsolutePath(R"(\\Server1000\superuser\file)"));
+  EXPECT_TRUE(IsAbsolutePath(R"(\\zzzz 1000\user with space\file with space)"));
+  EXPECT_TRUE(
+      IsAbsolutePath(R"(C:\Program Files (x86)\Windows Folder\shader.glsl)"));
+  EXPECT_TRUE(IsAbsolutePath(R"(X:\❤\☯\☢)"));
+  EXPECT_FALSE(IsAbsolutePath(R"(third_party\gmock)"));
+  EXPECT_FALSE(IsAbsolutePath(R"(C:..\File.txt)"));
+  EXPECT_FALSE(IsAbsolutePath(R"(zz:\❤\☯\☢)"));
+}
+
 TEST_F(ReadFileTest, CorrectContent) {
   ASSERT_TRUE(ReadFile("include_file.1", &read_data));
   EXPECT_EQ("The quick brown fox jumps over a lazy dog.\n",

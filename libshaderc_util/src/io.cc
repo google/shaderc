@@ -41,8 +41,19 @@ void OutputFileErrorMessage(int errno_value) {
 namespace shaderc_util {
 
 bool IsAbsolutePath(const std::string& path) {
-  // TODO(antiagainst): add support for Windows.
-  return !path.empty() && path.front() == '/';
+  if (path.empty()) return false;
+  // Unix-like OS: /path/to/file
+  if (path.front() == '/') return true;
+  // Windows: \\server\user\file
+  if (path.size() > 1 && path[0] == '\\' && path[1] == '\\') {
+    return true;
+  }
+  // Windows: X:\path\to\file
+  if (path.size() > 2 && ::isalpha(path[0]) && path[1] == ':' &&
+      path[2] == '\\') {
+    return true;
+  }
+  return false;
 }
 
 bool ReadFile(const std::string& input_file_name,
