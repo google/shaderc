@@ -52,24 +52,33 @@ MessageType DeduceMessageType(string_piece* message) {
 // keeps all parameters untouched.
 bool DeduceLocationSpec(string_piece* message, string_piece* source_name,
                         string_piece* line_number) {
-  string_piece rest(*message);
-  const size_t first_colon_pos = rest.find_first_of(':');
-  if (first_colon_pos == string_piece::npos) return false;
-  const string_piece source = rest.substr(0, first_colon_pos);
-
-  rest = rest.substr(first_colon_pos + 1);
   // TODO(antiagainst): we use ':' as a delimiter here. It may be a valid
   // character in the filename. Also be aware of other special characters,
   // for example, ' '.
-  const size_t second_colon_pos = rest.find_first_of(':');
-  if (second_colon_pos == string_piece::npos) return false;
-  const string_piece line = rest.substr(0, second_colon_pos);
+  string_piece rest(*message);
+  size_t colon_after_source = rest.find_first_of(':');
+  if (colon_after_source == string_piece::npos) return false;
+
+  string_piece source = rest.substr(0, colon_after_source);
+  rest = rest.substr(colon_after_source + 1);
+  size_t colon_after_line = rest.find_first_of(':');
+  if (source.size() == 1 && ::isalpha(source.front()) && rest.size() > 0 &&
+      rest.front() == '\\') {
+    // Handle Windows path.
+    colon_after_source += colon_after_line + 1;
+    source = message->substr(0, colon_after_source);
+    rest = rest.substr(colon_after_line + 1);
+    colon_after_line = rest.find_first_of(':');
+  }
+
+  if (colon_after_line == string_piece::npos) return false;
+  const string_piece line = rest.substr(0, colon_after_line);
 
   if (!std::all_of(line.begin(), line.end(), ::isdigit)) return false;
 
   *source_name = source;
   *line_number = line;
-  *message = rest.substr(second_colon_pos + 1).strip_whitespace();
+  *message = rest.substr(colon_after_line + 1).strip_whitespace();
   return true;
 }
 
@@ -195,9 +204,8 @@ bool PrintFilteredErrors(const string_piece& file_name,
       switch (type) {
         case MessageType::Error:
         case MessageType::Warning:
-          *error_stream << name << ":";
-          assert(!source_name.empty() && !line_number.empty() && !rest.empty());
-          *error_stream << line_number << ": "
+          assert(!name.empty() && !line_number.empty() && !rest.empty());
+          *error_stream << name << ":" << line_number << ": "
                         << (type == MessageType::Error ? "error: "
                                                        : "warning: ")
                         << rest.strip_whitespace() << std::endl;

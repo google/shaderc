@@ -143,11 +143,11 @@ TEST(ParseGlslangOutputTest, LocationSpecification) {
   EXPECT_EQ("2", line_number.str());
   EXPECT_EQ("'#' : invalid directive: foo", rest.str());
 
-  EXPECT_EQ(MessageType::Warning,
-            ParseGlslangOutput(
-                "WARNING: 15:36: The following extension must be "
-                "enabled to use this feature:",
-                false, false, &segment_number, &line_number, &rest));
+  EXPECT_EQ(
+      MessageType::Warning,
+      ParseGlslangOutput("WARNING: 15:36: The following extension must be "
+                         "enabled to use this feature:",
+                         false, false, &segment_number, &line_number, &rest));
   EXPECT_EQ("15", segment_number.str());
   EXPECT_EQ("36", line_number.str());
   EXPECT_EQ("The following extension must be enabled to use this feature:",
@@ -177,6 +177,35 @@ TEST(ParseGlslangOutputTest, FileName) {
             ParseGlslangOutput("WARNING: 0xdeedbeef:0: wa:ha:ha", false, false,
                                &source_name, &line_number, &rest));
   EXPECT_EQ("0xdeedbeef", source_name.str());
+  EXPECT_EQ("0", line_number.str());
+  EXPECT_EQ("wa:ha:ha", rest.str());
+}
+
+TEST(ParseGlslangOutputTest, WindowsPath) {
+  string_piece source_name;
+  string_piece line_number;
+  string_piece rest;
+
+  EXPECT_EQ(
+      MessageType::Error,
+      ParseGlslangOutput(R"(ERROR: C:\path\to\shader.glsl:5: something wrong)",
+                         false, false, &source_name, &line_number, &rest));
+  EXPECT_EQ(R"(C:\path\to\shader.glsl)", source_name.str());
+  EXPECT_EQ("5", line_number.str());
+  EXPECT_EQ("something wrong", rest.str());
+
+  EXPECT_EQ(
+      MessageType::Warning,
+      ParseGlslangOutput(R"(WARNING: \\path\without\drive.vert:42: BOOM!)",
+                         false, false, &source_name, &line_number, &rest));
+  EXPECT_EQ(R"(\\path\without\drive.vert)", source_name.str());
+  EXPECT_EQ("42", line_number.str());
+  EXPECT_EQ("BOOM!", rest.str());
+
+  EXPECT_EQ(MessageType::Warning,
+            ParseGlslangOutput(R"(WARNING: X:\123.456\789:0: wa:ha:ha)", false,
+                               false, &source_name, &line_number, &rest));
+  EXPECT_EQ(R"(X:\123.456\789)", source_name.str());
   EXPECT_EQ("0", line_number.str());
   EXPECT_EQ("wa:ha:ha", rest.str());
 }
