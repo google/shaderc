@@ -290,10 +290,12 @@ class TestCase:
             test_status = TestStatus(
                 process.returncode, output[0], output[1],
                 self.directory, self.file_shaders)
-            for test_method in get_all_test_methods(self.test.__class__):
-                success, message = getattr(self.test, test_method)(test_status)
-                if not success:
-                    break
+            run_results = [getattr(self.test, test_method)(test_status)
+                           for test_method in get_all_test_methods(
+                               self.test.__class__)]
+            success, message = zip(*run_results)
+            success = all(success)
+            message = '\n'.join(message)
         except Exception as e:
             success = False
             message = str(e)
