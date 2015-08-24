@@ -116,8 +116,8 @@ macro(get_transitive_libs target out_list)
   LIST(REMOVE_DUPLICATES ${out_list})
 endmacro()
 
-# Combines the static library "target" with all of it's transitive static
-# library dependencies into a single static library "new_target".
+# Combines the static library "target" with all of its transitive static library
+# dependencies into a single static library "new_target".
 function(combine_static_lib new_target target)
   if ("${MSVC}")
     message(FATAL_ERROR "MSVC does not yet support merging static libraries")

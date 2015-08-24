@@ -31,7 +31,7 @@ case is then run by the following steps:
   4. All expected_* member varibles will be inspected and all placeholders in
      them will be expanded by calling instantiate_for_expectation() on those
      placeholders. After placeholder expansion, if the expected_* variable is
-     a list, it's element will be joined together with '' to form a single
+     a list, its element will be joined together with '' to form a single
      string. These expected_* variables are to be used by the check_*() methods.
   5. glslc will be run with the arguments supplied in glslc_args.
   6. All check_*() member methods will be called by supplying a TestStatus as
