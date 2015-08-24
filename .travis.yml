@@ -35,7 +35,8 @@ install:
   - sudo pip install nose
 
 before_script:
-  - svn checkout http://googlemock.googlecode.com/svn/tags/release-1.7.0 third_party/gmock-1.7.0
+  - git clone -b release-1.7.0 https://github.com/google/googlemock.git third_party/gmock-1.7.0
+  - git clone -b release-1.7.0 https://github.com/google/googletest.git third_party/gmock-1.7.0/gtest
   - git clone https://github.com/google/glslang.git third_party/glslang
 
 script:

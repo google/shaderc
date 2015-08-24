@@ -41,8 +41,8 @@ copy only to stage those changes for review, and to provide something for
 Shaderc to build against in the meantime.  Please see
 [DEVELOPMENT.howto.md](DEVELOPMENT.howto.md) for more details.
 
-Shaderc also depends on the
-[Google Mock](https://code.google.com/p/googlemock/) testing framework.
+Shaderc also depends on the [Google Mock](https://github.com/google/googlemock)
+testing framework.
 
 In the following sections, `$SOURCE_DIR` is the directory you intend to clone
 Shaderc into.
@@ -54,8 +54,9 @@ Shaderc into.
 ```sh
 git clone https://github.com/google/shaderc $SOURCE_DIR
 cd $SOURCE_DIR/third_party
-svn checkout http://googlemock.googlecode.com/svn/tags/release-1.7.0 \
-    gmock-1.7.0
+git clone -b release-1.7.0 https://github.com/google/googlemock.git gmock-1.7.0
+git clone -b release-1.7.0 https://github.com/google/googletest.git \
+    gmock-1.7.0/gtest
 git clone https://github.com/google/glslang glslang
 cd $SOURCE_DIR/
 ```
