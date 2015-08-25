@@ -41,3 +41,15 @@ build_script:
 
 test_script:
   - ctest -C %CONFIGURATION% --output-on-failure
+
+notifications:
+  - provider: Email
+    to:
+      - antiagainst@google.com
+      - awoloszyn@google.com
+      - deki@google.com
+      - dneto@google.com
+    subject: 'Shaderc Windows Build {{buildVersion}}: {{status}}'
+    on_build_success: false
+    on_build_failure: true
+    on_build_status_changed: true

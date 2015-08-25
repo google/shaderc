@@ -56,4 +56,10 @@ script:
 
 notifications:
   email:
-    - shaderc@noreply.github.com
+    recipients:
+      - antiagainst@google.com
+      - awoloszyn@google.com
+      - deki@google.com
+      - dneto@google.com
+    on_success: change
+    on_failure: always
