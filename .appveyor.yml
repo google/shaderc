@@ -27,7 +27,8 @@ init:
 
 # scripts that run after cloning repository
 install:
-  - svn checkout http://googlemock.googlecode.com/svn/tags/release-1.7.0 third_party/gmock-1.7.0
+  - git clone -b release-1.7.0 https://github.com/google/googlemock.git third_party/gmock-1.7.0
+  - git clone -b release-1.7.0 https://github.com/google/googletest.git third_party/gmock-1.7.0/gtest
   - git clone https://github.com/google/glslang third_party/glslang
 
 build:
@@ -49,7 +50,7 @@ notifications:
       - awoloszyn@google.com
       - deki@google.com
       - dneto@google.com
-    subject: 'Shaderc Windows Build {{buildVersion}}: {{status}}'
+    subject: 'Shaderc Windows Build #{{buildVersion}}: {{status}}'
     on_build_success: false
     on_build_failure: true
     on_build_status_changed: true
