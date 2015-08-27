@@ -43,7 +43,12 @@ We expect Shaderc to always build and test successfully on the platforms listed
 below.  Please keep that in mind when offering contributions.  This list will
 likely grow over time.
 
-* Linux x86
+| Platform | Build Status |
+|:--------:|:------------:|
+| Android (ARMv7)  | Not Automated |
+| Linux (x86_64)   | [![Linux Build Status](https://travis-ci.org/google/shaderc.svg)](https://travis-ci.org/google/shaderc "Linux Build Status") |
+| Windows (x86_64) | [![Windows Build status](https://ci.appveyor.com/api/projects/status/xcxci2mekggib1an?svg=true)](https://ci.appveyor.com/project/antiagainst/shaderc "Windows Build Status") |
+
 
 ## glslang
 
