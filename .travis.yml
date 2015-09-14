@@ -42,6 +42,7 @@ install:
   - if [ "$CC" = "clang" ]; then sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.6 90; fi
 
   - sudo pip install nose
+  - sudo pip install cpp-coveralls
 
 before_script:
   - git clone -b release-1.7.0 https://github.com/google/googlemock.git third_party/gmock-1.7.0
@@ -53,6 +54,22 @@ script:
   - mkdir build && cd build
   - cmake -GNinja -DCMAKE_BUILD_TYPE=${SHADERC_BUILD_TYPE} -DENABLE_CODE_COVERAGE=${SHADERC_CODE_COVERAGE} ..
   - ninja && ctest -j`nproc` --output-on-failure
+
+after_success:
+  # Collect coverage and push to coveralls.info.
+  # Ignore third party source code and tests.
+  - if [ "$CC" = "gcc" -a "$SHADERC_CODE_COVERAGE" = "ON" ]; then
+      coveralls
+        --root ../
+        --build-root ./
+        --exclude-pattern '.+/third_party/'
+        --exclude-pattern '.+/.+_test\.cc'
+        --exclude-pattern '.+/CMakeFiles/'
+        --gcov /usr/bin/gcov-4.8
+        --gcov-options '\--long-file-names --preserve-paths'
+        --verbose;
+    fi
+
 
 notifications:
   email:
