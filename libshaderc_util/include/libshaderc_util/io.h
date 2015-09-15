@@ -34,9 +34,9 @@ bool ReadFile(const std::string& input_file_name,
 
 // Returns and initializes the file_stream parameter if the output_filename
 // refers to a file, or returns &std::cout if the output_filename is "-".
-// Returns nullptr if the file could not be opened for writing.
-// If the output refers to a file, and the open failed for writing, file_stream
-// is left with its fail_bit set.
+// Returns nullptr and emits an error message to std::cout if the file could
+// not be opened for writing.  If the output refers to a file, and the open
+// failed for writing, file_stream is left with its fail_bit set.
 std::ostream* GetOutputStream(const string_piece& output_filename,
                               std::ofstream* file_stream);
 
