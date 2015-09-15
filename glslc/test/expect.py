@@ -249,12 +249,20 @@ class ErrorMessage(GlslCTest):
 
     To mix in this class, subclasses need to provide expected_error as the
     expected error message.
+
+    The test should fail if the subprocess was terminated by a signal.
     """
 
     def check_has_error_message(self, status):
         if not status.returncode:
             return False, ('Expected error message, but returned success from '
                            'glslc')
+        if status.returncode < 0:
+            # On Unix, a negative value -N for Popen.returncode indicates
+            # termination by signal N.
+            # https://docs.python.org/2/library/subprocess.html
+            return False, ('Expected error message, but glslc was terminated by '
+                           'signal ' + str(status.returncode))
         if not status.stderr:
             return False, 'Expected error message, but no output on stderr'
         if self.expected_error != convert_to_unix_line_endings(status.stderr):
