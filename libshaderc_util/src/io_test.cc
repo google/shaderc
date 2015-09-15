@@ -61,7 +61,7 @@ TEST(IsAbsolutePathTest, Windows) {
 
 TEST_F(ReadFileTest, CorrectContent) {
   ASSERT_TRUE(ReadFile("include_file.1", &read_data));
-  EXPECT_EQ("The quick brown fox jumps over a lazy dog.\n",
+  EXPECT_EQ("The quick brown fox jumps over a lazy dog.",
             ToString(read_data));
 }
 
