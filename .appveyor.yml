@@ -12,7 +12,7 @@ environment:
   PYTHON_PACKAGE_PATH: "C:/Python27/Scripts"
 
 configuration:
-  #- Debug
+  - Debug
   - Release
 
 branches:
