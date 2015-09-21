@@ -19,7 +19,7 @@
 #include <memory>
 #include <thread>
 
-#include "SPIRV/spirv.h"
+#include "SPIRV/spirv.hpp"
 
 namespace {
 

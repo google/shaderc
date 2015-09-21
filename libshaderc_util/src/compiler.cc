@@ -28,12 +28,7 @@
 
 #include "SPIRV/disassemble.h"
 #include "SPIRV/doc.h"
-#include "SPIRV/GLSL450Lib.h"
 #include "SPIRV/GlslangToSpv.h"
-
-// We must have the following global variable because declared as extern in
-// glslang/SPIRV/disassemble.cpp, which we will need for disassembling.
-const char* GlslStd450DebugNames[GLSL_STD_450::Count];
 
 namespace {
 using shaderc_util::string_piece;
@@ -172,7 +167,6 @@ bool Compiler::Compile(
   glslang::GlslangToSpv(*program.getIntermediate(used_shader_stage), spirv);
   if (disassemble_) {
     spv::Parameterize();
-    GLSL_STD_450::GetDebugNames(GlslStd450DebugNames);
     std::ostringstream disassembled_spirv;
     spv::Disassemble(disassembled_spirv, spirv);
     return shaderc_util::WriteFile(output_stream, disassembled_spirv.str());
