@@ -47,7 +47,10 @@ addons:
 install:
   - pip install --user nose
   - pip install --user cpp-coveralls
+
   - export PATH=$HOME/.local/bin:$PATH # Make sure we can find the above Python packages
+  - if [ "$CC" = "gcc"   ]; then export CC=gcc-4.8 CXX=g++-4.8; fi       # Make sure that gcc-4.8 is selected.
+  - if [ "$CC" = "clang" ]; then export CC=clang-3.6 CXX=clang++-3.6; fi # Make sure that clang-3.6 is selected.
 
 before_script:
   - git clone -b release-1.7.0 https://github.com/google/googlemock.git third_party/gmock-1.7.0
@@ -55,9 +58,6 @@ before_script:
   - git clone https://github.com/google/glslang.git third_party/glslang
 
 script:
-  - if [ "$CC" = "gcc"   ]; then export CC=gcc-4.8 CXX=g++-4.8; fi       # Make sure that gcc-4.8 is selected.
-  - if [ "$CC" = "clang" ]; then export CC=clang-3.6 CXX=clang++-3.6; fi # Make sure that clang-3.6 is selected.
-
   - mkdir build && cd build
   - cmake -GNinja -DCMAKE_BUILD_TYPE=${SHADERC_BUILD_TYPE} -DENABLE_CODE_COVERAGE=${SHADERC_CODE_COVERAGE} ..
   - ninja && ctest -j`nproc` --output-on-failure
@@ -65,7 +65,7 @@ script:
 after_success:
   # Collect coverage and push to coveralls.info.
   # Ignore third party source code and tests.
-  - if [ "$CC" = "gcc" -a "$SHADERC_CODE_COVERAGE" = "ON" ]; then
+  - if [ "$CC" = "gcc-4.8" -a "$SHADERC_CODE_COVERAGE" = "ON" ]; then
       coveralls
         --root ../
         --build-root ./
