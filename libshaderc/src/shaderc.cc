@@ -41,6 +41,14 @@ EShLanguage GetStage(shaderc_shader_kind kind) {
       return EShLangVertex;
     case shaderc_glsl_fragment_shader:
       return EShLangFragment;
+    case shaderc_glsl_compute_shader:
+      return EShLangCompute;
+    case shaderc_glsl_geometry_shader:
+      return EShLangGeometry;
+    case shaderc_glsl_tess_control_shader:
+      return EShLangTessControl;
+    case shaderc_glsl_tess_evaluation_shader:
+      return EShLangTessEvaluation;
   }
   assert(0 && "Unhandled shaderc_shader_kind");
   return EShLangVertex;

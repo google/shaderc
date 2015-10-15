@@ -24,7 +24,11 @@ extern "C" {
 
 typedef enum {
   shaderc_glsl_vertex_shader,
-  shaderc_glsl_fragment_shader
+  shaderc_glsl_fragment_shader,
+  shaderc_glsl_compute_shader,
+  shaderc_glsl_geometry_shader,
+  shaderc_glsl_tess_control_shader,
+  shaderc_glsl_tess_evaluation_shader
 } shaderc_shader_kind;
 
 // Usage examples:

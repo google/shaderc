@@ -261,4 +261,77 @@ TEST(CompileString, MultipleThreadsCalling) {
   EXPECT_THAT(results, Each(true));
 }
 
+TEST(CompileKinds, Vertex) {
+  Compiler compiler;
+  ASSERT_NE(nullptr, compiler.get_compiler_handle());
+  const std::string kVertexShader = "void main(){ gl_Position = vec4(0);}";
+  EXPECT_TRUE(CompilationSuccess(compiler.get_compiler_handle(), kVertexShader,
+                                 shaderc_glsl_vertex_shader));
+}
+
+TEST(CompileKinds, Fragment) {
+  Compiler compiler;
+  ASSERT_NE(nullptr, compiler.get_compiler_handle());
+  const std::string kFragShader = "void main(){ gl_FragColor = vec4(0);}";
+  EXPECT_TRUE(CompilationSuccess(compiler.get_compiler_handle(), kFragShader,
+                                 shaderc_glsl_fragment_shader));
+}
+
+TEST(CompileKinds, Compute) {
+  Compiler compiler;
+  ASSERT_NE(nullptr, compiler.get_compiler_handle());
+  const std::string kCompShader =
+    R"(#version 310 es
+       void main() {}
+  )";
+  EXPECT_TRUE(CompilationSuccess(compiler.get_compiler_handle(), kCompShader,
+                                 shaderc_glsl_compute_shader));
+}
+
+TEST(CompileKinds, Geometry) {
+  Compiler compiler;
+  ASSERT_NE(nullptr, compiler.get_compiler_handle());
+  const std::string kGeoShader =
+    R"(#version 310 es
+       #extension GL_OES_geometry_shader : enable
+       layout(points) in;
+       layout(points, max_vertices=1) out;
+       void main() {
+         gl_Position = vec4(1.0);
+         EmitVertex();
+         EndPrimitive();
+       }
+  )";
+  EXPECT_TRUE(CompilationSuccess(compiler.get_compiler_handle(), kGeoShader,
+                                 shaderc_glsl_geometry_shader));
+}
+
+TEST(CompileKinds, TessControl) {
+  Compiler compiler;
+  ASSERT_NE(nullptr, compiler.get_compiler_handle());
+  const std::string kTCSShader =
+    R"(#version 310 es
+       #extension GL_OES_tessellation_shader : enable
+       layout(vertices=1) out;
+       void main() {}
+  )";
+  EXPECT_TRUE(CompilationSuccess(compiler.get_compiler_handle(), kTCSShader,
+                                 shaderc_glsl_tess_control_shader));
+}
+
+TEST(CompileKinds, TessEvaluation) {
+  Compiler compiler;
+  ASSERT_NE(nullptr, compiler.get_compiler_handle());
+  const std::string kTESShader =
+    R"(#version 310 es
+       #extension GL_OES_tessellation_shader : enable
+       layout(triangles, equal_spacing, ccw) in;
+       void main() {
+         gl_Position = vec4(gl_TessCoord, 1.0);
+       }
+  )";
+  EXPECT_TRUE(CompilationSuccess(compiler.get_compiler_handle(), kTESShader,
+                                 shaderc_glsl_tess_evaluation_shader));
+}
+
 }  // anonymous namespace
