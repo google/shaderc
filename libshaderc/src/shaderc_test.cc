@@ -52,6 +52,14 @@ TEST(Init, MultipleThreadsCalling) {
   shaderc_compiler_release(compiler3);
 }
 
+TEST(Init, SPVVersion) {
+  unsigned int version = 0;
+  unsigned int revision = 0;
+  shaderc_get_spv_version(&version, &revision);
+  EXPECT_EQ(spv::Version, version);
+  EXPECT_EQ(spv::Revision, revision);
+}
+
 // RAII class for shaderc_spv_module.
 class Compilation {
  public:

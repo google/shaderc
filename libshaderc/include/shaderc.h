@@ -143,6 +143,9 @@ const char* shaderc_module_get_bytes(const shaderc_spv_module_t module);
 // during the compilation.
 const char* shaderc_module_get_error_message(const shaderc_spv_module_t module);
 
+// Provides the version & revision of the SPIR-V which will be produced
+void shaderc_get_spv_version(unsigned int *version, unsigned int *revision);
+
 #ifdef __cplusplus
 }
 #endif  // __cplusplus

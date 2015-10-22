@@ -21,6 +21,8 @@
 #include <sstream>
 #include <vector>
 
+#include "SPIRV/spirv.hpp"
+
 #include "libshaderc_util/compiler.h"
 #include "libshaderc_util/resources.h"
 
@@ -204,4 +206,9 @@ void shaderc_module_release(shaderc_spv_module_t module) { delete module; }
 const char* shaderc_module_get_error_message(
     const shaderc_spv_module_t module) {
   return module->messages.c_str();
+}
+
+void shaderc_get_spv_version(unsigned int *version, unsigned int *revision) {
+    *version = spv::Version;
+    *revision = spv::Revision;
 }
