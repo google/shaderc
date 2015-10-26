@@ -65,7 +65,7 @@ typedef struct shaderc_compiler* shaderc_compiler_t;
 // no synchronization; concurrent invocation of these functions on the SAME
 // object requires synchronization IF AND ONLY IF some of them take a non-const
 // argument.
-shaderc_compiler_t shaderc_compiler_initialize();
+shaderc_compiler_t shaderc_compiler_initialize(void);
 
 // Releases the resources held by the shaderc_compiler_t.
 // After this call it is invalid to make any future calls to functions
@@ -81,7 +81,7 @@ typedef struct shaderc_compile_options* shaderc_compile_options_t;
 // A return of NULL indicates that there was an error initializing the options.
 // Any function operating on shaderc_compile_options_t must offer the
 // basic thread-safety guarantee.
-shaderc_compile_options_t shaderc_compile_options_initialize();
+shaderc_compile_options_t shaderc_compile_options_initialize(void);
 
 // Returns a copy of the given shaderc_compile_options_t.
 // If NULL is passed as the parameter the call is the same as
