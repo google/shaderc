@@ -24,17 +24,18 @@ endif(WIN32)
 if (ANDROID)
 # For android let's preemptively find the correct packages so that
 # child projects (glslang, googletest) do not fail to find them.
-find_host_program(ECHO_EXE echo REQUIRED)
-find_host_program(PYTHON_EXE python REQUIRED)
 find_host_package(PythonInterp)
 find_host_package(BISON)
-else()
-# Every extra program found here should have a corresponding
-# entry for the ANDROID case.
-find_program(ECHO_EXE echo REQUIRED)
-find_program(PYTHON_EXE python REQUIRED)
 endif()
 
+foreach(PROGRAM echo python)
+  string(TOUPPER ${PROGRAM} PROG_UC)
+  if (ANDROID)
+    find_host_program(${PROG_UC}_EXE ${PROGRAM} REQUIRED)
+  else()
+    find_program(${PROG_UC}_EXE ${PROGRAM} REQUIRED)
+  endif()
+endforeach(PROGRAM)
 
 option(ENABLE_CODE_COVERAGE "Enable collecting code coverage." OFF)
 if (ENABLE_CODE_COVERAGE)
