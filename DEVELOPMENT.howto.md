@@ -19,7 +19,7 @@ the changes into a single commit and cherry-pick them into the repository.
 
 Before accepting, there may be some review feedback prompting changes in the
 submission.  You should expect reviewers to strictly insist on the
-[commenting](http://google-styleguide.googlecode.com/svn/trunk/cppguide.html#Comments)
+[commenting](https://google.github.io/styleguide/cppguide.html#Comments)
 guidelines -- in particular, every file, class, method, data member, and global
 will require a comment.  Reviewers will also expect to see test coverage for
 every code change.  _How much_ coverage will be a judgment call on a
@@ -30,12 +30,12 @@ we will strive to engineer the code to make writing tests easy.
 ## Coding style
 
 For our C++ files, we use the
-[Google C++ style guide](http://google-styleguide.googlecode.com/svn/trunk/cppguide.html).
+[Google C++ style guide](https://google.github.io/styleguide/cppguide.html).
 (Conveniently, the formatting rules it specifies can be achieved using
 `clang-format -style=google`.)
 
 For our Python files, we use the
-[Google Python style guide](https://google-styleguide.googlecode.com/svn/trunk/pyguide.html).
+[Google Python style guide](https://google.github.io/styleguide/pyguide.html).
 
 ## Supported platforms
 
