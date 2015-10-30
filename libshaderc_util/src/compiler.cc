@@ -148,7 +148,9 @@ bool Compiler::Compile(
   bool success =
       shader.parse(&shaderc_util::kDefaultTBuiltInResource, default_version_,
                    default_profile_, force_version_profile_,
-                   kNotForwardCompatible, EShMsgDefault, includer);
+                   kNotForwardCompatible,
+                   static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules),
+                   includer);
 
   success &= PrintFilteredErrors(error_tag, error_stream, warnings_as_errors_,
                                  suppress_warnings_, shader.getInfoLog(),
