@@ -1,9 +1,11 @@
 LOCAL_PATH := $(call my-dir)/glslang
 GLSLANG_LOCAL_PATH := $(call my-dir)/glslang
 
+GLSLANG_OS_FLAGS := -DGLSLANG_OSINCLUDE_UNIX
+
 include $(CLEAR_VARS)
 LOCAL_MODULE:=SPIRV
-LOCAL_CXXFLAGS:=-std=c++11
+LOCAL_CXXFLAGS:=-std=c++11 $(GLSLANG_OS_FLAGS)
 LOCAL_EXPORT_C_INCLUDES:=$(GLSLANG_LOCAL_PATH)
 LOCAL_SRC_FILES:= \
 	SPIRV/GlslangToSpv.cpp \
@@ -18,16 +20,16 @@ include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE:=OSDependent
-LOCAL_CXXFLAGS:=-std=c++11
+LOCAL_CXXFLAGS:=-std=c++11 $(GLSLANG_OS_FLAGS)
 LOCAL_EXPORT_C_INCLUDES:=$(GLSLANG_LOCAL_PATH)
-LOCAL_SRC_FILES:=glslang/OSDependent/Linux/ossource.cpp
-LOCAL_C_INCLUDES:=$(GLSLANG_LOCAL_PATH) $(GLSLANG_LOCAL_PATH)/glslang/OSDependent/Linux/
-LOCAL_EXPORT_C_INCLUDES:=$(GLSLANG_LOCAL_PATH)/glslang/OSDependent/Linux/
+LOCAL_SRC_FILES:=glslang/OSDependent/Unix/ossource.cpp
+LOCAL_C_INCLUDES:=$(GLSLANG_LOCAL_PATH) $(GLSLANG_LOCAL_PATH)/glslang/OSDependent/Unix/
+LOCAL_EXPORT_C_INCLUDES:=$(GLSLANG_LOCAL_PATH)/glslang/OSDependent/Unix/
 include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE:=OGLCompiler
-LOCAL_CXXFLAGS:=-std=c++11
+LOCAL_CXXFLAGS:=-std=c++11 $(GLSLANG_OS_FLAGS)
 LOCAL_EXPORT_C_INCLUDES:=$(GLSLANG_LOCAL_PATH)
 LOCAL_SRC_FILES:=OGLCompilersDLL/InitializeDll.cpp
 LOCAL_C_INCLUDES:=$(GLSLANG_LOCAL_PATH)/OGLCompiler
@@ -36,7 +38,7 @@ include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE:=glslang
-LOCAL_CXXFLAGS:=-std=c++11
+LOCAL_CXXFLAGS:=-std=c++11 $(GLSLANG_OS_FLAGS)
 LOCAL_EXPORT_C_INCLUDES:=$(GLSLANG_LOCAL_PATH)
 #TODO(awoloszyn) This creates the glslang_tab.cpp/h files in the source tree.
 #                Figure out if there is a way in the android build system
