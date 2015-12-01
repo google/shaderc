@@ -1,8 +1,8 @@
 # Suppress all warnings from third-party projects.
 set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS -w)
 
-if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/gmock-1.7.0)
-  add_subdirectory(gmock-1.7.0)
+if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/googletest)
+  add_subdirectory(googletest)
 endif()
 if (NOT TARGET gmock)
   message(FATAL_ERROR "gmock was not found - required for tests")

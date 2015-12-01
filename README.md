@@ -54,9 +54,7 @@ Shaderc into.
 ```sh
 git clone https://github.com/google/shaderc $SOURCE_DIR
 cd $SOURCE_DIR/third_party
-git clone -b release-1.7.0 https://github.com/google/googlemock.git gmock-1.7.0
-git clone -b release-1.7.0 https://github.com/google/googletest.git \
-    gmock-1.7.0/gtest
+git clone https://github.com/google/googletest.git
 git clone https://github.com/google/glslang glslang
 cd $SOURCE_DIR/
 ```

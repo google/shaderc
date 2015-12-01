@@ -27,8 +27,7 @@ init:
 
 # scripts that run after cloning repository
 install:
-  - git clone -b release-1.7.0 https://github.com/google/googlemock.git third_party/gmock-1.7.0
-  - git clone -b release-1.7.0 https://github.com/google/googletest.git third_party/gmock-1.7.0/gtest
+  - git clone https://github.com/google/googletest.git third_party/googletest
   - git clone https://github.com/google/glslang third_party/glslang
 
 build:
