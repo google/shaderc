@@ -125,14 +125,23 @@ function(combine_static_lib new_target target)
 
   set(all_libs "")
   get_transitive_libs(${target} all_libs)
-  string(REPLACE ";" "\\\\naddlib " all_libs_string "${all_libs}")
 
-  set(ar_script
-    "create lib${new_target}.a\\\\naddlib ${all_libs_string}\\\\nsave\\\\nend")
+  if(APPLE)
+    string(REPLACE ";" " " all_libs_string "${all_libs}")
 
-  add_custom_command(OUTPUT lib${new_target}.a
-    DEPENDS ${all_libs}
-    COMMAND ${ECHO_EXE} -e ${ar_script} | ${CMAKE_AR} -M)
+    add_custom_command(OUTPUT lib${new_target}.a
+      DEPENDS ${all_libs}
+      COMMAND libtool -static -o lib${new_target}.a ${all_libs})
+  else()
+    string(REPLACE ";" "\\\\naddlib " all_libs_string "${all_libs}")
+
+    set(ar_script
+      "create lib${new_target}.a\\\\naddlib ${all_libs_string}\\\\nsave\\\\nend")
+
+    add_custom_command(OUTPUT lib${new_target}.a
+      DEPENDS ${all_libs}
+      COMMAND ${ECHO_EXE} -e ${ar_script} | ${CMAKE_AR} -M)
+  endif()
   add_custom_target(${new_target}_genfile ALL
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/lib${new_target}.a)
 
