@@ -123,18 +123,34 @@ function(combine_static_lib new_target target)
     message(FATAL_ERROR "MSVC does not yet support merging static libraries")
   endif()
 
-  set(all_libs "")
-  get_transitive_libs(${target} all_libs)
-  string(REPLACE ";" "\\\\naddlib " all_libs_string "${all_libs}")
+  # Should remove the if and use libtool on MacOS and Linux
+  if(APPLE)
 
-  set(ar_script
-    "create lib${new_target}.a\\\\naddlib ${all_libs_string}\\\\nsave\\\\nend")
+    set(all_libs "")
+    get_transitive_libs(${target} all_libs)
+    string(REPLACE ";" " " all_libs_string "${all_libs}")
 
-  add_custom_command(OUTPUT lib${new_target}.a
-    DEPENDS ${all_libs}
-    COMMAND ${ECHO_EXE} -e ${ar_script} | ${CMAKE_AR} -M)
-  add_custom_target(${new_target}_genfile ALL
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/lib${new_target}.a)
+    add_custom_command(OUTPUT lib${new_target}.a
+      DEPENDS ${all_libs}
+      COMMAND libtool -static -o lib${new_target}.a ${all_libs})
+    add_custom_target(${new_target}_genfile ALL
+      DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/lib${new_target}.a)
+
+  else()
+
+    set(all_libs "")
+    get_transitive_libs(${target} all_libs)
+    string(REPLACE ";" "\\\\naddlib " all_libs_string "${all_libs}")
+
+    set(ar_script
+      "create lib${new_target}.a\\\\naddlib ${all_libs_string}\\\\nsave\\\\nend")
+
+    add_custom_command(OUTPUT lib${new_target}.a
+      DEPENDS ${all_libs}
+      COMMAND ${ECHO_EXE} -e ${ar_script} | ${CMAKE_AR} -M)
+    add_custom_target(${new_target}_genfile ALL
+      DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/lib${new_target}.a)
+  endif()
 
   # CMake needs to be able to see this as another normal library,
   # so import the newly created library as an imported library,
@@ -143,4 +159,5 @@ function(combine_static_lib new_target target)
   set_target_properties(${new_target}
     PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/lib${new_target}.a)
   add_dependencies(${new_target} ${new_target}_genfile)
+  
 endfunction()
