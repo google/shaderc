@@ -40,15 +40,15 @@ function(add_asciidoc TARGET FILE)
   endif(ASCIIDOCTOR_EXE)
 endfunction()
 
-# Run nosetests in the current directory. Nosetests will look for python files
-# with "nosetest" in their name, as well as descending into directories with
-# "nosetest" in their name. The test name will be ${PREFIX}_nosetests.
+# Run nosetests on file ${PREFIX}_nosetest.py. Nosetests will look for classes
+# and functions whose names start with "nosetest". The test name will be
+# ${PREFIX}_nosetests.
 function(add_nosetests PREFIX)
   if(NOSETESTS_EXE)
     add_test(
       NAME ${PREFIX}_nosetests
-      COMMAND ${NOSETESTS_EXE}
-        -m "(?:^|[b_./-])[Nn]ose[Tt]est" -v ${CMAKE_CURRENT_SOURCE_DIR})
+      COMMAND ${NOSETESTS_EXE} -m "^[Nn]ose[Tt]est" -v
+        ${CMAKE_CURRENT_SOURCE_DIR}/${PREFIX}_nosetest.py)
   endif()
 endfunction()
 
