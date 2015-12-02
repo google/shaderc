@@ -127,7 +127,6 @@ function(combine_static_lib new_target target)
   get_transitive_libs(${target} all_libs)
   
   if(APPLE)
-
     string(REPLACE ";" " " all_libs_string "${all_libs}")
 
     add_custom_command(OUTPUT lib${new_target}.a
@@ -136,7 +135,6 @@ function(combine_static_lib new_target target)
     add_custom_target(${new_target}_genfile ALL
       DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/lib${new_target}.a)
   else()
-
     string(REPLACE ";" "\\\\naddlib " all_libs_string "${all_libs}")
 
     set(ar_script
