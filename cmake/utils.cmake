@@ -123,11 +123,11 @@ function(combine_static_lib new_target target)
     message(FATAL_ERROR "MSVC does not yet support merging static libraries")
   endif()
 
-  # Should remove the if and use libtool on MacOS and Linux
+  set(all_libs "")
+  get_transitive_libs(${target} all_libs)
+  
   if(APPLE)
 
-    set(all_libs "")
-    get_transitive_libs(${target} all_libs)
     string(REPLACE ";" " " all_libs_string "${all_libs}")
 
     add_custom_command(OUTPUT lib${new_target}.a
@@ -135,11 +135,8 @@ function(combine_static_lib new_target target)
       COMMAND libtool -static -o lib${new_target}.a ${all_libs})
     add_custom_target(${new_target}_genfile ALL
       DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/lib${new_target}.a)
-
   else()
 
-    set(all_libs "")
-    get_transitive_libs(${target} all_libs)
     string(REPLACE ";" "\\\\naddlib " all_libs_string "${all_libs}")
 
     set(ar_script
