@@ -321,6 +321,10 @@ def main():
         manager.leave_output = True
     for root, _, filenames in os.walk(root_dir):
         for filename in fnmatch.filter(filenames, '*.py'):
+            if filename.endswith('nosetest.py'):
+                # Skip nose tests, which are for testing functions of
+                # the test framework.
+                continue
             sys.path = default_path
             sys.path.append(root)
             mod = __import__(os.path.splitext(filename)[0])

@@ -1,3 +1,4 @@
+add_nosetests(expect)
 add_nosetests(glslc_test_framework)
 
 add_test(NAME glslc_tests
