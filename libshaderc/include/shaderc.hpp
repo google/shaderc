@@ -104,6 +104,13 @@ class CompileOptions {
     AddMacroDefinition(name.c_str(), value.c_str());
   }
 
+  // Set the target shader environment, affecting which warnings or errors will be issued.
+  // The version will be for distinguishing between different versions of the target environment.
+  // "0" is the only supported version at this point
+  void SetTargetEnvironment(shaderc_target_env target, uint32_t version) {
+    shaderc_compile_options_set_target_env(options_, target, version);
+  }
+
  private:
   CompileOptions& operator=(const CompileOptions& other) = delete;
   shaderc_compile_options_t options_;

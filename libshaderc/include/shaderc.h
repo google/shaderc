@@ -21,6 +21,7 @@ extern "C" {
 
 #include <stddef.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 typedef enum {
   shaderc_glsl_vertex_shader,
@@ -30,6 +31,13 @@ typedef enum {
   shaderc_glsl_tess_control_shader,
   shaderc_glsl_tess_evaluation_shader
 } shaderc_shader_kind;
+
+typedef enum {
+  shaderc_target_env_vulkan,      // create SPIR-V under Vulkan semantics
+  shaderc_target_env_glsl,        // create SPIR-V under OpenGL semantics
+  shaderc_target_env_glsl_compat, // create SPIR-V under OpenGL semantics, including compatibility profile functions
+  shaderc_target_env_default = shaderc_target_env_vulkan
+} shaderc_target_env;
 
 // Usage examples:
 //
@@ -104,6 +112,12 @@ void shaderc_compile_options_release(shaderc_compile_options_t options);
 // deleted after this function has returned.
 void shaderc_compile_options_add_macro_definition(
     shaderc_compile_options_t options, const char* name, const char* value);
+
+// Set the target shader environment, affecting which warnings or errors will be issued.
+// The version will be for distinguishing between different versions of the target environment.
+// "0" is the only supported version at this point
+void shaderc_compile_options_set_target_env(
+    shaderc_compile_options_t options, shaderc_target_env target, uint32_t version);
 
 // An opaque handle to the results of a call to shaderc_compile_into_spv().
 typedef struct shaderc_spv_module* shaderc_spv_module_t;
