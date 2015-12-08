@@ -249,4 +249,24 @@ TEST(CppInterface, MacroCompileOptions) {
                   .GetSuccess());
 }
 
+TEST(CppInterface, TargetEnvCompileOptions) {
+  shaderc::Compiler compiler;
+  shaderc::CompileOptions options;
+
+  // Test shader compilation which requires opengl compatibility environment
+  options.SetTargetEnvironment(shaderc_target_env_opengl_compat, 0);
+  const std::string kGlslShader =
+    R"(#version 100
+       uniform highp sampler2D tex;
+       void main() {
+         gl_FragColor = texture2D(tex, vec2(0.0,0.0));
+       }
+  )";
+
+  EXPECT_TRUE(compiler.CompileGlslToSpv(kGlslShader,
+                                        shaderc_glsl_fragment_shader,
+                                        options)
+                  .GetSuccess());
+}
+
 }  // anonymous namespace

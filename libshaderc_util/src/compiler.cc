@@ -149,7 +149,7 @@ bool Compiler::Compile(
       shader.parse(&shaderc_util::kDefaultTBuiltInResource, default_version_,
                    default_profile_, force_version_profile_,
                    kNotForwardCompatible,
-                   static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules),
+                   message_rules_,
                    includer);
 
   success &= PrintFilteredErrors(error_tag, error_stream, warnings_as_errors_,
@@ -184,6 +184,10 @@ bool Compiler::Compile(
 void Compiler::AddMacroDefinition(const string_piece& macro,
                                   const string_piece& definition) {
   predefined_macros_[macro] = definition;
+}
+
+void Compiler::SetMessageRules(EShMessages rules) {
+  message_rules_ = rules;
 }
 
 void Compiler::SetForcedVersionProfile(int version, EProfile profile) {

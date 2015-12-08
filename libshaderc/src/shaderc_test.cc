@@ -232,6 +232,36 @@ TEST(CompileStringWithOptions, IfDefCompileOption) {
                                  shaderc_glsl_vertex_shader, options.get()));
 }
 
+TEST(CompileStringWithOptions, TargetEnv) {
+  Compiler compiler;
+  compile_options_ptr options(shaderc_compile_options_initialize());
+  ASSERT_NE(nullptr, compiler.get_compiler_handle());
+
+  // Confirm that this shader compiles with shaderc_target_env_opengl_compat;
+  // if targeting Vulkan, glslang will fail to compile it
+  const std::string kGlslShader =
+    R"(#version 100
+       uniform highp sampler2D tex;
+       void main() {
+         gl_FragColor = texture2D(tex, vec2(0.0,0.0));
+       }
+  )";
+
+  EXPECT_FALSE(CompilesToValidSpv(compiler.get_compiler_handle(),
+                                  kGlslShader,
+                                  shaderc_glsl_fragment_shader, options.get()));
+
+  shaderc_compile_options_set_target_env(options.get(), shaderc_target_env_opengl_compat, 0);
+  EXPECT_TRUE(CompilesToValidSpv(compiler.get_compiler_handle(),
+                                 kGlslShader,
+                                 shaderc_glsl_fragment_shader, options.get()));
+
+  shaderc_compile_options_set_target_env(options.get(), shaderc_target_env_vulkan, 0);
+  EXPECT_FALSE(CompilesToValidSpv(compiler.get_compiler_handle(),
+                                  kGlslShader,
+                                  shaderc_glsl_fragment_shader, options.get()));
+}
+
 TEST(CompileString, ShaderKindRespected) {
   Compiler compiler;
   ASSERT_NE(nullptr, compiler.get_compiler_handle());

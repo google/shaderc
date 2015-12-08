@@ -56,6 +56,24 @@ EShLanguage GetStage(shaderc_shader_kind kind) {
   return EShLangVertex;
 }
 
+// Converts shaderc_target_env to EShMessages
+EShMessages GetMessageRules(shaderc_target_env target) {
+  EShMessages msgs = EShMsgDefault;
+
+  switch(target) {
+    case shaderc_target_env_opengl_compat:
+      break;
+    case shaderc_target_env_opengl:
+      msgs = EShMsgSpvRules;
+      break;
+    case shaderc_target_env_vulkan:
+      msgs = static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules);
+      break;
+  }
+
+  return msgs;
+}
+
 struct {
   // The number of currently initialized compilers.
   int compiler_initialization_count;
@@ -103,6 +121,13 @@ void shaderc_compile_options_release(shaderc_compile_options_t options) {
 void shaderc_compile_options_add_macro_definition(
     shaderc_compile_options_t options, const char* name, const char* value) {
   options->compiler.AddMacroDefinition(name, value);
+}
+
+void shaderc_compile_options_set_target_env(
+    shaderc_compile_options_t options, shaderc_target_env target, uint32_t version) {
+  // "version" reserved for future use, intended to distinguish between different
+  // versions of a target environment
+  options->compiler.SetMessageRules(GetMessageRules(target));
 }
 
 shaderc_compiler_t shaderc_compiler_initialize() {

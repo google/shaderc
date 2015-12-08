@@ -55,7 +55,8 @@ class Compiler {
         disassemble_(false),
         warnings_as_errors_(false),
         suppress_warnings_(false),
-        generate_debug_info_(false) {}
+        generate_debug_info_(false),
+        message_rules_(static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules)) {}
 
   // Instead of outputting object files, output the disassembled textual output.
   virtual void SetDisassemblyMode();
@@ -77,6 +78,9 @@ class Compiler {
   // calls.
   void AddMacroDefinition(const string_piece& macro,
                           const string_piece& definition);
+
+  // Sets message rules to be used when generating compiler warnings/errors
+  void SetMessageRules(EShMessages rules);
 
   // Forces (without any verification) the default version and profile for
   // subsequent CompileShader() calls.
@@ -201,6 +205,11 @@ class Compiler {
   // When true, compilation will generate debug info with the binary SPIR-V
   // output.
   bool generate_debug_info_;
+
+  // Sets the glslang EshMessages bitmask for determining which dialect of GLSL
+  // and which SPIR-V codegen semantics are used. This impacts the warning & error
+  // messages as well as the set of available builtins
+  EShMessages message_rules_;
 };
 
 }  // namespace shaderc_util
