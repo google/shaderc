@@ -61,9 +61,9 @@ EShMessages GetMessageRules(shaderc_target_env target) {
   EShMessages msgs = EShMsgDefault;
 
   switch(target) {
-    case shaderc_target_env_glsl_compat:
+    case shaderc_target_env_opengl_compat:
       break;
-    case shaderc_target_env_glsl:
+    case shaderc_target_env_opengl:
       msgs = EShMsgSpvRules;
       break;
     case shaderc_target_env_vulkan:

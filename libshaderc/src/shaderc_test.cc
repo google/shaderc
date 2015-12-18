@@ -237,7 +237,7 @@ TEST(CompileStringWithOptions, TargetEnv) {
   compile_options_ptr options(shaderc_compile_options_initialize());
   ASSERT_NE(nullptr, compiler.get_compiler_handle());
 
-  // Confirm that this shader compiles with shaderc_target_env_glsl_compat;
+  // Confirm that this shader compiles with shaderc_target_env_opengl_compat;
   // if targeting Vulkan, glslang will fail to compile it
   const std::string kGlslShader =
     R"(#version 100
@@ -251,7 +251,7 @@ TEST(CompileStringWithOptions, TargetEnv) {
                                   kGlslShader,
                                   shaderc_glsl_fragment_shader, options.get()));
 
-  shaderc_compile_options_set_target_env(options.get(), shaderc_target_env_glsl_compat, 0);
+  shaderc_compile_options_set_target_env(options.get(), shaderc_target_env_opengl_compat, 0);
   EXPECT_TRUE(CompilesToValidSpv(compiler.get_compiler_handle(),
                                  kGlslShader,
                                  shaderc_glsl_fragment_shader, options.get()));

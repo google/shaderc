@@ -206,7 +206,9 @@ class Compiler {
   // output.
   bool generate_debug_info_;
 
-  // Set of rules used to generate compiler warnings/errors
+  // Sets the glslang EshMessages bitmask for determining which dialect of GLSL
+  // and which SPIR-V codegen semantics are used. This impacts the warning & error
+  // messages as well as the set of available builtins
   EShMessages message_rules_;
 };
 

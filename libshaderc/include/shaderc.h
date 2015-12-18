@@ -33,9 +33,9 @@ typedef enum {
 } shaderc_shader_kind;
 
 typedef enum {
-  shaderc_target_env_vulkan,      // create SPIR-V under Vulkan semantics
-  shaderc_target_env_glsl,        // create SPIR-V under OpenGL semantics
-  shaderc_target_env_glsl_compat, // create SPIR-V under OpenGL semantics, including compatibility profile functions
+  shaderc_target_env_vulkan,        // create SPIR-V under Vulkan semantics
+  shaderc_target_env_opengl,        // create SPIR-V under OpenGL semantics
+  shaderc_target_env_opengl_compat, // create SPIR-V under OpenGL semantics, including compatibility profile functions
   shaderc_target_env_default = shaderc_target_env_vulkan
 } shaderc_target_env;
 
