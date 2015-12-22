@@ -232,11 +232,10 @@ TEST(CompileStringWithOptions, DisassemblyOption) {
   EXPECT_THAT(shaderc_module_get_bytes(comp.result()),
               HasSubstr("MemoryModel"));
 
-  const std::string kMinimalShaderCloneOption = "void main(){}\n";
   compile_options_ptr cloned_options(
       shaderc_compile_options_clone(options.get()));
   Compilation comp_clone(compiler.get_compiler_handle(),
-                         kMinimalShaderCloneOption, shaderc_glsl_vertex_shader,
+                         kMinimalShader, shaderc_glsl_vertex_shader,
                          cloned_options.get());
   EXPECT_TRUE(shaderc_module_get_success(comp_clone.result()));
   // The mode should be carried into any clone of the original option object.
