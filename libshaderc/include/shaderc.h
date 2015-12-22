@@ -165,7 +165,7 @@ size_t shaderc_module_get_length(const shaderc_spv_module_t module);
 // Returns a pointer to the start of the SPIR-V bytes, either SPIR-V binary or
 // char string. When the source string is compiled into SPIR-V binary, this is
 // guaranteed to be castable to a uint32_t*. If the source string is compiled in
-// disassembly mode or preprocessing only mode, the pointer will points to the
+// disassembly mode or preprocessing only mode, the pointer will point to the
 // result char string.
 const char* shaderc_module_get_bytes(const shaderc_spv_module_t module);
 
