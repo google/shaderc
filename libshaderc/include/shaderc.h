@@ -113,6 +113,13 @@ void shaderc_compile_options_release(shaderc_compile_options_t options);
 void shaderc_compile_options_add_macro_definition(
     shaderc_compile_options_t options, const char* name, const char* value);
 
+// Set the compiler to do only preprocessing. The byte array result in the
+// module returned by the compilation is the text of the preprocessed shader.
+// This option override all other compilation modes, such as disassembly mode
+// and the default mode of compilation to SPIR-V binary.
+void shaderc_compile_options_set_preprocessing_only_mode(
+    shaderc_compile_options_t options);
+
 // Set the target shader environment, affecting which warnings or errors will be issued.
 // The version will be for distinguishing between different versions of the target environment.
 // "0" is the only supported version at this point
@@ -122,14 +129,18 @@ void shaderc_compile_options_set_target_env(
 // An opaque handle to the results of a call to shaderc_compile_into_spv().
 typedef struct shaderc_spv_module* shaderc_spv_module_t;
 
-// Takes a GLSL source string and the associated shader type, compiles it into
-// SPIR-V, and returns a shaderc_spv_module that contains the results of the
-// compilation.  The entry_point_name null-terminated string
-// defines the name of the entry point to associate with this GLSL source.
-// If the additional_options parameter is not NULL, then the compilation is
-// modified by any options present.
-// May be safely called from multiple threads without explicit synchronization.
-// If there was failure in allocating the compiler object NULL will be returned.
+// Takes a GLSL source string and the associated shader type, compiles
+// it according to the given additional_options. By default the source
+// string will be compiled into SPIR-V binary and a shaderc_spv_module will
+// be returned to hold the results of the compilation. When disassembly
+// mode or preprocessing only mode is enabled in the additional_options,
+// the source string will be compiled into char strings and held by the
+// returned shaderc_spv_module.  The entry_point_name null-terminated
+// string defines the name of the entry point to associate with this
+// GLSL source. If the additional_options parameter is not NULL, then the
+// compilation is modified by any options present. May be safely called
+// from multiple threads without explicit synchronization. If there was
+// failure in allocating the compiler object NULL will be returned.
 shaderc_spv_module_t shaderc_compile_into_spv(
     const shaderc_compiler_t compiler, const char* source_text,
     size_t source_text_size, shaderc_shader_kind shader_kind,
@@ -146,11 +157,16 @@ void shaderc_module_release(shaderc_spv_module_t module);
 // Returns true if the result in module was a successful compilation.
 bool shaderc_module_get_success(const shaderc_spv_module_t module);
 
-// Returns the number of bytes in a SPIR-V module.
+// Returns the number of bytes in a SPIR-V module result string. When the module
+// is compiled with disassembly mode or preprocessing only mode, the result
+// string is a char string. Otherwise, the result string is binary string.
 size_t shaderc_module_get_length(const shaderc_spv_module_t module);
 
-// Returns a pointer to the start of the SPIR-V bytes.
-// This is guaranteed to be castable to a uint32_t*.
+// Returns a pointer to the start of the SPIR-V bytes, either SPIR-V binary or
+// char string. When the source string is compiled into SPIR-V binary, this is
+// guaranteed to be castable to a uint32_t*. If the source string is compiled in
+// disassembly mode or preprocessing only mode, the pointer points to the result
+// char string, and it will not castable to a uint32_t*.
 const char* shaderc_module_get_bytes(const shaderc_spv_module_t module);
 
 // Returns a null-terminated string that contains any error messages generated
