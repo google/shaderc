@@ -113,6 +113,10 @@ void shaderc_compile_options_release(shaderc_compile_options_t options);
 void shaderc_compile_options_add_macro_definition(
     shaderc_compile_options_t options, const char* name, const char* value);
 
+// Set the compiler to emit disassembly code.
+void shaderc_compile_options_set_disassembly_mode(
+    shaderc_compile_options_t options);
+
 // Set the compiler to only do preprocessing. When both preprocessing only mode
 // and disassembly mode are turned on, the compiler will respect preprocessing
 // only

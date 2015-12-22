@@ -216,7 +216,7 @@ TEST(CompileStringWithOptions, MacroCompileOptions) {
       shaderc_glsl_vertex_shader, cloned_options.get()));
 }
 
-TEST(CompileStringWithOptions, PreprocessingOnlyOption) {
+TEST(CompileStringWithOptions, PreprocessingModeOnlyOption) {
   Compiler compiler;
   compile_options_ptr options(shaderc_compile_options_initialize());
   shaderc_compile_options_set_preprocessing_only_mode(options.get());
@@ -241,6 +241,21 @@ TEST(CompileStringWithOptions, PreprocessingOnlyOption) {
   EXPECT_TRUE(shaderc_module_get_success(comp_clone.result()));
   EXPECT_THAT(shaderc_module_get_bytes(comp_clone.result()),
               HasSubstr("void main(){ }"));
+}
+
+TEST(CompileStringWithOptions, DisassemblyModeOption){
+  Compiler compiler;
+  compile_options_ptr options(shaderc_compile_options_initialize());
+  shaderc_compile_options_set_disassembly_mode(options.get());
+  ASSERT_NE(nullptr, compiler.get_compiler_handle());
+  const std::string kMinimalShader = "void main(){}\n";
+  Compilation comp(compiler.get_compiler_handle(), kMinimalShader,
+                   shaderc_glsl_vertex_shader, options.get());
+  EXPECT_TRUE(shaderc_module_get_success(comp.result()));
+  EXPECT_THAT(shaderc_module_get_bytes(comp.result()),
+              HasSubstr("Capability Shader"));
+  EXPECT_THAT(shaderc_module_get_bytes(comp.result()),
+              HasSubstr("MemoryModel"));
 }
 
 TEST(CompileStringWithOptions, IfDefCompileOption) {
