@@ -113,6 +113,17 @@ void shaderc_compile_options_release(shaderc_compile_options_t options);
 void shaderc_compile_options_add_macro_definition(
     shaderc_compile_options_t options, const char* name, const char* value);
 
+// Set the compiler to emit disassembly code.
+void shaderc_compile_options_set_disassembly_mode(
+    shaderc_compile_options_t options);
+
+// Set the compiler to only do preprocessing. When both preprocessing only mode
+// and disassembly mode are turned on, the compiler will respect preprocessing
+// only
+// mode.
+void shaderc_compile_options_set_preprocessing_only_mode(
+    shaderc_compile_options_t options);
+
 // Set the target shader environment, affecting which warnings or errors will be issued.
 // The version will be for distinguishing between different versions of the target environment.
 // "0" is the only supported version at this point
