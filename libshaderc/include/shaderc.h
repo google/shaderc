@@ -115,7 +115,7 @@ void shaderc_compile_options_add_macro_definition(
 
 // Set the compiler to do only preprocessing. The byte array result in the
 // module returned by the compilation is the text of the preprocessed shader.
-// This option override all other compilation modes, such as disassembly mode
+// This option overrides all other compilation modes, such as disassembly mode
 // and the default mode of compilation to SPIR-V binary.
 void shaderc_compile_options_set_preprocessing_only_mode(
     shaderc_compile_options_t options);
@@ -165,8 +165,8 @@ size_t shaderc_module_get_length(const shaderc_spv_module_t module);
 // Returns a pointer to the start of the SPIR-V bytes, either SPIR-V binary or
 // char string. When the source string is compiled into SPIR-V binary, this is
 // guaranteed to be castable to a uint32_t*. If the source string is compiled in
-// disassembly mode or preprocessing only mode, the pointer points to the result
-// char string, and it will not castable to a uint32_t*.
+// disassembly mode or preprocessing only mode, the pointer will points to the
+// result char string.
 const char* shaderc_module_get_bytes(const shaderc_spv_module_t module);
 
 // Returns a null-terminated string that contains any error messages generated
