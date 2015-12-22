@@ -216,7 +216,7 @@ TEST(CompileStringWithOptions, MacroCompileOptions) {
       shaderc_glsl_vertex_shader, cloned_options.get()));
 }
 
-TEST(CompileStringWithOptions, DisassemblyOption){
+TEST(CompileStringWithOptions, DisassemblyOption) {
   Compiler compiler;
   compile_options_ptr options(shaderc_compile_options_initialize());
   shaderc_compile_options_set_disassembly_mode(options.get());
