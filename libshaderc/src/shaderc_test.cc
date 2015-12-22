@@ -216,6 +216,35 @@ TEST(CompileStringWithOptions, MacroCompileOptions) {
       shaderc_glsl_vertex_shader, cloned_options.get()));
 }
 
+TEST(CompileStringWithOptions, DisassemblyOption) {
+  Compiler compiler;
+  compile_options_ptr options(shaderc_compile_options_initialize());
+  shaderc_compile_options_set_disassembly_mode(options.get());
+  ASSERT_NE(nullptr, compiler.get_compiler_handle());
+  const std::string kMinimalShader = "void main(){}\n";
+  Compilation comp(compiler.get_compiler_handle(), kMinimalShader,
+                   shaderc_glsl_vertex_shader, options.get());
+  EXPECT_TRUE(shaderc_module_get_success(comp.result()));
+  // This should work with both the glslang native disassembly format and the
+  // SPIR-V tools assembly format.
+  EXPECT_THAT(shaderc_module_get_bytes(comp.result()),
+              HasSubstr("Capability Shader"));
+  EXPECT_THAT(shaderc_module_get_bytes(comp.result()),
+              HasSubstr("MemoryModel"));
+
+  compile_options_ptr cloned_options(
+      shaderc_compile_options_clone(options.get()));
+  Compilation comp_clone(compiler.get_compiler_handle(),
+                         kMinimalShader, shaderc_glsl_vertex_shader,
+                         cloned_options.get());
+  EXPECT_TRUE(shaderc_module_get_success(comp_clone.result()));
+  // The mode should be carried into any clone of the original option object.
+  EXPECT_THAT(shaderc_module_get_bytes(comp_clone.result()),
+              HasSubstr("Capability Shader"));
+  EXPECT_THAT(shaderc_module_get_bytes(comp_clone.result()),
+              HasSubstr("MemoryModel"));
+}
+
 TEST(CompileStringWithOptions, PreprocessingOnlyOption) {
   Compiler compiler;
   compile_options_ptr options(shaderc_compile_options_initialize());

@@ -113,6 +113,14 @@ void shaderc_compile_options_release(shaderc_compile_options_t options);
 void shaderc_compile_options_add_macro_definition(
     shaderc_compile_options_t options, const char* name, const char* value);
 
+// Set the compiler to emit a disassembly text instead of a binary. In
+// this mode, the byte array result in the shaderc_spv_module returned
+// from shaderc_compile_into_spv() will consist of SPIR-V assembly text.
+// Note the preprocessing only mode overrides this option, and this option
+// overrides the default mode generating a SPIR-V binary.
+void shaderc_compile_options_set_disassembly_mode(
+    shaderc_compile_options_t options);
+
 // Set the compiler to do only preprocessing. The byte array result in the
 // module returned by the compilation is the text of the preprocessed shader.
 // This option overrides all other compilation modes, such as disassembly mode

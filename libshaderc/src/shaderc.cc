@@ -123,6 +123,11 @@ void shaderc_compile_options_add_macro_definition(
   options->compiler.AddMacroDefinition(name, value);
 }
 
+void shaderc_compile_options_set_disassembly_mode(
+    shaderc_compile_options_t options) {
+  options->compiler.SetDisassemblyMode();
+}
+
 void shaderc_compile_options_set_preprocessing_only_mode(
     shaderc_compile_options_t options) {
   options->compiler.SetPreprocessingOnlyMode();
