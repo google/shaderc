@@ -295,7 +295,7 @@ TEST(CppInterface, PreprocessingOnlyOption) {
               HasSubstr("void main(){ }"));
 }
 
-TEST(CppInterface, PreprocessingOnlyModeOverridesDisassemblyMode) {
+TEST(CppInterface, PreprocessingOnlyModeFirstOverridesDisassemblyMode) {
   shaderc::Compiler compiler;
   // Sets preprocessing only mode first, then sets disassembly mode.
   // Preprocessing only mode should override disassembly mode.
@@ -309,7 +309,10 @@ TEST(CppInterface, PreprocessingOnlyModeOverridesDisassemblyMode) {
       kMinimalShader, shaderc_glsl_vertex_shader, options_preprocessing_mode_first);
   EXPECT_TRUE(result_preprocessing_mode_first.GetSuccess());
   EXPECT_THAT(result_preprocessing_mode_first.GetData(), HasSubstr("void main(){ }"));
+}
 
+TEST(CppInterface, PreprocessingOnlyModeSecondOverridesDisassemblyMode) {
+  shaderc::Compiler compiler;
   // Sets disassembly mode first, then preprocessing only mode.
   // Preprocessing only mode should still override disassembly mode.
   shaderc::CompileOptions options_disassembly_mode_first;
