@@ -302,10 +302,13 @@ TEST(CppInterface, PreprocessingOnlyModeFirstOverridesDisassemblyMode) {
   shaderc::CompileOptions options_preprocessing_mode_first;
   options_preprocessing_mode_first.SetPreprocessingOnlyMode();
   options_preprocessing_mode_first.SetDisassemblyMode();
-  shaderc::SpvModule result_preprocessing_mode_first = compiler.CompileGlslToSpv(
-      kMinimalShaderWithMacro, shaderc_glsl_vertex_shader, options_preprocessing_mode_first);
+  shaderc::SpvModule result_preprocessing_mode_first =
+      compiler.CompileGlslToSpv(kMinimalShaderWithMacro,
+                                shaderc_glsl_vertex_shader,
+                                options_preprocessing_mode_first);
   EXPECT_TRUE(result_preprocessing_mode_first.GetSuccess());
-  EXPECT_THAT(result_preprocessing_mode_first.GetData(), HasSubstr("void main(){ }"));
+  EXPECT_THAT(result_preprocessing_mode_first.GetData(),
+              HasSubstr("void main(){ }"));
 }
 
 TEST(CppInterface, PreprocessingOnlyModeSecondOverridesDisassemblyMode) {
@@ -316,10 +319,11 @@ TEST(CppInterface, PreprocessingOnlyModeSecondOverridesDisassemblyMode) {
   options_disassembly_mode_first.SetDisassemblyMode();
   options_disassembly_mode_first.SetPreprocessingOnlyMode();
   shaderc::SpvModule result_disassembly_mode_first = compiler.CompileGlslToSpv(
-      kMinimalShaderWithMacro, shaderc_glsl_vertex_shader, options_disassembly_mode_first);
+      kMinimalShaderWithMacro, shaderc_glsl_vertex_shader,
+      options_disassembly_mode_first);
   EXPECT_TRUE(result_disassembly_mode_first.GetSuccess());
-  EXPECT_THAT(result_disassembly_mode_first.GetData(), HasSubstr("void main(){ }"));
-
+  EXPECT_THAT(result_disassembly_mode_first.GetData(),
+              HasSubstr("void main(){ }"));
 }
 
 TEST(CppInterface, TargetEnvCompileOptions) {
