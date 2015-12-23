@@ -27,6 +27,10 @@ using testing::Each;
 using testing::HasSubstr;
 
 const char kMinimalShader[] = "void main(){}";
+const std::string kMinimalShaderWithMacro =
+    "#define E main\n"
+    "void E(){}\n";
+
 TEST(CppInterface, MultipleCalls) {
   shaderc::Compiler compiler1, compiler2, compiler3;
   EXPECT_TRUE(compiler1.IsValid());
@@ -253,7 +257,6 @@ TEST(CppInterface, DisassemblyOption) {
   shaderc::Compiler compiler;
   shaderc::CompileOptions options;
   options.SetDisassemblyMode();
-  const std::string kMinimalShader = "void main(){}\n";
   shaderc::SpvModule result = compiler.CompileGlslToSpv(
       kMinimalShader, shaderc_glsl_vertex_shader, options);
   EXPECT_TRUE(result.GetSuccess());
@@ -276,11 +279,8 @@ TEST(CppInterface, PreprocessingOnlyOption) {
   shaderc::Compiler compiler;
   shaderc::CompileOptions options;
   options.SetPreprocessingOnlyMode();
-  const std::string kMinimalShader =
-      "#define E main\n"
-      "void E(){}\n";
   shaderc::SpvModule result = compiler.CompileGlslToSpv(
-      kMinimalShader, shaderc_glsl_vertex_shader, options);
+      kMinimalShaderWithMacro, shaderc_glsl_vertex_shader, options);
   EXPECT_TRUE(result.GetSuccess());
   EXPECT_THAT(result.GetData(), HasSubstr("void main(){ }"));
 
@@ -302,11 +302,8 @@ TEST(CppInterface, PreprocessingOnlyModeFirstOverridesDisassemblyMode) {
   shaderc::CompileOptions options_preprocessing_mode_first;
   options_preprocessing_mode_first.SetPreprocessingOnlyMode();
   options_preprocessing_mode_first.SetDisassemblyMode();
-  const std::string kMinimalShader =
-      "#define E main\n"
-      "void E(){}\n";
   shaderc::SpvModule result_preprocessing_mode_first = compiler.CompileGlslToSpv(
-      kMinimalShader, shaderc_glsl_vertex_shader, options_preprocessing_mode_first);
+      kMinimalShaderWithMacro, shaderc_glsl_vertex_shader, options_preprocessing_mode_first);
   EXPECT_TRUE(result_preprocessing_mode_first.GetSuccess());
   EXPECT_THAT(result_preprocessing_mode_first.GetData(), HasSubstr("void main(){ }"));
 }
@@ -319,7 +316,7 @@ TEST(CppInterface, PreprocessingOnlyModeSecondOverridesDisassemblyMode) {
   options_disassembly_mode_first.SetDisassemblyMode();
   options_disassembly_mode_first.SetPreprocessingOnlyMode();
   shaderc::SpvModule result_disassembly_mode_first = compiler.CompileGlslToSpv(
-      kMinimalShader, shaderc_glsl_vertex_shader, options_disassembly_mode_first);
+      kMinimalShaderWithMacro, shaderc_glsl_vertex_shader, options_disassembly_mode_first);
   EXPECT_TRUE(result_disassembly_mode_first.GetSuccess());
   EXPECT_THAT(result_disassembly_mode_first.GetData(), HasSubstr("void main(){ }"));
 
