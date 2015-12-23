@@ -257,8 +257,8 @@ TEST(CppInterface, DisassemblyOption) {
   shaderc::SpvModule result = compiler.CompileGlslToSpv(
       kMinimalShader, shaderc_glsl_vertex_shader, options);
   EXPECT_TRUE(result.GetSuccess());
-  // This should work with both the glslang native disassembly formt and the
-  // SPIR-V tools assembly format.
+  // This should work with both the glslang native disassembly format and the
+  // SPIR-V Tools assembly format.
   EXPECT_THAT(result.GetData(), HasSubstr("Capability Shader"));
   EXPECT_THAT(result.GetData(), HasSubstr("MemoryModel"));
 
@@ -293,6 +293,33 @@ TEST(CppInterface, PreprocessingOnlyOption) {
   EXPECT_TRUE(result_from_cloned_options.GetSuccess());
   EXPECT_THAT(result_from_cloned_options.GetData(),
               HasSubstr("void main(){ }"));
+}
+
+TEST(CppInterface, PreprocessingOnlyModeOverridesDisassemblyMode) {
+  shaderc::Compiler compiler;
+  // Sets preprocessing only mode first, then sets disassembly mode.
+  // Preprocessing only mode should override disassembly mode.
+  shaderc::CompileOptions options_preprocessing_mode_first;
+  options_preprocessing_mode_first.SetPreprocessingOnlyMode();
+  options_preprocessing_mode_first.SetDisassemblyMode();
+  const std::string kMinimalShader =
+      "#define E main\n"
+      "void E(){}\n";
+  shaderc::SpvModule result_preprocessing_mode_first = compiler.CompileGlslToSpv(
+      kMinimalShader, shaderc_glsl_vertex_shader, options_preprocessing_mode_first);
+  EXPECT_TRUE(result_preprocessing_mode_first.GetSuccess());
+  EXPECT_THAT(result_preprocessing_mode_first.GetData(), HasSubstr("void main(){ }"));
+
+  // Sets disassembly mode first, then preprocessing only mode.
+  // Preprocessing only mode should still override disassembly mode.
+  shaderc::CompileOptions options_disassembly_mode_first;
+  options_disassembly_mode_first.SetDisassemblyMode();
+  options_disassembly_mode_first.SetPreprocessingOnlyMode();
+  shaderc::SpvModule result_disassembly_mode_first = compiler.CompileGlslToSpv(
+      kMinimalShader, shaderc_glsl_vertex_shader, options_disassembly_mode_first);
+  EXPECT_TRUE(result_disassembly_mode_first.GetSuccess());
+  EXPECT_THAT(result_disassembly_mode_first.GetData(), HasSubstr("void main(){ }"));
+
 }
 
 TEST(CppInterface, TargetEnvCompileOptions) {
