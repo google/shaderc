@@ -249,6 +249,52 @@ TEST(CppInterface, MacroCompileOptions) {
                   .GetSuccess());
 }
 
+TEST(CppInterface, DisassemblyOption) {
+  shaderc::Compiler compiler;
+  shaderc::CompileOptions options;
+  options.SetDisassemblyMode();
+  const std::string kMinimalShader = "void main(){}\n";
+  shaderc::SpvModule result = compiler.CompileGlslToSpv(
+      kMinimalShader, shaderc_glsl_vertex_shader, options);
+  EXPECT_TRUE(result.GetSuccess());
+  // This should work with both the glslang native disassembly formt and the
+  // SPIR-V tools assembly format.
+  EXPECT_THAT(result.GetData(), HasSubstr("Capability Shader"));
+  EXPECT_THAT(result.GetData(), HasSubstr("MemoryModel"));
+
+  shaderc::CompileOptions cloned_options(options);
+  shaderc::SpvModule result_from_cloned_options = compiler.CompileGlslToSpv(
+      kMinimalShader, shaderc_glsl_vertex_shader, cloned_options);
+  EXPECT_TRUE(result_from_cloned_options.GetSuccess());
+  // The mode should be carried into any clone of the original option object.
+  EXPECT_THAT(result_from_cloned_options.GetData(),
+              HasSubstr("Capability Shader"));
+  EXPECT_THAT(result_from_cloned_options.GetData(), HasSubstr("MemoryModel"));
+}
+
+TEST(CppInterface, PreprocessingOnlyOption) {
+  shaderc::Compiler compiler;
+  shaderc::CompileOptions options;
+  options.SetPreprocessingOnlyMode();
+  const std::string kMinimalShader =
+      "#define E main\n"
+      "void E(){}\n";
+  shaderc::SpvModule result = compiler.CompileGlslToSpv(
+      kMinimalShader, shaderc_glsl_vertex_shader, options);
+  EXPECT_TRUE(result.GetSuccess());
+  EXPECT_THAT(result.GetData(), HasSubstr("void main(){ }"));
+
+  const std::string kMinimalShaderCloneOption =
+      "#define E_CLONE_OPTION main\n"
+      "void E_CLONE_OPTION(){}\n";
+  shaderc::CompileOptions cloned_options(options);
+  shaderc::SpvModule result_from_cloned_options = compiler.CompileGlslToSpv(
+      kMinimalShaderCloneOption, shaderc_glsl_vertex_shader, cloned_options);
+  EXPECT_TRUE(result_from_cloned_options.GetSuccess());
+  EXPECT_THAT(result_from_cloned_options.GetData(),
+              HasSubstr("void main(){ }"));
+}
+
 TEST(CppInterface, TargetEnvCompileOptions) {
   shaderc::Compiler compiler;
   shaderc::CompileOptions options;

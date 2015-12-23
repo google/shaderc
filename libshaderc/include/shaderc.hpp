@@ -104,6 +104,23 @@ class CompileOptions {
     AddMacroDefinition(name.c_str(), value.c_str());
   }
 
+  // Set the compiler to emit a disassembly text instead of a binary. In
+  // this mode, the byte array result in the shaderc_spv_module returned
+  // from shaderc_compile_into_spv() will consist of SPIR-V assembly text.
+  // Note the preprocessing only mode overrides this option, and this option
+  // overrides the default mode generating a SPIR-V binary.
+  void SetDisassemblyMode(){
+    shaderc_compile_options_set_disassembly_mode(options_);
+  }
+
+  // Set the compiler to do only preprocessing. The byte array result in the
+  // module returned by the compilation is the text of the preprocessed shader.
+  // This option overrides all other compilation modes, such as disassembly mode
+  // and the default mode of compilation to SPIR-V binary.
+  void SetPreprocessingOnlyMode() {
+    shaderc_compile_options_set_preprocessing_only_mode(options_);
+  }
+
   // Set the target shader environment, affecting which warnings or errors will be issued.
   // The version will be for distinguishing between different versions of the target environment.
   // "0" is the only supported version at this point
@@ -151,6 +168,9 @@ class Compiler {
   // parameter.
   // It is valid for the returned SpvModule object to outlive this compiler
   // object.
+  // Note when the options_ has disassembly mode or preprocessing only mode set
+  // on, the returned SpvModule will hold a text string, instead of a SPIR-V binary
+  // generated with default options.
   SpvModule CompileGlslToSpv(const char* source_text, size_t source_text_size,
                              shaderc_shader_kind shader_kind,
                              const CompileOptions& options) const {
