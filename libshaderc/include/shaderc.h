@@ -128,6 +128,10 @@ void shaderc_compile_options_set_disassembly_mode(
 void shaderc_compile_options_set_preprocessing_only_mode(
     shaderc_compile_options_t options);
 
+// Sets the compiler to suppress all warning messages before they are output.
+void shaderc_compile_options_set_suppress_warnings(
+    shaderc_compile_options_t options);
+
 // Sets the target shader environment, affecting which warnings or errors will
 // be issued.  The version will be for distinguishing between different versions
 // of the target environment.  "0" is the only supported version at this point
