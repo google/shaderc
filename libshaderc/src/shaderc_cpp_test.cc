@@ -326,6 +326,76 @@ TEST(CppInterface, PreprocessingOnlyModeSecondOverridesDisassemblyMode) {
               HasSubstr("void main(){ }"));
 }
 
+TEST(CppInterface, WarningsOnLine) {
+  shaderc::Compiler compiler;
+  shaderc::CompileOptions options;
+  // By default the compiler will emit a warning on line 2 complaining
+  // 'float' as a deprecated attribute in version 130.
+  const std::string kDeprecatedAttributeShader =
+      "#version 130\n"
+      "attribute float x;\n"
+      "void main() {}\n";
+  shaderc::SpvModule result_suppress_warnings_on_line =
+      compiler.CompileGlslToSpv(kDeprecatedAttributeShader,
+                                shaderc_glsl_vertex_shader, options);
+  EXPECT_TRUE(result_suppress_warnings_on_line.GetSuccess());
+  EXPECT_THAT(
+      result_suppress_warnings_on_line.GetErrorMessage().c_str(),
+      HasSubstr(":2: warning: attribute deprecated in version 130; may be "
+                "removed in future release\n"));
+}
+
+TEST(CppInterface, SuppressWarningsOnLine) {
+  shaderc::Compiler compiler;
+  shaderc::CompileOptions options_suppress_warnings;
+  // Sets the compiler to suppress warnings, so that the deprecated attribute
+  // warning won't be emitted.
+  options_suppress_warnings.SetSuppressWarnings();
+  const std::string kDeprecatedAttributeShader =
+      "#version 130\n"
+      "attribute float x;\n"
+      "void main() {}\n";
+  shaderc::SpvModule result_suppress_warnings_on_line =
+      compiler.CompileGlslToSpv(kDeprecatedAttributeShader,
+                                shaderc_glsl_vertex_shader,
+                                options_suppress_warnings);
+  EXPECT_TRUE(result_suppress_warnings_on_line.GetSuccess());
+  EXPECT_STREQ(result_suppress_warnings_on_line.GetErrorMessage().c_str(), "");
+}
+
+TEST(CppInterface, GlobalWarnings) {
+  shaderc::Compiler compiler;
+  shaderc::CompileOptions options;
+  // By default the compiler will emit a warning as version 550 is an unknown
+  // version.
+  const std::string kMinimalUnknownVersionShader =
+      "#version 550\n"
+      "void main() {}\n";
+  shaderc::SpvModule result_suppress_warnings_on_line =
+      compiler.CompileGlslToSpv(kMinimalUnknownVersionShader,
+                                shaderc_glsl_vertex_shader, options);
+  EXPECT_TRUE(result_suppress_warnings_on_line.GetSuccess());
+  EXPECT_THAT(result_suppress_warnings_on_line.GetErrorMessage().c_str(),
+              HasSubstr("warning: version 550 is unknown.\n"));
+}
+
+TEST(CppInterface, SuppressGlobalWarnings) {
+  shaderc::Compiler compiler;
+  shaderc::CompileOptions options_suppress_warnings;
+  // Sets the compiler to suppress warnings, so that the unknown version warning
+  // won't be emitted.
+  options_suppress_warnings.SetSuppressWarnings();
+  const std::string kMinimalUnknownVersionShader =
+      "#version 550\n"
+      "void main() {}\n";
+  shaderc::SpvModule result_suppress_warnings_on_line =
+      compiler.CompileGlslToSpv(kMinimalUnknownVersionShader,
+                                shaderc_glsl_vertex_shader,
+                                options_suppress_warnings);
+  EXPECT_TRUE(result_suppress_warnings_on_line.GetSuccess());
+  EXPECT_STREQ(result_suppress_warnings_on_line.GetErrorMessage().c_str(), "");
+}
+
 TEST(CppInterface, TargetEnvCompileOptions) {
   shaderc::Compiler compiler;
   shaderc::CompileOptions options;

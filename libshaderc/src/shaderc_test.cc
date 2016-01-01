@@ -272,6 +272,66 @@ TEST(CompileStringWithOptions, PreprocessingOnlyOption) {
               HasSubstr("void main(){ }"));
 }
 
+TEST(CompileStringWithOptions, WarningsOnLine) {
+  Compiler compiler;
+  compile_options_ptr options(shaderc_compile_options_initialize());
+  ASSERT_NE(nullptr, compiler.get_compiler_handle());
+  const std::string kDeprecatedAttributeShader =
+      "#version 130\n"
+      "attribute float x;\n"
+      "void main() {}\n";
+  Compilation comp(compiler.get_compiler_handle(), kDeprecatedAttributeShader,
+                   shaderc_glsl_vertex_shader, options.get());
+  EXPECT_TRUE(shaderc_module_get_success(comp.result()));
+  EXPECT_THAT(
+      shaderc_module_get_error_message(comp.result()),
+      HasSubstr(":2: warning: attribute deprecated in version 130; may be "
+                "removed in future release\n"));
+}
+
+TEST(CompileStringWithOptions, SuppressWarningsOnLine) {
+  Compiler compiler;
+  compile_options_ptr options(shaderc_compile_options_initialize());
+  shaderc_compile_options_set_suppress_warnings(options.get());
+  ASSERT_NE(nullptr, compiler.get_compiler_handle());
+  const std::string kDeprecatedAttributeShader =
+      "#version 130\n"
+      "attribute float x;\n"
+      "void main() {}\n";
+  Compilation comp(compiler.get_compiler_handle(), kDeprecatedAttributeShader,
+                   shaderc_glsl_vertex_shader, options.get());
+  EXPECT_TRUE(shaderc_module_get_success(comp.result()));
+  EXPECT_STREQ(shaderc_module_get_error_message(comp.result()), "");
+}
+
+TEST(CompileStringWithOptions, GlobalWarnings) {
+  Compiler compiler;
+  compile_options_ptr options(shaderc_compile_options_initialize());
+  ASSERT_NE(nullptr, compiler.get_compiler_handle());
+  const std::string kMinimalUnknownVersionShader =
+      "#version 550\n"
+      "void main() {}\n";
+  Compilation comp(compiler.get_compiler_handle(), kMinimalUnknownVersionShader,
+                   shaderc_glsl_vertex_shader, options.get());
+  EXPECT_TRUE(shaderc_module_get_success(comp.result()));
+  EXPECT_THAT(shaderc_module_get_error_message(comp.result()),
+              HasSubstr("version 550 is unknown.\n"));
+}
+
+TEST(CompileStringWithOptions, SuppressGlobalWarnings) {
+  Compiler compiler;
+  compile_options_ptr options(shaderc_compile_options_initialize());
+  shaderc_compile_options_set_suppress_warnings(options.get());
+  ASSERT_NE(nullptr, compiler.get_compiler_handle());
+  const std::string kMinimalUnknownVersionShader =
+      "#version 550\n"
+      "void main() {}\n";
+  Compilation comp(compiler.get_compiler_handle(), kMinimalUnknownVersionShader,
+                   shaderc_glsl_vertex_shader, options.get());
+  EXPECT_TRUE(shaderc_module_get_success(comp.result()));
+  EXPECT_STREQ(shaderc_module_get_error_message(comp.result()), "");
+}
+
 TEST(CompileStringWithOptions, IfDefCompileOption) {
   Compiler compiler;
   compile_options_ptr options(shaderc_compile_options_initialize());
