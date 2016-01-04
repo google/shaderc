@@ -489,7 +489,7 @@ TEST(CppInterface, SuppressWarningsModeFirstOverridesWarningsAsErrorsMode) {
   shaderc::Compiler compiler;
   shaderc::CompileOptions options_suppress_warnings_first;
   // Sets suppress-warnings mode first, then sets warnings-as-errors mode.
-  // suppress-warnings mode should overrides warnings-as-errors mode, no
+  // suppress-warnings mode should override warnings-as-errors mode, no
   // error message should be output for this case.
   options_suppress_warnings_first.SetSuppressWarnings();
   options_suppress_warnings_first.SetWarningsAsErrors();
@@ -512,7 +512,7 @@ TEST(CppInterface, SuppressWarningsModeSecondOverridesWarningsAsErrorsMode) {
   shaderc::Compiler compiler;
   shaderc::CompileOptions options_suppress_warnings_second;
   // Sets warnings-as errors mode first, then sets suppress-warnings mode.
-  // suppress-warnings mode should overrides warnings-as-errors mode, no
+  // suppress-warnings mode should override warnings-as-errors mode, no
   // error message should be output for this case.
   options_suppress_warnings_second.SetSuppressWarnings();
   options_suppress_warnings_second.SetWarningsAsErrors();
