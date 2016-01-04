@@ -423,7 +423,7 @@ TEST_F(CppInterface, GlobalWarningsAsErrorsClonedOptions) {
 
 TEST_F(CppInterface, SuppressWarningsModeFirstOverridesWarningsAsErrorsMode) {
   // Sets suppress-warnings mode first, then sets warnings-as-errors mode.
-  // suppress-warnings mode should overrides warnings-as-errors mode, no
+  // suppress-warnings mode should override warnings-as-errors mode, no
   // error message should be output for this case.
   options_.SetSuppressWarnings();
   options_.SetWarningsAsErrors();
@@ -438,7 +438,7 @@ TEST_F(CppInterface, SuppressWarningsModeFirstOverridesWarningsAsErrorsMode) {
 
 TEST_F(CppInterface, SuppressWarningsModeSecondOverridesWarningsAsErrorsMode) {
   // Sets warnings-as errors mode first, then sets suppress-warnings mode.
-  // suppress-warnings mode should overrides warnings-as-errors mode, no
+  // suppress-warnings mode should override warnings-as-errors mode, no
   // error message should be output for this case.
   options_.SetSuppressWarnings();
   options_.SetWarningsAsErrors();
