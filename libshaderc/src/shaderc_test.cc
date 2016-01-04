@@ -301,7 +301,7 @@ TEST(CompileStringWithOptions, SuppressWarningsOnLine) {
   Compilation comp(compiler.get_compiler_handle(), kDeprecatedAttributeShader,
                    shaderc_glsl_vertex_shader, options.get());
   EXPECT_TRUE(shaderc_module_get_success(comp.result()));
-  EXPECT_STREQ(shaderc_module_get_error_message(comp.result()), "");
+  EXPECT_STREQ("", shaderc_module_get_error_message(comp.result()));
 }
 
 TEST(CompileStringWithOptions, GlobalWarnings) {
@@ -329,7 +329,7 @@ TEST(CompileStringWithOptions, SuppressGlobalWarnings) {
   Compilation comp(compiler.get_compiler_handle(), kMinimalUnknownVersionShader,
                    shaderc_glsl_vertex_shader, options.get());
   EXPECT_TRUE(shaderc_module_get_success(comp.result()));
-  EXPECT_STREQ(shaderc_module_get_error_message(comp.result()), "");
+  EXPECT_STREQ("", shaderc_module_get_error_message(comp.result()));
 }
 
 TEST(CompileStringWithOptions, IfDefCompileOption) {
