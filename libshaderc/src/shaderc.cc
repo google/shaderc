@@ -145,6 +145,11 @@ void shaderc_compile_options_set_target_env(
   options->compiler.SetMessageRules(GetMessageRules(target));
 }
 
+void shaderc_compile_options_set_warnings_as_errors(
+    shaderc_compile_options_t options) {
+  options->compiler.SetWarningsAsErrors();
+}
+
 shaderc_compiler_t shaderc_compiler_initialize() {
   std::lock_guard<std::mutex> lock(glsl_state.mutex);
   ++glsl_state.compiler_initialization_count;

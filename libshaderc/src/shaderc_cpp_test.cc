@@ -381,6 +381,41 @@ TEST(CppInterface, SuppressWarningsOnLineClonedOptions) {
   EXPECT_EQ("", result_cloned_options.GetErrorMessage());
 }
 
+TEST(CppInterface, WarningsOnLineAsErrors) {
+  shaderc::Compiler compiler;
+  shaderc::CompileOptions options_warnings_as_errors;
+  // Sets the compiler to make warnings into errors. So that the deprecated
+  // attribute warning will be emitted as an error and compilation should fail.
+  options_warnings_as_errors.SetWarningsAsErrors();
+  const shaderc::SpvModule result_warnings_as_errors_on_line =
+      compiler.CompileGlslToSpv(kDeprecatedAttributeShader,
+                                shaderc_glsl_vertex_shader,
+                                options_warnings_as_errors);
+  EXPECT_FALSE(result_warnings_as_errors_on_line.GetSuccess());
+  // The error message should show an error instead of a warning.
+  EXPECT_THAT(
+      result_warnings_as_errors_on_line.GetErrorMessage(),
+      HasSubstr(":2: error: attribute deprecated in version 130; may be "
+                "removed in future release\n"));
+}
+
+TEST(CppInterface, WarningsOnLineAsErrorsClonedOptions) {
+  shaderc::Compiler compiler;
+  shaderc::CompileOptions options_warnings_as_errors;
+  // Sets the compiler to make warnings into errors. This mode should be carried
+  // into any clone of the original option object.
+  options_warnings_as_errors.SetWarningsAsErrors();
+  shaderc::CompileOptions cloned_options(options_warnings_as_errors);
+  const shaderc::SpvModule result_cloned_options = compiler.CompileGlslToSpv(
+      kDeprecatedAttributeShader, shaderc_glsl_vertex_shader, cloned_options);
+  EXPECT_FALSE(result_cloned_options.GetSuccess());
+  // The error message should show an error instead of a warning.
+  EXPECT_THAT(
+      result_cloned_options.GetErrorMessage(),
+      HasSubstr(":2: error: attribute deprecated in version 130; may be "
+                "removed in future release\n"));
+}
+
 TEST(CppInterface, GlobalWarnings) {
   shaderc::Compiler compiler;
   shaderc::CompileOptions options;
@@ -419,6 +454,81 @@ TEST(CppInterface, SuppressGlobalWarningsClonedOptions) {
       kMinimalUnknownVersionShader, shaderc_glsl_vertex_shader, cloned_options);
   EXPECT_TRUE(result_cloned_options.GetSuccess());
   EXPECT_EQ("", result_cloned_options.GetErrorMessage());
+}
+
+TEST(CppInterface, GlobalWarningsAsErrors) {
+  shaderc::Compiler compiler;
+  shaderc::CompileOptions options_warnings_as_errors;
+  // Sets the compiler to make warnings into errors. So that the unknown
+  // version warning will be emitted as an error and compilation should fail.
+  options_warnings_as_errors.SetWarningsAsErrors();
+  const shaderc::SpvModule result_warnings_as_errors_on_line =
+      compiler.CompileGlslToSpv(kMinimalUnknownVersionShader,
+                                shaderc_glsl_vertex_shader,
+                                options_warnings_as_errors);
+  EXPECT_FALSE(result_warnings_as_errors_on_line.GetSuccess());
+  EXPECT_THAT(result_warnings_as_errors_on_line.GetErrorMessage(),
+              HasSubstr("error: version 550 is unknown.\n"));
+}
+
+TEST(CppInterface, GlobalWarningsAsErrorsClonedOptions) {
+  shaderc::Compiler compiler;
+  shaderc::CompileOptions options_warnings_as_errors;
+  // Sets the compiler to make warnings into errors. This mode should be carried
+  // into any clone of the original option object.
+  options_warnings_as_errors.SetWarningsAsErrors();
+  shaderc::CompileOptions cloned_options(options_warnings_as_errors);
+  const shaderc::SpvModule result_cloned_options = compiler.CompileGlslToSpv(
+      kMinimalUnknownVersionShader, shaderc_glsl_vertex_shader, cloned_options);
+  EXPECT_FALSE(result_cloned_options.GetSuccess());
+  EXPECT_THAT(result_cloned_options.GetErrorMessage(),
+              HasSubstr("error: version 550 is unknown.\n"));
+}
+
+TEST(CppInterface, SuppressWarningsModeFirstOverridesWarningsAsErrorsMode) {
+  shaderc::Compiler compiler;
+  shaderc::CompileOptions options_suppress_warnings_first;
+  // Sets suppress-warnings mode first, then sets warnings-as-errors mode.
+  // suppress-warnings mode should overrides warnings-as-errors mode, no
+  // error message should be output for this case.
+  options_suppress_warnings_first.SetSuppressWarnings();
+  options_suppress_warnings_first.SetWarningsAsErrors();
+  // Warnings on line should be inhibited.
+  const shaderc::SpvModule result_warnings_on_line = compiler.CompileGlslToSpv(
+      kDeprecatedAttributeShader, shaderc_glsl_vertex_shader,
+      options_suppress_warnings_first);
+  EXPECT_TRUE(result_warnings_on_line.GetSuccess());
+  EXPECT_EQ("", result_warnings_on_line.GetErrorMessage());
+
+  // Global warnings should be inhibited.
+  const shaderc::SpvModule result_global_warnings = compiler.CompileGlslToSpv(
+      kMinimalUnknownVersionShader, shaderc_glsl_vertex_shader,
+      options_suppress_warnings_first);
+  EXPECT_TRUE(result_global_warnings.GetSuccess());
+  EXPECT_EQ("", result_global_warnings.GetErrorMessage());
+}
+
+TEST(CppInterface, SuppressWarningsModeSecondOverridesWarningsAsErrorsMode) {
+  shaderc::Compiler compiler;
+  shaderc::CompileOptions options_suppress_warnings_second;
+  // Sets warnings-as errors mode first, then sets suppress-warnings mode.
+  // suppress-warnings mode should overrides warnings-as-errors mode, no
+  // error message should be output for this case.
+  options_suppress_warnings_second.SetSuppressWarnings();
+  options_suppress_warnings_second.SetWarningsAsErrors();
+  // Warnings on line should be inhibited.
+  const shaderc::SpvModule result_warnings_on_line = compiler.CompileGlslToSpv(
+      kDeprecatedAttributeShader, shaderc_glsl_vertex_shader,
+      options_suppress_warnings_second);
+  EXPECT_TRUE(result_warnings_on_line.GetSuccess());
+  EXPECT_EQ("", result_warnings_on_line.GetErrorMessage());
+
+  // Global warnings should be inhibited.
+  const shaderc::SpvModule result_global_warnings = compiler.CompileGlslToSpv(
+      kMinimalUnknownVersionShader, shaderc_glsl_vertex_shader,
+      options_suppress_warnings_second);
+  EXPECT_TRUE(result_global_warnings.GetSuccess());
+  EXPECT_EQ("", result_global_warnings.GetErrorMessage());
 }
 
 TEST(CppInterface, TargetEnvCompileOptions) {
