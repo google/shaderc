@@ -72,7 +72,7 @@ class Compilation {
 
   ~Compilation() { shaderc_module_release(compiled_result_); }
 
-  shaderc_spv_module_t result() { return compiled_result_; }
+  shaderc_spv_module_t result() const { return compiled_result_; }
 
  private:
   shaderc_spv_module_t compiled_result_;
@@ -109,7 +109,7 @@ bool CompilationSuccess(const shaderc_compiler_t compiler,
 bool CompilesToValidSpv(const shaderc_compiler_t compiler,
                         const std::string& shader, shaderc_shader_kind kind,
                         const shaderc_compile_options_t options = nullptr) {
-  Compilation comp(compiler, shader, kind, options);
+  const Compilation comp(compiler, shader, kind, options);
   auto result = comp.result();
   if (!shaderc_module_get_success(result)) return false;
   size_t length = shaderc_module_get_length(result);
@@ -222,8 +222,8 @@ TEST(CompileStringWithOptions, DisassemblyOption) {
   shaderc_compile_options_set_disassembly_mode(options.get());
   ASSERT_NE(nullptr, compiler.get_compiler_handle());
   const std::string kMinimalShader = "void main(){}\n";
-  Compilation comp(compiler.get_compiler_handle(), kMinimalShader,
-                   shaderc_glsl_vertex_shader, options.get());
+  const Compilation comp(compiler.get_compiler_handle(), kMinimalShader,
+                         shaderc_glsl_vertex_shader, options.get());
   EXPECT_TRUE(shaderc_module_get_success(comp.result()));
   // This should work with both the glslang native disassembly format and the
   // SPIR-V tools assembly format.
@@ -234,9 +234,9 @@ TEST(CompileStringWithOptions, DisassemblyOption) {
 
   compile_options_ptr cloned_options(
       shaderc_compile_options_clone(options.get()));
-  Compilation comp_clone(compiler.get_compiler_handle(),
-                         kMinimalShader, shaderc_glsl_vertex_shader,
-                         cloned_options.get());
+  const Compilation comp_clone(compiler.get_compiler_handle(), kMinimalShader,
+                               shaderc_glsl_vertex_shader,
+                               cloned_options.get());
   EXPECT_TRUE(shaderc_module_get_success(comp_clone.result()));
   // The mode should be carried into any clone of the original option object.
   EXPECT_THAT(shaderc_module_get_bytes(comp_clone.result()),
@@ -253,8 +253,8 @@ TEST(CompileStringWithOptions, PreprocessingOnlyOption) {
   const std::string kMinimalShader =
       "#define E main\n"
       "void E(){}\n";
-  Compilation comp(compiler.get_compiler_handle(), kMinimalShader,
-                   shaderc_glsl_vertex_shader, options.get());
+  const Compilation comp(compiler.get_compiler_handle(), kMinimalShader,
+                         shaderc_glsl_vertex_shader, options.get());
   EXPECT_TRUE(shaderc_module_get_success(comp.result()));
   EXPECT_THAT(shaderc_module_get_bytes(comp.result()),
               HasSubstr("void main(){ }"));
@@ -264,9 +264,9 @@ TEST(CompileStringWithOptions, PreprocessingOnlyOption) {
       "void E_CLONE_OPTION(){}\n";
   compile_options_ptr cloned_options(
       shaderc_compile_options_clone(options.get()));
-  Compilation comp_clone(compiler.get_compiler_handle(),
-                         kMinimalShaderCloneOption, shaderc_glsl_vertex_shader,
-                         cloned_options.get());
+  const Compilation comp_clone(
+      compiler.get_compiler_handle(), kMinimalShaderCloneOption,
+      shaderc_glsl_vertex_shader, cloned_options.get());
   EXPECT_TRUE(shaderc_module_get_success(comp_clone.result()));
   EXPECT_THAT(shaderc_module_get_bytes(comp_clone.result()),
               HasSubstr("void main(){ }"));
@@ -296,25 +296,24 @@ TEST(CompileStringWithOptions, TargetEnv) {
   // Confirm that this shader compiles with shaderc_target_env_opengl_compat;
   // if targeting Vulkan, glslang will fail to compile it
   const std::string kGlslShader =
-    R"(#version 100
+      R"(#version 100
        uniform highp sampler2D tex;
        void main() {
          gl_FragColor = texture2D(tex, vec2(0.0,0.0));
        }
   )";
 
-  EXPECT_FALSE(CompilesToValidSpv(compiler.get_compiler_handle(),
-                                  kGlslShader,
+  EXPECT_FALSE(CompilesToValidSpv(compiler.get_compiler_handle(), kGlslShader,
                                   shaderc_glsl_fragment_shader, options.get()));
 
-  shaderc_compile_options_set_target_env(options.get(), shaderc_target_env_opengl_compat, 0);
-  EXPECT_TRUE(CompilesToValidSpv(compiler.get_compiler_handle(),
-                                 kGlslShader,
+  shaderc_compile_options_set_target_env(options.get(),
+                                         shaderc_target_env_opengl_compat, 0);
+  EXPECT_TRUE(CompilesToValidSpv(compiler.get_compiler_handle(), kGlslShader,
                                  shaderc_glsl_fragment_shader, options.get()));
 
-  shaderc_compile_options_set_target_env(options.get(), shaderc_target_env_vulkan, 0);
-  EXPECT_FALSE(CompilesToValidSpv(compiler.get_compiler_handle(),
-                                  kGlslShader,
+  shaderc_compile_options_set_target_env(options.get(),
+                                         shaderc_target_env_vulkan, 0);
+  EXPECT_FALSE(CompilesToValidSpv(compiler.get_compiler_handle(), kGlslShader,
                                   shaderc_glsl_fragment_shader, options.get()));
 }
 
@@ -331,8 +330,9 @@ TEST(CompileString, ShaderKindRespected) {
 TEST(CompileString, ErrorsReported) {
   Compiler compiler;
   ASSERT_NE(nullptr, compiler.get_compiler_handle());
-  Compilation comp(compiler.get_compiler_handle(), "int f(){return wrongname;}",
-                   shaderc_glsl_vertex_shader);
+  const Compilation comp(compiler.get_compiler_handle(),
+                         "int f(){return wrongname;}",
+                         shaderc_glsl_vertex_shader);
   ASSERT_FALSE(shaderc_module_get_success(comp.result()));
   EXPECT_THAT(shaderc_module_get_error_message(comp.result()),
               HasSubstr("wrongname"));
@@ -375,7 +375,7 @@ TEST(CompileKinds, Compute) {
   Compiler compiler;
   ASSERT_NE(nullptr, compiler.get_compiler_handle());
   const std::string kCompShader =
-    R"(#version 310 es
+      R"(#version 310 es
        void main() {}
   )";
   EXPECT_TRUE(CompilationSuccess(compiler.get_compiler_handle(), kCompShader,
@@ -386,7 +386,7 @@ TEST(CompileKinds, Geometry) {
   Compiler compiler;
   ASSERT_NE(nullptr, compiler.get_compiler_handle());
   const std::string kGeoShader =
-    R"(#version 310 es
+      R"(#version 310 es
        #extension GL_OES_geometry_shader : enable
        layout(points) in;
        layout(points, max_vertices=1) out;
@@ -404,7 +404,7 @@ TEST(CompileKinds, TessControl) {
   Compiler compiler;
   ASSERT_NE(nullptr, compiler.get_compiler_handle());
   const std::string kTCSShader =
-    R"(#version 310 es
+      R"(#version 310 es
        #extension GL_OES_tessellation_shader : enable
        layout(vertices=1) out;
        void main() {}
@@ -417,7 +417,7 @@ TEST(CompileKinds, TessEvaluation) {
   Compiler compiler;
   ASSERT_NE(nullptr, compiler.get_compiler_handle());
   const std::string kTESShader =
-    R"(#version 310 es
+      R"(#version 310 es
        #extension GL_OES_tessellation_shader : enable
        layout(triangles, equal_spacing, ccw) in;
        void main() {
