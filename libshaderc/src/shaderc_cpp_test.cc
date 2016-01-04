@@ -362,10 +362,8 @@ TEST(CppInterface, SuppressWarningsOnLine) {
 
   shaderc::CompileOptions cloned_options(options_suppress_warnings);
   // The mode should be carried into any clone of the original option object.
-  const shaderc::SpvModule result_cloned_options =
-      compiler.CompileGlslToSpv(kDeprecatedAttributeShader,
-                                shaderc_glsl_vertex_shader,
-                                cloned_options);
+  const shaderc::SpvModule result_cloned_options = compiler.CompileGlslToSpv(
+      kDeprecatedAttributeShader, shaderc_glsl_vertex_shader, cloned_options);
   EXPECT_TRUE(result_cloned_options.GetSuccess());
   EXPECT_EQ("", result_cloned_options.GetErrorMessage());
 }
@@ -397,10 +395,8 @@ TEST(CppInterface, SuppressGlobalWarnings) {
 
   shaderc::CompileOptions cloned_options(options_suppress_warnings);
   // The mode should be carried into any clone of the original option object.
-  const shaderc::SpvModule result_cloned_options =
-      compiler.CompileGlslToSpv(kMinimalUnknownVersionShader,
-                                shaderc_glsl_vertex_shader,
-                                cloned_options);
+  const shaderc::SpvModule result_cloned_options = compiler.CompileGlslToSpv(
+      kMinimalUnknownVersionShader, shaderc_glsl_vertex_shader, cloned_options);
   EXPECT_TRUE(result_cloned_options.GetSuccess());
   EXPECT_EQ("", result_cloned_options.GetErrorMessage());
 }
