@@ -349,6 +349,30 @@ TEST_F(CppInterface, SuppressWarningsOnLineClonedOptions) {
                                 shaderc_glsl_vertex_shader, cloned_options));
 }
 
+TEST_F(CppInterface, WarningsOnLineAsErrors) {
+  // Sets the compiler to make warnings into errors. So that the deprecated
+  // attribute warning will be emitted as an error and compilation should fail.
+  options_.SetWarningsAsErrors();
+  EXPECT_THAT(CompilationErrors(kDeprecatedAttributeShader,
+                                  shaderc_glsl_vertex_shader,
+                                  options_warnings_as_errors),
+              HasSubstr(":2: error: attribute deprecated in version 130; may be "
+              "removed in future release\n"));
+}
+
+TEST_F(CppInterface, WarningsOnLineAsErrorsClonedOptions) {
+  // Sets the compiler to make warnings into errors. So that the deprecated
+  // attribute warning will be emitted as an error and compilation should fail.
+  options_.SetWarningsAsErrors();
+  CompileOptions cloned_options(options_);
+  // The error message should show an error instead of a warning.
+  EXPECT_THAT(CompilationErrors(kDeprecatedAttributeShader,
+                                  shaderc_glsl_vertex_shader,
+                                  cloned_options),
+              HasSubstr(":2: error: attribute deprecated in version 130; may be "
+              "removed in future release\n"));
+}
+
 TEST_F(CppInterface, GlobalWarnings) {
   // By default the compiler will emit a warning as version 550 is an unknown
   // version.
@@ -374,6 +398,57 @@ TEST_F(CppInterface, SuppressGlobalWarningsClonedOptions) {
   EXPECT_EQ("",
             CompilationWarnings(kMinimalUnknownVersionShader,
                                 shaderc_glsl_vertex_shader, cloned_options));
+}
+
+TEST_F(CppInterface, GlobalWarningsAsErrors) {
+  // Sets the compiler to make warnings into errors. So that the unknown
+  // version warning will be emitted as an error and compilation should fail.
+  options_.SetWarningsAsErrors();
+  EXPECT_THAT(CompilationErrors(kMinimalUnknownVersionShader,
+                                shaderc_glsl_vertext_shader,
+                                options_),
+              HasSubstr("error: version 550 is unknown.\n"));
+}
+
+TEST_F(CppInterface, GlobalWarningsAsErrorsClonedOptions) {
+  // Sets the compiler to make warnings into errors. This mode should be carried
+  // into any clone of the original option object.
+  options_.SetWarningsAsErrors();
+  CompileOptions cloned_options(options_);
+  EXPECT_THAT(CompilationErrors(kMinimalUnknownVersionShader,
+                                shaderc_glsl_vertext_shader,
+                                cloned_options),
+              HasSubstr("error: version 550 is unknown.\n"));
+}
+
+TEST_F(CppInterface, SuppressWarningsModeFirstOverridesWarningsAsErrorsMode) {
+  // Sets suppress-warnings mode first, then sets warnings-as-errors mode.
+  // suppress-warnings mode should overrides warnings-as-errors mode, no
+  // error message should be output for this case.
+  options_.SetSuppressWarnings();
+  options_.SetWarningsAsErrors();
+  // Warnings on line should be inhibited.
+  EXPECT_EQ("", CompilationErrors(kDeprecatedAttributeShader, shaderc_glsl_vertex_shader,
+      options_));
+
+  // Global warnings should be inhibited.
+  EXPECT_EQ("", CompilationErrors(kMinimalUnknownVersionShader, shaderc_glsl_vertex_shader,
+      options_));
+}
+
+TEST_F(CppInterface, SuppressWarningsModeSecondOverridesWarningsAsErrorsMode) {
+  // Sets warnings-as errors mode first, then sets suppress-warnings mode.
+  // suppress-warnings mode should overrides warnings-as-errors mode, no
+  // error message should be output for this case.
+  options_.SetSuppressWarnings();
+  options_.SetWarningsAsErrors();
+  // Warnings on line should be inhibited.
+  EXPECT_EQ("", CompilationErrors(kDeprecatedAttributeShader, shaderc_glsl_vertex_shader,
+      options_));
+
+  // Global warnings should be inhibited.
+  EXPECT_EQ("", CompilationErrors(kMinimalUnknownVersionShader, shaderc_glsl_vertex_shader,
+      options_));
 }
 
 TEST_F(CppInterface, TargetEnvCompileOptions) {
