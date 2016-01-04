@@ -330,7 +330,7 @@ TEST(CppInterface, WarningsOnLine) {
   shaderc::Compiler compiler;
   shaderc::CompileOptions options;
   // By default the compiler will emit a warning on line 2 complaining
-  // 'float' as a deprecated attribute in version 130.
+  // that 'float' is a deprecated attribute in version 130.
   const std::string kDeprecatedAttributeShader =
       "#version 130\n"
       "attribute float x;\n"
@@ -340,7 +340,7 @@ TEST(CppInterface, WarningsOnLine) {
                                 shaderc_glsl_vertex_shader, options);
   EXPECT_TRUE(result_suppress_warnings_on_line.GetSuccess());
   EXPECT_THAT(
-      result_suppress_warnings_on_line.GetErrorMessage().c_str(),
+      result_suppress_warnings_on_line.GetErrorMessage(),
       HasSubstr(":2: warning: attribute deprecated in version 130; may be "
                 "removed in future release\n"));
 }
@@ -361,6 +361,15 @@ TEST(CppInterface, SuppressWarningsOnLine) {
                                 options_suppress_warnings);
   EXPECT_TRUE(result_suppress_warnings_on_line.GetSuccess());
   EXPECT_STREQ(result_suppress_warnings_on_line.GetErrorMessage().c_str(), "");
+
+  shaderc::CompileOptions cloned_options(options_suppress_warnings);
+  // The mode should be carried into any clone of the original option object.
+  shaderc::SpvModule result_cloned_options =
+      compiler.CompileGlslToSpv(kDeprecatedAttributeShader,
+                                shaderc_glsl_vertex_shader,
+                                cloned_options);
+  EXPECT_TRUE(result_cloned_options.GetSuccess());
+  EXPECT_STREQ(result_cloned_options.GetErrorMessage().c_str(), "");
 }
 
 TEST(CppInterface, GlobalWarnings) {
@@ -394,6 +403,15 @@ TEST(CppInterface, SuppressGlobalWarnings) {
                                 options_suppress_warnings);
   EXPECT_TRUE(result_suppress_warnings_on_line.GetSuccess());
   EXPECT_STREQ(result_suppress_warnings_on_line.GetErrorMessage().c_str(), "");
+
+  shaderc::CompileOptions cloned_options(options_suppress_warnings);
+  // The mode should be carried into any clone of the original option object.
+  shaderc::SpvModule result_cloned_options =
+      compiler.CompileGlslToSpv(kMinimalUnknownVersionShader,
+                                shaderc_glsl_vertex_shader,
+                                cloned_options);
+  EXPECT_TRUE(result_cloned_options.GetSuccess());
+  EXPECT_STREQ(result_cloned_options.GetErrorMessage().c_str(), "");
 }
 
 TEST(CppInterface, TargetEnvCompileOptions) {
