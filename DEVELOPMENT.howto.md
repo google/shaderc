@@ -47,7 +47,7 @@ likely grow over time.
 |:--------:|:------------:|
 | Android (ARMv7)  | Not Automated |
 | Linux (x86_64)   | [![Linux Build Status](https://travis-ci.org/google/shaderc.svg)](https://travis-ci.org/google/shaderc "Linux Build Status") |
-| Windows (x86_64) | [![Windows Build status](https://ci.appveyor.com/api/projects/status/xcxci2mekggib1an?svg=true)](https://ci.appveyor.com/project/antiagainst/shaderc "Windows Build Status") |
+| Windows (x86_64) | [![Windows Build status](https://ci.appveyor.com/api/projects/status/g6c372blna7vnk1l?svg=true)](https://ci.appveyor.com/project/dneto0/shaderc "Windows Build Status") |
 
 
 ## glslang
