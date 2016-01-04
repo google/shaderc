@@ -26,6 +26,19 @@ namespace {
 using testing::Each;
 using testing::HasSubstr;
 
+// By default the compiler will emit a warning on line 2 complaining
+// that 'float' is a deprecated attribute in version 130.
+const std::string kDeprecatedAttributeShader =
+    "#version 130\n"
+    "attribute float x;\n"
+    "void main() {}\n";
+
+// By default the compiler will emit a warning as version 550 is an unknown
+// version.
+const std::string kMinimalUnknownVersionShader =
+    "#version 550\n"
+    "void main() {}\n";
+
 TEST(Init, MultipleCalls) {
   shaderc_compiler_t compiler1, compiler2, compiler3;
   EXPECT_NE(nullptr, compiler1 = shaderc_compiler_initialize());
@@ -276,10 +289,6 @@ TEST(CompileStringWithOptions, WarningsOnLine) {
   Compiler compiler;
   compile_options_ptr options(shaderc_compile_options_initialize());
   ASSERT_NE(nullptr, compiler.get_compiler_handle());
-  const std::string kDeprecatedAttributeShader =
-      "#version 130\n"
-      "attribute float x;\n"
-      "void main() {}\n";
   const Compilation comp(compiler.get_compiler_handle(),
                          kDeprecatedAttributeShader, shaderc_glsl_vertex_shader,
                          options.get());
@@ -295,10 +304,6 @@ TEST(CompileStringWithOptions, SuppressWarningsOnLine) {
   compile_options_ptr options(shaderc_compile_options_initialize());
   shaderc_compile_options_set_suppress_warnings(options.get());
   ASSERT_NE(nullptr, compiler.get_compiler_handle());
-  const std::string kDeprecatedAttributeShader =
-      "#version 130\n"
-      "attribute float x;\n"
-      "void main() {}\n";
   const Compilation comp(compiler.get_compiler_handle(),
                          kDeprecatedAttributeShader, shaderc_glsl_vertex_shader,
                          options.get());
@@ -310,9 +315,6 @@ TEST(CompileStringWithOptions, GlobalWarnings) {
   Compiler compiler;
   compile_options_ptr options(shaderc_compile_options_initialize());
   ASSERT_NE(nullptr, compiler.get_compiler_handle());
-  const std::string kMinimalUnknownVersionShader =
-      "#version 550\n"
-      "void main() {}\n";
   const Compilation comp(compiler.get_compiler_handle(),
                          kMinimalUnknownVersionShader,
                          shaderc_glsl_vertex_shader, options.get());
@@ -326,9 +328,6 @@ TEST(CompileStringWithOptions, SuppressGlobalWarnings) {
   compile_options_ptr options(shaderc_compile_options_initialize());
   shaderc_compile_options_set_suppress_warnings(options.get());
   ASSERT_NE(nullptr, compiler.get_compiler_handle());
-  const std::string kMinimalUnknownVersionShader =
-      "#version 550\n"
-      "void main() {}\n";
   const Compilation comp(compiler.get_compiler_handle(),
                          kMinimalUnknownVersionShader,
                          shaderc_glsl_vertex_shader, options.get());
