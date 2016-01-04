@@ -133,6 +133,11 @@ void shaderc_compile_options_set_preprocessing_only_mode(
   options->compiler.SetPreprocessingOnlyMode();
 }
 
+void shaderc_compile_options_set_suppress_warnings(
+    shaderc_compile_options_t options) {
+  options->compiler.SetSuppressWarnings();
+}
+
 void shaderc_compile_options_set_target_env(
     shaderc_compile_options_t options, shaderc_target_env target, uint32_t version) {
   // "version" reserved for future use, intended to distinguish between different
