@@ -39,6 +39,14 @@ typedef enum {
   shaderc_target_env_default = shaderc_target_env_vulkan
 } shaderc_target_env;
 
+typedef enum {
+  shaderc_profile_none,  // Used if and only if GLSL version did not specify
+                         // profiles.
+  shaderc_profile_core,
+  shaderc_profile_compatibility,
+  shaderc_profile_es,
+} shaderc_profile;
+
 // Usage examples:
 //
 // Aggressively release compiler resources, but spend time in initialization
@@ -120,6 +128,14 @@ void shaderc_compile_options_add_macro_definition(
 // overrides the default mode generating a SPIR-V binary.
 void shaderc_compile_options_set_disassembly_mode(
     shaderc_compile_options_t options);
+
+// Forces the GLSL language version and profile to a given pair. The version
+// number is the same as would appear in the #version annotation in the source.
+// Version and profile specified here overrides the #version annotation in the
+// source. Use profile: 'shaderc_profile_none' for GLSL versions that do not
+// define profiles, e.g. versions below 150.
+void shaderc_compile_options_set_forced_version_profile(
+    shaderc_compile_options_t options, int version, shaderc_profile profile);
 
 // Sets the compiler mode to do only preprocessing. The byte array result in the
 // module returned by the compilation is the text of the preprocessed shader.

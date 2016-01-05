@@ -113,6 +113,16 @@ class CompileOptions {
     shaderc_compile_options_set_disassembly_mode(options_);
   }
 
+  // Forces the GLSL language version and profile to a given pair. The version
+  // number is the same as would appear in the #version annotation in the
+  // source. Version and profile specified here overrides the #version
+  // annotation in the source. Use profile: 'shaderc_profile_none' for GLSL
+  // versions that do not define profiles, e.g. versions below 150.
+  void SetForcedVersionProfile(int version, shaderc_profile profile) {
+    shaderc_compile_options_set_forced_version_profile(options_, version,
+                                                       profile);
+  }
+
   // Sets the compiler to do only preprocessing. The byte array result in the
   // module returned by the compilation is the text of the preprocessed shader.
   // This option overrides all other compilation modes, such as disassembly mode
