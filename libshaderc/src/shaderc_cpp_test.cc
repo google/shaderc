@@ -23,6 +23,7 @@
 
 namespace {
 
+using shaderc::CompileOptions;
 using testing::Each;
 using testing::HasSubstr;
 
@@ -56,7 +57,7 @@ class CppInterface : public testing::Test {
   // Compiles a shader with options and returns true on success, false on
   // failure.
   bool CompilationSuccess(const std::string& shader, shaderc_shader_kind kind,
-                          const shaderc::CompileOptions& options) const {
+                          const CompileOptions& options) const {
     return compiler_.CompileGlslToSpv(shader.c_str(), shader.length(), kind,
                                       options)
         .GetSuccess();
@@ -71,7 +72,7 @@ class CppInterface : public testing::Test {
   // Compiles a shader with options and returns true if the result is valid
   // SPIR-V.
   bool CompilesToValidSpv(const std::string& shader, shaderc_shader_kind kind,
-                          const shaderc::CompileOptions& options) const {
+                          const CompileOptions& options) const {
     return IsValidSpv(compiler_.CompileGlslToSpv(shader, kind, options));
   }
 
@@ -79,7 +80,10 @@ class CppInterface : public testing::Test {
   // message.
   std::string CompilationErrors(const std::string& shader,
                                 shaderc_shader_kind kind,
-                                const shaderc::CompileOptions& options) {
+                                // This could default to options_, but that can
+                                // be easily confused with a no-options-provided
+                                // case:
+                                const CompileOptions& options) {
     const auto module = compiler_.CompileGlslToSpv(shader, kind, options);
     EXPECT_TRUE(module.GetSuccess()) << kind << '\n' << shader;
     return module.GetErrorMessage();
@@ -87,6 +91,7 @@ class CppInterface : public testing::Test {
 
   // For compiling shaders in subclass tests:
   shaderc::Compiler compiler_;
+  CompileOptions options_;
 
  private:
   static bool IsValidSpv(const shaderc::SpvModule& result) {
@@ -163,30 +168,27 @@ TEST_F(CppInterface, MinimalShader) {
 }
 
 TEST_F(CppInterface, BasicOptions) {
-  shaderc::CompileOptions options;
   ASSERT_TRUE(compiler_.IsValid());
   EXPECT_TRUE(
-      CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader, options));
+      CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader, options_));
   EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_fragment_shader,
-                                 options));
+                                 options_));
 }
 
 TEST_F(CppInterface, CopiedOptions) {
-  shaderc::CompileOptions options;
   ASSERT_TRUE(compiler_.IsValid());
   EXPECT_TRUE(
-      CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader, options));
-  shaderc::CompileOptions copied_options(options);
+      CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader, options_));
+  CompileOptions copied_options(options_);
   EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_fragment_shader,
                                  copied_options));
 }
 
 TEST_F(CppInterface, MovedOptions) {
-  shaderc::CompileOptions options;
   ASSERT_TRUE(compiler_.IsValid());
   EXPECT_TRUE(
-      CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader, options));
-  shaderc::CompileOptions copied_options(std::move(options));
+      CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader, options_));
+  CompileOptions copied_options(std::move(options_));
   EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_fragment_shader,
                                  copied_options));
 }
@@ -238,14 +240,13 @@ TEST_F(CppInterface, AccessorsOnNullModule) {
 }
 
 TEST_F(CppInterface, MacroCompileOptions) {
-  shaderc::CompileOptions options;
-  options.AddMacroDefinition("E", "main");
+  options_.AddMacroDefinition("E", "main");
   const std::string kMinimalExpandedShader = "void E(){}";
   const std::string kMinimalDoubleExpandedShader = "F E(){}";
   EXPECT_TRUE(CompilationSuccess(kMinimalExpandedShader,
-                                 shaderc_glsl_vertex_shader, options));
+                                 shaderc_glsl_vertex_shader, options_));
 
-  shaderc::CompileOptions cloned_options(options);
+  CompileOptions cloned_options(options_);
   // The simplest should still compile with the cloned options.
   EXPECT_TRUE(CompilationSuccess(kMinimalExpandedShader,
                                  shaderc_glsl_vertex_shader, cloned_options));
@@ -256,7 +257,7 @@ TEST_F(CppInterface, MacroCompileOptions) {
   cloned_options.AddMacroDefinition("F", "void");
   // This should still not work with the original options.
   EXPECT_FALSE(CompilationSuccess(kMinimalDoubleExpandedShader,
-                                  shaderc_glsl_vertex_shader, options));
+                                  shaderc_glsl_vertex_shader, options_));
   // This should work with the cloned options that have the additional
   // parameter.
   EXPECT_TRUE(CompilationSuccess(kMinimalDoubleExpandedShader,
@@ -264,17 +265,16 @@ TEST_F(CppInterface, MacroCompileOptions) {
 }
 
 TEST_F(CppInterface, DisassemblyOption) {
-  shaderc::CompileOptions options;
-  options.SetDisassemblyMode();
+  options_.SetDisassemblyMode();
   shaderc::SpvModule result = compiler_.CompileGlslToSpv(
-      kMinimalShader, shaderc_glsl_vertex_shader, options);
+      kMinimalShader, shaderc_glsl_vertex_shader, options_);
   EXPECT_TRUE(result.GetSuccess());
   // This should work with both the glslang native disassembly format and the
   // SPIR-V Tools assembly format.
   EXPECT_THAT(result.GetData(), HasSubstr("Capability Shader"));
   EXPECT_THAT(result.GetData(), HasSubstr("MemoryModel"));
 
-  shaderc::CompileOptions cloned_options(options);
+  CompileOptions cloned_options(options_);
   shaderc::SpvModule result_from_cloned_options = compiler_.CompileGlslToSpv(
       kMinimalShader, shaderc_glsl_vertex_shader, cloned_options);
   EXPECT_TRUE(result_from_cloned_options.GetSuccess());
@@ -285,17 +285,16 @@ TEST_F(CppInterface, DisassemblyOption) {
 }
 
 TEST_F(CppInterface, PreprocessingOnlyOption) {
-  shaderc::CompileOptions options;
-  options.SetPreprocessingOnlyMode();
+  options_.SetPreprocessingOnlyMode();
   shaderc::SpvModule result = compiler_.CompileGlslToSpv(
-      kMinimalShaderWithMacro, shaderc_glsl_vertex_shader, options);
+      kMinimalShaderWithMacro, shaderc_glsl_vertex_shader, options_);
   EXPECT_TRUE(result.GetSuccess());
   EXPECT_THAT(result.GetData(), HasSubstr("void main(){ }"));
 
   const std::string kMinimalShaderCloneOption =
       "#define E_CLONE_OPTION main\n"
       "void E_CLONE_OPTION(){}\n";
-  shaderc::CompileOptions cloned_options(options);
+  CompileOptions cloned_options(options_);
   shaderc::SpvModule result_from_cloned_options = compiler_.CompileGlslToSpv(
       kMinimalShaderCloneOption, shaderc_glsl_vertex_shader, cloned_options);
   EXPECT_TRUE(result_from_cloned_options.GetSuccess());
@@ -306,13 +305,11 @@ TEST_F(CppInterface, PreprocessingOnlyOption) {
 TEST_F(CppInterface, PreprocessingOnlyModeFirstOverridesDisassemblyMode) {
   // Sets preprocessing only mode first, then sets disassembly mode.
   // Preprocessing only mode should override disassembly mode.
-  shaderc::CompileOptions options_preprocessing_mode_first;
-  options_preprocessing_mode_first.SetPreprocessingOnlyMode();
-  options_preprocessing_mode_first.SetDisassemblyMode();
+  options_.SetPreprocessingOnlyMode();
+  options_.SetDisassemblyMode();
   shaderc::SpvModule result_preprocessing_mode_first =
       compiler_.CompileGlslToSpv(kMinimalShaderWithMacro,
-                                 shaderc_glsl_vertex_shader,
-                                 options_preprocessing_mode_first);
+                                 shaderc_glsl_vertex_shader, options_);
   EXPECT_TRUE(result_preprocessing_mode_first.GetSuccess());
   EXPECT_THAT(result_preprocessing_mode_first.GetData(),
               HasSubstr("void main(){ }"));
@@ -321,12 +318,10 @@ TEST_F(CppInterface, PreprocessingOnlyModeFirstOverridesDisassemblyMode) {
 TEST_F(CppInterface, PreprocessingOnlyModeSecondOverridesDisassemblyMode) {
   // Sets disassembly mode first, then preprocessing only mode.
   // Preprocessing only mode should still override disassembly mode.
-  shaderc::CompileOptions options_disassembly_mode_first;
-  options_disassembly_mode_first.SetDisassemblyMode();
-  options_disassembly_mode_first.SetPreprocessingOnlyMode();
+  options_.SetDisassemblyMode();
+  options_.SetPreprocessingOnlyMode();
   shaderc::SpvModule result_disassembly_mode_first = compiler_.CompileGlslToSpv(
-      kMinimalShaderWithMacro, shaderc_glsl_vertex_shader,
-      options_disassembly_mode_first);
+      kMinimalShaderWithMacro, shaderc_glsl_vertex_shader, options_);
   EXPECT_TRUE(result_disassembly_mode_first.GetSuccess());
   EXPECT_THAT(result_disassembly_mode_first.GetData(),
               HasSubstr("void main(){ }"));
@@ -337,67 +332,58 @@ TEST_F(CppInterface, WarningsOnLine) {
   // that 'float' is a deprecated attribute in version 130.
   EXPECT_THAT(
       CompilationErrors(kDeprecatedAttributeShader, shaderc_glsl_vertex_shader,
-                        shaderc::CompileOptions()),
+                        CompileOptions()),
       HasSubstr(":2: warning: attribute deprecated in version 130; may be "
                 "removed in future release\n"));
 }
 
 TEST_F(CppInterface, SuppressWarningsOnLine) {
-  shaderc::CompileOptions options_suppress_warnings;
   // Sets the compiler to suppress warnings, so that the deprecated attribute
   // warning won't be emitted.
-  options_suppress_warnings.SetSuppressWarnings();
+  options_.SetSuppressWarnings();
   EXPECT_EQ("", CompilationErrors(kDeprecatedAttributeShader,
-                                  shaderc_glsl_vertex_shader,
-                                  options_suppress_warnings));
+                                  shaderc_glsl_vertex_shader, options_));
 }
 
 TEST_F(CppInterface, SuppressWarningsOnLineClonedOptions) {
-  shaderc::CompileOptions options_suppress_warnings;
   // Sets the compiler to suppress warnings, so that the deprecated attribute
   // warning won't be emitted, and the mode should be carried into any clone of
   // the original option object.
-  options_suppress_warnings.SetSuppressWarnings();
-  shaderc::CompileOptions cloned_options(options_suppress_warnings);
+  options_.SetSuppressWarnings();
+  CompileOptions cloned_options(options_);
   EXPECT_EQ("", CompilationErrors(kDeprecatedAttributeShader,
                                   shaderc_glsl_vertex_shader, cloned_options));
 }
 
 TEST_F(CppInterface, GlobalWarnings) {
-  shaderc::CompileOptions options;
   // By default the compiler will emit a warning as version 550 is an unknown
   // version.
   EXPECT_THAT(CompilationErrors(kMinimalUnknownVersionShader,
-                                shaderc_glsl_vertex_shader, options),
+                                shaderc_glsl_vertex_shader, options_),
               HasSubstr("warning: version 550 is unknown.\n"));
 }
 
 TEST_F(CppInterface, SuppressGlobalWarnings) {
-  shaderc::CompileOptions options_suppress_warnings;
   // Sets the compiler to suppress warnings, so that the unknown version warning
   // won't be emitted.
-  options_suppress_warnings.SetSuppressWarnings();
+  options_.SetSuppressWarnings();
   EXPECT_EQ("", CompilationErrors(kMinimalUnknownVersionShader,
-                                  shaderc_glsl_vertex_shader,
-                                  options_suppress_warnings));
+                                  shaderc_glsl_vertex_shader, options_));
 }
 
 TEST_F(CppInterface, SuppressGlobalWarningsClonedOptions) {
-  shaderc::CompileOptions options_suppress_warnings;
   // Sets the compiler to suppress warnings, so that the unknown version warning
   // won't be emitted, and the mode should be carried into any clone of the
   // original option object.
-  options_suppress_warnings.SetSuppressWarnings();
-  shaderc::CompileOptions cloned_options(options_suppress_warnings);
+  options_.SetSuppressWarnings();
+  CompileOptions cloned_options(options_);
   EXPECT_EQ("", CompilationErrors(kMinimalUnknownVersionShader,
                                   shaderc_glsl_vertex_shader, cloned_options));
 }
 
 TEST_F(CppInterface, TargetEnvCompileOptions) {
-  shaderc::CompileOptions options;
-
   // Test shader compilation which requires opengl compatibility environment
-  options.SetTargetEnvironment(shaderc_target_env_opengl_compat, 0);
+  options_.SetTargetEnvironment(shaderc_target_env_opengl_compat, 0);
   const std::string kGlslShader =
       R"(#version 100
        uniform highp sampler2D tex;
@@ -407,7 +393,7 @@ TEST_F(CppInterface, TargetEnvCompileOptions) {
   )";
 
   EXPECT_TRUE(
-      CompilationSuccess(kGlslShader, shaderc_glsl_fragment_shader, options));
+      CompilationSuccess(kGlslShader, shaderc_glsl_fragment_shader, options_));
 }
 
 }  // anonymous namespace
