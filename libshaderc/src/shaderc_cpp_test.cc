@@ -47,7 +47,8 @@ const std::string kMinimalUnknownVersionShader =
 class CppInterface : public testing::Test {
  protected:
   // Compiles a shader and returns true on success, false on failure.
-  bool CompilationSuccess(const std::string& shader, shaderc_shader_kind kind) {
+  bool CompilationSuccess(const std::string& shader,
+                          shaderc_shader_kind kind) const {
     return compiler_.CompileGlslToSpv(shader.c_str(), shader.length(), kind)
         .GetSuccess();
   }
@@ -55,14 +56,37 @@ class CppInterface : public testing::Test {
   // Compiles a shader with options and returns true on success, false on
   // failure.
   bool CompilationSuccess(const std::string& shader, shaderc_shader_kind kind,
-                          const shaderc::CompileOptions& options) {
+                          const shaderc::CompileOptions& options) const {
     return compiler_.CompileGlslToSpv(shader.c_str(), shader.length(), kind,
                                       options)
         .GetSuccess();
   }
 
+  // Compiles a shader and returns true if the result is valid SPIR-V.
+  bool CompilesToValidSpv(const std::string& shader,
+                          shaderc_shader_kind kind) const {
+    return IsValidSpv(compiler_.CompileGlslToSpv(shader, kind));
+  }
+
+  // Compiles a shader with options and returns true if the result is valid
+  // SPIR-V.
+  bool CompilesToValidSpv(const std::string& shader, shaderc_shader_kind kind,
+                          const shaderc::CompileOptions& options) const {
+    return IsValidSpv(compiler_.CompileGlslToSpv(shader, kind, options));
+  }
+
   // For compiling shaders in subclass tests:
   shaderc::Compiler compiler_;
+
+ private:
+  static bool IsValidSpv(const shaderc::SpvModule& result) {
+    if (!result.GetSuccess()) return false;
+    size_t length = result.GetLength();
+    if (length < 20) return false;
+    const uint32_t* bytes = static_cast<const uint32_t*>(
+        static_cast<const void*>(result.GetData()));
+    return bytes[0] == spv::MagicNumber;
+  }
 };
 
 TEST_F(CppInterface, MultipleCalls) {
@@ -91,32 +115,6 @@ TEST_F(CppInterface, MultipleThreadsInitializing) {
   EXPECT_TRUE(compiler1->IsValid());
   EXPECT_TRUE(compiler2->IsValid());
   EXPECT_TRUE(compiler3->IsValid());
-}
-
-// Compiles a shader and returns true if the result is valid SPIR-V.
-bool CompilesToValidSpv(const shaderc::Compiler& compiler,
-                        const std::string& shader, shaderc_shader_kind kind) {
-  shaderc::SpvModule result = compiler.CompileGlslToSpv(shader, kind);
-  if (!result.GetSuccess()) return false;
-  size_t length = result.GetLength();
-  if (length < 20) return false;
-  const uint32_t* bytes =
-      static_cast<const uint32_t*>(static_cast<const void*>(result.GetData()));
-  return bytes[0] == spv::MagicNumber;
-}
-
-// Compiles a shader with the given options and returns true if the result is
-// valid SPIR-V.
-bool CompilesToValidSpv(const shaderc::Compiler& compiler,
-                        const std::string& shader, shaderc_shader_kind kind,
-                        const shaderc::CompileOptions& options) {
-  shaderc::SpvModule result = compiler.CompileGlslToSpv(shader, kind, options);
-  if (!result.GetSuccess()) return false;
-  size_t length = result.GetLength();
-  if (length < 20) return false;
-  const uint32_t* bytes =
-      static_cast<const uint32_t*>(static_cast<const void*>(result.GetData()));
-  return bytes[0] == spv::MagicNumber;
 }
 
 TEST_F(CppInterface, CompilerMoves) {
@@ -150,39 +148,37 @@ TEST_F(CppInterface, GarbageString) {
 
 TEST_F(CppInterface, MinimalShader) {
   ASSERT_TRUE(compiler_.IsValid());
-  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
-                                 shaderc_glsl_vertex_shader));
-  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
-                                 shaderc_glsl_fragment_shader));
+  EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader));
+  EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_fragment_shader));
 }
 
 TEST_F(CppInterface, BasicOptions) {
   shaderc::CompileOptions options;
   ASSERT_TRUE(compiler_.IsValid());
-  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
-                                 shaderc_glsl_vertex_shader, options));
-  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
-                                 shaderc_glsl_fragment_shader, options));
+  EXPECT_TRUE(
+      CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader, options));
+  EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_fragment_shader,
+                                 options));
 }
 
 TEST_F(CppInterface, CopiedOptions) {
   shaderc::CompileOptions options;
   ASSERT_TRUE(compiler_.IsValid());
-  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
-                                 shaderc_glsl_vertex_shader, options));
+  EXPECT_TRUE(
+      CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader, options));
   shaderc::CompileOptions copied_options(options);
-  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
-                                 shaderc_glsl_fragment_shader, copied_options));
+  EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_fragment_shader,
+                                 copied_options));
 }
 
 TEST_F(CppInterface, MovedOptions) {
   shaderc::CompileOptions options;
   ASSERT_TRUE(compiler_.IsValid());
-  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
-                                 shaderc_glsl_vertex_shader, options));
+  EXPECT_TRUE(
+      CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader, options));
   shaderc::CompileOptions copied_options(std::move(options));
-  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
-                                 shaderc_glsl_fragment_shader, copied_options));
+  EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_fragment_shader,
+                                 copied_options));
 }
 
 TEST_F(CppInterface, StdAndCString) {
