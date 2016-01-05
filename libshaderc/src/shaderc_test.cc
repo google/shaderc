@@ -363,6 +363,54 @@ TEST(CompileStringWithOptions, SuppressGlobalWarnings) {
   EXPECT_STREQ("", shaderc_module_get_error_message(comp.result()));
 }
 
+TEST(CompileStringWithOptions, SuppressWarningsModeFirstOverridesWarningsAsErrorsMode) {
+  Compiler compiler;
+  compile_options_ptr options(shaderc_compile_options_initialize());
+  // Sets suppress-warnings mode first, then sets warnings-as-errors mode.
+  // suppress-warnings mode should override warnings-as-errors mode.
+  shaderc_compile_options_set_suppress_warnings(options.get());
+  shaderc_compile_options_set_warnings_as_errors(options.get());
+  ASSERT_NE(nullptr, compiler.get_compiler_handle());
+
+  // Warnings on line should be inhibited.
+  const Compilation comp_deprecated_attribute(compiler.get_compiler_handle(),
+                         kDeprecatedAttributeShader,
+                         shaderc_glsl_vertex_shader, options.get());
+  EXPECT_TRUE(shaderc_module_get_success(comp_deprecated_attribute.result()));
+  EXPECT_STREQ("", shaderc_module_get_error_message(comp_deprecated_attribute.result()));
+
+  // Global warnings should be inhibited.
+  const Compilation comp_unknown_version(compiler.get_compiler_handle(),
+                         kMinimalUnknownVersionShader,
+                         shaderc_glsl_vertex_shader, options.get());
+  EXPECT_TRUE(shaderc_module_get_success(comp_unknown_version.result()));
+  EXPECT_STREQ("", shaderc_module_get_error_message(comp_unknown_version.result()));
+}
+
+TEST(CompileStringWithOptions, SuppressWarningsModeSecondOverridesWarningsAsErrorsMode) {
+  Compiler compiler;
+  compile_options_ptr options(shaderc_compile_options_initialize());
+  // Sets warnings-as-errors mode first, then sets suppress-warnings mode.
+  // suppress-warnings mode should override warnings-as-errors mode.
+  shaderc_compile_options_set_warnings_as_errors(options.get());
+  shaderc_compile_options_set_suppress_warnings(options.get());
+  ASSERT_NE(nullptr, compiler.get_compiler_handle());
+
+  // Warnings on line should be inhibited.
+  const Compilation comp_deprecated_attribute(compiler.get_compiler_handle(),
+                         kDeprecatedAttributeShader,
+                         shaderc_glsl_vertex_shader, options.get());
+  EXPECT_TRUE(shaderc_module_get_success(comp_deprecated_attribute.result()));
+  EXPECT_STREQ("", shaderc_module_get_error_message(comp_deprecated_attribute.result()));
+
+  // Global warnings should be inhibited.
+  const Compilation comp_unknown_version(compiler.get_compiler_handle(),
+                         kMinimalUnknownVersionShader,
+                         shaderc_glsl_vertex_shader, options.get());
+  EXPECT_TRUE(shaderc_module_get_success(comp_unknown_version.result()));
+  EXPECT_STREQ("", shaderc_module_get_error_message(comp_unknown_version.result()));
+}
+
 TEST(CompileStringWithOptions, IfDefCompileOption) {
   Compiler compiler;
   compile_options_ptr options(shaderc_compile_options_initialize());
