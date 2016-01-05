@@ -355,7 +355,7 @@ TEST_F(CppInterface, WarningsOnLineAsErrors) {
   options_.SetWarningsAsErrors();
   EXPECT_THAT(CompilationErrors(kDeprecatedAttributeShader,
                                   shaderc_glsl_vertex_shader,
-                                  options_warnings_as_errors),
+                                  options_),
               HasSubstr(":2: error: attribute deprecated in version 130; may be "
               "removed in future release\n"));
 }
@@ -405,7 +405,7 @@ TEST_F(CppInterface, GlobalWarningsAsErrors) {
   // version warning will be emitted as an error and compilation should fail.
   options_.SetWarningsAsErrors();
   EXPECT_THAT(CompilationErrors(kMinimalUnknownVersionShader,
-                                shaderc_glsl_vertext_shader,
+                                shaderc_glsl_vertex_shader,
                                 options_),
               HasSubstr("error: version 550 is unknown.\n"));
 }
@@ -416,7 +416,7 @@ TEST_F(CppInterface, GlobalWarningsAsErrorsClonedOptions) {
   options_.SetWarningsAsErrors();
   CompileOptions cloned_options(options_);
   EXPECT_THAT(CompilationErrors(kMinimalUnknownVersionShader,
-                                shaderc_glsl_vertext_shader,
+                                shaderc_glsl_vertex_shader,
                                 cloned_options),
               HasSubstr("error: version 550 is unknown.\n"));
 }
