@@ -451,8 +451,8 @@ TEST_F(CppInterface, SuppressWarningsModeSecondOverridesWarningsAsErrorsMode) {
   // Sets warnings-as-errors mode first, then sets suppress-warnings mode.
   // suppress-warnings mode should override warnings-as-errors mode, no
   // error message should be output for this case.
-  options_.SetSuppressWarnings();
   options_.SetWarningsAsErrors();
+  options_.SetSuppressWarnings();
   // Warnings on line should be inhibited.
   EXPECT_EQ("", CompilationWarnings(kDeprecatedAttributeShader,
                                     shaderc_glsl_vertex_shader, options_));
