@@ -89,6 +89,19 @@ class CppInterface : public testing::Test {
     return module.GetErrorMessage();
   }
 
+  // Compiles a shader, asserts compilation fail, and returns the error
+  // messages.
+  std::string CompilationErrors(
+      const std::string& shader, shaderc_shader_kind kind,
+      // This could default to options_, but that can
+      // be easily confused with a no-options-provided
+      // case:
+      const CompileOptions& options) {
+    const auto module = compiler_.CompileGlslToSpv(shader, kind, options);
+    EXPECT_FALSE(module.GetSuccess()) << kind << '\n' << shader;
+    return module.GetErrorMessage();
+  }
+
   // For compiling shaders in subclass tests:
   shaderc::Compiler compiler_;
   CompileOptions options_;
@@ -353,11 +366,11 @@ TEST_F(CppInterface, WarningsOnLineAsErrors) {
   // Sets the compiler to make warnings into errors. So that the deprecated
   // attribute warning will be emitted as an error and compilation should fail.
   options_.SetWarningsAsErrors();
-  EXPECT_THAT(CompilationErrors(kDeprecatedAttributeShader,
-                                  shaderc_glsl_vertex_shader,
-                                  options_),
-              HasSubstr(":2: error: attribute deprecated in version 130; may be "
-              "removed in future release\n"));
+  EXPECT_THAT(
+      CompilationErrors(kDeprecatedAttributeShader, shaderc_glsl_vertex_shader,
+                        options_),
+      HasSubstr(":2: error: attribute deprecated in version 130; may be "
+                "removed in future release\n"));
 }
 
 TEST_F(CppInterface, WarningsOnLineAsErrorsClonedOptions) {
@@ -366,11 +379,11 @@ TEST_F(CppInterface, WarningsOnLineAsErrorsClonedOptions) {
   options_.SetWarningsAsErrors();
   CompileOptions cloned_options(options_);
   // The error message should show an error instead of a warning.
-  EXPECT_THAT(CompilationErrors(kDeprecatedAttributeShader,
-                                  shaderc_glsl_vertex_shader,
-                                  cloned_options),
-              HasSubstr(":2: error: attribute deprecated in version 130; may be "
-              "removed in future release\n"));
+  EXPECT_THAT(
+      CompilationErrors(kDeprecatedAttributeShader, shaderc_glsl_vertex_shader,
+                        cloned_options),
+      HasSubstr(":2: error: attribute deprecated in version 130; may be "
+                "removed in future release\n"));
 }
 
 TEST_F(CppInterface, GlobalWarnings) {
@@ -405,8 +418,7 @@ TEST_F(CppInterface, GlobalWarningsAsErrors) {
   // version warning will be emitted as an error and compilation should fail.
   options_.SetWarningsAsErrors();
   EXPECT_THAT(CompilationErrors(kMinimalUnknownVersionShader,
-                                shaderc_glsl_vertex_shader,
-                                options_),
+                                shaderc_glsl_vertex_shader, options_),
               HasSubstr("error: version 550 is unknown.\n"));
 }
 
@@ -416,8 +428,7 @@ TEST_F(CppInterface, GlobalWarningsAsErrorsClonedOptions) {
   options_.SetWarningsAsErrors();
   CompileOptions cloned_options(options_);
   EXPECT_THAT(CompilationErrors(kMinimalUnknownVersionShader,
-                                shaderc_glsl_vertex_shader,
-                                cloned_options),
+                                shaderc_glsl_vertex_shader, cloned_options),
               HasSubstr("error: version 550 is unknown.\n"));
 }
 
@@ -428,27 +439,27 @@ TEST_F(CppInterface, SuppressWarningsModeFirstOverridesWarningsAsErrorsMode) {
   options_.SetSuppressWarnings();
   options_.SetWarningsAsErrors();
   // Warnings on line should be inhibited.
-  EXPECT_EQ("", CompilationErrors(kDeprecatedAttributeShader, shaderc_glsl_vertex_shader,
-      options_));
+  EXPECT_EQ("", CompilationWarnings(kDeprecatedAttributeShader,
+                                    shaderc_glsl_vertex_shader, options_));
 
   // Global warnings should be inhibited.
-  EXPECT_EQ("", CompilationErrors(kMinimalUnknownVersionShader, shaderc_glsl_vertex_shader,
-      options_));
+  EXPECT_EQ("", CompilationWarnings(kMinimalUnknownVersionShader,
+                                    shaderc_glsl_vertex_shader, options_));
 }
 
 TEST_F(CppInterface, SuppressWarningsModeSecondOverridesWarningsAsErrorsMode) {
-  // Sets warnings-as errors mode first, then sets suppress-warnings mode.
+  // Sets warnings-as-errors mode first, then sets suppress-warnings mode.
   // suppress-warnings mode should override warnings-as-errors mode, no
   // error message should be output for this case.
   options_.SetSuppressWarnings();
   options_.SetWarningsAsErrors();
   // Warnings on line should be inhibited.
-  EXPECT_EQ("", CompilationErrors(kDeprecatedAttributeShader, shaderc_glsl_vertex_shader,
-      options_));
+  EXPECT_EQ("", CompilationWarnings(kDeprecatedAttributeShader,
+                                    shaderc_glsl_vertex_shader, options_));
 
   // Global warnings should be inhibited.
-  EXPECT_EQ("", CompilationErrors(kMinimalUnknownVersionShader, shaderc_glsl_vertex_shader,
-      options_));
+  EXPECT_EQ("", CompilationWarnings(kMinimalUnknownVersionShader,
+                                    shaderc_glsl_vertex_shader, options_));
 }
 
 TEST_F(CppInterface, TargetEnvCompileOptions) {
