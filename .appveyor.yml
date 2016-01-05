@@ -49,6 +49,7 @@ notifications:
       - awoloszyn@google.com
       - deki@google.com
       - dneto@google.com
+      - qining@google.com
     subject: 'Shaderc Windows Build #{{buildVersion}}: {{status}}'
     on_build_success: false
     on_build_failure: true

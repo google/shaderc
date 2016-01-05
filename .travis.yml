@@ -84,5 +84,6 @@ notifications:
       - awoloszyn@google.com
       - deki@google.com
       - dneto@google.com
+      - qining@google.com
     on_success: change
     on_failure: always
