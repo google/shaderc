@@ -75,6 +75,16 @@ class CppInterface : public testing::Test {
     return IsValidSpv(compiler_.CompileGlslToSpv(shader, kind, options));
   }
 
+  // Compiles a shader, asserts compilation success, and returns the error
+  // message.
+  std::string CompilationErrors(const std::string& shader,
+                                shaderc_shader_kind kind,
+                                const shaderc::CompileOptions& options) {
+    const auto module = compiler_.CompileGlslToSpv(shader, kind, options);
+    EXPECT_TRUE(module.GetSuccess()) << kind << '\n' << shader;
+    return module.GetErrorMessage();
+  }
+
   // For compiling shaders in subclass tests:
   shaderc::Compiler compiler_;
 
@@ -323,14 +333,11 @@ TEST_F(CppInterface, PreprocessingOnlyModeSecondOverridesDisassemblyMode) {
 }
 
 TEST_F(CppInterface, WarningsOnLine) {
-  shaderc::CompileOptions options;
   // By default the compiler will emit a warning on line 2 complaining
   // that 'float' is a deprecated attribute in version 130.
-  const shaderc::SpvModule result_warnings_on_line = compiler_.CompileGlslToSpv(
-      kDeprecatedAttributeShader, shaderc_glsl_vertex_shader, options);
-  EXPECT_TRUE(result_warnings_on_line.GetSuccess());
   EXPECT_THAT(
-      result_warnings_on_line.GetErrorMessage(),
+      CompilationErrors(kDeprecatedAttributeShader, shaderc_glsl_vertex_shader,
+                        shaderc::CompileOptions()),
       HasSubstr(":2: warning: attribute deprecated in version 130; may be "
                 "removed in future release\n"));
 }
@@ -340,12 +347,9 @@ TEST_F(CppInterface, SuppressWarningsOnLine) {
   // Sets the compiler to suppress warnings, so that the deprecated attribute
   // warning won't be emitted.
   options_suppress_warnings.SetSuppressWarnings();
-  const shaderc::SpvModule result_suppress_warnings_on_line =
-      compiler_.CompileGlslToSpv(kDeprecatedAttributeShader,
-                                 shaderc_glsl_vertex_shader,
-                                 options_suppress_warnings);
-  EXPECT_TRUE(result_suppress_warnings_on_line.GetSuccess());
-  EXPECT_EQ("", result_suppress_warnings_on_line.GetErrorMessage());
+  EXPECT_EQ("", CompilationErrors(kDeprecatedAttributeShader,
+                                  shaderc_glsl_vertex_shader,
+                                  options_suppress_warnings));
 }
 
 TEST_F(CppInterface, SuppressWarningsOnLineClonedOptions) {
@@ -355,20 +359,16 @@ TEST_F(CppInterface, SuppressWarningsOnLineClonedOptions) {
   // the original option object.
   options_suppress_warnings.SetSuppressWarnings();
   shaderc::CompileOptions cloned_options(options_suppress_warnings);
-  const shaderc::SpvModule result_cloned_options = compiler_.CompileGlslToSpv(
-      kDeprecatedAttributeShader, shaderc_glsl_vertex_shader, cloned_options);
-  EXPECT_TRUE(result_cloned_options.GetSuccess());
-  EXPECT_EQ("", result_cloned_options.GetErrorMessage());
+  EXPECT_EQ("", CompilationErrors(kDeprecatedAttributeShader,
+                                  shaderc_glsl_vertex_shader, cloned_options));
 }
 
 TEST_F(CppInterface, GlobalWarnings) {
   shaderc::CompileOptions options;
   // By default the compiler will emit a warning as version 550 is an unknown
   // version.
-  const shaderc::SpvModule result_warnings_on_line = compiler_.CompileGlslToSpv(
-      kMinimalUnknownVersionShader, shaderc_glsl_vertex_shader, options);
-  EXPECT_TRUE(result_warnings_on_line.GetSuccess());
-  EXPECT_THAT(result_warnings_on_line.GetErrorMessage(),
+  EXPECT_THAT(CompilationErrors(kMinimalUnknownVersionShader,
+                                shaderc_glsl_vertex_shader, options),
               HasSubstr("warning: version 550 is unknown.\n"));
 }
 
@@ -377,12 +377,9 @@ TEST_F(CppInterface, SuppressGlobalWarnings) {
   // Sets the compiler to suppress warnings, so that the unknown version warning
   // won't be emitted.
   options_suppress_warnings.SetSuppressWarnings();
-  const shaderc::SpvModule result_suppress_warnings_on_line =
-      compiler_.CompileGlslToSpv(kMinimalUnknownVersionShader,
-                                 shaderc_glsl_vertex_shader,
-                                 options_suppress_warnings);
-  EXPECT_TRUE(result_suppress_warnings_on_line.GetSuccess());
-  EXPECT_EQ("", result_suppress_warnings_on_line.GetErrorMessage());
+  EXPECT_EQ("", CompilationErrors(kMinimalUnknownVersionShader,
+                                  shaderc_glsl_vertex_shader,
+                                  options_suppress_warnings));
 }
 
 TEST_F(CppInterface, SuppressGlobalWarningsClonedOptions) {
@@ -392,10 +389,8 @@ TEST_F(CppInterface, SuppressGlobalWarningsClonedOptions) {
   // original option object.
   options_suppress_warnings.SetSuppressWarnings();
   shaderc::CompileOptions cloned_options(options_suppress_warnings);
-  const shaderc::SpvModule result_cloned_options = compiler_.CompileGlslToSpv(
-      kMinimalUnknownVersionShader, shaderc_glsl_vertex_shader, cloned_options);
-  EXPECT_TRUE(result_cloned_options.GetSuccess());
-  EXPECT_EQ("", result_cloned_options.GetErrorMessage());
+  EXPECT_EQ("", CompilationErrors(kMinimalUnknownVersionShader,
+                                  shaderc_glsl_vertex_shader, cloned_options));
 }
 
 TEST_F(CppInterface, TargetEnvCompileOptions) {
