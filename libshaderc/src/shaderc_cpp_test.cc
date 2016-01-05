@@ -58,8 +58,8 @@ class CppInterface : public testing::Test {
   // failure.
   bool CompilationSuccess(const std::string& shader, shaderc_shader_kind kind,
                           const CompileOptions& options) const {
-    return compiler_.CompileGlslToSpv(shader.c_str(), shader.length(), kind,
-                                      options)
+    return compiler_
+        .CompileGlslToSpv(shader.c_str(), shader.length(), kind, options)
         .GetSuccess();
   }
 
@@ -76,14 +76,14 @@ class CppInterface : public testing::Test {
     return IsValidSpv(compiler_.CompileGlslToSpv(shader, kind, options));
   }
 
-  // Compiles a shader, asserts compilation success, and returns the error
-  // message.
-  std::string CompilationErrors(const std::string& shader,
-                                shaderc_shader_kind kind,
-                                // This could default to options_, but that can
-                                // be easily confused with a no-options-provided
-                                // case:
-                                const CompileOptions& options) {
+  // Compiles a shader, asserts compilation success, and returns the warning
+  // messages.
+  std::string CompilationWarnings(
+      const std::string& shader, shaderc_shader_kind kind,
+      // This could default to options_, but that can
+      // be easily confused with a no-options-provided
+      // case:
+      const CompileOptions& options) {
     const auto module = compiler_.CompileGlslToSpv(shader, kind, options);
     EXPECT_TRUE(module.GetSuccess()) << kind << '\n' << shader;
     return module.GetErrorMessage();
@@ -331,8 +331,8 @@ TEST_F(CppInterface, WarningsOnLine) {
   // By default the compiler will emit a warning on line 2 complaining
   // that 'float' is a deprecated attribute in version 130.
   EXPECT_THAT(
-      CompilationErrors(kDeprecatedAttributeShader, shaderc_glsl_vertex_shader,
-                        CompileOptions()),
+      CompilationWarnings(kDeprecatedAttributeShader,
+                          shaderc_glsl_vertex_shader, CompileOptions()),
       HasSubstr(":2: warning: attribute deprecated in version 130; may be "
                 "removed in future release\n"));
 }
@@ -341,8 +341,8 @@ TEST_F(CppInterface, SuppressWarningsOnLine) {
   // Sets the compiler to suppress warnings, so that the deprecated attribute
   // warning won't be emitted.
   options_.SetSuppressWarnings();
-  EXPECT_EQ("", CompilationErrors(kDeprecatedAttributeShader,
-                                  shaderc_glsl_vertex_shader, options_));
+  EXPECT_EQ("", CompilationWarnings(kDeprecatedAttributeShader,
+                                    shaderc_glsl_vertex_shader, options_));
 }
 
 TEST_F(CppInterface, SuppressWarningsOnLineClonedOptions) {
@@ -351,15 +351,16 @@ TEST_F(CppInterface, SuppressWarningsOnLineClonedOptions) {
   // the original option object.
   options_.SetSuppressWarnings();
   CompileOptions cloned_options(options_);
-  EXPECT_EQ("", CompilationErrors(kDeprecatedAttributeShader,
-                                  shaderc_glsl_vertex_shader, cloned_options));
+  EXPECT_EQ("",
+            CompilationWarnings(kDeprecatedAttributeShader,
+                                shaderc_glsl_vertex_shader, cloned_options));
 }
 
 TEST_F(CppInterface, GlobalWarnings) {
   // By default the compiler will emit a warning as version 550 is an unknown
   // version.
-  EXPECT_THAT(CompilationErrors(kMinimalUnknownVersionShader,
-                                shaderc_glsl_vertex_shader, options_),
+  EXPECT_THAT(CompilationWarnings(kMinimalUnknownVersionShader,
+                                  shaderc_glsl_vertex_shader, options_),
               HasSubstr("warning: version 550 is unknown.\n"));
 }
 
@@ -367,8 +368,8 @@ TEST_F(CppInterface, SuppressGlobalWarnings) {
   // Sets the compiler to suppress warnings, so that the unknown version warning
   // won't be emitted.
   options_.SetSuppressWarnings();
-  EXPECT_EQ("", CompilationErrors(kMinimalUnknownVersionShader,
-                                  shaderc_glsl_vertex_shader, options_));
+  EXPECT_EQ("", CompilationWarnings(kMinimalUnknownVersionShader,
+                                    shaderc_glsl_vertex_shader, options_));
 }
 
 TEST_F(CppInterface, SuppressGlobalWarningsClonedOptions) {
@@ -377,8 +378,9 @@ TEST_F(CppInterface, SuppressGlobalWarningsClonedOptions) {
   // original option object.
   options_.SetSuppressWarnings();
   CompileOptions cloned_options(options_);
-  EXPECT_EQ("", CompilationErrors(kMinimalUnknownVersionShader,
-                                  shaderc_glsl_vertex_shader, cloned_options));
+  EXPECT_EQ("",
+            CompilationWarnings(kMinimalUnknownVersionShader,
+                                shaderc_glsl_vertex_shader, cloned_options));
 }
 
 TEST_F(CppInterface, TargetEnvCompileOptions) {
