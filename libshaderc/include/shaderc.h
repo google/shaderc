@@ -128,7 +128,7 @@ void shaderc_compile_options_set_disassembly_mode(
 void shaderc_compile_options_set_preprocessing_only_mode(
     shaderc_compile_options_t options);
 
-// Sets the compiler mode to suppress warnings, overrides warnings-as-errors
+// Sets the compiler mode to suppress warnings, overriding warnings-as-errors
 // mode. When both suppress-warnings and warnings-as-errors modes are
 // turned on, warning messages will be inhibited, and will not be emitted
 // as error messages.
