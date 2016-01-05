@@ -104,6 +104,10 @@ class CppInterface : public testing::Test {
   }
 };
 
+TEST_F(CppInterface, CompilerValidUponConstruction) {
+  EXPECT_TRUE(compiler_.IsValid());
+}
+
 TEST_F(CppInterface, MultipleCalls) {
   shaderc::Compiler compiler1, compiler2, compiler3;
   EXPECT_TRUE(compiler1.IsValid());
@@ -133,20 +137,17 @@ TEST_F(CppInterface, MultipleThreadsInitializing) {
 }
 
 TEST_F(CppInterface, CompilerMoves) {
-  ASSERT_TRUE(compiler_.IsValid());
   shaderc::Compiler compiler2(std::move(compiler_));
   ASSERT_FALSE(compiler_.IsValid());
   ASSERT_TRUE(compiler2.IsValid());
 }
 
 TEST_F(CppInterface, EmptyString) {
-  ASSERT_TRUE(compiler_.IsValid());
   EXPECT_FALSE(CompilationSuccess("", shaderc_glsl_vertex_shader));
   EXPECT_FALSE(CompilationSuccess("", shaderc_glsl_fragment_shader));
 }
 
 TEST_F(CppInterface, ModuleMoves) {
-  ASSERT_TRUE(compiler_.IsValid());
   shaderc::SpvModule result =
       compiler_.CompileGlslToSpv(kMinimalShader, shaderc_glsl_vertex_shader);
   EXPECT_TRUE(result.GetSuccess());
@@ -156,19 +157,16 @@ TEST_F(CppInterface, ModuleMoves) {
 }
 
 TEST_F(CppInterface, GarbageString) {
-  ASSERT_TRUE(compiler_.IsValid());
   EXPECT_FALSE(CompilationSuccess("jfalkds", shaderc_glsl_vertex_shader));
   EXPECT_FALSE(CompilationSuccess("jfalkds", shaderc_glsl_fragment_shader));
 }
 
 TEST_F(CppInterface, MinimalShader) {
-  ASSERT_TRUE(compiler_.IsValid());
   EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader));
   EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_fragment_shader));
 }
 
 TEST_F(CppInterface, BasicOptions) {
-  ASSERT_TRUE(compiler_.IsValid());
   EXPECT_TRUE(
       CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader, options_));
   EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_fragment_shader,
@@ -176,7 +174,6 @@ TEST_F(CppInterface, BasicOptions) {
 }
 
 TEST_F(CppInterface, CopiedOptions) {
-  ASSERT_TRUE(compiler_.IsValid());
   EXPECT_TRUE(
       CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader, options_));
   CompileOptions copied_options(options_);
@@ -185,7 +182,6 @@ TEST_F(CppInterface, CopiedOptions) {
 }
 
 TEST_F(CppInterface, MovedOptions) {
-  ASSERT_TRUE(compiler_.IsValid());
   EXPECT_TRUE(
       CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader, options_));
   CompileOptions copied_options(std::move(options_));
@@ -194,7 +190,6 @@ TEST_F(CppInterface, MovedOptions) {
 }
 
 TEST_F(CppInterface, StdAndCString) {
-  ASSERT_TRUE(compiler_.IsValid());
   shaderc::SpvModule result1 = compiler_.CompileGlslToSpv(
       kMinimalShader, strlen(kMinimalShader), shaderc_glsl_fragment_shader);
   shaderc::SpvModule result2 = compiler_.CompileGlslToSpv(
@@ -209,7 +204,6 @@ TEST_F(CppInterface, StdAndCString) {
 }
 
 TEST_F(CppInterface, ErrorsReported) {
-  ASSERT_TRUE(compiler_.IsValid());
   shaderc::SpvModule result = compiler_.CompileGlslToSpv(
       "int f(){return wrongname;}", shaderc_glsl_vertex_shader);
   ASSERT_FALSE(result.GetSuccess());
@@ -217,7 +211,6 @@ TEST_F(CppInterface, ErrorsReported) {
 }
 
 TEST_F(CppInterface, MultipleThreadsCalling) {
-  ASSERT_TRUE(compiler_.IsValid());
   bool results[10];
   std::vector<std::thread> threads;
   for (auto& r : results) {
