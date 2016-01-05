@@ -299,6 +299,21 @@ TEST(CompileStringWithOptions, WarningsOnLine) {
                 "removed in future release\n"));
 }
 
+TEST(CompileStringWithOptions, WarningsOnLineAsErrors) {
+  Compiler compiler;
+  compile_options_ptr options(shaderc_compile_options_initialize());
+  shaderc_compile_options_set_warnings_as_errors(options.get());
+  ASSERT_NE(nullptr, compiler.get_compiler_handle());
+  const Compilation comp(compiler.get_compiler_handle(),
+                         kDeprecatedAttributeShader, shaderc_glsl_vertex_shader,
+                         options.get());
+  EXPECT_FALSE(shaderc_module_get_success(comp.result()));
+  EXPECT_THAT(
+      shaderc_module_get_error_message(comp.result()),
+      HasSubstr(":2: error: attribute deprecated in version 130; may be "
+                "removed in future release\n"));
+}
+
 TEST(CompileStringWithOptions, SuppressWarningsOnLine) {
   Compiler compiler;
   compile_options_ptr options(shaderc_compile_options_initialize());
@@ -321,6 +336,19 @@ TEST(CompileStringWithOptions, GlobalWarnings) {
   EXPECT_TRUE(shaderc_module_get_success(comp.result()));
   EXPECT_THAT(shaderc_module_get_error_message(comp.result()),
               HasSubstr("version 550 is unknown.\n"));
+}
+
+TEST(CompileStringWithOptions, GlobalWarningsAsErrors) {
+  Compiler compiler;
+  compile_options_ptr options(shaderc_compile_options_initialize());
+  shaderc_compile_options_set_warnings_as_errors(options.get());
+  ASSERT_NE(nullptr, compiler.get_compiler_handle());
+  const Compilation comp(compiler.get_compiler_handle(),
+                         kMinimalUnknownVersionShader,
+                         shaderc_glsl_vertex_shader, options.get());
+  EXPECT_FALSE(shaderc_module_get_success(comp.result()));
+  EXPECT_THAT(shaderc_module_get_error_message(comp.result()),
+              HasSubstr("error: version 550 is unknown.\n"));
 }
 
 TEST(CompileStringWithOptions, SuppressGlobalWarnings) {
