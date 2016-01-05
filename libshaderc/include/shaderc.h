@@ -39,6 +39,12 @@ typedef enum {
   shaderc_target_env_default = shaderc_target_env_vulkan
 } shaderc_target_env;
 
+typedef enum {
+  shaderc_profile_core,
+  shaderc_profile_compatibility,
+  shaderc_profile_es,
+} shaderc_profile;
+
 // Usage examples:
 //
 // Aggressively release compiler resources, but spend time in initialization
@@ -120,6 +126,11 @@ void shaderc_compile_options_add_macro_definition(
 // overrides the default mode generating a SPIR-V binary.
 void shaderc_compile_options_set_disassembly_mode(
     shaderc_compile_options_t options);
+
+// Sets the compiler mode to force (without any verification) the default
+// version and profile for compilation.
+void shaderc_compile_options_set_forced_version_profile(
+    shaderc_compile_options_t options, int version, shaderc_profile profile);
 
 // Sets the compiler mode to do only preprocessing. The byte array result in the
 // module returned by the compilation is the text of the preprocessed shader.

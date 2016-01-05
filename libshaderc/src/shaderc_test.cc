@@ -42,6 +42,12 @@ const std::string kMinimalUnknownVersionShader =
     "#version 550\n"
     "void main() {}\n";
 
+// gl_ClipDistance doesn't exist in es profile (at least until 3.10).
+const std::string kCoreVertShaderWithoutVersion =
+    "void main() {\n"
+    "gl_ClipDistance[0] = 5.;\n"
+    "}\n";
+
 TEST(Init, MultipleCalls) {
   shaderc_compiler_t compiler1, compiler2, compiler3;
   EXPECT_NE(nullptr, compiler1 = shaderc_compiler_initialize());
@@ -281,6 +287,78 @@ TEST_F(CompileStringWithOptionsTest, DisassemblyOption) {
       kMinimalShader, shaderc_glsl_vertex_shader, cloned_options.get());
   EXPECT_THAT(disassembly_text_cloned_options, HasSubstr("Capability Shader"));
   EXPECT_THAT(disassembly_text_cloned_options, HasSubstr("MemoryModel"));
+}
+
+TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileCorrectStd) {
+  // Forces the version and profile to 450core, which fixes the missing
+  // #version.
+  shaderc_compile_options_set_forced_version_profile(options_.get(), 450,
+                                                     shaderc_profile_core);
+  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  EXPECT_TRUE(CompilesToValidSpv(kCoreVertShaderWithoutVersion,
+                                 shaderc_glsl_vertex_shader, options_.get()));
+}
+
+TEST_F(CompileStringWithOptionsTest,
+       ForcedVersionProfileCorrectStdClonedOptions) {
+  // Forces the version and profile to 450core, which fixes the missing
+  // #version.
+  shaderc_compile_options_set_forced_version_profile(options_.get(), 450,
+                                                     shaderc_profile_core);
+  // This mode should be carried to any clone of the original options object.
+  compile_options_ptr cloned_options(
+      shaderc_compile_options_clone(options_.get()));
+  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  EXPECT_TRUE(CompilesToValidSpv(kCoreVertShaderWithoutVersion,
+                                 shaderc_glsl_vertex_shader,
+                                 cloned_options.get()));
+}
+
+TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileWrongStd) {
+  // Forces the version and profile to 310es, which is a wrong pair.
+  shaderc_compile_options_set_forced_version_profile(options_.get(), 310,
+                                                     shaderc_profile_es);
+  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  EXPECT_THAT(CompilationErrors(kCoreVertShaderWithoutVersion,
+                                shaderc_glsl_vertex_shader, options_.get()),
+              HasSubstr("error: 'gl_ClipDistance' : undeclared identifier\n"));
+}
+
+TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileConflictingStd) {
+  // Forces the version and profile to 450core, which is in conflict with the
+  // #version in shader.
+  shaderc_compile_options_set_forced_version_profile(options_.get(), 450,
+                                                     shaderc_profile_core);
+  const std::string kVertexShader =
+      std::string("#version 310 es\n") + kCoreVertShaderWithoutVersion;
+  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  EXPECT_THAT(CompilationWarnings(kVertexShader, shaderc_glsl_vertex_shader,
+                                options_.get()),
+              HasSubstr("warning: (version, profile) forced to be (450, core), "
+                        "while in source code it is (310, es)\n"));
+}
+
+TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileUnknownVersionStd) {
+  // Forces the version and profile to 4242core, which is an unknown version.
+  shaderc_compile_options_set_forced_version_profile(
+      options_.get(), 4242 /*unknown version*/, shaderc_profile_core);
+  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  // Warning message should complain about the unknown version.
+  EXPECT_THAT(CompilationWarnings(kMinimalShader, shaderc_glsl_vertex_shader,
+                                  options_.get()),
+              HasSubstr("warning: version 4242 is unknown.\n"));
+}
+
+TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileRedundantProfileStd) {
+  // Forces the version and profile to 100core. But versions before 150 do not
+  // allow a profile token, compilation should fail.
+  shaderc_compile_options_set_forced_version_profile(options_.get(), 100,
+                                                     shaderc_profile_core);
+  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  EXPECT_THAT(CompilationErrors(kMinimalShader, shaderc_glsl_vertex_shader,
+                                options_.get()),
+              HasSubstr("error: #version: versions before 150 do not allow a "
+                        "profile token\n"));
 }
 
 TEST_F(CompileStringWithOptionsTest, PreprocessingOnlyOption) {

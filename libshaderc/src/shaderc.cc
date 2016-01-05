@@ -128,6 +128,24 @@ void shaderc_compile_options_set_disassembly_mode(
   options->compiler.SetDisassemblyMode();
 }
 
+void shaderc_compile_options_set_forced_version_profile(
+    shaderc_compile_options_t options, int version, shaderc_profile profile) {
+  // Transfer the profile parameter from public enum type to glslang internal
+  // enum type. No default case here so that compiler will complain if new enum
+  // member is added later but not handled here.
+  switch(profile){
+    case shaderc_profile_core:
+      options->compiler.SetForcedVersionProfile(version, ECoreProfile);
+      break;
+    case shaderc_profile_compatibility:
+      options->compiler.SetForcedVersionProfile(version, ECompatibilityProfile);
+      break;
+    case shaderc_profile_es:
+      options->compiler.SetForcedVersionProfile(version, EEsProfile);
+      break;
+  }
+}
+
 void shaderc_compile_options_set_preprocessing_only_mode(
     shaderc_compile_options_t options) {
   options->compiler.SetPreprocessingOnlyMode();

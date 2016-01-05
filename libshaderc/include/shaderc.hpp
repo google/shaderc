@@ -113,6 +113,13 @@ class CompileOptions {
     shaderc_compile_options_set_disassembly_mode(options_);
   }
 
+  // Sets the compiler mode to force (without any verification) the default
+  // version and profile for compilation.
+  void SetForcedVersionProfile(int version, shaderc_profile profile) {
+    shaderc_compile_options_set_forced_version_profile(options_, version,
+                                                       profile);
+  }
+
   // Sets the compiler to do only preprocessing. The byte array result in the
   // module returned by the compilation is the text of the preprocessed shader.
   // This option overrides all other compilation modes, such as disassembly mode
