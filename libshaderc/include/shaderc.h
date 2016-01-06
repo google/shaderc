@@ -121,6 +121,10 @@ void shaderc_compile_options_release(shaderc_compile_options_t options);
 void shaderc_compile_options_add_macro_definition(
     shaderc_compile_options_t options, const char* name, const char* value);
 
+// Sets the compiler mode to generate debug information in the output.
+void shaderc_compile_options_set_generate_debug_info(
+    shaderc_compile_options_t options);
+
 // Sets the compiler mode to emit a disassembly text instead of a binary. In
 // this mode, the byte array result in the shaderc_spv_module returned
 // from shaderc_compile_into_spv() will consist of SPIR-V assembly text.

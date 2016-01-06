@@ -48,6 +48,13 @@ const std::string kCoreVertShaderWithoutVersion =
     "gl_ClipDistance[0] = 5.;\n"
     "}\n";
 
+// Generated debug information should contain the name of the vector:
+// debug_info_sample.
+const std::string kMinimalDebugInfoShader =
+    "void main(){\n"
+    "vec2 debug_info_sample = vec2(1.0,1.0);\n"
+    "}\n";
+
 TEST(Init, MultipleCalls) {
   shaderc_compiler_t compiler1, compiler2, compiler3;
   EXPECT_NE(nullptr, compiler1 = shaderc_compiler_initialize());
@@ -181,7 +188,12 @@ class CompileStringTest : public testing::Test {
                            options);
     EXPECT_TRUE(shaderc_module_get_success(comp.result())) << kind << '\n'
                                                            << shader;
-    return shaderc_module_get_bytes(comp.result());
+    // Use string(const char* s, size_t n) constructor instead of
+    // string(const char* s) to make sure the string has complete binary data.
+    // string(const char* s) assumes a null-terminated C-string, which will cut
+    // the binary data when it sees a '\0' byte.
+    return std::string(shaderc_module_get_bytes(comp.result()),
+                       shaderc_module_get_length(comp.result()));
   };
 
   Compiler compiler_;
@@ -369,6 +381,39 @@ TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileRedundantProfileStd) {
                                 options_.get()),
               HasSubstr("error: #version: versions before 150 do not allow a "
                         "profile token\n"));
+}
+
+TEST_F(CompileStringWithOptionsTest, GenerateDebugInfoBinary) {
+  shaderc_compile_options_set_generate_debug_info(options_.get());
+  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  // The binary output should contain the name of the vector: debug_info_sample.
+  EXPECT_THAT(CompilationOutput(kMinimalDebugInfoShader,
+                                shaderc_glsl_vertex_shader, options_.get()),
+              HasSubstr("debug_info_sample"));
+}
+
+TEST_F(CompileStringWithOptionsTest, GenerateDebugInfoBinaryClonedOptions) {
+  shaderc_compile_options_set_generate_debug_info(options_.get());
+  compile_options_ptr cloned_options(
+      shaderc_compile_options_clone(options_.get()));
+  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  // The binary output should contain the name of the vector: debug_info_sample.
+  EXPECT_THAT(
+      CompilationOutput(kMinimalDebugInfoShader, shaderc_glsl_vertex_shader,
+                        cloned_options.get()),
+      HasSubstr("debug_info_sample"));
+}
+
+TEST_F(CompileStringWithOptionsTest, GenerateDebugInfoDisassembly) {
+  shaderc_compile_options_set_generate_debug_info(options_.get());
+  // Sets compiler to disassembly mode so that we can compare its output as
+  // a string.
+  shaderc_compile_options_set_disassembly_mode(options_.get());
+  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  // The disassembly output should contain the name of the vector: debug_info_sample.
+  EXPECT_THAT(CompilationOutput(kMinimalDebugInfoShader,
+                                shaderc_glsl_vertex_shader, options_.get()),
+              HasSubstr("debug_info_sample"));
 }
 
 TEST_F(CompileStringWithOptionsTest, PreprocessingOnlyOption) {
@@ -594,8 +639,8 @@ TEST_F(CompileKindsTest, TessControl) {
        layout(vertices=1) out;
        void main() {}
   )";
-  EXPECT_TRUE(
-      CompilationSuccess(kTessControlShader, shaderc_glsl_tess_control_shader));
+  EXPECT_TRUE(CompilationSuccess(kTessControlShader,
+                                 shaderc_glsl_tess_control_shader));
 }
 
 TEST_F(CompileKindsTest, TessEvaluation) {
