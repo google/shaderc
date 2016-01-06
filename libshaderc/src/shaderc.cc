@@ -155,7 +155,7 @@ shaderc_compiler_t shaderc_compiler_initialize() {
   ++glsl_state.compiler_initialization_count;
   bool success = true;
   if (glsl_state.compiler_initialization_count == 1) {
-    TRY_IF_EXCEPTIONS_ENABLED { success = ShInitialize(); }
+    TRY_IF_EXCEPTIONS_ENABLED { success = (ShInitialize() != 0); }
     CATCH_IF_EXCEPTIONS_ENABLED(...) { success = false; }
   }
   if (!success) {

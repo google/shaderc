@@ -138,7 +138,7 @@ bool Compiler::Compile(
 
   glslang::TShader shader(used_shader_stage);
   const char* shader_strings = input_source_string.data();
-  const int shader_lengths = input_source_string.size();
+  const int shader_lengths = static_cast<int>(input_source_string.size());
   const char* string_names = error_tag.c_str();
   shader.setStringsWithLengthsAndNames(&shader_strings, &shader_lengths,
                                        &string_names, 1);
@@ -213,7 +213,7 @@ std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
   // The stage does not matter for preprocessing.
   glslang::TShader shader(EShLangVertex);
   const char* shader_strings = shader_source.data();
-  const int shader_lengths = shader_source.size();
+  const int shader_lengths = static_cast<int>(shader_source.size());
   const char* string_names = error_tag.c_str();
   shader.setStringsWithLengthsAndNames(&shader_strings, &shader_lengths,
                                        &string_names, 1);
