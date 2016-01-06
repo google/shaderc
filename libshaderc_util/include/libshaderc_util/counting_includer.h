@@ -24,7 +24,7 @@ namespace shaderc_util {
 // An Includer that counts how many #include directives it saw.
 class CountingIncluder : public glslang::TShader::Includer {
  public:
-  CountingIncluder() : num_include_directives_({0}) {}
+  CountingIncluder() : num_include_directives_{0} {}
 
   // Bumps num_include_directives and returns the results of
   // include_delegate(filename).  Subclasses should override include_delegate()
