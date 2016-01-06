@@ -154,7 +154,7 @@ class CompileStringTest : public testing::Test {
     return shaderc_module_get_error_message(comp.result());
   };
 
-  // Compiles a shader, expects compilation fail, and returns the warning
+  // Compiles a shader, expects compilation failure, and returns the warning
   // messages.
   const std::string CompilationErrors(
       const std::string& shader, shaderc_shader_kind kind,
@@ -399,7 +399,7 @@ TEST_F(CompileStringWithOptionsTest, IfDefCompileOption) {
       "#ifdef E\n"
       "void main(){}\n"
       "#else\n"
-      "garbage string won't compile\n"
+      "#error\n"
       "#endif";
   EXPECT_TRUE(CompilesToValidSpv(kMinimalExpandedShader,
                                  shaderc_glsl_vertex_shader, options_.get()));
@@ -500,18 +500,18 @@ TEST_F(CompileKindsTest, Geometry) {
 
 TEST_F(CompileKindsTest, TessControl) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  const std::string kTCSShader =
+  const std::string kTessControlShader =
       R"(#version 310 es
        #extension GL_OES_tessellation_shader : enable
        layout(vertices=1) out;
        void main() {}
   )";
-  EXPECT_TRUE(CompilationSuccess(kTCSShader, shaderc_glsl_tess_control_shader));
+  EXPECT_TRUE(CompilationSuccess(kTessControlShader, shaderc_glsl_tess_control_shader));
 }
 
 TEST_F(CompileKindsTest, TessEvaluation) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  const std::string kTESShader =
+  const std::string kTessEvaluationShader =
       R"(#version 310 es
        #extension GL_OES_tessellation_shader : enable
        layout(triangles, equal_spacing, ccw) in;
@@ -520,7 +520,7 @@ TEST_F(CompileKindsTest, TessEvaluation) {
        }
   )";
   EXPECT_TRUE(
-      CompilationSuccess(kTESShader, shaderc_glsl_tess_evaluation_shader));
+      CompilationSuccess(kTessEvaluationShader, shaderc_glsl_tess_evaluation_shader));
 }
 
 }  // anonymous namespace
