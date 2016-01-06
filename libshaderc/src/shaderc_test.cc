@@ -114,7 +114,11 @@ class Compiler {
   shaderc_compiler_t compiler;
 };
 
-class CompileString : public testing::Test {
+// A testing class to test the compilation of a string with or without options.
+// This class wraps the initailization of compiler and compiler options and
+// groups the result checking methods. Subclass tests can access the compiler
+// object and compiler option object to set their properties.
+class CompileStringTest : public testing::Test {
  protected:
   // Compiles a shader and returns true on success, false on failure.
   bool CompilationSuccess(const std::string& shader, shaderc_shader_kind kind,
@@ -138,7 +142,7 @@ class CompileString : public testing::Test {
     return bytes[0] == spv::MagicNumber;
   }
 
-  // Compiles a shader, asserts compilation success, and returns the warning
+  // Compiles a shader, expects compilation success, and returns the warning
   // messages.
   const std::string CompilationWarnings(
       const std::string& shader, shaderc_shader_kind kind,
@@ -150,7 +154,7 @@ class CompileString : public testing::Test {
     return shaderc_module_get_error_message(comp.result());
   };
 
-  // Compiles a shader, asserts compilation fail, and returns the warning
+  // Compiles a shader, expects compilation fail, and returns the warning
   // messages.
   const std::string CompilationErrors(
       const std::string& shader, shaderc_shader_kind kind,
@@ -162,7 +166,7 @@ class CompileString : public testing::Test {
     return shaderc_module_get_error_message(comp.result());
   };
 
-  // Compiles a shader, asserts compilation success, and returns the output
+  // Compiles a shader, expects compilation success, and returns the output
   // bytes.
   const std::string CompilationOutput(
       const std::string& shader, shaderc_shader_kind kind,
@@ -174,32 +178,31 @@ class CompileString : public testing::Test {
     return shaderc_module_get_bytes(comp.result());
   };
 
-  // For compiling shaders in subclass tests
   Compiler compiler_;
   compile_options_ptr options_;
 
  public:
-  CompileString() : options_(shaderc_compile_options_initialize()){};
+  CompileStringTest() : options_(shaderc_compile_options_initialize()){};
 };
 
 // Name holders so that we have test cases being grouped with only one real
 // compilation class.
-using CompileStringWithOptions = CompileString;
-using CompileKinds = CompileString;
+using CompileStringWithOptionsTest = CompileStringTest;
+using CompileKindsTest = CompileStringTest;
 
-TEST_F(CompileString, EmptyString) {
+TEST_F(CompileStringTest, EmptyString) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   EXPECT_FALSE(CompilationSuccess("", shaderc_glsl_vertex_shader));
   EXPECT_FALSE(CompilationSuccess("", shaderc_glsl_fragment_shader));
 }
 
-TEST_F(CompileString, GarbageString) {
+TEST_F(CompileStringTest, GarbageString) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   EXPECT_FALSE(CompilationSuccess("jfalkds", shaderc_glsl_vertex_shader));
   EXPECT_FALSE(CompilationSuccess("jfalkds", shaderc_glsl_fragment_shader));
 }
 
-TEST_F(CompileString, ReallyLongShader) {
+TEST_F(CompileStringTest, ReallyLongShader) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   std::string minimal_shader = "";
   minimal_shader += "void foo(){}";
@@ -209,19 +212,19 @@ TEST_F(CompileString, ReallyLongShader) {
   EXPECT_TRUE(CompilesToValidSpv(minimal_shader, shaderc_glsl_fragment_shader));
 }
 
-TEST_F(CompileString, MinimalShader) {
+TEST_F(CompileStringTest, MinimalShader) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader));
   EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_fragment_shader));
 }
 
-TEST_F(CompileString, WorksWithCompileOptions) {
+TEST_F(CompileStringTest, WorksWithCompileOptions) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader,
                                  options_.get()));
 }
 
-TEST_F(CompileStringWithOptions, CloneCompilerOptions) {
+TEST_F(CompileStringWithOptionsTest, CloneCompilerOptions) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   compile_options_ptr options_(shaderc_compile_options_initialize());
   EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader,
@@ -232,7 +235,7 @@ TEST_F(CompileStringWithOptions, CloneCompilerOptions) {
                                  cloned_options.get()));
 }
 
-TEST_F(CompileStringWithOptions, MacroCompileOptions) {
+TEST_F(CompileStringWithOptionsTest, MacroCompileOptions) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   shaderc_compile_options_add_macro_definition(options_.get(), "E", "main");
   const std::string kMinimalExpandedShader = "void E(){}";
@@ -261,7 +264,7 @@ TEST_F(CompileStringWithOptions, MacroCompileOptions) {
                                  cloned_options.get()));
 }
 
-TEST_F(CompileStringWithOptions, DisassemblyOption) {
+TEST_F(CompileStringWithOptionsTest, DisassemblyOption) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   shaderc_compile_options_set_disassembly_mode(options_.get());
   // This should work with both the glslang native disassembly format and the
@@ -280,7 +283,7 @@ TEST_F(CompileStringWithOptions, DisassemblyOption) {
   EXPECT_THAT(disassembly_text_cloned_options, HasSubstr("MemoryModel"));
 }
 
-TEST_F(CompileStringWithOptions, PreprocessingOnlyOption) {
+TEST_F(CompileStringWithOptionsTest, PreprocessingOnlyOption) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   shaderc_compile_options_set_preprocessing_only_mode(options_.get());
   const std::string kMinimalShaderWithMacro =
@@ -301,7 +304,7 @@ TEST_F(CompileStringWithOptions, PreprocessingOnlyOption) {
   EXPECT_THAT(preprocessed_text_cloned_options, HasSubstr("void main(){ }"));
 }
 
-TEST_F(CompileStringWithOptions, WarningsOnLine) {
+TEST_F(CompileStringWithOptionsTest, WarningsOnLine) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   EXPECT_THAT(
       CompilationWarnings(kDeprecatedAttributeShader,
@@ -310,7 +313,7 @@ TEST_F(CompileStringWithOptions, WarningsOnLine) {
                 "removed in future release\n"));
 }
 
-TEST_F(CompileStringWithOptions, WarningsOnLineAsErrors) {
+TEST_F(CompileStringWithOptionsTest, WarningsOnLineAsErrors) {
   shaderc_compile_options_set_warnings_as_errors(options_.get());
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   EXPECT_THAT(
@@ -320,7 +323,7 @@ TEST_F(CompileStringWithOptions, WarningsOnLineAsErrors) {
                 "removed in future release\n"));
 }
 
-TEST_F(CompileStringWithOptions, SuppressWarningsOnLine) {
+TEST_F(CompileStringWithOptionsTest, SuppressWarningsOnLine) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   shaderc_compile_options_set_suppress_warnings(options_.get());
   EXPECT_EQ("",
@@ -328,14 +331,14 @@ TEST_F(CompileStringWithOptions, SuppressWarningsOnLine) {
                                 shaderc_glsl_vertex_shader, options_.get()));
 }
 
-TEST_F(CompileStringWithOptions, GlobalWarnings) {
+TEST_F(CompileStringWithOptionsTest, GlobalWarnings) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   EXPECT_THAT(CompilationWarnings(kMinimalUnknownVersionShader,
                                   shaderc_glsl_vertex_shader, options_.get()),
               HasSubstr("version 550 is unknown.\n"));
 }
 
-TEST_F(CompileStringWithOptions, GlobalWarningsAsErrors) {
+TEST_F(CompileStringWithOptionsTest, GlobalWarningsAsErrors) {
   shaderc_compile_options_set_warnings_as_errors(options_.get());
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   EXPECT_THAT(CompilationErrors(kMinimalUnknownVersionShader,
@@ -343,7 +346,7 @@ TEST_F(CompileStringWithOptions, GlobalWarningsAsErrors) {
               HasSubstr("error: version 550 is unknown.\n"));
 }
 
-TEST_F(CompileStringWithOptions, SuppressGlobalWarnings) {
+TEST_F(CompileStringWithOptionsTest, SuppressGlobalWarnings) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   shaderc_compile_options_set_suppress_warnings(options_.get());
   EXPECT_EQ("",
@@ -351,7 +354,7 @@ TEST_F(CompileStringWithOptions, SuppressGlobalWarnings) {
                                 shaderc_glsl_vertex_shader, options_.get()));
 }
 
-TEST_F(CompileStringWithOptions,
+TEST_F(CompileStringWithOptionsTest,
        SuppressWarningsModeFirstOverridesWarningsAsErrorsMode) {
   // Sets suppress-warnings mode first, then sets warnings-as-errors mode.
   // suppress-warnings mode should override warnings-as-errors mode.
@@ -370,7 +373,7 @@ TEST_F(CompileStringWithOptions,
                                 shaderc_glsl_vertex_shader, options_.get()));
 }
 
-TEST_F(CompileStringWithOptions,
+TEST_F(CompileStringWithOptionsTest,
        SuppressWarningsModeSecondOverridesWarningsAsErrorsMode) {
   // Sets suppress-warnings mode first, then sets warnings-as-errors mode.
   // suppress-warnings mode should override warnings-as-errors mode.
@@ -389,7 +392,7 @@ TEST_F(CompileStringWithOptions,
                                 shaderc_glsl_vertex_shader, options_.get()));
 }
 
-TEST_F(CompileStringWithOptions, IfDefCompileOption) {
+TEST_F(CompileStringWithOptionsTest, IfDefCompileOption) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   shaderc_compile_options_add_macro_definition(options_.get(), "E", nullptr);
   const std::string kMinimalExpandedShader =
@@ -402,7 +405,7 @@ TEST_F(CompileStringWithOptions, IfDefCompileOption) {
                                  shaderc_glsl_vertex_shader, options_.get()));
 }
 
-TEST_F(CompileStringWithOptions, TargetEnv) {
+TEST_F(CompileStringWithOptionsTest, TargetEnv) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   // Confirm that this shader compiles with shaderc_target_env_opengl_compat;
   // if targeting Vulkan, glslang will fail to compile it
@@ -428,21 +431,21 @@ TEST_F(CompileStringWithOptions, TargetEnv) {
                                   options_.get()));
 }
 
-TEST_F(CompileString, ShaderKindRespected) {
+TEST_F(CompileStringTest, ShaderKindRespected) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   const std::string kVertexShader = "void main(){ gl_Position = vec4(0);}";
   EXPECT_TRUE(CompilationSuccess(kVertexShader, shaderc_glsl_vertex_shader));
   EXPECT_FALSE(CompilationSuccess(kVertexShader, shaderc_glsl_fragment_shader));
 }
 
-TEST_F(CompileString, ErrorsReported) {
+TEST_F(CompileStringTest, ErrorsReported) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   EXPECT_THAT(CompilationErrors("int f(){return wrongname;}",
                                 shaderc_glsl_vertex_shader),
               HasSubstr("wrongname"));
 }
 
-TEST_F(CompileString, MultipleThreadsCalling) {
+TEST_F(CompileStringTest, MultipleThreadsCalling) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   bool results[10];
   std::vector<std::thread> threads;
@@ -457,19 +460,19 @@ TEST_F(CompileString, MultipleThreadsCalling) {
   EXPECT_THAT(results, Each(true));
 }
 
-TEST_F(CompileKinds, Vertex) {
+TEST_F(CompileKindsTest, Vertex) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   const std::string kVertexShader = "void main(){ gl_Position = vec4(0);}";
   EXPECT_TRUE(CompilationSuccess(kVertexShader, shaderc_glsl_vertex_shader));
 }
 
-TEST_F(CompileKinds, Fragment) {
+TEST_F(CompileKindsTest, Fragment) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   const std::string kFragShader = "void main(){ gl_FragColor = vec4(0);}";
   EXPECT_TRUE(CompilationSuccess(kFragShader, shaderc_glsl_fragment_shader));
 }
 
-TEST_F(CompileKinds, Compute) {
+TEST_F(CompileKindsTest, Compute) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   const std::string kCompShader =
       R"(#version 310 es
@@ -478,7 +481,7 @@ TEST_F(CompileKinds, Compute) {
   EXPECT_TRUE(CompilationSuccess(kCompShader, shaderc_glsl_compute_shader));
 }
 
-TEST_F(CompileKinds, Geometry) {
+TEST_F(CompileKindsTest, Geometry) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   const std::string kGeoShader =
 
@@ -495,7 +498,7 @@ TEST_F(CompileKinds, Geometry) {
   EXPECT_TRUE(CompilationSuccess(kGeoShader, shaderc_glsl_geometry_shader));
 }
 
-TEST_F(CompileKinds, TessControl) {
+TEST_F(CompileKindsTest, TessControl) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   const std::string kTCSShader =
       R"(#version 310 es
@@ -506,7 +509,7 @@ TEST_F(CompileKinds, TessControl) {
   EXPECT_TRUE(CompilationSuccess(kTCSShader, shaderc_glsl_tess_control_shader));
 }
 
-TEST_F(CompileKinds, TessEvaluation) {
+TEST_F(CompileKindsTest, TessEvaluation) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   const std::string kTESShader =
       R"(#version 310 es
