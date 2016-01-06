@@ -104,6 +104,11 @@ class CompileOptions {
     AddMacroDefinition(name.c_str(), value.c_str());
   }
 
+  // Sets the compiler mode to generate debug information in the output.
+  void SetGenerateDebugInfo(){
+    shaderc_compile_options_set_generate_debug_info(options_);
+  }
+
   // Sets the compiler to emit a disassembly text instead of a binary. In
   // this mode, the byte array result in the shaderc_spv_module returned
   // from shaderc_compile_into_spv() will consist of SPIR-V assembly text.

@@ -51,6 +51,12 @@ const std::string kCoreVertShaderWithoutVersion =
     "gl_ClipDistance[0] = 5.;\n"
     "}\n";
 
+// Debug information should contain the name of the vector: debug_info_sample.
+const std::string kMinimalDebugInfoShader =
+    "void main(){\n"
+    "vec2 debug_info_sample = vec2(1.0, 1.0);\n"
+    "}\n";
+
 class CppInterface : public testing::Test {
  protected:
   // Compiles a shader and returns true on success, false on failure.
@@ -106,6 +112,16 @@ class CppInterface : public testing::Test {
     const auto module = compiler_.CompileGlslToSpv(shader, kind, options);
     EXPECT_FALSE(module.GetSuccess()) << kind << '\n' << shader;
     return module.GetErrorMessage();
+  }
+
+  // Compiles a shader, expects compilation success, and returns the output
+  // bytes.
+  std::string CompilationOutput(const std::string& shader,
+                                shaderc_shader_kind kind,
+                                const CompileOptions& options) const {
+    const auto module = compiler_.CompileGlslToSpv(shader, kind, options);
+    EXPECT_TRUE(module.GetSuccess()) << kind << '\n';
+    return std::string(module.GetData(), module.GetLength());
   }
 
   // For compiling shaders in subclass tests:
@@ -359,6 +375,44 @@ TEST_F(CppInterface, ForcedVersionProfileRedundantProfileStd) {
       CompilationErrors(kMinimalShader, shaderc_glsl_vertex_shader, options_),
       HasSubstr("error: #version: versions before 150 do not allow a profile "
                 "token\n"));
+}
+
+TEST_F(CppInterface, GenerateDebugInfoBinary) {
+  options_.SetGenerateDebugInfo();
+  // The output binary should contain the name of the vector: debug_info_sample as char
+  // array.
+  EXPECT_THAT(CompilationOutput(kMinimalDebugInfoShader,
+                                shaderc_glsl_vertex_shader, options_),
+              HasSubstr("debug_info_sample"));
+}
+
+TEST_F(CppInterface, GenerateDebugInfoBinaryClonedOptions) {
+  options_.SetGenerateDebugInfo();
+  CompileOptions cloned_options(options_);
+  // The output binary should contain the name of the vector: debug_info_sample as char
+  // array.
+  EXPECT_THAT(CompilationOutput(kMinimalDebugInfoShader,
+                                shaderc_glsl_vertex_shader, cloned_options),
+              HasSubstr("debug_info_sample"));
+}
+
+TEST_F(CppInterface, GenerateDebugInfoDisassembly) {
+  options_.SetGenerateDebugInfo();
+  // Debug info should also be emitted in disassembly mode.
+  options_.SetDisassemblyMode();
+  // The output disassembly should contain the name of the vector: debug_info_sample.
+  EXPECT_THAT(CompilationOutput(kMinimalDebugInfoShader,
+                                shaderc_glsl_vertex_shader, options_),
+              HasSubstr("debug_info_sample"));
+}
+
+TEST_F(CppInterface, GenerateDebugInfoDisassemblyClonedOptions) {
+  options_.SetGenerateDebugInfo();
+  // Generate debug info mode should be carried to the cloned options.
+  CompileOptions cloned_options(options_);
+  EXPECT_THAT(CompilationOutput(kMinimalDebugInfoShader,
+                                shaderc_glsl_vertex_shader, cloned_options),
+              HasSubstr("debug_info_sample"));
 }
 
 TEST_F(CppInterface, PreprocessingOnlyOption) {
