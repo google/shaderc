@@ -182,8 +182,10 @@ class CompileString : public testing::Test {
   };
 };
 
-class CompileStringWithOptions : public CompileString {};
-class CompileKinds : public CompileString {};
+// Name holders so that we have test cases being grouped with only one real
+// compilation class.
+using CompileStringWithOptions = CompileString;
+using CompileKinds = CompileString;
 
 TEST_F(CompileString, EmptyString) {
   EXPECT_FALSE(CompilationSuccess("", shaderc_glsl_vertex_shader));
