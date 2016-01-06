@@ -506,7 +506,8 @@ TEST_F(CompileKindsTest, TessControl) {
        layout(vertices=1) out;
        void main() {}
   )";
-  EXPECT_TRUE(CompilationSuccess(kTessControlShader, shaderc_glsl_tess_control_shader));
+  EXPECT_TRUE(
+      CompilationSuccess(kTessControlShader, shaderc_glsl_tess_control_shader));
 }
 
 TEST_F(CompileKindsTest, TessEvaluation) {
@@ -519,8 +520,8 @@ TEST_F(CompileKindsTest, TessEvaluation) {
          gl_Position = vec4(gl_TessCoord, 1.0);
        }
   )";
-  EXPECT_TRUE(
-      CompilationSuccess(kTessEvaluationShader, shaderc_glsl_tess_evaluation_shader));
+  EXPECT_TRUE(CompilationSuccess(kTessEvaluationShader,
+                                 shaderc_glsl_tess_evaluation_shader));
 }
 
 }  // anonymous namespace
