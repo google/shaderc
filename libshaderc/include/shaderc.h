@@ -132,10 +132,8 @@ void shaderc_compile_options_set_disassembly_mode(
 // Forces the GLSL language version and profile to a given pair. The version
 // number is the same as would appear in the #version annotation in the source.
 // Version and profile specified here overrides the #version annotation in the
-// source. Versions before 150 do not allow a profile token, in that case
-// shaderc_profile_none should be passed down as the profile parameter, and
-// shaderc_profile_none should only be used when none profile is specified along
-// with version.
+// source. Use profile: 'shaderc_profile_none' for GLSL versions that do not
+// define profiles, e.g. versions below 150.
 void shaderc_compile_options_set_forced_version_profile(
     shaderc_compile_options_t options, int version, shaderc_profile profile);
 
