@@ -314,8 +314,9 @@ TEST_F(CompileStringWithOptionsTest,
                                  cloned_options.get()));
 }
 
-TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileWrongStd) {
-  // Forces the version and profile to 310es, which is a wrong pair.
+TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileInvalidModule) {
+  // Forces the version and profile to 310es, while the source module is invalid
+  // for this version of GLSL. Compilation should fail.
   shaderc_compile_options_set_forced_version_profile(options_.get(), 310,
                                                      shaderc_profile_es);
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
@@ -347,6 +348,15 @@ TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileUnknownVersionStd) {
   EXPECT_THAT(CompilationWarnings(kMinimalShader, shaderc_glsl_vertex_shader,
                                   options_.get()),
               HasSubstr("warning: version 4242 is unknown.\n"));
+}
+
+TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileVersionsBefore150) {
+  // Versions before 150 do not allow a profile token, shaderc_profile_none
+  // should be passed down as the profile parameter.
+  shaderc_compile_options_set_forced_version_profile(options_.get(), 100,
+                                                     shaderc_profile_none);
+  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  EXPECT_TRUE(CompilationSuccess(kMinimalShader, shaderc_glsl_vertex_shader, options_.get()));
 }
 
 TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileRedundantProfileStd) {

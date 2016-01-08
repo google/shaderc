@@ -313,8 +313,9 @@ TEST_F(CppInterface, ForcedVersionProfileCorrectStdClonedOptions) {
                                  shaderc_glsl_vertex_shader, cloned_options));
 }
 
-TEST_F(CppInterface, ForcedVersionProfileWrongStd) {
-  // Forces the version and profile to 310es, which is a wrong pair.
+TEST_F(CppInterface, ForcedVersionProfileInvalidModule) {
+  // Forces the version and profile to 310es, while the source module is invalid
+  // for this version of GLSL. Compilation should fail.
   options_.SetForcedVersionProfile(310, shaderc_profile_es);
   EXPECT_THAT(CompilationErrors(kCoreVertShaderWithoutVersion,
                                 shaderc_glsl_vertex_shader, options_),
@@ -340,6 +341,14 @@ TEST_F(CppInterface, ForcedVersionProfileUnknownVersionStd) {
   EXPECT_THAT(
       CompilationWarnings(kMinimalShader, shaderc_glsl_vertex_shader, options_),
       HasSubstr("warning: version 4242 is unknown.\n"));
+}
+
+TEST_F(CppInterface, ForcedVersionProfileVersionsBefore150) {
+  // Versions before 150 do not allow a profile token, shaderc_profile_none
+  // should be passed down as the profile parameter.
+  options_.SetForcedVersionProfile(100, shaderc_profile_none);
+  EXPECT_TRUE(
+      CompilationSuccess(kMinimalShader, shaderc_glsl_vertex_shader, options_));
 }
 
 TEST_F(CppInterface, ForcedVersionProfileRedundantProfileStd) {

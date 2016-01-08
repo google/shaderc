@@ -134,6 +134,9 @@ void shaderc_compile_options_set_forced_version_profile(
   // enum type. No default case here so that compiler will complain if new enum
   // member is added later but not handled here.
   switch(profile){
+    case shaderc_profile_none:
+      options->compiler.SetForcedVersionProfile(version, ENoProfile);
+      break;
     case shaderc_profile_core:
       options->compiler.SetForcedVersionProfile(version, ECoreProfile);
       break;
