@@ -121,6 +121,10 @@ class CppInterface : public testing::Test {
                                 const CompileOptions& options) const {
     const auto module = compiler_.CompileGlslToSpv(shader, kind, options);
     EXPECT_TRUE(module.GetSuccess()) << kind << '\n';
+    // Use string(const char* s, size_t n) constructor instead of
+    // string(const char* s) to make sure the string has complete binary data.
+    // string(const char* s) assumes a null-terminated C-string, which will cut
+    // the binary data when it sees a '\0' byte.
     return std::string(module.GetData(), module.GetLength());
   }
 
