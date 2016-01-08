@@ -310,7 +310,7 @@ TEST_F(CppInterface, ForcedVersionProfileCorrectStdClonedOptions) {
   options_.SetForcedVersionProfile(450, shaderc_profile_core);
   CompileOptions cloned_options(options_);
   EXPECT_TRUE(CompilesToValidSpv(kCoreVertShaderWithoutVersion,
-                                 shaderc_glsl_vertex_shader, options_));
+                                 shaderc_glsl_vertex_shader, cloned_options));
 }
 
 TEST_F(CppInterface, ForcedVersionProfileWrongStd) {

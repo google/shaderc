@@ -113,8 +113,10 @@ class CompileOptions {
     shaderc_compile_options_set_disassembly_mode(options_);
   }
 
-  // Sets the compiler mode to force (without any verification) the default
-  // version and profile for compilation.
+  // Forces the GLSL language version and profile to a given pair. The version
+  // number is the same as would appear in the #version annotation in the
+  // source. Version and profile specified here overrides the #version
+  // annotation in the source.
   void SetForcedVersionProfile(int version, shaderc_profile profile) {
     shaderc_compile_options_set_forced_version_profile(options_, version,
                                                        profile);
