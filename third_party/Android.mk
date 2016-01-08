@@ -1,5 +1,7 @@
-LOCAL_PATH := $(call my-dir)/glslang
-GLSLANG_LOCAL_PATH := $(call my-dir)/glslang
+THIRD_PARTY_PATH := $(call my-dir)
+
+LOCAL_PATH := $(THIRD_PARTY_PATH)/glslang
+GLSLANG_LOCAL_PATH := $(THIRD_PARTY_PATH)/glslang
 
 GLSLANG_OS_FLAGS := -DGLSLANG_OSINCLUDE_UNIX
 
@@ -83,3 +85,37 @@ LOCAL_C_INCLUDES:=$(GLSLANG_LOCAL_PATH)
 LOCAL_STATIC_LIBRARIES:=OSDependent OGLCompiler SPIRV
 include $(BUILD_STATIC_LIBRARY)
 
+LOCAL_PATH := $(THIRD_PARTY_PATH)/spirv-tools
+SPVTOOLS_LOCAL_PATH := $(THIRD_PARTY_PATH)/spirv-tools
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := SPIRV-Tools
+LOCAL_C_INCLUDES := \
+		$(SPVTOOLS_LOCAL_PATH)/include \
+		$(SPVTOOLS_LOCAL_PATH)/external/include \
+		$(SPVTOOLS_LOCAL_PATH)/source
+LOCAL_EXPORT_C_INCLUDES := \
+		$(SPVTOOLS_LOCAL_PATH)/include \
+		$(SPVTOOLS_LOCAL_PATH)/external/include
+LOCAL_CXXFLAGS := -std=c++11
+LOCAL_SRC_FILES:= \
+		source/assembly_grammar.cpp \
+		source/binary.cpp \
+		source/diagnostic.cpp \
+		source/disassemble.cpp \
+		source/ext_inst.cpp \
+		source/opcode.cpp \
+		source/operand.cpp \
+		source/print.cpp \
+		source/spirv_endian.cpp \
+		source/table.cpp \
+		source/text.cpp \
+		source/text_handler.cpp \
+		source/validate_cfg.cpp \
+		source/validate.cpp \
+		source/validate_id.cpp \
+		source/validate_instruction.cpp \
+		source/validate_layout.cpp \
+		source/validate_ssa.cpp \
+		source/validate_types.cpp
+include $(BUILD_STATIC_LIBRARY)

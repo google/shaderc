@@ -28,7 +28,8 @@ init:
 # scripts that run after cloning repository
 install:
   - git clone https://github.com/google/googletest.git third_party/googletest
-  - git clone https://github.com/google/glslang third_party/glslang
+  - git clone https://github.com/google/glslang.git third_party/glslang
+  - git clone https://github.com/KhronosGroup/SPIRV-Tools.git third_party/spirv-tools
 
 build:
   parallel: true  # enable MSBuild parallel builds

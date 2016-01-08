@@ -41,7 +41,10 @@ copy only to stage those changes for review, and to provide something for
 Shaderc to build against in the meantime.  Please see
 [DEVELOPMENT.howto.md](DEVELOPMENT.howto.md) for more details.
 
-Shaderc also depends on the [Google Mock](https://github.com/google/googlemock)
+Shaderc depends on [SPIRV-Tools](https://github.com/KhronosGroup/SPIRV-Tools)
+for assembling and disassembling SPIR-V binaries.
+
+Shaderc depends on the [Google Mock](https://github.com/google/googlemock)
 testing framework.
 
 In the following sections, `$SOURCE_DIR` is the directory you intend to clone
@@ -55,7 +58,8 @@ Shaderc into.
 git clone https://github.com/google/shaderc $SOURCE_DIR
 cd $SOURCE_DIR/third_party
 git clone https://github.com/google/googletest.git
-git clone https://github.com/google/glslang glslang
+git clone https://github.com/google/glslang.git
+git clone https://github.com/KhronosGroup/SPIRV-Tools.git spirv-tools
 cd $SOURCE_DIR/
 ```
 

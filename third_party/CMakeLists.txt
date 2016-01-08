@@ -1,6 +1,7 @@
 # Suppress all warnings from third-party projects.
 set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS -w)
 
+# Configure third party projects.
 if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/googletest)
   add_subdirectory(googletest)
 endif()
@@ -9,7 +10,7 @@ if (NOT TARGET gmock)
 endif()
 
 set(OLD_PLATFORM_TOOLSET ${CMAKE_GENERATOR_TOOLSET})
-# Configure third party projects.
+
 if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/glslang)
   add_subdirectory(glslang)
 endif()
@@ -23,12 +24,19 @@ if(WIN32)
     set(CMAKE_GENERATOR_TOOLSET "${OLD_PLATFORM_TOOLSET}" CACHE STRING
       "Platform Toolset" FORCE)
 endif()
+
+if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/spirv-tools)
+  add_subdirectory(spirv-tools)
+endif()
+if (NOT TARGET SPIRV-Tools)
+  message(FATAL_ERROR "SPIRV-Tools was not found - required for compilation")
+endif()
+
 # Configure out-of-source-directory tests for glslang.
 # The glslang project uses a bash script called "runtests" to run tests.
 # The runtests script assumes the glslangValidator executable exists in
 # a location inside the source tree, but we build it elsewhere.
 # We need to copy the test files, fix the path references, and then run tests.
-
 set(GLSLANG_TEST_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/glslang/Test)
 set(GLSLANG_TEST_BIN_DIR
       ${CMAKE_CURRENT_BINARY_DIR}/test-glslang/${CMAKE_CFG_INTDIR})
@@ -57,3 +65,7 @@ else()
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test-glslang/
   )
 endif()
+
+add_test(NAME spirv-tools-testsuite
+  COMMAND UnitSPIRV
+  WORKING_DIRECTORY ${SPIRV-Tools_BINARY_DIR})
