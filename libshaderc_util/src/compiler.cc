@@ -26,9 +26,9 @@
 #include "libshaderc_util/string_piece.h"
 #include "libshaderc_util/version_profile.h"
 
+#include "libspirv/libspirv.h"
+
 #include "SPIRV/GlslangToSpv.h"
-#include "SPIRV/disassemble.h"
-#include "SPIRV/doc.h"
 
 namespace {
 using shaderc_util::string_piece;
@@ -65,6 +65,41 @@ std::pair<int, string_piece> DecodeLineDirective(string_piece directive) {
   directive = directive.substr(space_loc);
   directive = directive.strip("\" \n");
   return std::make_pair(line, directive);
+}
+
+// Writes the message contained in the diagnostic parameter to *dest. Assumes
+// the diagnostic message is reported for a binary location.
+void OutputSpvToolsDiagnostic(spv_diagnostic diagnostic, std::string* dest) {
+  assert(!diagnostic->isTextSource);
+
+  std::ostringstream os;
+  os << diagnostic->position.index << ": " << diagnostic->error;
+  *dest = os.str();
+}
+
+// Disassembles the given binary. Returns SPV_SUCCESS and writes the
+// disassembled text to *text_or_error if successful. Otherwise, writes the
+// error message to *text_or_error.
+spv_result_t DisassembleBinary(const std::vector<uint32_t>& binary,
+                               std::string* text_or_error) {
+  auto spvtools_context = spvContextCreate();
+  spv_text disassembled_text = nullptr;
+  spv_diagnostic spvtools_diagnostic = nullptr;
+
+  spv_result_t result = spvBinaryToText(
+      spvtools_context, binary.data(), binary.size(),
+      /* options = */ 0u, &disassembled_text, &spvtools_diagnostic);
+  if (result == SPV_SUCCESS) {
+    text_or_error->assign(disassembled_text->str, disassembled_text->length);
+  } else {
+    OutputSpvToolsDiagnostic(spvtools_diagnostic, text_or_error);
+  }
+
+  spvDiagnosticDestroy(spvtools_diagnostic);
+  spvTextDestroy(disassembled_text);
+  spvContextDestroy(spvtools_context);
+
+  return result;
 }
 
 }  // anonymous namespace
@@ -167,10 +202,14 @@ bool Compiler::Compile(
   std::vector<uint32_t> spirv;
   glslang::GlslangToSpv(*program.getIntermediate(used_shader_stage), spirv);
   if (disassemble_) {
-    spv::Parameterize();
-    std::ostringstream disassembled_spirv;
-    spv::Disassemble(disassembled_spirv, spirv);
-    return shaderc_util::WriteFile(output_stream, disassembled_spirv.str());
+    std::string text_or_error;
+    if (DisassembleBinary(spirv, &text_or_error) != SPV_SUCCESS) {
+      *error_stream << "shaderc: internal error: compilation succeeded but "
+                       "failed to disassemble: "
+                    << text_or_error << "\n";
+      return false;
+    }
+    return shaderc_util::WriteFile(output_stream, text_or_error);
   } else {
     return shaderc_util::WriteFile(
         output_stream,
