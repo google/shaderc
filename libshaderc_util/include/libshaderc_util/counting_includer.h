@@ -24,7 +24,14 @@ namespace shaderc_util {
 // An Includer that counts how many #include directives it saw.
 class CountingIncluder : public glslang::TShader::Includer {
  public:
-  CountingIncluder() : num_include_directives_{0} {}
+  // Done as .store(0) instead of in the initializer list for the following
+  // reasons:
+  // Clang > 3.6 will complain about it if it is written as ({0}).
+  // VS2013 fails if it is written as {0}.
+  // G++-4.8 does not correctly support std::atomic_init.
+  CountingIncluder() {
+    num_include_directives_.store(0);
+  }
 
   // Bumps num_include_directives and returns the results of
   // include_delegate(filename).  Subclasses should override include_delegate()
