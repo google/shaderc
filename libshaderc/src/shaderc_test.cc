@@ -337,6 +337,15 @@ TEST_F(CompileStringWithOptionsTest, DisassemblyOption) {
   EXPECT_THAT(disassembly_text_cloned_options, HasSubstr("MemoryModel"));
 }
 
+TEST_F(CompileStringWithOptionsTest, DisassembleMinimalShader) {
+  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  shaderc_compile_options_set_disassembly_mode(options_.get());
+
+  const std::string disassembly_text = CompilationOutput(
+      kMinimalShader, shaderc_glsl_vertex_shader, options_.get());
+  EXPECT_EQ(kMinimalShaderDisassembly, disassembly_text);
+}
+
 TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileCorrectStd) {
   // Forces the version and profile to 450core, which fixes the missing
   // #version.

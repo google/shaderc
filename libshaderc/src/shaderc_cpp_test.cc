@@ -312,6 +312,14 @@ TEST_F(CppInterface, DisassemblyOption) {
   EXPECT_THAT(result_from_cloned_options.GetData(), HasSubstr("MemoryModel"));
 }
 
+TEST_F(CppInterface, DisassembleMinimalShader) {
+  options_.SetDisassemblyMode();
+  shaderc::SpvModule result = compiler_.CompileGlslToSpv(
+      kMinimalShader, shaderc_glsl_vertex_shader, "shader", options_);
+  EXPECT_TRUE(CompilationResultIsSuccess(result));
+  EXPECT_STREQ(kMinimalShaderDisassembly, result.GetData());
+}
+
 TEST_F(CppInterface, ForcedVersionProfileCorrectStd) {
   // Forces the version and profile to 450core, which fixes the missing
   // #version.

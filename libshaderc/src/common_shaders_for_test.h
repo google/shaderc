@@ -163,6 +163,28 @@ const char kVertexOnlyShaderWithInvalidPragma[] =
     "    gl_Position = vec4(1.);\n"
     "}";
 
+// The disassembly for kMinimalShader.
+const char kMinimalShaderDisassembly[] =
+    "; SPIR-V\n"
+    "; Version: 1.0\n"
+    "; Generator: Khronos Glslang Reference Front End; 1\n"
+    "; Bound: 6\n"
+    "; Schema: 0\n"
+    "OpCapability Shader\n"
+    "%1 = OpExtInstImport \"GLSL.std.450\"\n"
+    "OpMemoryModel Logical GLSL450\n"
+    "OpEntryPoint Vertex %4 \"main\"\n"
+    "OpSource GLSL 110\n"
+    "OpSourceExtension \"GL_GOOGLE_cpp_style_line_directive\"\n"
+    "OpSourceExtension \"GL_GOOGLE_include_directive\"\n"
+    "OpName %4 \"main\"\n"
+    "%2 = OpTypeVoid\n"
+    "%3 = OpTypeFunction %2\n"
+    "%4 = OpFunction %2 None %3\n"
+    "%5 = OpLabel\n"
+    "OpReturn\n"
+    "OpFunctionEnd\n";
+
 #ifdef __cplusplus
 }
 #endif  // __cplusplus
