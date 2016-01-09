@@ -27,30 +27,30 @@ using testing::Each;
 using testing::HasSubstr;
 
 // The minimal shader without #version
-const std::string kMinimalShader = "void main(){}";
+const char kMinimalShader[] = "void main(){}";
 
 // By default the compiler will emit a warning on line 2 complaining
 // that 'float' is a deprecated attribute in version 130.
-const std::string kDeprecatedAttributeShader =
+const char kDeprecatedAttributeShader[] =
     "#version 130\n"
     "attribute float x;\n"
     "void main() {}\n";
 
 // By default the compiler will emit a warning as version 550 is an unknown
 // version.
-const std::string kMinimalUnknownVersionShader =
+const char kMinimalUnknownVersionShader[] =
     "#version 550\n"
     "void main() {}\n";
 
 // gl_ClipDistance doesn't exist in es profile (at least until 3.10).
-const std::string kCoreVertShaderWithoutVersion =
+const char kCoreVertShaderWithoutVersion[] =
     "void main() {\n"
     "gl_ClipDistance[0] = 5.;\n"
     "}\n";
 
 // Generated debug information should contain the name of the vector:
 // debug_info_sample.
-const std::string kMinimalDebugInfoShader =
+const char kMinimalDebugInfoShader[] =
     "void main(){\n"
     "vec2 debug_info_sample = vec2(1.0,1.0);\n"
     "}\n";
@@ -200,7 +200,7 @@ class CompileStringTest : public testing::Test {
   compile_options_ptr options_;
 
  public:
-  CompileStringTest() : options_(shaderc_compile_options_initialize()){};
+  CompileStringTest() : options_(shaderc_compile_options_initialize()) {}
 };
 
 // Name holders so that we have test cases being grouped with only one real
@@ -346,7 +346,7 @@ TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileConflictingStd) {
       std::string("#version 310 es\n") + kCoreVertShaderWithoutVersion;
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   EXPECT_THAT(CompilationWarnings(kVertexShader, shaderc_glsl_vertex_shader,
-                                options_.get()),
+                                  options_.get()),
               HasSubstr("warning: (version, profile) forced to be (450, core), "
                         "while in source code it is (310, es)\n"));
 }
@@ -368,7 +368,8 @@ TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileVersionsBefore150) {
   shaderc_compile_options_set_forced_version_profile(options_.get(), 100,
                                                      shaderc_profile_none);
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  EXPECT_TRUE(CompilationSuccess(kMinimalShader, shaderc_glsl_vertex_shader, options_.get()));
+  EXPECT_TRUE(CompilationSuccess(kMinimalShader, shaderc_glsl_vertex_shader,
+                                 options_.get()));
 }
 
 TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileRedundantProfileStd) {
@@ -410,7 +411,8 @@ TEST_F(CompileStringWithOptionsTest, GenerateDebugInfoDisassembly) {
   // a string.
   shaderc_compile_options_set_disassembly_mode(options_.get());
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  // The disassembly output should contain the name of the vector: debug_info_sample.
+  // The disassembly output should contain the name of the vector:
+  // debug_info_sample.
   EXPECT_THAT(CompilationOutput(kMinimalDebugInfoShader,
                                 shaderc_glsl_vertex_shader, options_.get()),
               HasSubstr("debug_info_sample"));
@@ -639,8 +641,8 @@ TEST_F(CompileKindsTest, TessControl) {
        layout(vertices=1) out;
        void main() {}
   )";
-  EXPECT_TRUE(CompilationSuccess(kTessControlShader,
-                                 shaderc_glsl_tess_control_shader));
+  EXPECT_TRUE(
+      CompilationSuccess(kTessControlShader, shaderc_glsl_tess_control_shader));
 }
 
 TEST_F(CompileKindsTest, TessEvaluation) {

@@ -28,31 +28,31 @@ using testing::Each;
 using testing::HasSubstr;
 
 const char kMinimalShader[] = "void main(){}";
-const std::string kMinimalShaderWithMacro =
+const char kMinimalShaderWithMacro[] =
     "#define E main\n"
     "void E(){}\n";
 
 // By default the compiler will emit a warning on line 2 complaining
 // that 'float' is a deprecated attribute in version 130.
-const std::string kDeprecatedAttributeShader =
+const char kDeprecatedAttributeShader[] =
     "#version 130\n"
     "attribute float x;\n"
     "void main() {}\n";
 
 // By default the compiler will emit a warning as version 550 is an unknown
 // version.
-const std::string kMinimalUnknownVersionShader =
+const char kMinimalUnknownVersionShader[] =
     "#version 550\n"
     "void main() {}\n";
 
 // gl_ClipDistance doesn't exist in es profile (at least until 3.10).
-const std::string kCoreVertShaderWithoutVersion =
+const char kCoreVertShaderWithoutVersion[] =
     "void main() {\n"
     "gl_ClipDistance[0] = 5.;\n"
     "}\n";
 
 // Debug information should contain the name of the vector: debug_info_sample.
-const std::string kMinimalDebugInfoShader =
+const char kMinimalDebugInfoShader[] =
     "void main(){\n"
     "vec2 debug_info_sample = vec2(1.0, 1.0);\n"
     "}\n";
@@ -103,12 +103,12 @@ class CppInterface : public testing::Test {
 
   // Compiles a shader, asserts compilation fail, and returns the error
   // messages.
-  std::string CompilationErrors(
-      const std::string& shader, shaderc_shader_kind kind,
-      // This could default to options_, but that can
-      // be easily confused with a no-options-provided
-      // case:
-      const CompileOptions& options) {
+  std::string CompilationErrors(const std::string& shader,
+                                shaderc_shader_kind kind,
+                                // This could default to options_, but that can
+                                // be easily confused with a no-options-provided
+                                // case:
+                                const CompileOptions& options) {
     const auto module = compiler_.CompileGlslToSpv(shader, kind, options);
     EXPECT_FALSE(module.GetSuccess()) << kind << '\n' << shader;
     return module.GetErrorMessage();
@@ -383,8 +383,8 @@ TEST_F(CppInterface, ForcedVersionProfileRedundantProfileStd) {
 
 TEST_F(CppInterface, GenerateDebugInfoBinary) {
   options_.SetGenerateDebugInfo();
-  // The output binary should contain the name of the vector: debug_info_sample as char
-  // array.
+  // The output binary should contain the name of the vector: debug_info_sample
+  // as char array.
   EXPECT_THAT(CompilationOutput(kMinimalDebugInfoShader,
                                 shaderc_glsl_vertex_shader, options_),
               HasSubstr("debug_info_sample"));
@@ -393,8 +393,8 @@ TEST_F(CppInterface, GenerateDebugInfoBinary) {
 TEST_F(CppInterface, GenerateDebugInfoBinaryClonedOptions) {
   options_.SetGenerateDebugInfo();
   CompileOptions cloned_options(options_);
-  // The output binary should contain the name of the vector: debug_info_sample as char
-  // array.
+  // The output binary should contain the name of the vector: debug_info_sample
+  // as char array.
   EXPECT_THAT(CompilationOutput(kMinimalDebugInfoShader,
                                 shaderc_glsl_vertex_shader, cloned_options),
               HasSubstr("debug_info_sample"));
@@ -404,7 +404,8 @@ TEST_F(CppInterface, GenerateDebugInfoDisassembly) {
   options_.SetGenerateDebugInfo();
   // Debug info should also be emitted in disassembly mode.
   options_.SetDisassemblyMode();
-  // The output disassembly should contain the name of the vector: debug_info_sample.
+  // The output disassembly should contain the name of the vector:
+  // debug_info_sample.
   EXPECT_THAT(CompilationOutput(kMinimalDebugInfoShader,
                                 shaderc_glsl_vertex_shader, options_),
               HasSubstr("debug_info_sample"));
