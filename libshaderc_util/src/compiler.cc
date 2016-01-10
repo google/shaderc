@@ -67,40 +67,61 @@ std::pair<int, string_piece> DecodeLineDirective(string_piece directive) {
   return std::make_pair(line, directive);
 }
 
-// Writes the message contained in the diagnostic parameter to *dest. Assumes
-// the diagnostic message is reported for a binary location.
-void OutputSpvToolsDiagnostic(spv_diagnostic diagnostic, std::string* dest) {
-  assert(!diagnostic->isTextSource);
+// A wrapper class for SPIRV-Tools API. Uses singleton design pattern here to
+// amortize the cost of creating the SPIRV-Tools context object.
+class SpvtoolsApi {
+ public:
+  ~SpvtoolsApi() { spvContextDestroy(context_); }
 
-  std::ostringstream os;
-  os << diagnostic->position.index << ": " << diagnostic->error;
-  *dest = os.str();
-}
-
-// Disassembles the given binary. Returns SPV_SUCCESS and writes the
-// disassembled text to *text_or_error if successful. Otherwise, writes the
-// error message to *text_or_error.
-spv_result_t DisassembleBinary(const std::vector<uint32_t>& binary,
-                               std::string* text_or_error) {
-  auto spvtools_context = spvContextCreate();
-  spv_text disassembled_text = nullptr;
-  spv_diagnostic spvtools_diagnostic = nullptr;
-
-  spv_result_t result = spvBinaryToText(
-      spvtools_context, binary.data(), binary.size(),
-      /* options = */ 0u, &disassembled_text, &spvtools_diagnostic);
-  if (result == SPV_SUCCESS) {
-    text_or_error->assign(disassembled_text->str, disassembled_text->length);
-  } else {
-    OutputSpvToolsDiagnostic(spvtools_diagnostic, text_or_error);
+  // Returns the single API instance. The compiler guarantees that this instance
+  // is lazy initialized and will be destructed at program termination. The
+  // initialization is thread-safe under C++11 semantics.
+  static SpvtoolsApi& GetInstance() {
+    static SpvtoolsApi instance;
+    return instance;
   }
 
-  spvDiagnosticDestroy(spvtools_diagnostic);
-  spvTextDestroy(disassembled_text);
-  spvContextDestroy(spvtools_context);
+  // Disassembles the given binary. Returns SPV_SUCCESS and writes the
+  // disassembled text to *text_or_error if successful. Otherwise, writes the
+  // error message to *text_or_error.
+  spv_result_t Disassemble(const std::vector<uint32_t>& binary,
+                           std::string* text_or_error) {
+    spv_text disassembled_text = nullptr;
+    spv_diagnostic diagnostic = nullptr;
 
-  return result;
-}
+    spv_result_t result =
+        spvBinaryToText(context_, binary.data(), binary.size(),
+                        /* options = */ 0u, &disassembled_text, &diagnostic);
+    if (result == SPV_SUCCESS) {
+      text_or_error->assign(disassembled_text->str, disassembled_text->length);
+    } else {
+      OutputDiagnostic(diagnostic, text_or_error);
+    }
+
+    spvDiagnosticDestroy(diagnostic);
+    spvTextDestroy(disassembled_text);
+
+    return result;
+  }
+
+ private:
+  SpvtoolsApi() : context_(spvContextCreate()) {}
+  SpvtoolsApi(const SpvtoolsApi&) = delete;
+  SpvtoolsApi& operator=(const SpvtoolsApi&) = delete;
+
+  // Writes the message contained in the diagnostic parameter to *dest. Assumes
+  // the diagnostic message is reported for a binary location.
+  static void OutputDiagnostic(spv_diagnostic diagnostic, std::string* dest) {
+    assert(!diagnostic->isTextSource);
+
+    std::ostringstream os;
+    os << diagnostic->position.index << ": " << diagnostic->error;
+    *dest = os.str();
+  }
+
+  // Context object for SPIRV-Tools API.
+  spv_context context_;
+};
 
 }  // anonymous namespace
 
@@ -203,7 +224,8 @@ bool Compiler::Compile(
   glslang::GlslangToSpv(*program.getIntermediate(used_shader_stage), spirv);
   if (disassemble_) {
     std::string text_or_error;
-    if (DisassembleBinary(spirv, &text_or_error) != SPV_SUCCESS) {
+    if (SpvtoolsApi::GetInstance().Disassemble(spirv, &text_or_error) !=
+        SPV_SUCCESS) {
       *error_stream << "shaderc: internal error: compilation succeeded but "
                        "failed to disassemble: "
                     << text_or_error << "\n";
