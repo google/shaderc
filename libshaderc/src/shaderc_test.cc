@@ -55,6 +55,19 @@ const char kMinimalDebugInfoShader[] =
     "vec2 debug_info_sample = vec2(1.0,1.0);\n"
     "}\n";
 
+// Compiler should generate two errors.
+const char kTwoErrorsShader[] =
+    "#error\n"
+    "#error\n"
+    "void main(){}\n";
+
+// Compiler should generate two warnings.
+const char kTwoWarningsShader[] =
+    "#version 130\n"
+    "attribute float x;\n"
+    "attribute float y;\n"
+    "void main(){}\n";
+
 TEST(Init, MultipleCalls) {
   shaderc_compiler_t compiler1, compiler2, compiler3;
   EXPECT_NE(nullptr, compiler1 = shaderc_compiler_initialize());
@@ -416,6 +429,36 @@ TEST_F(CompileStringWithOptionsTest, GenerateDebugInfoDisassembly) {
   EXPECT_THAT(CompilationOutput(kMinimalDebugInfoShader,
                                 shaderc_glsl_vertex_shader, options_.get()),
               HasSubstr("debug_info_sample"));
+}
+
+TEST_F(CompileStringWithOptionsTest, GetNumErrors) {
+  Compilation comp(compiler_.get_compiler_handle(), kTwoErrorsShader,
+                   shaderc_glsl_vertex_shader, options_.get());
+  // Expects compilation failure and two errors.
+  EXPECT_FALSE(shaderc_module_get_success(comp.result()));
+  EXPECT_EQ(2, shaderc_module_get_num_errors(comp.result()));
+  // Expects the number of warnings to be zero.
+  EXPECT_EQ(0, shaderc_module_get_num_warnings(comp.result()));
+}
+
+TEST_F(CompileStringWithOptionsTest, GetNumWarnings) {
+  Compilation comp(compiler_.get_compiler_handle(), kTwoWarningsShader,
+                   shaderc_glsl_vertex_shader, options_.get());
+  // Expects compilation success with two warnings.
+  EXPECT_TRUE(shaderc_module_get_success(comp.result()));
+  EXPECT_EQ(2, shaderc_module_get_num_warnings(comp.result()));
+  // Expects the number of errors to be zero.
+  EXPECT_EQ(0, shaderc_module_get_num_errors(comp.result()));
+}
+
+TEST_F(CompileStringWithOptionsTest, ZeroErrorsZeroWarnings) {
+  Compilation comp(compiler_.get_compiler_handle(), kMinimalShader,
+                   shaderc_glsl_vertex_shader);
+  // Expects compilation success with zero warnings.
+  EXPECT_TRUE(shaderc_module_get_success(comp.result()));
+  EXPECT_EQ(0, shaderc_module_get_num_warnings(comp.result()));
+  // Expects the number of errors to be zero.
+  EXPECT_EQ(0, shaderc_module_get_num_errors(comp.result()));
 }
 
 TEST_F(CompileStringWithOptionsTest, PreprocessingOnlyOption) {

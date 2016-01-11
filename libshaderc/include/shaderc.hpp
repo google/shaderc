@@ -67,6 +67,22 @@ class SpvModule {
     return shaderc_module_get_length(module_);
   }
 
+  // Returns the number of warnings generated during the compilation.
+  size_t GetNumWarnings() const {
+    if (!module_) {
+      return 0;
+    }
+    return shaderc_module_get_num_warnings(module_);
+  }
+
+  // Returns the number of errors generated during the compilation.
+  size_t GetNumErrors() const {
+    if (!module_) {
+      return 0;
+    }
+    return shaderc_module_get_num_errors(module_);
+  }
+
  private:
   SpvModule(const SpvModule& other) = delete;
   SpvModule& operator=(const SpvModule& other) = delete;

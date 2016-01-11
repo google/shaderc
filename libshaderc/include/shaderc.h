@@ -204,6 +204,12 @@ bool shaderc_module_get_success(const shaderc_spv_module_t module);
 // string is a char string. Otherwise, the result string is binary string.
 size_t shaderc_module_get_length(const shaderc_spv_module_t module);
 
+// Returns the number of warnings generated during the compilation.
+size_t shaderc_module_get_num_warnings(const shaderc_spv_module_t module);
+
+// Returns the number of errors generated during the compilation.
+size_t shaderc_module_get_num_errors(const shaderc_spv_module_t module);
+
 // Returns a pointer to the start of the SPIR-V bytes, either SPIR-V binary or
 // char string. When the source string is compiled into SPIR-V binary, this is
 // guaranteed to be castable to a uint32_t*. If the source string is compiled in

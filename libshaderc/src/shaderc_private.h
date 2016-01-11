@@ -29,6 +29,10 @@ struct shaderc_spv_module {
   std::string spirv;
   // Compilation messages.
   std::string messages;
+  // Number of errors.
+  size_t num_errors = 0;
+  // Number of warnings.
+  size_t num_warnings = 0;
 };
 
 struct shaderc_compiler {

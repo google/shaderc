@@ -57,6 +57,19 @@ const char kMinimalDebugInfoShader[] =
     "vec2 debug_info_sample = vec2(1.0, 1.0);\n"
     "}\n";
 
+// Compiler should generate two errors.
+const char kTwoErrorsShader[] =
+    "#error\n"
+    "#error\n"
+    "void main(){}\n";
+
+// Compiler should generate two warnings.
+const char kTwoWarningsShader[] =
+    "#version 130\n"
+    "attribute float x;\n"
+    "attribute float y;\n"
+    "void main(){}\n";
+
 class CppInterface : public testing::Test {
  protected:
   // Compiles a shader and returns true on success, false on failure.
@@ -418,6 +431,32 @@ TEST_F(CppInterface, GenerateDebugInfoDisassemblyClonedOptions) {
   EXPECT_THAT(CompilationOutput(kMinimalDebugInfoShader,
                                 shaderc_glsl_vertex_shader, cloned_options),
               HasSubstr("debug_info_sample"));
+}
+
+TEST_F(CppInterface, GetNumErrors) {
+  std::string shader(kTwoErrorsShader);
+  const shaderc::SpvModule module = compiler_.CompileGlslToSpv(
+      kTwoErrorsShader, strlen(kTwoErrorsShader),
+      shaderc_glsl_vertex_shader);
+  EXPECT_FALSE(module.GetSuccess());
+  EXPECT_EQ(2, module.GetNumErrors());
+}
+
+TEST_F(CppInterface, GetNumWarnings) {
+  const shaderc::SpvModule module = compiler_.CompileGlslToSpv(
+      kTwoWarningsShader, strlen(kTwoWarningsShader),
+      shaderc_glsl_vertex_shader);
+  EXPECT_TRUE(module.GetSuccess());
+  EXPECT_EQ(2, module.GetNumWarnings());
+}
+
+TEST_F(CppInterface, ZeroErrorsZeroWarnings) {
+  const shaderc::SpvModule module = compiler_.CompileGlslToSpv(
+      kMinimalShader, strlen(kMinimalShader),
+      shaderc_glsl_vertex_shader);
+  EXPECT_TRUE(module.GetSuccess());
+  EXPECT_EQ(0, module.GetNumErrors());
+  EXPECT_EQ(0, module.GetNumWarnings());
 }
 
 TEST_F(CppInterface, PreprocessingOnlyOption) {

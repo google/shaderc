@@ -234,8 +234,8 @@ shaderc_spv_module_t shaderc_compile_into_spv(
   TRY_IF_EXCEPTIONS_ENABLED {
     std::stringstream output;
     std::stringstream errors;
-    size_t total_warnings;
-    size_t total_errors;
+    size_t total_warnings = 0;
+    size_t total_errors = 0;
     EShLanguage stage = GetStage(shader_kind);
     shaderc_util::string_piece source_string =
         shaderc_util::string_piece(source_text, source_text + source_text_size);
@@ -255,6 +255,8 @@ shaderc_spv_module_t shaderc_compile_into_spv(
     }
     result->messages = errors.str();
     result->spirv = output.str();
+    result->num_warnings = total_warnings;
+    result->num_errors = total_errors;
   }
   CATCH_IF_EXCEPTIONS_ENABLED(...) { result->compilation_succeeded = false; }
   return result;
@@ -266,6 +268,14 @@ bool shaderc_module_get_success(const shaderc_spv_module_t module) {
 
 size_t shaderc_module_get_length(const shaderc_spv_module_t module) {
   return module->spirv.size();
+}
+
+size_t shaderc_module_get_num_warnings(const shaderc_spv_module_t module) {
+  return module->num_warnings;
+}
+
+size_t shaderc_module_get_num_errors(const shaderc_spv_module_t module) {
+  return module->num_errors;
 }
 
 const char* shaderc_module_get_bytes(const shaderc_spv_module_t module) {
