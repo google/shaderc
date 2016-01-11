@@ -20,6 +20,7 @@
 #include <mutex>
 #include <sstream>
 #include <vector>
+#include <memory>
 
 #include "SPIRV/spirv.hpp"
 
@@ -96,10 +97,61 @@ class ForbidInclude : public shaderc_util::CountingIncluder {
   }
 };
 
+// QINING
+class FileIncluder : public shaderc_util::CountingIncluder {
+ private:
+  bool AreValidCallbacks() const {
+    return callbacks_.get_fullpath_and_content!= nullptr &&
+           callbacks_.finalize_including!= nullptr;
+  }
+
+  // Find filename in search path and returns its contents.
+  std::pair<std::string, std::string> include_delegate(
+      const char* filename) const override {
+    if (!AreValidCallbacks())
+      return std::make_pair<std::string, std::string>(
+          "", "unexpected include directive");
+    // size_t full_path_length = callbacks_.fullpath_size_getter(filename);
+    ////char* full_path_ptr = new char[full_path_length];
+    // std::unique_ptr<char[]> full_path(new char[full_path_length]);
+    // char* full_path_ptr = full_path.get();
+    // callbacks_.fullpath_data_getter(filename, &full_path_ptr);
+    // size_t content_length = callbacks_.content_size_getter(filename);
+    ////char* content_ptr = new char[content_length];
+    // std::unique_ptr<char[]> content(new char[content_length]);
+    // char* content_ptr = content.get();
+    // callbacks_.content_data_getter(filename, &content_ptr);
+
+    // return std::pair<std::string, std::string>(
+    //    std::string(full_path_ptr, full_path_length),
+    //    std::string(content_ptr, content_length));
+
+    shaderc_includer_fullpath_content* data =
+        callbacks_.get_fullpath_and_content(callbacks_.getter_user_data,
+                                            filename);
+    std::pair<std::string, std::string> entry =
+        std::make_pair<std::string, std::string>(
+            std::string(data->fullpath, data->fullpath_length),
+            std::string(data->content, data->content_length));
+    callbacks_.finalize_including(callbacks_.finalizer_user_data, filename,
+                                  data);
+    return entry;
+  }
+
+  shaderc_includer_callbacks callbacks_;
+
+ public:
+  FileIncluder(const shaderc_includer_callbacks& callbacks)
+      : callbacks_(callbacks){};
+  FileIncluder() : callbacks_({nullptr, nullptr, nullptr, nullptr}){};
+};
+
 }  // anonymous namespace
 
 struct shaderc_compile_options {
+  shaderc_compile_options(){};
   shaderc_util::Compiler compiler;
+  shaderc_includer_callbacks includer_callbacks = {nullptr, nullptr, nullptr, nullptr};
 };
 
 shaderc_compile_options_t shaderc_compile_options_initialize() {
@@ -152,6 +204,12 @@ void shaderc_compile_options_set_forced_version_profile(
       options->compiler.SetForcedVersionProfile(version, EEsProfile);
       break;
   }
+}
+
+void shaderc_compile_options_set_includer_callbacks(
+    shaderc_compile_options_t options,
+    const shaderc_includer_callbacks* callbacks_ptr) {
+  options->includer_callbacks = *callbacks_ptr;
 }
 
 void shaderc_compile_options_set_preprocessing_only_mode(
@@ -245,13 +303,15 @@ shaderc_spv_module_t shaderc_compile_into_spv(
     };
     if (additional_options) {
       result->compilation_succeeded = additional_options->compiler.Compile(
-          source_string, stage, "shader", stage_function, ForbidInclude(),
-          &output, &errors, &total_warnings, &total_errors);
+          source_string, stage, "shader", stage_function,
+          FileIncluder(additional_options->includer_callbacks), &output,
+          &errors, &total_warnings, &total_errors);
     } else {
       // Compile with default options.
       result->compilation_succeeded = shaderc_util::Compiler().Compile(
-          source_string, stage, "shader", stage_function, ForbidInclude(),
-          &output, &errors, &total_warnings, &total_errors);
+          source_string, stage, "shader", stage_function,
+          FileIncluder(), &output,
+          &errors, &total_warnings, &total_errors);
     }
     result->messages = errors.str();
     result->spirv = output.str();

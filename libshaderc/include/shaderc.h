@@ -47,6 +47,7 @@ typedef enum {
   shaderc_profile_es,
 } shaderc_profile;
 
+
 // Usage examples:
 //
 // Aggressively release compiler resources, but spend time in initialization
@@ -140,6 +141,53 @@ void shaderc_compile_options_set_disassembly_mode(
 // define profiles, e.g. versions below 150.
 void shaderc_compile_options_set_forced_version_profile(
     shaderc_compile_options_t options, int version, shaderc_profile profile);
+
+// When including a file, libshaderc initiates a query to get the full path
+// and the content of a file for a given file name. The query is initiated
+// through calling a function pointer, which is the response method and
+// implemented at client side. The response method should follow the specified
+// signature here, and be passed to libshaderc through corresponding setter
+// functions.
+// When the including of a file is done, libshaderc will call a client method to
+// clean up the resources used during the including process. Client code should
+// implement the clean up method and also pass it as a callback function pointer
+// to libshaderc along with the response method.
+
+// The struct that contains the information required by includer. A pointer to
+// this struct should be returned by client's response method.
+struct shaderc_includer_fullpath_content {
+  char* fullpath;
+  size_t fullpath_length;
+  char* content;
+  size_t content_length;
+};
+
+// Callback function type, return a pointer to a struct that contains fullpath
+// and content.
+typedef shaderc_includer_fullpath_content* (
+    *shaderc_includer_fullpath_and_content_getter_fn)(void* user_data,
+                                                      const char* filename);
+
+// Callback function type, to notify client that the includer is done with the full
+// path and content, client can clean up the resources used for them.
+typedef void (*shaderc_includer_fullpath_and_content_finalizer_fn)(
+    void* user_data, const char* filename,
+    shaderc_includer_fullpath_content* data);
+
+// A struct that contains all the elements that a includer requires from client
+// side.
+struct shaderc_includer_callbacks {
+  shaderc_includer_fullpath_and_content_getter_fn get_fullpath_and_content;
+  void* getter_user_data;
+  shaderc_includer_fullpath_and_content_finalizer_fn finalize_including;
+  void* finalizer_user_data;
+};
+
+// Sets the callback functions for the includer. When the includer queries for
+// the full path and content of a file, client's method will be called to
+// response. And when the query is done, client will be notified to clean up.
+void shaderc_compile_options_set_includer_callbacks(
+    shaderc_compile_options_t options, shaderc_includer_callbacks* callbacks_ptr);
 
 // Sets the compiler mode to do only preprocessing. The byte array result in the
 // module returned by the compilation is the text of the preprocessed shader.

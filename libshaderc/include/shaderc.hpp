@@ -125,6 +125,10 @@ class CompileOptions {
     shaderc_compile_options_set_generate_debug_info(options_);
   }
 
+  void SetIncluderCallbacks(shaderc_includer_callbacks* callbacks_ptr) {
+    shaderc_compile_options_set_includer_callbacks(options_, callbacks_ptr);
+  }
+
   // Sets the compiler to emit a disassembly text instead of a binary. In
   // this mode, the byte array result in the shaderc_spv_module returned
   // from shaderc_compile_into_spv() will consist of SPIR-V assembly text.
