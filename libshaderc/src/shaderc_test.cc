@@ -55,6 +55,19 @@ const char kMinimalDebugInfoShader[] =
     "vec2 debug_info_sample = vec2(1.0,1.0);\n"
     "}\n";
 
+// Compiler should generate two errors.
+const char kTwoErrorsShader[] =
+    "#error\n"
+    "#error\n"
+    "void main(){}\n";
+
+// Compiler should generate two warnings.
+const char kTwoWarnings[] =
+    "#version 130\n"
+    "attribute float x;\n"
+    "attribute float y;\n"
+    "void main(){}\n";
+
 TEST(Init, MultipleCalls) {
   shaderc_compiler_t compiler1, compiler2, compiler3;
   EXPECT_NE(nullptr, compiler1 = shaderc_compiler_initialize());
@@ -416,6 +429,26 @@ TEST_F(CompileStringWithOptionsTest, GenerateDebugInfoDisassembly) {
   EXPECT_THAT(CompilationOutput(kMinimalDebugInfoShader,
                                 shaderc_glsl_vertex_shader, options_.get()),
               HasSubstr("debug_info_sample"));
+}
+
+TEST_F(CompileStringWithOptionsTest, GetNumErrors) {
+  shaderc_spv_module_t result =
+      Compilation(compiler_.get_compiler_handle(), kTwoErrorsShader,
+                  shaderc_glsl_vertex_shader)
+          .result();
+  // Expects compilation failure and two errors.
+  EXPECT_FALSE(shaderc_module_get_success(result));
+  EXPECT_EQ(2, shaderc_module_get_num_errors(result));
+}
+
+TEST_F(CompileStringWithOptionsTest, GetNumWarnings) {
+  shaderc_spv_module_t result =
+      Compilation(compiler_.get_compiler_handle(), kTwoWarnings,
+                  shaderc_glsl_vertex_shader)
+          .result();
+  // Expects compilation success with two warnings.
+  EXPECT_TRUE(shaderc_module_get_success(result));
+  EXPECT_EQ(2, shaderc_module_get_num_warnings(result));
 }
 
 TEST_F(CompileStringWithOptionsTest, PreprocessingOnlyOption) {
