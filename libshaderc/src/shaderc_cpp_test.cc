@@ -450,6 +450,15 @@ TEST_F(CppInterface, GetNumWarnings) {
   EXPECT_EQ(2, module.GetNumWarnings());
 }
 
+TEST_F(CppInterface, ZeroErrorsZeroWarnings) {
+  const shaderc::SpvModule module = compiler_.CompileGlslToSpv(
+      kMinimalShader, strlen(kMinimalShader),
+      shaderc_glsl_vertex_shader);
+  EXPECT_TRUE(module.GetSuccess());
+  EXPECT_EQ(0, module.GetNumErrors());
+  EXPECT_EQ(0, module.GetNumWarnings());
+}
+
 TEST_F(CppInterface, PreprocessingOnlyOption) {
   options_.SetPreprocessingOnlyMode();
   shaderc::SpvModule result = compiler_.CompileGlslToSpv(
