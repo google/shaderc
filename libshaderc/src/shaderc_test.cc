@@ -454,7 +454,7 @@ TEST_F(CompileStringWithOptionsTest, GetNumWarnings) {
 TEST_F(CompileStringWithOptionsTest, ZeroErrorsZeroWarnings) {
   Compilation comp(compiler_.get_compiler_handle(), kMinimalShader,
                    shaderc_glsl_vertex_shader);
-  // Expects compilation success with two warnings.
+  // Expects compilation success with zero warnings.
   EXPECT_TRUE(shaderc_module_get_success(comp.result()));
   EXPECT_EQ(0, shaderc_module_get_num_warnings(comp.result()));
   // Expects the number of errors to be zero.
