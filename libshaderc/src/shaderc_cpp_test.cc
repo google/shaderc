@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 #include <memory>
 #include <thread>
+#include <unordered_map>
 
 #include "SPIRV/spirv.hpp"
 
@@ -503,6 +504,121 @@ TEST_F(CppInterface, PreprocessingOnlyModeSecondOverridesDisassemblyMode) {
   EXPECT_THAT(result_disassembly_mode_first.GetData(),
               HasSubstr("void main(){ }"));
 }
+
+// To test file inclusion, use an unordered_map as a fake file system to store
+// fake files to be included. The unordered_map represents a filesystem by
+// mapping filename (or path) string to the contents of that file as a string.
+using FakeFS = std::unordered_map<std::string, std::string>;
+
+// An includer test case needs: 1) A fake file system which is actually an
+// unordered_map, so that we can resolve the content given a string. A valid
+// fake file system must have one entry with key:'root' to specify the start
+// shader file for compilation. 2) An string that we expect to see in the
+// compilation output.
+class IncluderTestCase {
+ public:
+  IncluderTestCase(FakeFS fake_fs, std::string expected_substring)
+      : fake_fs_(fake_fs), expected_substring_(expected_substring) {
+    assert(fake_fs_.find("root") != fake_fs_.end() &&
+           "Valid fake file system needs a 'root' file\n");
+  }
+
+  const FakeFS& fake_fs() const { return fake_fs_; }
+  const std::string& expected_substring() const { return expected_substring_; }
+
+ private:
+  FakeFS fake_fs_;
+  std::string expected_substring_;
+};
+
+// A mock class that simulates an includer. This class implements
+// IncluderInterface to provide GetInclude() and ReleaseInclude() methods.
+class TestIncluder : public shaderc::CompileOptions::IncluderInterface {
+ public:
+  TestIncluder(const FakeFS& fake_fs) : fake_fs_(fake_fs), responses_({}){}
+
+  // Get path and content from the fake file system.
+  shaderc_includer_response* GetInclude(const char* filename) override {
+    responses_.emplace_back(shaderc_includer_response{
+        filename, strlen(filename), fake_fs_.at(std::string(filename)).c_str(),
+        fake_fs_.at(std::string(filename)).size()});
+    return &responses_.back();
+  }
+
+  // Response data is owned as private property, no need to release explicitly.
+  void ReleaseInclude(shaderc_includer_response*) override {}
+
+ private:
+  const FakeFS& fake_fs_;
+  std::vector<shaderc_includer_response> responses_;
+};
+
+using IncluderTests = testing::TestWithParam<IncluderTestCase>;
+
+// Parameterized tests for includer.
+TEST_P(IncluderTests, SetIncluder) {
+  const IncluderTestCase& test_case = GetParam();
+  const FakeFS& fs = test_case.fake_fs();
+  const std::string& shader = fs.at("root");
+  shaderc::Compiler compiler;
+  CompileOptions options;
+  options.SetIncluder(std::unique_ptr<TestIncluder>(new TestIncluder(fs)));
+  options.SetPreprocessingOnlyMode();
+  const shaderc::SpvModule module = compiler.CompileGlslToSpv(
+      shader.c_str(), shaderc_glsl_vertex_shader, options);
+  // Checks the existence of the expected string.
+  EXPECT_THAT(module.GetData(), HasSubstr(test_case.expected_substring()));
+}
+
+TEST_P(IncluderTests, SetIncluderClonedOptions) {
+  const IncluderTestCase& test_case = GetParam();
+  const FakeFS& fs = test_case.fake_fs();
+  const std::string& shader = fs.at("root");
+  shaderc::Compiler compiler;
+  CompileOptions options;
+  options.SetIncluder(std::unique_ptr<TestIncluder>(new TestIncluder(fs)));
+  options.SetPreprocessingOnlyMode();
+
+  // Cloned options should have all the settings.
+  CompileOptions cloned_options(options);
+  const shaderc::SpvModule module = compiler.CompileGlslToSpv(
+      shader.c_str(), shaderc_glsl_vertex_shader, cloned_options);
+  // Checks the existence of the expected string.
+  EXPECT_THAT(module.GetData(), HasSubstr(test_case.expected_substring()));
+}
+
+INSTANTIATE_TEST_CASE_P(CppInterface, IncluderTests,
+                        testing::ValuesIn(std::vector<IncluderTestCase>{
+                            IncluderTestCase(
+                                // Fake file system.
+                                {
+                                    {"root",
+                                     "void foo() {}\n"
+                                     "#include \"path/to/file_1\"\n"},
+                                    {"path/to/file_1", "content of file_1\n"},
+                                },
+                                // Expected output.
+                                "#line 0 \"path/to/file_1\"\n"
+                                " content of file_1\n"
+                                "#line 2"),
+                            IncluderTestCase(
+                                // Fake file system.
+                                {{"root",
+                                  "void foo() {}\n"
+                                  "#include \"path/to/file_1\"\n"},
+                                 {"path/to/file_1",
+                                  "#include \"path/to/file_2\"\n"
+                                  "content of file_1\n"},
+                                 {"path/to/file_2", "content of file_2\n"}},
+                                // Expected output.
+                                "#line 0 \"path/to/file_1\"\n"
+                                "#line 0 \"path/to/file_2\"\n"
+                                " content of file_2\n"
+                                "#line 1 \"path/to/file_1\"\n"
+                                " content of file_1\n"
+                                "#line 2"),
+
+                        }));
 
 TEST_F(CppInterface, WarningsOnLine) {
   // By default the compiler will emit a warning on line 2 complaining

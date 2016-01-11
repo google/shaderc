@@ -85,21 +85,56 @@ struct {
 
 std::mutex compile_mutex;  // Guards shaderc_compile_*.
 
-// Rejects #include directives.
-class ForbidInclude : public shaderc_util::CountingIncluder {
+class InternalFileIncluder : public shaderc_util::CountingIncluder {
+ public:
+  InternalFileIncluder(
+      const shaderc_includer_response_get_fn get_includer_response,
+      const shaderc_includer_response_release_fn release_includer_response,
+      void* user_data)
+      : get_includer_response_(get_includer_response),
+        release_includer_response_(release_includer_response),
+        user_data_(user_data){};
+  InternalFileIncluder()
+      : get_includer_response_(nullptr),
+        release_includer_response_(nullptr),
+        user_data_(nullptr){};
+
  private:
-  // Returns empty contents and an error message.  See base-class version.
+  // Check the validity of the callbacks.
+  bool AreValidCallbacks() const {
+    return get_includer_response_ != nullptr &&
+           release_includer_response_ != nullptr;
+  }
+
+  // Find filename in search path and returns its contents.
   std::pair<std::string, std::string> include_delegate(
       const char* filename) const override {
-    return std::make_pair<std::string, std::string>(
-        "", "unexpected include directive");
+    if (!AreValidCallbacks())
+      return std::make_pair<std::string, std::string>(
+          "", "unexpected include directive");
+    shaderc_includer_response* data =
+        get_includer_response_(user_data_, filename);
+    std::pair<std::string, std::string> entry =
+        std::make_pair<std::string, std::string>(
+            std::string(data->path, data->path_length),
+            std::string(data->content, data->content_length));
+    release_includer_response_(user_data_, data);
+    return entry;
   }
+
+  const shaderc_includer_response_get_fn get_includer_response_;
+  const shaderc_includer_response_release_fn release_includer_response_;
+  void* user_data_;
 };
 
 }  // anonymous namespace
 
 struct shaderc_compile_options {
+  shaderc_compile_options(){};
   shaderc_util::Compiler compiler;
+  shaderc_includer_response_get_fn get_includer_response;
+  shaderc_includer_response_release_fn release_includer_response;
+  void* includer_user_data;
 };
 
 shaderc_compile_options_t shaderc_compile_options_initialize() {
@@ -152,6 +187,16 @@ void shaderc_compile_options_set_forced_version_profile(
       options->compiler.SetForcedVersionProfile(version, EEsProfile);
       break;
   }
+}
+
+void shaderc_compile_options_set_includer_callbacks(
+    shaderc_compile_options_t options,
+    shaderc_includer_response_get_fn get_includer_response,
+    shaderc_includer_response_release_fn release_includer_response,
+    void* user_data) {
+  options->get_includer_response = get_includer_response;
+  options->release_includer_response = release_includer_response;
+  options->includer_user_data = user_data;
 }
 
 void shaderc_compile_options_set_preprocessing_only_mode(
@@ -245,13 +290,17 @@ shaderc_spv_module_t shaderc_compile_into_spv(
     };
     if (additional_options) {
       result->compilation_succeeded = additional_options->compiler.Compile(
-          source_string, stage, "shader", stage_function, ForbidInclude(),
-          &output, &errors, &total_warnings, &total_errors);
+          source_string, stage, "shader", stage_function,
+          InternalFileIncluder(additional_options->get_includer_response,
+                       additional_options->release_includer_response,
+                       additional_options->includer_user_data), &output,
+          &errors, &total_warnings, &total_errors);
     } else {
       // Compile with default options.
       result->compilation_succeeded = shaderc_util::Compiler().Compile(
-          source_string, stage, "shader", stage_function, ForbidInclude(),
-          &output, &errors, &total_warnings, &total_errors);
+          source_string, stage, "shader", stage_function,
+          InternalFileIncluder(), &output,
+          &errors, &total_warnings, &total_errors);
     }
     result->messages = errors.str();
     result->spirv = output.str();
