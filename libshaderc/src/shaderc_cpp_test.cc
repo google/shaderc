@@ -439,7 +439,8 @@ TEST_F(CppInterface, GetNumErrors) {
       kTwoErrorsShader, strlen(kTwoErrorsShader),
       shaderc_glsl_vertex_shader);
   EXPECT_FALSE(module.GetSuccess());
-  EXPECT_EQ(2, module.GetNumErrors());
+  EXPECT_EQ(2u, module.GetNumErrors());
+  EXPECT_EQ(0u, module.GetNumWarnings());
 }
 
 TEST_F(CppInterface, GetNumWarnings) {
@@ -447,7 +448,8 @@ TEST_F(CppInterface, GetNumWarnings) {
       kTwoWarningsShader, strlen(kTwoWarningsShader),
       shaderc_glsl_vertex_shader);
   EXPECT_TRUE(module.GetSuccess());
-  EXPECT_EQ(2, module.GetNumWarnings());
+  EXPECT_EQ(2u, module.GetNumWarnings());
+  EXPECT_EQ(0u, module.GetNumErrors());
 }
 
 TEST_F(CppInterface, ZeroErrorsZeroWarnings) {
@@ -455,8 +457,8 @@ TEST_F(CppInterface, ZeroErrorsZeroWarnings) {
       kMinimalShader, strlen(kMinimalShader),
       shaderc_glsl_vertex_shader);
   EXPECT_TRUE(module.GetSuccess());
-  EXPECT_EQ(0, module.GetNumErrors());
-  EXPECT_EQ(0, module.GetNumWarnings());
+  EXPECT_EQ(0u, module.GetNumErrors());
+  EXPECT_EQ(0u, module.GetNumWarnings());
 }
 
 TEST_F(CppInterface, PreprocessingOnlyOption) {

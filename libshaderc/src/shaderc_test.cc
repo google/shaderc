@@ -436,9 +436,9 @@ TEST_F(CompileStringWithOptionsTest, GetNumErrors) {
                    shaderc_glsl_vertex_shader, options_.get());
   // Expects compilation failure and two errors.
   EXPECT_FALSE(shaderc_module_get_success(comp.result()));
-  EXPECT_EQ(2, shaderc_module_get_num_errors(comp.result()));
+  EXPECT_EQ(2u, shaderc_module_get_num_errors(comp.result()));
   // Expects the number of warnings to be zero.
-  EXPECT_EQ(0, shaderc_module_get_num_warnings(comp.result()));
+  EXPECT_EQ(0u, shaderc_module_get_num_warnings(comp.result()));
 }
 
 TEST_F(CompileStringWithOptionsTest, GetNumWarnings) {
@@ -446,9 +446,9 @@ TEST_F(CompileStringWithOptionsTest, GetNumWarnings) {
                    shaderc_glsl_vertex_shader, options_.get());
   // Expects compilation success with two warnings.
   EXPECT_TRUE(shaderc_module_get_success(comp.result()));
-  EXPECT_EQ(2, shaderc_module_get_num_warnings(comp.result()));
+  EXPECT_EQ(2u, shaderc_module_get_num_warnings(comp.result()));
   // Expects the number of errors to be zero.
-  EXPECT_EQ(0, shaderc_module_get_num_errors(comp.result()));
+  EXPECT_EQ(0u, shaderc_module_get_num_errors(comp.result()));
 }
 
 TEST_F(CompileStringWithOptionsTest, ZeroErrorsZeroWarnings) {
@@ -456,9 +456,9 @@ TEST_F(CompileStringWithOptionsTest, ZeroErrorsZeroWarnings) {
                    shaderc_glsl_vertex_shader);
   // Expects compilation success with zero warnings.
   EXPECT_TRUE(shaderc_module_get_success(comp.result()));
-  EXPECT_EQ(0, shaderc_module_get_num_warnings(comp.result()));
+  EXPECT_EQ(0u, shaderc_module_get_num_warnings(comp.result()));
   // Expects the number of errors to be zero.
-  EXPECT_EQ(0, shaderc_module_get_num_errors(comp.result()));
+  EXPECT_EQ(0u, shaderc_module_get_num_errors(comp.result()));
 }
 
 TEST_F(CompileStringWithOptionsTest, PreprocessingOnlyOption) {
