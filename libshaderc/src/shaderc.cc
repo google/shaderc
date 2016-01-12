@@ -20,7 +20,6 @@
 #include <mutex>
 #include <sstream>
 #include <vector>
-#include <memory>
 
 #include "SPIRV/spirv.hpp"
 
@@ -126,13 +125,13 @@ class FileIncluder : public shaderc_util::CountingIncluder {
     //    std::string(full_path_ptr, full_path_length),
     //    std::string(content_ptr, content_length));
 
-    shaderc_includer_fullpath_content* data =
+    shaderc_includer_fullpath_content data =
         callbacks_.get_fullpath_and_content(callbacks_.getter_user_data,
                                             filename);
     std::pair<std::string, std::string> entry =
         std::make_pair<std::string, std::string>(
-            std::string(data->fullpath, data->fullpath_length),
-            std::string(data->content, data->content_length));
+            std::string(data.fullpath, data.fullpath_length),
+            std::string(data.content, data.content_length));
     callbacks_.finalize_including(callbacks_.finalizer_user_data, filename,
                                   data);
     return entry;

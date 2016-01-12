@@ -504,6 +504,51 @@ TEST_F(CppInterface, PreprocessingOnlyModeSecondOverridesDisassemblyMode) {
               HasSubstr("void main(){ }"));
 }
 
+TEST_F(CppInterface, SetIncluderCallbacks) {
+  const std::string kMinimalIncludeShader =
+      "void foo() {}\n"
+      "#include \"include/b\"\n";
+  // Create a fake file object, with specified fullpath and content.
+  struct FakeFile {
+    std::string fullpath = "Full/Path/Sample";
+    std::string content = "void main() {foo();}\n";
+  };
+  FakeFile fake_file;
+  shaderc_includer_callbacks callbacks{
+      // A response method that returns fake full path and file content as
+      // defined above.
+      [](void* user_data, const char* filename) {
+        (void)filename;
+        auto* fake_file = static_cast<FakeFile*>(user_data);
+        const char* fullpath = fake_file->fullpath.c_str();
+        const char* content = fake_file->content.c_str();
+        shaderc_includer_fullpath_content fullpath_and_content{
+            fullpath, fake_file->fullpath.size(), content,
+            fake_file->content.size()};
+        return fullpath_and_content;
+      },
+      &fake_file,
+      // The data is owned in this test function stack, no need to clean
+      // anything.
+      [](void* user_data, const char* filename,
+         shaderc_includer_fullpath_content data) {
+        (void)user_data;
+        (void)filename;
+        (void)data;
+      },
+      nullptr};
+  options_.SetIncluderCallbacks(&callbacks);
+  EXPECT_TRUE(CompilationSuccess(kMinimalIncludeShader,
+                                 shaderc_glsl_vertex_shader, options_));
+  // Expect to see the content of the fake file object in the output of
+  // preprocessing.
+  options_.SetPreprocessingOnlyMode();
+  EXPECT_THAT(CompilationOutput(kMinimalIncludeShader,
+                                shaderc_glsl_vertex_shader, options_),
+              HasSubstr("void foo(){ }\n#line 0 \"Full/Path/Sample\"\n void "
+                        "main(){ foo();}\n#line 2"));
+}
+
 TEST_F(CppInterface, WarningsOnLine) {
   // By default the compiler will emit a warning on line 2 complaining
   // that 'float' is a deprecated attribute in version 130.
