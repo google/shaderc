@@ -339,7 +339,7 @@ void shaderc_compiler_release(shaderc_compiler_t compiler) {
 shaderc_spv_module_t shaderc_compile_into_spv(
     const shaderc_compiler_t compiler, const char* source_text,
     size_t source_text_size, shaderc_shader_kind shader_kind,
-    const char* entry_point_name,
+    const char* input_file_name, const char* entry_point_name,
     const shaderc_compile_options_t additional_options) {
   std::lock_guard<std::mutex> lock(compile_mutex);
 
@@ -355,12 +355,13 @@ shaderc_spv_module_t shaderc_compile_into_spv(
     std::stringstream errors;
     size_t total_warnings = 0;
     size_t total_errors = 0;
+    std::string input_file_name_str(input_file_name);
     EShLanguage forced_stage = GetForcedStage(shader_kind);
     shaderc_util::string_piece source_string =
         shaderc_util::string_piece(source_text, source_text + source_text_size);
     if (additional_options) {
       result->compilation_succeeded = additional_options->compiler.Compile(
-          source_string, forced_stage, "shader",
+          source_string, forced_stage, input_file_name_str,
           StageDeducer(shader_kind),
           InternalFileIncluder(additional_options->get_includer_response,
                                additional_options->release_includer_response,
@@ -369,9 +370,9 @@ shaderc_spv_module_t shaderc_compile_into_spv(
     } else {
       // Compile with default options.
       result->compilation_succeeded = shaderc_util::Compiler().Compile(
-          source_string, forced_stage, "shader", StageDeducer(shader_kind),
-          InternalFileIncluder(), &output, &errors, &total_warnings,
-          &total_errors);
+          source_string, forced_stage, input_file_name_str,
+          StageDeducer(shader_kind), InternalFileIncluder(), &output, &errors,
+          &total_warnings, &total_errors);
     }
     result->messages = errors.str();
     result->spirv = output.str();

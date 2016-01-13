@@ -255,9 +255,11 @@ class Compiler {
   // It is valid for the returned SpvModule object to outlive this compiler
   // object.
   SpvModule CompileGlslToSpv(const char* source_text, size_t source_text_size,
-                             shaderc_shader_kind shader_kind) const {
-    shaderc_spv_module_t module = shaderc_compile_into_spv(
-        compiler_, source_text, source_text_size, shader_kind, "main", nullptr);
+                             shaderc_shader_kind shader_kind,
+                             const char* input_file_name) const {
+    shaderc_spv_module_t module =
+        shaderc_compile_into_spv(compiler_, source_text, source_text_size,
+                                 shader_kind, input_file_name, "main", nullptr);
     return SpvModule(module);
   }
 
@@ -281,28 +283,31 @@ class Compiler {
   // binary generated with default options.
   SpvModule CompileGlslToSpv(const char* source_text, size_t source_text_size,
                              shaderc_shader_kind shader_kind,
+                             const char* input_file_name,
                              const CompileOptions& options) const {
-    shaderc_spv_module_t module =
-        shaderc_compile_into_spv(compiler_, source_text, source_text_size,
-                                 shader_kind, "main", options.options_);
+    shaderc_spv_module_t module = shaderc_compile_into_spv(
+        compiler_, source_text, source_text_size, shader_kind, input_file_name,
+        "main", options.options_);
     return SpvModule(module);
   }
 
   // Compiles the given source GLSL into a SPIR-V module by invoking
   // CompileGlslToSpv(const char*, size_t, shaderc_shader_kind);
   SpvModule CompileGlslToSpv(const std::string& source_text,
-                             shaderc_shader_kind shader_kind) const {
-    return CompileGlslToSpv(source_text.data(), source_text.size(),
-                            shader_kind);
+                             shaderc_shader_kind shader_kind,
+                             const char* input_file_name) const {
+    return CompileGlslToSpv(source_text.data(), source_text.size(), shader_kind,
+                            input_file_name);
   }
 
   // Compiles the given source GLSL into a SPIR-V module by invoking
   // CompileGlslToSpv(const char*, size_t, shaderc_shader_kind, options);
   SpvModule CompileGlslToSpv(const std::string& source_text,
                              shaderc_shader_kind shader_kind,
+                             const char* input_file_name,
                              const CompileOptions& options) const {
     return CompileGlslToSpv(source_text.data(), source_text.size(), shader_kind,
-                            options);
+                            input_file_name, options);
   }
 
  private:

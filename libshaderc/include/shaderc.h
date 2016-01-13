@@ -256,7 +256,7 @@ typedef struct shaderc_spv_module* shaderc_spv_module_t;
 shaderc_spv_module_t shaderc_compile_into_spv(
     const shaderc_compiler_t compiler, const char* source_text,
     size_t source_text_size, shaderc_shader_kind shader_kind,
-    const char* entry_point_name,
+    const char* input_file_name, const char* entry_point_name,
     const shaderc_compile_options_t additional_options);
 
 // The following functions, operating on shaderc_spv_module_t objects, offer
