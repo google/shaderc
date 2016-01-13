@@ -47,7 +47,6 @@ typedef enum {
   shaderc_profile_es,
 } shaderc_profile;
 
-
 // Usage examples:
 //
 // Aggressively release compiler resources, but spend time in initialization
@@ -142,16 +141,15 @@ void shaderc_compile_options_set_disassembly_mode(
 void shaderc_compile_options_set_forced_version_profile(
     shaderc_compile_options_t options, int version, shaderc_profile profile);
 
-// When including a file, libshaderc initiates a query to get the full path
-// and the content of a file. The query is initiated
-// through calling a function pointer, which is a client-side implemented
-// reponse method. The response method should follow the specified function
-// signature below, and it should be passed to libshaderc through corresponding
-// setter functions.
+// When including a file, libshaderc initiates a query to get the full
+// path and the content of a file. The query is initiated through calling a
+// function pointer, which is a client-side implemented reponse method. The
+// response method should follow the specified function signature below, and
+// it should be passed to libshaderc through corresponding setter functions.
 // When the including of a file is done, libshaderc will call a client-side
-// implemented method to clean up the resources used for the including process.
-// Client should implement the clean up method and pass it as a callback
-// function pointer to libshaderc along with the response method.
+// implemented method to clean up the resources used for the including
+// process.  Client should implement the clean up method and pass it as a
+// callback function pointer to libshaderc along with the response method.
 
 // The struct that contains the information to be returned to the includer.
 // The client-side implemented response method should return this struct. And
