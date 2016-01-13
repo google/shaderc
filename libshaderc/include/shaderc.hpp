@@ -15,9 +15,9 @@
 #ifndef SHADERC_HPP_
 #define SHADERC_HPP_
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 #include "shaderc.h"
 
@@ -122,7 +122,7 @@ class CompileOptions {
   }
 
   // Sets the compiler mode to generate debug information in the output.
-  void SetGenerateDebugInfo(){
+  void SetGenerateDebugInfo() {
     shaderc_compile_options_set_generate_debug_info(options_);
   }
 
@@ -145,8 +145,7 @@ class CompileOptions {
 
   class IncluderInterface {
    public:
-    virtual shaderc_includer_response* GetInclude(
-        const char* filename) = 0;
+    virtual shaderc_includer_response* GetInclude(const char* filename) = 0;
     virtual void ReleaseInclude(shaderc_includer_response* data) = 0;
   };
 
@@ -174,7 +173,7 @@ class CompileOptions {
   // from shaderc_compile_into_spv() will consist of SPIR-V assembly text.
   // Note the preprocessing only mode overrides this option, and this option
   // overrides the default mode generating a SPIR-V binary.
-  void SetDisassemblyMode(){
+  void SetDisassemblyMode() {
     shaderc_compile_options_set_disassembly_mode(options_);
   }
 
@@ -204,8 +203,10 @@ class CompileOptions {
     shaderc_compile_options_set_suppress_warnings(options_);
   }
 
-  // Sets the target shader environment, affecting which warnings or errors will be issued.
-  // The version will be for distinguishing between different versions of the target environment.
+  // Sets the target shader environment, affecting which warnings or errors will
+  // be issued.
+  // The version will be for distinguishing between different versions of the
+  // target environment.
   // "0" is the only supported version at this point
   void SetTargetEnvironment(shaderc_target_env target, uint32_t version) {
     shaderc_compile_options_set_target_env(options_, target, version);
@@ -251,13 +252,18 @@ class Compiler {
   // annotation is supported. If the shader kind is set to one of the default
   // shader kinds, the compiler will fall back to the specified default shader
   // kind in case it failed to deduce the shader kind from the source string.
+  // The input_file_name is a null-termintated string. It is used as a tag to
+  // identify the source string in cases like emitting error messages. It
+  // doesn't have to be a 'file name'.
   // The compilation is done with default compile options.
   // It is valid for the returned SpvModule object to outlive this compiler
   // object.
   SpvModule CompileGlslToSpv(const char* source_text, size_t source_text_size,
-                             shaderc_shader_kind shader_kind) const {
-    shaderc_spv_module_t module = shaderc_compile_into_spv(
-        compiler_, source_text, source_text_size, shader_kind, "main", nullptr);
+                             shaderc_shader_kind shader_kind,
+                             const char* input_file_name) const {
+    shaderc_spv_module_t module =
+        shaderc_compile_into_spv(compiler_, source_text, source_text_size,
+                                 shader_kind, input_file_name, "main", nullptr);
     return SpvModule(module);
   }
 
@@ -272,6 +278,9 @@ class Compiler {
   // annotation is supported. If the shader kind is set to one of the default
   // shader kinds, the compiler will fall back to the specified default shader
   // kind in case it failed to deduce the shader kind from the source string.
+  // The input_file_name is a null-termintated string. It is used as a tag to
+  // identify the source string in cases like emitting error messages. It
+  // doesn't have to be a 'file name'.
   // The compilation is passed any options specified in the CompileOptions
   // parameter.
   // It is valid for the returned SpvModule object to outlive this compiler
@@ -281,28 +290,32 @@ class Compiler {
   // binary generated with default options.
   SpvModule CompileGlslToSpv(const char* source_text, size_t source_text_size,
                              shaderc_shader_kind shader_kind,
+                             const char* input_file_name,
                              const CompileOptions& options) const {
-    shaderc_spv_module_t module =
-        shaderc_compile_into_spv(compiler_, source_text, source_text_size,
-                                 shader_kind, "main", options.options_);
+    shaderc_spv_module_t module = shaderc_compile_into_spv(
+        compiler_, source_text, source_text_size, shader_kind, input_file_name,
+        "main", options.options_);
     return SpvModule(module);
   }
 
   // Compiles the given source GLSL into a SPIR-V module by invoking
-  // CompileGlslToSpv(const char*, size_t, shaderc_shader_kind);
+  // CompileGlslToSpv(const char*, size_t, shaderc_shader_kind, const char*);
   SpvModule CompileGlslToSpv(const std::string& source_text,
-                             shaderc_shader_kind shader_kind) const {
-    return CompileGlslToSpv(source_text.data(), source_text.size(),
-                            shader_kind);
+                             shaderc_shader_kind shader_kind,
+                             const char* input_file_name) const {
+    return CompileGlslToSpv(source_text.data(), source_text.size(), shader_kind,
+                            input_file_name);
   }
 
   // Compiles the given source GLSL into a SPIR-V module by invoking
-  // CompileGlslToSpv(const char*, size_t, shaderc_shader_kind, options);
+  // CompileGlslToSpv(const char*, size_t, shaderc_shader_kind, const char*,
+  // options);
   SpvModule CompileGlslToSpv(const std::string& source_text,
                              shaderc_shader_kind shader_kind,
+                             const char* input_file_name,
                              const CompileOptions& options) const {
     return CompileGlslToSpv(source_text.data(), source_text.size(), shader_kind,
-                            options);
+                            input_file_name, options);
   }
 
  private:

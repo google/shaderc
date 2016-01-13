@@ -19,8 +19,8 @@
 extern "C" {
 #endif
 
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 typedef enum {
@@ -47,9 +47,11 @@ typedef enum {
 } shaderc_shader_kind;
 
 typedef enum {
-  shaderc_target_env_vulkan,        // create SPIR-V under Vulkan semantics
-  shaderc_target_env_opengl,        // create SPIR-V under OpenGL semantics
-  shaderc_target_env_opengl_compat, // create SPIR-V under OpenGL semantics, including compatibility profile functions
+  shaderc_target_env_vulkan,         // create SPIR-V under Vulkan semantics
+  shaderc_target_env_opengl,         // create SPIR-V under OpenGL semantics
+  shaderc_target_env_opengl_compat,  // create SPIR-V under OpenGL semantics,
+                                     // including compatibility profile
+                                     // functions
   shaderc_target_env_default = shaderc_target_env_vulkan
 } shaderc_target_env;
 
@@ -198,12 +200,9 @@ typedef void (*shaderc_includer_response_release_fn)(
 //  go to /path/to/include/b to find the file b.
 //  This needs context info from compiler to client includer, and may needs
 //  interface changes.
-
 void shaderc_compile_options_set_includer_callbacks(
-    shaderc_compile_options_t options,
-    shaderc_includer_response_get_fn getter,
-    shaderc_includer_response_release_fn releasor,
-    void* user_data);
+    shaderc_compile_options_t options, shaderc_includer_response_get_fn getter,
+    shaderc_includer_response_release_fn releasor, void* user_data);
 
 // Sets the compiler mode to do only preprocessing. The byte array result in the
 // module returned by the compilation is the text of the preprocessed shader.
@@ -222,8 +221,9 @@ void shaderc_compile_options_set_suppress_warnings(
 // Sets the target shader environment, affecting which warnings or errors will
 // be issued.  The version will be for distinguishing between different versions
 // of the target environment.  "0" is the only supported version at this point
-void shaderc_compile_options_set_target_env(
-    shaderc_compile_options_t options, shaderc_target_env target, uint32_t version);
+void shaderc_compile_options_set_target_env(shaderc_compile_options_t options,
+                                            shaderc_target_env target,
+                                            uint32_t version);
 
 // Sets the compiler mode to treat all warnings as errors. Note the
 // suppress-warnings mode overrides this option, i.e. if both
@@ -235,14 +235,17 @@ void shaderc_compile_options_set_warnings_as_errors(
 // An opaque handle to the results of a call to shaderc_compile_into_spv().
 typedef struct shaderc_spv_module* shaderc_spv_module_t;
 
-// Takes a GLSL source string and the associated shader kind, compiles it
-// according to the given additional_options. If the shader kind is not set
-// to a specified kind, but shaderc_glslc_infer_from_source, the compiler
-// will try to deduce the shader kind from the source string and a failure
-// in deducing will generate an error. Currently only #pragma annotation is
-// supported. If the shader kind is set to one of the default shader kinds,
-// the compiler will fall back to the default shader kind in case it failed to
-// deduce the shader kind from source string.
+// Takes a GLSL source string and the associated shader kind, input file
+// name, compiles it according to the given additional_options. If the shader
+// kind is not set to a specified kind, but shaderc_glslc_infer_from_source,
+// the compiler will try to deduce the shader kind from the source
+// string and a failure in deducing will generate an error. Currently only
+// #pragma annotation is supported. If the shader kind is set to one of the
+// default shader kinds, the compiler will fall back to the default shader
+// kind in case it failed to deduce the shader kind from source string.
+// The input_file_name is a null-termintated string. It is used as a tag to
+// identify the source string in cases like emitting error messages. It
+// doesn't have to be a 'file name'.
 // By default the source string will be compiled into SPIR-V binary
 // and a shaderc_spv_module will be returned to hold the results of the
 // compilation. When disassembly mode or preprocessing only mode is enabled
@@ -256,7 +259,7 @@ typedef struct shaderc_spv_module* shaderc_spv_module_t;
 shaderc_spv_module_t shaderc_compile_into_spv(
     const shaderc_compiler_t compiler, const char* source_text,
     size_t source_text_size, shaderc_shader_kind shader_kind,
-    const char* entry_point_name,
+    const char* input_file_name, const char* entry_point_name,
     const shaderc_compile_options_t additional_options);
 
 // The following functions, operating on shaderc_spv_module_t objects, offer
@@ -292,7 +295,7 @@ const char* shaderc_module_get_bytes(const shaderc_spv_module_t module);
 const char* shaderc_module_get_error_message(const shaderc_spv_module_t module);
 
 // Provides the version & revision of the SPIR-V which will be produced
-void shaderc_get_spv_version(unsigned int *version, unsigned int *revision);
+void shaderc_get_spv_version(unsigned int* version, unsigned int* revision);
 
 #ifdef __cplusplus
 }
