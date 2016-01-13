@@ -496,8 +496,9 @@ TEST_F(CompileStringWithOptionsTest, SetIncluderCallbacks) {
   shaderc_includer_callbacks callbacks{
       // A response method that returns fake full path and file content as
       // defined above.
-      +[](void* user_data, const char* filename) {
-        (void) filename;
+      [/*Capture list is not allowed for function pointer*/](
+          void* user_data, const char* filename) {
+        (void)filename;
         auto* fake_file = static_cast<FakeFile*>(user_data);
         const char* fullpath = fake_file->fullpath.c_str();
         const char* content = fake_file->content.c_str();
@@ -509,11 +510,12 @@ TEST_F(CompileStringWithOptionsTest, SetIncluderCallbacks) {
       &fake_file,
       // The data is owned in this test function stack, no need to clean
       // anything.
-      +[](void* user_data, const char* filename,
-         shaderc_includer_fullpath_content data) {
-        (void) user_data;
-        (void) filename;
-        (void) data;
+      [/*Capture list is not allowed for function pointer*/](
+          void* user_data, const char* filename,
+          shaderc_includer_fullpath_content data) {
+        (void)user_data;
+        (void)filename;
+        (void)data;
       },
       nullptr};
   shaderc_compile_options_set_includer_callbacks(options_.get(), &callbacks);
