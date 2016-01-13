@@ -243,6 +243,14 @@ class Compiler {
   // Compiles the given source GLSL into a SPIR-V module.
   // The source_text parameter must be a valid pointer.
   // The source_text_size parameter must be the length of the source text.
+  // The shader_kind parameter either forces the compilation to be done with a
+  // specified shader kind, or hint the compiler how to determine the exact
+  // shader kind. If the shader kind is set to shaderc_glslc_infer_from_source,
+  // the compiler will try to deduce the shader kind from the source string and
+  // a failure in this proess will generate an error. Currently only #pragma
+  // annotation is supported. If the shader kind is set to one of the default
+  // shader kinds, the compiler will fall back to the specified default shader
+  // kind in case it failed to deduce the shader kind from the source string.
   // The compilation is done with default compile options.
   // It is valid for the returned SpvModule object to outlive this compiler
   // object.
@@ -256,13 +264,21 @@ class Compiler {
   // Compiles the given source GLSL into a SPIR-V module.
   // The source_text parameter must be a valid pointer.
   // The source_text_size parameter must be the length of the source text.
+  // The shader_kind parameter either forces the compilation to be done with a
+  // specified shader kind, or hint the compiler how to determine the exact
+  // shader kind. If the shader kind is set to shaderc_glslc_infer_from_source,
+  // the compiler will try to deduce the shader kind from the source string and
+  // a failure in this proess will generate an error. Currently only #pragma
+  // annotation is supported. If the shader kind is set to one of the default
+  // shader kinds, the compiler will fall back to the specified default shader
+  // kind in case it failed to deduce the shader kind from the source string.
   // The compilation is passed any options specified in the CompileOptions
   // parameter.
   // It is valid for the returned SpvModule object to outlive this compiler
   // object.
   // Note when the options_ has disassembly mode or preprocessing only mode set
-  // on, the returned SpvModule will hold a text string, instead of a SPIR-V binary
-  // generated with default options.
+  // on, the returned SpvModule will hold a text string, instead of a SPIR-V
+  // binary generated with default options.
   SpvModule CompileGlslToSpv(const char* source_text, size_t source_text_size,
                              shaderc_shader_kind shader_kind,
                              const CompileOptions& options) const {
