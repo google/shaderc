@@ -96,7 +96,6 @@ class ForbidInclude : public shaderc_util::CountingIncluder {
   }
 };
 
-// QINING
 class FileIncluder : public shaderc_util::CountingIncluder {
  private:
   bool AreValidCallbacks() const {
@@ -110,21 +109,6 @@ class FileIncluder : public shaderc_util::CountingIncluder {
     if (!AreValidCallbacks())
       return std::make_pair<std::string, std::string>(
           "", "unexpected include directive");
-    // size_t full_path_length = callbacks_.fullpath_size_getter(filename);
-    ////char* full_path_ptr = new char[full_path_length];
-    // std::unique_ptr<char[]> full_path(new char[full_path_length]);
-    // char* full_path_ptr = full_path.get();
-    // callbacks_.fullpath_data_getter(filename, &full_path_ptr);
-    // size_t content_length = callbacks_.content_size_getter(filename);
-    ////char* content_ptr = new char[content_length];
-    // std::unique_ptr<char[]> content(new char[content_length]);
-    // char* content_ptr = content.get();
-    // callbacks_.content_data_getter(filename, &content_ptr);
-
-    // return std::pair<std::string, std::string>(
-    //    std::string(full_path_ptr, full_path_length),
-    //    std::string(content_ptr, content_length));
-
     shaderc_includer_fullpath_content data =
         callbacks_.get_fullpath_and_content(callbacks_.getter_user_data,
                                             filename);
