@@ -36,8 +36,11 @@
 
 namespace {
 
-// Returns shader stage (ie: vertex, fragment, etc.) corresponding to kind.
-EShLanguage GetStage(shaderc_shader_kind kind) {
+// Returns shader stage (ie: vertex, fragment, etc.) in response to forced
+// shader kinds. If the shader kind is not a forced kind, returns EshLangCount
+// to let #pragma annotation or shader stage deducer determine the stage to
+// use.
+EShLanguage GetForcedStage(shaderc_shader_kind kind) {
   switch (kind) {
     case shaderc_glsl_vertex_shader:
       return EShLangVertex;
@@ -51,9 +54,17 @@ EShLanguage GetStage(shaderc_shader_kind kind) {
       return EShLangTessControl;
     case shaderc_glsl_tess_evaluation_shader:
       return EShLangTessEvaluation;
+    case shaderc_glsl_infer_from_source:
+    case shaderc_glsl_default_vertex_shader:
+    case shaderc_glsl_default_fragment_shader:
+    case shaderc_glsl_default_compute_shader:
+    case shaderc_glsl_default_geometry_shader:
+    case shaderc_glsl_default_tess_control_shader:
+    case shaderc_glsl_default_tess_evaluation_shader:
+      return EShLangCount;
   }
   assert(0 && "Unhandled shaderc_shader_kind");
-  return EShLangVertex;
+  return EShLangCount;
 }
 
 // Converts shaderc_target_env to EShMessages
@@ -84,6 +95,69 @@ struct {
 };
 
 std::mutex compile_mutex;  // Guards shaderc_compile_*.
+
+// A wrapper functor class to be used as stage deducer for libshaderc_util
+// Compile() interface. When the given shader kind is one of the default shader
+// kinds, this functor will be called if #pragma is not found in the source
+// code. And it returns the corresponding shader stage. When the shader kind is
+// a forced shader kind, this functor won't be called and it simply returns
+// EShLangCount to make the syntax correct. When the shader kind is set to
+// shaderc_glsl_deduce_from_pragma, this functor also returns EShLangCount, but
+// the compiler should emit error if #pragma annotation is not found in this
+// case.
+class StageDeducer {
+ public:
+  StageDeducer() : kind_(shaderc_glsl_infer_from_source){};
+  StageDeducer(shaderc_shader_kind kind) : kind_(kind){};
+  // The method that underlying glslang will call to determine the shader stage
+  // to be used in current compilation. It is called only when there is neither
+  // forced shader kind (or say stage, in the view of glslang), nor #pragma
+  // annotation in the source code. This method transforms an user defined
+  // 'default' shader kind to the corresponding shader stage. As this is the
+  // last trial to determine the shader stage, failing to find the corresponding
+  // shader stage will cause an error.
+  EShLanguage operator()(std::ostream* error_stream,
+                         const shaderc_util::string_piece& error_tag) const {
+    EShLanguage stage = GetDefaultStage(kind_);
+    if (stage == EShLangCount) {
+      *error_stream << "error: '" << error_tag
+                    << "' could not determine the shader stage" << std::endl;
+    }
+    return stage;
+  };
+
+ private:
+  // Gets the corresponding shader stage for a given 'default' shader kind. All
+  // other kinds are mapped to EShLangCount which should not be used.
+  EShLanguage GetDefaultStage(shaderc_shader_kind kind) const {
+    switch (kind) {
+      case shaderc_glsl_vertex_shader:
+      case shaderc_glsl_fragment_shader:
+      case shaderc_glsl_compute_shader:
+      case shaderc_glsl_geometry_shader:
+      case shaderc_glsl_tess_control_shader:
+      case shaderc_glsl_tess_evaluation_shader:
+      case shaderc_glsl_infer_from_source:
+        return EShLangCount;
+      case shaderc_glsl_default_vertex_shader:
+        return EShLangVertex;
+      case shaderc_glsl_default_fragment_shader:
+        return EShLangFragment;
+      case shaderc_glsl_default_compute_shader:
+        return EShLangCompute;
+      case shaderc_glsl_default_geometry_shader:
+        return EShLangGeometry;
+      case shaderc_glsl_default_tess_control_shader:
+        return EShLangTessControl;
+      case shaderc_glsl_default_tess_evaluation_shader:
+        return EShLangTessEvaluation;
+    }
+    assert(0 && "Unhandled shaderc_shader_kind");
+    return EShLangCount;
+  }
+
+  shaderc_shader_kind kind_;
+};
 
 class InternalFileIncluder : public shaderc_util::CountingIncluder {
  public:
@@ -281,26 +355,23 @@ shaderc_spv_module_t shaderc_compile_into_spv(
     std::stringstream errors;
     size_t total_warnings = 0;
     size_t total_errors = 0;
-    EShLanguage stage = GetStage(shader_kind);
+    EShLanguage forced_stage = GetForcedStage(shader_kind);
     shaderc_util::string_piece source_string =
         shaderc_util::string_piece(source_text, source_text + source_text_size);
-    auto stage_function = [](std::ostream* error_stream,
-                             const shaderc_util::string_piece& eror_tag) {
-      return EShLangCount;
-    };
     if (additional_options) {
       result->compilation_succeeded = additional_options->compiler.Compile(
-          source_string, stage, "shader", stage_function,
+          source_string, forced_stage, "shader",
+          StageDeducer(shader_kind),
           InternalFileIncluder(additional_options->get_includer_response,
-                       additional_options->release_includer_response,
-                       additional_options->includer_user_data), &output,
-          &errors, &total_warnings, &total_errors);
+                               additional_options->release_includer_response,
+                               additional_options->includer_user_data),
+          &output, &errors, &total_warnings, &total_errors);
     } else {
       // Compile with default options.
       result->compilation_succeeded = shaderc_util::Compiler().Compile(
-          source_string, stage, "shader", stage_function,
-          InternalFileIncluder(), &output,
-          &errors, &total_warnings, &total_errors);
+          source_string, forced_stage, "shader", StageDeducer(shader_kind),
+          InternalFileIncluder(), &output, &errors, &total_warnings,
+          &total_errors);
     }
     result->messages = errors.str();
     result->spirv = output.str();

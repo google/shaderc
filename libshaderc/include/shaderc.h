@@ -24,12 +24,26 @@ extern "C" {
 #include <stdint.h>
 
 typedef enum {
+  // Forced shader kinds. These shader kinds force the compiler to compile the
+  // source code as the specified kind of shader.
   shaderc_glsl_vertex_shader,
   shaderc_glsl_fragment_shader,
   shaderc_glsl_compute_shader,
   shaderc_glsl_geometry_shader,
   shaderc_glsl_tess_control_shader,
-  shaderc_glsl_tess_evaluation_shader
+  shaderc_glsl_tess_evaluation_shader,
+  // Deduce the shader kind from #pragma annotation in the source code. Compiler
+  // will emit error if #pragma annotation is not found.
+  shaderc_glsl_infer_from_source,
+  // Default shader kinds. Compiler will fall back to compile the source code as
+  // the specified kind of shader when #pragma annotation is not found in the
+  // source code.
+  shaderc_glsl_default_vertex_shader,
+  shaderc_glsl_default_fragment_shader,
+  shaderc_glsl_default_compute_shader,
+  shaderc_glsl_default_geometry_shader,
+  shaderc_glsl_default_tess_control_shader,
+  shaderc_glsl_default_tess_evaluation_shader,
 } shaderc_shader_kind;
 
 typedef enum {
@@ -221,18 +235,24 @@ void shaderc_compile_options_set_warnings_as_errors(
 // An opaque handle to the results of a call to shaderc_compile_into_spv().
 typedef struct shaderc_spv_module* shaderc_spv_module_t;
 
-// Takes a GLSL source string and the associated shader type, compiles
-// it according to the given additional_options. By default the source
-// string will be compiled into SPIR-V binary and a shaderc_spv_module will
-// be returned to hold the results of the compilation. When disassembly
-// mode or preprocessing only mode is enabled in the additional_options,
-// the source string will be compiled into char strings and held by the
-// returned shaderc_spv_module.  The entry_point_name null-terminated
-// string defines the name of the entry point to associate with this
-// GLSL source. If the additional_options parameter is not NULL, then the
-// compilation is modified by any options present. May be safely called
-// from multiple threads without explicit synchronization. If there was
-// failure in allocating the compiler object NULL will be returned.
+// Takes a GLSL source string and the associated shader kind, compiles it
+// according to the given additional_options. If the shader kind is not set
+// to a specified kind, but shaderc_glslc_infer_from_source, the compiler
+// will try to deduce the shader kind from the source string and a failure
+// in deducing will generate an error. Currently only #pragma annotation is
+// supported. If the shader kind is set to one of the default shader kinds,
+// the compiler will fall back to the default shader kind in case it failed to
+// deduce the shader kind from source string.
+// By default the source string will be compiled into SPIR-V binary
+// and a shaderc_spv_module will be returned to hold the results of the
+// compilation. When disassembly mode or preprocessing only mode is enabled
+// in the additional_options, the source string will be compiled into char
+// strings and held by the returned shaderc_spv_module.  The entry_point_name
+// null-terminated string defines the name of the entry point to associate
+// with this GLSL source. If the additional_options parameter is not NULL,
+// then the compilation is modified by any options present. May be safely
+// called from multiple threads without explicit synchronization. If there
+// was failure in allocating the compiler object NULL will be returned.
 shaderc_spv_module_t shaderc_compile_into_spv(
     const shaderc_compiler_t compiler, const char* source_text,
     size_t source_text_size, shaderc_shader_kind shader_kind,

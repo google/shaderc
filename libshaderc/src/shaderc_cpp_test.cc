@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "shaderc.hpp"
+#include "common_shaders_for_test.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -28,48 +29,32 @@ using shaderc::CompileOptions;
 using testing::Each;
 using testing::HasSubstr;
 
-const char kMinimalShader[] = "void main(){}";
-const char kMinimalShaderWithMacro[] =
-    "#define E main\n"
-    "void E(){}\n";
+// Examine whether a SPIR-V result module has valid SPIR-V code, by checking the
+// magic number in the fixed postion of the  data of the result module. Returns
+// true if the magic number is found at the correct postion, otherwise returns
+// false.
+bool IsValidSpv(const shaderc::SpvModule& result) {
+  if (!result.GetSuccess()) return false;
+  size_t length = result.GetLength();
+  if (length < 20) return false;
+  const uint32_t* bytes =
+      static_cast<const uint32_t*>(static_cast<const void*>(result.GetData()));
+  return bytes[0] == spv::MagicNumber;
+}
 
-// By default the compiler will emit a warning on line 2 complaining
-// that 'float' is a deprecated attribute in version 130.
-const char kDeprecatedAttributeShader[] =
-    "#version 130\n"
-    "attribute float x;\n"
-    "void main() {}\n";
+// Compiles a shader and returns true if the result is valid SPIR-V.
+bool CompilesToValidSpv(const shaderc::Compiler& compiler,
+                        const std::string& shader, shaderc_shader_kind kind) {
+  return IsValidSpv(compiler.CompileGlslToSpv(shader, kind));
+}
 
-// By default the compiler will emit a warning as version 550 is an unknown
-// version.
-const char kMinimalUnknownVersionShader[] =
-    "#version 550\n"
-    "void main() {}\n";
-
-// gl_ClipDistance doesn't exist in es profile (at least until 3.10).
-const char kCoreVertShaderWithoutVersion[] =
-    "void main() {\n"
-    "gl_ClipDistance[0] = 5.;\n"
-    "}\n";
-
-// Debug information should contain the name of the vector: debug_info_sample.
-const char kMinimalDebugInfoShader[] =
-    "void main(){\n"
-    "vec2 debug_info_sample = vec2(1.0, 1.0);\n"
-    "}\n";
-
-// Compiler should generate two errors.
-const char kTwoErrorsShader[] =
-    "#error\n"
-    "#error\n"
-    "void main(){}\n";
-
-// Compiler should generate two warnings.
-const char kTwoWarningsShader[] =
-    "#version 130\n"
-    "attribute float x;\n"
-    "attribute float y;\n"
-    "void main(){}\n";
+// Compiles a shader with options and returns true if the result is valid
+// SPIR-V.
+bool CompilesToValidSpv(const shaderc::Compiler& compiler,
+                        const std::string& shader, shaderc_shader_kind kind,
+                        const CompileOptions& options) {
+  return IsValidSpv(compiler.CompileGlslToSpv(shader, kind, options));
+}
 
 class CppInterface : public testing::Test {
  protected:
@@ -87,19 +72,6 @@ class CppInterface : public testing::Test {
     return compiler_
         .CompileGlslToSpv(shader.c_str(), shader.length(), kind, options)
         .GetSuccess();
-  }
-
-  // Compiles a shader and returns true if the result is valid SPIR-V.
-  bool CompilesToValidSpv(const std::string& shader,
-                          shaderc_shader_kind kind) const {
-    return IsValidSpv(compiler_.CompileGlslToSpv(shader, kind));
-  }
-
-  // Compiles a shader with options and returns true if the result is valid
-  // SPIR-V.
-  bool CompilesToValidSpv(const std::string& shader, shaderc_shader_kind kind,
-                          const CompileOptions& options) const {
-    return IsValidSpv(compiler_.CompileGlslToSpv(shader, kind, options));
   }
 
   // Compiles a shader, asserts compilation success, and returns the warning
@@ -145,16 +117,6 @@ class CppInterface : public testing::Test {
   // For compiling shaders in subclass tests:
   shaderc::Compiler compiler_;
   CompileOptions options_;
-
- private:
-  static bool IsValidSpv(const shaderc::SpvModule& result) {
-    if (!result.GetSuccess()) return false;
-    size_t length = result.GetLength();
-    if (length < 20) return false;
-    const uint32_t* bytes = static_cast<const uint32_t*>(
-        static_cast<const void*>(result.GetData()));
-    return bytes[0] == spv::MagicNumber;
-  }
 };
 
 TEST_F(CppInterface, CompilerValidUponConstruction) {
@@ -215,31 +177,33 @@ TEST_F(CppInterface, GarbageString) {
 }
 
 TEST_F(CppInterface, MinimalShader) {
-  EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader));
-  EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_fragment_shader));
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
+                                 shaderc_glsl_vertex_shader));
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
+                                 shaderc_glsl_fragment_shader));
 }
 
 TEST_F(CppInterface, BasicOptions) {
-  EXPECT_TRUE(
-      CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader, options_));
-  EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_fragment_shader,
-                                 options_));
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
+                                 shaderc_glsl_vertex_shader, options_));
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
+                                 shaderc_glsl_fragment_shader, options_));
 }
 
 TEST_F(CppInterface, CopiedOptions) {
-  EXPECT_TRUE(
-      CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader, options_));
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
+                                 shaderc_glsl_vertex_shader, options_));
   CompileOptions copied_options(options_);
-  EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_fragment_shader,
-                                 copied_options));
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
+                                 shaderc_glsl_fragment_shader, copied_options));
 }
 
 TEST_F(CppInterface, MovedOptions) {
-  EXPECT_TRUE(
-      CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader, options_));
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
+                                 shaderc_glsl_vertex_shader, options_));
   CompileOptions copied_options(std::move(options_));
-  EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_fragment_shader,
-                                 copied_options));
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
+                                 shaderc_glsl_fragment_shader, copied_options));
 }
 
 TEST_F(CppInterface, StdAndCString) {
@@ -334,7 +298,7 @@ TEST_F(CppInterface, ForcedVersionProfileCorrectStd) {
   // Forces the version and profile to 450core, which fixes the missing
   // #version.
   options_.SetForcedVersionProfile(450, shaderc_profile_core);
-  EXPECT_TRUE(CompilesToValidSpv(kCoreVertShaderWithoutVersion,
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kCoreVertShaderWithoutVersion,
                                  shaderc_glsl_vertex_shader, options_));
 }
 
@@ -343,7 +307,7 @@ TEST_F(CppInterface, ForcedVersionProfileCorrectStdClonedOptions) {
   // #version.
   options_.SetForcedVersionProfile(450, shaderc_profile_core);
   CompileOptions cloned_options(options_);
-  EXPECT_TRUE(CompilesToValidSpv(kCoreVertShaderWithoutVersion,
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kCoreVertShaderWithoutVersion,
                                  shaderc_glsl_vertex_shader, cloned_options));
 }
 
@@ -437,17 +401,16 @@ TEST_F(CppInterface, GenerateDebugInfoDisassemblyClonedOptions) {
 TEST_F(CppInterface, GetNumErrors) {
   std::string shader(kTwoErrorsShader);
   const shaderc::SpvModule module = compiler_.CompileGlslToSpv(
-      kTwoErrorsShader, strlen(kTwoErrorsShader),
-      shaderc_glsl_vertex_shader);
+      kTwoErrorsShader, strlen(kTwoErrorsShader), shaderc_glsl_vertex_shader);
   EXPECT_FALSE(module.GetSuccess());
   EXPECT_EQ(2u, module.GetNumErrors());
   EXPECT_EQ(0u, module.GetNumWarnings());
 }
 
 TEST_F(CppInterface, GetNumWarnings) {
-  const shaderc::SpvModule module = compiler_.CompileGlslToSpv(
-      kTwoWarningsShader, strlen(kTwoWarningsShader),
-      shaderc_glsl_vertex_shader);
+  const shaderc::SpvModule module =
+      compiler_.CompileGlslToSpv(kTwoWarningsShader, strlen(kTwoWarningsShader),
+                                 shaderc_glsl_vertex_shader);
   EXPECT_TRUE(module.GetSuccess());
   EXPECT_EQ(2u, module.GetNumWarnings());
   EXPECT_EQ(0u, module.GetNumErrors());
@@ -455,8 +418,7 @@ TEST_F(CppInterface, GetNumWarnings) {
 
 TEST_F(CppInterface, ZeroErrorsZeroWarnings) {
   const shaderc::SpvModule module = compiler_.CompileGlslToSpv(
-      kMinimalShader, strlen(kMinimalShader),
-      shaderc_glsl_vertex_shader);
+      kMinimalShader, strlen(kMinimalShader), shaderc_glsl_vertex_shader);
   EXPECT_TRUE(module.GetSuccess());
   EXPECT_EQ(0u, module.GetNumErrors());
   EXPECT_EQ(0u, module.GetNumWarnings());
@@ -505,6 +467,83 @@ TEST_F(CppInterface, PreprocessingOnlyModeSecondOverridesDisassemblyMode) {
               HasSubstr("void main(){ }"));
 }
 
+// A shader kind test cases needs: 1) A shader text with or without #pragma
+// annotation, 2) shader_kind.
+struct ShaderKindTestCase {
+  const char* shader_;
+  shaderc_shader_kind shader_kind_;
+};
+
+// Test the shader kind deduction process. If the shader kind is one
+// of the non-default ones, the compiler will just try to compile the
+// source code in that specified shader kind. If the shader kind is
+// shaderc_glsl_deduce_from_pragma, the compiler will determine the shader
+// kind from #pragma annotation in the source code and emit error if none
+// such annotation is found. When the shader kind is one of the default
+// ones, the compiler will fall back to use the specified shader kind if
+// and only if #pragma annoation is not found.
+
+// Valid shader kind settings should generate valid SPIR-V code.
+using ValidShaderKind = testing::TestWithParam<ShaderKindTestCase>;
+
+TEST_P(ValidShaderKind, ValidSpvCode) {
+  const ShaderKindTestCase& test_case = GetParam();
+  shaderc::Compiler compiler;
+  EXPECT_TRUE(
+      CompilesToValidSpv(compiler, test_case.shader_, test_case.shader_kind_));
+}
+
+INSTANTIATE_TEST_CASE_P(
+    CompileStringTest, ValidShaderKind,
+    testing::ValuesIn(std::vector<ShaderKindTestCase>{
+        // Valid default shader kinds.
+        {kEmpty310ESShader, shaderc_glsl_default_vertex_shader},
+        {kEmpty310ESShader, shaderc_glsl_default_fragment_shader},
+        {kEmpty310ESShader, shaderc_glsl_default_compute_shader},
+        {kGeometryOnlyShader, shaderc_glsl_default_geometry_shader},
+        {kTessControlOnlyShader, shaderc_glsl_default_tess_control_shader},
+        {kTessEvaluationOnlyShader,
+         shaderc_glsl_default_tess_evaluation_shader},
+
+        // #pragma annotation overrides default shader kinds.
+        {kVertexOnlyShaderWithPragma, shaderc_glsl_default_compute_shader},
+        {kFragmentOnlyShaderWithPragma, shaderc_glsl_default_vertex_shader},
+        {kTessControlOnlyShaderWithPragma,
+         shaderc_glsl_default_fragment_shader},
+        {kTessEvaluationOnlyShaderWithPragma,
+         shaderc_glsl_default_tess_control_shader},
+        {kGeometryOnlyShaderWithPragma,
+         shaderc_glsl_default_tess_evaluation_shader},
+        {kComputeOnlyShaderWithPragma, shaderc_glsl_default_geometry_shader},
+
+        // Specified non-default shader kind overrides #pragma annotation.
+        {kVertexOnlyShaderWithInvalidPragma, shaderc_glsl_vertex_shader},
+    }));
+
+// Invalid shader kind settings should generate errors.
+using InvalidShaderKind = testing::TestWithParam<ShaderKindTestCase>;
+
+TEST_P(InvalidShaderKind, CompilationShouldFail) {
+  const ShaderKindTestCase& test_case = GetParam();
+  shaderc::Compiler compiler;
+  EXPECT_FALSE(
+      CompilesToValidSpv(compiler, test_case.shader_, test_case.shader_kind_));
+}
+
+INSTANTIATE_TEST_CASE_P(
+    CompileStringTest, InvalidShaderKind,
+    testing::ValuesIn(std::vector<ShaderKindTestCase>{
+        // Invalid default shader kind.
+        {kVertexOnlyShader, shaderc_glsl_default_fragment_shader},
+        // Sets to deduce shader kind from #pragma, but #pragma is defined in
+        // the source code.
+        {kVertexOnlyShader, shaderc_glsl_infer_from_source},
+        // Invalid #pragma cause errors, even though default shader kind is set
+        // to valid shader kind.
+        {kVertexOnlyShaderWithInvalidPragma,
+         shaderc_glsl_default_vertex_shader},
+    }));
+
 // To test file inclusion, use an unordered_map as a fake file system to store
 // fake files to be included. The unordered_map represents a filesystem by
 // mapping filename (or path) string to the contents of that file as a string.
@@ -535,7 +574,7 @@ class IncluderTestCase {
 // IncluderInterface to provide GetInclude() and ReleaseInclude() methods.
 class TestIncluder : public shaderc::CompileOptions::IncluderInterface {
  public:
-  TestIncluder(const FakeFS& fake_fs) : fake_fs_(fake_fs), responses_({}){}
+  TestIncluder(const FakeFS& fake_fs) : fake_fs_(fake_fs), responses_({}) {}
 
   // Get path and content from the fake file system.
   shaderc_includer_response* GetInclude(const char* filename) override {

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "shaderc.h"
+#include "common_shaders_for_test.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -26,62 +27,6 @@ namespace {
 
 using testing::Each;
 using testing::HasSubstr;
-
-// The minimal shader without #version
-const char kMinimalShader[] = "void main(){}";
-
-// By default the compiler will emit a warning on line 2 complaining
-// that 'float' is a deprecated attribute in version 130.
-const char kDeprecatedAttributeShader[] =
-    "#version 130\n"
-    "attribute float x;\n"
-    "void main() {}\n";
-
-// By default the compiler will emit a warning as version 550 is an unknown
-// version.
-const char kMinimalUnknownVersionShader[] =
-    "#version 550\n"
-    "void main() {}\n";
-
-// gl_ClipDistance doesn't exist in es profile (at least until 3.10).
-const char kCoreVertShaderWithoutVersion[] =
-    "void main() {\n"
-    "gl_ClipDistance[0] = 5.;\n"
-    "}\n";
-
-// Generated debug information should contain the name of the vector:
-// debug_info_sample.
-const char kMinimalDebugInfoShader[] =
-    "void main(){\n"
-    "vec2 debug_info_sample = vec2(1.0,1.0);\n"
-    "}\n";
-
-// Compiler should generate two errors.
-const char kTwoErrorsShader[] =
-    "#error\n"
-    "#error\n"
-    "void main(){}\n";
-
-// Compiler should generate two warnings.
-const char kTwoWarningsShader[] =
-    "#version 130\n"
-    "attribute float x;\n"
-    "attribute float y;\n"
-    "void main(){}\n";
-
-// A shader that compiles under OpenGL compatibility profile rules,
-// but not OpenGL core profile rules.
-const char kOpenGLCompatibilityFragmentShader[] =
-    R"(#version 100
-     uniform highp sampler2D tex;
-     void main() {
-       gl_FragColor = texture2D(tex, vec2(0.0,0.0));
-     })";
-
-// A shader that compiles under OpenGL core profile rules.
-const char kOpenGLVertexShader[] =
-    R"(#version 150
-       void main() { int t = gl_VertexID; })";
 
 TEST(Init, MultipleCalls) {
   shaderc_compiler_t compiler1, compiler2, compiler3;
@@ -155,6 +100,20 @@ class Compiler {
   shaderc_compiler_t compiler;
 };
 
+// Compiles a shader and returns true if the result is valid SPIR-V.
+bool CompilesToValidSpv(Compiler& compiler, const std::string& shader,
+                        shaderc_shader_kind kind,
+                        const shaderc_compile_options_t options = nullptr) {
+  const Compilation comp(compiler.get_compiler_handle(), shader, kind, options);
+  auto result = comp.result();
+  if (!shaderc_module_get_success(result)) return false;
+  size_t length = shaderc_module_get_length(result);
+  if (length < 20) return false;
+  const uint32_t* bytes = static_cast<const uint32_t*>(
+      static_cast<const void*>(shaderc_module_get_bytes(result)));
+  return bytes[0] == spv::MagicNumber;
+}
+
 // A testing class to test the compilation of a string with or without options.
 // This class wraps the initailization of compiler and compiler options and
 // groups the result checking methods. Subclass tests can access the compiler
@@ -167,20 +126,6 @@ class CompileStringTest : public testing::Test {
     return shaderc_module_get_success(
         Compilation(compiler_.get_compiler_handle(), shader, kind, options)
             .result());
-  }
-
-  // Compiles a shader and returns true if the result is valid SPIR-V.
-  bool CompilesToValidSpv(const std::string& shader, shaderc_shader_kind kind,
-                          const shaderc_compile_options_t options = nullptr) {
-    const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
-                           options);
-    auto result = comp.result();
-    if (!shaderc_module_get_success(result)) return false;
-    size_t length = shaderc_module_get_length(result);
-    if (length < 20) return false;
-    const uint32_t* bytes = static_cast<const uint32_t*>(
-        static_cast<const void*>(shaderc_module_get_bytes(result)));
-    return bytes[0] == spv::MagicNumber;
   }
 
   // Compiles a shader, expects compilation success, and returns the warning
@@ -254,30 +199,35 @@ TEST_F(CompileStringTest, ReallyLongShader) {
   minimal_shader += "void foo(){}";
   minimal_shader.append(1024 * 1024 * 8, ' ');  // 8MB of spaces.
   minimal_shader += "void main(){}";
-  EXPECT_TRUE(CompilesToValidSpv(minimal_shader, shaderc_glsl_vertex_shader));
-  EXPECT_TRUE(CompilesToValidSpv(minimal_shader, shaderc_glsl_fragment_shader));
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, minimal_shader,
+                                 shaderc_glsl_vertex_shader));
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, minimal_shader,
+                                 shaderc_glsl_fragment_shader));
 }
 
 TEST_F(CompileStringTest, MinimalShader) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader));
-  EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_fragment_shader));
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
+                                 shaderc_glsl_vertex_shader));
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
+                                 shaderc_glsl_fragment_shader));
 }
 
 TEST_F(CompileStringTest, WorksWithCompileOptions) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader,
-                                 options_.get()));
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
+                                 shaderc_glsl_vertex_shader, options_.get()));
 }
 
 TEST_F(CompileStringWithOptionsTest, CloneCompilerOptions) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   compile_options_ptr options_(shaderc_compile_options_initialize());
-  EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader,
-                                 options_.get()));
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
+                                 shaderc_glsl_vertex_shader, options_.get()));
   compile_options_ptr cloned_options(
       shaderc_compile_options_clone(options_.get()));
-  EXPECT_TRUE(CompilesToValidSpv(kMinimalShader, shaderc_glsl_vertex_shader,
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
+                                 shaderc_glsl_vertex_shader,
                                  cloned_options.get()));
 }
 
@@ -286,26 +236,26 @@ TEST_F(CompileStringWithOptionsTest, MacroCompileOptions) {
   shaderc_compile_options_add_macro_definition(options_.get(), "E", "main");
   const std::string kMinimalExpandedShader = "void E(){}";
   const std::string kMinimalDoubleExpandedShader = "F E(){}";
-  EXPECT_TRUE(CompilesToValidSpv(kMinimalExpandedShader,
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalExpandedShader,
                                  shaderc_glsl_vertex_shader, options_.get()));
   compile_options_ptr cloned_options(
       shaderc_compile_options_clone(options_.get()));
   // The simplest should still compile with the cloned options.
-  EXPECT_TRUE(CompilesToValidSpv(kMinimalExpandedShader,
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalExpandedShader,
                                  shaderc_glsl_vertex_shader,
                                  cloned_options.get()));
-  EXPECT_FALSE(CompilesToValidSpv(kMinimalDoubleExpandedShader,
+  EXPECT_FALSE(CompilesToValidSpv(compiler_, kMinimalDoubleExpandedShader,
                                   shaderc_glsl_vertex_shader,
                                   cloned_options.get()));
 
   shaderc_compile_options_add_macro_definition(cloned_options.get(), "F",
                                                "void");
   // This should still not work with the original options.
-  EXPECT_FALSE(CompilesToValidSpv(kMinimalDoubleExpandedShader,
+  EXPECT_FALSE(CompilesToValidSpv(compiler_, kMinimalDoubleExpandedShader,
                                   shaderc_glsl_vertex_shader, options_.get()));
   // This should work with the cloned options that have the additional
   // parameter.
-  EXPECT_TRUE(CompilesToValidSpv(kMinimalDoubleExpandedShader,
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalDoubleExpandedShader,
                                  shaderc_glsl_vertex_shader,
                                  cloned_options.get()));
 }
@@ -335,7 +285,7 @@ TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileCorrectStd) {
   shaderc_compile_options_set_forced_version_profile(options_.get(), 450,
                                                      shaderc_profile_core);
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  EXPECT_TRUE(CompilesToValidSpv(kCoreVertShaderWithoutVersion,
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kCoreVertShaderWithoutVersion,
                                  shaderc_glsl_vertex_shader, options_.get()));
 }
 
@@ -349,7 +299,7 @@ TEST_F(CompileStringWithOptionsTest,
   compile_options_ptr cloned_options(
       shaderc_compile_options_clone(options_.get()));
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  EXPECT_TRUE(CompilesToValidSpv(kCoreVertShaderWithoutVersion,
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kCoreVertShaderWithoutVersion,
                                  shaderc_glsl_vertex_shader,
                                  cloned_options.get()));
 }
@@ -497,6 +447,82 @@ TEST_F(CompileStringWithOptionsTest, PreprocessingOnlyOption) {
   EXPECT_THAT(preprocessed_text_cloned_options, HasSubstr("void main(){ }"));
 }
 
+// A shader kind test cases needs: 1) A shader text with or without #pragma
+// annotation, 2) shader_kind.
+struct ShaderKindTestCase {
+  const char* shader_;
+  shaderc_shader_kind shader_kind_;
+};
+
+// Test the shader kind deduction process. If the shader kind is one of the
+// forced ones, the compiler will just try to compile the source code in that
+// specified shader kind. If the shader kind is shaderc_glsl_deduce_from_pragma,
+// the compiler will determine the shader kind from #pragma annotation in the
+// source code and emit error if none such annotation is found. When the shader
+// kind is one of the default ones, the compiler will fall back to use the
+// specified shader kind if and only if #pragma annoation is not found.
+
+// Valid shader kind settings should generate valid SPIR-V code.
+using ValidShaderKind = testing::TestWithParam<ShaderKindTestCase>;
+
+TEST_P(ValidShaderKind, ValidSpvCode) {
+  const ShaderKindTestCase& test_case = GetParam();
+  Compiler compiler;
+  EXPECT_TRUE(
+      CompilesToValidSpv(compiler, test_case.shader_, test_case.shader_kind_));
+}
+
+INSTANTIATE_TEST_CASE_P(
+    CompileStringTest, ValidShaderKind,
+    testing::ValuesIn(std::vector<ShaderKindTestCase>{
+        // Valid default shader kinds.
+        {kEmpty310ESShader, shaderc_glsl_default_vertex_shader},
+        {kEmpty310ESShader, shaderc_glsl_default_fragment_shader},
+        {kEmpty310ESShader, shaderc_glsl_default_compute_shader},
+        {kGeometryOnlyShader, shaderc_glsl_default_geometry_shader},
+        {kTessControlOnlyShader, shaderc_glsl_default_tess_control_shader},
+        {kTessEvaluationOnlyShader,
+         shaderc_glsl_default_tess_evaluation_shader},
+
+        // #pragma annotation overrides default shader kinds.
+        {kVertexOnlyShaderWithPragma, shaderc_glsl_default_compute_shader},
+        {kFragmentOnlyShaderWithPragma, shaderc_glsl_default_vertex_shader},
+        {kTessControlOnlyShaderWithPragma,
+         shaderc_glsl_default_fragment_shader},
+        {kTessEvaluationOnlyShaderWithPragma,
+         shaderc_glsl_default_tess_control_shader},
+        {kGeometryOnlyShaderWithPragma,
+         shaderc_glsl_default_tess_evaluation_shader},
+        {kComputeOnlyShaderWithPragma, shaderc_glsl_default_geometry_shader},
+
+        // Specified non-default shader kind overrides #pragma annotation.
+        {kVertexOnlyShaderWithInvalidPragma, shaderc_glsl_vertex_shader},
+    }));
+
+using InvalidShaderKind = testing::TestWithParam<ShaderKindTestCase>;
+
+// Invalid shader kind settings should generate errors.
+TEST_P(InvalidShaderKind, CompilationShouldFail) {
+  const ShaderKindTestCase& test_case = GetParam();
+  Compiler compiler;
+  EXPECT_FALSE(
+      CompilesToValidSpv(compiler, test_case.shader_, test_case.shader_kind_));
+}
+
+INSTANTIATE_TEST_CASE_P(
+    CompileStringTest, InvalidShaderKind,
+    testing::ValuesIn(std::vector<ShaderKindTestCase>{
+        // Invalid default shader kind.
+        {kVertexOnlyShader, shaderc_glsl_default_fragment_shader},
+        // Sets to deduce shader kind from #pragma, but #pragma is defined in
+        // the source code.
+        {kVertexOnlyShader, shaderc_glsl_infer_from_source},
+        // Invalid #pragma cause errors, even though default shader kind is set
+        // to valid shader kind.
+        {kVertexOnlyShaderWithInvalidPragma,
+         shaderc_glsl_default_vertex_shader},
+    }));
+
 // To test file inclusion, use an unordered_map as a fake file system to store
 // fake files to be included. The unordered_map represents a filesystem by
 // mapping filename (or path) string to the contents of that file as a string.
@@ -605,7 +631,7 @@ TEST_P(IncluderTests, SetIncluderCallbacksClonedOptions) {
               HasSubstr(test_case.expected_substring()));
 }
 
-INSTANTIATE_TEST_CASE_P(CppInterface, IncluderTests,
+INSTANTIATE_TEST_CASE_P(CompileStringTest, IncluderTests,
                         testing::ValuesIn(std::vector<IncluderTestCase>{
                             IncluderTestCase(
                                 // Fake file system.
@@ -735,7 +761,7 @@ TEST_F(CompileStringWithOptionsTest, IfDefCompileOption) {
       "#else\n"
       "#error\n"
       "#endif";
-  EXPECT_TRUE(CompilesToValidSpv(kMinimalExpandedShader,
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalExpandedShader,
                                  shaderc_glsl_vertex_shader, options_.get()));
 }
 
@@ -745,24 +771,24 @@ TEST_F(CompileStringWithOptionsTest,
   // shaderc_target_env_opengl_compat.  When targeting OpenGL core profile
   // or Vulkan, it should fail to compile.
 
-  EXPECT_FALSE(CompilesToValidSpv(kOpenGLCompatibilityFragmentShader,
+  EXPECT_FALSE(CompilesToValidSpv(compiler_, kOpenGLCompatibilityFragmentShader,
                                   shaderc_glsl_fragment_shader,
                                   options_.get()));
 
   shaderc_compile_options_set_target_env(options_.get(),
                                          shaderc_target_env_opengl_compat, 0);
-  EXPECT_TRUE(CompilesToValidSpv(kOpenGLCompatibilityFragmentShader,
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kOpenGLCompatibilityFragmentShader,
                                  shaderc_glsl_fragment_shader, options_.get()));
 
   shaderc_compile_options_set_target_env(options_.get(),
                                          shaderc_target_env_opengl, 0);
-  EXPECT_FALSE(CompilesToValidSpv(kOpenGLCompatibilityFragmentShader,
+  EXPECT_FALSE(CompilesToValidSpv(compiler_, kOpenGLCompatibilityFragmentShader,
                                   shaderc_glsl_fragment_shader,
                                   options_.get()));
 
   shaderc_compile_options_set_target_env(options_.get(),
                                          shaderc_target_env_vulkan, 0);
-  EXPECT_FALSE(CompilesToValidSpv(kOpenGLCompatibilityFragmentShader,
+  EXPECT_FALSE(CompilesToValidSpv(compiler_, kOpenGLCompatibilityFragmentShader,
                                   shaderc_glsl_fragment_shader,
                                   options_.get()));
 }
@@ -774,12 +800,12 @@ TEST_F(CompileStringWithOptionsTest,
 
   shaderc_compile_options_set_target_env(options_.get(),
                                          shaderc_target_env_opengl_compat, 0);
-  EXPECT_TRUE(CompilesToValidSpv(kOpenGLVertexShader,
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kOpenGLVertexShader,
                                  shaderc_glsl_vertex_shader, options_.get()));
 
   shaderc_compile_options_set_target_env(options_.get(),
                                          shaderc_target_env_opengl, 0);
-  EXPECT_TRUE(CompilesToValidSpv(kOpenGLVertexShader,
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kOpenGLVertexShader,
                                  shaderc_glsl_vertex_shader, options_.get()));
 
   // TODO(dneto): Check what happens when targeting Vulkan.
