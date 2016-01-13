@@ -18,17 +18,37 @@
 
 namespace glslc {
 
-std::pair<std::string, std::string> FileIncluder::include_delegate(
-    const char* filename) const {
-  const std::string full_path = file_finder_.FindReadableFilepath(filename);
-  std::vector<char> content;
-  if (!full_path.empty() && shaderc_util::ReadFile(full_path, &content)) {
-    return std::make_pair(full_path,
-                          std::string(content.begin(), content.end()));
+shaderc_includer_response* FileIncluder::GetInclude(const char* filename) {
+  file_full_path_ = file_finder_.FindReadableFilepath(filename);
+  if (!file_full_path_.empty() &&
+      shaderc_util::ReadFile(file_full_path_, &file_content_)) {
+    response_ = {
+        file_full_path_.c_str(), file_full_path_.length(), file_content_.data(),
+        file_content_.size(),
+    };
   } else {
-    // TODO(deki): Emit error message.
-    return std::make_pair("", "");
+    char error_msg[] = "include file not found.";
+    file_content_.insert(file_content_.begin(), error_msg,
+                         error_msg + sizeof(error_msg) / sizeof(error_msg[0]));
+    response_ = {
+        filename, std::strlen(filename), file_content_.data(),
+        file_content_.size(),
+    };
   }
+  return &response_;
+}
+
+void FileIncluder::ReleaseInclude(shaderc_includer_response* data) {
+  // In the first implementation, we don't need to use data, as we cache only
+  // one latest response data. All we need to do is resetting the cached
+  // response data to null.
+  (void)data;
+
+  response_ = {
+      nullptr, 0u, nullptr, 0u,
+  };
+  file_content_.clear();
+  file_full_path_.clear();
 }
 
 }  // namespace glslc

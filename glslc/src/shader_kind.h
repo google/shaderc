@@ -12,34 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef GLSLC_SHADER_STAGE_H_
-#define GLSLC_SHADER_STAGE_H_
+#ifndef GLSLC_SHADER_KIND_H_
+#define GLSLC_SHADER_KIND_H_
 
 #include <ostream>
 
-#include "glslang/Public/ShaderLang.h"
-
 #include "libshaderc_util/string_piece.h"
+#include "shaderc.h"
 
 namespace glslc {
 
-// A callable class that deduces a shader stage from a file name.
-class StageDeducer {
- public:
-  StageDeducer(shaderc_util::string_piece file_name) : file_name_(file_name) {}
-  // Returns a glslang EShLanguage from the file_name_ member or EShLangCount
-  // if the shader stage could not be determined.
-  // Any errors are written to error_stream.
-  EShLanguage operator()(std::ostream* error_stream,
-                         const shaderc_util::string_piece& error_tag) const;
-
- private:
-  shaderc_util::string_piece file_name_;
-};
-
-EShLanguage GetShaderStageFromCmdLine(
+// Parse the string piece from command line to get the force shader kind.
+shaderc_shader_kind GetForcedShaderKindFromCmdLine(
     const shaderc_util::string_piece& f_shader_stage);
 
+// Parse the file name extension to get the default shader kind.
+shaderc_shader_kind DeduceDefaultShaderKindFromFileName(
+    shaderc_util::string_piece file_name);
 }  // namespace glslc
 
-#endif  // GLSLC_SHADER_STAGE_H_
+#endif  // GLSLC_SHADER_KIND_H_

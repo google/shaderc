@@ -25,7 +25,7 @@
 
 #include "file_compiler.h"
 #include "file.h"
-#include "shader_stage.h"
+#include "shader_kind.h"
 
 using shaderc_util::string_piece;
 
@@ -97,11 +97,15 @@ bool GetOptionArgument(int argc, char** argv, int* index,
 }  // anonymous namespace
 
 int main(int argc, char** argv) {
-  std::vector<std::pair<std::string, EShLanguage>> input_files;
-  EShLanguage force_shader_stage = EShLangCount;
+  std::vector<std::pair<std::string, shaderc_shader_kind>> input_files;
+  shaderc_shader_kind forced_shader_kind = shaderc_glsl_infer_from_source;
   glslc::FileCompiler compiler;
   bool success = true;
   bool has_stdin_input = false;
+  // Contains all the macro names data. Current libshaderc interface requires
+  // null-terminated string, we need to 'pull out' and copy the macro names and
+  // hold their data here.
+  std::vector<std::string> macro_names;
 
   compiler.AddIncludeDirectory("");
 
@@ -133,8 +137,12 @@ int main(int argc, char** argv) {
       compiler.SetWorkingDirectory(workdir.str());
     } else if (arg.starts_with("-fshader-stage=")) {
       const string_piece stage = arg.substr(std::strlen("-fshader-stage="));
-      force_shader_stage = glslc::GetShaderStageFromCmdLine(arg);
-      if (force_shader_stage == EShLangCount) {
+      // forced_shader_kind can be 1) one of the forced shader kinds, which
+      // means following files will be compiler with the specified shader
+      // kind; 2) shaderc_glsl_infer_from_source, which means 'arg' doesn't
+      // specify a valid shader kind, an error should be emitted for this.
+      forced_shader_kind = glslc::GetForcedShaderKindFromCmdLine(arg);
+      if (forced_shader_kind == shaderc_glsl_infer_from_source) {
         std::cerr << "glslc: error: stage not recognized: '" << stage << "'"
                   << std::endl;
         return 1;
@@ -142,9 +150,9 @@ int main(int argc, char** argv) {
     } else if (arg.starts_with("-std=")) {
       const string_piece standard = arg.substr(std::strlen("-std="));
       int version;
-      EProfile profile;
-      if (!shaderc_util::ParseVersionProfile(standard.str(), &version,
-                                             &profile)) {
+      shaderc_profile profile;
+      if (!shaderc_parse_version_profile(standard.str().c_str(), &version,
+                                         &profile)) {
         std::cerr << "glslc: error: invalid value '" << standard
                   << "' in '-std=" << standard << "'" << std::endl;
         return 1;
@@ -176,24 +184,40 @@ int main(int argc, char** argv) {
         std::cerr << "glslc: error: argument to '-D' is missing" << std::endl;
       } else {
         const string_piece argument = arg.substr(2);
-        size_t name_length = argument.find_first_of('=');
-        const string_piece name = argument.substr(0, name_length);
-        if (name.starts_with("GL_")) {
+        // Get the exact length of the macro string.
+        size_t equal_sign_loc = argument.find_first_of('=');
+        size_t name_length = equal_sign_loc != shaderc_util::string_piece::npos
+                                 ? equal_sign_loc
+                                 : arg.size() - strlen("-D");
+        const string_piece name_piece = argument.substr(0, name_length);
+        if (name_piece.starts_with("GL_")) {
           std::cerr
               << "glslc: error: names beginning with 'GL_' cannot be defined: "
               << arg << std::endl;
           return 1;
         }
-        if (name.find("__") != string_piece::npos) {
+        if (name_piece.find("__") != string_piece::npos) {
           std::cerr
               << "glslc: warning: names containing consecutive underscores "
                  "are reserved: "
               << arg << std::endl;
         }
+
+        // We have to insert a null terminator at the end of name, as we are
+        // using libshaderc's API instead of libshaderc_util's. Libshaderc API
+        // assumes a const char* string, while libshaderc_util assume a
+        // string_piece one. The original implementation doesn't append '\0' but
+        // works fine with libshaderc_util because it has 'end_' property. But
+        // libshaderc api doesn't know that so the macro 'name' will include the
+        // 'value' if we don't insert '\0'.
+
+        macro_names.emplace_back(std::string(name_piece.data(), name_length));
+        const char* name = macro_names.back().c_str();
         // TODO(deki): check arg for newlines.
-        compiler.AddMacroDefinition(name, name_length < argument.size()
-                                              ? argument.substr(name_length + 1)
-                                              : "");
+        compiler.AddMacroDefinition(
+            name, name_length < argument.size()
+                      ? argument.substr(name_length + 1).data()
+                      : "");
       }
     } else if (arg.starts_with("-I")) {
       string_piece option_arg;
@@ -225,7 +249,16 @@ int main(int argc, char** argv) {
         }
         has_stdin_input = true;
       }
-      input_files.emplace_back(arg.str(), force_shader_stage);
+
+      // If forced_shader_kind is shaderc_glsl_infer_from_source, that means
+      // we didn't set forced shader kinds (otherwise an error should have
+      // already been emitted before). So we should deduce the shader kind
+      // from the file name. If forced_shader_kind is specifed to one of
+      // the forced shader kinds, use that for the following compilation.
+      input_files.emplace_back(
+          arg.str(), forced_shader_kind == shaderc_glsl_infer_from_source
+                         ? glslc::DeduceDefaultShaderKindFromFileName(arg)
+                         : forced_shader_kind);
     }
   }
 
@@ -235,9 +268,9 @@ int main(int argc, char** argv) {
 
   for (const auto& input_file : input_files) {
     const std::string& name = input_file.first;
-    const EShLanguage stage = input_file.second;
+    const shaderc_shader_kind kind = input_file.second;
 
-    success &= compiler.CompileShaderFile(name, stage);
+    success &= compiler.CompileShaderFile(name, kind);
   }
 
   compiler.OutputMessages();

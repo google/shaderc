@@ -16,13 +16,16 @@
 #define GLSLC_FILE_COMPILER_H
 
 #include <string>
-#include "libshaderc_util/compiler.h"
+
+#include "libshaderc_util/string_piece.h"
+#include "libshaderc_util/file_finder.h"
+#include "shaderc.hpp"
 
 namespace glslc {
 
 // Context for managing compilation of source GLSL files into destination
 // SPIR-V files.
-class FileCompiler : public shaderc_util::Compiler {
+class FileCompiler : public shaderc::Compiler {
  public:
   FileCompiler() : needs_linking_(true), total_warnings_(0), total_errors_(0) {}
 
@@ -40,7 +43,7 @@ class FileCompiler : public shaderc_util::Compiler {
   // Any errors/warnings found in the shader source will be output to std::cerr
   // and increment the counts reported by OutputMessages().
   bool CompileShaderFile(const std::string& input_file,
-                         EShLanguage shader_stage);
+                         shaderc_shader_kind shader_kind);
 
   // Sets the working directory for the compilation.
   void SetWorkingDirectory(const std::string& dir);
@@ -57,7 +60,7 @@ class FileCompiler : public shaderc_util::Compiler {
     output_file_name_ = file;
   }
 
-  // Returns false if any options are incompatible.  The num_files parameter
+  // Returns false if any options are incompatible. The num_files parameter
   // represents the number of files that will be compiled.
   bool ValidateOptions(size_t num_files);
 
@@ -69,12 +72,45 @@ class FileCompiler : public shaderc_util::Compiler {
   void SetIndividualCompilationMode();
 
   // Instead of outputting object files, output the disassembled textual output.
-  virtual void SetDisassemblyMode() override;
+  virtual void SetDisassemblyMode();
+
+  // Delegates CompilerOptions to add macro definiations.
+  virtual void AddMacroDefinition(const char* name, const char* value) {
+    options_.AddMacroDefinition(name, value);
+  };
+
+  // Delegates CompilerOptions to add macro definiations.
+  virtual void AddMacroDefinition(const std::string& name) {
+    options_.AddMacroDefinition(name);
+  };
+
+  // Delegates CompilerOptions to specify forced version and profile.
+  virtual void SetForcedVersionProfile(int version, shaderc_profile profile) {
+    options_.SetForcedVersionProfile(version, profile);
+  };
+
+  // Delegates CompilerOptions to turn on debug information generation.
+  virtual void SetGenerateDebugInfo() {
+    options_.SetGenerateDebugInfo();
+  };
+
+  // Delegates CompilerOptions to set suppressing warning mode.
+  virtual void SetSuppressWarnings() {
+    options_.SetSuppressWarnings();
+  };
+
+  // Delegates CompilerOptions to make all warnings being treated as errors.
+  virtual void SetWarningsAsErrors() {
+    options_.SetWarningsAsErrors();
+  };
 
   // Instead of outputting object files, output the preprocessed source files.
-  virtual void SetPreprocessingOnlyMode() override;
+  virtual void SetPreprocessingOnlyMode();
 
  private:
+  // Delegates the compiler options
+  shaderc::CompileOptions options_;
+
   // Returns the name of the output file, given the input_filename string.
   std::string GetOutputFileName(std::string input_filename);
 
@@ -87,6 +123,12 @@ class FileCompiler : public shaderc_util::Compiler {
 
   // Indicates whether linking is needed to generate the final output.
   bool needs_linking_;
+
+  // Flag for disassembly mode.
+  bool disassemble_ = false;
+
+  // Flag for preprocessing only mode.
+  bool preprocess_only_ = false;
 
   // Reflects the type of file being generated.
   std::string file_extension_;

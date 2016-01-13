@@ -17,28 +17,28 @@
 
 #include <string>
 #include <utility>
+#include <vector>
 
-#include "glslang/Public/ShaderLang.h"
-
-#include "libshaderc_util/counting_includer.h"
 #include "libshaderc_util/file_finder.h"
+#include "shaderc.hpp"
 
 namespace glslc {
 
 // A CountingIncluder for files.  Translates the #include argument into the
 // file's contents, based on a FileFinder.
-class FileIncluder : public shaderc_util::CountingIncluder {
+class FileIncluder : public shaderc::CompileOptions::IncluderInterface{
  public:
   FileIncluder(const shaderc_util::FileFinder* file_finder)
       : file_finder_(*file_finder) {}
+  shaderc_includer_response* GetInclude(const char* filename) override;
+  void ReleaseInclude(shaderc_includer_response* data) override;
 
  private:
-  // Finds filename in search path and returns its contents.
-  std::pair<std::string, std::string> include_delegate(
-      const char* filename) const override;
-
   // Used by include() to get the full filepath.
   const shaderc_util::FileFinder& file_finder_;
+  shaderc_includer_response response_;
+  std::vector<char> file_content_;
+  std::string file_full_path_;
 };
 
 }  // namespace glslc
