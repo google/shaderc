@@ -520,7 +520,7 @@ TEST_F(CompileStringWithOptionsTest, SetIncluderCallbacks) {
       nullptr};
   shaderc_compile_options_set_includer_callbacks(options_.get(), &callbacks);
   // Expect the compilation to succeed.
-  EXPECT_TRUE(CompilationSuccess(kMinimalIncludeShader,
+  EXPECT_TRUE(CompilesToValidSpv(kMinimalIncludeShader,
                                  shaderc_glsl_vertex_shader, options_.get()));
   // Sets compiler to preprocessing only mode, so we can check the result after
   // preprocessing.

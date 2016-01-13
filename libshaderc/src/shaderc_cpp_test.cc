@@ -540,7 +540,7 @@ TEST_F(CppInterface, SetIncluderCallbacks) {
       },
       nullptr};
   options_.SetIncluderCallbacks(&callbacks);
-  EXPECT_TRUE(CompilationSuccess(kMinimalIncludeShader,
+  EXPECT_TRUE(CompilesToValidSpv(kMinimalIncludeShader,
                                  shaderc_glsl_vertex_shader, options_));
   // Expect to see the content of the fake file object in the output of
   // preprocessing.
