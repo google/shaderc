@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 #include <memory>
 #include <thread>
+#include <unordered_map>
 
 #include "SPIRV/spirv.hpp"
 
@@ -504,51 +505,114 @@ TEST_F(CppInterface, PreprocessingOnlyModeSecondOverridesDisassemblyMode) {
               HasSubstr("void main(){ }"));
 }
 
-TEST_F(CppInterface, SetIncluderCallbacks) {
-  const std::string kMinimalIncludeShader =
-      "void foo() {}\n"
-      "#include \"include/b\"\n";
+// A helper class that wrap the intialization of the tests for setting includer
+// callbacks.
+class InitializeSetIncluderTest {
+ public:
   // Create a fake file object, with specified fullpath and content.
   struct FakeFile {
-    std::string fullpath = "Full/Path/Sample";
-    std::string content = "void main() {foo();}\n";
+    std::string fullpath;
+    std::string content;
   };
-  FakeFile fake_file;
-  shaderc_includer_callbacks callbacks{
-      // A response method that returns fake full path and file content as
-      // defined above.
-      [/*Capture list is not allowed for function pointer*/](
-          void* user_data, const char* filename) {
-        (void)filename;
-        auto* fake_file = static_cast<FakeFile*>(user_data);
-        const char* fullpath = fake_file->fullpath.c_str();
-        const char* content = fake_file->content.c_str();
-        shaderc_includer_fullpath_content fullpath_and_content{
-            fullpath, fake_file->fullpath.size(), content,
-            fake_file->content.size()};
-        return fullpath_and_content;
-      },
-      &fake_file,
-      // The data is owned in this test function stack, no need to clean
-      // anything.
-      [/*Capture list is not allowed for function pointer*/](
-          void* user_data, const char* filename,
-          shaderc_includer_fullpath_content data) {
-        (void)user_data;
-        (void)filename;
-        (void)data;
-      },
-      nullptr};
-  options_.SetIncluderCallbacks(&callbacks);
-  EXPECT_TRUE(CompilesToValidSpv(kMinimalIncludeShader,
+  // Use hashmap to store fake files to be included.
+  using FakeFS = std::unordered_map<std::string, FakeFile>;
+  InitializeSetIncluderTest(CompileOptions& options, const std::string& kMainShader,
+                    FakeFS& fake_fs)
+      : options_(options), kMainShader_(kMainShader), fake_fs_(fake_fs) {
+    shaderc_includer_callbacks callbacks{
+        // A response method that returns fake full path and file content as
+        // defined above.
+        [/*Capture list is not allowed for function pointer*/](
+            void* user_data, const char* filename) {
+          auto& fake_fs = *static_cast<FakeFS*>(user_data);
+          const char* fullpath = fake_fs[filename].fullpath.c_str();
+          const char* content = fake_fs[filename].content.c_str();
+          shaderc_includer_fullpath_content fullpath_and_content{
+              fullpath, fake_fs[filename].fullpath.size(), content,
+              fake_fs[filename].content.size()};
+          return fullpath_and_content;
+        },
+        &fake_fs_,
+        // The data is owned in this test function stack, no need to clean
+        // anything.
+        [/*Capture list is not allowed for function pointer*/](
+            void* user_data, const char* filename,
+            shaderc_includer_fullpath_content data) {
+          (void)user_data;
+          (void)filename;
+          (void)data;
+        },
+        nullptr};
+    options_.SetIncluderCallbacks(&callbacks);
+  };
+
+ private:
+  CompileOptions& options_;
+  const std::string& kMainShader_;
+  FakeFS& fake_fs_;
+};
+
+TEST_F(CppInterface, SetIncluderCallbacks) {
+  const std::string kMainIncludingShader =
+      "void foo() {}\n"
+      "#include \"file_0\"\n"
+      "#include \"file_1\"\n";
+
+  InitializeSetIncluderTest::FakeFS fake_fs(
+      {{"file_0", {"path/to/file_0", "void bar() {}\n"}},
+       {"file_1", {"path/to/file_1", "void main() {foo(); bar();}\n"}}});
+
+  InitializeSetIncluderTest helper(options_, kMainIncludingShader, fake_fs);
+
+  // Expects the compilation to succeed.
+  EXPECT_TRUE(CompilesToValidSpv(kMainIncludingShader,
                                  shaderc_glsl_vertex_shader, options_));
-  // Expect to see the content of the fake file object in the output of
-  // preprocessing.
+
+  // Sets compiler to preprocessing only mode, so we can check the result after
+  // preprocessing. Expect to see the content of the fake file object in the
+  // output of preprocessing.
   options_.SetPreprocessingOnlyMode();
-  EXPECT_THAT(CompilationOutput(kMinimalIncludeShader,
-                                shaderc_glsl_vertex_shader, options_),
-              HasSubstr("void foo(){ }\n#line 0 \"Full/Path/Sample\"\n void "
-                        "main(){ foo();}\n#line 2"));
+  std::string preprocessing_output = CompilationOutput(
+      kMainIncludingShader, shaderc_glsl_vertex_shader, options_);
+  EXPECT_THAT(preprocessing_output, HasSubstr("#line 0 \"path/to/file_0\"\n"
+                                              " void bar(){ }\n"
+                                              "#line 2"));
+  EXPECT_THAT(preprocessing_output, HasSubstr("#line 0 \"path/to/file_1\"\n"
+                                              " void main(){ foo();bar();}\n"
+                                              "#line 3"));
+}
+
+TEST_F(CppInterface, SetIncluderCallbacksNestedInclude) {
+  const std::string kMainIncludingShader =
+      "void foo() {}\n"
+      "#include \"file_0\"\n";
+
+  InitializeSetIncluderTest::FakeFS fake_fs({
+      {"file_0",
+       {"path/to/file_0",
+        "#include \"file_1\"\n"
+        "void main() {foo(); bar();}\n"}},
+      {"file_1", {"path/to/file_1", "void bar() {}\n"}},
+  });
+
+  InitializeSetIncluderTest helper(options_, kMainIncludingShader, fake_fs);
+
+  // Expect the compilation to succeed.
+  EXPECT_TRUE(CompilesToValidSpv(kMainIncludingShader,
+                                 shaderc_glsl_vertex_shader, options_));
+
+  // Sets compiler to preprocessing only mode, so we can check the result after
+  // preprocessing. Expect to see the content of the fake file object in the
+  // output of preprocessing.
+  options_.SetPreprocessingOnlyMode();
+  std::string preprocessing_output = CompilationOutput(
+      kMainIncludingShader, shaderc_glsl_vertex_shader, options_);
+  EXPECT_THAT(preprocessing_output, HasSubstr("#line 0 \"path/to/file_0\"\n"
+                                              "#line 0 \"path/to/file_1\"\n"
+                                              " void bar(){ }\n"
+                                              "#line 1 \"path/to/file_0\"\n"
+                                              " void main(){ foo();bar();}\n"
+                                              "#line 2"));
 }
 
 TEST_F(CppInterface, WarningsOnLine) {
