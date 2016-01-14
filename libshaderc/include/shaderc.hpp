@@ -130,12 +130,12 @@ class CompileOptions {
   // to resolve the full path and content of the file to be included, and clean
   // up the resources used for the including process. Client code should
   // implement this interface and configure the includer instance then set it to
-  // libshaderc through following api.
+  // libshaderc through following API.
   class Includer {
    public:
-    virtual shaderc_includer_response* GetIncluderResponse(
+    virtual shaderc_includer_response* GetInclude(
         const char* filename) = 0;
-    virtual void ReleaseIncluderResponse(shaderc_includer_response* data) = 0;
+    virtual void ReleaseInclude(shaderc_includer_response* data) = 0;
   };
 
   // Sets the includer instance for libshaderc to call on when resolving
@@ -146,11 +146,11 @@ class CompileOptions {
         options_,
         [](void* user_data, const char* filename) {
           auto* includer = static_cast<Includer*>(user_data);
-          return includer->GetIncluderResponse(filename);
+          return includer->GetInclude(filename);
         },
         [](void* user_data, shaderc_includer_response* data) {
           auto* includer = static_cast<Includer*>(user_data);
-          return includer->ReleaseIncluderResponse(data);
+          return includer->ReleaseInclude(data);
         },
         includer_.get());
   }

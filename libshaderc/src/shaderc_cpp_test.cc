@@ -519,7 +519,7 @@ class TestIncluder : public shaderc::CompileOptions::Includer {
   TestIncluder(FakeFS& fake_fs) : fake_fs_(fake_fs){};
 
   // Get path and content from the fake file system.
-  shaderc_includer_response* GetIncluderResponse(
+  shaderc_includer_response* GetInclude(
       const char* filename) override {
     FakeFile& file_to_include = fake_fs_[filename];
     response_.path = file_to_include.path.c_str();
@@ -530,7 +530,7 @@ class TestIncluder : public shaderc::CompileOptions::Includer {
   };
 
   // Response data is owned as private property, no need to release explicitly.
-  void ReleaseIncluderResponse(shaderc_includer_response* data) override {
+  void ReleaseInclude(shaderc_includer_response* data) override {
     (void)data;
   };
 

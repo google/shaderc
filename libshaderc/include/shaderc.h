@@ -143,10 +143,10 @@ void shaderc_compile_options_set_forced_version_profile(
 
 // To support file inclusion, libshaderc invokes a callback into its client to
 // resolve the full path and content of the included file.
-// Client callback should follow the specified function signature below, and
+// The client callback should follow the specified function signature below, and
 // it should be passed to libshaderc through the corresponding setter function.
 // When the including of a file is done, libshaderc will call another client
-// callback to clean up the resources used for the including process.  Client
+// callback to clean up the resources used for the including process. The client
 // should implement the clean up method and pass it to libshaderc together with
 // the response method.
 
@@ -161,7 +161,7 @@ struct shaderc_includer_response {
 };
 
 // The function signature of the client-side implemented reponse method. It
-// returns shaderc_includer_reponsestruct.
+// returns a pointer to shaderc_includer_reponse struct.
 typedef shaderc_includer_response* (
     *shaderc_includer_response_get_fn)(void* user_data,
                                                       const char* filename);
