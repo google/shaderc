@@ -493,9 +493,8 @@ class IncluderResponsor {
   };
   // Use hashmap as a fake file system to store fake files to be included.
   using FakeFS = std::unordered_map<std::string, FakeFile>;
-  IncluderResponsor(shaderc_compile_options_t options,
-                    const std::string& kMainShader, FakeFS& fake_fs)
-      : options_(options), kMainShader_(kMainShader), fake_fs_(fake_fs) {
+  IncluderResponsor(shaderc_compile_options_t options, FakeFS& fake_fs)
+      : options_(options), fake_fs_(fake_fs) {
     shaderc_compile_options_set_includer_callbacks(
         options_, GetIncluderResponseCb, ReleaseIncluderResponseCb, this);
   };
@@ -529,7 +528,6 @@ class IncluderResponsor {
 
  private:
   shaderc_compile_options_t options_;
-  const std::string& kMainShader_;
   FakeFS& fake_fs_;
   // Includer response data is stored as private property.
   shaderc_includer_response response_;
@@ -547,9 +545,7 @@ TEST_F(CompileStringWithOptionsTest, Includer) {
       {"file_1", {"path/to/file_1", "void main() {foo(); bar();}\n"}}});
 
   // Sets callbacks for libshaderc includer.
-  IncluderResponsor responsor(options_.get(),
-                                         kMainIncludingShader,
-                                         fake_fs);
+  IncluderResponsor responsor(options_.get(), fake_fs);
   // Expect the compilation to succeed.
   EXPECT_TRUE(CompilesToValidSpv(kMainIncludingShader,
                                  shaderc_glsl_vertex_shader, options_.get()));
@@ -583,7 +579,7 @@ TEST_F(CompileStringWithOptionsTest, IncluderClonedOptions) {
        {"file_1", {"path/to/file_1", "void main() {foo(); bar();}\n"}}});
 
   // Sets callbacks for libshaderc includer.
-  IncluderResponsor responsor(options_.get(), kMainIncludingShader, fake_fs);
+  IncluderResponsor responsor(options_.get(), fake_fs);
   // Clone a new options object.
   compile_options_ptr cloned_options(
       shaderc_compile_options_clone(options_.get()));
@@ -619,7 +615,7 @@ TEST_F(CompileStringWithOptionsTest, IncluderNestedInclude) {
   });
 
   // Sets callbacks for libshaderc includer.
-  IncluderResponsor responsor(options_.get(), kMainIncludingShader, fake_fs);
+  IncluderResponsor responsor(options_.get(), fake_fs);
   // Clone a new options object.
   compile_options_ptr cloned_options(
       shaderc_compile_options_clone(options_.get()));
@@ -653,7 +649,7 @@ TEST_F(CompileStringWithOptionsTest, IncluderNestedIncludeClonedOptions) {
   });
 
   // Sets callbacks for libshaderc includer.
-  IncluderResponsor responsor(options_.get(), kMainIncludingShader, fake_fs);
+  IncluderResponsor responsor(options_.get(), fake_fs);
 
   EXPECT_TRUE(CompilesToValidSpv(kMainIncludingShader,
                                  shaderc_glsl_vertex_shader, options_.get()));

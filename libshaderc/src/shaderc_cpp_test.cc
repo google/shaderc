@@ -515,9 +515,8 @@ class IncluderResponsor {
   };
   // Use hashmap as a fake file system to store fake files to be included.
   using FakeFS = std::unordered_map<std::string, FakeFile>;
-  IncluderResponsor(CompileOptions& options, const std::string& kMainShader,
-                    FakeFS& fake_fs)
-      : options_(options), kMainShader_(kMainShader), fake_fs_(fake_fs) {
+  IncluderResponsor(CompileOptions& options, FakeFS& fake_fs)
+      : options_(options), fake_fs_(fake_fs) {
     options_.SetIncluderCallbacks(GetIncluderResponseCb,
                                   ReleaseIncluderResponseCb, this);
   };
@@ -551,7 +550,6 @@ class IncluderResponsor {
 
  private:
   CompileOptions& options_;
-  const std::string& kMainShader_;
   FakeFS& fake_fs_;
   // Includer response data is stored as private property.
   shaderc_includer_response response_;
@@ -567,7 +565,7 @@ TEST_F(CppInterface, Includer) {
       {{"file_0", {"path/to/file_0", "void bar() {}\n"}},
        {"file_1", {"path/to/file_1", "void main() {foo(); bar();}\n"}}});
 
-  IncluderResponsor responsor(options_, kMainIncludingShader, fake_fs);
+  IncluderResponsor responsor(options_, fake_fs);
 
   // Expects the compilation to succeed.
   EXPECT_TRUE(CompilesToValidSpv(kMainIncludingShader,
@@ -600,7 +598,7 @@ TEST_F(CppInterface, IncluderNestedInclude) {
       {"file_1", {"path/to/file_1", "void bar() {}\n"}},
   });
 
-  IncluderResponsor responsor(options_, kMainIncludingShader, fake_fs);
+  IncluderResponsor responsor(options_, fake_fs);
 
   // Expect the compilation to succeed.
   EXPECT_TRUE(CompilesToValidSpv(kMainIncludingShader,
