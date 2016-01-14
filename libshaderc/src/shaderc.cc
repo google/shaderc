@@ -85,7 +85,7 @@ struct {
 
 std::mutex compile_mutex;  // Guards shaderc_compile_*.
 
-class FileIncluder : public shaderc_util::CountingIncluder {
+class InternalFileIncluder : public shaderc_util::CountingIncluder {
  private:
   bool AreValidCallbacks() const {
     return GetIncluderResponse_ != nullptr &&
@@ -113,14 +113,14 @@ class FileIncluder : public shaderc_util::CountingIncluder {
   void* user_data_;
 
  public:
-  FileIncluder(
+  InternalFileIncluder(
       const shaderc_includer_response_get_fn GetIncluderResponse,
       const shaderc_includer_response_release_fn ReleaseIncluderResponse,
       void* user_data)
       : GetIncluderResponse_(GetIncluderResponse),
         ReleaseIncluderResponse_(ReleaseIncluderResponse),
         user_data_(user_data){};
-  FileIncluder()
+  InternalFileIncluder()
       : GetIncluderResponse_(nullptr),
         ReleaseIncluderResponse_(nullptr),
         user_data_(nullptr){};
@@ -290,7 +290,7 @@ shaderc_spv_module_t shaderc_compile_into_spv(
     if (additional_options) {
       result->compilation_succeeded = additional_options->compiler.Compile(
           source_string, stage, "shader", stage_function,
-          FileIncluder(additional_options->GetIncluderResponse,
+          InternalFileIncluder(additional_options->GetIncluderResponse,
                        additional_options->ReleaseIncluderResponse,
                        additional_options->includer_user_data), &output,
           &errors, &total_warnings, &total_errors);
@@ -298,7 +298,7 @@ shaderc_spv_module_t shaderc_compile_into_spv(
       // Compile with default options.
       result->compilation_succeeded = shaderc_util::Compiler().Compile(
           source_string, stage, "shader", stage_function,
-          FileIncluder(), &output,
+          InternalFileIncluder(), &output,
           &errors, &total_warnings, &total_errors);
     }
     result->messages = errors.str();

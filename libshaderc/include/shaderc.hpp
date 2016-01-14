@@ -17,6 +17,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "shaderc.h"
 
@@ -125,12 +126,33 @@ class CompileOptions {
     shaderc_compile_options_set_generate_debug_info(options_);
   }
 
-  void SetIncluderCallbacks(
-      shaderc_includer_response_get_fn get_includer_response,
-      shaderc_includer_response_release_fn release_includer_response,
-      void* user_data) {
+  // Define an includer interface, on which libshaderc will invoke the methods
+  // to resolve the full path and content of the file to be included, and clean
+  // up the resources used for the including process. Client code should
+  // implement this interface and configure the includer instance then set it to
+  // libshaderc through following api.
+  class Includer {
+   public:
+    virtual shaderc_includer_response* GetIncluderResponse(
+        const char* filename) = 0;
+    virtual void ReleaseIncluderResponse(shaderc_includer_response* data) = 0;
+  };
+
+  // Sets the includer instance for libshaderc to call on when resolving
+  // including and cleaning the data.
+  void SetIncluder(std::unique_ptr<Includer>&& includer) {
+    includer_ = std::move(includer);
     shaderc_compile_options_set_includer_callbacks(
-        options_, get_includer_response, release_includer_response, user_data);
+        options_,
+        [](void* user_data, const char* filename) {
+          auto* includer = static_cast<Includer*>(user_data);
+          return includer->GetIncluderResponse(filename);
+        },
+        [](void* user_data, shaderc_includer_response* data) {
+          auto* includer = static_cast<Includer*>(user_data);
+          return includer->ReleaseIncluderResponse(data);
+        },
+        includer_.get());
   }
 
   // Sets the compiler to emit a disassembly text instead of a binary. In
@@ -186,6 +208,7 @@ class CompileOptions {
  private:
   CompileOptions& operator=(const CompileOptions& other) = delete;
   shaderc_compile_options_t options_;
+  std::unique_ptr<Includer> includer_;
 
   friend class Compiler;
 };

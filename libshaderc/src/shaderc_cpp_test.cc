@@ -506,7 +506,7 @@ TEST_F(CppInterface, PreprocessingOnlyModeSecondOverridesDisassemblyMode) {
 }
 
 // A mock class that simulate a client of the includer.
-class IncluderResponsor {
+class TestIncluder : public shaderc::CompileOptions::Includer {
  public:
   // Create a fake file object, with specified path and content.
   struct FakeFile {
@@ -515,14 +515,12 @@ class IncluderResponsor {
   };
   // Use hashmap as a fake file system to store fake files to be included.
   using FakeFS = std::unordered_map<std::string, FakeFile>;
-  IncluderResponsor(CompileOptions& options, FakeFS& fake_fs)
-      : options_(options), fake_fs_(fake_fs) {
-    options_.SetIncluderCallbacks(GetIncluderResponseCb,
-                                  ReleaseIncluderResponseCb, this);
-  };
+
+  TestIncluder(FakeFS& fake_fs) : fake_fs_(fake_fs){};
 
   // Get path and content from the fake file system.
-  shaderc_includer_response* GetIncluderResponse(const char* filename) {
+  shaderc_includer_response* GetIncluderResponse(
+      const char* filename) override {
     FakeFile& file_to_include = fake_fs_[filename];
     response_.path = file_to_include.path.c_str();
     response_.path_length = file_to_include.path.size();
@@ -532,24 +530,11 @@ class IncluderResponsor {
   };
 
   // Response data is owned as private property, no need to release explicitly.
-  void ReleaseIncluderResponse(shaderc_includer_response* data) { (void)data; };
-
-  // Wrapper for the corresponding member function.
-  static shaderc_includer_response* GetIncluderResponseCb(
-      void* user_data, const char* filename) {
-    auto* responsor_handle = static_cast<IncluderResponsor*>(user_data);
-    return responsor_handle->GetIncluderResponse(filename);
-  };
-
-  // Wrapper for the corresponding member function.
-  static void ReleaseIncluderResponseCb(void* user_data,
-                                        shaderc_includer_response* data) {
-    auto* responsor_handle = static_cast<IncluderResponsor*>(user_data);
-    return responsor_handle->ReleaseIncluderResponse(data);
+  void ReleaseIncluderResponse(shaderc_includer_response* data) override {
+    (void)data;
   };
 
  private:
-  CompileOptions& options_;
   FakeFS& fake_fs_;
   // Includer response data is stored as private property.
   shaderc_includer_response response_;
@@ -561,11 +546,12 @@ TEST_F(CppInterface, Includer) {
       "#include \"file_0\"\n"
       "#include \"file_1\"\n";
 
-  IncluderResponsor::FakeFS fake_fs(
+  TestIncluder::FakeFS fake_fs(
       {{"file_0", {"path/to/file_0", "void bar() {}\n"}},
        {"file_1", {"path/to/file_1", "void main() {foo(); bar();}\n"}}});
 
-  IncluderResponsor responsor(options_, fake_fs);
+  options_.SetIncluder(
+      std::unique_ptr<TestIncluder>(new TestIncluder(fake_fs)));
 
   // Expects the compilation to succeed.
   EXPECT_TRUE(CompilesToValidSpv(kMainIncludingShader,
@@ -590,7 +576,7 @@ TEST_F(CppInterface, IncluderNestedInclude) {
       "void foo() {}\n"
       "#include \"file_0\"\n";
 
-  IncluderResponsor::FakeFS fake_fs({
+  TestIncluder::FakeFS fake_fs({
       {"file_0",
        {"path/to/file_0",
         "#include \"file_1\"\n"
@@ -598,7 +584,8 @@ TEST_F(CppInterface, IncluderNestedInclude) {
       {"file_1", {"path/to/file_1", "void bar() {}\n"}},
   });
 
-  IncluderResponsor responsor(options_, fake_fs);
+  options_.SetIncluder(
+      std::unique_ptr<TestIncluder>(new TestIncluder(fake_fs)));
 
   // Expect the compilation to succeed.
   EXPECT_TRUE(CompilesToValidSpv(kMainIncludingShader,
