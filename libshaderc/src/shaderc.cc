@@ -85,22 +85,11 @@ struct {
 
 std::mutex compile_mutex;  // Guards shaderc_compile_*.
 
-// Rejects #include directives.
-class ForbidInclude : public shaderc_util::CountingIncluder {
- private:
-  // Returns empty contents and an error message.  See base-class version.
-  std::pair<std::string, std::string> include_delegate(
-      const char* filename) const override {
-    return std::make_pair<std::string, std::string>(
-        "", "unexpected include directive");
-  }
-};
-
 class FileIncluder : public shaderc_util::CountingIncluder {
  private:
   bool AreValidCallbacks() const {
-    return callbacks_.get_fullpath_and_content!= nullptr &&
-           callbacks_.finalize_including!= nullptr;
+    return GetIncluderResponse_ != nullptr &&
+           ReleaseIncluderResponse_ != nullptr;
   }
 
   // Find filename in search path and returns its contents.
@@ -109,24 +98,32 @@ class FileIncluder : public shaderc_util::CountingIncluder {
     if (!AreValidCallbacks())
       return std::make_pair<std::string, std::string>(
           "", "unexpected include directive");
-    shaderc_includer_fullpath_content data =
-        callbacks_.get_fullpath_and_content(callbacks_.getter_user_data,
-                                            filename);
+    shaderc_includer_response* data =
+        GetIncluderResponse_(user_data_, filename);
     std::pair<std::string, std::string> entry =
         std::make_pair<std::string, std::string>(
-            std::string(data.fullpath, data.fullpath_length),
-            std::string(data.content, data.content_length));
-    callbacks_.finalize_including(callbacks_.finalizer_user_data, filename,
-                                  data);
+            std::string(data->path, data->path_length),
+            std::string(data->content, data->content_length));
+    ReleaseIncluderResponse_(user_data_, data);
     return entry;
   }
 
-  shaderc_includer_callbacks callbacks_;
+  const shaderc_includer_response_get_fn GetIncluderResponse_;
+  const shaderc_includer_response_release_fn ReleaseIncluderResponse_;
+  void* user_data_;
 
  public:
-  FileIncluder(const shaderc_includer_callbacks& callbacks)
-      : callbacks_(callbacks){};
-  FileIncluder() : callbacks_({nullptr, nullptr, nullptr, nullptr}){};
+  FileIncluder(
+      const shaderc_includer_response_get_fn GetIncluderResponse,
+      const shaderc_includer_response_release_fn ReleaseIncluderResponse,
+      void* user_data)
+      : GetIncluderResponse_(GetIncluderResponse),
+        ReleaseIncluderResponse_(ReleaseIncluderResponse),
+        user_data_(user_data){};
+  FileIncluder()
+      : GetIncluderResponse_(nullptr),
+        ReleaseIncluderResponse_(nullptr),
+        user_data_(nullptr){};
 };
 
 }  // anonymous namespace
@@ -134,7 +131,9 @@ class FileIncluder : public shaderc_util::CountingIncluder {
 struct shaderc_compile_options {
   shaderc_compile_options(){};
   shaderc_util::Compiler compiler;
-  shaderc_includer_callbacks includer_callbacks = {nullptr, nullptr, nullptr, nullptr};
+  shaderc_includer_response_get_fn GetIncluderResponse;
+  shaderc_includer_response_release_fn ReleaseIncluderResponse;
+  void* includer_user_data;
 };
 
 shaderc_compile_options_t shaderc_compile_options_initialize() {
@@ -191,8 +190,12 @@ void shaderc_compile_options_set_forced_version_profile(
 
 void shaderc_compile_options_set_includer_callbacks(
     shaderc_compile_options_t options,
-    const shaderc_includer_callbacks* callbacks_ptr) {
-  options->includer_callbacks = *callbacks_ptr;
+    shaderc_includer_response_get_fn get_includer_response,
+    shaderc_includer_response_release_fn release_includer_response,
+    void* user_data) {
+  options->GetIncluderResponse = get_includer_response;
+  options->ReleaseIncluderResponse = release_includer_response;
+  options->includer_user_data = user_data;
 }
 
 void shaderc_compile_options_set_preprocessing_only_mode(
@@ -287,7 +290,9 @@ shaderc_spv_module_t shaderc_compile_into_spv(
     if (additional_options) {
       result->compilation_succeeded = additional_options->compiler.Compile(
           source_string, stage, "shader", stage_function,
-          FileIncluder(additional_options->includer_callbacks), &output,
+          FileIncluder(additional_options->GetIncluderResponse,
+                       additional_options->ReleaseIncluderResponse,
+                       additional_options->includer_user_data), &output,
           &errors, &total_warnings, &total_errors);
     } else {
       // Compile with default options.

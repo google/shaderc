@@ -505,64 +505,69 @@ TEST_F(CppInterface, PreprocessingOnlyModeSecondOverridesDisassemblyMode) {
               HasSubstr("void main(){ }"));
 }
 
-// A helper class that wrap the intialization of the tests for setting includer
-// callbacks.
-class InitializeSetIncluderTest {
+// A mock class that simulate a client of the includer.
+class IncluderResponsor {
  public:
-  // Create a fake file object, with specified fullpath and content.
+  // Create a fake file object, with specified path and content.
   struct FakeFile {
-    std::string fullpath;
+    std::string path;
     std::string content;
   };
-  // Use hashmap to store fake files to be included.
+  // Use hashmap as a fake file system to store fake files to be included.
   using FakeFS = std::unordered_map<std::string, FakeFile>;
-  InitializeSetIncluderTest(CompileOptions& options, const std::string& kMainShader,
+  IncluderResponsor(CompileOptions& options, const std::string& kMainShader,
                     FakeFS& fake_fs)
       : options_(options), kMainShader_(kMainShader), fake_fs_(fake_fs) {
-    shaderc_includer_callbacks callbacks{
-        // A response method that returns fake full path and file content as
-        // defined above.
-        [/*Capture list is not allowed for function pointer*/](
-            void* user_data, const char* filename) {
-          auto& fake_fs = *static_cast<FakeFS*>(user_data);
-          const char* fullpath = fake_fs[filename].fullpath.c_str();
-          const char* content = fake_fs[filename].content.c_str();
-          shaderc_includer_fullpath_content fullpath_and_content{
-              fullpath, fake_fs[filename].fullpath.size(), content,
-              fake_fs[filename].content.size()};
-          return fullpath_and_content;
-        },
-        &fake_fs_,
-        // The data is owned in this test function stack, no need to clean
-        // anything.
-        [/*Capture list is not allowed for function pointer*/](
-            void* user_data, const char* filename,
-            shaderc_includer_fullpath_content data) {
-          (void)user_data;
-          (void)filename;
-          (void)data;
-        },
-        nullptr};
-    options_.SetIncluderCallbacks(&callbacks);
+    options_.SetIncluderCallbacks(GetIncluderResponseCb,
+                                  ReleaseIncluderResponseCb, this);
+  };
+
+  // Get path and content from the fake file system.
+  shaderc_includer_response* GetIncluderResponse(const char* filename) {
+    FakeFile& file_to_include = fake_fs_[filename];
+    response_.path = file_to_include.path.c_str();
+    response_.path_length = file_to_include.path.size();
+    response_.content = file_to_include.content.c_str();
+    response_.content_length = file_to_include.content.size();
+    return &response_;
+  };
+
+  // Response data is owned as private property, no need to release explicitly.
+  void ReleaseIncluderResponse(shaderc_includer_response* data) { (void)data; };
+
+  // Wrapper for the corresponding member function.
+  static shaderc_includer_response* GetIncluderResponseCb(
+      void* user_data, const char* filename) {
+    auto* responsor_handle = static_cast<IncluderResponsor*>(user_data);
+    return responsor_handle->GetIncluderResponse(filename);
+  };
+
+  // Wrapper for the corresponding member function.
+  static void ReleaseIncluderResponseCb(void* user_data,
+                                        shaderc_includer_response* data) {
+    auto* responsor_handle = static_cast<IncluderResponsor*>(user_data);
+    return responsor_handle->ReleaseIncluderResponse(data);
   };
 
  private:
   CompileOptions& options_;
   const std::string& kMainShader_;
   FakeFS& fake_fs_;
+  // Includer response data is stored as private property.
+  shaderc_includer_response response_;
 };
 
-TEST_F(CppInterface, SetIncluderCallbacks) {
+TEST_F(CppInterface, Includer) {
   const std::string kMainIncludingShader =
       "void foo() {}\n"
       "#include \"file_0\"\n"
       "#include \"file_1\"\n";
 
-  InitializeSetIncluderTest::FakeFS fake_fs(
+  IncluderResponsor::FakeFS fake_fs(
       {{"file_0", {"path/to/file_0", "void bar() {}\n"}},
        {"file_1", {"path/to/file_1", "void main() {foo(); bar();}\n"}}});
 
-  InitializeSetIncluderTest helper(options_, kMainIncludingShader, fake_fs);
+  IncluderResponsor responsor(options_, kMainIncludingShader, fake_fs);
 
   // Expects the compilation to succeed.
   EXPECT_TRUE(CompilesToValidSpv(kMainIncludingShader,
@@ -582,12 +587,12 @@ TEST_F(CppInterface, SetIncluderCallbacks) {
                                               "#line 3"));
 }
 
-TEST_F(CppInterface, SetIncluderCallbacksNestedInclude) {
+TEST_F(CppInterface, IncluderNestedInclude) {
   const std::string kMainIncludingShader =
       "void foo() {}\n"
       "#include \"file_0\"\n";
 
-  InitializeSetIncluderTest::FakeFS fake_fs({
+  IncluderResponsor::FakeFS fake_fs({
       {"file_0",
        {"path/to/file_0",
         "#include \"file_1\"\n"
@@ -595,7 +600,7 @@ TEST_F(CppInterface, SetIncluderCallbacksNestedInclude) {
       {"file_1", {"path/to/file_1", "void bar() {}\n"}},
   });
 
-  InitializeSetIncluderTest helper(options_, kMainIncludingShader, fake_fs);
+  IncluderResponsor responsor(options_, kMainIncludingShader, fake_fs);
 
   // Expect the compilation to succeed.
   EXPECT_TRUE(CompilesToValidSpv(kMainIncludingShader,

@@ -125,8 +125,12 @@ class CompileOptions {
     shaderc_compile_options_set_generate_debug_info(options_);
   }
 
-  void SetIncluderCallbacks(shaderc_includer_callbacks* callbacks_ptr) {
-    shaderc_compile_options_set_includer_callbacks(options_, callbacks_ptr);
+  void SetIncluderCallbacks(
+      shaderc_includer_response_get_fn get_includer_response,
+      shaderc_includer_response_release_fn release_includer_response,
+      void* user_data) {
+    shaderc_compile_options_set_includer_callbacks(
+        options_, get_includer_response, release_includer_response, user_data);
   }
 
   // Sets the compiler to emit a disassembly text instead of a binary. In
