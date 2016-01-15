@@ -556,9 +556,7 @@ TEST_P(IncluderTests, SetIncluderCallbacks) {
   TestIncluder includer(fs);
   Compiler compiler;
   compile_options_ptr options(shaderc_compile_options_initialize());
-  // Sets the compiler to preprocessing only mode.
   shaderc_compile_options_set_preprocessing_only_mode(options.get());
-  // Sets includer callbacks.
   shaderc_compile_options_set_includer_callbacks(
       options.get(), TestIncluder::GetIncluderResponseWrapper,
       TestIncluder::ReleaseIncluderResponseWrapper, &includer);
@@ -577,9 +575,7 @@ TEST_P(IncluderTests, SetIncluderCallbacksClonedOptions) {
   TestIncluder includer(fs);
   Compiler compiler;
   compile_options_ptr options(shaderc_compile_options_initialize());
-  // Sets the compiler to preprocessing only mode.
   shaderc_compile_options_set_preprocessing_only_mode(options.get());
-  // Sets includer callbacks.
   shaderc_compile_options_set_includer_callbacks(
       options.get(), TestIncluder::GetIncluderResponseWrapper,
       TestIncluder::ReleaseIncluderResponseWrapper, &includer);
@@ -610,13 +606,16 @@ INSTANTIATE_TEST_CASE_P(
             "#line 0 \"path/to/file_1\"\n"
             " content of file_1\n"
             "#line 2"),
-        IncluderTestCase({{"root",
+        IncluderTestCase(
+            // Fake file system.
+            {{"root",
                            "void foo() {}\n"
                            "#include \"path/to/file_1\"\n"},
                           {"path/to/file_1",
                            "#include \"path/to/file_2\"\n"
                            "content of file_1\n"},
                           {"path/to/file_2", "content of file_2\n"}},
+                          // Expected output.
                          "#line 0 \"path/to/file_1\"\n"
                          "#line 0 \"path/to/file_2\"\n"
                          " content of file_2\n"
