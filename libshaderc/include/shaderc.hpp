@@ -126,12 +126,23 @@ class CompileOptions {
     shaderc_compile_options_set_generate_debug_info(options_);
   }
 
-  // Define an includer interface, on which libshaderc will invoke the methods
+  // Includer interface, on which libshaderc will invoke the methods
   // to resolve the full path and content of the file to be included, and clean
   // up the resources used for the including process. Client code should
   // implement this interface and configure the includer instance then set it to
   // libshaderc through following API. The ownship of the instance will be
   // passed to CompileOptions, and it will be destroyed with CompileOptions.
+  // TODO: File inclusion needs to be context-aware.
+  // e.g.
+  //  In file: /path/to/main_shader.vert:
+  //  #include "include/a"
+  //  In file: /path/to/include/a":
+  //  #include "b"
+  //  When compiling /path/to/main_shader.vert, the compiler should be able to
+  //  go to /path/to/include/b to find the file b.
+  //  This needs context info from compiler to client includer, and may needs
+  //  interface changes.
+
   class IncluderInterface {
    public:
     virtual shaderc_includer_response* GetInclude(
@@ -143,16 +154,6 @@ class CompileOptions {
   // path and content of file to be included, and also cleaning the including
   // related data. The ownership of the includer instance will be passed to
   // CompileOptions and will be destroyed with CompileOptions.
-  // TODO: File inclusion needs to be context-aware.
-  // e.g.
-  //  In file: /path/to/main_shader.vert:
-  //  #include "include/a"
-  //  In file: /path/to/include/a":
-  //  #include "b"
-  //  When compiling /path/to/main_shader.vert, the compiler should be able to
-  //  go to /path/to/include/b to find the file b.
-  //  This needs context info from compiler to client includer, supporint needs
-  //  interface changes.
   void SetIncluder(std::unique_ptr<IncluderInterface>&& includer) {
     includer_ = std::move(includer);
     shaderc_compile_options_set_includer_callbacks(

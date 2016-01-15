@@ -182,7 +182,7 @@ typedef void (*shaderc_includer_response_release_fn)(
 //  #include "b"
 //  When compiling /path/to/main_shader.vert, the compiler should be able to
 //  go to /path/to/include/b to find the file b.
-//  This needs context info from compiler to client includer, supporint needs
+//  This needs context info from compiler to client includer, and may needs
 //  interface changes.
 
 void shaderc_compile_options_set_includer_callbacks(

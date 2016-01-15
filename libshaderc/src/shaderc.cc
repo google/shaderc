@@ -88,22 +88,22 @@ std::mutex compile_mutex;  // Guards shaderc_compile_*.
 class InternalFileIncluder : public shaderc_util::CountingIncluder {
  public:
   InternalFileIncluder(
-      const shaderc_includer_response_get_fn GetIncluderResponse,
-      const shaderc_includer_response_release_fn ReleaseIncluderResponse,
+      const shaderc_includer_response_get_fn get_includer_response,
+      const shaderc_includer_response_release_fn release_includer_response,
       void* user_data)
-      : GetIncluderResponse_(GetIncluderResponse),
-        ReleaseIncluderResponse_(ReleaseIncluderResponse),
+      : get_includer_response_(get_includer_response),
+        release_includer_response_(release_includer_response),
         user_data_(user_data){};
   InternalFileIncluder()
-      : GetIncluderResponse_(nullptr),
-        ReleaseIncluderResponse_(nullptr),
+      : get_includer_response_(nullptr),
+        release_includer_response_(nullptr),
         user_data_(nullptr){};
 
  private:
   // Check the validity of the callbacks.
   bool AreValidCallbacks() const {
-    return GetIncluderResponse_ != nullptr &&
-           ReleaseIncluderResponse_ != nullptr;
+    return get_includer_response_ != nullptr &&
+           release_includer_response_ != nullptr;
   }
 
   // Find filename in search path and returns its contents.
@@ -113,17 +113,17 @@ class InternalFileIncluder : public shaderc_util::CountingIncluder {
       return std::make_pair<std::string, std::string>(
           "", "unexpected include directive");
     shaderc_includer_response* data =
-        GetIncluderResponse_(user_data_, filename);
+        get_includer_response_(user_data_, filename);
     std::pair<std::string, std::string> entry =
         std::make_pair<std::string, std::string>(
             std::string(data->path, data->path_length),
             std::string(data->content, data->content_length));
-    ReleaseIncluderResponse_(user_data_, data);
+    release_includer_response_(user_data_, data);
     return entry;
   }
 
-  const shaderc_includer_response_get_fn GetIncluderResponse_;
-  const shaderc_includer_response_release_fn ReleaseIncluderResponse_;
+  const shaderc_includer_response_get_fn get_includer_response_;
+  const shaderc_includer_response_release_fn release_includer_response_;
   void* user_data_;
 };
 
@@ -132,8 +132,8 @@ class InternalFileIncluder : public shaderc_util::CountingIncluder {
 struct shaderc_compile_options {
   shaderc_compile_options(){};
   shaderc_util::Compiler compiler;
-  shaderc_includer_response_get_fn GetIncluderResponse;
-  shaderc_includer_response_release_fn ReleaseIncluderResponse;
+  shaderc_includer_response_get_fn get_includer_response;
+  shaderc_includer_response_release_fn release_includer_response;
   void* includer_user_data;
 };
 
@@ -194,8 +194,8 @@ void shaderc_compile_options_set_includer_callbacks(
     shaderc_includer_response_get_fn get_includer_response,
     shaderc_includer_response_release_fn release_includer_response,
     void* user_data) {
-  options->GetIncluderResponse = get_includer_response;
-  options->ReleaseIncluderResponse = release_includer_response;
+  options->get_includer_response = get_includer_response;
+  options->release_includer_response = release_includer_response;
   options->includer_user_data = user_data;
 }
 
@@ -291,8 +291,8 @@ shaderc_spv_module_t shaderc_compile_into_spv(
     if (additional_options) {
       result->compilation_succeeded = additional_options->compiler.Compile(
           source_string, stage, "shader", stage_function,
-          InternalFileIncluder(additional_options->GetIncluderResponse,
-                       additional_options->ReleaseIncluderResponse,
+          InternalFileIncluder(additional_options->get_includer_response,
+                       additional_options->release_includer_response,
                        additional_options->includer_user_data), &output,
           &errors, &total_warnings, &total_errors);
     } else {
