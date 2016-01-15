@@ -143,6 +143,16 @@ class CompileOptions {
   // path and content of file to be included, and also cleaning the including
   // related data. The ownership of the includer instance will be passed to
   // CompileOptions and will be destroyed with CompileOptions.
+  // TODO: File inclusion needs to be context-aware.
+  // e.g.
+  //  In file: /path/to/main_shader.vert:
+  //  #include "include/a"
+  //  In file: /path/to/include/a":
+  //  #include "b"
+  //  When compiling /path/to/main_shader.vert, the compiler should be able to
+  //  go to /path/to/include/b to find the file b.
+  //  This needs context info from compiler to client includer, supporint needs
+  //  interface changes.
   void SetIncluder(std::unique_ptr<IncluderInterface>&& includer) {
     includer_ = std::move(includer);
     shaderc_compile_options_set_includer_callbacks(

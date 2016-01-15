@@ -172,6 +172,17 @@ typedef void (*shaderc_includer_response_release_fn)(
 // Sets the callback functions for the includer. When the includer queries for
 // the full path and content of a file, client's method will be called to
 // response. And when the query is done, client will be notified to clean up.
+// TODO: File inclusion needs to be context-aware.
+// e.g.
+//  In file: /path/to/main_shader.vert:
+//  #include "include/a"
+//  In file: /path/to/include/a":
+//  #include "b"
+//  When compiling /path/to/main_shader.vert, the compiler should be able to
+//  go to /path/to/include/b to find the file b.
+//  This needs context info from compiler to client includer, supporint needs
+//  interface changes.
+
 void shaderc_compile_options_set_includer_callbacks(
     shaderc_compile_options_t options,
     shaderc_includer_response_get_fn getter,

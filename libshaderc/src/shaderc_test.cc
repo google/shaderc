@@ -546,7 +546,7 @@ class TestIncluder {
 using IncluderTests = testing::TestWithParam<IncluderTestCase>;
 
 // Parameterized tests for includer.
-TEST_P(IncluderTests, FileIncluder) {
+TEST_P(IncluderTests, SetIncluderCallbacks) {
   const IncluderTestCase& test_case = GetParam();
   const FakeFS& fs = test_case.fake_fs();
   // Compilation is always started on 'root' file.
@@ -563,6 +563,32 @@ TEST_P(IncluderTests, FileIncluder) {
 
   const Compilation comp(compiler.get_compiler_handle(), shader,
                          shaderc_glsl_vertex_shader, options.get());
+  // Checks the existence of the expected string.
+  EXPECT_THAT(shaderc_module_get_bytes(comp.result()),
+              HasSubstr(test_case.expected_substring()));
+}
+
+TEST_P(IncluderTests, SetIncluderCallbacksClonedOptions) {
+  const IncluderTestCase& test_case = GetParam();
+  const FakeFS& fs = test_case.fake_fs();
+  // Compilation is always started on 'root' file.
+  const std::string& shader = fs.at("root");
+  TestIncluder includer(fs);
+  Compiler compiler;
+  compile_options_ptr options(shaderc_compile_options_initialize());
+  // Sets the compiler to preprocessing only mode.
+  shaderc_compile_options_set_preprocessing_only_mode(options.get());
+  // Sets includer callbacks.
+  shaderc_compile_options_set_includer_callbacks(
+      options.get(), TestIncluder::GetIncluderResponseWrapper,
+      TestIncluder::ReleaseIncluderResponseWrapper, &includer);
+
+  // Cloned options should have all the settings.
+  compile_options_ptr cloned_options(
+      shaderc_compile_options_clone(options.get()));
+
+  const Compilation comp(compiler.get_compiler_handle(), shader,
+                         shaderc_glsl_vertex_shader, cloned_options.get());
   // Checks the existence of the expected string.
   EXPECT_THAT(shaderc_module_get_bytes(comp.result()),
               HasSubstr(test_case.expected_substring()));

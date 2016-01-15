@@ -552,7 +552,7 @@ class TestIncluder : public shaderc::CompileOptions::IncluderInterface {
 using IncluderTests = testing::TestWithParam<IncluderTestCase>;
 
 // Parameterized tests for includer.
-TEST_P(IncluderTests, FileIncluder) {
+TEST_P(IncluderTests, SetIncluder) {
   const IncluderTestCase& test_case = GetParam();
   const FakeFS& fs = test_case.fake_fs();
   // Compilation is always started on 'root' file.
@@ -565,6 +565,26 @@ TEST_P(IncluderTests, FileIncluder) {
   options.SetPreprocessingOnlyMode();
   const shaderc::SpvModule module = compiler.CompileGlslToSpv(
       shader.c_str(), shaderc_glsl_vertex_shader, options);
+  // Checks the existence of the expected string.
+  EXPECT_THAT(module.GetData(), HasSubstr(test_case.expected_substring()));
+}
+
+TEST_P(IncluderTests, SetIncluderClonedOptions) {
+  const IncluderTestCase& test_case = GetParam();
+  const FakeFS& fs = test_case.fake_fs();
+  // Compilation is always started on 'root' file.
+  const std::string& shader = fs.at("root");
+  shaderc::Compiler compiler;
+  CompileOptions options;
+  // Sets includer instance.
+  options.SetIncluder(std::unique_ptr<TestIncluder>(new TestIncluder(fs)));
+  // Sets the compiler to preprocessing only mode.
+  options.SetPreprocessingOnlyMode();
+
+  // Cloned options should have all the settings.
+  CompileOptions cloned_options(options);
+  const shaderc::SpvModule module = compiler.CompileGlslToSpv(
+      shader.c_str(), shaderc_glsl_vertex_shader, cloned_options);
   // Checks the existence of the expected string.
   EXPECT_THAT(module.GetData(), HasSubstr(test_case.expected_substring()));
 }
