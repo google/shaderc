@@ -86,7 +86,21 @@ struct {
 std::mutex compile_mutex;  // Guards shaderc_compile_*.
 
 class InternalFileIncluder : public shaderc_util::CountingIncluder {
+ public:
+  InternalFileIncluder(
+      const shaderc_includer_response_get_fn GetIncluderResponse,
+      const shaderc_includer_response_release_fn ReleaseIncluderResponse,
+      void* user_data)
+      : GetIncluderResponse_(GetIncluderResponse),
+        ReleaseIncluderResponse_(ReleaseIncluderResponse),
+        user_data_(user_data){};
+  InternalFileIncluder()
+      : GetIncluderResponse_(nullptr),
+        ReleaseIncluderResponse_(nullptr),
+        user_data_(nullptr){};
+
  private:
+  // Check the validity of the callbacks.
   bool AreValidCallbacks() const {
     return GetIncluderResponse_ != nullptr &&
            ReleaseIncluderResponse_ != nullptr;
@@ -111,19 +125,6 @@ class InternalFileIncluder : public shaderc_util::CountingIncluder {
   const shaderc_includer_response_get_fn GetIncluderResponse_;
   const shaderc_includer_response_release_fn ReleaseIncluderResponse_;
   void* user_data_;
-
- public:
-  InternalFileIncluder(
-      const shaderc_includer_response_get_fn GetIncluderResponse,
-      const shaderc_includer_response_release_fn ReleaseIncluderResponse,
-      void* user_data)
-      : GetIncluderResponse_(GetIncluderResponse),
-        ReleaseIncluderResponse_(ReleaseIncluderResponse),
-        user_data_(user_data){};
-  InternalFileIncluder()
-      : GetIncluderResponse_(nullptr),
-        ReleaseIncluderResponse_(nullptr),
-        user_data_(nullptr){};
 };
 
 }  // anonymous namespace

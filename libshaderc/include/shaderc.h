@@ -162,9 +162,8 @@ struct shaderc_includer_response {
 
 // The function signature of the client-side implemented reponse method. It
 // returns a pointer to shaderc_includer_reponse struct.
-typedef shaderc_includer_response* (
-    *shaderc_includer_response_get_fn)(void* user_data,
-                                                      const char* filename);
+typedef shaderc_includer_response* (*shaderc_includer_response_get_fn)(
+    void* user_data, const char* filename);
 
 // The function signature of the client-side implemented clean-up method.
 // Includer will call this callback function when the including process is done

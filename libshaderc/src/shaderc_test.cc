@@ -484,7 +484,7 @@ TEST_F(CompileStringWithOptionsTest, PreprocessingOnlyOption) {
 }
 
 // A mock class that simulate a client of the includer.
-class IncluderResponsor {
+class IncluderResponder {
  public:
   // Create a fake file object, with specified fullpath and content.
   struct FakeFile {
@@ -493,7 +493,7 @@ class IncluderResponsor {
   };
   // Use hashmap as a fake file system to store fake files to be included.
   using FakeFS = std::unordered_map<std::string, FakeFile>;
-  IncluderResponsor(shaderc_compile_options_t options, FakeFS& fake_fs)
+  IncluderResponder(shaderc_compile_options_t options, FakeFS& fake_fs)
       : options_(options), fake_fs_(fake_fs) {
     shaderc_compile_options_set_includer_callbacks(
         options_, GetIncluderResponseCb, ReleaseIncluderResponseCb, this);
@@ -515,14 +515,14 @@ class IncluderResponsor {
   // Wrapper for the corresponding member function.
   static shaderc_includer_response* GetIncluderResponseCb(
       void* user_data, const char* filename) {
-    auto* responsor_handle = static_cast<IncluderResponsor*>(user_data);
+    auto* responsor_handle = static_cast<IncluderResponder*>(user_data);
     return responsor_handle->GetIncluderResponse(filename);
   };
 
   // Wrapper for the corresponding member function.
   static void ReleaseIncluderResponseCb(void* user_data,
                                         shaderc_includer_response* data) {
-    auto* responsor_handle = static_cast<IncluderResponsor*>(user_data);
+    auto* responsor_handle = static_cast<IncluderResponder*>(user_data);
     return responsor_handle->ReleaseIncluderResponse(data);
   };
 
@@ -540,12 +540,12 @@ TEST_F(CompileStringWithOptionsTest, Includer) {
       "#include \"file_0\"\n"
       "#include \"file_1\"\n";
 
-  IncluderResponsor::FakeFS fake_fs({
+  IncluderResponder::FakeFS fake_fs({
       {"file_0", {"path/to/file_0", "void bar() {}\n"}},
       {"file_1", {"path/to/file_1", "void main() {foo(); bar();}\n"}}});
 
   // Sets callbacks for libshaderc includer.
-  IncluderResponsor responsor(options_.get(), fake_fs);
+  IncluderResponder responder(options_.get(), fake_fs);
   // Expect the compilation to succeed.
   EXPECT_TRUE(CompilesToValidSpv(kMainIncludingShader,
                                  shaderc_glsl_vertex_shader, options_.get()));
@@ -574,12 +574,12 @@ TEST_F(CompileStringWithOptionsTest, IncluderClonedOptions) {
       "#include \"file_0\"\n"
       "#include \"file_1\"\n";
 
-  IncluderResponsor::FakeFS fake_fs(
+  IncluderResponder::FakeFS fake_fs(
       {{"file_0", {"path/to/file_0", "void bar() {}\n"}},
        {"file_1", {"path/to/file_1", "void main() {foo(); bar();}\n"}}});
 
   // Sets callbacks for libshaderc includer.
-  IncluderResponsor responsor(options_.get(), fake_fs);
+  IncluderResponder responder(options_.get(), fake_fs);
   // Clone a new options object.
   compile_options_ptr cloned_options(
       shaderc_compile_options_clone(options_.get()));
@@ -606,7 +606,7 @@ TEST_F(CompileStringWithOptionsTest, IncluderNestedInclude) {
       "void foo() {}\n"
       "#include \"file_0\"\n";
 
-  IncluderResponsor::FakeFS fake_fs({
+  IncluderResponder::FakeFS fake_fs({
       {"file_0",
        {"path/to/file_0",
         "#include \"file_1\"\n"
@@ -615,7 +615,7 @@ TEST_F(CompileStringWithOptionsTest, IncluderNestedInclude) {
   });
 
   // Sets callbacks for libshaderc includer.
-  IncluderResponsor responsor(options_.get(), fake_fs);
+  IncluderResponder responder(options_.get(), fake_fs);
   // Clone a new options object.
   compile_options_ptr cloned_options(
       shaderc_compile_options_clone(options_.get()));
@@ -640,7 +640,7 @@ TEST_F(CompileStringWithOptionsTest, IncluderNestedIncludeClonedOptions) {
       "void foo() {}\n"
       "#include \"file_0\"\n";
 
-  IncluderResponsor::FakeFS fake_fs({
+  IncluderResponder::FakeFS fake_fs({
       {"file_0",
        {"path/to/file_0",
         "#include \"file_1\"\n"
@@ -649,7 +649,7 @@ TEST_F(CompileStringWithOptionsTest, IncluderNestedIncludeClonedOptions) {
   });
 
   // Sets callbacks for libshaderc includer.
-  IncluderResponsor responsor(options_.get(), fake_fs);
+  IncluderResponder responder(options_.get(), fake_fs);
 
   EXPECT_TRUE(CompilesToValidSpv(kMainIncludingShader,
                                  shaderc_glsl_vertex_shader, options_.get()));

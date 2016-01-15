@@ -130,8 +130,9 @@ class CompileOptions {
   // to resolve the full path and content of the file to be included, and clean
   // up the resources used for the including process. Client code should
   // implement this interface and configure the includer instance then set it to
-  // libshaderc through following API.
-  class Includer {
+  // libshaderc through following API. The ownship of the instance will be
+  // passed to CompileOptions, and it will be destroyed with CompileOptions.
+  class IncluderInterface {
    public:
     virtual shaderc_includer_response* GetInclude(
         const char* filename) = 0;
@@ -139,17 +140,18 @@ class CompileOptions {
   };
 
   // Sets the includer instance for libshaderc to call on when resolving
-  // including and cleaning the data.
-  void SetIncluder(std::unique_ptr<Includer>&& includer) {
+  // including and cleaning the data. The ownership of the includer instance
+  // will be passed to CompileOptions and will be destroyed with CompileOptions.
+  void SetIncluder(std::unique_ptr<IncluderInterface>&& includer) {
     includer_ = std::move(includer);
     shaderc_compile_options_set_includer_callbacks(
         options_,
         [](void* user_data, const char* filename) {
-          auto* includer = static_cast<Includer*>(user_data);
+          auto* includer = static_cast<IncluderInterface*>(user_data);
           return includer->GetInclude(filename);
         },
         [](void* user_data, shaderc_includer_response* data) {
-          auto* includer = static_cast<Includer*>(user_data);
+          auto* includer = static_cast<IncluderInterface*>(user_data);
           return includer->ReleaseInclude(data);
         },
         includer_.get());
@@ -208,7 +210,7 @@ class CompileOptions {
  private:
   CompileOptions& operator=(const CompileOptions& other) = delete;
   shaderc_compile_options_t options_;
-  std::unique_ptr<Includer> includer_;
+  std::unique_ptr<IncluderInterface> includer_;
 
   friend class Compiler;
 };
