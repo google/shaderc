@@ -507,13 +507,13 @@ TEST_F(CppInterface, PreprocessingOnlyModeSecondOverridesDisassemblyMode) {
 
 // To test file inclusion, use an unordered_map as a fake file system to store
 // fake files to be included. The unordered_map represents a filesystem by
-// mapping filename string (or path) to the contents of that file as a string.
+// mapping filename (or path) string to the contents of that file as a string.
 using FakeFS = std::unordered_map<std::string, std::string>;
 
 // An includer test case needs: 1) A fake file system which is actually an
 // unordered_map, so that we can resolve the content given a string. A valid
 // fake file system must have one entry with key:'root' to specify the start
-// shader file or compilation.2) An string that we expect to see in the
+// shader file for compilation. 2) An string that we expect to see in the
 // compilation output.
 class IncluderTestCase {
  public:
