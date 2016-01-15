@@ -153,13 +153,15 @@ void shaderc_compile_options_set_forced_version_profile(
 // The struct that contains the information to be returned to the libshaderc.
 // The client-side implemented response method should return a pointer of this
 // struct. The underlying data is owned by client code.
-struct shaderc_includer_response { const char* path; size_t path_length;
+struct shaderc_includer_response {
+  const char* path;
+  size_t path_length;
   const char* content;
   size_t content_length;
 };
 
-// The function signature of the client-side implemented reponse method. It
-// returns a pointer to shaderc_includer_reponse struct.
+// The function signature of the client-side implemented response method. It
+// returns a pointer to shaderc_includer_response struct.
 typedef shaderc_includer_response* (*shaderc_includer_response_get_fn)(
     void* user_data, const char* filename);
 
