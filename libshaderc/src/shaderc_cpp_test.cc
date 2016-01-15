@@ -521,7 +521,7 @@ class IncluderTestCase {
       : fake_fs_(fake_fs), expected_substring_(expected_substring) {
     assert(fake_fs_.find("root") != fake_fs_.end() &&
            "Valid fake file system needs a 'root' file\n");
-  };
+  }
 
   const FakeFS& fake_fs() const { return fake_fs_; }
   const std::string& expected_substring() const { return expected_substring_; }
@@ -535,7 +535,7 @@ class IncluderTestCase {
 // IncluderInterface to provide GetInclude() and ReleaseInclude() methods.
 class TestIncluder : public shaderc::CompileOptions::IncluderInterface {
  public:
-  TestIncluder(const FakeFS& fake_fs) : fake_fs_(fake_fs), responses_({}){};
+  TestIncluder(const FakeFS& fake_fs) : fake_fs_(fake_fs), responses_({}){}
 
   // Get path and content from the fake file system.
   shaderc_includer_response* GetInclude(const char* filename) override {
@@ -546,7 +546,7 @@ class TestIncluder : public shaderc::CompileOptions::IncluderInterface {
   }
 
   // Response data is owned as private property, no need to release explicitly.
-  void ReleaseInclude(shaderc_includer_response* data) override { (void)data; }
+  void ReleaseInclude(shaderc_includer_response*) override {}
 
  private:
   const FakeFS& fake_fs_;
@@ -587,39 +587,38 @@ TEST_P(IncluderTests, SetIncluderClonedOptions) {
   EXPECT_THAT(module.GetData(), HasSubstr(test_case.expected_substring()));
 }
 
-INSTANTIATE_TEST_CASE_P(
-    CppInterface, IncluderTests,
-    testing::ValuesIn(std::vector<IncluderTestCase>{
-        IncluderTestCase(
-            // Fake file system.
-            {
-                {"root",
-                 "void foo() {}\n"
-                 "#include \"path/to/file_1\"\n"},
-                {"path/to/file_1", "content of file_1\n"},
-            },
-            // Expected output.
-            "#line 0 \"path/to/file_1\"\n"
-            " content of file_1\n"
-            "#line 2"),
-        IncluderTestCase(
-            // Fake file system.
-            {{"root",
-                           "void foo() {}\n"
-                           "#include \"path/to/file_1\"\n"},
-                          {"path/to/file_1",
-                           "#include \"path/to/file_2\"\n"
-                           "content of file_1\n"},
-                          {"path/to/file_2", "content of file_2\n"}},
-                          // Expected output.
-                         "#line 0 \"path/to/file_1\"\n"
-                         "#line 0 \"path/to/file_2\"\n"
-                         " content of file_2\n"
-                         "#line 1 \"path/to/file_1\"\n"
-                         " content of file_1\n"
-                         "#line 2"),
+INSTANTIATE_TEST_CASE_P(CppInterface, IncluderTests,
+                        testing::ValuesIn(std::vector<IncluderTestCase>{
+                            IncluderTestCase(
+                                // Fake file system.
+                                {
+                                    {"root",
+                                     "void foo() {}\n"
+                                     "#include \"path/to/file_1\"\n"},
+                                    {"path/to/file_1", "content of file_1\n"},
+                                },
+                                // Expected output.
+                                "#line 0 \"path/to/file_1\"\n"
+                                " content of file_1\n"
+                                "#line 2"),
+                            IncluderTestCase(
+                                // Fake file system.
+                                {{"root",
+                                  "void foo() {}\n"
+                                  "#include \"path/to/file_1\"\n"},
+                                 {"path/to/file_1",
+                                  "#include \"path/to/file_2\"\n"
+                                  "content of file_1\n"},
+                                 {"path/to/file_2", "content of file_2\n"}},
+                                // Expected output.
+                                "#line 0 \"path/to/file_1\"\n"
+                                "#line 0 \"path/to/file_2\"\n"
+                                " content of file_2\n"
+                                "#line 1 \"path/to/file_1\"\n"
+                                " content of file_1\n"
+                                "#line 2"),
 
-    }));
+                        }));
 
 TEST_F(CppInterface, WarningsOnLine) {
   // By default the compiler will emit a warning on line 2 complaining

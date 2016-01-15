@@ -499,7 +499,7 @@ class IncluderTestCase {
       : fake_fs_(fake_fs), expected_substring_(expected_substring) {
     assert(fake_fs_.find("root") != fake_fs_.end() &&
            "Valid fake file system needs a 'root' file\n");
-      };
+  }
 
   const FakeFS& fake_fs() const { return fake_fs_; }
   const std::string& expected_substring() const { return expected_substring_; }
@@ -526,19 +526,19 @@ class TestIncluder {
   }
 
   // Response data is owned as private property, no need to release explicitly.
-  void ReleaseInclude(shaderc_includer_response* data) { (void)data; };
+  void ReleaseInclude(shaderc_includer_response*) {}
 
   // Wrapper for the corresponding member function.
   static shaderc_includer_response* GetIncluderResponseWrapper(
       void* user_data, const char* filename) {
     return static_cast<TestIncluder*>(user_data)->GetInclude(filename);
-  };
+  }
 
   // Wrapper for the corresponding member function.
   static void ReleaseIncluderResponseWrapper(void* user_data,
                                              shaderc_includer_response* data) {
     return static_cast<TestIncluder*>(user_data)->ReleaseInclude(data);
-  };
+  }
 
  private:
   // Includer response data is stored as private property.
@@ -591,39 +591,38 @@ TEST_P(IncluderTests, SetIncluderCallbacksClonedOptions) {
               HasSubstr(test_case.expected_substring()));
 }
 
-INSTANTIATE_TEST_CASE_P(
-    CppInterface, IncluderTests,
-    testing::ValuesIn(std::vector<IncluderTestCase>{
-        IncluderTestCase(
-            // Fake file system.
-            {
-                {"root",
-                 "void foo() {}\n"
-                 "#include \"path/to/file_1\"\n"},
-                {"path/to/file_1", "content of file_1\n"},
-            },
-            // Expected output.
-            "#line 0 \"path/to/file_1\"\n"
-            " content of file_1\n"
-            "#line 2"),
-        IncluderTestCase(
-            // Fake file system.
-            {{"root",
-                           "void foo() {}\n"
-                           "#include \"path/to/file_1\"\n"},
-                          {"path/to/file_1",
-                           "#include \"path/to/file_2\"\n"
-                           "content of file_1\n"},
-                          {"path/to/file_2", "content of file_2\n"}},
-                          // Expected output.
-                         "#line 0 \"path/to/file_1\"\n"
-                         "#line 0 \"path/to/file_2\"\n"
-                         " content of file_2\n"
-                         "#line 1 \"path/to/file_1\"\n"
-                         " content of file_1\n"
-                         "#line 2"),
+INSTANTIATE_TEST_CASE_P(CppInterface, IncluderTests,
+                        testing::ValuesIn(std::vector<IncluderTestCase>{
+                            IncluderTestCase(
+                                // Fake file system.
+                                {
+                                    {"root",
+                                     "void foo() {}\n"
+                                     "#include \"path/to/file_1\"\n"},
+                                    {"path/to/file_1", "content of file_1\n"},
+                                },
+                                // Expected output.
+                                "#line 0 \"path/to/file_1\"\n"
+                                " content of file_1\n"
+                                "#line 2"),
+                            IncluderTestCase(
+                                // Fake file system.
+                                {{"root",
+                                  "void foo() {}\n"
+                                  "#include \"path/to/file_1\"\n"},
+                                 {"path/to/file_1",
+                                  "#include \"path/to/file_2\"\n"
+                                  "content of file_1\n"},
+                                 {"path/to/file_2", "content of file_2\n"}},
+                                // Expected output.
+                                "#line 0 \"path/to/file_1\"\n"
+                                "#line 0 \"path/to/file_2\"\n"
+                                " content of file_2\n"
+                                "#line 1 \"path/to/file_1\"\n"
+                                " content of file_1\n"
+                                "#line 2"),
 
-    }));
+                        }));
 
 TEST_F(CompileStringWithOptionsTest, WarningsOnLine) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
