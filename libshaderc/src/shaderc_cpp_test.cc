@@ -507,28 +507,21 @@ TEST_F(CppInterface, PreprocessingOnlyModeSecondOverridesDisassemblyMode) {
 
 // Use hashmap as a fake file system to store fake files to be included.
 using FakeFS = std::unordered_map<std::string, std::string>;
-// Use a vector to store expected results.
-using ExpectedResults = std::vector<std::string>;
 
 // Includer test case struct
 class IncluderTestCase {
  public:
-  IncluderTestCase(std::string root_file, FakeFS fake_fs,
-                   ExpectedResults expected_substrings)
-      : root_file_(root_file),
-        fake_fs_(fake_fs),
-        expected_substrings_(expected_substrings){};
+  IncluderTestCase(FakeFS fake_fs, std::string expected_substring)
+      : fake_fs_(fake_fs), expected_substring_(expected_substring){};
 
-  const std::string& root_file() const { return root_file_; };
   const FakeFS& fake_fs() const { return fake_fs_; }
-  const ExpectedResults& expected_substrings() const {
-    return expected_substrings_;
+  const std::string& expected_substring() const {
+    return expected_substring_;
   }
 
  private:
-  std::string root_file_;
   FakeFS fake_fs_;
-  ExpectedResults expected_substrings_;
+  std::string expected_substring_;
 };
 
 class TestIncluder : public shaderc::CompileOptions::IncluderInterface {
@@ -552,70 +545,49 @@ class TestIncluder : public shaderc::CompileOptions::IncluderInterface {
   const FakeFS& fake_fs_;
 };
 
-using IncluderTest = testing::TestWithParam<IncluderTestCase>;
+using IncluderTests = testing::TestWithParam<IncluderTestCase>;
 
-TEST_P(IncluderTest, FileIncluder) {
+TEST_P(IncluderTests, FileIncluder) {
   const IncluderTestCase& test_case = GetParam();
   const FakeFS& fs = test_case.fake_fs();
-  const std::string& shader = fs.at(test_case.root_file());
+  const std::string& shader = fs.at("root");
   shaderc::Compiler compiler;
   CompileOptions options;
   options.SetIncluder(std::unique_ptr<TestIncluder>(new TestIncluder(fs)));
   options.SetPreprocessingOnlyMode();
   const shaderc::SpvModule module = compiler.CompileGlslToSpv(
       shader.c_str(), shaderc_glsl_vertex_shader, options);
-  for (auto& expected_substring : test_case.expected_substrings()) {
-    EXPECT_THAT(module.GetData(), HasSubstr(expected_substring));
-  }
+  EXPECT_THAT(module.GetData(), HasSubstr(test_case.expected_substring()));
 }
 
 INSTANTIATE_TEST_CASE_P(
-    WhatIsThis, IncluderTest,
+    CppInterface, IncluderTests,
     testing::ValuesIn(std::vector<IncluderTestCase>{
-        {                   // test case 0
-         "path/to/file_0",  // root file path
-         {
-             // fake fs
-             {"path/to/file_0",  // path to file_0
-              "void foo() {}\n"  // content of file_0
-              "#include \"path/to/file_1\"\n"
-              "#include \"path/to/file_2\"\n"},
-             {"path/to/file_1",                 // path to file_1
-              "void bar() {}\n"},               // content of file_1
-             {"path/to/file_2",                 // path to file_2
-              "void main() {foo(); bar();}\n"}  // content of file_2
-         },                                     // end of fake fs
+        IncluderTestCase(
+            {
+                {"root",
+                 "void foo() {}\n"
+                 "#include \"path/to/file_1\"\n"},
+                {"path/to/file_1", "content of file_1\n"},
+            },
+            "#line 0 \"path/to/file_1\"\n"
+            " content of file_1\n"
+            "#line 2"),
+        IncluderTestCase({{"root",
+                           "void foo() {}\n"
+                           "#include \"path/to/file_1\"\n"},
+                          {"path/to/file_1",
+                           "#include \"path/to/file_2\"\n"
+                           "content of file_1\n"},
+                          {"path/to/file_2", "content of file_2\n"}},
+                         "#line 0 \"path/to/file_1\"\n"
+                         "#line 0 \"path/to/file_2\"\n"
+                         " content of file_2\n"
+                         "#line 1 \"path/to/file_1\"\n"
+                         " content of file_1\n"
+                         "#line 2"),
 
-         {// expected substrings
-          "#line 0 \"path/to/file_1\"\n"
-          " void bar(){ }\n"
-          "#line 2",
-
-          "#line 0 \"path/to/file_2\"\n"
-          " void main(){ foo();bar();}\n"
-          "#line 3"}},
-
-        {                   // test case 1
-         "path/to/file_0",  // root file path
-         {
-             // fake fs
-             {"path/to/file_0",  // path to file_0
-              "void foo() {}\n"  // content of file_0
-              "#include \"path/to/file_1\"\n"},
-             {"path/to/file_1",  // path to file_1
-              "#include \"path/to/file_2\"\n"
-              "void main() {foo(); bar();}\n"},  // content of file_1
-             {"path/to/file_2",                  // path to file_2
-              "void bar() {}\n"}                 // content of file_2
-         },                                      // end of fake fs
-
-         {// expected substrings
-          "#line 0 \"path/to/file_1\"\n"
-          "#line 0 \"path/to/file_2\"\n"
-          " void bar(){ }\n"
-          "#line 1 \"path/to/file_1\"\n"
-          " void main(){ foo();bar();}\n"
-          "#line 2"}}}));
+    }));
 
 TEST_F(CppInterface, WarningsOnLine) {
   // By default the compiler will emit a warning on line 2 complaining

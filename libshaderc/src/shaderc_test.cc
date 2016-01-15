@@ -483,189 +483,106 @@ TEST_F(CompileStringWithOptionsTest, PreprocessingOnlyOption) {
   EXPECT_THAT(preprocessed_text_cloned_options, HasSubstr("void main(){ }"));
 }
 
-// A mock class that simulate a client of the includer.
-class IncluderResponder {
+// Use hashmap as a fake file system to store fake files to be included.
+using FakeFS = std::unordered_map<std::string, std::string>;
+
+// Includer test case struct
+class IncluderTestCase {
  public:
-  // Create a fake file object, with specified fullpath and content.
-  struct FakeFile {
-    std::string path;
-    std::string content;
-  };
-  // Use hashmap as a fake file system to store fake files to be included.
-  using FakeFS = std::unordered_map<std::string, FakeFile>;
-  IncluderResponder(shaderc_compile_options_t options, FakeFS& fake_fs)
-      : options_(options), fake_fs_(fake_fs) {
-    shaderc_compile_options_set_includer_callbacks(
-        options_, GetIncluderResponseCb, ReleaseIncluderResponseCb, this);
-  };
+  IncluderTestCase(FakeFS fake_fs, std::string expected_substring)
+      : fake_fs_(fake_fs), expected_substring_(expected_substring){};
+
+  const FakeFS& fake_fs() const { return fake_fs_; }
+  const std::string& expected_substring() const { return expected_substring_; }
+
+ private:
+  FakeFS fake_fs_;
+  std::string expected_substring_;
+};
+
+// A mock class that simulate a client of the includer.
+class TestIncluder {
+ public:
+  TestIncluder(const FakeFS& fake_fs) : fake_fs_(fake_fs){};
 
   // Get path and content from the fake file system.
-  shaderc_includer_response* GetIncluderResponse(const char* filename) {
-    FakeFile& file_to_include = fake_fs_[filename];
-    response_.path = file_to_include.path.c_str();
-    response_.path_length = file_to_include.path.size();
-    response_.content = file_to_include.content.c_str();
-    response_.content_length = file_to_include.content.size();
+  shaderc_includer_response* GetInclude(const char* filename) {
+    response_.path = filename;
+    response_.path_length = strlen(response_.path);
+    response_.content = fake_fs_.at(std::string(filename)).c_str();
+    response_.content_length = strlen(response_.content);
     return &response_;
-  };
+  }
 
   // Response data is owned as private property, no need to release explicitly.
-  void ReleaseIncluderResponse(shaderc_includer_response* data) { (void)data; };
+  void ReleaseInclude(shaderc_includer_response* data) { (void)data; };
 
   // Wrapper for the corresponding member function.
-  static shaderc_includer_response* GetIncluderResponseCb(
+  static shaderc_includer_response* GetIncluderResponseWrapper(
       void* user_data, const char* filename) {
-    auto* responsor_handle = static_cast<IncluderResponder*>(user_data);
-    return responsor_handle->GetIncluderResponse(filename);
+    return static_cast<TestIncluder*>(user_data)->GetInclude(filename);
   };
 
   // Wrapper for the corresponding member function.
-  static void ReleaseIncluderResponseCb(void* user_data,
-                                        shaderc_includer_response* data) {
-    auto* responsor_handle = static_cast<IncluderResponder*>(user_data);
-    return responsor_handle->ReleaseIncluderResponse(data);
+  static void ReleaseIncluderResponseWrapper(void* user_data,
+                                             shaderc_includer_response* data) {
+    return static_cast<TestIncluder*>(user_data)->ReleaseInclude(data);
   };
 
  private:
-  shaderc_compile_options_t options_;
-  FakeFS& fake_fs_;
   // Includer response data is stored as private property.
   shaderc_includer_response response_;
+  const FakeFS& fake_fs_;
 };
 
-TEST_F(CompileStringWithOptionsTest, Includer) {
-  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  const std::string kMainIncludingShader =
-      "void foo() {}\n"
-      "#include \"file_0\"\n"
-      "#include \"file_1\"\n";
+using IncluderTests = testing::TestWithParam<IncluderTestCase>;
 
-  IncluderResponder::FakeFS fake_fs({
-      {"file_0", {"path/to/file_0", "void bar() {}\n"}},
-      {"file_1", {"path/to/file_1", "void main() {foo(); bar();}\n"}}});
+TEST_P(IncluderTests, FileIncluder) {
+  const IncluderTestCase& test_case = GetParam();
+  const FakeFS& fs = test_case.fake_fs();
+  const std::string& shader = fs.at("root");
+  TestIncluder includer(fs);
+  Compiler compiler;
+  compile_options_ptr options(shaderc_compile_options_initialize());
+  shaderc_compile_options_set_preprocessing_only_mode(options.get());
+  shaderc_compile_options_set_includer_callbacks(
+      options.get(), TestIncluder::GetIncluderResponseWrapper,
+      TestIncluder::ReleaseIncluderResponseWrapper, &includer);
+  const Compilation comp(compiler.get_compiler_handle(), shader,
+                         shaderc_glsl_vertex_shader, options.get());
 
-  // Sets callbacks for libshaderc includer.
-  IncluderResponder responder(options_.get(), fake_fs);
-  // Expect the compilation to succeed.
-  EXPECT_TRUE(CompilesToValidSpv(kMainIncludingShader,
-                                 shaderc_glsl_vertex_shader, options_.get()));
-
-  // Sets compiler to preprocessing only mode, so we can check the result after
-  // preprocessing. Expect to see the content of the fake file object in the
-  // output of preprocessing.
-  shaderc_compile_options_set_preprocessing_only_mode(options_.get());
-  std::string preprocessing_output = CompilationOutput(kMainIncludingShader,
-                                                      shaderc_glsl_vertex_shader,
-                                                      options_.get());
-  EXPECT_THAT(preprocessing_output,
-              HasSubstr("#line 0 \"path/to/file_0\"\n"
-                        " void bar(){ }\n"
-                        "#line 2"));
-  EXPECT_THAT(preprocessing_output,
-              HasSubstr("#line 0 \"path/to/file_1\"\n"
-                        " void main(){ foo();bar();}\n"
-                        "#line 3"));
+  EXPECT_THAT(shaderc_module_get_bytes(comp.result()),
+              HasSubstr(test_case.expected_substring()));
 }
 
-TEST_F(CompileStringWithOptionsTest, IncluderClonedOptions) {
-  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  const std::string kMainIncludingShader =
-      "void foo() {}\n"
-      "#include \"file_0\"\n"
-      "#include \"file_1\"\n";
+INSTANTIATE_TEST_CASE_P(
+    CppInterface, IncluderTests,
+    testing::ValuesIn(std::vector<IncluderTestCase>{
+        IncluderTestCase(
+            {
+                {"root",
+                 "void foo() {}\n"
+                 "#include \"path/to/file_1\"\n"},
+                {"path/to/file_1", "content of file_1\n"},
+            },
+            "#line 0 \"path/to/file_1\"\n"
+            " content of file_1\n"
+            "#line 2"),
+        IncluderTestCase({{"root",
+                           "void foo() {}\n"
+                           "#include \"path/to/file_1\"\n"},
+                          {"path/to/file_1",
+                           "#include \"path/to/file_2\"\n"
+                           "content of file_1\n"},
+                          {"path/to/file_2", "content of file_2\n"}},
+                         "#line 0 \"path/to/file_1\"\n"
+                         "#line 0 \"path/to/file_2\"\n"
+                         " content of file_2\n"
+                         "#line 1 \"path/to/file_1\"\n"
+                         " content of file_1\n"
+                         "#line 2"),
 
-  IncluderResponder::FakeFS fake_fs(
-      {{"file_0", {"path/to/file_0", "void bar() {}\n"}},
-       {"file_1", {"path/to/file_1", "void main() {foo(); bar();}\n"}}});
-
-  // Sets callbacks for libshaderc includer.
-  IncluderResponder responder(options_.get(), fake_fs);
-  // Clone a new options object.
-  compile_options_ptr cloned_options(
-      shaderc_compile_options_clone(options_.get()));
-  // Expect the compilation to succeed.
-  EXPECT_TRUE(CompilesToValidSpv(
-      kMainIncludingShader, shaderc_glsl_vertex_shader, cloned_options.get()));
-
-  // Sets compiler to preprocessing only mode, so we can check the result after
-  // preprocessing. Expect to see the content of the fake file object in the
-  // output of preprocessing.
-  shaderc_compile_options_set_preprocessing_only_mode(cloned_options.get());
-  std::string preprocessing_output = CompilationOutput(
-      kMainIncludingShader, shaderc_glsl_vertex_shader, cloned_options.get());
-  EXPECT_THAT(preprocessing_output, HasSubstr("#line 0 \"path/to/file_0\"\n"
-                                              " void bar(){ }\n"
-                                              "#line 2"));
-  EXPECT_THAT(preprocessing_output, HasSubstr("#line 0 \"path/to/file_1\"\n"
-                                              " void main(){ foo();bar();}\n"
-                                              "#line 3"));
-}
-
-TEST_F(CompileStringWithOptionsTest, IncluderNestedInclude) {
-  const std::string kMainIncludingShader =
-      "void foo() {}\n"
-      "#include \"file_0\"\n";
-
-  IncluderResponder::FakeFS fake_fs({
-      {"file_0",
-       {"path/to/file_0",
-        "#include \"file_1\"\n"
-        "void main() {foo(); bar();}\n"}},
-      {"file_1", {"path/to/file_1", "void bar() {}\n"}},
-  });
-
-  // Sets callbacks for libshaderc includer.
-  IncluderResponder responder(options_.get(), fake_fs);
-  // Clone a new options object.
-  compile_options_ptr cloned_options(
-      shaderc_compile_options_clone(options_.get()));
-  EXPECT_TRUE(CompilesToValidSpv(kMainIncludingShader,
-                                 shaderc_glsl_vertex_shader, cloned_options.get()));
-  // Sets compiler to preprocessing only mode, so we can check the result after
-  // preprocessing. Expect to see the content of the fake file object in the
-  // output of preprocessing.
-  shaderc_compile_options_set_preprocessing_only_mode(cloned_options.get());
-  std::string preprocessing_output = CompilationOutput(
-      kMainIncludingShader, shaderc_glsl_vertex_shader, cloned_options.get());
-  EXPECT_THAT(preprocessing_output, HasSubstr("#line 0 \"path/to/file_0\"\n"
-                                              "#line 0 \"path/to/file_1\"\n"
-                                              " void bar(){ }\n"
-                                              "#line 1 \"path/to/file_0\"\n"
-                                              " void main(){ foo();bar();}\n"
-                                              "#line 2"));
-}
-
-TEST_F(CompileStringWithOptionsTest, IncluderNestedIncludeClonedOptions) {
-  const std::string kMainIncludingShader =
-      "void foo() {}\n"
-      "#include \"file_0\"\n";
-
-  IncluderResponder::FakeFS fake_fs({
-      {"file_0",
-       {"path/to/file_0",
-        "#include \"file_1\"\n"
-        "void main() {foo(); bar();}\n"}},
-      {"file_1", {"path/to/file_1", "void bar() {}\n"}},
-  });
-
-  // Sets callbacks for libshaderc includer.
-  IncluderResponder responder(options_.get(), fake_fs);
-
-  EXPECT_TRUE(CompilesToValidSpv(kMainIncludingShader,
-                                 shaderc_glsl_vertex_shader, options_.get()));
-  // Sets compiler to preprocessing only mode, so we can check the result after
-  // preprocessing. Expect to see the content of the fake file object in the
-  // output of preprocessing.
-  shaderc_compile_options_set_preprocessing_only_mode(options_.get());
-  std::string preprocessing_output = CompilationOutput(
-      kMainIncludingShader, shaderc_glsl_vertex_shader, options_.get());
-  EXPECT_THAT(preprocessing_output, HasSubstr("#line 0 \"path/to/file_0\"\n"
-                                              "#line 0 \"path/to/file_1\"\n"
-                                              " void bar(){ }\n"
-                                              "#line 1 \"path/to/file_0\"\n"
-                                              " void main(){ foo();bar();}\n"
-                                              "#line 2"));
-}
+    }));
 
 TEST_F(CompileStringWithOptionsTest, WarningsOnLine) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
