@@ -512,15 +512,14 @@ class IncluderTestCase {
 // libshaderc C API.
 class TestIncluder {
  public:
-  TestIncluder(const FakeFS& fake_fs) : fake_fs_(fake_fs){};
+  TestIncluder(const FakeFS& fake_fs) : fake_fs_(fake_fs), responses_({}){};
 
   // Get path and content from the fake file system.
   shaderc_includer_response* GetInclude(const char* filename) {
-    response_.path = filename;
-    response_.path_length = strlen(response_.path);
-    response_.content = fake_fs_.at(std::string(filename)).c_str();
-    response_.content_length = strlen(response_.content);
-    return &response_;
+    responses_.emplace_back(shaderc_includer_response{
+        filename, strlen(filename), fake_fs_.at(std::string(filename)).c_str(),
+        fake_fs_.at(std::string(filename)).size()});
+    return &responses_.back();
   }
 
   // Response data is owned as private property, no need to release explicitly.
@@ -540,8 +539,8 @@ class TestIncluder {
 
  private:
   // Includer response data is stored as private property.
-  shaderc_includer_response response_;
   const FakeFS& fake_fs_;
+  std::vector<shaderc_includer_response> responses_;
 };
 
 using IncluderTests = testing::TestWithParam<IncluderTestCase>;
