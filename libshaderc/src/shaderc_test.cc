@@ -483,14 +483,20 @@ TEST_F(CompileStringWithOptionsTest, PreprocessingOnlyOption) {
   EXPECT_THAT(preprocessed_text_cloned_options, HasSubstr("void main(){ }"));
 }
 
-// Use hashmap as a fake file system to store fake files to be included.
+// To test file inclusion, use hashmap as a fake file system to store fake files
+// to be included.
 using FakeFS = std::unordered_map<std::string, std::string>;
 
-// Includer test case struct
+// A includer test case needs: 1) A fake file system which is actually an
+// unordered_map, so that we can resolve the content given a file path. 2) An
+// string that we expect to see in the compilation output.
 class IncluderTestCase {
  public:
   IncluderTestCase(FakeFS fake_fs, std::string expected_substring)
-      : fake_fs_(fake_fs), expected_substring_(expected_substring){};
+      : fake_fs_(fake_fs), expected_substring_(expected_substring){
+        // Compilation starts on 'root' file, ensure it exists.
+        assert(fake_fs_.find("root") != fake_fs_.end());
+      };
 
   const FakeFS& fake_fs() const { return fake_fs_; }
   const std::string& expected_substring() const { return expected_substring_; }
@@ -500,7 +506,10 @@ class IncluderTestCase {
   std::string expected_substring_;
 };
 
-// A mock class that simulate a client of the includer.
+// A mock class that simulate an includer. C API needs two function pointers
+// each for get including data and release the data. This class defined two
+// static functions, which wrap their matching member functions, to be passed to
+// libshaderc C API.
 class TestIncluder {
  public:
   TestIncluder(const FakeFS& fake_fs) : fake_fs_(fake_fs){};
@@ -537,52 +546,61 @@ class TestIncluder {
 
 using IncluderTests = testing::TestWithParam<IncluderTestCase>;
 
+// Parameterized tests for includer.
 TEST_P(IncluderTests, FileIncluder) {
   const IncluderTestCase& test_case = GetParam();
   const FakeFS& fs = test_case.fake_fs();
+  // Compilation is always started on 'root' file.
   const std::string& shader = fs.at("root");
   TestIncluder includer(fs);
   Compiler compiler;
   compile_options_ptr options(shaderc_compile_options_initialize());
+  // Sets the compiler to preprocessing only mode.
   shaderc_compile_options_set_preprocessing_only_mode(options.get());
+  // Sets includer callbacks.
   shaderc_compile_options_set_includer_callbacks(
       options.get(), TestIncluder::GetIncluderResponseWrapper,
       TestIncluder::ReleaseIncluderResponseWrapper, &includer);
+
   const Compilation comp(compiler.get_compiler_handle(), shader,
                          shaderc_glsl_vertex_shader, options.get());
-
+  // Checks the existence of the expected string.
   EXPECT_THAT(shaderc_module_get_bytes(comp.result()),
               HasSubstr(test_case.expected_substring()));
 }
 
-INSTANTIATE_TEST_CASE_P(
-    CppInterface, IncluderTests,
-    testing::ValuesIn(std::vector<IncluderTestCase>{
-        IncluderTestCase(
-            {
-                {"root",
-                 "void foo() {}\n"
-                 "#include \"path/to/file_1\"\n"},
-                {"path/to/file_1", "content of file_1\n"},
-            },
-            "#line 0 \"path/to/file_1\"\n"
-            " content of file_1\n"
-            "#line 2"),
-        IncluderTestCase({{"root",
-                           "void foo() {}\n"
-                           "#include \"path/to/file_1\"\n"},
-                          {"path/to/file_1",
-                           "#include \"path/to/file_2\"\n"
-                           "content of file_1\n"},
-                          {"path/to/file_2", "content of file_2\n"}},
-                         "#line 0 \"path/to/file_1\"\n"
-                         "#line 0 \"path/to/file_2\"\n"
-                         " content of file_2\n"
-                         "#line 1 \"path/to/file_1\"\n"
-                         " content of file_1\n"
-                         "#line 2"),
+INSTANTIATE_TEST_CASE_P(CppInterface, IncluderTests,
+                        testing::ValuesIn(std::vector<IncluderTestCase>{
+                            IncluderTestCase(
+                                // Fake file system.
+                                {
+                                    {"root",
+                                     "void foo() {}\n"
+                                     "#include \"path/to/file_1\"\n"},
+                                    {"path/to/file_1", "content of file_1\n"},
+                                },
+                                // Expected output.
+                                "#line 0 \"path/to/file_1\"\n"
+                                " content of file_1\n"
+                                "#line 2"),
+                            IncluderTestCase(
+                                // Fake file system.
+                                {{"root",
+                                  "void foo() {}\n"
+                                  "#include \"path/to/file_1\"\n"},
+                                 {"path/to/file_1",
+                                  "#include \"path/to/file_2\"\n"
+                                  "content of file_1\n"},
+                                 {"path/to/file_2", "content of file_2\n"}},
+                                // Expected output.
+                                "#line 0 \"path/to/file_1\"\n"
+                                "#line 0 \"path/to/file_2\"\n"
+                                " content of file_2\n"
+                                "#line 1 \"path/to/file_1\"\n"
+                                " content of file_1\n"
+                                "#line 2"),
 
-    }));
+                        }));
 
 TEST_F(CompileStringWithOptionsTest, WarningsOnLine) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());

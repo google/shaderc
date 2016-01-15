@@ -150,12 +150,10 @@ void shaderc_compile_options_set_forced_version_profile(
 // should implement the clean up method and pass it to libshaderc together with
 // the response method.
 
-// The struct that contains the information to be returned to the includer.
-// The client-side implemented response method should return this struct. And
-// the underlying data is owned by client code.
-struct shaderc_includer_response {
-  const char* path;
-  size_t path_length;
+// The struct that contains the information to be returned to the libshaderc.
+// The client-side implemented response method should return a pointer of this
+// struct. The underlying data is owned by client code.
+struct shaderc_includer_response { const char* path; size_t path_length;
   const char* content;
   size_t content_length;
 };

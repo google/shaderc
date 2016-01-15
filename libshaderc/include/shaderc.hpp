@@ -139,9 +139,10 @@ class CompileOptions {
     virtual void ReleaseInclude(shaderc_includer_response* data) = 0;
   };
 
-  // Sets the includer instance for libshaderc to call on when resolving
-  // including and cleaning the data. The ownership of the includer instance
-  // will be passed to CompileOptions and will be destroyed with CompileOptions.
+  // Sets the includer instance for libshaderc to call on to resolve the full
+  // path and content of file to be included, and also cleaning the including
+  // related data. The ownership of the includer instance will be passed to
+  // CompileOptions and will be destroyed with CompileOptions.
   void SetIncluder(std::unique_ptr<IncluderInterface>&& includer) {
     includer_ = std::move(includer);
     shaderc_compile_options_set_includer_callbacks(
