@@ -20,15 +20,15 @@
 
 #include "libshaderc_util/format.h"
 #include "libshaderc_util/io.h"
+#include "libshaderc_util/message.h"
 #include "libshaderc_util/resources.h"
 #include "libshaderc_util/shader_stage.h"
 #include "libshaderc_util/string_piece.h"
 #include "libshaderc_util/version_profile.h"
-#include "libshaderc_util/message.h"
 
+#include "SPIRV/GlslangToSpv.h"
 #include "SPIRV/disassemble.h"
 #include "SPIRV/doc.h"
-#include "SPIRV/GlslangToSpv.h"
 
 namespace {
 using shaderc_util::string_piece;
@@ -80,7 +80,6 @@ bool Compiler::Compile(
     const CountingIncluder& includer, std::ostream* output_stream,
     std::ostream* error_stream, size_t* total_warnings,
     size_t* total_errors) const {
-  GlslInitializer initializer;
   EShLanguage used_shader_stage = forced_shader_stage;
   const std::string macro_definitions =
       shaderc_util::format(predefined_macros_, "#define ", " ", "\n");
@@ -136,6 +135,8 @@ bool Compiler::Compile(
     }
   }
 
+  // Parsing requires its own Glslang symbol tables.
+  GlslInitializer initializer;
   glslang::TShader shader(used_shader_stage);
   const char* shader_strings = input_source_string.data();
   const int shader_lengths = static_cast<int>(input_source_string.size());
@@ -148,9 +149,7 @@ bool Compiler::Compile(
   bool success =
       shader.parse(&shaderc_util::kDefaultTBuiltInResource, default_version_,
                    default_profile_, force_version_profile_,
-                   kNotForwardCompatible,
-                   message_rules_,
-                   includer);
+                   kNotForwardCompatible, message_rules_, includer);
 
   success &= PrintFilteredErrors(error_tag, error_stream, warnings_as_errors_,
                                  suppress_warnings_, shader.getInfoLog(),
@@ -186,9 +185,7 @@ void Compiler::AddMacroDefinition(const string_piece& macro,
   predefined_macros_[macro] = definition;
 }
 
-void Compiler::SetMessageRules(EShMessages rules) {
-  message_rules_ = rules;
-}
+void Compiler::SetMessageRules(EShMessages rules) { message_rules_ = rules; }
 
 void Compiler::SetForcedVersionProfile(int version, EProfile profile) {
   default_version_ = version;
@@ -210,6 +207,12 @@ std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
     const std::string& error_tag, const string_piece& shader_source,
     const string_piece& shader_preamble,
     const CountingIncluder& includer) const {
+  // Glslang's symbol tables of builtins are lazily initialized, but
+  // the already-initialized check is insensitive to whether SPIR-V
+  // or Vulkan is turned on.  Since preprocessing uses different
+  // message rules from parsing, to be safe the preprocessor step must
+  // build its own symbol tables and tear them down.
+  GlslInitializer initializer;
   // The stage does not matter for preprocessing.
   glslang::TShader shader(EShLangVertex);
   const char* shader_strings = shader_source.data();
@@ -219,11 +222,17 @@ std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
                                        &string_names, 1);
   shader.setPreamble(shader_preamble.data());
 
+  // The preprocessor might be sensitive to the target environment.
+  // So combine the existing rules with the just-give-me-preprocessor-output
+  // flag.
+  const auto rules =
+      static_cast<EShMessages>(EShMsgOnlyPreprocessor | message_rules_);
+
   std::string preprocessed_shader;
   const bool success = shader.preprocess(
       &shaderc_util::kDefaultTBuiltInResource, default_version_,
-      default_profile_, force_version_profile_, kNotForwardCompatible,
-      EShMsgOnlyPreprocessor, &preprocessed_shader, includer);
+      default_profile_, force_version_profile_, kNotForwardCompatible, rules,
+      &preprocessed_shader, includer);
 
   if (success) {
     return std::make_tuple(true, preprocessed_shader, shader.getInfoLog());

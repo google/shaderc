@@ -38,6 +38,13 @@ add_shaderc_tests(
 
 target_include_directories(shaderc_util_counting_includer_test PRIVATE ${glslang_SOURCE_DIR})
 
+add_shaderc_tests(
+  TEST_PREFIX shaderc_util
+  LINK_LIBS shaderc_util glslang OSDependent OGLCompiler glslang SPIRV ${CMAKE_THREAD_LIBS_INIT}
+  INCLUDE_DIRS ${glslang_SOURCE_DIR}
+  TEST_NAMES
+    compiler)
+
 # This target copies content of testdata into the build directory.
 add_custom_target(testdata COMMAND
   ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/testdata/copy-to-build.cmake)
