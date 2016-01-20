@@ -10,10 +10,10 @@ LOCAL_EXPORT_C_INCLUDES:=$(GLSLANG_LOCAL_PATH)
 LOCAL_SRC_FILES:= \
 	SPIRV/GlslangToSpv.cpp \
 	SPIRV/InReadableOrder.cpp \
-	SPIRV/SpvBuilder.cpp \
 	SPIRV/SPVRemapper.cpp \
-	SPIRV/doc.cpp \
-	SPIRV/disassemble.cpp
+	SPIRV/SpvBuilder.cpp \
+	SPIRV/disassemble.cpp \
+	SPIRV/doc.cpp
 
 LOCAL_C_INCLUDES:=$(GLSLANG_LOCAL_PATH) $(GLSLANG_LOCAL_PATH)/glslang/SPIRV
 LOCAL_EXPORT_C_INCLUDES:=$(GLSLANG_LOCAL_PATH)/glslang/SPIRV
