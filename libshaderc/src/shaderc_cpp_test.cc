@@ -199,8 +199,8 @@ TEST_F(CppInterface, CopiedOptions) {
 }
 
 TEST_F(CppInterface, MovedOptions) {
-  EXPECT_TRUE(
-      CompilesToValidSpv(compiler_, kMinimalShader, shaderc_glsl_vertex_shader, options_));
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
+                                 shaderc_glsl_vertex_shader, options_));
   CompileOptions copied_options(std::move(options_));
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
                                  shaderc_glsl_fragment_shader, copied_options));
@@ -401,17 +401,16 @@ TEST_F(CppInterface, GenerateDebugInfoDisassemblyClonedOptions) {
 TEST_F(CppInterface, GetNumErrors) {
   std::string shader(kTwoErrorsShader);
   const shaderc::SpvModule module = compiler_.CompileGlslToSpv(
-      kTwoErrorsShader, strlen(kTwoErrorsShader),
-      shaderc_glsl_vertex_shader);
+      kTwoErrorsShader, strlen(kTwoErrorsShader), shaderc_glsl_vertex_shader);
   EXPECT_FALSE(module.GetSuccess());
   EXPECT_EQ(2u, module.GetNumErrors());
   EXPECT_EQ(0u, module.GetNumWarnings());
 }
 
 TEST_F(CppInterface, GetNumWarnings) {
-  const shaderc::SpvModule module = compiler_.CompileGlslToSpv(
-      kTwoWarningsShader, strlen(kTwoWarningsShader),
-      shaderc_glsl_vertex_shader);
+  const shaderc::SpvModule module =
+      compiler_.CompileGlslToSpv(kTwoWarningsShader, strlen(kTwoWarningsShader),
+                                 shaderc_glsl_vertex_shader);
   EXPECT_TRUE(module.GetSuccess());
   EXPECT_EQ(2u, module.GetNumWarnings());
   EXPECT_EQ(0u, module.GetNumErrors());
@@ -419,8 +418,7 @@ TEST_F(CppInterface, GetNumWarnings) {
 
 TEST_F(CppInterface, ZeroErrorsZeroWarnings) {
   const shaderc::SpvModule module = compiler_.CompileGlslToSpv(
-      kMinimalShader, strlen(kMinimalShader),
-      shaderc_glsl_vertex_shader);
+      kMinimalShader, strlen(kMinimalShader), shaderc_glsl_vertex_shader);
   EXPECT_TRUE(module.GetSuccess());
   EXPECT_EQ(0u, module.GetNumErrors());
   EXPECT_EQ(0u, module.GetNumWarnings());
@@ -576,7 +574,7 @@ class IncluderTestCase {
 // IncluderInterface to provide GetInclude() and ReleaseInclude() methods.
 class TestIncluder : public shaderc::CompileOptions::IncluderInterface {
  public:
-  TestIncluder(const FakeFS& fake_fs) : fake_fs_(fake_fs), responses_({}){}
+  TestIncluder(const FakeFS& fake_fs) : fake_fs_(fake_fs), responses_({}) {}
 
   // Get path and content from the fake file system.
   shaderc_includer_response* GetInclude(const char* filename) override {

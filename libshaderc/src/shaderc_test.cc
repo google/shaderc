@@ -814,22 +814,22 @@ TEST_F(CompileStringWithOptionsTest,
 TEST_F(CompileStringWithOptionsTest, TargetEnvIgnoredWhenPreprocessing) {
   shaderc_compile_options_set_preprocessing_only_mode(options_.get());
 
-  EXPECT_TRUE(CompilationSuccess(compiler_, kOpenGLCompatibilityFragmentShader,
+  EXPECT_TRUE(CompilationSuccess(kOpenGLCompatibilityFragmentShader,
                                  shaderc_glsl_fragment_shader, options_.get()));
 
   shaderc_compile_options_set_target_env(options_.get(),
                                          shaderc_target_env_opengl_compat, 0);
-  EXPECT_TRUE(CompilationSuccess(compiler_, kOpenGLCompatibilityFragmentShader,
+  EXPECT_TRUE(CompilationSuccess(kOpenGLCompatibilityFragmentShader,
                                  shaderc_glsl_fragment_shader, options_.get()));
 
   shaderc_compile_options_set_target_env(options_.get(),
                                          shaderc_target_env_opengl, 0);
-  EXPECT_TRUE(CompilationSuccess(compiler_, kOpenGLCompatibilityFragmentShader,
+  EXPECT_TRUE(CompilationSuccess(kOpenGLCompatibilityFragmentShader,
                                  shaderc_glsl_fragment_shader, options_.get()));
 
   shaderc_compile_options_set_target_env(options_.get(),
                                          shaderc_target_env_vulkan, 0);
-  EXPECT_TRUE(CompilationSuccess(compiler_, kOpenGLCompatibilityFragmentShader,
+  EXPECT_TRUE(CompilationSuccess(kOpenGLCompatibilityFragmentShader,
                                  shaderc_glsl_fragment_shader, options_.get()));
 }
 

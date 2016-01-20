@@ -64,6 +64,20 @@ const char kTwoWarningsShader[] =
     "attribute float y;\n"
     "void main(){}\n";
 
+// A shader that compiles under OpenGL compatibility profile rules,
+// but not OpenGL core profile rules.
+const char kOpenGLCompatibilityFragmentShader[] =
+    R"(#version 100
+     uniform highp sampler2D tex;
+     void main() {
+       gl_FragColor = texture2D(tex, vec2(0.0,0.0));
+     })";
+
+// A shader that compiles under OpenGL core profile rules.
+const char kOpenGLVertexShader[] =
+    R"(#version 150
+       void main() { int t = gl_VertexID; })";
+
 // Empty 310 es shader. It is valid for vertex, fragment, compute shader kind.
 const char kEmpty310ESShader[] =
     "#version 310 es\n"
