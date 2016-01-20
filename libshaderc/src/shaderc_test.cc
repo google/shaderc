@@ -119,8 +119,8 @@ bool CompilesToValidSpv(Compiler& compiler, const std::string& shader,
 // A testing class to test the compilation of a string with or without options.
 // This class wraps the initailization of compiler and compiler options and
 // groups the result checking methods. Subclass tests can access the compiler
-// object and compiler option object to set their properties. All the Input file
-// names are set to "shader".
+// object and compiler option object to set their properties. Input file names
+// are set to "shader".
 class CompileStringTest : public testing::Test {
  protected:
   // Compiles a shader and returns true on success, false on failure.
@@ -402,7 +402,7 @@ TEST_F(CompileStringWithOptionsTest, GenerateDebugInfoDisassembly) {
 
 TEST_F(CompileStringWithOptionsTest, GetNumErrors) {
   Compilation comp(compiler_.get_compiler_handle(), kTwoErrorsShader,
-                   shaderc_glsl_vertex_shader, "shader" /*input_file_name*/,
+                   shaderc_glsl_vertex_shader, "shader",
                    options_.get());
   // Expects compilation failure and two errors.
   EXPECT_FALSE(shaderc_module_get_success(comp.result()));
@@ -413,7 +413,7 @@ TEST_F(CompileStringWithOptionsTest, GetNumErrors) {
 
 TEST_F(CompileStringWithOptionsTest, GetNumWarnings) {
   Compilation comp(compiler_.get_compiler_handle(), kTwoWarningsShader,
-                   shaderc_glsl_vertex_shader, "shader" /*input_file_name*/,
+                   shaderc_glsl_vertex_shader, "shader",
                    options_.get());
   // Expects compilation success with two warnings.
   EXPECT_TRUE(shaderc_module_get_success(comp.result()));
@@ -424,7 +424,7 @@ TEST_F(CompileStringWithOptionsTest, GetNumWarnings) {
 
 TEST_F(CompileStringWithOptionsTest, ZeroErrorsZeroWarnings) {
   Compilation comp(compiler_.get_compiler_handle(), kMinimalShader,
-                   shaderc_glsl_vertex_shader, "shader" /*input_file_name*/);
+                   shaderc_glsl_vertex_shader, "shader");
   // Expects compilation success with zero warnings.
   EXPECT_TRUE(shaderc_module_get_success(comp.result()));
   EXPECT_EQ(0u, shaderc_module_get_num_warnings(comp.result()));
@@ -609,7 +609,7 @@ TEST_P(IncluderTests, SetIncluderCallbacks) {
 
   const Compilation comp(compiler.get_compiler_handle(), shader,
                          shaderc_glsl_vertex_shader,
-                         "shader" /*input_file_name*/, options.get());
+                         "shader", options.get());
   // Checks the existence of the expected string.
   EXPECT_THAT(shaderc_module_get_bytes(comp.result()),
               HasSubstr(test_case.expected_substring()));
@@ -633,7 +633,7 @@ TEST_P(IncluderTests, SetIncluderCallbacksClonedOptions) {
 
   const Compilation comp(compiler.get_compiler_handle(), shader,
                          shaderc_glsl_vertex_shader,
-                         "shader" /*input_file_name*/, cloned_options.get());
+                         "shader", cloned_options.get());
   // Checks the existence of the expected string.
   EXPECT_THAT(shaderc_module_get_bytes(comp.result()),
               HasSubstr(test_case.expected_substring()));

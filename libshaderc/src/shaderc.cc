@@ -71,7 +71,7 @@ EShLanguage GetForcedStage(shaderc_shader_kind kind) {
 EShMessages GetMessageRules(shaderc_target_env target) {
   EShMessages msgs = EShMsgDefault;
 
-  switch(target) {
+  switch (target) {
     case shaderc_target_env_opengl_compat:
       break;
     case shaderc_target_env_opengl:
@@ -247,7 +247,7 @@ void shaderc_compile_options_set_forced_version_profile(
   // Transfer the profile parameter from public enum type to glslang internal
   // enum type. No default case here so that compiler will complain if new enum
   // member is added later but not handled here.
-  switch(profile){
+  switch (profile) {
     case shaderc_profile_none:
       options->compiler.SetForcedVersionProfile(version, ENoProfile);
       break;
@@ -283,9 +283,11 @@ void shaderc_compile_options_set_suppress_warnings(
   options->compiler.SetSuppressWarnings();
 }
 
-void shaderc_compile_options_set_target_env(
-    shaderc_compile_options_t options, shaderc_target_env target, uint32_t version) {
-  // "version" reserved for future use, intended to distinguish between different
+void shaderc_compile_options_set_target_env(shaderc_compile_options_t options,
+                                            shaderc_target_env target,
+                                            uint32_t version) {
+  // "version" reserved for future use, intended to distinguish between
+  // different
   // versions of a target environment
   options->compiler.SetMessageRules(GetMessageRules(target));
 }
@@ -410,7 +412,7 @@ const char* shaderc_module_get_error_message(
   return module->messages.c_str();
 }
 
-void shaderc_get_spv_version(unsigned int *version, unsigned int *revision) {
-    *version = spv::Version;
-    *revision = spv::Revision;
+void shaderc_get_spv_version(unsigned int* version, unsigned int* revision) {
+  *version = spv::Version;
+  *revision = spv::Revision;
 }

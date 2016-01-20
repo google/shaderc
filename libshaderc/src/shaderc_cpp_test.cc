@@ -42,21 +42,20 @@ bool IsValidSpv(const shaderc::SpvModule& result) {
   return bytes[0] == spv::MagicNumber;
 }
 
-// Compiles a shader and returns true if the result is valid SPIR-V.
+// Compiles a shader and returns true if the result is valid SPIR-V. The
+// input_file_name is set to "shader".
 bool CompilesToValidSpv(const shaderc::Compiler& compiler,
-                        const std::string& shader, shaderc_shader_kind kind,
-                        const char* input_file_name) {
-  return IsValidSpv(compiler.CompileGlslToSpv(shader, kind, input_file_name));
+                        const std::string& shader, shaderc_shader_kind kind) {
+  return IsValidSpv(compiler.CompileGlslToSpv(shader, kind, "shader"));
 }
 
 // Compiles a shader with options and returns true if the result is valid
-// SPIR-V.
+// SPIR-V. The input_file_name is set to "shader".
 bool CompilesToValidSpv(const shaderc::Compiler& compiler,
                         const std::string& shader, shaderc_shader_kind kind,
-                        const char* input_file_name,
                         const CompileOptions& options) {
   return IsValidSpv(
-      compiler.CompileGlslToSpv(shader, kind, input_file_name, options));
+      compiler.CompileGlslToSpv(shader, kind, "shader", options));
 }
 
 class CppInterface : public testing::Test {
@@ -191,49 +190,40 @@ TEST_F(CppInterface, GarbageString) {
 
 TEST_F(CppInterface, MinimalShader) {
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
-                                 shaderc_glsl_vertex_shader,
-                                 "shader" /*input_file_name*/));
+                                 shaderc_glsl_vertex_shader));
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
-                                 shaderc_glsl_fragment_shader,
-                                 "shader" /*input_file_name*/));
+                                 shaderc_glsl_fragment_shader));
 }
 
 TEST_F(CppInterface, BasicOptions) {
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
-                                 shaderc_glsl_vertex_shader,
-                                 "shader" /*input_file_name*/, options_));
+                                 shaderc_glsl_vertex_shader, options_));
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
-                                 shaderc_glsl_fragment_shader,
-                                 "shader" /*input_file_name*/, options_));
+                                 shaderc_glsl_fragment_shader, options_));
 }
 
 TEST_F(CppInterface, CopiedOptions) {
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
-                                 shaderc_glsl_vertex_shader,
-                                 "shader" /*input_file_name*/, options_));
+                                 shaderc_glsl_vertex_shader, options_));
   CompileOptions copied_options(options_);
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
-                                 shaderc_glsl_fragment_shader,
-                                 "shader" /*input_file_name*/, copied_options));
+                                 shaderc_glsl_fragment_shader, copied_options));
 }
 
 TEST_F(CppInterface, MovedOptions) {
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
-                                 shaderc_glsl_vertex_shader, "shader",
-                                 options_));
+                                 shaderc_glsl_vertex_shader, options_));
   CompileOptions copied_options(std::move(options_));
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
-                                 shaderc_glsl_fragment_shader,
-                                 "shader" /*input_file_name*/, copied_options));
+                                 shaderc_glsl_fragment_shader, copied_options));
 }
 
 TEST_F(CppInterface, StdAndCString) {
-  shaderc::SpvModule result1 = compiler_.CompileGlslToSpv(
-      kMinimalShader, strlen(kMinimalShader), shaderc_glsl_fragment_shader,
-      "shader" /*input_file_name*/);
+  shaderc::SpvModule result1 =
+      compiler_.CompileGlslToSpv(kMinimalShader, strlen(kMinimalShader),
+                                 shaderc_glsl_fragment_shader, "shader");
   shaderc::SpvModule result2 = compiler_.CompileGlslToSpv(
-      std::string(kMinimalShader), shaderc_glsl_fragment_shader,
-      "shader" /*input_file_name*/);
+      std::string(kMinimalShader), shaderc_glsl_fragment_shader, "shader");
   EXPECT_TRUE(result1.GetSuccess());
   EXPECT_TRUE(result2.GetSuccess());
   EXPECT_EQ(result1.GetLength(), result2.GetLength());
@@ -245,8 +235,7 @@ TEST_F(CppInterface, StdAndCString) {
 
 TEST_F(CppInterface, ErrorsReported) {
   shaderc::SpvModule result = compiler_.CompileGlslToSpv(
-      "int f(){return wrongname;}", shaderc_glsl_vertex_shader,
-      "shader" /*input_file_name*/);
+      "int f(){return wrongname;}", shaderc_glsl_vertex_shader, "shader");
   ASSERT_FALSE(result.GetSuccess());
   EXPECT_THAT(result.GetErrorMessage(), HasSubstr("wrongname"));
 }
@@ -325,8 +314,7 @@ TEST_F(CppInterface, ForcedVersionProfileCorrectStd) {
   // #version.
   options_.SetForcedVersionProfile(450, shaderc_profile_core);
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kCoreVertShaderWithoutVersion,
-                                 shaderc_glsl_vertex_shader,
-                                 "shader" /*input_file_name*/, options_));
+                                 shaderc_glsl_vertex_shader, options_));
 }
 
 TEST_F(CppInterface, ForcedVersionProfileCorrectStdClonedOptions) {
@@ -335,8 +323,7 @@ TEST_F(CppInterface, ForcedVersionProfileCorrectStdClonedOptions) {
   options_.SetForcedVersionProfile(450, shaderc_profile_core);
   CompileOptions cloned_options(options_);
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kCoreVertShaderWithoutVersion,
-                                 shaderc_glsl_vertex_shader,
-                                 "shader" /*input_file_name*/, cloned_options));
+                                 shaderc_glsl_vertex_shader, cloned_options));
 }
 
 TEST_F(CppInterface, ForcedVersionProfileInvalidModule) {
@@ -535,8 +522,7 @@ TEST_P(ValidShaderKind, ValidSpvCode) {
   const ShaderKindTestCase& test_case = GetParam();
   shaderc::Compiler compiler;
   EXPECT_TRUE(CompilesToValidSpv(compiler, test_case.shader_,
-                                 test_case.shader_kind_,
-                                 "shader" /*input_file_name*/));
+                                 test_case.shader_kind_));
 }
 
 INSTANTIATE_TEST_CASE_P(
@@ -573,8 +559,7 @@ TEST_P(InvalidShaderKind, CompilationShouldFail) {
   const ShaderKindTestCase& test_case = GetParam();
   shaderc::Compiler compiler;
   EXPECT_FALSE(CompilesToValidSpv(compiler, test_case.shader_,
-                                  test_case.shader_kind_,
-                                  "shader" /*input_file_name*/));
+                                  test_case.shader_kind_));
 }
 
 INSTANTIATE_TEST_CASE_P(
