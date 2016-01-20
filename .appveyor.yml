@@ -21,7 +21,7 @@ branches:
 
 # scripts that are called at very beginning, before repo cloning
 init:
-  - ps: (new-object net.webclient).DownloadFile('https://raw.github.com/pypa/pip/master/contrib/get-pip.py', 'C:/get-pip.py')
+  - ps: (new-object net.webclient).DownloadFile('https://bootstrap.pypa.io/get-pip.py', 'C:/get-pip.py')
   - "%PYTHON_PATH%/python.exe C:/get-pip.py"
   - "%PYTHON_PACKAGE_PATH%/pip.exe install nose"
 
