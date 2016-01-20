@@ -69,6 +69,20 @@ const char kTwoWarningsShader[] =
     "attribute float y;\n"
     "void main(){}\n";
 
+// A shader that compiles under OpenGL compatibility profile rules,
+// but not OpenGL core profile rules.
+const char kOpenGLCompatibilityFragmentShader[] =
+    R"(#version 100
+     uniform highp sampler2D tex;
+     void main() {
+       gl_FragColor = texture2D(tex, vec2(0.0,0.0));
+     })";
+
+// A shader that compiles under OpenGL core profile rules.
+const char kOpenGLVertexShader[] =
+    R"(#version 150
+       void main() { int t = gl_VertexID; })";
+
 TEST(Init, MultipleCalls) {
   shaderc_compiler_t compiler1, compiler2, compiler3;
   EXPECT_NE(nullptr, compiler1 = shaderc_compiler_initialize());
@@ -725,30 +739,72 @@ TEST_F(CompileStringWithOptionsTest, IfDefCompileOption) {
                                  shaderc_glsl_vertex_shader, options_.get()));
 }
 
-TEST_F(CompileStringWithOptionsTest, TargetEnv) {
-  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  // Confirm that this shader compiles with shaderc_target_env_opengl_compat;
-  // if targeting Vulkan, glslang will fail to compile it
-  const std::string kGlslShader =
-      R"(#version 100
-       uniform highp sampler2D tex;
-       void main() {
-         gl_FragColor = texture2D(tex, vec2(0.0,0.0));
-       }
-  )";
+TEST_F(CompileStringWithOptionsTest,
+       TargetEnvRespectedWhenCompilingOpenGLCompatibilityShaderToBinary) {
+  // Confirm that kOpenGLCompatibilityFragmentShader compiles with
+  // shaderc_target_env_opengl_compat.  When targeting OpenGL core profile
+  // or Vulkan, it should fail to compile.
 
-  EXPECT_FALSE(CompilesToValidSpv(kGlslShader, shaderc_glsl_fragment_shader,
+  EXPECT_FALSE(CompilesToValidSpv(kOpenGLCompatibilityFragmentShader,
+                                  shaderc_glsl_fragment_shader,
                                   options_.get()));
 
   shaderc_compile_options_set_target_env(options_.get(),
                                          shaderc_target_env_opengl_compat, 0);
-  EXPECT_TRUE(CompilesToValidSpv(kGlslShader, shaderc_glsl_fragment_shader,
-                                 options_.get()));
+  EXPECT_TRUE(CompilesToValidSpv(kOpenGLCompatibilityFragmentShader,
+                                 shaderc_glsl_fragment_shader, options_.get()));
+
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_opengl, 0);
+  EXPECT_FALSE(CompilesToValidSpv(kOpenGLCompatibilityFragmentShader,
+                                  shaderc_glsl_fragment_shader,
+                                  options_.get()));
 
   shaderc_compile_options_set_target_env(options_.get(),
                                          shaderc_target_env_vulkan, 0);
-  EXPECT_FALSE(CompilesToValidSpv(kGlslShader, shaderc_glsl_fragment_shader,
+  EXPECT_FALSE(CompilesToValidSpv(kOpenGLCompatibilityFragmentShader,
+                                  shaderc_glsl_fragment_shader,
                                   options_.get()));
+}
+
+TEST_F(CompileStringWithOptionsTest,
+       TargetEnvRespectedWhenCompilingOpenGLCoreShaderToBinary) {
+  // Confirm that kOpenGLVertexShader compiles when targeting OpenGL
+  // compatibility or core profiles.
+
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_opengl_compat, 0);
+  EXPECT_TRUE(CompilesToValidSpv(kOpenGLVertexShader,
+                                 shaderc_glsl_vertex_shader, options_.get()));
+
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_opengl, 0);
+  EXPECT_TRUE(CompilesToValidSpv(kOpenGLVertexShader,
+                                 shaderc_glsl_vertex_shader, options_.get()));
+
+  // TODO(dneto): Check what happens when targeting Vulkan.
+}
+
+TEST_F(CompileStringWithOptionsTest, TargetEnvIgnoredWhenPreprocessing) {
+  shaderc_compile_options_set_preprocessing_only_mode(options_.get());
+
+  EXPECT_TRUE(CompilationSuccess(kOpenGLCompatibilityFragmentShader,
+                                 shaderc_glsl_fragment_shader, options_.get()));
+
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_opengl_compat, 0);
+  EXPECT_TRUE(CompilationSuccess(kOpenGLCompatibilityFragmentShader,
+                                 shaderc_glsl_fragment_shader, options_.get()));
+
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_opengl, 0);
+  EXPECT_TRUE(CompilationSuccess(kOpenGLCompatibilityFragmentShader,
+                                 shaderc_glsl_fragment_shader, options_.get()));
+
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_vulkan, 0);
+  EXPECT_TRUE(CompilationSuccess(kOpenGLCompatibilityFragmentShader,
+                                 shaderc_glsl_fragment_shader, options_.get()));
 }
 
 TEST_F(CompileStringTest, ShaderKindRespected) {
