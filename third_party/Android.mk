@@ -9,6 +9,7 @@ LOCAL_CXXFLAGS:=-std=c++11 $(GLSLANG_OS_FLAGS)
 LOCAL_EXPORT_C_INCLUDES:=$(GLSLANG_LOCAL_PATH)
 LOCAL_SRC_FILES:= \
 	SPIRV/GlslangToSpv.cpp \
+	SPIRV/InReadableOrder.cpp \
 	SPIRV/SpvBuilder.cpp \
 	SPIRV/SPVRemapper.cpp \
 	SPIRV/doc.cpp \
