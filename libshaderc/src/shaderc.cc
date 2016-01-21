@@ -107,8 +107,8 @@ std::mutex compile_mutex;  // Guards shaderc_compile_*.
 // case.
 class StageDeducer {
  public:
-  StageDeducer() : kind_(shaderc_glsl_infer_from_source){};
-  StageDeducer(shaderc_shader_kind kind) : kind_(kind){};
+  StageDeducer() : kind_(shaderc_glsl_infer_from_source), error_(false){};
+  StageDeducer(shaderc_shader_kind kind) : kind_(kind), error_(false){};
   // The method that underlying glslang will call to determine the shader stage
   // to be used in current compilation. It is called only when there is neither
   // forced shader kind (or say stage, in the view of glslang), nor #pragma
@@ -116,15 +116,17 @@ class StageDeducer {
   // 'default' shader kind to the corresponding shader stage. As this is the
   // last trial to determine the shader stage, failing to find the corresponding
   // shader stage will cause an error.
-  EShLanguage operator()(std::ostream* error_stream,
-                         const shaderc_util::string_piece& error_tag) const {
+  EShLanguage operator()(std::ostream* /*error_stream*/,
+                         const shaderc_util::string_piece& /*error_tag*/) {
     EShLanguage stage = GetDefaultStage(kind_);
     if (stage == EShLangCount) {
-      *error_stream << "error: '" << error_tag
-                    << "' could not determine the shader stage" << std::endl;
+      error_ = true;
     }
     return stage;
   };
+
+  // Returns true if there is error during shader stage deduction.
+  bool error() const { return error_; }
 
  private:
   // Gets the corresponding shader stage for a given 'default' shader kind. All
@@ -157,6 +159,7 @@ class StageDeducer {
   }
 
   shaderc_shader_kind kind_;
+  bool error_;
 };
 
 class InternalFileIncluder : public shaderc_util::CountingIncluder {
@@ -361,10 +364,10 @@ shaderc_spv_module_t shaderc_compile_into_spv(
     EShLanguage forced_stage = GetForcedStage(shader_kind);
     shaderc_util::string_piece source_string =
         shaderc_util::string_piece(source_text, source_text + source_text_size);
+    StageDeducer stage_deducer(shader_kind);
     if (additional_options) {
       result->compilation_succeeded = additional_options->compiler.Compile(
-          source_string, forced_stage, input_file_name_str,
-          StageDeducer(shader_kind),
+          source_string, forced_stage, input_file_name_str, stage_deducer,
           InternalFileIncluder(additional_options->get_includer_response,
                                additional_options->release_includer_response,
                                additional_options->includer_user_data),
@@ -372,14 +375,21 @@ shaderc_spv_module_t shaderc_compile_into_spv(
     } else {
       // Compile with default options.
       result->compilation_succeeded = shaderc_util::Compiler().Compile(
-          source_string, forced_stage, input_file_name_str,
-          StageDeducer(shader_kind), InternalFileIncluder(), &output, &errors,
-          &total_warnings, &total_errors);
+          source_string, forced_stage, input_file_name_str, stage_deducer,
+          InternalFileIncluder(), &output, &errors, &total_warnings,
+          &total_errors);
     }
     result->messages = errors.str();
     result->spirv = output.str();
     result->num_warnings = total_warnings;
     result->num_errors = total_errors;
+    if (!result->compilation_succeeded) {
+      // Check whether the error is caused by failing to deduce the shader
+      // stage. If it is the case, set the error type to shader kind error.
+      // Otherwise, set it to compilation error.
+      result->error_type = stage_deducer.error() ? shaderc_shader_kind_error
+                                                 : shaderc_compilation_error;
+    }
   }
   CATCH_IF_EXCEPTIONS_ENABLED(...) { result->compilation_succeeded = false; }
   return result;

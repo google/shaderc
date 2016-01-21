@@ -63,6 +63,15 @@ typedef enum {
   shaderc_profile_es,
 } shaderc_profile;
 
+// Used in result module (shaderc_spv_module) to tell the type of errors
+// generated during compilation.
+typedef enum {
+  shaderc_none_error,
+  shaderc_shader_kind_error,  // errors due to failure in shader stage
+                              // deduction.
+  shaderc_compilation_error,
+} shaderc_error_type;
+
 // Usage examples:
 //
 // Aggressively release compiler resources, but spend time in initialization
