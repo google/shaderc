@@ -60,7 +60,11 @@ before_script:
 script:
   - mkdir build && cd build
   - cmake -GNinja -DCMAKE_BUILD_TYPE=${SHADERC_BUILD_TYPE} -DENABLE_CODE_COVERAGE=${SHADERC_CODE_COVERAGE} ..
-  - ninja && ctest -j`nproc` --output-on-failure
+    # Sometimes g++-4.9 flakes with an internal compiler error.
+    # This may result from out-of-memory scenarios when expanding many templates.
+    # If we fail the build the first time, then try to continue in single-process mode.
+  - ninja || ninja -j 1
+  - ctest -j`nproc` --output-on-failure
 
 after_success:
   # Collect coverage and push to coveralls.info.
