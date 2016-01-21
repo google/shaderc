@@ -66,7 +66,7 @@ typedef enum {
 // Used in the result module (shaderc_spv_module) to tell the type of errors
 // generated during compilation.
 typedef enum {
-  shaderc_compilation_result_success,
+  shaderc_compilation_result_success = 0,
   shaderc_compilation_result_failed_invalid_stage,  // error in the deduction of shader stage
   shaderc_compilation_result_compilation_failed,
   shaderc_compilation_result_null_result_module,
