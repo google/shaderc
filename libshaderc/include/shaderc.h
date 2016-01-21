@@ -292,6 +292,10 @@ size_t shaderc_module_get_num_warnings(const shaderc_spv_module_t module);
 // Returns the number of errors generated during the compilation.
 size_t shaderc_module_get_num_errors(const shaderc_spv_module_t module);
 
+// Returns the type of the generated compilation errors. Returns
+// shaderc_none_error if there isn't error or result module doesn't exist.
+shaderc_error_type shaderc_module_get_error_type(const shaderc_spv_module_t);
+
 // Returns a pointer to the start of the SPIR-V bytes, either SPIR-V binary or
 // char string. When the source string is compiled into SPIR-V binary, this is
 // guaranteed to be castable to a uint32_t*. If the source string is compiled in

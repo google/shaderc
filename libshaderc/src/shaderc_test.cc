@@ -223,6 +223,53 @@ TEST_F(CompileStringTest, WorksWithCompileOptions) {
                                  shaderc_glsl_vertex_shader, options_.get()));
 }
 
+TEST_F(CompileStringTest, GetNumErrors) {
+  Compilation comp(compiler_.get_compiler_handle(), kTwoErrorsShader,
+                   shaderc_glsl_vertex_shader, "shader");
+  // Expects compilation failure and two errors.
+  EXPECT_FALSE(shaderc_module_get_success(comp.result()));
+  EXPECT_EQ(2u, shaderc_module_get_num_errors(comp.result()));
+  // Expects the number of warnings to be zero.
+  EXPECT_EQ(0u, shaderc_module_get_num_warnings(comp.result()));
+}
+
+TEST_F(CompileStringTest, GetNumWarnings) {
+  Compilation comp(compiler_.get_compiler_handle(), kTwoWarningsShader,
+                   shaderc_glsl_vertex_shader, "shader");
+  // Expects compilation success with two warnings.
+  EXPECT_TRUE(shaderc_module_get_success(comp.result()));
+  EXPECT_EQ(2u, shaderc_module_get_num_warnings(comp.result()));
+  // Expects the number of errors to be zero.
+  EXPECT_EQ(0u, shaderc_module_get_num_errors(comp.result()));
+}
+
+TEST_F(CompileStringTest, ZeroErrorsZeroWarnings) {
+  Compilation comp(compiler_.get_compiler_handle(), kMinimalShader,
+                   shaderc_glsl_vertex_shader, "shader");
+  // Expects compilation success with zero warnings.
+  EXPECT_TRUE(shaderc_module_get_success(comp.result()));
+  EXPECT_EQ(0u, shaderc_module_get_num_warnings(comp.result()));
+  // Expects the number of errors to be zero.
+  EXPECT_EQ(0u, shaderc_module_get_num_errors(comp.result()));
+}
+
+TEST_F(CompileStringTest, ErrorTypeShaderStageDeductionError) {
+  // The shader kind/stage can not be determined, the error type field should
+  // indicate the error type is shaderc_shader_kind_error.
+  Compilation comp(compiler_.get_compiler_handle(), kMinimalShader,
+                   shaderc_glsl_infer_from_source, "shader");
+  EXPECT_EQ(shaderc_shader_kind_error,
+            shaderc_module_get_error_type(comp.result()));
+}
+TEST_F(CompileStringTest, ErrorTypeCompilationError) {
+  // The shader kind is valid, the result module's error type field should
+  // indicate this compilaion fails due to compilation errors.
+  Compilation comp(compiler_.get_compiler_handle(), kTwoErrorsShader,
+                   shaderc_glsl_vertex_shader, "shader");
+  EXPECT_EQ(shaderc_compilation_error,
+            shaderc_module_get_error_type(comp.result()));
+}
+
 TEST_F(CompileStringWithOptionsTest, CloneCompilerOptions) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   compile_options_ptr options_(shaderc_compile_options_initialize());
@@ -398,38 +445,6 @@ TEST_F(CompileStringWithOptionsTest, GenerateDebugInfoDisassembly) {
   EXPECT_THAT(CompilationOutput(kMinimalDebugInfoShader,
                                 shaderc_glsl_vertex_shader, options_.get()),
               HasSubstr("debug_info_sample"));
-}
-
-TEST_F(CompileStringWithOptionsTest, GetNumErrors) {
-  Compilation comp(compiler_.get_compiler_handle(), kTwoErrorsShader,
-                   shaderc_glsl_vertex_shader, "shader",
-                   options_.get());
-  // Expects compilation failure and two errors.
-  EXPECT_FALSE(shaderc_module_get_success(comp.result()));
-  EXPECT_EQ(2u, shaderc_module_get_num_errors(comp.result()));
-  // Expects the number of warnings to be zero.
-  EXPECT_EQ(0u, shaderc_module_get_num_warnings(comp.result()));
-}
-
-TEST_F(CompileStringWithOptionsTest, GetNumWarnings) {
-  Compilation comp(compiler_.get_compiler_handle(), kTwoWarningsShader,
-                   shaderc_glsl_vertex_shader, "shader",
-                   options_.get());
-  // Expects compilation success with two warnings.
-  EXPECT_TRUE(shaderc_module_get_success(comp.result()));
-  EXPECT_EQ(2u, shaderc_module_get_num_warnings(comp.result()));
-  // Expects the number of errors to be zero.
-  EXPECT_EQ(0u, shaderc_module_get_num_errors(comp.result()));
-}
-
-TEST_F(CompileStringWithOptionsTest, ZeroErrorsZeroWarnings) {
-  Compilation comp(compiler_.get_compiler_handle(), kMinimalShader,
-                   shaderc_glsl_vertex_shader, "shader");
-  // Expects compilation success with zero warnings.
-  EXPECT_TRUE(shaderc_module_get_success(comp.result()));
-  EXPECT_EQ(0u, shaderc_module_get_num_warnings(comp.result()));
-  // Expects the number of errors to be zero.
-  EXPECT_EQ(0u, shaderc_module_get_num_errors(comp.result()));
 }
 
 TEST_F(CompileStringWithOptionsTest, PreprocessingOnlyOption) {

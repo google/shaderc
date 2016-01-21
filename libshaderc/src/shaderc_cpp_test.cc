@@ -437,6 +437,23 @@ TEST_F(CppInterface, ZeroErrorsZeroWarnings) {
   EXPECT_EQ(0u, module.GetNumWarnings());
 }
 
+TEST_F(CppInterface, ErrorTypeShaderStageDeductionError) {
+  // The shader kind/stage can not be determined, the error type field should
+  // indicate the error type is shaderc_shader_kind_error.
+  const shaderc::SpvModule module =
+      compiler_.CompileGlslToSpv(kMinimalShader, strlen(kMinimalShader),
+                                 shaderc_glsl_infer_from_source, "shader");
+  EXPECT_EQ(shaderc_shader_kind_error, module.GetErrorType());
+}
+
+TEST_F(CppInterface, ErrorTypeCompilationError) {
+  // The shader kind is valid, the result module's error type field should
+  // indicate this compilaion fails due to compilation errors.
+  const shaderc::SpvModule module = compiler_.CompileGlslToSpv(
+      kTwoErrorsShader, shaderc_glsl_vertex_shader, "shader");
+  EXPECT_EQ(shaderc_compilation_error, module.GetErrorType());
+}
+
 TEST_F(CppInterface, ErrorTagIsInputFileName) {
   std::string shader(kTwoErrorsShader);
   const shaderc::SpvModule module =

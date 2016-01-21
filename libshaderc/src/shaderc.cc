@@ -367,7 +367,11 @@ shaderc_spv_module_t shaderc_compile_into_spv(
     StageDeducer stage_deducer(shader_kind);
     if (additional_options) {
       result->compilation_succeeded = additional_options->compiler.Compile(
-          source_string, forced_stage, input_file_name_str, stage_deducer,
+          source_string, forced_stage, input_file_name_str,
+          // stage_deducer has a flag: error_, which we need to check later.
+          // We need to make this a reference wrapper, so that std::function
+          // won't make a copy for this callable object.
+          std::ref(stage_deducer),
           InternalFileIncluder(additional_options->get_includer_response,
                                additional_options->release_includer_response,
                                additional_options->includer_user_data),
@@ -375,9 +379,9 @@ shaderc_spv_module_t shaderc_compile_into_spv(
     } else {
       // Compile with default options.
       result->compilation_succeeded = shaderc_util::Compiler().Compile(
-          source_string, forced_stage, input_file_name_str, stage_deducer,
-          InternalFileIncluder(), &output, &errors, &total_warnings,
-          &total_errors);
+          source_string, forced_stage, input_file_name_str,
+          std::ref(stage_deducer), InternalFileIncluder(), &output, &errors,
+          &total_warnings, &total_errors);
     }
     result->messages = errors.str();
     result->spirv = output.str();
@@ -420,6 +424,11 @@ void shaderc_module_release(shaderc_spv_module_t module) { delete module; }
 const char* shaderc_module_get_error_message(
     const shaderc_spv_module_t module) {
   return module->messages.c_str();
+}
+
+shaderc_error_type shaderc_module_get_error_type(
+    const shaderc_spv_module_t module) {
+  return module->error_type;
 }
 
 void shaderc_get_spv_version(unsigned int* version, unsigned int* revision) {

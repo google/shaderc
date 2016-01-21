@@ -49,6 +49,15 @@ class SpvModule {
     return shaderc_module_get_error_message(module_);
   }
 
+  // Returns the type of the generated compilation errors. Returns
+  // shaderc_none_error if there isn't error or result module doesn't exist.
+  shaderc_error_type GetErrorType() const {
+    if (!module_) {
+      return shaderc_none_error;
+    }
+    return shaderc_module_get_error_type(module_);
+  }
+
   // Returns a pointer to the start of the compiled SPIR-V.
   // It is guaranteed that static_cast<uint32_t> is valid to call on this
   // pointer.
