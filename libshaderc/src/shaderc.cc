@@ -391,16 +391,15 @@ shaderc_spv_module_t shaderc_compile_into_spv(
       // Check whether the error is caused by failing to deduce the shader
       // stage. If it is the case, set the error type to shader kind error.
       // Otherwise, set it to compilation error.
-      result->error_type = stage_deducer.error() ? shaderc_shader_kind_error
-                                                 : shaderc_compilation_error;
+      result->compilation_result = stage_deducer.error()
+                               ? shaderc_compilation_result_failed_invalid_stage
+                               : shaderc_compilation_result_compilation_failed;
+    } else {
+      result->compilation_result = shaderc_compilation_result_success;
     }
   }
   CATCH_IF_EXCEPTIONS_ENABLED(...) { result->compilation_succeeded = false; }
   return result;
-}
-
-bool shaderc_module_get_success(const shaderc_spv_module_t module) {
-  return module->compilation_succeeded;
 }
 
 size_t shaderc_module_get_length(const shaderc_spv_module_t module) {
@@ -426,9 +425,9 @@ const char* shaderc_module_get_error_message(
   return module->messages.c_str();
 }
 
-shaderc_error_type shaderc_module_get_error_type(
+shaderc_compilation_result shaderc_module_get_compilation_result(
     const shaderc_spv_module_t module) {
-  return module->error_type;
+  return module->compilation_result;
 }
 
 void shaderc_get_spv_version(unsigned int* version, unsigned int* revision) {

@@ -66,10 +66,11 @@ typedef enum {
 // Used in the result module (shaderc_spv_module) to tell the type of errors
 // generated during compilation.
 typedef enum {
-  shaderc_none_error,
-  shaderc_shader_kind_error,  // error in the deduction of shader stage
-  shaderc_compilation_error,
-} shaderc_error_type;
+  shaderc_compilation_result_success,
+  shaderc_compilation_result_failed_invalid_stage,  // error in the deduction of shader stage
+  shaderc_compilation_result_compilation_failed,
+  shaderc_compilation_result_null_result_module,
+} shaderc_compilation_result;
 
 // Usage examples:
 //
@@ -291,9 +292,11 @@ size_t shaderc_module_get_num_warnings(const shaderc_spv_module_t module);
 // Returns the number of errors generated during the compilation.
 size_t shaderc_module_get_num_errors(const shaderc_spv_module_t module);
 
-// Returns the type of the errors of one compilation. Returns shaderc_none_error
-// if there isn't any error.
-shaderc_error_type shaderc_module_get_error_type(const shaderc_spv_module_t);
+// Returns the compilation result, indicating whether the compilation succeeded,
+// or failed due to some reasons, like invalid shader stage or compilation
+// errors.
+shaderc_compilation_result shaderc_module_get_compilation_result(
+    const shaderc_spv_module_t);
 
 // Returns a pointer to the start of the SPIR-V bytes, either SPIR-V binary or
 // char string. When the source string is compiled into SPIR-V binary, this is

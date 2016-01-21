@@ -33,8 +33,8 @@ struct shaderc_spv_module {
   size_t num_errors = 0;
   // Number of warnings.
   size_t num_warnings = 0;
-  // Error type.
-  shaderc_error_type error_type = shaderc_none_error;
+  // Compilation result.
+  shaderc_compilation_result compilation_result;
 };
 
 struct shaderc_compiler {
