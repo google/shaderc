@@ -6,5 +6,5 @@ void android_main(struct android_app* state) {
   shaderc::Compiler compiler;
   const char* test_program = "void main() {}";
   compiler.CompileGlslToSpv(test_program, strlen(test_program),
-                            shaderc_glsl_vertex_shader);
+                            shaderc_glsl_vertex_shader, "shader");
 }
