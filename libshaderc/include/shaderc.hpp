@@ -299,7 +299,7 @@ class Compiler {
   }
 
   // Compiles the given source GLSL into a SPIR-V module by invoking
-  // CompileGlslToSpv(const char*, size_t, shaderc_shader_kind);
+  // CompileGlslToSpv(const char*, size_t, shaderc_shader_kind, const char*);
   SpvModule CompileGlslToSpv(const std::string& source_text,
                              shaderc_shader_kind shader_kind,
                              const char* input_file_name) const {
@@ -308,7 +308,8 @@ class Compiler {
   }
 
   // Compiles the given source GLSL into a SPIR-V module by invoking
-  // CompileGlslToSpv(const char*, size_t, shaderc_shader_kind, options);
+  // CompileGlslToSpv(const char*, size_t, shaderc_shader_kind, const char*,
+  // options);
   SpvModule CompileGlslToSpv(const std::string& source_text,
                              shaderc_shader_kind shader_kind,
                              const char* input_file_name,
