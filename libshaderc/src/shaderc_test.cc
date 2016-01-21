@@ -101,6 +101,13 @@ class Compiler {
   shaderc_compiler_t compiler;
 };
 
+// Helper function to check if the compilation result indicates a successful
+// compilation.
+bool CompilationResultIsSuccess(const shaderc_spv_module_t result_module) {
+  return shaderc_module_get_compilation_status(result_module) ==
+         shaderc_compilation_status_success;
+}
+
 // Compiles a shader and returns true if the result is valid SPIR-V.
 bool CompilesToValidSpv(Compiler& compiler, const std::string& shader,
                         shaderc_shader_kind kind,
@@ -108,7 +115,7 @@ bool CompilesToValidSpv(Compiler& compiler, const std::string& shader,
   const Compilation comp(compiler.get_compiler_handle(), shader, kind, "shader",
                          options);
   auto result = comp.result();
-  if (!shaderc_module_get_success(result)) return false;
+  if (!CompilationResultIsSuccess(result)) return false;
   size_t length = shaderc_module_get_length(result);
   if (length < 20) return false;
   const uint32_t* bytes = static_cast<const uint32_t*>(
@@ -126,7 +133,7 @@ class CompileStringTest : public testing::Test {
   // Compiles a shader and returns true on success, false on failure.
   bool CompilationSuccess(const std::string& shader, shaderc_shader_kind kind,
                           shaderc_compile_options_t options = nullptr) {
-    return shaderc_module_get_success(
+    return CompilationResultIsSuccess(
         Compilation(compiler_.get_compiler_handle(), shader, kind,
                     "shader", options)
             .result());
@@ -139,7 +146,7 @@ class CompileStringTest : public testing::Test {
       const shaderc_compile_options_t options = nullptr) {
     const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
                            "shader", options);
-    EXPECT_TRUE(shaderc_module_get_success(comp.result())) << kind << '\n'
+    EXPECT_TRUE(CompilationResultIsSuccess(comp.result())) << kind << '\n'
                                                            << shader;
     return shaderc_module_get_error_message(comp.result());
   };
@@ -151,7 +158,7 @@ class CompileStringTest : public testing::Test {
       const shaderc_compile_options_t options = nullptr) {
     const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
                            "shader", options);
-    EXPECT_FALSE(shaderc_module_get_success(comp.result())) << kind << '\n'
+    EXPECT_FALSE(CompilationResultIsSuccess(comp.result())) << kind << '\n'
                                                             << shader;
     return shaderc_module_get_error_message(comp.result());
   };
@@ -163,7 +170,7 @@ class CompileStringTest : public testing::Test {
       const shaderc_compile_options_t options = nullptr) {
     const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
                            "shader", options);
-    EXPECT_TRUE(shaderc_module_get_success(comp.result())) << kind << '\n'
+    EXPECT_TRUE(CompilationResultIsSuccess(comp.result())) << kind << '\n'
                                                            << shader;
     // Use string(const char* s, size_t n) constructor instead of
     // string(const char* s) to make sure the string has complete binary data.
@@ -221,6 +228,53 @@ TEST_F(CompileStringTest, WorksWithCompileOptions) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
                                  shaderc_glsl_vertex_shader, options_.get()));
+}
+
+TEST_F(CompileStringTest, GetNumErrors) {
+  Compilation comp(compiler_.get_compiler_handle(), kTwoErrorsShader,
+                   shaderc_glsl_vertex_shader, "shader");
+  // Expects compilation failure and two errors.
+  EXPECT_FALSE(CompilationResultIsSuccess(comp.result()));
+  EXPECT_EQ(2u, shaderc_module_get_num_errors(comp.result()));
+  // Expects the number of warnings to be zero.
+  EXPECT_EQ(0u, shaderc_module_get_num_warnings(comp.result()));
+}
+
+TEST_F(CompileStringTest, GetNumWarnings) {
+  Compilation comp(compiler_.get_compiler_handle(), kTwoWarningsShader,
+                   shaderc_glsl_vertex_shader, "shader");
+  // Expects compilation success with two warnings.
+  EXPECT_TRUE(CompilationResultIsSuccess(comp.result()));
+  EXPECT_EQ(2u, shaderc_module_get_num_warnings(comp.result()));
+  // Expects the number of errors to be zero.
+  EXPECT_EQ(0u, shaderc_module_get_num_errors(comp.result()));
+}
+
+TEST_F(CompileStringTest, ZeroErrorsZeroWarnings) {
+  Compilation comp(compiler_.get_compiler_handle(), kMinimalShader,
+                   shaderc_glsl_vertex_shader, "shader");
+  // Expects compilation success with zero warnings.
+  EXPECT_TRUE(CompilationResultIsSuccess(comp.result()));
+  EXPECT_EQ(0u, shaderc_module_get_num_warnings(comp.result()));
+  // Expects the number of errors to be zero.
+  EXPECT_EQ(0u, shaderc_module_get_num_errors(comp.result()));
+}
+
+TEST_F(CompileStringTest, ErrorTypeUnknownShaderStage) {
+  // The shader kind/stage can not be determined, the error type field should
+  // indicate the error type is shaderc_shader_kind_error.
+  Compilation comp(compiler_.get_compiler_handle(), kMinimalShader,
+                   shaderc_glsl_infer_from_source, "shader");
+  EXPECT_EQ(shaderc_compilation_status_invalid_stage,
+            shaderc_module_get_compilation_status(comp.result()));
+}
+TEST_F(CompileStringTest, ErrorTypeCompilationError) {
+  // The shader kind is valid, the result module's error type field should
+  // indicate this compilaion fails due to compilation errors.
+  Compilation comp(compiler_.get_compiler_handle(), kTwoErrorsShader,
+                   shaderc_glsl_vertex_shader, "shader");
+  EXPECT_EQ(shaderc_compilation_status_compilation_error,
+            shaderc_module_get_compilation_status(comp.result()));
 }
 
 TEST_F(CompileStringWithOptionsTest, CloneCompilerOptions) {
@@ -398,38 +452,6 @@ TEST_F(CompileStringWithOptionsTest, GenerateDebugInfoDisassembly) {
   EXPECT_THAT(CompilationOutput(kMinimalDebugInfoShader,
                                 shaderc_glsl_vertex_shader, options_.get()),
               HasSubstr("debug_info_sample"));
-}
-
-TEST_F(CompileStringWithOptionsTest, GetNumErrors) {
-  Compilation comp(compiler_.get_compiler_handle(), kTwoErrorsShader,
-                   shaderc_glsl_vertex_shader, "shader",
-                   options_.get());
-  // Expects compilation failure and two errors.
-  EXPECT_FALSE(shaderc_module_get_success(comp.result()));
-  EXPECT_EQ(2u, shaderc_module_get_num_errors(comp.result()));
-  // Expects the number of warnings to be zero.
-  EXPECT_EQ(0u, shaderc_module_get_num_warnings(comp.result()));
-}
-
-TEST_F(CompileStringWithOptionsTest, GetNumWarnings) {
-  Compilation comp(compiler_.get_compiler_handle(), kTwoWarningsShader,
-                   shaderc_glsl_vertex_shader, "shader",
-                   options_.get());
-  // Expects compilation success with two warnings.
-  EXPECT_TRUE(shaderc_module_get_success(comp.result()));
-  EXPECT_EQ(2u, shaderc_module_get_num_warnings(comp.result()));
-  // Expects the number of errors to be zero.
-  EXPECT_EQ(0u, shaderc_module_get_num_errors(comp.result()));
-}
-
-TEST_F(CompileStringWithOptionsTest, ZeroErrorsZeroWarnings) {
-  Compilation comp(compiler_.get_compiler_handle(), kMinimalShader,
-                   shaderc_glsl_vertex_shader, "shader");
-  // Expects compilation success with zero warnings.
-  EXPECT_TRUE(shaderc_module_get_success(comp.result()));
-  EXPECT_EQ(0u, shaderc_module_get_num_warnings(comp.result()));
-  // Expects the number of errors to be zero.
-  EXPECT_EQ(0u, shaderc_module_get_num_errors(comp.result()));
 }
 
 TEST_F(CompileStringWithOptionsTest, PreprocessingOnlyOption) {

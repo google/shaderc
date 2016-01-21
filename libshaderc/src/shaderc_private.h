@@ -23,8 +23,6 @@
 
 // Described in shaderc.h.
 struct shaderc_spv_module {
-  // Whether compilation succeeded.
-  bool compilation_succeeded;
   // SPIR-V binary.
   std::string spirv;
   // Compilation messages.
@@ -33,6 +31,9 @@ struct shaderc_spv_module {
   size_t num_errors = 0;
   // Number of warnings.
   size_t num_warnings = 0;
+  // Compilation status.
+  shaderc_compilation_status compilation_status =
+      shaderc_compilation_status_null_result_module;
 };
 
 struct shaderc_compiler {

@@ -36,17 +36,22 @@ class SpvModule {
     other.module_ = nullptr;
   }
 
-  // Returns true if the module was successfully compiled.
-  bool GetSuccess() const {
-    return module_ && shaderc_module_get_success(module_);
-  }
-
   // Returns any error message found during compilation.
   std::string GetErrorMessage() const {
     if (!module_) {
       return "";
     }
     return shaderc_module_get_error_message(module_);
+  }
+
+  // Returns the compilation status, indicating whether the compilation
+  // succeeded, or failed due to some reasons, like invalid shader stage or
+  // compilation errors.
+  shaderc_compilation_status GetCompilationStatus() const {
+    if (!module_) {
+      return shaderc_compilation_status_null_result_module;
+    }
+    return shaderc_module_get_compilation_status(module_);
   }
 
   // Returns a pointer to the start of the compiled SPIR-V.
