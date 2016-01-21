@@ -128,7 +128,7 @@ class CompileStringTest : public testing::Test {
                           shaderc_compile_options_t options = nullptr) {
     return shaderc_module_get_success(
         Compilation(compiler_.get_compiler_handle(), shader, kind,
-                    "shader" /*input_file_name*/, options)
+                    "shader", options)
             .result());
   }
 
@@ -138,7 +138,7 @@ class CompileStringTest : public testing::Test {
       const std::string& shader, shaderc_shader_kind kind,
       const shaderc_compile_options_t options = nullptr) {
     const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
-                           "shader" /*input_file_name*/, options);
+                           "shader", options);
     EXPECT_TRUE(shaderc_module_get_success(comp.result())) << kind << '\n'
                                                            << shader;
     return shaderc_module_get_error_message(comp.result());
@@ -150,7 +150,7 @@ class CompileStringTest : public testing::Test {
       const std::string& shader, shaderc_shader_kind kind,
       const shaderc_compile_options_t options = nullptr) {
     const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
-                           "shader" /*input_file_name*/, options);
+                           "shader", options);
     EXPECT_FALSE(shaderc_module_get_success(comp.result())) << kind << '\n'
                                                             << shader;
     return shaderc_module_get_error_message(comp.result());
@@ -162,7 +162,7 @@ class CompileStringTest : public testing::Test {
       const std::string& shader, shaderc_shader_kind kind,
       const shaderc_compile_options_t options = nullptr) {
     const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
-                           "shader" /*input_file_name*/, options);
+                           "shader", options);
     EXPECT_TRUE(shaderc_module_get_success(comp.result())) << kind << '\n'
                                                            << shader;
     // Use string(const char* s, size_t n) constructor instead of
