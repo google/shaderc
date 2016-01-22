@@ -452,6 +452,19 @@ bool shaderc_parse_version_profile(const char* str, int* version,
       std::string(str, strlen(str)), version, &glslang_profile);
   if (!success) return false;
 
-
-
+  switch (glslang_profile) {
+    case EEsProfile:
+      *profile = shaderc_profile_es;
+      return true;
+    case ECoreProfile:
+      *profile = shaderc_profile_core;
+      return true;
+    case ECompatibilityProfile:
+      *profile = shaderc_profile_compatibility;
+    case ENoProfile:
+      *profile = shaderc_profile_none;
+      return true;
+    case EBadProfile:
+      return false;
+  }
 }

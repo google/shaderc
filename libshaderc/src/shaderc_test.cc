@@ -956,4 +956,48 @@ TEST_F(CompileKindsTest, TessEvaluation) {
                                  shaderc_glsl_tess_evaluation_shader));
 }
 
+// A test case for ParseVersionProfileTest needs: 1) the input string, 2)
+// expected parsing results, including 'succeed' flag, version value, and
+// profile enum.
+struct ParseVersionProfileTestCase {
+  std::string str;
+  bool expected_succeed;
+  int expected_version;
+  shaderc_profile expected_profile;
+};
+
+// Test for a helper function to parse version and profile from string.
+using ParseVersionProfileTest =
+    testing::TestWithParam<ParseVersionProfileTestCase>;
+
+TEST_P(ParseVersionProfileTest, FromNullTerminatedString) {
+  const ParseVersionProfileTestCase& test_case = GetParam();
+  int version;
+  shaderc_profile profile;
+  bool succeed =
+      shaderc_parse_version_profile(test_case.str.c_str(), &version, &profile);
+  EXPECT_EQ(test_case.expected_succeed, succeed);
+  // check the return version and profile only when the parsing succeeds.
+  if (succeed) {
+    EXPECT_EQ(test_case.expected_version, version);
+    EXPECT_EQ(test_case.expected_profile, profile);
+  }
+}
+
+INSTANTIATE_TEST_CASE_P(
+    HelperMethods, ParseVersionProfileTest,
+    testing::ValuesIn(std::vector<ParseVersionProfileTestCase>{
+        // Valid version profiles
+        {"450core", true, 450, shaderc_profile_core},
+        {"310es", true, 310, shaderc_profile_es},
+        {"100", true, 100, shaderc_profile_none},
+
+        // Invalid version profiles, the expected_version and expected_profile
+        // can be random value as they won't be checked if the tests pass
+        // correctly.
+        {"totally_wrong", false, 0, shaderc_profile_none},
+        {"111core", false, 0, shaderc_profile_none},
+        {"450wrongprofile", false, 0, shaderc_profile_none},
+    }));
+
 }  // anonymous namespace
