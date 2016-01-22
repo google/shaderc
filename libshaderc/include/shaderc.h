@@ -312,6 +312,13 @@ const char* shaderc_module_get_error_message(const shaderc_spv_module_t module);
 // Provides the version & revision of the SPIR-V which will be produced
 void shaderc_get_spv_version(unsigned int* version, unsigned int* revision);
 
+// Parses the version and profile from a given string containing both
+// version and profile, like: '450core'. Returns false if the string can
+// not be parsed. Returns true when the parsing succeeds. The parsed version
+// and profile are returned through arguments.
+bool shaderc_parse_version_profile(const char* str, int* version,
+                                   shaderc_profile* profile);
+
 #ifdef __cplusplus
 }
 #endif  // __cplusplus

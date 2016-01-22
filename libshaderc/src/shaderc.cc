@@ -25,6 +25,7 @@
 
 #include "libshaderc_util/compiler.h"
 #include "libshaderc_util/resources.h"
+#include "libshaderc_util/version_profile.h"
 
 #if (defined(_MSC_VER) && !defined(_CPPUNWIND)) || !defined(__EXCEPTIONS)
 #define TRY_IF_EXCEPTIONS_ENABLED
@@ -442,4 +443,33 @@ shaderc_compilation_status shaderc_module_get_compilation_status(
 void shaderc_get_spv_version(unsigned int* version, unsigned int* revision) {
   *version = spv::Version;
   *revision = spv::Revision;
+}
+
+bool shaderc_parse_version_profile(const char* str, int* version,
+                                   shaderc_profile* profile) {
+  EProfile glslang_profile;
+  bool success = shaderc_util::ParseVersionProfile(
+      std::string(str, strlen(str)), version, &glslang_profile);
+  if (!success) return false;
+
+  switch (glslang_profile) {
+    case EEsProfile:
+      *profile = shaderc_profile_es;
+      return true;
+    case ECoreProfile:
+      *profile = shaderc_profile_core;
+      return true;
+    case ECompatibilityProfile:
+      *profile = shaderc_profile_compatibility;
+      return true;
+    case ENoProfile:
+      *profile = shaderc_profile_none;
+      return true;
+    case EBadProfile:
+      return false;
+  }
+
+  // Shouldn't reach here, all profile enum should be handled above.
+  // Be strict to return false.
+  return false;
 }
