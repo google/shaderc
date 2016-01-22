@@ -1007,6 +1007,7 @@ INSTANTIATE_TEST_CASE_P(
         ParseVersionProfileTestCase("totally_wrong", false),
         ParseVersionProfileTestCase("111core", false),
         ParseVersionProfileTestCase("450wrongprofile", false),
+        ParseVersionProfileTestCase("", false),
     }));
 
 }  // anonymous namespace
