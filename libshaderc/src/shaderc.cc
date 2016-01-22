@@ -468,4 +468,8 @@ bool shaderc_parse_version_profile(const char* str, int* version,
     case EBadProfile:
       return false;
   }
+
+  // Shouldn't reach here, all profile enum should be handled above.
+  // Be strict to return false.
+  return false;
 }
