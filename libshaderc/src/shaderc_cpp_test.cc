@@ -32,8 +32,8 @@ using testing::HasSubstr;
 // Helper function to check if the compilation result indicates a successful
 // compilation.
 bool CompilationResultIsSuccess(const shaderc::SpvModule& result_module) {
-  return result_module.GetCompilationResult() ==
-         shaderc_compilation_result_success;
+  return result_module.GetCompilationStatus() ==
+         shaderc_compilation_status_success;
 }
 
 // Examine whether a SPIR-V result module has valid SPIR-V code, by checking the
@@ -72,7 +72,7 @@ class CppInterface : public testing::Test {
                           shaderc_shader_kind kind) const {
     return compiler_
         .CompileGlslToSpv(shader.c_str(), shader.length(), kind, "shader")
-        .GetCompilationResult() == shaderc_compilation_result_success;
+        .GetCompilationStatus() == shaderc_compilation_status_success;
   }
 
   // Compiles a shader with options and returns true on success, false on
@@ -83,7 +83,7 @@ class CppInterface : public testing::Test {
     return compiler_
         .CompileGlslToSpv(shader.c_str(), shader.length(), kind, "shader",
                           options)
-        .GetCompilationResult() == shaderc_compilation_result_success;
+        .GetCompilationStatus() == shaderc_compilation_status_success;
   }
 
   // Compiles a shader, asserts compilation success, and returns the warning
@@ -450,8 +450,8 @@ TEST_F(CppInterface, ErrorTypeUnknownShaderStage) {
   const shaderc::SpvModule module =
       compiler_.CompileGlslToSpv(kMinimalShader, strlen(kMinimalShader),
                                  shaderc_glsl_infer_from_source, "shader");
-  EXPECT_EQ(shaderc_compilation_result_failed_invalid_stage,
-            module.GetCompilationResult());
+  EXPECT_EQ(shaderc_compilation_status_invalid_stage,
+            module.GetCompilationStatus());
 }
 
 TEST_F(CppInterface, ErrorTypeCompilationError) {
@@ -459,8 +459,8 @@ TEST_F(CppInterface, ErrorTypeCompilationError) {
   // indicate this compilaion fails due to compilation errors.
   const shaderc::SpvModule module = compiler_.CompileGlslToSpv(
       kTwoErrorsShader, shaderc_glsl_vertex_shader, "shader");
-  EXPECT_EQ(shaderc_compilation_result_compilation_failed,
-            module.GetCompilationResult());
+  EXPECT_EQ(shaderc_compilation_status_compilation_error,
+            module.GetCompilationStatus());
 }
 
 TEST_F(CppInterface, ErrorTagIsInputFileName) {

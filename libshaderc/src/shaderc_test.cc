@@ -104,8 +104,8 @@ class Compiler {
 // Helper function to check if the compilation result indicates a successful
 // compilation.
 bool CompilationResultIsSuccess(const shaderc_spv_module_t result_module) {
-  return shaderc_module_get_compilation_result(result_module) ==
-         shaderc_compilation_result_success;
+  return shaderc_module_get_compilation_status(result_module) ==
+         shaderc_compilation_status_success;
 }
 
 // Compiles a shader and returns true if the result is valid SPIR-V.
@@ -265,16 +265,16 @@ TEST_F(CompileStringTest, ErrorTypeUnknownShaderStage) {
   // indicate the error type is shaderc_shader_kind_error.
   Compilation comp(compiler_.get_compiler_handle(), kMinimalShader,
                    shaderc_glsl_infer_from_source, "shader");
-  EXPECT_EQ(shaderc_compilation_result_failed_invalid_stage,
-            shaderc_module_get_compilation_result(comp.result()));
+  EXPECT_EQ(shaderc_compilation_status_invalid_stage,
+            shaderc_module_get_compilation_status(comp.result()));
 }
 TEST_F(CompileStringTest, ErrorTypeCompilationError) {
   // The shader kind is valid, the result module's error type field should
   // indicate this compilaion fails due to compilation errors.
   Compilation comp(compiler_.get_compiler_handle(), kTwoErrorsShader,
                    shaderc_glsl_vertex_shader, "shader");
-  EXPECT_EQ(shaderc_compilation_result_compilation_failed,
-            shaderc_module_get_compilation_result(comp.result()));
+  EXPECT_EQ(shaderc_compilation_status_compilation_error,
+            shaderc_module_get_compilation_status(comp.result()));
 }
 
 TEST_F(CompileStringWithOptionsTest, CloneCompilerOptions) {
