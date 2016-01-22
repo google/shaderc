@@ -67,8 +67,9 @@ typedef enum {
 // compilation.
 typedef enum {
   shaderc_compilation_status_success = 0,
-  shaderc_compilation_status_invalid_stage,  // error in the deduction of shader stage
+  shaderc_compilation_status_invalid_stage,  // error stage deduction
   shaderc_compilation_status_compilation_error,
+  shaderc_compilation_status_internal_error, //unexpected failure
   shaderc_compilation_status_null_result_module,
 } shaderc_compilation_status;
 

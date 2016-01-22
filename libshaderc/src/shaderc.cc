@@ -407,7 +407,7 @@ shaderc_spv_module_t shaderc_compile_into_spv(
     }
   }
   CATCH_IF_EXCEPTIONS_ENABLED(...) {
-    result->compilation_status = shaderc_compilation_status_compilation_error;
+    result->compilation_status = shaderc_compilation_status_internal_error;
   }
   return result;
 }
