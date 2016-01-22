@@ -960,10 +960,18 @@ TEST_F(CompileKindsTest, TessEvaluation) {
 // expected parsing results, including 'succeed' flag, version value, and
 // profile enum.
 struct ParseVersionProfileTestCase {
-  std::string str;
-  bool expected_succeed;
-  int expected_version;
-  shaderc_profile expected_profile;
+  ParseVersionProfileTestCase(
+      const std::string& input_string, bool expected_succeed,
+      int expected_version = 0,
+      shaderc_profile expected_profile = shaderc_profile_none)
+      : input_string_(input_string),
+        expected_succeed_(expected_succeed),
+        expected_version_(expected_version),
+        expected_profile_(expected_profile) {}
+  std::string input_string_;
+  bool expected_succeed_;
+  int expected_version_;
+  shaderc_profile expected_profile_;
 };
 
 // Test for a helper function to parse version and profile from string.
@@ -975,12 +983,12 @@ TEST_P(ParseVersionProfileTest, FromNullTerminatedString) {
   int version;
   shaderc_profile profile;
   bool succeed =
-      shaderc_parse_version_profile(test_case.str.c_str(), &version, &profile);
-  EXPECT_EQ(test_case.expected_succeed, succeed);
+      shaderc_parse_version_profile(test_case.input_string_.c_str(), &version, &profile);
+  EXPECT_EQ(test_case.expected_succeed_, succeed);
   // check the return version and profile only when the parsing succeeds.
   if (succeed) {
-    EXPECT_EQ(test_case.expected_version, version);
-    EXPECT_EQ(test_case.expected_profile, profile);
+    EXPECT_EQ(test_case.expected_version_, version);
+    EXPECT_EQ(test_case.expected_profile_, profile);
   }
 }
 
@@ -988,16 +996,17 @@ INSTANTIATE_TEST_CASE_P(
     HelperMethods, ParseVersionProfileTest,
     testing::ValuesIn(std::vector<ParseVersionProfileTestCase>{
         // Valid version profiles
-        {"450core", true, 450, shaderc_profile_core},
-        {"310es", true, 310, shaderc_profile_es},
-        {"100", true, 100, shaderc_profile_none},
+        ParseVersionProfileTestCase("450core", true, 450, shaderc_profile_core),
+        ParseVersionProfileTestCase("450compatibility", true, 450,
+                                    shaderc_profile_compatibility),
+        ParseVersionProfileTestCase("310es", true, 310, shaderc_profile_es),
+        ParseVersionProfileTestCase("100", true, 100, shaderc_profile_none),
 
         // Invalid version profiles, the expected_version and expected_profile
-        // can be random value as they won't be checked if the tests pass
-        // correctly.
-        {"totally_wrong", false, 0, shaderc_profile_none},
-        {"111core", false, 0, shaderc_profile_none},
-        {"450wrongprofile", false, 0, shaderc_profile_none},
+        // doesn't matter as they won't be checked if the tests pass correctly.
+        ParseVersionProfileTestCase("totally_wrong", false),
+        ParseVersionProfileTestCase("111core", false),
+        ParseVersionProfileTestCase("450wrongprofile", false),
     }));
 
 }  // anonymous namespace

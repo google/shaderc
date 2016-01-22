@@ -461,6 +461,7 @@ bool shaderc_parse_version_profile(const char* str, int* version,
       return true;
     case ECompatibilityProfile:
       *profile = shaderc_profile_compatibility;
+      return true;
     case ENoProfile:
       *profile = shaderc_profile_none;
       return true;
