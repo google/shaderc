@@ -64,37 +64,4 @@ TEST(DeduceDefaultShaderKindFromFileName, InvalidKinds) {
             glslc::DeduceDefaultShaderKindFromFileName("no-file-extension"));
 }
 
-// TEST(StageDeducer, InvalidStages) {
-// std::stringstream error_stream;
-
-// EXPECT_EQ(EShLangCount, glslc::StageDeducer("a.glsl")(&error_stream, "tag"));
-// EXPECT_EQ(
-// "glslc: error: 'a.glsl': .glsl file encountered but no"
-// " -fshader-stage specified ahead\n",
-// error_stream.str());
-// error_stream.str("");
-
-// EXPECT_EQ(EShLangCount, glslc::StageDeducer("-")(&error_stream, "tag"));
-// EXPECT_EQ(
-// "glslc: error: '-': -fshader-stage required when input is from"
-// " standard input \"-\"\n",
-// error_stream.str());
-// error_stream.str("");
-
-// EXPECT_EQ(EShLangCount, glslc::StageDeducer("a.foo")(&error_stream, "tag"));
-// EXPECT_EQ(
-// "glslc: error: 'a.foo': file not recognized: File format not"
-// " recognized\n",
-// error_stream.str());
-// error_stream.str("");
-
-// EXPECT_EQ(EShLangCount,
-// glslc::StageDeducer("no-file-extension")(&error_stream, "tag"));
-// EXPECT_EQ(
-// "glslc: error: 'no-file-extension': file not recognized: File format not"
-// " recognized\n",
-// error_stream.str());
-// error_stream.str("");
-// }
-
 }  // anonymous namespace

@@ -39,8 +39,8 @@ shaderc_includer_response* FileIncluder::GetInclude(const char* filename) {
 }
 
 void FileIncluder::ReleaseInclude(shaderc_includer_response* data) {
-  // In the first implementation, we don't need to use data, as we cache only
-  // one latest response data. All we need to do is resetting the cached
+  // In this first draft, we don't need to use data argument, as we cache only
+  // the latest response data. All we need to do is resetting the cached
   // response data to null.
   (void)data;
 
