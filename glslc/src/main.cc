@@ -106,6 +106,7 @@ int main(int argc, char** argv) {
   // null-terminated string, we need to 'pull out' and copy the macro names and
   // hold their data here.
   std::vector<std::string> macro_names;
+  std::vector<std::string> macro_values;
 
   compiler.AddIncludeDirectory("");
 
@@ -213,12 +214,14 @@ int main(int argc, char** argv) {
         // 'value' if we don't insert '\0'.
 
         macro_names.emplace_back(std::string(name_piece.data(), name_length));
+        macro_values.emplace_back(
+            std::string(name_length < argument_length
+                            ? argument.substr(name_length + 1).data()
+                            : ""));
         const char* name = macro_names.back().c_str();
+        const char* value = macro_values.back().c_str();
         // TODO(deki): check arg for newlines.
-        compiler.AddMacroDefinition(
-            name, name_length < argument_length
-                      ? argument.substr(name_length + 1).data()
-                      : "");
+        compiler.AddMacroDefinition(name, value);
       }
     } else if (arg.starts_with("-I")) {
       string_piece option_arg;
