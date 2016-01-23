@@ -190,6 +190,7 @@ int main(int argc, char** argv) {
                                  ? equal_sign_loc
                                  : arg.size() - strlen("-D");
         const string_piece name_piece = argument.substr(0, name_length);
+        size_t argument_length = argument.size() - (argument.back() == '=' ? 1 : 0);
         if (name_piece.starts_with("GL_")) {
           std::cerr
               << "glslc: error: names beginning with 'GL_' cannot be defined: "
@@ -215,7 +216,7 @@ int main(int argc, char** argv) {
         const char* name = macro_names.back().c_str();
         // TODO(deki): check arg for newlines.
         compiler.AddMacroDefinition(
-            name, name_length < argument.size()
+            name, name_length < argument_length
                       ? argument.substr(name_length + 1).data()
                       : "");
       }
