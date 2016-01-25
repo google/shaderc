@@ -139,7 +139,7 @@ int main(int argc, char** argv) {
     } else if (arg.starts_with("-fshader-stage=")) {
       const string_piece stage = arg.substr(std::strlen("-fshader-stage="));
       // forced_shader_kind can be 1) one of the forced shader kinds, which
-      // means following files will be compiler with the specified shader
+      // means following files will be compiled with the specified shader
       // kind; 2) shaderc_glsl_infer_from_source, which means 'arg' doesn't
       // specify a valid shader kind, an error should be emitted for this.
       forced_shader_kind = glslc::GetForcedShaderKindFromCmdLine(arg);
