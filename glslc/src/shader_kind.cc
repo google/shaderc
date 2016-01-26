@@ -53,7 +53,8 @@ shaderc_shader_kind GetForcedShaderKindFromCmdLine(
   return MapStageNameToForcedKind(f_shader_stage.substr(equal_pos + 1));
 }
 
-shaderc_shader_kind DeduceDefaultShaderKindFromFileName(string_piece file_name) {
+shaderc_shader_kind DeduceDefaultShaderKindFromFileName(
+    const string_piece file_name) {
   // Add new stage types here.
   static const KindMapping kStringToStage[] = {
       {"vert", shaderc_glsl_default_vertex_shader},

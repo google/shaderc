@@ -30,9 +30,9 @@ class FileCompiler : public shaderc::Compiler {
   FileCompiler() : needs_linking_(true), total_warnings_(0), total_errors_(0) {}
 
   // Compiles a shader received in input_file, returning true on success and
-  // false otherwise. If force_shader_stage is not EShLangCount then the
-  // given shader_stage will be used, otherwise it will be determined
-  // from the source or the file type.
+  // false otherwise. If force_shader_kind is not shaderc_glsl_infer_source or
+  // any default shader kind then the given shader_stage will be used, otherwise
+  // it will be determined from the source or the file type.
   //
   // Places the compilation output into a new file whose name is derived from
   // input_file according to the rules from glslc/README.asciidoc.
@@ -72,40 +72,40 @@ class FileCompiler : public shaderc::Compiler {
   void SetIndividualCompilationMode();
 
   // Instead of outputting object files, output the disassembled textual output.
-  virtual void SetDisassemblyMode();
+  void SetDisassemblyMode();
 
   // Delegates CompilerOptions to add macro definiations.
-  virtual void AddMacroDefinition(const char* name, const char* value) {
+  void AddMacroDefinition(const char* name, const char* value) {
     options_.AddMacroDefinition(name, value);
   };
 
   // Delegates CompilerOptions to add macro definiations.
-  virtual void AddMacroDefinition(const std::string& name) {
+  void AddMacroDefinition(const std::string& name) {
     options_.AddMacroDefinition(name);
   };
 
   // Delegates CompilerOptions to specify forced version and profile.
-  virtual void SetForcedVersionProfile(int version, shaderc_profile profile) {
+  void SetForcedVersionProfile(int version, shaderc_profile profile) {
     options_.SetForcedVersionProfile(version, profile);
   };
 
   // Delegates CompilerOptions to turn on debug information generation.
-  virtual void SetGenerateDebugInfo() {
+  void SetGenerateDebugInfo() {
     options_.SetGenerateDebugInfo();
   };
 
   // Delegates CompilerOptions to set suppressing warning mode.
-  virtual void SetSuppressWarnings() {
+  void SetSuppressWarnings() {
     options_.SetSuppressWarnings();
   };
 
   // Delegates CompilerOptions to make all warnings being treated as errors.
-  virtual void SetWarningsAsErrors() {
+  void SetWarningsAsErrors() {
     options_.SetWarningsAsErrors();
   };
 
   // Instead of outputting object files, output the preprocessed source files.
-  virtual void SetPreprocessingOnlyMode();
+  void SetPreprocessingOnlyMode();
 
  private:
   // Delegates the compiler options
