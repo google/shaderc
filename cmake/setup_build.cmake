@@ -1,11 +1,11 @@
-# Find nosetests; see add_nosetests() from utils.cmake for opting in to
+# Find nosetests; see shaderc_add_nosetests() from utils.cmake for opting in to
 # nosetests in a specific directory.
 find_program(NOSETESTS_EXE NAMES nosetests PATHS $ENV{PYTHON_PACKAGE_PATH})
 if (NOT NOSETESTS_EXE)
   message(STATUS "nosetests was not found - python code will not be tested")
 endif()
 
-# Find asciidoctor; see add_asciidoc() from utils.cmake for
+# Find asciidoctor; see shaderc_add_asciidoc() from utils.cmake for
 # adding documents.
 find_program(ASCIIDOCTOR_EXE NAMES asciidoctor)
 if (NOT ASCIIDOCTOR_EXE)

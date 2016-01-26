@@ -1,13 +1,13 @@
 # utility functions
 
-function (use_gmock TARGET)
+function (shaderc_use_gmock TARGET)
   target_include_directories(${TARGET} PRIVATE
     ${gmock_SOURCE_DIR}/include
     ${gtest_SOURCE_DIR}/include)
   target_link_libraries(${TARGET} PRIVATE gmock gtest_main)
-endfunction(use_gmock)
+endfunction(shaderc_use_gmock)
 
-function(default_compile_options TARGET)
+function(shaderc_default_compile_options TARGET)
   if (NOT "${MSVC}")
     target_compile_options(${TARGET} PRIVATE -std=c++11 -fPIC -Wall -Werror)
     if (ENABLE_CODE_COVERAGE)
@@ -24,11 +24,11 @@ function(default_compile_options TARGET)
     # (performance warning)
     target_compile_options(${TARGET} PRIVATE /wd4800)
   endif()
-endfunction(default_compile_options)
+endfunction(shaderc_default_compile_options)
 
 # Build an asciidoc file; additional arguments past the base filename specify
 # additional dependencies for the file.
-function(add_asciidoc TARGET FILE)
+function(shaderc_add_asciidoc TARGET FILE)
   if (ASCIIDOCTOR_EXE)
     set(DEST ${CMAKE_CURRENT_BINARY_DIR}/${FILE}.html)
     add_custom_command(
@@ -43,7 +43,7 @@ endfunction()
 # Run nosetests on file ${PREFIX}_nosetest.py. Nosetests will look for classes
 # and functions whose names start with "nosetest". The test name will be
 # ${PREFIX}_nosetests.
-function(add_nosetests PREFIX)
+function(shaderc_add_nosetests PREFIX)
   if(NOSETESTS_EXE)
     add_test(
       NAME ${PREFIX}_nosetests
@@ -60,7 +60,7 @@ endfunction()
 # LINK_LIBS:    (optional) a list of libraries to be linked to the test target
 # INCLUDE_DIRS: (optional) a list of include directories to be searched
 #               for header files.
-function(add_shaderc_tests)
+function(shaderc_add_tests)
   cmake_parse_arguments(PARSED_ARGS
     ""
     "TEST_PREFIX"
@@ -75,7 +75,7 @@ function(add_shaderc_tests)
   foreach(TARGET ${PARSED_ARGS_TEST_NAMES})
     set(TEST_NAME ${PARSED_ARGS_TEST_PREFIX}_${TARGET}_test)
     add_executable(${TEST_NAME} src/${TARGET}_test.cc)
-    default_compile_options(${TEST_NAME})
+    shaderc_default_compile_options(${TEST_NAME})
     if (PARSED_ARGS_LINK_LIBS)
       target_link_libraries(${TEST_NAME} PRIVATE
         ${PARSED_ARGS_LINK_LIBS})
@@ -84,17 +84,17 @@ function(add_shaderc_tests)
       target_include_directories(${TEST_NAME} PRIVATE
         ${PARSED_ARGS_INCLUDE_DIRS})
     endif()
-    use_gmock(${TEST_NAME})
+    shaderc_use_gmock(${TEST_NAME})
     add_test(
       NAME ${PARSED_ARGS_TEST_PREFIX}_${TARGET}
       COMMAND ${TEST_NAME})
   endforeach()
-endfunction(add_shaderc_tests)
+endfunction(shaderc_add_tests)
 
 # Finds all transitive static library dependencies of a given target.
 # This will skip libraries that were statically linked that were not
 # built by CMake, for example -lpthread.
-macro(get_transitive_libs target out_list)
+macro(shaderc_get_transitive_libs target out_list)
   if (TARGET ${target})
     get_target_property(libtype ${target} TYPE)
     # If this target is a static library, get anything it depends on.
@@ -102,7 +102,7 @@ macro(get_transitive_libs target out_list)
       get_target_property(libs ${target} LINK_LIBRARIES)
       if (libs)
         foreach(lib ${libs})
-          get_transitive_libs(${lib} ${out_list})
+          shaderc_get_transitive_libs(${lib} ${out_list})
         endforeach()
       endif()
     endif()
@@ -118,13 +118,13 @@ endmacro()
 
 # Combines the static library "target" with all of its transitive static library
 # dependencies into a single static library "new_target".
-function(combine_static_lib new_target target)
+function(shaderc_combine_static_lib new_target target)
   if ("${MSVC}")
     message(FATAL_ERROR "MSVC does not yet support merging static libraries")
   endif()
 
   set(all_libs "")
-  get_transitive_libs(${target} all_libs)
+  shaderc_get_transitive_libs(${target} all_libs)
 
   if(APPLE)
     string(REPLACE ";" " " all_libs_string "${all_libs}")

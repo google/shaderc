@@ -19,7 +19,7 @@ add_library(shaderc_util STATIC
   src/version_profile.cc
 )
 
-default_compile_options(shaderc_util)
+shaderc_default_compile_options(shaderc_util)
 target_include_directories(shaderc_util
   PUBLIC include PRIVATE ${glslang_SOURCE_DIR})
 find_package(Threads)
@@ -27,7 +27,7 @@ target_link_libraries(shaderc_util PRIVATE
   glslang OSDependent OGLCompiler glslang SPIRV
   SPIRV-Tools ${CMAKE_THREAD_LIBS_INIT})
 
-add_shaderc_tests(
+shaderc_add_tests(
   TEST_PREFIX shaderc_util
   LINK_LIBS shaderc_util
   TEST_NAMES
@@ -41,7 +41,7 @@ add_shaderc_tests(
 target_include_directories(shaderc_util_counting_includer_test
   PRIVATE ${glslang_SOURCE_DIR})
 
-add_shaderc_tests(
+shaderc_add_tests(
   TEST_PREFIX shaderc_util
   LINK_LIBS shaderc_util
   INCLUDE_DIRS ${glslang_SOURCE_DIR}
