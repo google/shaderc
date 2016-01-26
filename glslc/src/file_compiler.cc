@@ -146,8 +146,7 @@ void FileCompiler::SetPreprocessingOnlyFlags() {
   }
 }
 
-bool FileCompiler::ValidateOptions(
-    size_t num_files) {
+bool FileCompiler::ValidateOptions(size_t num_files) {
   if (num_files == 0) {
     std::cerr << "glslc: error: no input files" << std::endl;
     return false;

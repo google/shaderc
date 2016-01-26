@@ -31,7 +31,7 @@ class FileCompiler {
 
   // Compiles a shader received in input_file, returning true on success and
   // false otherwise. If force_shader_stage is not shaderc_glsl_infer_source or
-  // any default shader kind then the given shader_stage will be used, otherwise
+  // any default shader stage then the given shader_stage will be used, otherwise
   // it will be determined from the source or the file type.
   //
   // Places the compilation output into a new file whose name is derived from
@@ -67,17 +67,28 @@ class FileCompiler {
   // Outputs to std::cerr the number of warnings and errors if there are any.
   void OutputMessages();
 
-  // When any files are to be compiled, they are compiled individually and
-  // written to separate output files instead of linked together.
+  // Sets the flag to indicate individual compilation mode. In this mode, all
+  // files are compiled individually and written to separate output files
+  // instead of linked together. This method also sets the needs_linking_ flags
+  // to false and the file_extension to ".spv". Disassembly mode and preprocessing
+  // only mode override this mode and flags.
   void SetIndividualCompilationFlags();
 
-  // Instead of outputting object files, output the disassembled textual output.
+  // Sets the flag to indicate disassembly mode. In this mode, the compiler
+  // emits disassembled textual output, instead of outputting object files.
+  // This method also sets the file_extension to ".s" and needs_linking_ flag to
+  // false. This mode overrides individual compilation mode, and preprocessing
+  // only mode overrides this mode.
   void SetDisassemblyFlags();
 
-  // Instead of outputting object files, output the preprocessed source files.
+  // Sets the flag to indicate preprocessing only mode. In this mode, instead of
+  // outputting object files, the compiler emits the preprocessed source files.
+  // This method also sets the needs_linking_ flag to false and set the output
+  // file to stdout. This mode overrides disassembly mode and individual
+  // compilation mode.
   void SetPreprocessingOnlyFlags();
 
-  // Get the reference of the compiler options which reflects the command-line
+  // Gets the reference of the compiler options which reflects the command-line
   // arguments.
   shaderc::CompileOptions& options() {return options_;};
 
