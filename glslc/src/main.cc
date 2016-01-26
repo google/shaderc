@@ -213,15 +213,13 @@ int main(int argc, char** argv) {
         // libshaderc api doesn't know that so the macro 'name' will include the
         // 'value' if we don't insert '\0'.
 
-        macro_names.emplace_back(std::string(name_piece.data(), name_length));
-        macro_values.emplace_back(
-            std::string(name_length < argument_length
-                            ? argument.substr(name_length + 1).data()
-                            : ""));
-        const char* name = macro_names.back().c_str();
-        const char* value = macro_values.back().c_str();
+        macro_names.emplace_back(name_piece.data(), name_length);
+        macro_values.emplace_back(name_length < argument_length
+                                      ? argument.substr(name_length + 1).data()
+                                      : "");
         // TODO(deki): check arg for newlines.
-        compiler.AddMacroDefinition(name, value);
+        compiler.AddMacroDefinition(macro_names.back().c_str(),
+                                    macro_values.back().c_str());
       }
     } else if (arg.starts_with("-I")) {
       string_piece option_arg;
