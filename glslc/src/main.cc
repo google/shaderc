@@ -191,7 +191,7 @@ int main(int argc, char** argv) {
         size_t equal_sign_loc = argument.find_first_of('=');
         size_t name_length = equal_sign_loc != shaderc_util::string_piece::npos
                                  ? equal_sign_loc
-                                 : arg.size() - strlen("-D");
+                                 : (arg.size() - strlen("-D"));
         const string_piece name_piece = argument.substr(0, name_length);
         size_t argument_length = argument.size() - (argument.back() == '=' ? 1 : 0);
         if (name_piece.starts_with("GL_")) {
@@ -221,7 +221,7 @@ int main(int argc, char** argv) {
                                       : "");
         // TODO(deki): check arg for newlines.
         compiler.options().AddMacroDefinition(macro_names.back().c_str(),
-                                    macro_values.back().c_str());
+                                              macro_values.back().c_str());
       }
     } else if (arg.starts_with("-I")) {
       string_piece option_arg;
