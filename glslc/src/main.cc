@@ -25,7 +25,7 @@
 
 #include "file_compiler.h"
 #include "file.h"
-#include "shader_kind.h"
+#include "shader_stage.h"
 
 using shaderc_util::string_piece;
 
@@ -98,7 +98,7 @@ bool GetOptionArgument(int argc, char** argv, int* index,
 
 int main(int argc, char** argv) {
   std::vector<std::pair<std::string, shaderc_shader_kind>> input_files;
-  shaderc_shader_kind forced_shader_kind = shaderc_glsl_infer_from_source;
+  shaderc_shader_kind forced_shader_stage = shaderc_glsl_infer_from_source;
   glslc::FileCompiler compiler;
   bool success = true;
   bool has_stdin_input = false;
@@ -138,12 +138,12 @@ int main(int argc, char** argv) {
       compiler.SetWorkingDirectory(workdir.str());
     } else if (arg.starts_with("-fshader-stage=")) {
       const string_piece stage = arg.substr(std::strlen("-fshader-stage="));
-      // forced_shader_kind can be 1) one of the forced shader kinds, which
+      // forced_shader_stage can be 1) one of the forced shader kinds, which
       // means following files will be compiled with the specified shader
       // kind; 2) shaderc_glsl_infer_from_source, which means 'arg' doesn't
       // specify a valid shader kind, an error should be emitted for this.
-      forced_shader_kind = glslc::GetForcedShaderKindFromCmdLine(arg);
-      if (forced_shader_kind == shaderc_glsl_infer_from_source) {
+      forced_shader_stage = glslc::GetForcedShaderKindFromCmdLine(arg);
+      if (forced_shader_stage == shaderc_glsl_infer_from_source) {
         std::cerr << "glslc: error: stage not recognized: '" << stage << "'"
                   << std::endl;
         return 1;
@@ -152,13 +152,13 @@ int main(int argc, char** argv) {
       const string_piece standard = arg.substr(std::strlen("-std="));
       int version;
       shaderc_profile profile;
-      if (!shaderc_parse_version_profile(standard.str().c_str(), &version,
+      if (!shaderc_parse_version_profile(standard.begin(), &version,
                                          &profile)) {
         std::cerr << "glslc: error: invalid value '" << standard
                   << "' in '-std=" << standard << "'" << std::endl;
         return 1;
       }
-      compiler.SetForcedVersionProfile(version, profile);
+      compiler.options().SetForcedVersionProfile(version, profile);
     } else if (arg.starts_with("-x")) {
       string_piece option_arg;
       if (!GetOptionArgument(argc, argv, &i, "-x", &option_arg)) {
@@ -174,11 +174,13 @@ int main(int argc, char** argv) {
         }
       }
     } else if (arg == "-c") {
-      compiler.SetIndividualCompilationMode();
+      compiler.SetIndividualCompilationFlags();
     } else if (arg == "-E") {
-      compiler.SetPreprocessingOnlyMode();
+      compiler.options().SetPreprocessingOnlyMode();
+      compiler.SetPreprocessingOnlyFlags();
     } else if (arg == "-S") {
-      compiler.SetDisassemblyMode();
+      compiler.options().SetDisassemblyMode();
+      compiler.SetDisassemblyFlags();
     } else if (arg.starts_with("-D")) {
       const size_t length = arg.size();
       if (length <= 2) {
@@ -218,7 +220,7 @@ int main(int argc, char** argv) {
                                       ? argument.substr(name_length + 1).data()
                                       : "");
         // TODO(deki): check arg for newlines.
-        compiler.AddMacroDefinition(macro_names.back().c_str(),
+        compiler.options().AddMacroDefinition(macro_names.back().c_str(),
                                     macro_values.back().c_str());
       }
     } else if (arg.starts_with("-I")) {
@@ -232,11 +234,11 @@ int main(int argc, char** argv) {
         compiler.AddIncludeDirectory(option_arg.str());
       }
     } else if (arg == "-g") {
-      compiler.SetGenerateDebugInfo();
+      compiler.options().SetGenerateDebugInfo();
     } else if (arg == "-w") {
-      compiler.SetSuppressWarnings();
+      compiler.options().SetSuppressWarnings();
     } else if (arg == "-Werror") {
-      compiler.SetWarningsAsErrors();
+      compiler.options().SetWarningsAsErrors();
     } else if (!(arg == "-") && arg[0] == '-') {
       std::cerr << "glslc: error: "
                 << (arg[1] == '-' ? "unsupported option" : "unknown argument")
@@ -252,15 +254,15 @@ int main(int argc, char** argv) {
         has_stdin_input = true;
       }
 
-      // If forced_shader_kind is shaderc_glsl_infer_from_source, that means
+      // If forced_shader_stage is shaderc_glsl_infer_from_source, that means
       // we didn't set forced shader kinds (otherwise an error should have
       // already been emitted before). So we should deduce the shader kind
-      // from the file name. If forced_shader_kind is specifed to one of
+      // from the file name. If forced_shader_stage is specifed to one of
       // the forced shader kinds, use that for the following compilation.
       input_files.emplace_back(
-          arg.str(), forced_shader_kind == shaderc_glsl_infer_from_source
+          arg.str(), forced_shader_stage == shaderc_glsl_infer_from_source
                          ? glslc::DeduceDefaultShaderKindFromFileName(arg)
-                         : forced_shader_kind);
+                         : forced_shader_stage );
     }
   }
 
@@ -270,9 +272,9 @@ int main(int argc, char** argv) {
 
   for (const auto& input_file : input_files) {
     const std::string& name = input_file.first;
-    const shaderc_shader_kind kind = input_file.second;
+    const shaderc_shader_kind stage = input_file.second;
 
-    success &= compiler.CompileShaderFile(name, kind);
+    success &= compiler.CompileShaderFile(name, stage);
   }
 
   compiler.OutputMessages();

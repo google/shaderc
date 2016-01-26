@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef GLSLC_SHADER_KIND_H_
-#define GLSLC_SHADER_KIND_H_
+#ifndef GLSLC_SHADER_STAGE_H_
+#define GLSLC_SHADER_STAGE_H_
 
 #include <ostream>
 
@@ -24,11 +24,11 @@ namespace glslc {
 
 // Parse the string piece from command line to get the force shader kind.
 shaderc_shader_kind GetForcedShaderKindFromCmdLine(
-    const shaderc_util::string_piece& f_shader_stage);
+    const shaderc_util::string_piece& f_shader_stage_str);
 
 // Parse the file name extension to get the default shader kind.
 shaderc_shader_kind DeduceDefaultShaderKindFromFileName(
     shaderc_util::string_piece file_name);
 }  // namespace glslc
 
-#endif  // GLSLC_SHADER_KIND_H_
+#endif  // GLSLC_SHADER_STAGE_H_

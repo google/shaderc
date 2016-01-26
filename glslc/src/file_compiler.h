@@ -25,12 +25,12 @@ namespace glslc {
 
 // Context for managing compilation of source GLSL files into destination
 // SPIR-V files.
-class FileCompiler : public shaderc::Compiler {
+class FileCompiler {
  public:
   FileCompiler() : needs_linking_(true), total_warnings_(0), total_errors_(0) {}
 
   // Compiles a shader received in input_file, returning true on success and
-  // false otherwise. If force_shader_kind is not shaderc_glsl_infer_source or
+  // false otherwise. If force_shader_stage is not shaderc_glsl_infer_source or
   // any default shader kind then the given shader_stage will be used, otherwise
   // it will be determined from the source or the file type.
   //
@@ -43,7 +43,7 @@ class FileCompiler : public shaderc::Compiler {
   // Any errors/warnings found in the shader source will be output to std::cerr
   // and increment the counts reported by OutputMessages().
   bool CompileShaderFile(const std::string& input_file,
-                         shaderc_shader_kind shader_kind);
+                         shaderc_shader_kind shader_stage);
 
   // Sets the working directory for the compilation.
   void SetWorkingDirectory(const std::string& dir);
@@ -69,46 +69,24 @@ class FileCompiler : public shaderc::Compiler {
 
   // When any files are to be compiled, they are compiled individually and
   // written to separate output files instead of linked together.
-  void SetIndividualCompilationMode();
+  void SetIndividualCompilationFlags();
 
   // Instead of outputting object files, output the disassembled textual output.
-  void SetDisassemblyMode();
-
-  // Delegates CompilerOptions to add macro definiations.
-  void AddMacroDefinition(const char* name, const char* value) {
-    options_.AddMacroDefinition(name, value);
-  };
-
-  // Delegates CompilerOptions to add macro definiations.
-  void AddMacroDefinition(const std::string& name) {
-    options_.AddMacroDefinition(name);
-  };
-
-  // Delegates CompilerOptions to specify forced version and profile.
-  void SetForcedVersionProfile(int version, shaderc_profile profile) {
-    options_.SetForcedVersionProfile(version, profile);
-  };
-
-  // Delegates CompilerOptions to turn on debug information generation.
-  void SetGenerateDebugInfo() {
-    options_.SetGenerateDebugInfo();
-  };
-
-  // Delegates CompilerOptions to set suppressing warning mode.
-  void SetSuppressWarnings() {
-    options_.SetSuppressWarnings();
-  };
-
-  // Delegates CompilerOptions to make all warnings being treated as errors.
-  void SetWarningsAsErrors() {
-    options_.SetWarningsAsErrors();
-  };
+  void SetDisassemblyFlags();
 
   // Instead of outputting object files, output the preprocessed source files.
-  void SetPreprocessingOnlyMode();
+  void SetPreprocessingOnlyFlags();
+
+  // Get the reference of the compiler options which reflects the command-line
+  // arguments.
+  shaderc::CompileOptions& options() {return options_;};
 
  private:
-  // Delegates the compiler options
+  // Performs actual SPIR-V compilation on the contents of input files.
+  shaderc::Compiler compiler_;
+
+  // Reflects the command-line arguments and goes into
+  // compiler_.CompileGlslToSpv().
   shaderc::CompileOptions options_;
 
   // Returns the name of the output file, given the input_filename string.

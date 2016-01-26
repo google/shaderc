@@ -19,7 +19,7 @@
 
 #include "file.h"
 #include "file_includer.h"
-#include "shader_kind.h"
+#include "shader_stage.h"
 
 #include "libshaderc_util/io.h"
 #include "libshaderc_util/message.h"
@@ -31,7 +31,7 @@ using shaderc_util::string_piece;
 
 namespace glslc {
 bool FileCompiler::CompileShaderFile(const std::string& input_file,
-                                     shaderc_shader_kind shader_kind) {
+                                     shaderc_shader_kind shader_stage) {
   std::vector<char> input_data;
   std::string path = input_file;
   if (!workdir_.empty() && !shaderc_util::IsAbsolutePath(path)) {
@@ -67,12 +67,12 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
   options_.SetIncluder(std::move(includer));
 
   shaderc::SpvModule result =
-      CompileGlslToSpv(source_string.begin(), source_string.size(), shader_kind,
-                       error_file_name.data(), options_);
+      compiler_.CompileGlslToSpv(source_string.begin(), source_string.size(),
+                                 shader_stage, error_file_name.data(), options_);
   total_errors_ += result.GetNumErrors();
   total_warnings_ += result.GetNumWarnings();
 
-  bool compilation_succeeded =
+  bool compilation_success =
       result.GetCompilationStatus() == shaderc_compilation_status_success
           ? true
           : false;
@@ -113,7 +113,7 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
     std::cerr << "\n";
   }
 
-  return compilation_succeeded;
+  return compilation_success;
 }
 
 void FileCompiler::SetWorkingDirectory(const std::string& dir) {
@@ -125,22 +125,20 @@ void FileCompiler::AddIncludeDirectory(const std::string& path) {
   include_file_finder_.search_path().push_back(path);
 }
 
-void FileCompiler::SetIndividualCompilationMode() {
+void FileCompiler::SetIndividualCompilationFlags() {
   if (!disassemble_) {
     needs_linking_ = false;
     file_extension_ = ".spv";
   }
 }
 
-void FileCompiler::SetDisassemblyMode() {
-  options_.SetDisassemblyMode();
+void FileCompiler::SetDisassemblyFlags() {
   disassemble_ = true;
   needs_linking_ = false;
   file_extension_ = ".s";
 }
 
-void FileCompiler::SetPreprocessingOnlyMode() {
-  options_.SetPreprocessingOnlyMode();
+void FileCompiler::SetPreprocessingOnlyFlags() {
   preprocess_only_ = true;
   needs_linking_ = false;
   if (output_file_name_.empty()) {

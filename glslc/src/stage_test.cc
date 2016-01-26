@@ -18,7 +18,7 @@
 // compiler.  It's easier to write these unit tests than to inject
 // a dependency on a fake compiler.
 #include "shaderc.h"
-#include "shader_kind.h"
+#include "shader_stage.h"
 
 #include <sstream>
 
@@ -28,7 +28,7 @@ using shaderc_util::string_piece;
 
 namespace {
 
-TEST(DeduceDefaultShaderKindFromFileName, ValidKinds) {
+TEST(DeduceDefaultShaderKindFromFileName, ValidStage) {
   std::stringstream error_stream;
   EXPECT_EQ(shaderc_glsl_default_vertex_shader,
             glslc::DeduceDefaultShaderKindFromFileName("a.vert"));
@@ -49,7 +49,7 @@ TEST(DeduceDefaultShaderKindFromFileName, ValidKinds) {
             glslc::DeduceDefaultShaderKindFromFileName("a.comp"));
 }
 
-TEST(DeduceDefaultShaderKindFromFileName, InvalidKinds) {
+TEST(DeduceDefaultShaderKindFromFileName, InvalidStage) {
   std::stringstream error_stream;
   EXPECT_EQ(shaderc_glsl_infer_from_source,
             glslc::DeduceDefaultShaderKindFromFileName("a.glsl"));

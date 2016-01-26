@@ -7,8 +7,8 @@ add_library(glslc STATIC
   src/file.h
   src/file_includer.cc
   src/file_includer.h
-  src/shader_kind.cc
-  src/shader_kind.h
+  src/shader_stage.cc
+  src/shader_stage.h
 )
 
 shaderc_default_compile_options(glslc)
@@ -27,8 +27,7 @@ shaderc_add_tests(
   LINK_LIBS glslc shaderc_util shaderc
   TEST_NAMES
     file
-	kind
-    )
+    stage)
 
 shaderc_add_asciidoc(glslc_doc_README README)
 

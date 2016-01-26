@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "shader_kind.h"
+#include "shader_stage.h"
 
 #include "libshaderc_util/resources.h"
 
@@ -22,10 +22,10 @@ using shaderc_util::string_piece;
 
 namespace {
 
-// Maps an identifier to a shader kind.
-struct KindMapping {
+// Maps an identifier to a shader stage.
+struct StageMapping {
   const char* id;
-  shaderc_shader_kind kind;
+  shaderc_shader_kind stage;
 };
 
 }  // anonymous namespace
@@ -33,7 +33,7 @@ struct KindMapping {
 namespace glslc {
 
 shaderc_shader_kind MapStageNameToForcedKind(const string_piece& stage_name) {
-  const KindMapping string_to_kind[] = {
+  const StageMapping string_to_kind[] = {
       {"vertex", shaderc_glsl_vertex_shader},
       {"fragment", shaderc_glsl_fragment_shader},
       {"tesscontrol", shaderc_glsl_tess_control_shader},
@@ -41,22 +41,22 @@ shaderc_shader_kind MapStageNameToForcedKind(const string_piece& stage_name) {
       {"geometry", shaderc_glsl_geometry_shader},
       {"compute", shaderc_glsl_compute_shader}};
   for (const auto& entry : string_to_kind) {
-    if (stage_name == entry.id) return entry.kind;
+    if (stage_name == entry.id) return entry.stage;
   }
   return shaderc_glsl_infer_from_source;
 }
 
 shaderc_shader_kind GetForcedShaderKindFromCmdLine(
-    const shaderc_util::string_piece& f_shader_stage) {
-  size_t equal_pos = f_shader_stage.find_first_of("=");
+    const shaderc_util::string_piece& f_shader_stage_str) {
+  size_t equal_pos = f_shader_stage_str.find_first_of("=");
   if (equal_pos == std::string::npos) return shaderc_glsl_infer_from_source;
-  return MapStageNameToForcedKind(f_shader_stage.substr(equal_pos + 1));
+  return MapStageNameToForcedKind(f_shader_stage_str.substr(equal_pos + 1));
 }
 
 shaderc_shader_kind DeduceDefaultShaderKindFromFileName(
     const string_piece file_name) {
   // Add new stage types here.
-  static const KindMapping kStringToStage[] = {
+  static const StageMapping kStringToStage[] = {
       {"vert", shaderc_glsl_default_vertex_shader},
       {"frag", shaderc_glsl_default_fragment_shader},
       {"tesc", shaderc_glsl_default_tess_control_shader},
@@ -65,13 +65,13 @@ shaderc_shader_kind DeduceDefaultShaderKindFromFileName(
       {"comp", shaderc_glsl_default_compute_shader}};
 
   const string_piece extension = glslc::GetFileExtension(file_name);
-  shaderc_shader_kind kind = shaderc_glsl_infer_from_source;
+  shaderc_shader_kind stage = shaderc_glsl_infer_from_source;
 
   for (const auto& entry : kStringToStage) {
-    if (extension == entry.id) kind = entry.kind;
+    if (extension == entry.id) stage = entry.stage;
   }
 
-  return kind;
+  return stage;
 }
 
 }  // namespace glslc
