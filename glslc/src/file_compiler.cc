@@ -94,14 +94,16 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
                 << "file not recognized: File format not recognized";
     }
     std::cerr << "\n";
+
+    return false;
   }
 
   // Write output to output file.
   output_stream->write(result.GetData(), result.GetLength());
   // Write error message to std::cerr.
   std::cerr << result.GetErrorMessage();
-  // Something wrong happen on output.
   if (output_stream->fail()) {
+    // Something wrong happened on output.
     if (output_stream == &std::cout) {
       std::cerr << "glslc: error: error writing to standard output"
                 << std::endl;
