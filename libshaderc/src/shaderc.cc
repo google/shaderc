@@ -168,6 +168,7 @@ class StageDeducer {
   bool error_;
 };
 
+// A bridge between the libshaderc includer and libshaderc_util includer.
 class InternalFileIncluder : public shaderc_util::CountingIncluder {
  public:
   InternalFileIncluder(
@@ -198,9 +199,8 @@ class InternalFileIncluder : public shaderc_util::CountingIncluder {
     shaderc_includer_response* data =
         get_includer_response_(user_data_, filename);
     std::pair<std::string, std::string> entry =
-        std::make_pair<std::string, std::string>(
-            std::string(data->path, data->path_length),
-            std::string(data->content, data->content_length));
+        std::make_pair(std::string(data->path, data->path_length),
+                       std::string(data->content, data->content_length));
     release_includer_response_(user_data_, data);
     return entry;
   }

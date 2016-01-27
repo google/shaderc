@@ -69,7 +69,7 @@ typedef enum {
   shaderc_compilation_status_success = 0,
   shaderc_compilation_status_invalid_stage,  // error stage deduction
   shaderc_compilation_status_compilation_error,
-  shaderc_compilation_status_internal_error, // unexpected failure
+  shaderc_compilation_status_internal_error,  // unexpected failure
   shaderc_compilation_status_null_result_module,
 } shaderc_compilation_status;
 
@@ -167,39 +167,9 @@ void shaderc_compile_options_set_disassembly_mode(
 void shaderc_compile_options_set_forced_version_profile(
     shaderc_compile_options_t options, int version, shaderc_profile profile);
 
-// To support file inclusion, libshaderc invokes a callback into its client to
-// resolve the full path and content of the included file.
-// The client callback should follow the specified function signature below, and
-// it should be passed to libshaderc through the corresponding setter function.
-// When the including of a file is done, libshaderc will call another client
-// callback to clean up the resources used for the including process. The client
-// should implement the clean up method and pass it to libshaderc together with
-// the response method.
-
-// The struct that contains the information to be returned to the libshaderc.
-// The client-side implemented response method should return a pointer of this
-// struct. The underlying data is owned by client code.
-struct shaderc_includer_response {
-  const char* path;
-  size_t path_length;
-  const char* content;
-  size_t content_length;
-};
-
-// The function signature of the client-side implemented response method. It
-// returns a pointer to shaderc_includer_response struct.
-typedef shaderc_includer_response* (*shaderc_includer_response_get_fn)(
-    void* user_data, const char* filename);
-
-// The function signature of the client-side implemented clean-up method.
-// Includer will call this callback function when the including process is done
-// with the fullpath and content data.
-typedef void (*shaderc_includer_response_release_fn)(
-    void* user_data, shaderc_includer_response* data);
-
-// Sets the callback functions for the includer. When the includer queries for
-// the full path and content of a file, client's method will be called to
-// response. And when the query is done, client will be notified to clean up.
+// Response to a request for #include content.  "Includer" is client code that
+// resolves #include arguments into objects of this type.
+//
 // TODO: File inclusion needs to be context-aware.
 // e.g.
 //  In file: /path/to/main_shader.vert:
@@ -210,9 +180,31 @@ typedef void (*shaderc_includer_response_release_fn)(
 //  go to /path/to/include/b to find the file b.
 //  This needs context info from compiler to client includer, and may needs
 //  interface changes.
+struct shaderc_includer_response {
+  const char* path;
+  size_t path_length;
+  const char* content;
+  size_t content_length;
+};
+
+// A function mapping a #include argument to its includer response.  The
+// includer retains memory ownership of the response object.
+typedef shaderc_includer_response* (*shaderc_includer_response_get_fn)(
+    void* user_data, const char* filename);
+
+// A function to destroy an includer response when it's no longer needed.
+typedef void (*shaderc_includer_response_release_fn)(
+    void* user_data, shaderc_includer_response* data);
+
+// Sets includer callback functions. When a compiler encounters a #include in
+// the source, it will query the includer by invoking getter on user_data and
+// the #include argument.  The includer must respond with a
+// shaderc_includer_response object that remains valid until releaser is invoked
+// on it.  When the compiler is done processing the response, it will invoke
+// releaser on user_data and the response pointer.
 void shaderc_compile_options_set_includer_callbacks(
     shaderc_compile_options_t options, shaderc_includer_response_get_fn getter,
-    shaderc_includer_response_release_fn releasor, void* user_data);
+    shaderc_includer_response_release_fn releaser, void* user_data);
 
 // Sets the compiler mode to do only preprocessing. The byte array result in the
 // module returned by the compilation is the text of the preprocessed shader.

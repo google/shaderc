@@ -131,33 +131,19 @@ class CompileOptions {
     shaderc_compile_options_set_generate_debug_info(options_);
   }
 
-  // Includer interface, on which libshaderc will invoke the methods
-  // to resolve the full path and content of the file to be included, and clean
-  // up the resources used for the including process. Client code should
-  // implement this interface and configure the includer instance then set it to
-  // libshaderc through following API. The ownship of the instance will be
-  // passed to CompileOptions, and it will be destroyed with CompileOptions.
-  // TODO: File inclusion needs to be context-aware.
-  // e.g.
-  //  In file: /path/to/main_shader.vert:
-  //  #include "include/a"
-  //  In file: /path/to/include/a":
-  //  #include "b"
-  //  When compiling /path/to/main_shader.vert, the compiler should be able to
-  //  go to /path/to/include/b to find the file b.
-  //  This needs context info from compiler to client includer, and may needs
-  //  interface changes.
-
+  // A C++ version of the libshaderc includer interface.
   class IncluderInterface {
    public:
+    // Handles shaderc_includer_response_get_fn callbacks.
     virtual shaderc_includer_response* GetInclude(const char* filename) = 0;
+
+    // Handles shaderc_includer_response_release_fn callbacks.
     virtual void ReleaseInclude(shaderc_includer_response* data) = 0;
   };
 
-  // Sets the includer instance for libshaderc to call on to resolve the full
-  // path and content of file to be included, and also cleaning the including
-  // related data. The ownership of the includer instance will be passed to
-  // CompileOptions and will be destroyed with CompileOptions.
+  // Sets the includer instance for libshaderc to call on during compilation, as
+  // described in shaderc_compile_options_set_includer_callbacks().  Callbacks
+  // are routed to this includer's methods.
   void SetIncluder(std::unique_ptr<IncluderInterface>&& includer) {
     includer_ = std::move(includer);
     shaderc_compile_options_set_includer_callbacks(
