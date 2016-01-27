@@ -99,7 +99,7 @@ bool GetOptionArgument(int argc, char** argv, int* index,
 
 int main(int argc, char** argv) {
   std::vector<std::pair<std::string, shaderc_shader_kind>> input_files;
-  shaderc_shader_kind current_shader_stage = shaderc_glsl_infer_from_source;
+  shaderc_shader_kind current_fshader_stage = shaderc_glsl_infer_from_source;
   glslc::FileCompiler compiler;
   bool success = true;
   bool has_stdin_input = false;
@@ -141,8 +141,8 @@ int main(int argc, char** argv) {
       compiler.SetWorkingDirectory(workdir.str());
     } else if (arg.starts_with("-fshader-stage=")) {
       const string_piece stage = arg.substr(std::strlen("-fshader-stage="));
-      current_shader_stage = glslc::GetForcedShaderKindFromCmdLine(arg);
-      if (current_shader_stage == shaderc_glsl_infer_from_source) {
+      current_fshader_stage = glslc::GetForcedShaderKindFromCmdLine(arg);
+      if (current_fshader_stage == shaderc_glsl_infer_from_source) {
         std::cerr << "glslc: error: stage not recognized: '" << stage << "'"
                   << std::endl;
         return 1;
@@ -254,15 +254,15 @@ int main(int argc, char** argv) {
         has_stdin_input = true;
       }
 
-      // If current_shader_stage is shaderc_glsl_infer_from_source, that means
+      // If current_fshader_stage is shaderc_glsl_infer_from_source, that means
       // we didn't set forced shader kinds (otherwise an error should have
       // already been emitted before). So we should deduce the shader kind
-      // from the file name. If current_shader_stage is specifed to one of
+      // from the file name. If current_fshader_stage is specifed to one of
       // the forced shader kinds, use that for the following compilation.
       input_files.emplace_back(
-          arg.str(), current_shader_stage == shaderc_glsl_infer_from_source
+          arg.str(), current_fshader_stage == shaderc_glsl_infer_from_source
                          ? glslc::DeduceDefaultShaderKindFromFileName(arg)
-                         : current_shader_stage );
+                         : current_fshader_stage );
     }
   }
 

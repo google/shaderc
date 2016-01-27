@@ -27,11 +27,8 @@ shaderc_includer_response* FileIncluder::GetInclude(const char* filename) {
         file_content_.size(),
     };
   } else {
-    // The file to be included is not found or can not be opened. Response to be
-    // returned should have an empty string as path, and an error message as content.
     char error_msg[] = "Cannot open or find include file.";
-    file_content_.insert(file_content_.begin(), error_msg,
-                         error_msg + sizeof(error_msg) / sizeof(error_msg[0]));
+    file_content_.assign(std::begin(error_msg), std::end(error_msg));
     response_ = {
         filename, std::strlen(filename), file_content_.data(),
         file_content_.size(),
@@ -40,12 +37,7 @@ shaderc_includer_response* FileIncluder::GetInclude(const char* filename) {
   return &response_;
 }
 
-void FileIncluder::ReleaseInclude(shaderc_includer_response* data) {
-  // In this first draft, we don't need to use data argument, as we cache only
-  // the latest response data. All we need to do is resetting the cached
-  // response data to null.
-  (void)data;
-
+void FileIncluder::ReleaseInclude(shaderc_includer_response*) {
   response_ = {
       nullptr, 0u, nullptr, 0u,
   };
