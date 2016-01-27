@@ -75,21 +75,6 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
   bool compilation_success =
       result.GetCompilationStatus() == shaderc_compilation_status_success;
 
-  // Write output to output file.
-  output_stream->write(result.GetData(), result.GetLength());
-  // Write error message to std::cerr.
-  std::cerr << result.GetErrorMessage();
-  // Something wrong happen for output.
-  if (output_stream->fail()) {
-    if (output_stream == &std::cout) {
-      std::cerr << "glslc: error: error writing to standard output"
-                << std::endl;
-    } else {
-      std::cerr << "glslc: error: error writing to output file: '"
-                << output_file_name_ << "'" << std::endl;
-    }
-  }
-
   // Handle the error message for failing to deduce the shader kind.
   if (result.GetCompilationStatus() ==
       shaderc_compilation_status_invalid_stage) {
@@ -109,6 +94,22 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
                 << "file not recognized: File format not recognized";
     }
     std::cerr << "\n";
+  }
+
+  // Write output to output file.
+  output_stream->write(result.GetData(), result.GetLength());
+  // Write error message to std::cerr.
+  std::cerr << result.GetErrorMessage();
+  // Something wrong happen on output.
+  if (output_stream->fail()) {
+    if (output_stream == &std::cout) {
+      std::cerr << "glslc: error: error writing to standard output"
+                << std::endl;
+    } else {
+      std::cerr << "glslc: error: error writing to output file: '"
+                << output_file_name_ << "'" << std::endl;
+    }
+    return false;
   }
 
   return compilation_success;
