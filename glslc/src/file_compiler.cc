@@ -123,20 +123,20 @@ void FileCompiler::AddIncludeDirectory(const std::string& path) {
   include_file_finder_.search_path().push_back(path);
 }
 
-void FileCompiler::SetIndividualCompilationFlags() {
+void FileCompiler::SetIndividualCompilationFlag() {
   if (!disassemble_) {
     needs_linking_ = false;
     file_extension_ = ".spv";
   }
 }
 
-void FileCompiler::SetDisassemblyFlags() {
+void FileCompiler::SetDisassemblyFlag() {
   disassemble_ = true;
   needs_linking_ = false;
   file_extension_ = ".s";
 }
 
-void FileCompiler::SetPreprocessingOnlyFlags() {
+void FileCompiler::SetPreprocessingOnlyFlag() {
   preprocess_only_ = true;
   needs_linking_ = false;
   if (output_file_name_.empty()) {

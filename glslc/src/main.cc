@@ -177,13 +177,13 @@ int main(int argc, char** argv) {
         }
       }
     } else if (arg == "-c") {
-      compiler.SetIndividualCompilationFlags();
+      compiler.SetIndividualCompilationFlag();
     } else if (arg == "-E") {
       compiler.options().SetPreprocessingOnlyMode();
-      compiler.SetPreprocessingOnlyFlags();
+      compiler.SetPreprocessingOnlyFlag();
     } else if (arg == "-S") {
       compiler.options().SetDisassemblyMode();
-      compiler.SetDisassemblyFlags();
+      compiler.SetDisassemblyFlag();
     } else if (arg.starts_with("-D")) {
       const size_t length = arg.size();
       if (length <= 2) {
