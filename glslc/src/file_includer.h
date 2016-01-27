@@ -25,9 +25,9 @@
 namespace glslc {
 
 // An includer for files implementing shaderc's includer interface. It responds
-// the file including query from the compiler with the full path and content of
-// the file to be included. In the case that the file is not found or cannot be
-// opened, the full path field of in the response will point to an empty
+// to the file including query from the compiler with the full path and content
+// of the file to be included. In the case that the file is not found or cannot
+// be opened, the full path field of in the response will point to an empty
 // string, and error message will be passed to the content field.
 class FileIncluder : public shaderc::CompileOptions::IncluderInterface {
  public:
