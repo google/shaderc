@@ -44,7 +44,7 @@ typedef enum {
   shaderc_glsl_default_geometry_shader,
   shaderc_glsl_default_tess_control_shader,
   shaderc_glsl_default_tess_evaluation_shader,
-} shaderc_shader_kind;
+} shaderc_shader_stage;
 
 typedef enum {
   shaderc_target_env_vulkan,         // create SPIR-V under Vulkan semantics
@@ -260,7 +260,7 @@ typedef struct shaderc_spv_module* shaderc_spv_module_t;
 // was failure in allocating the compiler object NULL will be returned.
 shaderc_spv_module_t shaderc_compile_into_spv(
     const shaderc_compiler_t compiler, const char* source_text,
-    size_t source_text_size, shaderc_shader_kind shader_kind,
+    size_t source_text_size, shaderc_shader_stage shader_kind,
     const char* input_file_name, const char* entry_point_name,
     const shaderc_compile_options_t additional_options);
 

@@ -67,7 +67,7 @@ class Compilation {
  public:
   // Compiles shader, keeping the result.
   Compilation(const shaderc_compiler_t compiler, const std::string& shader,
-              shaderc_shader_kind kind, const char* input_file_name,
+              shaderc_shader_stage kind, const char* input_file_name,
               const shaderc_compile_options_t options = nullptr)
       : compiled_result_(
             shaderc_compile_into_spv(compiler, shader.c_str(), shader.size(),
@@ -110,7 +110,7 @@ bool CompilationResultIsSuccess(const shaderc_spv_module_t result_module) {
 
 // Compiles a shader and returns true if the result is valid SPIR-V.
 bool CompilesToValidSpv(Compiler& compiler, const std::string& shader,
-                        shaderc_shader_kind kind,
+                        shaderc_shader_stage kind,
                         const shaderc_compile_options_t options = nullptr) {
   const Compilation comp(compiler.get_compiler_handle(), shader, kind, "shader",
                          options);
@@ -131,7 +131,7 @@ bool CompilesToValidSpv(Compiler& compiler, const std::string& shader,
 class CompileStringTest : public testing::Test {
  protected:
   // Compiles a shader and returns true on success, false on failure.
-  bool CompilationSuccess(const std::string& shader, shaderc_shader_kind kind,
+  bool CompilationSuccess(const std::string& shader, shaderc_shader_stage kind,
                           shaderc_compile_options_t options = nullptr) {
     return CompilationResultIsSuccess(
         Compilation(compiler_.get_compiler_handle(), shader, kind,
@@ -142,7 +142,7 @@ class CompileStringTest : public testing::Test {
   // Compiles a shader, expects compilation success, and returns the warning
   // messages.
   const std::string CompilationWarnings(
-      const std::string& shader, shaderc_shader_kind kind,
+      const std::string& shader, shaderc_shader_stage kind,
       const shaderc_compile_options_t options = nullptr) {
     const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
                            "shader", options);
@@ -154,7 +154,7 @@ class CompileStringTest : public testing::Test {
   // Compiles a shader, expects compilation failure, and returns the warning
   // messages.
   const std::string CompilationErrors(
-      const std::string& shader, shaderc_shader_kind kind,
+      const std::string& shader, shaderc_shader_stage kind,
       const shaderc_compile_options_t options = nullptr) {
     const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
                            "shader", options);
@@ -166,7 +166,7 @@ class CompileStringTest : public testing::Test {
   // Compiles a shader, expects compilation success, and returns the output
   // bytes.
   const std::string CompilationOutput(
-      const std::string& shader, shaderc_shader_kind kind,
+      const std::string& shader, shaderc_shader_stage kind,
       const shaderc_compile_options_t options = nullptr) {
     const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
                            "shader", options);
@@ -488,7 +488,7 @@ TEST_F(CompileStringWithOptionsTest, PreprocessingOnlyOption) {
 // annotation, 2) shader_kind.
 struct ShaderKindTestCase {
   const char* shader_;
-  shaderc_shader_kind shader_kind_;
+  shaderc_shader_stage shader_kind_;
 };
 
 // Test the shader kind deduction process. If the shader kind is one of the

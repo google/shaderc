@@ -52,14 +52,14 @@ bool IsValidSpv(const shaderc::SpvModule& result) {
 // Compiles a shader and returns true if the result is valid SPIR-V. The
 // input_file_name is set to "shader".
 bool CompilesToValidSpv(const shaderc::Compiler& compiler,
-                        const std::string& shader, shaderc_shader_kind kind) {
+                        const std::string& shader, shaderc_shader_stage kind) {
   return IsValidSpv(compiler.CompileGlslToSpv(shader, kind, "shader"));
 }
 
 // Compiles a shader with options and returns true if the result is valid
 // SPIR-V. The input_file_name is set to "shader".
 bool CompilesToValidSpv(const shaderc::Compiler& compiler,
-                        const std::string& shader, shaderc_shader_kind kind,
+                        const std::string& shader, shaderc_shader_stage kind,
                         const CompileOptions& options) {
   return IsValidSpv(compiler.CompileGlslToSpv(shader, kind, "shader", options));
 }
@@ -69,7 +69,7 @@ class CppInterface : public testing::Test {
   // Compiles a shader and returns true on success, false on failure.
   // The input file name is set to "shader" by default.
   bool CompilationSuccess(const std::string& shader,
-                          shaderc_shader_kind kind) const {
+                          shaderc_shader_stage kind) const {
     return compiler_
         .CompileGlslToSpv(shader.c_str(), shader.length(), kind, "shader")
         .GetCompilationStatus() == shaderc_compilation_status_success;
@@ -78,7 +78,7 @@ class CppInterface : public testing::Test {
   // Compiles a shader with options and returns true on success, false on
   // failure.
   // The input file name is set to "shader" by default.
-  bool CompilationSuccess(const std::string& shader, shaderc_shader_kind kind,
+  bool CompilationSuccess(const std::string& shader, shaderc_shader_stage kind,
                           const CompileOptions& options) const {
     return compiler_
         .CompileGlslToSpv(shader.c_str(), shader.length(), kind, "shader",
@@ -90,7 +90,7 @@ class CppInterface : public testing::Test {
   // messages.
   // The input file name is set to "shader" by default.
   std::string CompilationWarnings(
-      const std::string& shader, shaderc_shader_kind kind,
+      const std::string& shader, shaderc_shader_stage kind,
       // This could default to options_, but that can
       // be easily confused with a no-options-provided
       // case:
@@ -104,7 +104,7 @@ class CppInterface : public testing::Test {
   // Compiles a shader, asserts compilation fail, and returns the error
   // messages.
   std::string CompilationErrors(const std::string& shader,
-                                shaderc_shader_kind kind,
+                                shaderc_shader_stage kind,
                                 // This could default to options_, but that can
                                 // be easily confused with a no-options-provided
                                 // case:
@@ -119,7 +119,7 @@ class CppInterface : public testing::Test {
   // bytes.
   // The input file name is set to "shader" by default.
   std::string CompilationOutput(const std::string& shader,
-                                shaderc_shader_kind kind,
+                                shaderc_shader_stage kind,
                                 const CompileOptions& options) const {
     const auto module =
         compiler_.CompileGlslToSpv(shader, kind, "shader", options);
@@ -531,7 +531,7 @@ TEST_F(CppInterface, PreprocessingOnlyModeSecondOverridesDisassemblyMode) {
 // annotation, 2) shader_kind.
 struct ShaderKindTestCase {
   const char* shader_;
-  shaderc_shader_kind shader_kind_;
+  shaderc_shader_stage shader_kind_;
 };
 
 // Test the shader kind deduction process. If the shader kind is one

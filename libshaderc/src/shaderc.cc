@@ -41,7 +41,7 @@ namespace {
 // shader kinds. If the shader kind is not a forced kind, returns EshLangCount
 // to let #pragma annotation or shader stage deducer determine the stage to
 // use.
-EShLanguage GetForcedStage(shaderc_shader_kind kind) {
+EShLanguage GetForcedStage(shaderc_shader_stage kind) {
   switch (kind) {
     case shaderc_glsl_vertex_shader:
       return EShLangVertex;
@@ -108,7 +108,7 @@ std::mutex compile_mutex;  // Guards shaderc_compile_*.
 // case.
 class StageDeducer {
  public:
-  StageDeducer(shaderc_shader_kind kind = shaderc_glsl_infer_from_source)
+  StageDeducer(shaderc_shader_stage kind = shaderc_glsl_infer_from_source)
       : kind_(kind), error_(false){};
   // The method that underlying glslang will call to determine the shader stage
   // to be used in current compilation. It is called only when there is neither
@@ -137,7 +137,7 @@ class StageDeducer {
  private:
   // Gets the corresponding shader stage for a given 'default' shader kind. All
   // other kinds are mapped to EShLangCount which should not be used.
-  EShLanguage GetDefaultStage(shaderc_shader_kind kind) const {
+  EShLanguage GetDefaultStage(shaderc_shader_stage kind) const {
     switch (kind) {
       case shaderc_glsl_vertex_shader:
       case shaderc_glsl_fragment_shader:
@@ -164,7 +164,7 @@ class StageDeducer {
     return EShLangCount;
   }
 
-  shaderc_shader_kind kind_;
+  shaderc_shader_stage kind_;
   bool error_;
 };
 
@@ -349,7 +349,7 @@ void shaderc_compiler_release(shaderc_compiler_t compiler) {
 
 shaderc_spv_module_t shaderc_compile_into_spv(
     const shaderc_compiler_t compiler, const char* source_text,
-    size_t source_text_size, shaderc_shader_kind shader_kind,
+    size_t source_text_size, shaderc_shader_stage shader_kind,
     const char* input_file_name, const char* entry_point_name,
     const shaderc_compile_options_t additional_options) {
   std::lock_guard<std::mutex> lock(compile_mutex);

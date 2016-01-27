@@ -250,7 +250,7 @@ class Compiler {
   // It is valid for the returned SpvModule object to outlive this compiler
   // object.
   SpvModule CompileGlslToSpv(const char* source_text, size_t source_text_size,
-                             shaderc_shader_kind shader_kind,
+                             shaderc_shader_stage shader_kind,
                              const char* input_file_name) const {
     shaderc_spv_module_t module =
         shaderc_compile_into_spv(compiler_, source_text, source_text_size,
@@ -280,7 +280,7 @@ class Compiler {
   // on, the returned SpvModule will hold a text string, instead of a SPIR-V
   // binary generated with default options.
   SpvModule CompileGlslToSpv(const char* source_text, size_t source_text_size,
-                             shaderc_shader_kind shader_kind,
+                             shaderc_shader_stage shader_kind,
                              const char* input_file_name,
                              const CompileOptions& options) const {
     shaderc_spv_module_t module = shaderc_compile_into_spv(
@@ -292,7 +292,7 @@ class Compiler {
   // Compiles the given source GLSL into a SPIR-V module by invoking
   // CompileGlslToSpv(const char*, size_t, shaderc_shader_kind, const char*);
   SpvModule CompileGlslToSpv(const std::string& source_text,
-                             shaderc_shader_kind shader_kind,
+                             shaderc_shader_stage shader_kind,
                              const char* input_file_name) const {
     return CompileGlslToSpv(source_text.data(), source_text.size(), shader_kind,
                             input_file_name);
@@ -302,7 +302,7 @@ class Compiler {
   // CompileGlslToSpv(const char*, size_t, shaderc_shader_kind, const char*,
   // options);
   SpvModule CompileGlslToSpv(const std::string& source_text,
-                             shaderc_shader_kind shader_kind,
+                             shaderc_shader_stage shader_kind,
                              const char* input_file_name,
                              const CompileOptions& options) const {
     return CompileGlslToSpv(source_text.data(), source_text.size(), shader_kind,
