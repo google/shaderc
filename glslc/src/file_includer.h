@@ -29,9 +29,6 @@ namespace glslc {
 // the file to be included. In the case that the file is not found or cannot be
 // opened, the full path field of in the response will point to an empty
 // string, and error message will be passed to the content field.
-// Only one response needs to be kept alive due to the implementation of
-// libshaderc's InternalFileIncluder::include_delegate, which make copies for
-// the full path and content.
 class FileIncluder : public shaderc::CompileOptions::IncluderInterface {
  public:
   FileIncluder(const shaderc_util::FileFinder* file_finder)
@@ -42,6 +39,9 @@ class FileIncluder : public shaderc::CompileOptions::IncluderInterface {
  private:
   // Used by GetInclude() to get the full filepath.
   const shaderc_util::FileFinder& file_finder_;
+  // Only one response needs to be kept alive due to the implementation of
+  // libshaderc's InternalFileIncluder::include_delegate, which make copies for
+  // the full path and content.
   shaderc_includer_response response_;
   std::vector<char> file_content_;
   std::string file_full_path_;
