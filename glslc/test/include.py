@@ -38,6 +38,19 @@ content a
 """
 
 @inside_glslc_testsuite('Include')
+class VerifyIncludeNotFound(expect.ErrorMessage):
+    """Tests #including a not existing sibling file."""
+
+    environment = Directory('.', [
+        File('a.vert', 'content a\n#include "b"\n')])
+
+    glslc_args = ['-E', 'a.vert']
+    expected_error = [
+        "a.vert:2: error: '#include' : Cannot open or find include file.\n",
+        '1 error generated.\n'
+    ]
+
+@inside_glslc_testsuite('Include')
 class VerifyCompileIncludeOneSibling(expect.ValidObjectFile):
     """Tests #including a sibling file via full compilation."""
 

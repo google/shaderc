@@ -31,7 +31,7 @@ using shaderc_util::string_piece;
 
 namespace glslc {
 bool FileCompiler::CompileShaderFile(const std::string& input_file,
-                                     EShLanguage shader_stage) {
+                                     shaderc_shader_kind shader_stage) {
   std::vector<char> input_data;
   std::string path = input_file;
   if (!workdir_.empty() && !shaderc_util::IsAbsolutePath(path)) {
@@ -62,13 +62,48 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
     source_string = string_piece(&(*input_data.begin()),
                                  &(*input_data.begin()) + input_data.size());
   }
-  StageDeducer deducer(input_file);
-  bool compilation_success =
-      Compile(source_string, shader_stage, error_file_name.str(), deducer,
-              glslc::FileIncluder(&include_file_finder_), output_stream,
-              &std::cerr, &total_warnings_, &total_errors_);
 
-  if (!compilation_success && output_stream->fail()) {
+  std::unique_ptr<FileIncluder> includer(new FileIncluder(&include_file_finder_));
+  options_.SetIncluder(std::move(includer));
+
+  shaderc::SpvModule result =
+      compiler_.CompileGlslToSpv(source_string.data(), source_string.size(),
+                                 shader_stage, error_file_name.data(), options_);
+  total_errors_ += result.GetNumErrors();
+  total_warnings_ += result.GetNumWarnings();
+
+  bool compilation_success =
+      result.GetCompilationStatus() == shaderc_compilation_status_success;
+
+  // Handle the error message for failing to deduce the shader kind.
+  if (result.GetCompilationStatus() ==
+      shaderc_compilation_status_invalid_stage) {
+    if (IsGlslFile(error_file_name)) {
+      std::cerr << "glslc: error: "
+                << "'" << error_file_name << "': "
+                << ".glsl file encountered but no -fshader-stage "
+                   "specified ahead";
+    } else if (error_file_name == "<stdin>") {
+      std::cerr
+          << "glslc: error: '-': -fshader-stage required when input is from "
+             "standard "
+             "input \"-\"";
+    } else {
+      std::cerr << "glslc: error: "
+                << "'" << error_file_name << "': "
+                << "file not recognized: File format not recognized";
+    }
+    std::cerr << "\n";
+
+    return false;
+  }
+
+  // Write output to output file.
+  output_stream->write(result.GetData(), result.GetLength());
+  // Write error message to std::cerr.
+  std::cerr << result.GetErrorMessage();
+  if (output_stream->fail()) {
+    // Something wrong happened on output.
     if (output_stream == &std::cout) {
       std::cerr << "glslc: error: error writing to standard output"
                 << std::endl;
@@ -76,7 +111,9 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
       std::cerr << "glslc: error: error writing to output file: '"
                 << output_file_name_ << "'" << std::endl;
     }
+    return false;
   }
+
   return compilation_success;
 }
 
@@ -89,21 +126,21 @@ void FileCompiler::AddIncludeDirectory(const std::string& path) {
   include_file_finder_.search_path().push_back(path);
 }
 
-void FileCompiler::SetIndividualCompilationMode() {
+void FileCompiler::SetIndividualCompilationFlag() {
   if (!disassemble_) {
     needs_linking_ = false;
     file_extension_ = ".spv";
   }
 }
 
-void FileCompiler::SetDisassemblyMode() {
-  Compiler::SetDisassemblyMode();
+void FileCompiler::SetDisassemblyFlag() {
+  disassemble_ = true;
   needs_linking_ = false;
   file_extension_ = ".s";
 }
 
-void FileCompiler::SetPreprocessingOnlyMode() {
-  Compiler::SetPreprocessingOnlyMode();
+void FileCompiler::SetPreprocessingOnlyFlag() {
+  preprocess_only_ = true;
   needs_linking_ = false;
   if (output_file_name_.empty()) {
     output_file_name_ = "-";
