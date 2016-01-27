@@ -14,62 +14,64 @@
 
 #include "shader_stage.h"
 
-#include "libshaderc_util/shader_stage.h"
-#include "libshaderc_util/file_finder.h"
 #include "libshaderc_util/resources.h"
 
 #include "file.h"
-#include "file_includer.h"
 
 using shaderc_util::string_piece;
 
 namespace {
 
-// Maps an identifier to a language.
-struct LanguageMapping {
+// Maps an identifier to a shader stage.
+struct StageMapping {
   const char* id;
-  EShLanguage language;
+  shaderc_shader_kind stage;
 };
 
 }  // anonymous namespace
 
 namespace glslc {
 
-EShLanguage StageDeducer::operator()(std::ostream* error_stream,
-                                     const string_piece& error_tag) const {
-  // Add new stage types here.
-  static const LanguageMapping kStringToStage[] = {
-      {"vert", EShLangVertex},      {"frag", EShLangFragment},
-      {"tesc", EShLangTessControl}, {"tese", EShLangTessEvaluation},
-      {"geom", EShLangGeometry},    {"comp", EShLangCompute}};
+shaderc_shader_kind MapStageNameToForcedKind(const string_piece& stage_name) {
+  const StageMapping string_to_kind[] = {
+      {"vertex", shaderc_glsl_vertex_shader},
+      {"fragment", shaderc_glsl_fragment_shader},
+      {"tesscontrol", shaderc_glsl_tess_control_shader},
+      {"tesseval", shaderc_glsl_tess_evaluation_shader},
+      {"geometry", shaderc_glsl_geometry_shader},
+      {"compute", shaderc_glsl_compute_shader}};
+  for (const auto& entry : string_to_kind) {
+    if (stage_name == entry.id) return entry.stage;
+  }
+  return shaderc_glsl_infer_from_source;
+}
 
-  const string_piece extension = glslc::GetFileExtension(file_name_);
-  EShLanguage stage = EShLangCount;
+shaderc_shader_kind GetForcedShaderKindFromCmdLine(
+    const shaderc_util::string_piece& f_shader_stage_str) {
+  size_t equal_pos = f_shader_stage_str.find_first_of("=");
+  if (equal_pos == std::string::npos) return shaderc_glsl_infer_from_source;
+  return MapStageNameToForcedKind(f_shader_stage_str.substr(equal_pos + 1));
+}
+
+shaderc_shader_kind DeduceDefaultShaderKindFromFileName(
+    const string_piece file_name) {
+  // Add new stage types here.
+  static const StageMapping kStringToStage[] = {
+      {"vert", shaderc_glsl_default_vertex_shader},
+      {"frag", shaderc_glsl_default_fragment_shader},
+      {"tesc", shaderc_glsl_default_tess_control_shader},
+      {"tese", shaderc_glsl_default_tess_evaluation_shader},
+      {"geom", shaderc_glsl_default_geometry_shader},
+      {"comp", shaderc_glsl_default_compute_shader}};
+
+  const string_piece extension = glslc::GetFileExtension(file_name);
+  shaderc_shader_kind stage = shaderc_glsl_infer_from_source;
 
   for (const auto& entry : kStringToStage) {
-    if (extension == entry.id) stage = entry.language;
+    if (extension == entry.id) stage = entry.stage;
   }
 
-  if (stage == EShLangCount) {
-    *error_stream << "glslc: error: '" << file_name_ << "': ";
-    if (IsGlslFile(file_name_)) {
-      *error_stream << ".glsl file encountered but no -fshader-stage "
-                       "specified ahead";
-    } else if (file_name_ == "-") {
-      *error_stream << "-fshader-stage required when input is from standard "
-                       "input \"-\"";
-    } else {
-      *error_stream << "file not recognized: File format not recognized";
-    }
-    *error_stream << "\n";
-  }
   return stage;
 }
 
-EShLanguage GetShaderStageFromCmdLine(
-    const shaderc_util::string_piece& f_shader_stage) {
-  size_t equal_pos = f_shader_stage.find_first_of("=");
-  if (equal_pos == std::string::npos) return EShLangCount;
-  return MapStageNameToLanguage(f_shader_stage.substr(equal_pos + 1));
-}
 }  // namespace glslc

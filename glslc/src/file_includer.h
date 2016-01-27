@@ -17,28 +17,34 @@
 
 #include <string>
 #include <utility>
+#include <vector>
 
-#include "glslang/Public/ShaderLang.h"
-
-#include "libshaderc_util/counting_includer.h"
 #include "libshaderc_util/file_finder.h"
+#include "shaderc.hpp"
 
 namespace glslc {
 
-// A CountingIncluder for files.  Translates the #include argument into the
-// file's contents, based on a FileFinder.
-class FileIncluder : public shaderc_util::CountingIncluder {
+// An includer for files implementing shaderc's includer interface. It responds
+// to the file including query from the compiler with the full path and content
+// of the file to be included. In the case that the file is not found or cannot
+// be opened, the full path field of in the response will point to an empty
+// string, and error message will be passed to the content field.
+class FileIncluder : public shaderc::CompileOptions::IncluderInterface {
  public:
   FileIncluder(const shaderc_util::FileFinder* file_finder)
       : file_finder_(*file_finder) {}
+  shaderc_includer_response* GetInclude(const char* filename) override;
+  void ReleaseInclude(shaderc_includer_response* data) override;
 
  private:
-  // Finds filename in search path and returns its contents.
-  std::pair<std::string, std::string> include_delegate(
-      const char* filename) const override;
-
-  // Used by include() to get the full filepath.
+  // Used by GetInclude() to get the full filepath.
   const shaderc_util::FileFinder& file_finder_;
+  // Only one response needs to be kept alive due to the implementation of
+  // libshaderc's InternalFileIncluder::include_delegate, which make copies for
+  // the full path and content.
+  shaderc_includer_response response_;
+  std::vector<char> file_content_;
+  std::string file_full_path_;
 };
 
 }  // namespace glslc

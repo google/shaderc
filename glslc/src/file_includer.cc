@@ -18,17 +18,30 @@
 
 namespace glslc {
 
-std::pair<std::string, std::string> FileIncluder::include_delegate(
-    const char* filename) const {
-  const std::string full_path = file_finder_.FindReadableFilepath(filename);
-  std::vector<char> content;
-  if (!full_path.empty() && shaderc_util::ReadFile(full_path, &content)) {
-    return std::make_pair(full_path,
-                          std::string(content.begin(), content.end()));
+shaderc_includer_response* FileIncluder::GetInclude(const char* filename) {
+  file_full_path_ = file_finder_.FindReadableFilepath(filename);
+  if (!file_full_path_.empty() &&
+      shaderc_util::ReadFile(file_full_path_, &file_content_)) {
+    response_ = {
+        file_full_path_.c_str(), file_full_path_.length(), file_content_.data(),
+        file_content_.size(),
+    };
   } else {
-    // TODO(deki): Emit error message.
-    return std::make_pair("", "");
+    char error_msg[] = "Cannot open or find include file.";
+    file_content_.assign(std::begin(error_msg), std::end(error_msg));
+    response_ = {
+        "", 0u, file_content_.data(), file_content_.size(),
+    };
   }
+  return &response_;
+}
+
+void FileIncluder::ReleaseInclude(shaderc_includer_response*) {
+  response_ = {
+      nullptr, 0u, nullptr, 0u,
+  };
+  file_content_.clear();
+  file_full_path_.clear();
 }
 
 }  // namespace glslc

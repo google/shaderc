@@ -16,20 +16,23 @@
 #define GLSLC_FILE_COMPILER_H
 
 #include <string>
-#include "libshaderc_util/compiler.h"
+
+#include "libshaderc_util/string_piece.h"
+#include "libshaderc_util/file_finder.h"
+#include "shaderc.hpp"
 
 namespace glslc {
 
 // Context for managing compilation of source GLSL files into destination
 // SPIR-V files.
-class FileCompiler : public shaderc_util::Compiler {
+class FileCompiler {
  public:
   FileCompiler() : needs_linking_(true), total_warnings_(0), total_errors_(0) {}
 
   // Compiles a shader received in input_file, returning true on success and
-  // false otherwise. If force_shader_stage is not EShLangCount then the
-  // given shader_stage will be used, otherwise it will be determined
-  // from the source or the file type.
+  // false otherwise. If force_shader_stage is not shaderc_glsl_infer_source or
+  // any default shader stage then the given shader_stage will be used, otherwise
+  // it will be determined from the source or the file type.
   //
   // Places the compilation output into a new file whose name is derived from
   // input_file according to the rules from glslc/README.asciidoc.
@@ -40,7 +43,7 @@ class FileCompiler : public shaderc_util::Compiler {
   // Any errors/warnings found in the shader source will be output to std::cerr
   // and increment the counts reported by OutputMessages().
   bool CompileShaderFile(const std::string& input_file,
-                         EShLanguage shader_stage);
+                         shaderc_shader_kind shader_stage);
 
   // Sets the working directory for the compilation.
   void SetWorkingDirectory(const std::string& dir);
@@ -57,24 +60,45 @@ class FileCompiler : public shaderc_util::Compiler {
     output_file_name_ = file;
   }
 
-  // Returns false if any options are incompatible.  The num_files parameter
+  // Returns false if any options are incompatible. The num_files parameter
   // represents the number of files that will be compiled.
   bool ValidateOptions(size_t num_files);
 
   // Outputs to std::cerr the number of warnings and errors if there are any.
   void OutputMessages();
 
-  // When any files are to be compiled, they are compiled individually and
-  // written to separate output files instead of linked together.
-  void SetIndividualCompilationMode();
+  // Sets the flag to indicate individual compilation mode. In this mode, all
+  // files are compiled individually and written to separate output files
+  // instead of linked together. This method also disables linking and sets the
+  // output file extension to ".spv". Disassembly mode and preprocessing only
+  // mode override this mode and flags.
+  void SetIndividualCompilationFlag();
 
-  // Instead of outputting object files, output the disassembled textual output.
-  virtual void SetDisassemblyMode() override;
+  // Sets the flag to indicate disassembly mode. In this mode, the compiler
+  // emits disassembled textual output, instead of outputting object files.
+  // This method also sets the output file extension to ".s" and disables
+  // linking. This mode overrides individual compilation mode, and preprocessing
+  // only mode overrides this mode.
+  void SetDisassemblyFlag();
 
-  // Instead of outputting object files, output the preprocessed source files.
-  virtual void SetPreprocessingOnlyMode() override;
+  // Sets the flag to indicate preprocessing only mode. In this mode, instead of
+  // outputting object files, the compiler emits the preprocessed source files.
+  // This method disables linking and sets the output file to stdout. This mode
+  // overrides disassembly mode and individual compilation mode.
+  void SetPreprocessingOnlyFlag();
+
+  // Gets the reference of the compiler options which reflects the command-line
+  // arguments.
+  shaderc::CompileOptions& options() {return options_;};
 
  private:
+  // Performs actual SPIR-V compilation on the contents of input files.
+  shaderc::Compiler compiler_;
+
+  // Reflects the command-line arguments and goes into
+  // compiler_.CompileGlslToSpv().
+  shaderc::CompileOptions options_;
+
   // Returns the name of the output file, given the input_filename string.
   std::string GetOutputFileName(std::string input_filename);
 
@@ -87,6 +111,12 @@ class FileCompiler : public shaderc_util::Compiler {
 
   // Indicates whether linking is needed to generate the final output.
   bool needs_linking_;
+
+  // Flag for disassembly mode.
+  bool disassemble_ = false;
+
+  // Flag for preprocessing only mode.
+  bool preprocess_only_ = false;
 
   // Reflects the type of file being generated.
   std::string file_extension_;
