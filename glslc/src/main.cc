@@ -19,6 +19,7 @@
 #include <iostream>
 #include <string>
 #include <utility>
+#include <list>
 
 #include "libshaderc_util/string_piece.h"
 #include "libshaderc_util/version_profile.h"
@@ -104,9 +105,11 @@ int main(int argc, char** argv) {
   bool has_stdin_input = false;
   // Contains all the macro names data. Current libshaderc interface requires
   // null-terminated string, we need to 'pull out' and copy the macro names and
-  // hold their data here.
-  std::vector<std::string> macro_names;
-  std::vector<std::string> macro_values;
+  // hold their data here. Besides, as the internal unordered_map in
+  // libshaderc_util is storing string_piece, we need to keep the addresses of
+  // our macros and values unchanged. std::list meets this requirement.
+  std::list<std::string> macro_names;
+  std::list<std::string> macro_values;
 
   compiler.AddIncludeDirectory("");
 

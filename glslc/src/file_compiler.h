@@ -69,23 +69,22 @@ class FileCompiler {
 
   // Sets the flag to indicate individual compilation mode. In this mode, all
   // files are compiled individually and written to separate output files
-  // instead of linked together. This method also sets the needs_linking_ flags
-  // to false and the file_extension to ".spv". Disassembly mode and preprocessing
-  // only mode override this mode and flags.
-  void SetIndividualCompilationFlags();
+  // instead of linked together. This method also disables linking and set the
+  // output file extension to ".spv". Disassembly mode and preprocessing only
+  // mode override this mode and flags.
+  void SetIndividualCompilationFlag();
 
   // Sets the flag to indicate disassembly mode. In this mode, the compiler
   // emits disassembled textual output, instead of outputting object files.
-  // This method also sets the file_extension to ".s" and needs_linking_ flag to
-  // false. This mode overrides individual compilation mode, and preprocessing
+  // This method also sets the output file extension to ".s" and disables
+  // linking. This mode overrides individual compilation mode, and preprocessing
   // only mode overrides this mode.
-  void SetDisassemblyFlags();
+  void SetDisassemblyFlag();
 
   // Sets the flag to indicate preprocessing only mode. In this mode, instead of
   // outputting object files, the compiler emits the preprocessed source files.
-  // This method also sets the needs_linking_ flag to false and set the output
-  // file to stdout. This mode overrides disassembly mode and individual
-  // compilation mode.
+  // This method disables linking and sets the output file to stdout. This mode
+  // overrides disassembly mode and individual compilation mode.
   void SetPreprocessingOnlyFlags();
 
   // Gets the reference of the compiler options which reflects the command-line

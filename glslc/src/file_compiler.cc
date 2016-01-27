@@ -73,9 +73,7 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
   total_warnings_ += result.GetNumWarnings();
 
   bool compilation_success =
-      result.GetCompilationStatus() == shaderc_compilation_status_success
-          ? true
-          : false;
+      result.GetCompilationStatus() == shaderc_compilation_status_success;
 
   // Write output to output file.
   output_stream->write(result.GetData(), result.GetLength());
