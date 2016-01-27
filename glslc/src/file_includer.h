@@ -24,8 +24,11 @@
 
 namespace glslc {
 
-// A CountingIncluder for files.  Translates the #include argument into the
-// file's contents, based on a FileFinder.
+// An includer for files implementing shaderc's includer interface. It resposnes
+// the file including query from the compiler with the full path and content of
+// the file to be included. In the case that the file is not found or cannot be
+// opened, the full path field of in the response will be an empty string, and
+// error message will be passed to the content field.
 class FileIncluder : public shaderc::CompileOptions::IncluderInterface {
  public:
   FileIncluder(const shaderc_util::FileFinder* file_finder)

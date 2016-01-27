@@ -99,7 +99,7 @@ bool GetOptionArgument(int argc, char** argv, int* index,
 
 int main(int argc, char** argv) {
   std::vector<std::pair<std::string, shaderc_shader_kind>> input_files;
-  shaderc_shader_kind forced_shader_stage = shaderc_glsl_infer_from_source;
+  shaderc_shader_kind current_shader_stage = shaderc_glsl_infer_from_source;
   glslc::FileCompiler compiler;
   bool success = true;
   bool has_stdin_input = false;
@@ -141,12 +141,8 @@ int main(int argc, char** argv) {
       compiler.SetWorkingDirectory(workdir.str());
     } else if (arg.starts_with("-fshader-stage=")) {
       const string_piece stage = arg.substr(std::strlen("-fshader-stage="));
-      // forced_shader_stage can be 1) one of the forced shader kinds, which
-      // means following files will be compiled with the specified shader
-      // kind; 2) shaderc_glsl_infer_from_source, which means 'arg' doesn't
-      // specify a valid shader kind, an error should be emitted for this.
-      forced_shader_stage = glslc::GetForcedShaderKindFromCmdLine(arg);
-      if (forced_shader_stage == shaderc_glsl_infer_from_source) {
+      current_shader_stage = glslc::GetForcedShaderKindFromCmdLine(arg);
+      if (current_shader_stage == shaderc_glsl_infer_from_source) {
         std::cerr << "glslc: error: stage not recognized: '" << stage << "'"
                   << std::endl;
         return 1;
@@ -194,9 +190,8 @@ int main(int argc, char** argv) {
         size_t equal_sign_loc = argument.find_first_of('=');
         size_t name_length = equal_sign_loc != shaderc_util::string_piece::npos
                                  ? equal_sign_loc
-                                 : (arg.size() - strlen("-D"));
+                                 : argument.size();
         const string_piece name_piece = argument.substr(0, name_length);
-        size_t argument_length = argument.size() - (argument.back() == '=' ? 1 : 0);
         if (name_piece.starts_with("GL_")) {
           std::cerr
               << "glslc: error: names beginning with 'GL_' cannot be defined: "
@@ -219,9 +214,11 @@ int main(int argc, char** argv) {
         // 'value' if we don't insert '\0'.
 
         macro_names.emplace_back(name_piece.data(), name_length);
-        macro_values.emplace_back(name_length < argument_length
-                                      ? argument.substr(name_length + 1).data()
-                                      : "");
+        macro_values.emplace_back(
+            equal_sign_loc == shaderc_util::string_piece::npos ||
+                    equal_sign_loc == argument.size() - 1
+                ? ""
+                : argument.substr(name_length + 1).data());
         // TODO(deki): check arg for newlines.
         compiler.options().AddMacroDefinition(macro_names.back().c_str(),
                                               macro_values.back().c_str());
@@ -257,15 +254,15 @@ int main(int argc, char** argv) {
         has_stdin_input = true;
       }
 
-      // If forced_shader_stage is shaderc_glsl_infer_from_source, that means
+      // If current_shader_stage is shaderc_glsl_infer_from_source, that means
       // we didn't set forced shader kinds (otherwise an error should have
       // already been emitted before). So we should deduce the shader kind
-      // from the file name. If forced_shader_stage is specifed to one of
+      // from the file name. If current_shader_stage is specifed to one of
       // the forced shader kinds, use that for the following compilation.
       input_files.emplace_back(
-          arg.str(), forced_shader_stage == shaderc_glsl_infer_from_source
+          arg.str(), current_shader_stage == shaderc_glsl_infer_from_source
                          ? glslc::DeduceDefaultShaderKindFromFileName(arg)
-                         : forced_shader_stage );
+                         : current_shader_stage );
     }
   }
 

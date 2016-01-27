@@ -22,7 +22,10 @@
 
 namespace glslc {
 
-// Parse the string piece from command line to get the force shader kind.
+// Parse the string piece from command line to get the force shader stage.
+// If the 'f_shader_stage_str' can not be parsed to an valid force shader stage,
+// returns 'shaderc_glsl_infer_from_source' and an error should be emitted at
+// the caller site.
 shaderc_shader_kind GetForcedShaderKindFromCmdLine(
     const shaderc_util::string_piece& f_shader_stage_str);
 
