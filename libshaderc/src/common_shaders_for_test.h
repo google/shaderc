@@ -78,7 +78,7 @@ const char kOpenGLVertexShader[] =
     R"(#version 150
        void main() { int t = gl_VertexID; })";
 
-// Empty 310 es shader. It is valid for vertex, fragment, compute shader kind.
+// Empty 310 es shader. It is valid for vertex, fragment, compute shader stage.
 const char kEmpty310ESShader[] =
     "#version 310 es\n"
     "void main() {}\n";

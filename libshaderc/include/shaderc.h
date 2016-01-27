@@ -24,20 +24,20 @@ extern "C" {
 #include <stdint.h>
 
 typedef enum {
-  // Forced shader kinds. These shader kinds force the compiler to compile the
-  // source code as the specified kind of shader.
+  // Forced shader stages. These shader stagesforce the compiler to compile the
+  // source code as the specified stage of shader.
   shaderc_glsl_vertex_shader,
   shaderc_glsl_fragment_shader,
   shaderc_glsl_compute_shader,
   shaderc_glsl_geometry_shader,
   shaderc_glsl_tess_control_shader,
   shaderc_glsl_tess_evaluation_shader,
-  // Deduce the shader kind from #pragma annotation in the source code. Compiler
-  // will emit error if #pragma annotation is not found.
+  // Deduce the shader stage from #pragma annotation in the source code.
+  // Compiler will emit error if #pragma annotation is not found.
   shaderc_glsl_infer_from_source,
-  // Default shader kinds. Compiler will fall back to compile the source code as
-  // the specified kind of shader when #pragma annotation is not found in the
-  // source code.
+  // Default shader stages. Compiler will fall back to compile the source code
+  // as the specified stage of shader when #pragma annotation is not found in
+  // the source code.
   shaderc_glsl_default_vertex_shader,
   shaderc_glsl_default_fragment_shader,
   shaderc_glsl_default_compute_shader,
@@ -154,7 +154,7 @@ void shaderc_compile_options_set_generate_debug_info(
 // Sets the compiler mode to emit a disassembly text instead of a binary. In
 // this mode, the byte array result in the shaderc_spv_module returned
 // from shaderc_compile_into_spv() will consist of SPIR-V assembly text.
-// Note the preprocessing only mode overrides this option, and this option
+// Note the preprocessing-only mode overrides this option, and this option
 // overrides the default mode generating a SPIR-V binary.
 void shaderc_compile_options_set_disassembly_mode(
     shaderc_compile_options_t options);
@@ -237,20 +237,20 @@ void shaderc_compile_options_set_warnings_as_errors(
 // An opaque handle to the results of a call to shaderc_compile_into_spv().
 typedef struct shaderc_spv_module* shaderc_spv_module_t;
 
-// Takes a GLSL source string and the associated shader kind, input file
+// Takes a GLSL source string and the associated shader stage, input file
 // name, compiles it according to the given additional_options. If the shader
-// kind is not set to a specified kind, but shaderc_glslc_infer_from_source,
-// the compiler will try to deduce the shader kind from the source
+// stage is not set to a specified stage, but shaderc_glslc_infer_from_source,
+// the compiler will try to deduce the shader stage from the source
 // string and a failure in deducing will generate an error. Currently only
-// #pragma annotation is supported. If the shader kind is set to one of the
-// default shader kinds, the compiler will fall back to the default shader
-// kind in case it failed to deduce the shader kind from source string.
+// #pragma annotation is supported. If the shader stage is set to one of the
+// default shader stages, the compiler will fall back to the default shader
+// stage in case it failed to deduce the shader stage from source string.
 // The input_file_name is a null-termintated string. It is used as a tag to
 // identify the source string in cases like emitting error messages. It
 // doesn't have to be a 'file name'.
 // By default the source string will be compiled into SPIR-V binary
 // and a shaderc_spv_module will be returned to hold the results of the
-// compilation. When disassembly mode or preprocessing only mode is enabled
+// compilation. When disassembly mode or preprocessing-only mode is enabled
 // in the additional_options, the source string will be compiled into char
 // strings and held by the returned shaderc_spv_module.  The entry_point_name
 // null-terminated string defines the name of the entry point to associate
@@ -260,7 +260,7 @@ typedef struct shaderc_spv_module* shaderc_spv_module_t;
 // was failure in allocating the compiler object NULL will be returned.
 shaderc_spv_module_t shaderc_compile_into_spv(
     const shaderc_compiler_t compiler, const char* source_text,
-    size_t source_text_size, shaderc_shader_stage shader_kind,
+    size_t source_text_size, shaderc_shader_stage shader_stage,
     const char* input_file_name, const char* entry_point_name,
     const shaderc_compile_options_t additional_options);
 
@@ -275,7 +275,7 @@ void shaderc_module_release(shaderc_spv_module_t module);
 bool shaderc_module_get_success(const shaderc_spv_module_t module);
 
 // Returns the number of bytes in a SPIR-V module result string. When the module
-// is compiled with disassembly mode or preprocessing only mode, the result
+// is compiled with disassembly mode or preprocessing-only mode, the result
 // string is a char string. Otherwise, the result string is binary string.
 size_t shaderc_module_get_length(const shaderc_spv_module_t module);
 
@@ -294,7 +294,7 @@ shaderc_compilation_status shaderc_module_get_compilation_status(
 // Returns a pointer to the start of the SPIR-V bytes, either SPIR-V binary or
 // char string. When the source string is compiled into SPIR-V binary, this is
 // guaranteed to be castable to a uint32_t*. If the source string is compiled in
-// disassembly mode or preprocessing only mode, the pointer will point to the
+// disassembly mode or preprocessing-only mode, the pointer will point to the
 // result char string.
 const char* shaderc_module_get_bytes(const shaderc_spv_module_t module);
 

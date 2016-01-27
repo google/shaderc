@@ -38,11 +38,11 @@
 namespace {
 
 // Returns shader stage (ie: vertex, fragment, etc.) in response to forced
-// shader kinds. If the shader kind is not a forced kind, returns EshLangCount
-// to let #pragma annotation or shader stage deducer determine the stage to
-// use.
-EShLanguage GetForcedStage(shaderc_shader_stage kind) {
-  switch (kind) {
+// shader stages. If the shader stage is not a forced stage, returns
+// EshLangCount to let #pragma annotation or shader stage deducer determine the
+// stage to use.
+EShLanguage GetForcedStage(shaderc_shader_stage stage) {
+  switch (stage) {
     case shaderc_glsl_vertex_shader:
       return EShLangVertex;
     case shaderc_glsl_fragment_shader:
@@ -64,7 +64,7 @@ EShLanguage GetForcedStage(shaderc_shader_stage kind) {
     case shaderc_glsl_default_tess_evaluation_shader:
       return EShLangCount;
   }
-  assert(0 && "Unhandled shaderc_shader_kind");
+  assert(0 && "Unhandled shaderc_shader_stage");
   return EShLangCount;
 }
 
@@ -98,23 +98,23 @@ struct {
 std::mutex compile_mutex;  // Guards shaderc_compile_*.
 
 // A wrapper functor class to be used as stage deducer for libshaderc_util
-// Compile() interface. When the given shader kind is one of the default shader
-// kinds, this functor will be called if #pragma is not found in the source
-// code. And it returns the corresponding shader stage. When the shader kind is
-// a forced shader kind, this functor won't be called and it simply returns
-// EShLangCount to make the syntax correct. When the shader kind is set to
+// Compile() interface. When the given shader stage is one of the default shader
+// stages, this functor will be called if #pragma is not found in the source
+// code. And it returns the corresponding shader stage. When the shader stage is
+// a forced shader stage, this functor won't be called and it simply returns
+// EShLangCount to make the syntax correct. When the shader stage is set to
 // shaderc_glsl_deduce_from_pragma, this functor also returns EShLangCount, but
 // the compiler should emit error if #pragma annotation is not found in this
 // case.
 class StageDeducer {
  public:
-  StageDeducer(shaderc_shader_stage kind = shaderc_glsl_infer_from_source)
-      : kind_(kind), error_(false){};
+  StageDeducer(shaderc_shader_stage stage = shaderc_glsl_infer_from_source)
+      : stage_(stage), error_(false){};
   // The method that underlying glslang will call to determine the shader stage
   // to be used in current compilation. It is called only when there is neither
-  // forced shader kind (or say stage, in the view of glslang), nor #pragma
+  // forced shader stage (or say stage, in the view of glslang), nor #pragma
   // annotation in the source code. This method transforms an user defined
-  // 'default' shader kind to the corresponding shader stage. As this is the
+  // 'default' shader stage to the corresponding shader stage. As this is the
   // last trial to determine the shader stage, failing to find the corresponding
   // shader stage will record an error.
   // Note that calling this method more than once during one compilation will
@@ -122,7 +122,7 @@ class StageDeducer {
   // call.
   EShLanguage operator()(std::ostream* /*error_stream*/,
                          const shaderc_util::string_piece& /*error_tag*/) {
-    EShLanguage stage = GetDefaultStage(kind_);
+    EShLanguage stage = GetDefaultStage(stage_);
     if (stage == EShLangCount) {
       error_ = true;
     } else {
@@ -135,10 +135,10 @@ class StageDeducer {
   bool error() const { return error_; }
 
  private:
-  // Gets the corresponding shader stage for a given 'default' shader kind. All
-  // other kinds are mapped to EShLangCount which should not be used.
-  EShLanguage GetDefaultStage(shaderc_shader_stage kind) const {
-    switch (kind) {
+  // Gets the corresponding shader stage for a given 'default' shader stage. All
+  // other stages are mapped to EShLangCount which should not be used.
+  EShLanguage GetDefaultStage(shaderc_shader_stage stage) const {
+    switch (stage) {
       case shaderc_glsl_vertex_shader:
       case shaderc_glsl_fragment_shader:
       case shaderc_glsl_compute_shader:
@@ -160,11 +160,11 @@ class StageDeducer {
       case shaderc_glsl_default_tess_evaluation_shader:
         return EShLangTessEvaluation;
     }
-    assert(0 && "Unhandled shaderc_shader_kind");
+    assert(0 && "Unhandled shaderc_shader_stage");
     return EShLangCount;
   }
 
-  shaderc_shader_stage kind_;
+  shaderc_shader_stage stage_;
   bool error_;
 };
 
@@ -349,7 +349,7 @@ void shaderc_compiler_release(shaderc_compiler_t compiler) {
 
 shaderc_spv_module_t shaderc_compile_into_spv(
     const shaderc_compiler_t compiler, const char* source_text,
-    size_t source_text_size, shaderc_shader_stage shader_kind,
+    size_t source_text_size, shaderc_shader_stage shader_stage,
     const char* input_file_name, const char* entry_point_name,
     const shaderc_compile_options_t additional_options) {
   std::lock_guard<std::mutex> lock(compile_mutex);
@@ -359,9 +359,8 @@ shaderc_spv_module_t shaderc_compile_into_spv(
     return nullptr;
   }
 
-  result->compilation_status =
-      shaderc_compilation_status_invalid_stage;
-  bool compilation_succeeded = false; // In case we exit early.
+  result->compilation_status = shaderc_compilation_status_invalid_stage;
+  bool compilation_succeeded = false;  // In case we exit early.
   if (!compiler->initialized) return result;
   TRY_IF_EXCEPTIONS_ENABLED {
     std::stringstream output;
@@ -369,10 +368,10 @@ shaderc_spv_module_t shaderc_compile_into_spv(
     size_t total_warnings = 0;
     size_t total_errors = 0;
     std::string input_file_name_str(input_file_name);
-    EShLanguage forced_stage = GetForcedStage(shader_kind);
+    EShLanguage forced_stage = GetForcedStage(shader_stage);
     shaderc_util::string_piece source_string =
         shaderc_util::string_piece(source_text, source_text + source_text_size);
-    StageDeducer stage_deducer(shader_kind);
+    StageDeducer stage_deducer(shader_stage);
     if (additional_options) {
       compilation_succeeded = additional_options->compiler.Compile(
           source_string, forced_stage, input_file_name_str,
@@ -399,7 +398,7 @@ shaderc_spv_module_t shaderc_compile_into_spv(
       result->compilation_status = shaderc_compilation_status_success;
     } else {
       // Check whether the error is caused by failing to deduce the shader
-      // stage. If it is the case, set the error type to shader kind error.
+      // stage. If it is the case, set the error type to shader stage error.
       // Otherwise, set it to compilation error.
       result->compilation_status =
           stage_deducer.error() ? shaderc_compilation_status_invalid_stage
