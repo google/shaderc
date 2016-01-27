@@ -30,8 +30,7 @@ shaderc_includer_response* FileIncluder::GetInclude(const char* filename) {
     char error_msg[] = "Cannot open or find include file.";
     file_content_.assign(std::begin(error_msg), std::end(error_msg));
     response_ = {
-        filename, std::strlen(filename), file_content_.data(),
-        file_content_.size(),
+        file_full_path_.c_str(), 0u, file_content_.data(), file_content_.size(),
     };
   }
   return &response_;
