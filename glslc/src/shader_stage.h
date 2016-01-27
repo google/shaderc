@@ -26,11 +26,11 @@ namespace glslc {
 // If the 'f_shader_stage_str' cannot be parsed to a valid force shader stage,
 // returns 'shaderc_glsl_infer_from_source' and an error should be emitted at
 // the caller site.
-shaderc_shader_kind GetForcedShaderKindFromCmdLine(
+shaderc_shader_stage GetForcedShaderStageFromCmdLine(
     const shaderc_util::string_piece& f_shader_stage_str);
 
 // Parse the file name extension to get the default shader kind.
-shaderc_shader_kind DeduceDefaultShaderKindFromFileName(
+shaderc_shader_stage DeduceDefaultShaderStageFromFileName(
     shaderc_util::string_piece file_name);
 }  // namespace glslc
 

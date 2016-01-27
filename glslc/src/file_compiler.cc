@@ -31,7 +31,7 @@ using shaderc_util::string_piece;
 
 namespace glslc {
 bool FileCompiler::CompileShaderFile(const std::string& input_file,
-                                     shaderc_shader_kind shader_stage) {
+                                     shaderc_shader_stage shader_stage) {
   std::vector<char> input_data;
   std::string path = input_file;
   if (!workdir_.empty() && !shaderc_util::IsAbsolutePath(path)) {
@@ -75,7 +75,7 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
   bool compilation_success =
       result.GetCompilationStatus() == shaderc_compilation_status_success;
 
-  // Handle the error message for failing to deduce the shader kind.
+  // Handle the error message for failing to deduce the shader stage.
   if (result.GetCompilationStatus() ==
       shaderc_compilation_status_invalid_stage) {
     if (IsGlslFile(error_file_name)) {
