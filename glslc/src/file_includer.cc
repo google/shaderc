@@ -27,7 +27,9 @@ shaderc_includer_response* FileIncluder::GetInclude(const char* filename) {
         file_content_.size(),
     };
   } else {
-    char error_msg[] = "include file not found.";
+    // The file to be included is not found or can not be opened. Response to be
+    // returned should have an empty string as path, and an error message as content.
+    char error_msg[] = "Cannot open or find include file.";
     file_content_.insert(file_content_.begin(), error_msg,
                          error_msg + sizeof(error_msg) / sizeof(error_msg[0]));
     response_ = {
