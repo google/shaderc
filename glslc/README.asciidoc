@@ -14,6 +14,7 @@ glslc [-c|-S|-E]
       [-Dmacroname[=value]...]
       [-std=standard] [-x glsl]
       [-fshader-stage=...]
+      [--target-env=...]
       [-g]
       [-w] [-Werror]
       [-o outfile] shader...

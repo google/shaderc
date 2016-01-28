@@ -61,6 +61,9 @@ void PrintHelp(std::ostream* out) {
        << "310es,\n"
        << "                    450core, etc.\n"
        << "  -S                Only run preprocess and compilation steps.\n"
+       << "  --target-env=<environment>\n"
+       << "                    Set the target shader environment, and the"
+       << " semantics of warnings and errors.\n"
        << "  -w                Suppresses all warning messages.\n"
        << "  -Werror           Treat all warnings as errors.\n"
        << "  -working-directory <dir>\n"
@@ -158,6 +161,22 @@ int main(int argc, char** argv) {
         return 1;
       }
       compiler.options().SetForcedVersionProfile(version, profile);
+    } else if (arg.starts_with("--target-env=")) {
+      shaderc_target_env target_env = shaderc_target_env_default;
+      const string_piece target_env_str = arg.substr(std::strlen("--target-env"));
+      if (target_env_str == "vulkan") {
+        target_env = shaderc_target_env_vulkan;
+      } else if (target_env_str == "opengl") {
+        target_env = shaderc_target_env_opengl;
+      } else if (target_env_str == "opengl_compat") {
+        target_env = shaderc_target_env_opengl_compat;
+      } else {
+        std::cerr << "glslc: error: invalid value '" << target_env_str
+                  << "' in '--target-env=" << target_env_str << "'"
+                  << std::endl;
+        return 1;
+      }
+      compiler.options().SetTargetEnvironment(target_env, 0);
     } else if (arg.starts_with("-x")) {
       string_piece option_arg;
       if (!GetOptionArgument(argc, argv, &i, "-x", &option_arg)) {
