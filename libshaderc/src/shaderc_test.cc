@@ -67,11 +67,11 @@ class Compilation {
  public:
   // Compiles shader, keeping the result.
   Compilation(const shaderc_compiler_t compiler, const std::string& shader,
-              shaderc_shader_kind kind, const char* input_file_name,
+              shaderc_shader_stage shader_stage, const char* input_file_name,
               const shaderc_compile_options_t options = nullptr)
-      : compiled_result_(
-            shaderc_compile_into_spv(compiler, shader.c_str(), shader.size(),
-                                     kind, input_file_name, "", options)) {}
+      : compiled_result_(shaderc_compile_into_spv(
+            compiler, shader.c_str(), shader.size(), shader_stage,
+            input_file_name, "", options)) {}
 
   ~Compilation() { shaderc_module_release(compiled_result_); }
 
@@ -110,10 +110,10 @@ bool CompilationResultIsSuccess(const shaderc_spv_module_t result_module) {
 
 // Compiles a shader and returns true if the result is valid SPIR-V.
 bool CompilesToValidSpv(Compiler& compiler, const std::string& shader,
-                        shaderc_shader_kind kind,
+                        shaderc_shader_stage shader_stage,
                         const shaderc_compile_options_t options = nullptr) {
-  const Compilation comp(compiler.get_compiler_handle(), shader, kind, "shader",
-                         options);
+  const Compilation comp(compiler.get_compiler_handle(), shader, shader_stage,
+                         "shader", options);
   auto result = comp.result();
   if (!CompilationResultIsSuccess(result)) return false;
   size_t length = shaderc_module_get_length(result);
@@ -131,10 +131,11 @@ bool CompilesToValidSpv(Compiler& compiler, const std::string& shader,
 class CompileStringTest : public testing::Test {
  protected:
   // Compiles a shader and returns true on success, false on failure.
-  bool CompilationSuccess(const std::string& shader, shaderc_shader_kind kind,
+  bool CompilationSuccess(const std::string& shader,
+                          shaderc_shader_stage shader_stage,
                           shaderc_compile_options_t options = nullptr) {
     return CompilationResultIsSuccess(
-        Compilation(compiler_.get_compiler_handle(), shader, kind,
+        Compilation(compiler_.get_compiler_handle(), shader, shader_stage,
                     "shader", options)
             .result());
   }
@@ -142,11 +143,12 @@ class CompileStringTest : public testing::Test {
   // Compiles a shader, expects compilation success, and returns the warning
   // messages.
   const std::string CompilationWarnings(
-      const std::string& shader, shaderc_shader_kind kind,
+      const std::string& shader, shaderc_shader_stage shader_stage,
       const shaderc_compile_options_t options = nullptr) {
-    const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
-                           "shader", options);
-    EXPECT_TRUE(CompilationResultIsSuccess(comp.result())) << kind << '\n'
+    const Compilation comp(compiler_.get_compiler_handle(), shader,
+                           shader_stage, "shader", options);
+    EXPECT_TRUE(CompilationResultIsSuccess(comp.result())) << shader_stage
+                                                           << '\n'
                                                            << shader;
     return shaderc_module_get_error_message(comp.result());
   };
@@ -154,11 +156,12 @@ class CompileStringTest : public testing::Test {
   // Compiles a shader, expects compilation failure, and returns the warning
   // messages.
   const std::string CompilationErrors(
-      const std::string& shader, shaderc_shader_kind kind,
+      const std::string& shader, shaderc_shader_stage shader_stage,
       const shaderc_compile_options_t options = nullptr) {
-    const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
-                           "shader", options);
-    EXPECT_FALSE(CompilationResultIsSuccess(comp.result())) << kind << '\n'
+    const Compilation comp(compiler_.get_compiler_handle(), shader,
+                           shader_stage, "shader", options);
+    EXPECT_FALSE(CompilationResultIsSuccess(comp.result())) << shader_stage
+                                                            << '\n'
                                                             << shader;
     return shaderc_module_get_error_message(comp.result());
   };
@@ -166,11 +169,12 @@ class CompileStringTest : public testing::Test {
   // Compiles a shader, expects compilation success, and returns the output
   // bytes.
   const std::string CompilationOutput(
-      const std::string& shader, shaderc_shader_kind kind,
+      const std::string& shader, shaderc_shader_stage shader_stage,
       const shaderc_compile_options_t options = nullptr) {
-    const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
-                           "shader", options);
-    EXPECT_TRUE(CompilationResultIsSuccess(comp.result())) << kind << '\n'
+    const Compilation comp(compiler_.get_compiler_handle(), shader,
+                           shader_stage, "shader", options);
+    EXPECT_TRUE(CompilationResultIsSuccess(comp.result())) << shader_stage
+                                                           << '\n'
                                                            << shader;
     // Use string(const char* s, size_t n) constructor instead of
     // string(const char* s) to make sure the string has complete binary data.
@@ -190,7 +194,7 @@ class CompileStringTest : public testing::Test {
 // Name holders so that we have test cases being grouped with only one real
 // compilation class.
 using CompileStringWithOptionsTest = CompileStringTest;
-using CompileKindsTest = CompileStringTest;
+using CompileStagesTest = CompileStringTest;
 
 TEST_F(CompileStringTest, EmptyString) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
@@ -261,15 +265,15 @@ TEST_F(CompileStringTest, ZeroErrorsZeroWarnings) {
 }
 
 TEST_F(CompileStringTest, ErrorTypeUnknownShaderStage) {
-  // The shader kind/stage can not be determined, the error type field should
-  // indicate the error type is shaderc_shader_kind_error.
+  // The shader stage can not be determined, the compilation status should
+  // indicate the failure is caused by invalid stage.
   Compilation comp(compiler_.get_compiler_handle(), kMinimalShader,
                    shaderc_glsl_infer_from_source, "shader");
   EXPECT_EQ(shaderc_compilation_status_invalid_stage,
             shaderc_module_get_compilation_status(comp.result()));
 }
 TEST_F(CompileStringTest, ErrorTypeCompilationError) {
-  // The shader kind is valid, the result module's error type field should
+  // The shader stage is valid, the result module's error type field should
   // indicate this compilaion fails due to compilation errors.
   Compilation comp(compiler_.get_compiler_handle(), kTwoErrorsShader,
                    shaderc_glsl_vertex_shader, "shader");
@@ -484,35 +488,36 @@ TEST_F(CompileStringWithOptionsTest, PreprocessingOnlyOption) {
   EXPECT_THAT(preprocessed_text_cloned_options, HasSubstr("void main(){ }"));
 }
 
-// A shader kind test cases needs: 1) A shader text with or without #pragma
-// annotation, 2) shader_kind.
-struct ShaderKindTestCase {
+// A shader stage test cases needs: 1) A shader text with or without #pragma
+// annotation, 2) shader stage.
+struct ShaderStageTestCase {
   const char* shader_;
-  shaderc_shader_kind shader_kind_;
+  shaderc_shader_stage shader_stage_;
 };
 
-// Test the shader kind deduction process. If the shader kind is one of the
+// Test the shader stage deduction process. If the shader stage is one of the
 // forced ones, the compiler will just try to compile the source code in that
-// specified shader kind. If the shader kind is shaderc_glsl_deduce_from_pragma,
-// the compiler will determine the shader kind from #pragma annotation in the
+// specified shader stage. If the shader stage is
+// shaderc_glsl_deduce_from_pragma,
+// the compiler will determine the shader stage from #pragma annotation in the
 // source code and emit error if none such annotation is found. When the shader
-// kind is one of the default ones, the compiler will fall back to use the
-// specified shader kind if and only if #pragma annoation is not found.
+// stage is one of the default ones, the compiler will fall back to use the
+// specified shader stage if and only if #pragma annoation is not found.
 
-// Valid shader kind settings should generate valid SPIR-V code.
-using ValidShaderKind = testing::TestWithParam<ShaderKindTestCase>;
+// Valid shader stage settings should generate valid SPIR-V code.
+using ValidShaderStage = testing::TestWithParam<ShaderStageTestCase>;
 
-TEST_P(ValidShaderKind, ValidSpvCode) {
-  const ShaderKindTestCase& test_case = GetParam();
+TEST_P(ValidShaderStage, ValidSpvCode) {
+  const ShaderStageTestCase& test_case = GetParam();
   Compiler compiler;
   EXPECT_TRUE(
-      CompilesToValidSpv(compiler, test_case.shader_, test_case.shader_kind_));
+      CompilesToValidSpv(compiler, test_case.shader_, test_case.shader_stage_));
 }
 
 INSTANTIATE_TEST_CASE_P(
-    CompileStringTest, ValidShaderKind,
-    testing::ValuesIn(std::vector<ShaderKindTestCase>{
-        // Valid default shader kinds.
+    CompileStringTest, ValidShaderStage,
+    testing::ValuesIn(std::vector<ShaderStageTestCase>{
+        // Valid default shader stage.
         {kEmpty310ESShader, shaderc_glsl_default_vertex_shader},
         {kEmpty310ESShader, shaderc_glsl_default_fragment_shader},
         {kEmpty310ESShader, shaderc_glsl_default_compute_shader},
@@ -521,7 +526,7 @@ INSTANTIATE_TEST_CASE_P(
         {kTessEvaluationOnlyShader,
          shaderc_glsl_default_tess_evaluation_shader},
 
-        // #pragma annotation overrides default shader kinds.
+        // #pragma annotation overrides default shader stage.
         {kVertexOnlyShaderWithPragma, shaderc_glsl_default_compute_shader},
         {kFragmentOnlyShaderWithPragma, shaderc_glsl_default_vertex_shader},
         {kTessControlOnlyShaderWithPragma,
@@ -532,30 +537,30 @@ INSTANTIATE_TEST_CASE_P(
          shaderc_glsl_default_tess_evaluation_shader},
         {kComputeOnlyShaderWithPragma, shaderc_glsl_default_geometry_shader},
 
-        // Specified non-default shader kind overrides #pragma annotation.
+        // Specified non-default shader stage overrides #pragma annotation.
         {kVertexOnlyShaderWithInvalidPragma, shaderc_glsl_vertex_shader},
     }));
 
-using InvalidShaderKind = testing::TestWithParam<ShaderKindTestCase>;
+using InvalidShaderStage = testing::TestWithParam<ShaderStageTestCase>;
 
-// Invalid shader kind settings should generate errors.
-TEST_P(InvalidShaderKind, CompilationShouldFail) {
-  const ShaderKindTestCase& test_case = GetParam();
+// Invalid shader stage settings should generate errors.
+TEST_P(InvalidShaderStage, CompilationShouldFail) {
+  const ShaderStageTestCase& test_case = GetParam();
   Compiler compiler;
   EXPECT_FALSE(
-      CompilesToValidSpv(compiler, test_case.shader_, test_case.shader_kind_));
+      CompilesToValidSpv(compiler, test_case.shader_, test_case.shader_stage_));
 }
 
 INSTANTIATE_TEST_CASE_P(
-    CompileStringTest, InvalidShaderKind,
-    testing::ValuesIn(std::vector<ShaderKindTestCase>{
-        // Invalid default shader kind.
+    CompileStringTest, InvalidShaderStage,
+    testing::ValuesIn(std::vector<ShaderStageTestCase>{
+        // Invalid default shader stage.
         {kVertexOnlyShader, shaderc_glsl_default_fragment_shader},
-        // Sets to deduce shader kind from #pragma, but #pragma is defined in
+        // Sets to deduce shader stage from #pragma, but #pragma is defined in
         // the source code.
         {kVertexOnlyShader, shaderc_glsl_infer_from_source},
-        // Invalid #pragma cause errors, even though default shader kind is set
-        // to valid shader kind.
+        // Invalid #pragma cause errors, even though default shader stage is set
+        // to valid shader stage.
         {kVertexOnlyShaderWithInvalidPragma,
          shaderc_glsl_default_vertex_shader},
     }));
@@ -639,8 +644,7 @@ TEST_P(IncluderTests, SetIncluderCallbacks) {
       TestIncluder::ReleaseIncluderResponseWrapper, &includer);
 
   const Compilation comp(compiler.get_compiler_handle(), shader,
-                         shaderc_glsl_vertex_shader,
-                         "shader", options.get());
+                         shaderc_glsl_vertex_shader, "shader", options.get());
   // Checks the existence of the expected string.
   EXPECT_THAT(shaderc_module_get_bytes(comp.result()),
               HasSubstr(test_case.expected_substring()));
@@ -663,8 +667,8 @@ TEST_P(IncluderTests, SetIncluderCallbacksClonedOptions) {
       shaderc_compile_options_clone(options.get()));
 
   const Compilation comp(compiler.get_compiler_handle(), shader,
-                         shaderc_glsl_vertex_shader,
-                         "shader", cloned_options.get());
+                         shaderc_glsl_vertex_shader, "shader",
+                         cloned_options.get());
   // Checks the existence of the expected string.
   EXPECT_THAT(shaderc_module_get_bytes(comp.result()),
               HasSubstr(test_case.expected_substring()));
@@ -872,7 +876,7 @@ TEST_F(CompileStringWithOptionsTest, TargetEnvIgnoredWhenPreprocessing) {
                                  shaderc_glsl_fragment_shader, options_.get()));
 }
 
-TEST_F(CompileStringTest, ShaderKindRespected) {
+TEST_F(CompileStringTest, ShaderStageRespected) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   const std::string kVertexShader = "void main(){ gl_Position = vec4(0);}";
   EXPECT_TRUE(CompilationSuccess(kVertexShader, shaderc_glsl_vertex_shader));
@@ -901,19 +905,19 @@ TEST_F(CompileStringTest, MultipleThreadsCalling) {
   EXPECT_THAT(results, Each(true));
 }
 
-TEST_F(CompileKindsTest, Vertex) {
+TEST_F(CompileStagesTest, Vertex) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   const std::string kVertexShader = "void main(){ gl_Position = vec4(0);}";
   EXPECT_TRUE(CompilationSuccess(kVertexShader, shaderc_glsl_vertex_shader));
 }
 
-TEST_F(CompileKindsTest, Fragment) {
+TEST_F(CompileStagesTest, Fragment) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   const std::string kFragShader = "void main(){ gl_FragColor = vec4(0);}";
   EXPECT_TRUE(CompilationSuccess(kFragShader, shaderc_glsl_fragment_shader));
 }
 
-TEST_F(CompileKindsTest, Compute) {
+TEST_F(CompileStagesTest, Compute) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   const std::string kCompShader =
       R"(#version 310 es
@@ -922,7 +926,7 @@ TEST_F(CompileKindsTest, Compute) {
   EXPECT_TRUE(CompilationSuccess(kCompShader, shaderc_glsl_compute_shader));
 }
 
-TEST_F(CompileKindsTest, Geometry) {
+TEST_F(CompileStagesTest, Geometry) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   const std::string kGeoShader =
 
@@ -939,7 +943,7 @@ TEST_F(CompileKindsTest, Geometry) {
   EXPECT_TRUE(CompilationSuccess(kGeoShader, shaderc_glsl_geometry_shader));
 }
 
-TEST_F(CompileKindsTest, TessControl) {
+TEST_F(CompileStagesTest, TessControl) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   const std::string kTessControlShader =
       R"(#version 310 es
@@ -951,7 +955,7 @@ TEST_F(CompileKindsTest, TessControl) {
       CompilationSuccess(kTessControlShader, shaderc_glsl_tess_control_shader));
 }
 
-TEST_F(CompileKindsTest, TessEvaluation) {
+TEST_F(CompileStagesTest, TessEvaluation) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   const std::string kTessEvaluationShader =
       R"(#version 310 es
@@ -991,8 +995,8 @@ TEST_P(ParseVersionProfileTest, FromNullTerminatedString) {
   const ParseVersionProfileTestCase& test_case = GetParam();
   int version;
   shaderc_profile profile;
-  bool succeed =
-      shaderc_parse_version_profile(test_case.input_string_.c_str(), &version, &profile);
+  bool succeed = shaderc_parse_version_profile(test_case.input_string_.c_str(),
+                                               &version, &profile);
   EXPECT_EQ(test_case.expected_succeed_, succeed);
   // check the return version and profile only when the parsing succeeds.
   if (succeed) {

@@ -43,7 +43,7 @@ class FileCompiler {
   // Any errors/warnings found in the shader source will be output to std::cerr
   // and increment the counts reported by OutputMessages().
   bool CompileShaderFile(const std::string& input_file,
-                         shaderc_shader_kind shader_stage);
+                         shaderc_shader_stage shader_stage);
 
   // Sets the working directory for the compilation.
   void SetWorkingDirectory(const std::string& dir);

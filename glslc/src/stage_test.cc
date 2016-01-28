@@ -28,40 +28,40 @@ using shaderc_util::string_piece;
 
 namespace {
 
-TEST(DeduceDefaultShaderKindFromFileName, ValidStage) {
+TEST(DeduceDefaultShaderStageFromFileName, ValidStage) {
   std::stringstream error_stream;
   EXPECT_EQ(shaderc_glsl_default_vertex_shader,
-            glslc::DeduceDefaultShaderKindFromFileName("a.vert"));
+            glslc::DeduceDefaultShaderStageFromFileName("a.vert"));
 
   EXPECT_EQ(shaderc_glsl_default_fragment_shader,
-            glslc::DeduceDefaultShaderKindFromFileName("a.frag"));
+            glslc::DeduceDefaultShaderStageFromFileName("a.frag"));
 
   EXPECT_EQ(shaderc_glsl_default_geometry_shader,
-            glslc::DeduceDefaultShaderKindFromFileName("a.geom"));
+            glslc::DeduceDefaultShaderStageFromFileName("a.geom"));
 
   EXPECT_EQ(shaderc_glsl_default_tess_control_shader,
-            glslc::DeduceDefaultShaderKindFromFileName("a.tesc"));
+            glslc::DeduceDefaultShaderStageFromFileName("a.tesc"));
 
   EXPECT_EQ(shaderc_glsl_default_tess_evaluation_shader,
-            glslc::DeduceDefaultShaderKindFromFileName("a.tese"));
+            glslc::DeduceDefaultShaderStageFromFileName("a.tese"));
 
   EXPECT_EQ(shaderc_glsl_default_compute_shader,
-            glslc::DeduceDefaultShaderKindFromFileName("a.comp"));
+            glslc::DeduceDefaultShaderStageFromFileName("a.comp"));
 }
 
-TEST(DeduceDefaultShaderKindFromFileName, InvalidStage) {
+TEST(DeduceDefaultShaderStageFromFileName, InvalidStage) {
   std::stringstream error_stream;
   EXPECT_EQ(shaderc_glsl_infer_from_source,
-            glslc::DeduceDefaultShaderKindFromFileName("a.glsl"));
+            glslc::DeduceDefaultShaderStageFromFileName("a.glsl"));
 
   EXPECT_EQ(shaderc_glsl_infer_from_source,
-            glslc::DeduceDefaultShaderKindFromFileName("-"));
+            glslc::DeduceDefaultShaderStageFromFileName("-"));
 
   EXPECT_EQ(shaderc_glsl_infer_from_source,
-            glslc::DeduceDefaultShaderKindFromFileName("a.foo"));
+            glslc::DeduceDefaultShaderStageFromFileName("a.foo"));
 
   EXPECT_EQ(shaderc_glsl_infer_from_source,
-            glslc::DeduceDefaultShaderKindFromFileName("no-file-extension"));
+            glslc::DeduceDefaultShaderStageFromFileName("no-file-extension"));
 }
 
 }  // anonymous namespace

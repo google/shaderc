@@ -162,7 +162,7 @@ class CompileOptions {
   // Sets the compiler to emit a disassembly text instead of a binary. In
   // this mode, the byte array result in the shaderc_spv_module returned
   // from shaderc_compile_into_spv() will consist of SPIR-V assembly text.
-  // Note the preprocessing only mode overrides this option, and this option
+  // Note the preprocessing-only mode overrides this option, and this option
   // overrides the default mode generating a SPIR-V binary.
   void SetDisassemblyMode() {
     shaderc_compile_options_set_disassembly_mode(options_);
@@ -235,14 +235,14 @@ class Compiler {
   // Compiles the given source GLSL into a SPIR-V module.
   // The source_text parameter must be a valid pointer.
   // The source_text_size parameter must be the length of the source text.
-  // The shader_kind parameter either forces the compilation to be done with a
-  // specified shader kind, or hint the compiler how to determine the exact
-  // shader kind. If the shader kind is set to shaderc_glslc_infer_from_source,
-  // the compiler will try to deduce the shader kind from the source string and
+  // The shader_stage parameter either forces the compilation to be done with a
+  // specified shader stage, or hint the compiler how to determine the exact
+  // shader stage. If the shader stage is set to shaderc_glslc_infer_from_source,
+  // the compiler will try to deduce the shader stage from the source string and
   // a failure in this proess will generate an error. Currently only #pragma
-  // annotation is supported. If the shader kind is set to one of the default
-  // shader kinds, the compiler will fall back to the specified default shader
-  // kind in case it failed to deduce the shader kind from the source string.
+  // annotation is supported. If the shader stage is set to one of the default
+  // shader stages, the compiler will fall back to the specified default shader
+  // stage in case it failed to deduce the shader stage from the source string.
   // The input_file_name is a null-termintated string. It is used as a tag to
   // identify the source string in cases like emitting error messages. It
   // doesn't have to be a 'file name'.
@@ -250,25 +250,25 @@ class Compiler {
   // It is valid for the returned SpvModule object to outlive this compiler
   // object.
   SpvModule CompileGlslToSpv(const char* source_text, size_t source_text_size,
-                             shaderc_shader_kind shader_kind,
+                             shaderc_shader_stage shader_stage,
                              const char* input_file_name) const {
     shaderc_spv_module_t module =
         shaderc_compile_into_spv(compiler_, source_text, source_text_size,
-                                 shader_kind, input_file_name, "main", nullptr);
+                                 shader_stage, input_file_name, "main", nullptr);
     return SpvModule(module);
   }
 
   // Compiles the given source GLSL into a SPIR-V module.
   // The source_text parameter must be a valid pointer.
   // The source_text_size parameter must be the length of the source text.
-  // The shader_kind parameter either forces the compilation to be done with a
-  // specified shader kind, or hint the compiler how to determine the exact
-  // shader kind. If the shader kind is set to shaderc_glslc_infer_from_source,
-  // the compiler will try to deduce the shader kind from the source string and
+  // The shader_stage parameter either forces the compilation to be done with a
+  // specified shader stage, or hint the compiler how to determine the exact
+  // shader stage. If the shader stage is set to shaderc_glslc_infer_from_source,
+  // the compiler will try to deduce the shader stage from the source string and
   // a failure in this proess will generate an error. Currently only #pragma
-  // annotation is supported. If the shader kind is set to one of the default
-  // shader kinds, the compiler will fall back to the specified default shader
-  // kind in case it failed to deduce the shader kind from the source string.
+  // annotation is supported. If the shader stage is set to one of the default
+  // shader stages, the compiler will fall back to the specified default shader
+  // stage in case it failed to deduce the shader stage from the source string.
   // The input_file_name is a null-termintated string. It is used as a tag to
   // identify the source string in cases like emitting error messages. It
   // doesn't have to be a 'file name'.
@@ -276,36 +276,36 @@ class Compiler {
   // parameter.
   // It is valid for the returned SpvModule object to outlive this compiler
   // object.
-  // Note when the options_ has disassembly mode or preprocessing only mode set
+  // Note when the options_ has disassembly mode or preprocessing-only mode set
   // on, the returned SpvModule will hold a text string, instead of a SPIR-V
   // binary generated with default options.
   SpvModule CompileGlslToSpv(const char* source_text, size_t source_text_size,
-                             shaderc_shader_kind shader_kind,
+                             shaderc_shader_stage shader_stage,
                              const char* input_file_name,
                              const CompileOptions& options) const {
     shaderc_spv_module_t module = shaderc_compile_into_spv(
-        compiler_, source_text, source_text_size, shader_kind, input_file_name,
+        compiler_, source_text, source_text_size, shader_stage, input_file_name,
         "main", options.options_);
     return SpvModule(module);
   }
 
   // Compiles the given source GLSL into a SPIR-V module by invoking
-  // CompileGlslToSpv(const char*, size_t, shaderc_shader_kind, const char*);
+  // CompileGlslToSpv(const char*, size_t, shaderc_shader_stage, const char*);
   SpvModule CompileGlslToSpv(const std::string& source_text,
-                             shaderc_shader_kind shader_kind,
+                             shaderc_shader_stage shader_stage,
                              const char* input_file_name) const {
-    return CompileGlslToSpv(source_text.data(), source_text.size(), shader_kind,
+    return CompileGlslToSpv(source_text.data(), source_text.size(), shader_stage,
                             input_file_name);
   }
 
   // Compiles the given source GLSL into a SPIR-V module by invoking
-  // CompileGlslToSpv(const char*, size_t, shaderc_shader_kind, const char*,
+  // CompileGlslToSpv(const char*, size_t, shaderc_shader_stage, const char*,
   // options);
   SpvModule CompileGlslToSpv(const std::string& source_text,
-                             shaderc_shader_kind shader_kind,
+                             shaderc_shader_stage shader_stage,
                              const char* input_file_name,
                              const CompileOptions& options) const {
-    return CompileGlslToSpv(source_text.data(), source_text.size(), shader_kind,
+    return CompileGlslToSpv(source_text.data(), source_text.size(), shader_stage,
                             input_file_name, options);
   }
 

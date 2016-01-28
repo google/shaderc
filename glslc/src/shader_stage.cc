@@ -25,35 +25,35 @@ namespace {
 // Maps an identifier to a shader stage.
 struct StageMapping {
   const char* id;
-  shaderc_shader_kind stage;
+  shaderc_shader_stage stage;
 };
 
 }  // anonymous namespace
 
 namespace glslc {
 
-shaderc_shader_kind MapStageNameToForcedKind(const string_piece& stage_name) {
-  const StageMapping string_to_kind[] = {
+shaderc_shader_stage MapStageNameToForcedShaderStage(const string_piece& stage_name) {
+  const StageMapping string_to_stage[] = {
       {"vertex", shaderc_glsl_vertex_shader},
       {"fragment", shaderc_glsl_fragment_shader},
       {"tesscontrol", shaderc_glsl_tess_control_shader},
       {"tesseval", shaderc_glsl_tess_evaluation_shader},
       {"geometry", shaderc_glsl_geometry_shader},
       {"compute", shaderc_glsl_compute_shader}};
-  for (const auto& entry : string_to_kind) {
+  for (const auto& entry : string_to_stage) {
     if (stage_name == entry.id) return entry.stage;
   }
   return shaderc_glsl_infer_from_source;
 }
 
-shaderc_shader_kind GetForcedShaderKindFromCmdLine(
+shaderc_shader_stage GetForcedShaderStageFromCmdLine(
     const shaderc_util::string_piece& f_shader_stage_str) {
   size_t equal_pos = f_shader_stage_str.find_first_of("=");
   if (equal_pos == std::string::npos) return shaderc_glsl_infer_from_source;
-  return MapStageNameToForcedKind(f_shader_stage_str.substr(equal_pos + 1));
+  return MapStageNameToForcedShaderStage(f_shader_stage_str.substr(equal_pos + 1));
 }
 
-shaderc_shader_kind DeduceDefaultShaderKindFromFileName(
+shaderc_shader_stage DeduceDefaultShaderStageFromFileName(
     const string_piece file_name) {
   // Add new stage types here.
   static const StageMapping kStringToStage[] = {
@@ -65,7 +65,7 @@ shaderc_shader_kind DeduceDefaultShaderKindFromFileName(
       {"comp", shaderc_glsl_default_compute_shader}};
 
   const string_piece extension = glslc::GetFileExtension(file_name);
-  shaderc_shader_kind stage = shaderc_glsl_infer_from_source;
+  shaderc_shader_stage stage = shaderc_glsl_infer_from_source;
 
   for (const auto& entry : kStringToStage) {
     if (extension == entry.id) stage = entry.stage;
