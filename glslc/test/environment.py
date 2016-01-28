@@ -75,4 +75,4 @@ class File:
             f.write(self.content)
         if not self.readable:
           access_bits = stat.S_IMODE(os.stat(full_path).st_mode)
-          os.chmod(full_path, access_bits & ~stat.S_IREAD)
+          os.chmod(full_path, access_bits & ~stat.S_IRUSR)
