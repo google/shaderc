@@ -284,8 +284,7 @@ void shaderc_compile_options_set_target_env(shaderc_compile_options_t options,
                                             shaderc_target_env target,
                                             uint32_t version) {
   // "version" reserved for future use, intended to distinguish between
-  // different
-  // versions of a target environment
+  // different versions of a target environment
   options->compiler.SetMessageRules(GetMessageRules(target));
 }
 
