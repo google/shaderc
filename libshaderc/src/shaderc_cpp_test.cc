@@ -535,7 +535,7 @@ TEST_F(CppInterface, PreprocessingOnlyModeSecondOverridesDisassemblyMode) {
 }
 
 // A shader stage test cases needs: 1) A shader text with or without #pragma
-// annotation, 2) shader_stage.
+// annotation, 2) shader stage.
 struct ShaderStageTestCase {
   const char* shader_;
   shaderc_shader_stage shader_stage_;

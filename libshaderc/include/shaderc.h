@@ -24,7 +24,7 @@ extern "C" {
 #include <stdint.h>
 
 typedef enum {
-  // Forced shader stages. These shader stagesforce the compiler to compile the
+  // Forced shader stages. These shader stages force the compiler to compile the
   // source code as the specified stage of shader.
   shaderc_glsl_vertex_shader,
   shaderc_glsl_fragment_shader,

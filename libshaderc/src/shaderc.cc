@@ -37,11 +37,11 @@
 
 namespace {
 
-// Returns shader stage (ie: vertex, fragment, etc.) in response to forced
-// shader stages. If the shader stage is not a forced stage, returns
-// EshLangCount to let #pragma annotation or shader stage deducer determine the
-// stage to use.
-EShLanguage GetForcedStage(shaderc_shader_stage stage) {
+// Returns glslang shader stage (ie: vertex, fragment, etc.) in response to
+// shaderc forced shader stages. If the shader stage is not a forced stage,
+// returns EshLangCount to let #pragma annotation or shader stage deducer
+// determine the stage to use.
+EShLanguage GetForcedGlslangStage(shaderc_shader_stage stage) {
   switch (stage) {
     case shaderc_glsl_vertex_shader:
       return EShLangVertex;
@@ -122,7 +122,7 @@ class StageDeducer {
   // call.
   EShLanguage operator()(std::ostream* /*error_stream*/,
                          const shaderc_util::string_piece& /*error_tag*/) {
-    EShLanguage stage = GetDefaultStage(stage_);
+    EShLanguage stage = GetDefaultGlslangStage(stage_);
     if (stage == EShLangCount) {
       error_ = true;
     } else {
@@ -135,9 +135,10 @@ class StageDeducer {
   bool error() const { return error_; }
 
  private:
-  // Gets the corresponding shader stage for a given 'default' shader stage. All
-  // other stages are mapped to EShLangCount which should not be used.
-  EShLanguage GetDefaultStage(shaderc_shader_stage stage) const {
+  // Gets the corresponding glslang shader stage for a given shaderc 'default'
+  // shader stage. All other shaderc stages are mapped to EShLangCount which
+  // should not be used.
+  EShLanguage GetDefaultGlslangStage(shaderc_shader_stage stage) const {
     switch (stage) {
       case shaderc_glsl_vertex_shader:
       case shaderc_glsl_fragment_shader:
@@ -368,7 +369,7 @@ shaderc_spv_module_t shaderc_compile_into_spv(
     size_t total_warnings = 0;
     size_t total_errors = 0;
     std::string input_file_name_str(input_file_name);
-    EShLanguage forced_stage = GetForcedStage(shader_stage);
+    EShLanguage forced_stage = GetForcedGlslangStage(shader_stage);
     shaderc_util::string_piece source_string =
         shaderc_util::string_piece(source_text, source_text + source_text_size);
     StageDeducer stage_deducer(shader_stage);
