@@ -30,6 +30,15 @@ const char kMinimalShaderWithMacro[] =
     "#define E main\n"
     "void E(){}\n";
 
+// The minimal shader that needs valueless predefinition of 'E' to compile.
+const char kValuelessPredefinitionShader[] =
+      "#version 140\n"
+      "#ifdef E\n"
+      "void main(){}\n"
+      "#else\n"
+      "#error\n"
+      "#endif";
+
 // By default the compiler will emit a warning on line 2 complaining
 // that 'float' is a deprecated attribute in version 130.  Use verison 140
 // because some versions of glslang will error out for a too-low version

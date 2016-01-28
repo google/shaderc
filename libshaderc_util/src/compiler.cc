@@ -221,9 +221,11 @@ bool Compiler::Compile(
   }
 }
 
-void Compiler::AddMacroDefinition(const string_piece& macro,
-                                  const string_piece& definition) {
-  predefined_macros_[macro] = definition;
+void Compiler::AddMacroDefinition(const char* macro, size_t macro_length,
+                                  const char* definition,
+                                  size_t definition_length) {
+  predefined_macros_[std::string(macro, macro_length)] =
+      definition ? std::string(definition, definition_length) : "";
 }
 
 void Compiler::SetMessageRules(EShMessages rules) { message_rules_ = rules; }

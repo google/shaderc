@@ -68,6 +68,16 @@ const char kOpenGLVertexShaderDeducibleStage[] =
        #pragma shader_stage(vertex)
        void main() { int t = gl_VertexID; })";
 
+// A shader that needs valueless macro predefinition E, to be compiled
+// successfully.
+const std::string kValuelessPredefinitionShader =
+      "#version 140\n"
+      "#ifdef E\n"
+      "void main(){}\n"
+      "#else\n"
+      "#error\n"
+      "#endif";
+
 // A CountingIncluder that never returns valid content for a requested
 // file inclusion.
 class DummyCountingIncluder : public shaderc_util::CountingIncluder {
@@ -185,6 +195,30 @@ TEST_F(CompilerTest, RespectTargetEnvOnOpenGLShaderWhenDeducingStage) {
 
 TEST_F(CompilerTest, DISABLED_RespectTargetEnvOnVulkanShader) {
   // TODO(dneto): Add test for a shader that should only compile for Vulkan.
+}
+
+TEST_F(CompilerTest, AddMacroDefinition) {
+  const std::string kMinimalExpandedShader = "void E(){}";
+  compiler_.AddMacroDefinition("E", 1u, "main", 4u);
+  EXPECT_TRUE(SimpleCompilationSucceeds(kMinimalExpandedShader, EShLangVertex));
+}
+
+TEST_F(CompilerTest, AddValuelessMacroDefinitionNullPointer) {
+  compiler_.AddMacroDefinition("E", 1u, nullptr, 100u);
+  EXPECT_TRUE(
+      SimpleCompilationSucceeds(kValuelessPredefinitionShader, EShLangVertex));
+}
+
+TEST_F(CompilerTest, AddValuelessMacroDefinitionZeroLength) {
+  compiler_.AddMacroDefinition("E", 1u, "something", 0u);
+  EXPECT_TRUE(
+      SimpleCompilationSucceeds(kValuelessPredefinitionShader, EShLangVertex));
+}
+
+TEST_F(CompilerTest, AddMacroDefinitionNotNullTerminated) {
+  const std::string kMinimalExpandedShader = "void E(){}";
+  compiler_.AddMacroDefinition("EFGH", 1u, "mainnnnnn", 4u);
+  EXPECT_TRUE(SimpleCompilationSucceeds(kMinimalExpandedShader, EShLangVertex));
 }
 
 }  // anonymous namespace

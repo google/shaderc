@@ -98,8 +98,7 @@ class GlslInitializer {
 
 // Maps macro names to their definitions.  Stores string_pieces, so the
 // underlying strings must outlive it.
-using MacroDictionary =
-    std::unordered_map<shaderc_util::string_piece, shaderc_util::string_piece>;
+using MacroDictionary = std::unordered_map<std::string, std::string>;
 
 // Holds all of the state required to compile source GLSL into SPIR-V.
 class Compiler {
@@ -134,9 +133,11 @@ class Compiler {
   void SetSuppressWarnings();
 
   // Adds an implicit macro definition obeyed by subsequent CompileShader()
-  // calls.
-  void AddMacroDefinition(const string_piece& macro,
-                          const string_piece& definition);
+  // calls. The macro and definition should be passed in with their char*
+  // pointer and their lengths. They can be modified or deleted after this
+  // function has returned.
+  void AddMacroDefinition(const char* macro, size_t macro_length,
+                          const char* definition, size_t definition_length);
 
   // Sets message rules to be used when generating compiler warnings/errors
   void SetMessageRules(EShMessages rules);
