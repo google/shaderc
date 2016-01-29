@@ -14,8 +14,6 @@
 
 #include "shader_stage.h"
 
-#include "libshaderc_util/resources.h"
-
 #include "file.h"
 
 using shaderc_util::string_piece;

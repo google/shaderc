@@ -22,7 +22,6 @@
 #include <list>
 
 #include "libshaderc_util/string_piece.h"
-#include "libshaderc_util/version_profile.h"
 
 #include "file_compiler.h"
 #include "file.h"
