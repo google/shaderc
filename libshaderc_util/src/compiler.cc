@@ -86,9 +86,10 @@ spv_result_t DisassembleBinary(const std::vector<uint32_t>& binary,
   spv_text disassembled_text = nullptr;
   spv_diagnostic spvtools_diagnostic = nullptr;
 
-  spv_result_t result = spvBinaryToText(
-      spvtools_context, binary.data(), binary.size(),
-      /* options = */ 0u, &disassembled_text, &spvtools_diagnostic);
+  spv_result_t result =
+      spvBinaryToText(spvtools_context, binary.data(), binary.size(),
+                      SPV_BINARY_TO_TEXT_OPTION_INDENT, &disassembled_text,
+                      &spvtools_diagnostic);
   if (result == SPV_SUCCESS) {
     text_or_error->assign(disassembled_text->str, disassembled_text->length);
   } else {
