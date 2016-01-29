@@ -135,8 +135,6 @@ bool Compiler::Compile(
     std::tie(success, preprocessed_shader, glslang_errors) =
         PreprocessShader(error_tag, input_source_string, preamble, includer);
 
-    // Make sure we do not create/destroy the entire glslang process data
-    // between here and compile_shader.
     success &= PrintFilteredErrors(error_tag, error_stream, warnings_as_errors_,
                                    /* suppress_warnings = */ true,
                                    glslang_errors.c_str(), total_warnings,
@@ -251,11 +249,6 @@ std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
     const std::string& error_tag, const string_piece& shader_source,
     const string_piece& shader_preamble,
     const CountingIncluder& includer) const {
-  // Glslang's symbol tables of builtins are lazily initialized, but
-  // the already-initialized check is insensitive to whether SPIR-V
-  // or Vulkan is turned on.  Since preprocessing uses different
-  // message rules from parsing, to be safe the preprocessor step must
-  // build its own symbol tables and tear them down.
 
   // The stage does not matter for preprocessing.
   glslang::TShader shader(EShLangVertex);
