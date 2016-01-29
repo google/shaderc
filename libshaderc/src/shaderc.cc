@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
-#include <mutex>
 #include <sstream>
 #include <vector>
 
@@ -85,17 +84,6 @@ EShMessages GetMessageRules(shaderc_target_env target) {
 
   return msgs;
 }
-
-struct {
-  // The number of currently initialized compilers.
-  int compiler_initialization_count;
-
-  std::mutex mutex;  // Guards creation and deletion of glsl state.
-} glsl_state = {
-    0,
-};
-
-std::mutex compile_mutex;  // Guards shaderc_compile_*.
 
 // A wrapper functor class to be used as stage deducer for libshaderc_util
 // Compile() interface. When the given shader kind is one of the default shader
@@ -307,62 +295,28 @@ void shaderc_compile_options_set_warnings_as_errors(
 }
 
 shaderc_compiler_t shaderc_compiler_initialize() {
-  std::lock_guard<std::mutex> lock(glsl_state.mutex);
-  ++glsl_state.compiler_initialization_count;
-  bool success = true;
-  if (glsl_state.compiler_initialization_count == 1) {
-    TRY_IF_EXCEPTIONS_ENABLED { success = (ShInitialize() != 0); }
-    CATCH_IF_EXCEPTIONS_ENABLED(...) { success = false; }
-  }
-  if (!success) {
-    glsl_state.compiler_initialization_count -= 1;
-    return nullptr;
-  }
+  static shaderc_util::GlslInitializer* initializer =
+      new shaderc_util::GlslInitializer;
   shaderc_compiler_t compiler = new (std::nothrow) shaderc_compiler;
-  if (!compiler) {
-    return nullptr;
-  }
-
+  compiler->initializer = initializer;
   return compiler;
 }
 
-void shaderc_compiler_release(shaderc_compiler_t compiler) {
-  if (compiler == nullptr) {
-    return;
-  }
-
-  if (compiler->initialized) {
-    compiler->initialized = false;
-    delete compiler;
-    // Defend against further dereferences through the "compiler" variable.
-    compiler = nullptr;
-    std::lock_guard<std::mutex> lock(glsl_state.mutex);
-    if (glsl_state.compiler_initialization_count) {
-      --glsl_state.compiler_initialization_count;
-      if (glsl_state.compiler_initialization_count == 0) {
-        TRY_IF_EXCEPTIONS_ENABLED { ShFinalize(); }
-        CATCH_IF_EXCEPTIONS_ENABLED(...) {}
-      }
-    }
-  }
-}
+void shaderc_compiler_release(shaderc_compiler_t compiler) { delete compiler; }
 
 shaderc_spv_module_t shaderc_compile_into_spv(
     const shaderc_compiler_t compiler, const char* source_text,
     size_t source_text_size, shaderc_shader_kind shader_kind,
     const char* input_file_name, const char* entry_point_name,
     const shaderc_compile_options_t additional_options) {
-  std::lock_guard<std::mutex> lock(compile_mutex);
-
   shaderc_spv_module_t result = new (std::nothrow) shaderc_spv_module;
   if (!result) {
     return nullptr;
   }
 
-  result->compilation_status =
-      shaderc_compilation_status_invalid_stage;
-  bool compilation_succeeded = false; // In case we exit early.
-  if (!compiler->initialized) return result;
+  result->compilation_status = shaderc_compilation_status_invalid_stage;
+  bool compilation_succeeded = false;  // In case we exit early.
+  if (!compiler->initializer) return result;
   TRY_IF_EXCEPTIONS_ENABLED {
     std::stringstream output;
     std::stringstream errors;
@@ -383,14 +337,16 @@ shaderc_spv_module_t shaderc_compile_into_spv(
           InternalFileIncluder(additional_options->get_includer_response,
                                additional_options->release_includer_response,
                                additional_options->includer_user_data),
-          &output, &errors, &total_warnings, &total_errors);
+          &output, &errors, &total_warnings, &total_errors,
+          compiler->initializer);
     } else {
       // Compile with default options.
       compilation_succeeded = shaderc_util::Compiler().Compile(
           source_string, forced_stage, input_file_name_str,
           std::ref(stage_deducer), InternalFileIncluder(), &output, &errors,
-          &total_warnings, &total_errors);
+          &total_warnings, &total_errors, compiler->initializer);
     }
+
     result->messages = errors.str();
     result->spirv = output.str();
     result->num_warnings = total_warnings;

@@ -36,9 +36,12 @@ struct shaderc_spv_module {
       shaderc_compilation_status_null_result_module;
 };
 
+namespace shaderc_util {
+class GlslInitializer;
+}
+
 struct shaderc_compiler {
-  // Whether or not this compiler is in an initialized state.
-  bool initialized = true;
+  shaderc_util::GlslInitializer* initializer;
 };
 
 #endif  // LIBSHADERC_SRC_SHADERC_PRIVATE_H_

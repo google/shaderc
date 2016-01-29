@@ -107,14 +107,16 @@ spv_result_t DisassembleBinary(const std::vector<uint32_t>& binary,
 namespace shaderc_util {
 
 bool Compiler::Compile(
-    const string_piece& input_source_string, EShLanguage forced_shader_stage,
-    const std::string& error_tag,
+    const string_piece& input_source_string, 
+    EShLanguage forced_shader_stage, const std::string& error_tag,
     const std::function<EShLanguage(std::ostream* error_stream,
                                     const string_piece& error_tag)>&
         stage_callback,
     const CountingIncluder& includer, std::ostream* output_stream,
     std::ostream* error_stream, size_t* total_warnings,
-    size_t* total_errors) const {
+    size_t* total_errors, GlslInitializer* initializer) const {
+
+  auto token = initializer->Acquire(GetMessageRules());
   EShLanguage used_shader_stage = forced_shader_stage;
   const std::string macro_definitions =
       shaderc_util::format(predefined_macros_, "#define ", " ", "\n");
@@ -133,6 +135,8 @@ bool Compiler::Compile(
     std::tie(success, preprocessed_shader, glslang_errors) =
         PreprocessShader(error_tag, input_source_string, preamble, includer);
 
+    // Make sure we do not create/destroy the entire glslang process data
+    // between here and compile_shader.
     success &= PrintFilteredErrors(error_tag, error_stream, warnings_as_errors_,
                                    /* suppress_warnings = */ true,
                                    glslang_errors.c_str(), total_warnings,
@@ -171,7 +175,6 @@ bool Compiler::Compile(
   }
 
   // Parsing requires its own Glslang symbol tables.
-  GlslInitializer initializer;
   glslang::TShader shader(used_shader_stage);
   const char* shader_strings = input_source_string.data();
   const int shader_lengths = static_cast<int>(input_source_string.size());
@@ -226,6 +229,8 @@ void Compiler::AddMacroDefinition(const string_piece& macro,
 
 void Compiler::SetMessageRules(EShMessages rules) { message_rules_ = rules; }
 
+EShMessages Compiler::GetMessageRules() const { return message_rules_; }
+
 void Compiler::SetForcedVersionProfile(int version, EProfile profile) {
   default_version_ = version;
   default_profile_ = profile;
@@ -251,7 +256,7 @@ std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
   // or Vulkan is turned on.  Since preprocessing uses different
   // message rules from parsing, to be safe the preprocessor step must
   // build its own symbol tables and tear them down.
-  GlslInitializer initializer;
+
   // The stage does not matter for preprocessing.
   glslang::TShader shader(EShLangVertex);
   const char* shader_strings = shader_source.data();

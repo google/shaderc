@@ -94,10 +94,11 @@ class CompilerTest : public testing::Test {
     std::stringstream errors;
     size_t total_warnings = 0;
     size_t total_errors = 0;
-
+    shaderc_util::GlslInitializer initializer;
     const bool result = compiler_.Compile(
-        source, stage, "shader", stage_callback, DummyCountingIncluder(), &out,
-        &errors, &total_warnings, &total_errors);
+        source, stage,
+        "shader", stage_callback, DummyCountingIncluder(), &out, &errors,
+        &total_warnings, &total_errors, &initializer);
     errors_ = errors.str();
     return result;
   }
