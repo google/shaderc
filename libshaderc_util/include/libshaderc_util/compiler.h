@@ -32,10 +32,10 @@
 namespace shaderc_util {
 
 // Initializes glslang on creation, and destroys it on completion.
-// There is expected to be precisely one of these objects active within
-// the current process at a time.
+// This object is expected to be a singleton, so that internal
+// glslang state can be correctly handled.
 // TODO(awoloszyn): Once glslang no longer has static global mutable state
-//                  remove this object.
+//                  remove this class.
 class GlslInitializer {
  public:
   GlslInitializer() : last_messages_(EShMsgDefault) {
@@ -71,8 +71,8 @@ class GlslInitializer {
 
   // Obtains exclusive access to the glslang state. The state remains
   // exclusive until the Initialization Token has been destroyed.
-  // Re-initializes glsl state iff the previous rules and the current rules
-  // are incompatible.
+  // Re-initializes glsl state iff the previous messages and the current
+  // messages are incompatible.
   InitializationToken Acquire(EShMessages new_messages) {
     state_lock_.lock();
 
@@ -160,8 +160,8 @@ class Compiler {
   // includer.
   //
   // The initializer parameter must be a valid GlslInitializer object.
-  // Acquire will be called on the initializer, and cleaned up
-  // as necessary.
+  // Acquire will be called on the initializer and the result will be
+  // destoryed before the function ends.
   //
   // Any error messages are written as if the file name were error_tag.
   // Any errors are written to the error_stream parameter.
