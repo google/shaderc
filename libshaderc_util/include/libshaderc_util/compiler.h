@@ -17,6 +17,7 @@
 #define LIBSHADERC_UTIL_INC_COMPILER_H
 
 #include <functional>
+#include <mutex>
 #include <ostream>
 #include <string>
 #include <unordered_map>
@@ -31,10 +32,68 @@
 namespace shaderc_util {
 
 // Initializes glslang on creation, and destroys it on completion.
+// This object is expected to be a singleton, so that internal
+// glslang state can be correctly handled.
+// TODO(awoloszyn): Once glslang no longer has static global mutable state
+//                  remove this class.
 class GlslInitializer {
  public:
-  GlslInitializer() { glslang::InitializeProcess(); }
+  GlslInitializer() : last_messages_(EShMsgDefault) {
+    glslang::InitializeProcess();
+  }
+
   ~GlslInitializer() { glslang::FinalizeProcess(); }
+
+  // Calls release on GlslangInitializer used to intialize this object
+  // when it is destroyed.
+  class InitializationToken {
+   public:
+    ~InitializationToken() {
+      if (initializer_) {
+        initializer_->Release();
+      }
+    }
+
+    InitializationToken(InitializationToken&& other):
+      initializer_(other.initializer_) {
+        other.initializer_ = nullptr;
+    }
+
+    InitializationToken(const InitializationToken&) = delete;
+
+   private:
+    InitializationToken(GlslInitializer* initializer)
+        : initializer_(initializer) {}
+
+    friend class GlslInitializer;
+    GlslInitializer* initializer_;
+  };
+
+  // Obtains exclusive access to the glslang state. The state remains
+  // exclusive until the Initialization Token has been destroyed.
+  // Re-initializes glsl state iff the previous messages and the current
+  // messages are incompatible.
+  InitializationToken Acquire(EShMessages new_messages) {
+    state_lock_.lock();
+
+    if ((last_messages_ ^ new_messages) &
+        (EShMsgVulkanRules | EShMsgSpvRules)) {
+      glslang::FinalizeProcess();
+      glslang::InitializeProcess();
+    }
+    last_messages_ = new_messages;
+    return InitializationToken(this);
+  }
+
+ private:
+  void Release() {
+    state_lock_.unlock();
+  }
+
+  friend class InitializationToken;
+
+  EShMessages last_messages_;
+  std::mutex state_lock_;
 };
 
 // Maps macro names to their definitions.  Stores string_pieces, so the
@@ -56,7 +115,7 @@ class Compiler {
         warnings_as_errors_(false),
         suppress_warnings_(false),
         generate_debug_info_(false),
-        message_rules_(static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules)) {}
+        message_rules_(GetDefaultRules()) {}
 
   // Instead of outputting object files, output the disassembled textual output.
   virtual void SetDisassemblyMode();
@@ -82,6 +141,9 @@ class Compiler {
   // Sets message rules to be used when generating compiler warnings/errors
   void SetMessageRules(EShMessages rules);
 
+  // Gets the message rules when generating compiler warnings/error.
+  EShMessages GetMessageRules() const;
+
   // Forces (without any verification) the default version and profile for
   // subsequent CompileShader() calls.
   void SetForcedVersionProfile(int version, EProfile profile);
@@ -97,6 +159,10 @@ class Compiler {
   // from the shader text. Any #include directives are parsed with the given
   // includer.
   //
+  // The initializer parameter must be a valid GlslInitializer object.
+  // Acquire will be called on the initializer and the result will be
+  // destoryed before the function ends.
+  //
   // Any error messages are written as if the file name were error_tag.
   // Any errors are written to the error_stream parameter.
   // total_warnings and total_errors are incremented once for every
@@ -110,7 +176,13 @@ class Compiler {
                                                    error_tag)>& stage_callback,
                const CountingIncluder& includer, std::ostream* output_stream,
                std::ostream* error_stream, size_t* total_warnings,
-               size_t* total_errors) const;
+               size_t* total_errors,
+               GlslInitializer* initializer) const;
+
+  static EShMessages GetDefaultRules() {
+    return static_cast<EShMessages>(EShMsgSpvRules |
+                                                EShMsgVulkanRules);
+  }
 
  protected:
   // Preprocesses a shader whose filename is filename and content is
