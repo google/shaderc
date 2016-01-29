@@ -53,20 +53,6 @@ class TestTargetEnvEqOpenglWithOpenGlCompatShader(expect.ErrorMessage):
 
 
 @inside_glslc_testsuite('OptionTargetEnv')
-class TestTargetEnvEqVulkanWithOpenGlCompatShader(expect.ErrorMessage):
-    """Tests the error message of compiling OpenGL Compatibility Fragment shader
-    with --target-env=vulkan"""
-    shader = FileShader(opengl_compat_fragment_shader(), '.frag')
-    glslc_args = ['--target-env=vulkan', shader]
-    expected_error = [shader, ":4: error: 'texture2D' : ",
-                      "no matching overloaded function found\n",
-                      shader, ":4: error: 'assign' :  ",
-                      "cannot convert from 'const float' to 'fragColor ",
-                      "mediump 4-component vector of float FragColor'\n",
-                      "2 errors generated.\n"]
-
-
-@inside_glslc_testsuite('OptionTargetEnv')
 class TestTargetEnvEqOpenglCompatWithOpenGlVertexShader(expect.ValidObjectFile):
     """Tests that compiling OpenGL vertex shader with --target-env=opengl_compat
     generates valid SPIR-V code"""
@@ -80,10 +66,3 @@ class TestTargetEnvEqOpenglWithOpenGlVertexShader(expect.ValidObjectFile):
     generates valid SPIR-V code"""
     shader = FileShader(opengl_vertex_shader(), '.vert')
     glslc_args = ['--target-env=opengl', '-c', shader]
-
-@inside_glslc_testsuite('OptionTargetEnv')
-class TestTargetEnvEqVulkanWithOpenGlVertexShader(expect.ValidObjectFile):
-    """Tests that compiling OpenGL vertex shader with --target-env=vulkan
-    generates valid SPIR-V code"""
-    shader = FileShader(opengl_vertex_shader(), '.vert')
-    glslc_args = ['--target-env=vulkan', '-c', shader]

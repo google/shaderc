@@ -352,14 +352,6 @@ class TestDashCapEIgnoresTargetEnvOpengl(expect.StdoutMatch):
     glslc_args = ['-E', '--target-env=opengl', shader]
 
 @inside_glslc_testsuite('OptionCapE')
-class TestDashCapEIgnoresTargetEnvVulkan(expect.StdoutMatch):
-    """Tests to make sure --target-env=vulkan is ignored when -E is set."""
-
-    shader = FileShader(opengl_compat_frag_shader(), '.frag')
-    expected_stdout = opengl_compat_frag_shader()
-    glslc_args = ['-E', '--target-env=vulkan', shader]
-
-@inside_glslc_testsuite('OptionCapE')
 class TestDashCapEIgnoresTargetEnvOpenglCompat(expect.StdoutMatch):
     """Tests to make sure --target-env=opengl_compat is ignored when -E is set."""
 
