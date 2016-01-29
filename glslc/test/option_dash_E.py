@@ -329,3 +329,40 @@ void main() {
         ' name\n',
         '1 error generated.\n']
     glslc_args = ['-E', shader]
+
+
+# OpenGL compatibility fragment shader. Can be compiled to SPIR-V successfully
+# when target environment is set to opengl_compat. Compilation will fail when
+# target environment is set to other values. But preprocessing should succeed
+# with any target environment values.
+def opengl_compat_frag_shader():
+    return '''#version 100
+uniform highp sampler2D tex;
+void main(){
+  gl_FragColor = texture2D(tex, vec2(0.0, 0.0));
+}\n'''
+
+
+@inside_glslc_testsuite('OptionCapE')
+class TestDashCapEIgnoresTargetEnvOpengl(expect.StdoutMatch):
+    """Tests to make sure --target-env=opengl is ignored when -E is set."""
+
+    shader = FileShader(opengl_compat_frag_shader(), '.frag')
+    expected_stdout = opengl_compat_frag_shader()
+    glslc_args = ['-E', '--target-env=opengl', shader]
+
+@inside_glslc_testsuite('OptionCapE')
+class TestDashCapEIgnoresTargetEnvVulkan(expect.StdoutMatch):
+    """Tests to make sure --target-env=vulkan is ignored when -E is set."""
+
+    shader = FileShader(opengl_compat_frag_shader(), '.frag')
+    expected_stdout = opengl_compat_frag_shader()
+    glslc_args = ['-E', '--target-env=vulkan', shader]
+
+@inside_glslc_testsuite('OptionCapE')
+class TestDashCapEIgnoresTargetEnvOpenglCompat(expect.StdoutMatch):
+    """Tests to make sure --target-env=opengl_compat is ignored when -E is set."""
+
+    shader = FileShader(opengl_compat_frag_shader(), '.frag')
+    expected_stdout = opengl_compat_frag_shader()
+    glslc_args = ['-E', '--target-env=vulkan', shader]

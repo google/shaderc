@@ -63,7 +63,8 @@ void PrintHelp(std::ostream* out) {
        << "  -S                Only run preprocess and compilation steps.\n"
        << "  --target-env=<environment>\n"
        << "                    Set the target shader environment, and the"
-       << " semantics of warnings and errors.\n"
+       << " semantics\n"
+       << "                    of warnings and errors.\n"
        << "  -w                Suppresses all warning messages.\n"
        << "  -Werror           Treat all warnings as errors.\n"
        << "  -working-directory <dir>\n"
@@ -163,7 +164,7 @@ int main(int argc, char** argv) {
       compiler.options().SetForcedVersionProfile(version, profile);
     } else if (arg.starts_with("--target-env=")) {
       shaderc_target_env target_env = shaderc_target_env_default;
-      const string_piece target_env_str = arg.substr(std::strlen("--target-env"));
+      const string_piece target_env_str = arg.substr(std::strlen("--target-env="));
       if (target_env_str == "vulkan") {
         target_env = shaderc_target_env_vulkan;
       } else if (target_env_str == "opengl") {

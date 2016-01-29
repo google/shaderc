@@ -165,6 +165,20 @@ one in the source code. But `-std=` does affect the behavior of `#line`
 directives in the preprocessed output. Behavior of `#line` directives will
 follow the version specified by `-std=`.
 
+==== `--target-env=`
+
+`--target-env=<value>` lets you specify a target environment on the command line.
+This affects the generation of warnings and errors. ``<value>`` can be one of
+the following:
+
+* `vulkan`: create SPIR-V under Vulkan semantics.
+* `opengl`: create SPIR-V under OpenGL semantics.
+* `opengl_compat`: create SPIR-V under OpenGL semantics, including compatibility
+  profile functions.
+
+By default, the ``<value>`` is set to `vulkan` and the compiler creates SPIR-V
+under Vulkan semantics.
+
 ==== `-x`
 
 `-x` lets you specify the language of the input shader files. Right now, the

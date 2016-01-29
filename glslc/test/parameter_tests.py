@@ -69,6 +69,9 @@ Options:
                     are concatenations of version and profile, e.g. 310es,
                     450core, etc.
   -S                Only run preprocess and compilation steps.
+  --target-env=<environment>
+                    Set the target shader environment, and the semantics
+                    of warnings and errors.
   -w                Suppresses all warning messages.
   -Werror           Treat all warnings as errors.
   -working-directory <dir>
