@@ -66,3 +66,41 @@ class TestTargetEnvEqOpenglWithOpenGlVertexShader(expect.ValidObjectFile):
     generates valid SPIR-V code"""
     shader = FileShader(opengl_vertex_shader(), '.vert')
     glslc_args = ['--target-env=opengl', '-c', shader]
+
+
+@inside_glslc_testsuite('OptionTargetEnv')
+class TestTargetEnvEqNoArg(expect.ErrorMessage):
+    """Tests the error message of assigning empty string to --target-env"""
+    shader = FileShader(opengl_vertex_shader(), '.vert')
+    glslc_args = ['--target-env=', shader]
+    expected_error = ["glslc: error: invalid value ",
+                      "'' in '--target-env='\n"]
+
+
+@inside_glslc_testsuite('OptionTargetEnv')
+class TestTargetEnvNoEqNoArg(expect.ErrorMessage):
+    """Tests the error message of using --target-env without equal sign and
+    arguments"""
+    shader = FileShader(opengl_vertex_shader(), '.vert')
+    glslc_args = ['--target-env', shader]
+    expected_error = ["glslc: error: unsupported option: ",
+                      "'--target-env'\n"]
+
+
+@inside_glslc_testsuite('OptionTargetEnv')
+class TestTargetEnvNoEqWithArg(expect.ErrorMessage):
+    """Tests the error message of using --target-env without equal sign but
+    arguments"""
+    shader = FileShader(opengl_vertex_shader(), '.vert')
+    glslc_args = ['--target-env', 'opengl', shader]
+    expected_error = ["glslc: error: unsupported option: ",
+                      "'--target-env'\n"]
+
+
+@inside_glslc_testsuite('OptionTargetEnv')
+class TestTargetEnvEqWrongArg(expect.ErrorMessage):
+    """Tests the error message of using --target-env with wrong argument"""
+    shader = FileShader(opengl_vertex_shader(), '.vert')
+    glslc_args = ['--target-env=wrong_arg', shader]
+    expected_error = ["glslc: error: invalid value ",
+                      "'wrong_arg' in '--target-env=wrong_arg'\n"]
