@@ -1,0 +1,5 @@
+create lib${AR_COMBINED_NAME}.a
+addlib ${ALL_AR_LIBS}
+save
+end
+
