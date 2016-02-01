@@ -96,24 +96,6 @@ Otherwise,
 `-o` lets you specify the output file's name. It cannot be used when there are
 multiple files generated. A filename of `-` represents standard output.
 
-==== `-working-directory`
-
-`-working-directory[=]` sets the working directory for the compilation.
-Paths/filenames in the following categories will be resolved against the
-argument of `-working-directory`:
-
-* Input files under *relative* paths.
-* Intermediate output files (files generated via the `-c` or `-S` option).
-** Including the filename under *relative* paths given by the `-o` option.
-* Non-system include files (files ``#include``d using double-quotation marks)
-  under *relative* paths.
-
-Output files will be generated into the current working directory if no
-<<compilation-stage-selection-options,compilation stage selection option>> is
-given.
-
-WARNING: Interaction with `#include` and `-I` is not implemented yet.
-
 === Language and Mode Selection Options
 
 [[option-f-shader-stage]]

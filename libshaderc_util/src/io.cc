@@ -56,6 +56,16 @@ bool IsAbsolutePath(const std::string& path) {
   return false;
 }
 
+std::string GetBaseFileName(const std::string& file_path) {
+  size_t loc_slash = file_path.find_last_of("/\\");
+  std::string base_name =
+      file_path.substr((loc_slash == std::string::npos ? -1 : loc_slash) + 1);
+  if (base_name == ".." || base_name == ".") {
+    base_name = "";
+  }
+  return base_name;
+}
+
 bool ReadFile(const std::string& input_file_name,
               std::vector<char>* input_data) {
   std::istream* stream = &std::cin;

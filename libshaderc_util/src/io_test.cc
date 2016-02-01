@@ -24,6 +24,7 @@ using shaderc_util::IsAbsolutePath;
 using shaderc_util::ReadFile;
 using shaderc_util::WriteFile;
 using shaderc_util::GetOutputStream;
+using shaderc_util::GetBaseFileName;
 
 std::string ToString(const std::vector<char>& v) {
   return std::string(v.data(), v.size());
@@ -57,6 +58,32 @@ TEST(IsAbsolutePathTest, Windows) {
       IsAbsolutePath(R"(C:\Program Files (x86)\Windows Folder\shader.glsl)"));
   EXPECT_FALSE(IsAbsolutePath(R"(third_party\gmock)"));
   EXPECT_FALSE(IsAbsolutePath(R"(C:..\File.txt)"));
+}
+
+TEST(GetBaseFileName, Linux) {
+  EXPECT_EQ("", GetBaseFileName(""));
+  EXPECT_EQ("", GetBaseFileName("/"));
+  EXPECT_EQ("", GetBaseFileName("."));
+  EXPECT_EQ("", GetBaseFileName(".."));
+  EXPECT_EQ("echo", GetBaseFileName("/bin/echo"));
+  EXPECT_EQ("shadow", GetBaseFileName("//etc/shadow"));
+  EXPECT_EQ("lib", GetBaseFileName("/../../../lib"));
+  EXPECT_EQ("something", GetBaseFileName("./something"));
+  EXPECT_EQ("input", GetBaseFileName("input"));
+  EXPECT_EQ("test", GetBaseFileName("../test"));
+  EXPECT_EQ("abc", GetBaseFileName(" /abc"));
+  EXPECT_EQ("ttt", GetBaseFileName("/abc def/ttt"));
+}
+
+TEST(GetBaseFileName, Windows) {
+  EXPECT_EQ("file", GetBaseFileName(R"(\\Server1000\superuser\file)"));
+  EXPECT_EQ("file with space",
+            GetBaseFileName(R"(\\zzzz 1000\user with space\file with space)"));
+  EXPECT_EQ(
+      "shader.glsl",
+      GetBaseFileName(R"(C:\Program Files (x86)\Windows Folder\shader.glsl)"));
+  EXPECT_EQ("gmock", GetBaseFileName(R"(third_party\gmock)"));
+  EXPECT_EQ("File.txt", GetBaseFileName(R"(C:..\File.txt)"));
 }
 
 TEST_F(ReadFileTest, CorrectContent) {

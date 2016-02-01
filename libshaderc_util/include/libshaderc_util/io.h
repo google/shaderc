@@ -25,6 +25,19 @@ namespace shaderc_util {
 // Returns true if the given path is an absolute path.
 bool IsAbsolutePath(const std::string& path);
 
+// A helper function to return the base file name from either absolute path or
+// relative path representation of a file. It keeps the component from the last
+// '/' or '\' to the end of the given string. If the component is '..' or '.',
+// returns an empty string. If '/' or '\' is the last char of the given string,
+// also returns an empty string.
+// e.g.: dir_a/dir_b/file_c.vert => file_c.vert
+//       dir_a/dir_b/.. => <empty string>
+//       dir_a/dir_b/.  => <empty string>
+//       dir_a/dirb/c/  => <empty string>
+// Note that this method doesn't check whether the given path is a valid one or
+// not.
+std::string GetBaseFileName(const std::string& file_path);
+
 // Reads all of the characters in a given file into input_data.  Outputs an
 // error message to std::cerr if the file could not be read and returns false if
 // there was an error.  If the input_file is "-", then input is read from

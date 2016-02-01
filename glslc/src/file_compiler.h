@@ -45,9 +45,6 @@ class FileCompiler {
   bool CompileShaderFile(const std::string& input_file,
                          shaderc_shader_kind shader_stage);
 
-  // Sets the working directory for the compilation.
-  void SetWorkingDirectory(const std::string& dir);
-
   // Adds a directory to be searched when processing #include directives.
   //
   // Best practice: if you add an empty string before any other path, that will
@@ -92,19 +89,33 @@ class FileCompiler {
   shaderc::CompileOptions& options() {return options_;};
 
  private:
+  // Returns the final file name to be used for the output file.
+  //
+  // If an output file name is specified by the SetOutputFileName(), use that
+  // argument as the final output file name.
+  //
+  // If the user did not specify an output filename:
+  //  If linking is not required, and the input filename has a
+  //  standard stage extension (e.g. .vert) then returns the input filename
+  //  without directory names but with the result extenstion (e.g. .spv or .s)
+  //  appended.
+  //
+  //  If linking is not required, and the input file name does not have a
+  //  standard stage extension, then also returns the directory-stripped input
+  //  filename, but replaces its extension with the result extension. (If the
+  //  resolved input filename does not have an extension, then appends the result
+  //  extension.)
+  //
+  //  If linking is required and output filename is not specified, returns
+  //  "a.spv".
+  std::string GetOutputFileName(std::string input_filename);
+
   // Performs actual SPIR-V compilation on the contents of input files.
   shaderc::Compiler compiler_;
 
   // Reflects the command-line arguments and goes into
   // compiler_.CompileGlslToSpv().
   shaderc::CompileOptions options_;
-
-  // Returns the name of the output file, given the input_filename string.
-  std::string GetOutputFileName(std::string input_filename);
-
-  // Resolves relative paths against this working directory. Must always end
-  // in '/'.
-  std::string workdir_;
 
   // A FileFinder used to substitute #include directives in the source code.
   shaderc_util::FileFinder include_file_finder_;

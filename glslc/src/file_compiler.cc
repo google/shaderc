@@ -34,9 +34,6 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
                                      shaderc_shader_kind shader_stage) {
   std::vector<char> input_data;
   std::string path = input_file;
-  if (!workdir_.empty() && !shaderc_util::IsAbsolutePath(path)) {
-    path = workdir_ + path;
-  }
   if (!shaderc_util::ReadFile(path, &input_data)) {
     return false;
   }
@@ -63,12 +60,13 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
                                  &(*input_data.begin()) + input_data.size());
   }
 
-  std::unique_ptr<FileIncluder> includer(new FileIncluder(&include_file_finder_));
+  std::unique_ptr<FileIncluder> includer(
+      new FileIncluder(&include_file_finder_));
   options_.SetIncluder(std::move(includer));
 
-  shaderc::SpvModule result =
-      compiler_.CompileGlslToSpv(source_string.data(), source_string.size(),
-                                 shader_stage, error_file_name.data(), options_);
+  shaderc::SpvModule result = compiler_.CompileGlslToSpv(
+      source_string.data(), source_string.size(), shader_stage,
+      error_file_name.data(), options_);
   total_errors_ += result.GetNumErrors();
   total_warnings_ += result.GetNumWarnings();
 
@@ -115,11 +113,6 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
   }
 
   return compilation_success;
-}
-
-void FileCompiler::SetWorkingDirectory(const std::string& dir) {
-  workdir_ = dir;
-  if (!dir.empty() && dir.back() != '/') workdir_.push_back('/');
 }
 
 void FileCompiler::AddIncludeDirectory(const std::string& path) {
@@ -178,21 +171,18 @@ void FileCompiler::OutputMessages() {
 }
 
 std::string FileCompiler::GetOutputFileName(std::string input_filename) {
-  std::string output_file = "a.spv";
-  if (!needs_linking_) {
-    if (IsStageFile(input_filename)) {
-      output_file = input_filename + file_extension_;
-    } else {
-      output_file = input_filename.substr(0, input_filename.find_last_of('.')) +
-                    file_extension_;
-    }
+  std::string final_output_file_name =
+      needs_linking_ ? "a.spv"
+                     : (IsStageFile(input_filename)
+                            ? shaderc_util::GetBaseFileName(input_filename) +
+                                  file_extension_
+                            : shaderc_util::GetBaseFileName(
+                                  input_filename.substr(
+                                      0, input_filename.find_last_of('.')) +
+                                  file_extension_));
+  if (!output_file_name_.empty()) {
+    final_output_file_name = output_file_name_.str();
   }
-  if (!output_file_name_.empty()) output_file = output_file_name_.str();
-  if (!needs_linking_ && !workdir_.empty() &&
-      !shaderc_util::IsAbsolutePath(input_filename)) {
-    output_file = workdir_ + output_file;
-  }
-  return output_file;
+  return final_output_file_name;
 }
-
 }  // namesapce glslc

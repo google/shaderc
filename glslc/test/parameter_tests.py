@@ -75,8 +75,6 @@ Options:
                     'opengl_compat' and 'vulkan'. The default value is 'vulkan'.
   -w                Suppresses all warning messages.
   -Werror           Treat all warnings as errors.
-  -working-directory <dir>
-                    Resolve file paths relative to the specified directory.
   -x <language>     Treat subsequent input files as having type <language>.
                     The only supported language is glsl.
 '''

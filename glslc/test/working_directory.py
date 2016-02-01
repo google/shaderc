@@ -21,7 +21,7 @@ from placeholder import FileShader
 
 MINIMAL_SHADER = '#version 140\nvoid main() {}'
 
-@inside_glslc_testsuite('WorkDir')
+# @inside_glslc_testsuite('WorkDir')
 class TestWorkDirNoArg(expect.ErrorMessage):
     """Tests -working-directory. Behavior cribbed from Clang."""
 
@@ -32,7 +32,7 @@ class TestWorkDirNoArg(expect.ErrorMessage):
         'glslc: error: no input files\n']
 
 
-@inside_glslc_testsuite('WorkDir')
+# @inside_glslc_testsuite('WorkDir')
 class TestWorkDirEqNoArg(expect.ErrorMessage):
     """Tests -working-directory=<empty>. Behavior cribbed from Clang."""
 
@@ -43,7 +43,7 @@ class TestWorkDirEqNoArg(expect.ErrorMessage):
 EMPTY_SHADER_IN_SUBDIR = Directory(
     'subdir', [File('shader.vert', MINIMAL_SHADER)])
 
-@inside_glslc_testsuite('WorkDir')
+# @inside_glslc_testsuite('WorkDir')
 class TestWorkDirEqNoArgCompileFile(expect.ValidNamedObjectFile):
     """Tests -working-directory=<empty> when compiling input file."""
 
@@ -53,7 +53,7 @@ class TestWorkDirEqNoArgCompileFile(expect.ValidNamedObjectFile):
     expected_object_filenames = ('subdir/shader.vert.spv',)
 
 
-@inside_glslc_testsuite('WorkDir')
+# @inside_glslc_testsuite('WorkDir')
 class TestMultipleWorkDir(expect.ValidNamedObjectFile):
     """Tests that if there are multiple -working-directory=<dir> specified,
     only the last one takes effect."""
@@ -66,7 +66,7 @@ class TestMultipleWorkDir(expect.ValidNamedObjectFile):
     expected_object_filenames = ('subdir/shader.vert.spv',)
 
 
-@inside_glslc_testsuite('WorkDir')
+# @inside_glslc_testsuite('WorkDir')
 class TestWorkDirPosition(expect.ValidNamedObjectFile):
     """Tests that -working-directory=<dir> affects all files before and after
     it on the command line."""
@@ -83,7 +83,7 @@ class TestWorkDirPosition(expect.ValidNamedObjectFile):
         'subdir/shader.vert.spv', 'subdir/cool.frag.spv', 'subdir/bla.vert.spv')
 
 
-@inside_glslc_testsuite('WorkDir')
+# @inside_glslc_testsuite('WorkDir')
 class TestWorkDirDeepDir(expect.ValidNamedObjectFile):
     """Tests that -working-directory=<dir> works with directory hierarchies."""
 
@@ -102,7 +102,7 @@ class TestWorkDirDeepDir(expect.ValidNamedObjectFile):
         'subdir/subsubdir/two.frag.spv')
 
 
-@inside_glslc_testsuite('WorkDir')
+# @inside_glslc_testsuite('WorkDir')
 class TestWorkDirCompileFile(expect.ValidNamedObjectFile):
     """Tests -working-directory=<dir> when compiling input file."""
 
@@ -112,7 +112,7 @@ class TestWorkDirCompileFile(expect.ValidNamedObjectFile):
     expected_object_filenames = ('subdir/shader.vert.spv',)
 
 
-@inside_glslc_testsuite('WorkDir')
+# @inside_glslc_testsuite('WorkDir')
 class TestWorkDirCompileFileOutput(expect.ValidNamedObjectFile):
     """Tests -working-directory=<dir> when compiling input file and specifying
     output filename."""
@@ -129,7 +129,7 @@ class TestWorkDirCompileFileOutput(expect.ValidNamedObjectFile):
     expected_object_filenames = ('subdir/bin/spv',)
 
 
-@inside_glslc_testsuite('WorkDir')
+# @inside_glslc_testsuite('WorkDir')
 class TestWorkDirArgNoEq(expect.ValidNamedObjectFile):
     """Tests -working-directory <dir>."""
 
@@ -138,7 +138,7 @@ class TestWorkDirArgNoEq(expect.ValidNamedObjectFile):
     expected_object_filenames = ('a.spv',)
 
 
-@inside_glslc_testsuite('WorkDir')
+# @inside_glslc_testsuite('WorkDir')
 class TestWorkDirEqInArg(expect.ValidNamedObjectFile):
     """Tests -working-directory=<dir-with-equal-sign-inside>."""
 
@@ -149,7 +149,7 @@ class TestWorkDirEqInArg(expect.ValidNamedObjectFile):
     expected_object_filenames = ('a.spv',)
 
 
-@inside_glslc_testsuite('WorkDir')
+# @inside_glslc_testsuite('WorkDir')
 class TestWorkDirCompileFileAbsolutePath(expect.ValidObjectFile):
     """Tests -working-directory=<dir> when compiling input file with absolute
     path."""
@@ -175,7 +175,7 @@ class WorkDirDoesntAffectLinkedFile(expect.ValidNamedObjectFile):
         Directory('bin', [])])
 
 
-@inside_glslc_testsuite('WorkDir')
+# @inside_glslc_testsuite('WorkDir')
 class TestWorkDirLinkFileDefaultLocation(WorkDirDoesntAffectLinkedFile):
     """Tests that -working-directory doesn't impact the default link-file
     location.
@@ -184,7 +184,7 @@ class TestWorkDirLinkFileDefaultLocation(WorkDirDoesntAffectLinkedFile):
     expected_object_filenames = ('a.spv',)
 
 
-@inside_glslc_testsuite('WorkDir')
+# @inside_glslc_testsuite('WorkDir')
 class TestWorkDirLinkFileExplicit(WorkDirDoesntAffectLinkedFile):
     """Tests that -working-directory doesn't impact the named link-file
     location.
@@ -193,7 +193,7 @@ class TestWorkDirLinkFileExplicit(WorkDirDoesntAffectLinkedFile):
     expected_object_filenames = ('b.spv',)
 
 
-@inside_glslc_testsuite('WorkDir')
+# @inside_glslc_testsuite('WorkDir')
 class TestWorkDirLinkFileInSubdir(WorkDirDoesntAffectLinkedFile):
     """Tests that -working-directory doesn't impact the link-file sent into an
     existing subdirectory.
@@ -202,7 +202,7 @@ class TestWorkDirLinkFileInSubdir(WorkDirDoesntAffectLinkedFile):
     expected_object_filenames = ('bin/spv',)
 
 
-@inside_glslc_testsuite('WorkDir')
+# @inside_glslc_testsuite('WorkDir')
 class TestWorkDirLinkFileInvalidPath(expect.ErrorMessage):
     """Tests that -working-directory doesn't impact the error generated for an
     invalid -o path.
