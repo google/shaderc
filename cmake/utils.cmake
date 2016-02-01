@@ -133,14 +133,15 @@ function(shaderc_combine_static_lib new_target target)
       DEPENDS ${all_libs}
       COMMAND libtool -static -o lib${new_target}.a ${all_libs})
   else()
-    string(REPLACE ";" "\\\\naddlib " all_libs_string "${all_libs}")
-
-    set(ar_script
-      "create lib${new_target}.a\\\\naddlib ${all_libs_string}\\\\nsave\\\\nend")
+    string(REPLACE ";" "\naddlib " all_libs_string "${all_libs}")
+    set(AR_COMBINED_NAME ${new_target})
+    set(ALL_AR_LIBS ${all_libs_string})
+    configure_file(${shaderc_SOURCE_DIR}/cmake/combine_arscript.in
+      "${new_target}.ar")
 
     add_custom_command(OUTPUT lib${new_target}.a
       DEPENDS ${all_libs}
-      COMMAND ${ECHO_EXE} -e ${ar_script} | ${CMAKE_AR} -M)
+      COMMAND ${CMAKE_AR} -M < ${new_target}.ar)
   endif()
   add_custom_target(${new_target}_genfile ALL
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/lib${new_target}.a)
