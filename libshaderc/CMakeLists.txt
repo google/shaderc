@@ -24,16 +24,12 @@ shaderc_add_tests(
     shaderc_cpp)
 
 
-if (NOT "${MSVC}")
-  # If we are not on windows, then create a single static library
-  # that contains everything needed to use shaderc.
-  shaderc_combine_static_lib(shaderc_combined shaderc)
-  shaderc_add_tests(
-    TEST_PREFIX shaderc_combined
-    LINK_LIBS shaderc_combined ${CMAKE_THREAD_LIBS_INIT}
-    INCLUDE_DIRS include ${glslang_SOURCE_DIR}
-    TEST_NAMES
-      shaderc
-      shaderc_cpp)
-endif()
+shaderc_combine_static_lib(shaderc_combined shaderc)
 
+shaderc_add_tests(
+TEST_PREFIX shaderc_combined
+LINK_LIBS shaderc_combined ${CMAKE_THREAD_LIBS_INIT}
+INCLUDE_DIRS include ${glslang_SOURCE_DIR}
+TEST_NAMES
+  shaderc
+  shaderc_cpp)
