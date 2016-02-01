@@ -99,6 +99,7 @@ macro(shaderc_get_transitive_libs target out_list)
     get_target_property(libtype ${target} TYPE)
     # If this target is a static library, get anything it depends on.
     if ("${libtype}" STREQUAL "STATIC_LIBRARY")
+      list(INSERT ${out_list} 0 "${target}")
       get_target_property(libs ${target} LINK_LIBRARIES)
       if (libs)
         foreach(lib ${libs})
@@ -107,12 +108,8 @@ macro(shaderc_get_transitive_libs target out_list)
       endif()
     endif()
   endif()
-  get_target_property(libname ${target} LOCATION)
   # If we know the location (i.e. if it was made with CMake) then we
   # can add it to our list.
-  if (libname)
-    list(INSERT ${out_list} 0 "${libname}")
-  endif()
   LIST(REMOVE_DUPLICATES ${out_list})
 endmacro()
 
@@ -127,17 +124,21 @@ function(shaderc_combine_static_lib new_target target)
   shaderc_get_transitive_libs(${target} all_libs)
 
   if(APPLE)
-    string(REPLACE ";" " " all_libs_string "${all_libs}")
+    string(REPLACE ";" ">;$<TARGET_FILE:" temp_string "${all_libs}")
+    string(CONCAT all_libs_string "$<TARGET_FILE:" "${temp_string}" ">")
 
     add_custom_command(OUTPUT lib${new_target}.a
       DEPENDS ${all_libs}
-      COMMAND libtool -static -o lib${new_target}.a ${all_libs})
+      COMMAND libtool -static -o lib${new_target}.a ${all_libs_string})
   else()
-    string(REPLACE ";" "\naddlib " all_libs_string "${all_libs}")
-    set(AR_COMBINED_NAME ${new_target})
-    set(ALL_AR_LIBS ${all_libs_string})
-    configure_file(${shaderc_SOURCE_DIR}/cmake/combine_arscript.in
-      "${new_target}.ar")
+    string(REPLACE ";" "> \naddlib $<TARGET_FILE:" temp_string "${all_libs}")
+    set(all_libs_string
+      "create lib${new_target}.a\naddlib $<TARGET_FILE:${temp_string}>")
+    set(build_script_file "${all_libs_string}\nsave\nend\n")
+
+    file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${new_target}.ar"
+        CONTENT ${build_script_file}
+        CONDITION 1)
 
     add_custom_command(OUTPUT lib${new_target}.a
       DEPENDS ${all_libs}
