@@ -177,22 +177,98 @@ void FileCompiler::OutputMessages() {
   shaderc_util::OutputMessages(&std::cerr, total_warnings_, total_errors_);
 }
 
+namespace {
+// An util function to get the file name (base) from a given absolute path.
+// It checks the begining of the path string to differentiate Windows and Linux.
+std::string GetBaseNameFromAbsolutePath(const std::string& path) {
+  if (path.empty()) return "";
+  // Unix-like OS: /path/to/file
+  if (path.front() == '/') return path.substr(path.find_last_of('/'));
+  // Windows: \\server\user\file
+  if (path.size() > 1 && path[0] == '\\' && path[1] == '\\') {
+    return path.substr(path.find_last_of('\\'));
+  }
+  // Windows: X:\path\to\file
+  if (path.size() > 2 && ::isalpha(path[0]) && path[1] == ':' &&
+      path[2] == '\\') {
+    return path.substr(path.find_last_of('\\'));
+  }
+  return "";
+}
+}  // anonymous namespace
+
 std::string FileCompiler::GetOutputFileName(std::string input_filename) {
-  std::string output_file = "a.spv";
-  if (!needs_linking_) {
-    if (IsStageFile(input_filename)) {
-      output_file = input_filename + file_extension_;
+  std::string default_output_file = "a.spv";
+
+  if(needs_linking_) {
+    // When linking enabled, ignore -working-directory for output, And don't
+    // induce output file name from input file name.
+    if (output_file_name_.empty()) {
+      // no '-o' argument specified, return the default output file name.
+      // e.g. glslc shader.vert
+      //      => a.spv in <curdir>/
+      return default_output_file;
     } else {
-      output_file = input_filename.substr(0, input_filename.find_last_of('.')) +
-                    file_extension_;
+      // If '-o' specified, use the argument as output file name, no matter
+      // relative path or absolute path it is.
+      // e.g. glslc shader.vert -o output.spv
+      //      => output.spv in <curdir>/
+      return output_file_name_.str();
+    }
+  } else {
+    // When linking is disable, should refer to -working-directory when the
+    // '-o' argument is a relative path or unspecified. If the '-o' argument
+    // is an absolute path, ignore the -working-directory for output.
+    if (output_file_name_.empty()) {
+      // No '-o' specified, use the input file names to induce the output file
+      // names.
+      // e.g. shader.vert => shader.spv or shader.s
+      //      shader.unknown => shader.spv or shader.s
+      //      shader => shader.spv or shader.s
+      std::string induced_file_name;
+      if (IsStageFile(input_filename)) {
+        induced_file_name = input_filename + file_extension_;
+      } else {
+        induced_file_name =
+            input_filename.substr(0, input_filename.find_last_of('.')) +
+            file_extension_;
+      }
+
+      if (workdir_.empty()) {
+        // no -working-directory specified
+        // e.g. glslc shader.vert -c
+        //      => shader.spv in <curdir>/
+        //      glslc /usr/local/shader.vert -c
+        //      => shader.spv in /usr/local/shader/
+        return induced_file_name;
+      } else {
+        // Case: -c/-S -working-directory=<some_dir> <input>
+        // e.g. glslc shader.vert -c -working-directory subdir
+        //      => shader.spv in <curdir>/subdir/
+        //
+        //      glslc /usr/local/shader.vert -c -working-directory subdir
+        //      => shader.spv in <curdir>/subdir/
+        if (shaderc_util::IsAbsolutePath(induced_file_name)) {
+          induced_file_name = GetBaseNameFromAbsolutePath(induced_file_name);
+        }
+        return workdir_ + induced_file_name;
+      }
+    } else {
+      // Case: -c/-S <abspath input>
+      // '-o' specified. If the argument is an absolute path, use it, if not,
+      // refer to the working directory.
+      // e.g. glslc shader.vert -c -o output.x -working-dir subdir
+      //      => output.x in <curdir>/subdir/
+      //
+      //      glslc shadser.vert -c -o /usr/local/output.x -working-dir subdir
+      //      => output.x in /usr/local/
+      if (shaderc_util::IsAbsolutePath(output_file_name_.str())) {
+        return output_file_name_.str();
+      } else {
+        return workdir_ + output_file_name_.str();
+      }
     }
   }
-  if (!output_file_name_.empty()) output_file = output_file_name_.str();
-  if (!needs_linking_ && !workdir_.empty() &&
-      !shaderc_util::IsAbsolutePath(input_filename)) {
-    output_file = workdir_ + output_file;
-  }
-  return output_file;
 }
 
 }  // namesapce glslc
