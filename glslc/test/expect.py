@@ -246,6 +246,23 @@ class ValidAssemblyFile(SuccessfulReturn, CorrectAssemblyFilePreamble):
         return True, ''
 
 
+class ValidNamedAssemblyFile(SuccessfulReturn, CorrectAssemblyFilePreamble):
+    """Mixin class for checking that a list of assembly files with the given
+    names are correctly generated, and there is no output on stdout/stderr.
+
+    To mix in this class, subclasses need to provide expected_assembly_filenames
+    as the expected assembly filenames.
+    """
+
+    def check_object_file_preamble(self, status):
+        for assembly_filename in self.expected_assembly_filenames:
+            success, message = self.verify_assembly_file_preamble(
+                os.path.join(status.directory, assembly_filename))
+            if not success:
+                return False, message
+        return True, ''
+
+
 class ErrorMessage(GlslCTest):
     """Mixin class for tests that fail with a specific error message.
 

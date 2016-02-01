@@ -17,8 +17,9 @@
 
 #include <string>
 
-#include "libshaderc_util/string_piece.h"
+#include "dependency_info.h"
 #include "libshaderc_util/file_finder.h"
+#include "libshaderc_util/string_piece.h"
 #include "shaderc.hpp"
 
 namespace glslc {
@@ -86,7 +87,17 @@ class FileCompiler {
 
   // Gets the reference of the compiler options which reflects the command-line
   // arguments.
-  shaderc::CompileOptions& options() {return options_;};
+  shaderc::CompileOptions& options() { return options_; };
+
+  // Gets a pointer which points to the dependency info dumping hander. Creates
+  // such a handler if such one does not exist.
+  DependencyInfoDumpingHandler* GetDependencyDumpingHandler() {
+    if (!dependency_info_dumping_handler_) {
+      dependency_info_dumping_handler_.reset(
+          new DependencyInfoDumpingHandler());
+    }
+    return dependency_info_dumping_handler_.get();
+  };
 
  private:
   // Returns the final file name to be used for the output file.
@@ -110,6 +121,27 @@ class FileCompiler {
   //  "a.spv".
   std::string GetOutputFileName(std::string input_filename);
 
+  // Returns the candidate output file name deduced from input file name and
+  // user specified output file name. It is computed as follows:
+  //
+  // If the user did specify an output filename and the compiler is not in
+  // preprocessing-only mode, then returns that file name.
+  //
+  // If the user did not specify an output filename:
+  //  If the input filename has a standard stage extension (e.g. .vert) then
+  //  returns the input filename without directory names but with the result
+  //  extenstion (e.g. .spv or .s) appended.
+  //
+  //  If the input file name does not have a standard stage extension, then also
+  //  returns the directory-stripped input filename, but replaces its extension
+  //  with the result extension. (If the resolved input filename does not have
+  //  an extension, then appends the result extension.)
+  //
+  //  When a resolved extension is not available because the compiler is in
+  //  preprocessing-only mode or the compilation requires linking, use .spv as
+  //  the extension.
+  std::string GetCandidateOutputFileName(std::string input_filename);
+
   // Performs actual SPIR-V compilation on the contents of input files.
   shaderc::Compiler compiler_;
 
@@ -128,6 +160,10 @@ class FileCompiler {
 
   // Flag for preprocessing only mode.
   bool preprocess_only_ = false;
+
+  // The ownership of dependency dumping handler.
+  std::unique_ptr<DependencyInfoDumpingHandler>
+      dependency_info_dumping_handler_ = nullptr;
 
   // Reflects the type of file being generated.
   std::string file_extension_;

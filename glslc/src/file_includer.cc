@@ -20,6 +20,7 @@ namespace glslc {
 
 shaderc_includer_response* FileIncluder::GetInclude(const char* filename) {
   file_full_path_ = file_finder_.FindReadableFilepath(filename);
+  source_files_used_.insert(file_full_path_);
   if (!file_full_path_.empty() &&
       shaderc_util::ReadFile(file_full_path_, &file_content_)) {
     response_ = {

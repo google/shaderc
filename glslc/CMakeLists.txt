@@ -9,6 +9,8 @@ add_library(glslc STATIC
   src/file_includer.h
   src/shader_stage.cc
   src/shader_stage.h
+  src/dependency_info.cc
+  src/dependency_info.h
 )
 
 shaderc_default_compile_options(glslc)

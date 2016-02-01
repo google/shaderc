@@ -17,14 +17,14 @@
 #include <cstdint>
 #include <cstring>
 #include <iostream>
+#include <list>
 #include <string>
 #include <utility>
-#include <list>
 
 #include "libshaderc_util/string_piece.h"
 
-#include "file_compiler.h"
 #include "file.h"
+#include "file_compiler.h"
 #include "shader_stage.h"
 
 using shaderc_util::string_piece;
@@ -59,6 +59,13 @@ void PrintHelp(std::ostream* out) {
        << "                    are concatenations of version and profile, e.g. "
        << "310es,\n"
        << "                    450core, etc.\n"
+       << "  -M                Generate make dependencies. Implies -E and -w.\n"
+       << "  -MM               An alias for -M.\n"
+       << "  -MD               Generate make dependencies and compile.\n"
+       << "  -MF <file>        Write dependency output to the given file.\n"
+       << "  -MT <target>      Specify the target of the rule emitted by "
+       << "dependency\n"
+       << "                    generation.\n"
        << "  -S                Only run preprocess and compilation steps.\n"
        << "  --target-env=<environment>\n"
        << "                    Set the target shader environment, and the"
@@ -151,7 +158,8 @@ int main(int argc, char** argv) {
       compiler.options().SetForcedVersionProfile(version, profile);
     } else if (arg.starts_with("--target-env=")) {
       shaderc_target_env target_env = shaderc_target_env_default;
-      const string_piece target_env_str = arg.substr(std::strlen("--target-env="));
+      const string_piece target_env_str =
+          arg.substr(std::strlen("--target-env="));
       if (target_env_str == "vulkan") {
         target_env = shaderc_target_env_vulkan;
       } else if (target_env_str == "opengl") {
@@ -184,6 +192,49 @@ int main(int argc, char** argv) {
     } else if (arg == "-E") {
       compiler.options().SetPreprocessingOnlyMode();
       compiler.SetPreprocessingOnlyFlag();
+    } else if (arg == "-M" || arg == "-MM") {
+      // -M implies -E and -w
+      compiler.options().SetPreprocessingOnlyMode();
+      compiler.SetPreprocessingOnlyFlag();
+      compiler.options().SetSuppressWarnings();
+      if (compiler.GetDependencyDumpingHandler()->DumpingModeNotSet()) {
+        compiler.GetDependencyDumpingHandler()
+            ->SetDumpAsNormalCompilationOutput();
+      } else {
+        std::cerr << "glslc: error: both -M (or -MM) and -MD are specified. "
+                     "Only one should be used at one time."
+                  << std::endl;
+        return 1;
+      }
+    } else if (arg == "-MD") {
+      if (compiler.GetDependencyDumpingHandler()->DumpingModeNotSet()) {
+        compiler.GetDependencyDumpingHandler()
+            ->SetDumpToExtraDependencyInfoFiles();
+      } else {
+        std::cerr << "glslc: error: both -M (or -MM) and -MD are specified. "
+                     "Only one should be used at one time."
+                  << std::endl;
+        return 1;
+      }
+    } else if (arg == "-MF") {
+      string_piece dep_file_name;
+      if (!GetOptionArgument(argc, argv, &i, "-MF", &dep_file_name)) {
+        std::cerr
+            << "glslc: error: missing dependency info filename after '-MF'"
+            << std::endl;
+        return 1;
+      }
+      compiler.GetDependencyDumpingHandler()->SetDependencyFileName(
+          std::string(dep_file_name.data(), dep_file_name.size()));
+    } else if (arg == "-MT") {
+      string_piece dep_file_name;
+      if (!GetOptionArgument(argc, argv, &i, "-MT", &dep_file_name)) {
+        std::cerr << "glslc: error: missing dependency info target after '-MT'"
+                  << std::endl;
+        return 1;
+      }
+      compiler.GetDependencyDumpingHandler()->SetTarget(
+          std::string(dep_file_name.data(), dep_file_name.size()));
     } else if (arg == "-S") {
       compiler.options().SetDisassemblyMode();
       compiler.SetDisassemblyFlag();
@@ -269,7 +320,7 @@ int main(int argc, char** argv) {
       input_files.emplace_back(
           arg.str(), current_fshader_stage == shaderc_glsl_infer_from_source
                          ? glslc::DeduceDefaultShaderKindFromFileName(arg)
-                         : current_fshader_stage );
+                         : current_fshader_stage);
     }
   }
 

@@ -62,6 +62,9 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
 
   std::unique_ptr<FileIncluder> includer(
       new FileIncluder(&include_file_finder_));
+  // Get a reference to the dependency trace before we pass the ownership to
+  // shaderc::CompileOptions.
+  const auto& included_files = includer->file_path_trace();
   options_.SetIncluder(std::move(includer));
 
   shaderc::SpvModule result = compiler_.CompileGlslToSpv(
@@ -96,8 +99,35 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
     return false;
   }
 
-  // Write output to output file.
-  output_stream->write(result.GetData(), result.GetLength());
+  // Get a string_piece which refers to the normal compilation output for now.
+  // This string_piece might be redirected to the dependency info to be dumped
+  // later, if the handler is instantiated to dump as normal compilation output,
+  // and the original compilation output should be blocked. Otherwise it won't
+  // be touched. The main output stream dumps this string_piece later.
+  string_piece compilation_output(result.GetData(),
+                                  result.GetData() + result.GetLength());
+
+  // If we have dependency info dumping handler instantiated, we should dump
+  // dependency info first. This may redirect the compilation output
+  // string_piece to dependency info.
+  std::string potential_dependency_info_output;
+  if (dependency_info_dumping_handler_) {
+    if (!dependency_info_dumping_handler_->DumpDependencyInfo(
+            GetCandidateOutputFileName(input_file), error_file_name.data(),
+            &potential_dependency_info_output, included_files)) {
+      return false;
+    }
+    if (!potential_dependency_info_output.empty()) {
+      // If the potential_dependency_info_output string is not empty, it means
+      // we should dump dependency info as normal compilation output. Redirect
+      // the compilation output string_piece to the dependency info stored in
+      // potential_dependency_info_output to make it happen.
+      compilation_output = potential_dependency_info_output;
+    }
+  }
+
+  // Write compilation output to output file.
+  output_stream->write(compilation_output.data(), compilation_output.size());
   // Write error message to std::cerr.
   std::cerr << result.GetErrorMessage();
   if (output_stream->fail()) {
@@ -127,9 +157,11 @@ void FileCompiler::SetIndividualCompilationFlag() {
 }
 
 void FileCompiler::SetDisassemblyFlag() {
-  disassemble_ = true;
-  needs_linking_ = false;
-  file_extension_ = ".s";
+  if (!preprocess_only_) {
+    disassemble_ = true;
+    needs_linking_ = false;
+    file_extension_ = ".s";
+  }
 }
 
 void FileCompiler::SetPreprocessingOnlyFlag() {
@@ -163,6 +195,19 @@ bool FileCompiler::ValidateOptions(size_t num_files) {
               << std::endl;
     return false;
   }
+
+  // If we have dependency info dumping handler instantiated, we should check
+  // its validity.
+  if (dependency_info_dumping_handler_) {
+    std::string dependency_info_dumping_hander_error_msg;
+    if (!dependency_info_dumping_handler_->IsValid(
+            &dependency_info_dumping_hander_error_msg, num_files)) {
+      std::cerr << "glslc: error: " << dependency_info_dumping_hander_error_msg
+                << std::endl;
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -171,18 +216,31 @@ void FileCompiler::OutputMessages() {
 }
 
 std::string FileCompiler::GetOutputFileName(std::string input_filename) {
-  std::string final_output_file_name =
-      needs_linking_ ? "a.spv"
-                     : (IsStageFile(input_filename)
-                            ? shaderc_util::GetBaseFileName(input_filename) +
-                                  file_extension_
-                            : shaderc_util::GetBaseFileName(
-                                  input_filename.substr(
-                                      0, input_filename.find_last_of('.')) +
-                                  file_extension_));
-  if (!output_file_name_.empty()) {
-    final_output_file_name = output_file_name_.str();
+  if (output_file_name_.empty()) {
+    return needs_linking_ ? std::string("a.spv")
+                          : GetCandidateOutputFileName(input_filename);
+  } else {
+    return output_file_name_.str();
   }
-  return final_output_file_name;
+}
+
+std::string FileCompiler::GetCandidateOutputFileName(
+    std::string input_filename) {
+  if (!output_file_name_.empty() && !preprocess_only_) {
+    return output_file_name_.str();
+  }
+
+  std::string extension = file_extension_;
+  if (preprocess_only_ || needs_linking_) {
+    extension = ".spv";
+  }
+
+  std::string candidate_output_file_name =
+      IsStageFile(input_filename)
+          ? shaderc_util::GetBaseFileName(input_filename) + extension
+          : shaderc_util::GetBaseFileName(
+                input_filename.substr(0, input_filename.find_last_of('.')) +
+                extension);
+  return candidate_output_file_name;
 }
 }  // namesapce glslc

@@ -68,6 +68,12 @@ Options:
   -std=<value>      Version and profile for input files. Possible values
                     are concatenations of version and profile, e.g. 310es,
                     450core, etc.
+  -M                Generate make dependencies. Implies -E and -w.
+  -MM               An alias for -M.
+  -MD               Generate make dependencies and compile.
+  -MF <file>        Write dependency output to the given file.
+  -MT <target>      Specify the target of the rule emitted by dependency
+                    generation.
   -S                Only run preprocess and compilation steps.
   --target-env=<environment>
                     Set the target shader environment, and the semantics

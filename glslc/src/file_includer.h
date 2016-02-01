@@ -18,6 +18,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <unordered_set>
 
 #include "libshaderc_util/file_finder.h"
 #include "shaderc.hpp"
@@ -35,6 +36,9 @@ class FileIncluder : public shaderc::CompileOptions::IncluderInterface {
       : file_finder_(*file_finder) {}
   shaderc_includer_response* GetInclude(const char* filename) override;
   void ReleaseInclude(shaderc_includer_response* data) override;
+  const std::unordered_set<std::string>& file_path_trace() const {
+    return source_files_used_;
+  };
 
  private:
   // Used by GetInclude() to get the full filepath.
@@ -45,6 +49,7 @@ class FileIncluder : public shaderc::CompileOptions::IncluderInterface {
   shaderc_includer_response response_;
   std::vector<char> file_content_;
   std::string file_full_path_;
+  std::unordered_set<std::string> source_files_used_;
 };
 
 }  // namespace glslc

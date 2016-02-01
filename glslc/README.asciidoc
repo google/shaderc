@@ -236,6 +236,80 @@ that all `warning:` messages are shown as `error:` and any warnings will cause
 a non-zero exit code from `glslc`. If `-w` is specified the warnings
 generated are suppressed before they are converted to errors.
 
+=== Dependency Generation Options
+
+==== `-M` or `-MM`
+
+`-M` generates *make* dependencies, outputs a rule suitable for *make*
+describing the dependencies of the main source file. Instead of outputting
+the result of preprocessing, the preprocessor outputs one *make* rule
+containing the SPIR-V object file name for that source file, a colon, and the
+names of all the included files.
+
+Unless specified explicitly (with `-MT`), the SPIR-V object file name in the
+generated *make* rules follows the rules of  <<output-file-naming,Output File
+Naming>> as in `-c` compilation stage.
+
+The dependency info file name can be specified by `-o` and `-MF` options. When
+both are specified, `-o` option is ignored.
+
+Specifying `-M` implies `-E`, and suppresses warnings with an implicit `-w`.
+
+`-MM` is an alias for `-M`.
+
+E.g., `glslc -M main.vert` will dump `main.vert.spv: main.vert <other included
+files>` to stdout. More examples are listed in
+<<dependency-generation-examples,Dependency Generation Examples>>
+
+==== `-MD`
+
+`-MD` tells the glslc compiler to both compile the source and generate *make*
+dependencies. Dependencies are written to a file whose name is determined as
+follows: If option `-MF` is specified, use its argument. Otherwise, use the
+filename formed by append *.d* to the name of the file containing compilation
+results.
+
+E.g., `glslc -c -MD main.vert` will generate `main.vert.spv` as the SPIR-V
+object file and `main.vert.spv.d` as the dependency info file. More examples
+are listed in <<dependency-generation-examples,Dependency Generation Examples>>
+
+==== `-MF`
+
+`-MF` lets you specify the dependency info file name when used with `-M` or
+`-MD`. This option is invalid when used with multiple input files.
+
+E.g., `glslc -c -MD main.vert -MF dep_info` will generate `main.vert.spv` as
+the SPIR-V object file and `dep_info` as the dependency info file.
+
+==== `-MT`
+
+`-MT` lets you specify the target of the rule emitted by dependency generation
+when used with `-M` or `-MD`.  This option is invalid when used with multiple
+input files.
+
+E.g., `glslc -M main.vert -MT target` will dump following dependency info to
+stdout: `target: main.vert <other dependent files>`.
+
+
+[[dependency-generation-examples]]
+.Dependency Generation Examples
+|===
+|Command Line Input|Compilation Output File|Dependency Output File|Dependency Info
+
+|glslc -M main.vert             | <NA> | <Stdout> | main.vert.spv: main.vert
+|glslc -M main.vert -o dep_info | <NA> | dep_info | main.vert.spv: main.vert
+|glslc -M main.vert -MF dep_info| <NA> | dep_info | main.vert.spv: main.vert
+|glslc -M main.vert -MT target  | <NA> | <Stdout> | target: main.vert
+|glslc -MD main.vert    |a.spv  |main.vert.spv.d|main.vert.spv: main.vert
+|glslc -c -MD main.vert |main.vert.spv|main.vert.spv.d|main.vert.spv: main.vert
+|glslc -S -MD main.vert |main.vert.s  |main.vert.s.d  |main.vert.s: main.vert
+|glslc -c -MD main.vert -MF dep_info  |main.vert.spv|dep_info|main.vert.spv: main.vert
+|glslc -c -MD main.vert -o obj  |obj  |obj.d  |obj: main.vert
+|glslc -c -MD main.vert -o obj -MF dep_info -MT target|obj|dep_info|target: main.vert
+|===
+
+
+
 == Divergence from and extensions to GLSL specifications
 
 === Source-filename-based `#line` and `\\__FILE__`

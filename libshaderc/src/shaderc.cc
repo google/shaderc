@@ -313,7 +313,6 @@ shaderc_spv_module_t shaderc_compile_into_spv(
   if (!result) {
     return nullptr;
   }
-
   result->compilation_status = shaderc_compilation_status_invalid_stage;
   bool compilation_succeeded = false;  // In case we exit early.
   if (!compiler->initializer) return result;
