@@ -71,7 +71,8 @@ Options:
   -S                Only run preprocess and compilation steps.
   --target-env=<environment>
                     Set the target shader environment, and the semantics
-                    of warnings and errors.
+                    of warnings and errors. Valid values are 'opengl',
+                    'opengl_compat' and 'vulkan'. The default value is 'vulkan'.
   -w                Suppresses all warning messages.
   -Werror           Treat all warnings as errors.
   -working-directory <dir>
