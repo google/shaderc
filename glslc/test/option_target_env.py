@@ -39,17 +39,15 @@ class TestTargetEnvEqOpenglCompatWithOpenGlCompatShader(expect.ValidObjectFile):
 
 
 @inside_glslc_testsuite('OptionTargetEnv')
-class TestTargetEnvEqOpenglWithOpenGlCompatShader(expect.ErrorMessage):
+class TestTargetEnvEqOpenglWithOpenGlCompatShader(expect.ErrorMessageSubstr):
     """Tests the error message of compiling OpenGL Compatibility Fragment shader
     with --target-env=opengl"""
     shader = FileShader(opengl_compat_fragment_shader(), '.frag')
     glslc_args = ['--target-env=opengl', shader]
-    expected_error = [shader, ":4: error: 'texture2D' : ",
-                      "no matching overloaded function found\n",
-                      shader, ":4: error: 'assign' :  ",
-                      "cannot convert from 'const float' to 'fragColor ",
-                      "mediump 4-component vector of float FragColor'\n",
-                      "2 errors generated.\n"]
+    expected_error_substr = [shader, ":4: error: 'assign' :  ",
+                             "cannot convert from 'const float' to ",
+                             "'fragColor mediump 4-component vector ",
+                             "of float FragColor'\n"]
 
 
 @inside_glslc_testsuite('OptionTargetEnv')
