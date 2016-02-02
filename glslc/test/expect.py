@@ -274,6 +274,35 @@ class ErrorMessage(GlslCTest):
         return True, ''
 
 
+class ErrorMessageSubstr(GlslCTest):
+    """Mixin class for tests that fail with a specific substring in the error
+    message.
+
+    To mix in this class, subclasses need to provide expected_error_substr as
+    the expected error message substring.
+
+    The test should fail if the subprocess was terminated by a signal.
+    """
+
+    def check_has_error_message_as_substring(self, status):
+        if not status.returncode:
+            return False, ('Expected error message, but returned success from '
+                           'glslc')
+        if status.returncode < 0:
+            # On Unix, a negative value -N for Popen.returncode indicates
+            # termination by signal N.
+            # https://docs.python.org/2/library/subprocess.html
+            return False, ('Expected error message, but glslc was terminated by '
+                           'signal ' + str(status.returncode))
+        if not status.stderr:
+            return False, 'Expected error message, but no output on stderr'
+        if not self.expected_error_substr in convert_to_unix_line_endings(status.stderr):
+            return False, ('Incorrect stderr output:\n{act}\n'
+                           'Expected substring not found in stderr:\n{exp}'.format(
+                               act=status.stderr, exp=self.expected_error_substr))
+        return True, ''
+
+
 class WarningMessage(GlslCTest):
     """Mixin class for tests that succeed but have a specific warning message.
 
