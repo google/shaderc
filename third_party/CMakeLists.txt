@@ -65,7 +65,3 @@ else()
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test-glslang/
   )
 endif()
-
-add_test(NAME spirv-tools-testsuite
-  COMMAND UnitSPIRV
-  WORKING_DIRECTORY ${SPIRV-Tools_BINARY_DIR})
