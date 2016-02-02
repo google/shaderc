@@ -79,7 +79,7 @@ class VerifyCompExtension(expect.ValidObjectFile):
 class InvalidExtension(expect.ErrorMessage):
     """Tests the error message if a file extension cannot be determined."""
 
-    shader = FileShader('', '.fraga')
+    shader = FileShader('#version 150\n', '.fraga')
     glslc_args = ['-c', shader]
     expected_error = [
         "glslc: error: '", shader,

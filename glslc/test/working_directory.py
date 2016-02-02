@@ -19,6 +19,7 @@ from environment import File, Directory
 from glslc_test_framework import inside_glslc_testsuite
 from placeholder import FileShader
 
+MINIMAL_SHADER = '#version 140\nvoid main() {}'
 
 @inside_glslc_testsuite('WorkDir')
 class TestWorkDirNoArg(expect.ErrorMessage):
@@ -40,7 +41,7 @@ class TestWorkDirEqNoArg(expect.ErrorMessage):
 
 
 EMPTY_SHADER_IN_SUBDIR = Directory(
-    'subdir', [File('shader.vert', 'void main() {}')])
+    'subdir', [File('shader.vert', MINIMAL_SHADER)])
 
 @inside_glslc_testsuite('WorkDir')
 class TestWorkDirEqNoArgCompileFile(expect.ValidNamedObjectFile):
@@ -71,9 +72,9 @@ class TestWorkDirPosition(expect.ValidNamedObjectFile):
     it on the command line."""
 
     environment = Directory('subdir', [
-        File('shader.vert', 'void main() {}'),
-        File('cool.frag', 'void main() {}'),
-        File('bla.vert', 'void main() {}')
+        File('shader.vert', MINIMAL_SHADER),
+        File('cool.frag', MINIMAL_SHADER),
+        File('bla.vert', MINIMAL_SHADER)
     ])
     glslc_args = ['-c', 'shader.vert', 'bla.vert',
                   '-working-directory=subdir', 'cool.frag']
@@ -88,10 +89,10 @@ class TestWorkDirDeepDir(expect.ValidNamedObjectFile):
 
     environment = Directory('subdir', [
         Directory('subsubdir', [
-            File('one.vert', 'void main() {}'),
-            File('two.frag', 'void main() {}')
+            File('one.vert', MINIMAL_SHADER),
+            File('two.frag', MINIMAL_SHADER)
         ]),
-        File('zero.vert', 'void main() {}')
+        File('zero.vert', MINIMAL_SHADER)
     ])
     glslc_args = ['-c', 'zero.vert', 'subsubdir/one.vert',
                   'subsubdir/two.frag', '-working-directory=subdir']
@@ -119,7 +120,7 @@ class TestWorkDirCompileFileOutput(expect.ValidNamedObjectFile):
     environment = Directory('.', [
         Directory('subdir', [
             Directory('bin', []),
-            File('shader.vert', 'void main() {}')
+            File('shader.vert', MINIMAL_SHADER)
         ])
     ])
     glslc_args = ['-c', '-o', 'bin/spv', '-working-directory=subdir',
@@ -142,7 +143,7 @@ class TestWorkDirEqInArg(expect.ValidNamedObjectFile):
     """Tests -working-directory=<dir-with-equal-sign-inside>."""
 
     environment = Directory('.', [
-        Directory('=subdir', [File('shader.vert', 'void main() {}')]),
+        Directory('=subdir', [File('shader.vert', MINIMAL_SHADER)]),
     ])
     glslc_args = ['-working-directory==subdir', 'shader.vert']
     expected_object_filenames = ('a.spv',)
@@ -153,7 +154,7 @@ class TestWorkDirCompileFileAbsolutePath(expect.ValidObjectFile):
     """Tests -working-directory=<dir> when compiling input file with absolute
     path."""
 
-    shader = FileShader('void main() {}', '.vert')
+    shader = FileShader(MINIMAL_SHADER, '.vert')
     glslc_args = ['-c', '-working-directory=subdir', shader]
 
 
@@ -166,7 +167,7 @@ class WorkDirDoesntAffectLinkedFile(expect.ValidNamedObjectFile):
     """
     environment = Directory('.', [
         Directory('subdir', [
-            File('shader.vert', 'void main(){}'),
+            File('shader.vert', MINIMAL_SHADER),
             # Try to fake glslc into putting the linked file here, though it
             # shouldn't (because -working-directory doesn't impact -o).
             Directory('bin', [])]),
@@ -209,7 +210,7 @@ class TestWorkDirLinkFileInvalidPath(expect.ErrorMessage):
 
     environment = Directory('.', [
         Directory('subdir', [
-            File('shader.vert', 'void main(){}'),
+            File('shader.vert', MINIMAL_SHADER),
             Directory('missing', [])]),  # Present here, but missing in parent.
         File('shader.vert', "fake file, doesn't compile.")])
 

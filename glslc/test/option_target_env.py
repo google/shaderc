@@ -18,7 +18,7 @@ from placeholder import FileShader
 
 
 def opengl_compat_fragment_shader():
-    return """#version 100
+    return """#version 140
 uniform highp sampler2D tex;
 void main() {
   gl_FragColor = texture2D(tex, vec2(0.0, 0.0));
@@ -44,12 +44,9 @@ class TestTargetEnvEqOpenglWithOpenGlCompatShader(expect.ErrorMessageSubstr):
     with --target-env=opengl"""
     shader = FileShader(opengl_compat_fragment_shader(), '.frag')
     glslc_args = ['--target-env=opengl', shader]
-    expected_error = [shader, ":4: error: 'texture2D' : ",
-                      "no matching overloaded function found\n",
-                      shader, ":4: error: 'assign' :  ",
-                      "cannot convert from 'const float' to 'fragColor ",
-                      "mediump 4-component vector of float FragColor'\n",
-                      "2 errors generated.\n"]
+    expected_error_substr = [shader, ":4: error: 'assign' :  ",
+                             "cannot convert from 'const float' to ",
+                             "'fragColor"]
 
 
 @inside_glslc_testsuite('OptionTargetEnv')

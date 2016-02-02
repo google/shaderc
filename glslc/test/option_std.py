@@ -52,16 +52,14 @@ class TestStdEqSpaceArg(expect.ErrorMessage):
     glslc_args = ['-c', '-std=', '450core', shader]
     expected_error = ["glslc: error: invalid value '' in '-std='\n"]
 
+# TODO(dneto): The error message changes with different versions of glslang.
 @inside_glslc_testsuite('OptionStd')
-class TestMissingVersionAndStd(expect.ErrorMessage):
+class TestMissingVersionAndStd(expect.ErrorMessageSubstr):
     """Tests that missing both #version and -std results in errors."""
 
     shader = FileShader(core_frag_shader_without_version(), '.frag')
     glslc_args = ['-c', shader]
-    expected_error = [
-        shader, ":1: error: 'gl_SampleID' : undeclared identifier\n",
-        shader, ":1: error: '=' :  cannot convert from 'temp float' to ",
-        "'temp int'\n2 errors generated.\n"]
+    expected_error_substr = ['error:']
 
 
 @inside_glslc_testsuite('OptionStd')
@@ -190,13 +188,13 @@ class TestCommentBeforeVersion(expect.ValidObjectFileWithWarning):
     """Tests that comments before #version (same line) is correctly handled."""
 
     shader = FileShader(
-        '/* some comment */ #version 100\n' +
+        '/* some comment */ #version 150\n' +
         core_vert_shader_without_version(), '.vert')
     glslc_args = ['-c', '-std=450', shader]
 
     expected_warning = [
         shader, ': warning: (version, profile) forced to be (450, none), while '
-        'in source code it is (100, none)\n1 warning generated.\n']
+        'in source code it is (150, none)\n1 warning generated.\n']
 
 
 @inside_glslc_testsuite('OptionStd')
@@ -204,14 +202,14 @@ class TestCommentAfterVersion(expect.ValidObjectFileWithWarning):
     """Tests that multiple-line comments after #version is correctly handled."""
 
     shader = FileShader(
-        '#version 100 compatibility ' +
+        '#version 150 compatibility ' +
         '/* start \n second line \n end */\n' +
         core_vert_shader_without_version(), '.vert')
     glslc_args = ['-c', '-std=450core', shader]
 
     expected_warning = [
         shader, ': warning: (version, profile) forced to be (450, core), while '
-        'in source code it is (100, compatibility)\n1 warning generated.\n']
+        'in source code it is (150, compatibility)\n1 warning generated.\n']
 
 
 # The following test case is disabled because of a bug in glslang.
@@ -255,7 +253,7 @@ class TestVersionInsideCrazyComment(expect.ValidObjectFileWithWarning):
 class TestVersionMissingProfile(expect.ErrorMessage):
     """Tests that missing required profile in -std results in an error."""
 
-    shader = FileShader('void main() {}', '.vert')
+    shader = FileShader('#version 140\nvoid main() {}', '.vert')
     glslc_args = ['-c', '-std=310', shader]
 
     expected_error = [
@@ -264,12 +262,12 @@ class TestVersionMissingProfile(expect.ErrorMessage):
 
 
 @inside_glslc_testsuite('OptionStd')
-class TestVersionRedudantProfile(expect.ErrorMessage):
+class TestVersionRedundantProfile(expect.ErrorMessageSubstr):
     """Tests that adding non-required profile in -std results in an error."""
 
-    shader = FileShader('void main() {}', '.vert')
+    shader = FileShader('#version 140\nvoid main() {}', '.vert')
     glslc_args = ['-c', '-std=100core', shader]
 
-    expected_error = [
+    expected_error_substr = [
         shader, ': error: #version: versions before 150 do not allow '
-        'a profile token\n1 error generated.\n']
+        'a profile token\n']

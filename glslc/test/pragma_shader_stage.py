@@ -410,7 +410,7 @@ class TestPSSfromIncludedFile(expect.ValidObjectFile):
     """Tests that #pragma shader_stage() from included files works."""
 
     environment = Directory('.', [
-        File('a.glsl', '#include "b.glsl"\n'
+        File('a.glsl', '#version 140\n#include "b.glsl"\n'
              'void main() { gl_Position = vec4(1.); }\n'),
         File('b.glsl', '#pragma shader_stage(vertex)')])
     glslc_args = ['-c', 'a.glsl']
@@ -423,6 +423,7 @@ class TestConflictingPSSfromIncludingAndIncludedFile(expect.ErrorMessage):
 
     environment = Directory('.', [
         File('a.vert',
+             '#version 140\n'
              '#pragma shader_stage(fragment)\n'
              'void main() { gl_Position = vec4(1.); }\n'
              '#include "b.glsl"\n'),
@@ -431,7 +432,7 @@ class TestConflictingPSSfromIncludingAndIncludedFile(expect.ErrorMessage):
 
     expected_error = [
         "b.glsl:1: error: '#pragma': conflicting stages for 'shader_stage' "
-        "#pragma: 'vertex' (was 'fragment' at a.vert:1)\n"]
+        "#pragma: 'vertex' (was 'fragment' at a.vert:2)\n"]
 
 
 @inside_glslc_testsuite('PragmaShaderStage')

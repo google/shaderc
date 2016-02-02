@@ -68,7 +68,7 @@ void main(){ }
 
 
 @inside_glslc_testsuite('#line')
-class TestPoundVersionSyntaxErrorInIncludingFile(expect.ErrorMessage):
+class TestPoundVersionSyntaxErrorInIncludingFile(expect.ErrorMessageSubstr):
     """Tests that error message for #version directive has the correct
     filename and line number."""
 
@@ -77,19 +77,18 @@ class TestPoundVersionSyntaxErrorInIncludingFile(expect.ErrorMessage):
         File('b.glsl', 'void main() {}\n')])
     glslc_args = ['-E', 'a.vert']
 
-    expected_error = [
+    expected_error_substr = [
         "a.vert:1: error: '#version' : must occur first in shader\n",
         "a.vert:1: error: '#version' : must be followed by version number\n",
         "a.vert:1: error: '#version' : bad profile name; use es, core, or "
         "compatibility\n",
-        "3 errors generated.\n",
     ]
 
 
 # TODO(antiagainst): now #version in included files results in an error.
 # Fix this after #version in included files are supported.
 @inside_glslc_testsuite('#line')
-class TestPoundVersion310InIncludedFile(expect.ErrorMessage):
+class TestPoundVersion310InIncludedFile(expect.ErrorMessageSubstr):
     """Tests that #line directives follows the behavior of version 310
     (specifying the line number for the next line) when we find a
     #version 310 directive in the included file."""
@@ -99,16 +98,15 @@ class TestPoundVersion310InIncludedFile(expect.ErrorMessage):
         File('b.glsl', '#version 310 es\n')])
     glslc_args = ['-E', 'a.vert']
 
-    expected_error = [
-        "b.glsl:1: error: '#version' : must occur first in shader\n",
-        '1 error generated.\n'
+    expected_error_substr = [
+        "b.glsl:1: error: '#version' : must occur first in shader\n"
     ]
 
 
 # TODO(antiagainst): now #version in included files results in an error.
 # Fix this after #version in included files are supported.
 @inside_glslc_testsuite('#line')
-class TestPoundVersion150InIncludedFile(expect.ErrorMessage):
+class TestPoundVersion150InIncludedFile(expect.ErrorMessageSubstr):
     """Tests that #line directives follows the behavior of version 150
     (specifying the line number for itself) when we find a #version 150
     directive in the included file."""
@@ -118,9 +116,8 @@ class TestPoundVersion150InIncludedFile(expect.ErrorMessage):
         File('b.glsl', '#version 150\n')])
     glslc_args = ['-E', 'a.vert']
 
-    expected_error = [
-        "b.glsl:1: error: '#version' : must occur first in shader\n",
-        '1 error generated.\n'
+    expected_error_substr = [
+        "b.glsl:1: error: '#version' : must occur first in shader\n"
     ]
 
 
