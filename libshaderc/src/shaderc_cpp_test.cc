@@ -269,8 +269,8 @@ TEST_F(CppInterface, AccessorsOnNullModule) {
 
 TEST_F(CppInterface, MacroCompileOptions) {
   options_.AddMacroDefinition("E", "main");
-  const std::string kMinimalExpandedShader = "void E(){}";
-  const std::string kMinimalDoubleExpandedShader = "F E(){}";
+  const std::string kMinimalExpandedShader = "#version 150\nvoid E(){}";
+  const std::string kMinimalDoubleExpandedShader = "#version 150\nF E(){}";
   EXPECT_TRUE(CompilationSuccess(kMinimalExpandedShader,
                                  shaderc_glsl_vertex_shader, options_));
 
@@ -317,7 +317,9 @@ TEST_F(CppInterface, DisassembleMinimalShader) {
   shaderc::SpvModule result = compiler_.CompileGlslToSpv(
       kMinimalShader, shaderc_glsl_vertex_shader, "shader", options_);
   EXPECT_TRUE(CompilationResultIsSuccess(result));
-  EXPECT_STREQ(kMinimalShaderDisassembly, result.GetData());
+  for (const auto& substring : kMinimalShaderDisassemblySubstrings) {
+    EXPECT_THAT(result.GetData(), HasSubstr(substring));
+  }
 }
 
 TEST_F(CppInterface, ForcedVersionProfileCorrectStd) {
@@ -370,7 +372,7 @@ TEST_F(CppInterface, ForcedVersionProfileUnknownVersionStd) {
 TEST_F(CppInterface, ForcedVersionProfileVersionsBefore150) {
   // Versions before 150 do not allow a profile token, shaderc_profile_none
   // should be passed down as the profile parameter.
-  options_.SetForcedVersionProfile(100, shaderc_profile_none);
+  options_.SetForcedVersionProfile(140, shaderc_profile_none);
   EXPECT_TRUE(
       CompilationSuccess(kMinimalShader, shaderc_glsl_vertex_shader, options_));
 }
@@ -479,7 +481,7 @@ TEST_F(CppInterface, ErrorTagIsInputFileName) {
   // Expects compilation failure errors. The error tag should be
   // 'SampleInputFile'
   EXPECT_FALSE(CompilationResultIsSuccess(module));
-  EXPECT_THAT(module.GetErrorMessage(), HasSubstr("SampleInputFile:2: error:"));
+  EXPECT_THAT(module.GetErrorMessage(), HasSubstr("SampleInputFile:4: error:"));
 }
 
 TEST_F(CppInterface, PreprocessingOnlyOption) {
@@ -490,6 +492,7 @@ TEST_F(CppInterface, PreprocessingOnlyOption) {
   EXPECT_THAT(result.GetData(), HasSubstr("void main(){ }"));
 
   const std::string kMinimalShaderCloneOption =
+      "#version 140\n"
       "#define E_CLONE_OPTION main\n"
       "void E_CLONE_OPTION(){}\n";
   CompileOptions cloned_options(options_);
@@ -692,6 +695,7 @@ INSTANTIATE_TEST_CASE_P(CppInterface, IncluderTests,
                                 // Fake file system.
                                 {
                                     {"root",
+                                     "#version 150\n"
                                      "void foo() {}\n"
                                      "#include \"path/to/file_1\"\n"},
                                     {"path/to/file_1", "content of file_1\n"},
@@ -699,10 +703,11 @@ INSTANTIATE_TEST_CASE_P(CppInterface, IncluderTests,
                                 // Expected output.
                                 "#line 0 \"path/to/file_1\"\n"
                                 " content of file_1\n"
-                                "#line 2"),
+                                "#line 3"),
                             IncluderTestCase(
                                 // Fake file system.
                                 {{"root",
+                                  "#version 150\n"
                                   "void foo() {}\n"
                                   "#include \"path/to/file_1\"\n"},
                                  {"path/to/file_1",
@@ -715,7 +720,7 @@ INSTANTIATE_TEST_CASE_P(CppInterface, IncluderTests,
                                 " content of file_2\n"
                                 "#line 1 \"path/to/file_1\"\n"
                                 " content of file_1\n"
-                                "#line 2"),
+                                "#line 3"),
 
                         }));
 

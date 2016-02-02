@@ -34,13 +34,13 @@ const EShMessages kVulkanRules =
 
 // A trivial vertex shader
 const char kVertexShader[] =
-    "#version 100\n"
+    "#version 140\n"
     "void main() {}";
 
 // A shader that compiles under OpenGL compatibility profile rules,
 // but not OpenGL core profile rules.
 const char kOpenGLCompatibilityFragShader[] =
-    R"(#version 100
+    R"(#version 140
        uniform highp sampler2D tex;
        void main() {
          gl_FragColor = texture2D(tex, vec2(0.0,0.0));
@@ -49,7 +49,7 @@ const char kOpenGLCompatibilityFragShader[] =
 // A shader that compiles under OpenGL compatibility profile rules,
 // but not OpenGL core profile rules, even when deducing the stage.
 const char kOpenGLCompatibilityFragShaderDeducibleStage[] =
-    R"(#version 100
+    R"(#version 140
        #pragma shader_stage(fragment)
        uniform highp sampler2D tex;
        void main() {

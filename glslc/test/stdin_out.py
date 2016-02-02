@@ -21,7 +21,7 @@ from placeholder import FileShader, StdinShader
 class VerifyStdinWorks(expect.ValidObjectFile):
     """Tests glslc accepts vertex shader extension (.vert)."""
 
-    shader = StdinShader('void main() { }')
+    shader = StdinShader('#version 140\nvoid main() { }')
     glslc_args = ['-c', '-fshader-stage=vertex', shader]
 
 
@@ -29,7 +29,7 @@ class VerifyStdinWorks(expect.ValidObjectFile):
 class VerifyStdoutWorks(
     expect.ReturnCodeIsZero, expect.StdoutMatch, expect.StderrMatch):
 
-    shader = FileShader('void main() {}', '.vert')
+    shader = FileShader('#version 140\nvoid main() {}', '.vert')
     glslc_args = [shader, '-o', '-']
 
     # We expect SOME stdout, we just do not care what.

@@ -22,18 +22,20 @@ class VerifyIncludeOneSibling(expect.StdoutMatch):
     """Tests #including a sibling file."""
 
     environment = Directory('.', [
-        File('a.vert', 'content a\n#include "b"\n'),
+        File('a.vert', '#version 140\ncontent a\n#include "b"\n'),
         File('b', 'content b\n')])
 
     glslc_args = ['-E', 'a.vert']
 
     expected_stdout = \
-"""#extension GL_GOOGLE_include_directive : enable
+"""#version 140
+#extension GL_GOOGLE_include_directive : enable
 #line 0 "a.vert"
+
 content a
 #line 0 "b"
  content b
-#line 2 "a.vert"
+#line 3 "a.vert"
 
 """
 
@@ -42,11 +44,11 @@ class VerifyIncludeNotFound(expect.ErrorMessage):
     """Tests #including a not existing sibling file."""
 
     environment = Directory('.', [
-        File('a.vert', 'content a\n#include "b"\n')])
+        File('a.vert', '#version 140\ncontent a\n#include "b"\n')])
 
     glslc_args = ['-E', 'a.vert']
     expected_error = [
-        "a.vert:2: error: '#include' : Cannot open or find include file.\n",
+        "a.vert:3: error: '#include' : Cannot open or find include file.\n",
         '1 error generated.\n'
     ]
 
@@ -55,7 +57,7 @@ class VerifyCompileIncludeOneSibling(expect.ValidObjectFile):
     """Tests #including a sibling file via full compilation."""
 
     environment = Directory('.', [
-        File('a.vert', 'void foo(){}\n#include "b"\n'),
+        File('a.vert', '#version 140\nvoid foo(){}\n#include "b"\n'),
         File('b', 'void main(){foo();}\n')])
 
     glslc_args = ['a.vert']
@@ -65,17 +67,19 @@ class VerifyIncludeWithoutNewline(expect.StdoutMatch):
     """Tests a #include without a newline."""
 
     environment = Directory('.', [
-        File('a.vert', '#include "b"'),
+        File('a.vert', '#version 140\n#include "b"'),
         File('b', 'content b\n')])
 
     glslc_args = ['-E', 'a.vert']
 
     expected_stdout = \
-"""#extension GL_GOOGLE_include_directive : enable
+"""#version 140
+#extension GL_GOOGLE_include_directive : enable
 #line 0 "a.vert"
+
 #line 0 "b"
 content b
-#line 1 "a.vert"
+#line 2 "a.vert"
 
 """
 
@@ -85,7 +89,8 @@ class VerifyCompileIncludeWithoutNewline(expect.ValidObjectFile):
 
     environment = Directory('.', [
         File('a.vert',
-             """void main
+             """#version 140
+             void main
              #include "b"
              """),
         File('b',
@@ -100,22 +105,24 @@ class VerifyIncludeTwoSiblings(expect.StdoutMatch):
     """Tests #including two sibling files."""
 
     environment = Directory('.', [
-        File('b.vert', '#include "a"\ncontent b\n#include "c"\n'),
+        File('b.vert', '#version 140\n#include "a"\ncontent b\n#include "c"\n'),
         File('a', 'content a\n'),
         File('c', 'content c\n')])
 
     glslc_args = ['-E', 'b.vert']
 
     expected_stdout = \
-"""#extension GL_GOOGLE_include_directive : enable
+"""#version 140
+#extension GL_GOOGLE_include_directive : enable
 #line 0 "b.vert"
+
 #line 0 "a"
 content a
-#line 1 "b.vert"
+#line 2 "b.vert"
  content b
 #line 0 "c"
  content c
-#line 3 "b.vert"
+#line 4 "b.vert"
 
 """
 
@@ -125,12 +132,14 @@ class VerifyCompileIncludeTwoSiblings(expect.ValidObjectFile):
 
     environment = Directory('.', [
         File('b.vert',
-             """#include "a"
+             """#version 140
+             #include "a"
              void bfun(){afun();}
              #include "c"
              """),
         File('a',
-             """void afun(){}
+             """
+             void afun(){}
              #define BODY {}
              """),
         File('c', 'void main() BODY\n')])
@@ -142,21 +151,23 @@ class VerifyNestedIncludeAmongSiblings(expect.StdoutMatch):
     """Tests #include inside #included sibling files."""
 
     environment = Directory('.', [
-        File('a.vert', '#include "b"\ncontent a\n'),
+        File('a.vert', '#version 140\n#include "b"\ncontent a\n'),
         File('b', 'content b\n#include "c"\n'),
         File('c', 'content c\n')])
 
     glslc_args = ['-E', 'a.vert']
 
     expected_stdout = \
-"""#extension GL_GOOGLE_include_directive : enable
+"""#version 140
+#extension GL_GOOGLE_include_directive : enable
 #line 0 "a.vert"
+
 #line 0 "b"
 content b
 #line 0 "c"
  content c
 #line 2 "b"
-#line 1 "a.vert"
+#line 2 "a.vert"
  content a
 """
 
@@ -166,7 +177,8 @@ class VerifyCompileNestedIncludeAmongSiblings(expect.ValidObjectFile):
 
     environment = Directory('.', [
         File('a.vert',
-             """#define BODY {}
+             """#version 140
+             #define BODY {}
              #include "b"
              void main(){cfun();}
              """),
@@ -186,18 +198,20 @@ class VerifyIncludeSubdir(expect.StdoutMatch):
     """Tests #including a file from a subdirectory."""
 
     environment = Directory('.', [
-        File('a.vert', 'content a1\n#include "subdir/a"\ncontent a2\n'),
+        File('a.vert', '#version 140\ncontent a1\n#include "subdir/a"\ncontent a2\n'),
         Directory('subdir', [File('a', 'content suba\n')])])
 
     glslc_args = ['-E', 'a.vert']
 
     expected_stdout = \
-"""#extension GL_GOOGLE_include_directive : enable
+"""#version 140
+#extension GL_GOOGLE_include_directive : enable
 #line 0 "a.vert"
+
 content a1
 #line 0 "subdir/a"
  content suba
-#line 2 "a.vert"
+#line 3 "a.vert"
  content a2
 """
 
@@ -207,7 +221,8 @@ class VerifyCompileIncludeSubdir(expect.ValidObjectFile):
 
     environment = Directory('.', [
         File('a.vert',
-             """#define BODY {}
+             """#version 140
+             #define BODY {}
              #include "subdir/a"
              void afun()BODY
              """),
@@ -221,7 +236,7 @@ class VerifyIncludeDeepSubdir(expect.StdoutMatch):
 
     environment = Directory('.', [
         File('a.vert',
-             'content a1\n#include "dir/subdir/subsubdir/a"\ncontent a2\n'),
+             '#version 140\ncontent a1\n#include "dir/subdir/subsubdir/a"\ncontent a2\n'),
         Directory('dir', [
             Directory('subdir', [
                 Directory('subsubdir', [File('a', 'content incl\n')])])])])
@@ -229,12 +244,14 @@ class VerifyIncludeDeepSubdir(expect.StdoutMatch):
     glslc_args = ['-E', 'a.vert']
 
     expected_stdout = \
-"""#extension GL_GOOGLE_include_directive : enable
+"""#version 140
+#extension GL_GOOGLE_include_directive : enable
 #line 0 "a.vert"
+
 content a1
 #line 0 "dir/subdir/subsubdir/a"
  content incl
-#line 2 "a.vert"
+#line 3 "a.vert"
  content a2
 """
 
@@ -245,7 +262,8 @@ class VerifyCompileIncludeDeepSubdir(expect.ValidObjectFile):
 
     environment = Directory('.', [
         File('a.vert',
-             """#define BODY {}
+             """#version 140
+             #define BODY {}
              #include "dir/subdir/subsubdir/a"
              void afun()BODY
              """),
@@ -274,13 +292,14 @@ class TestWrongPoundVersionInIncludingFile(expect.ValidObjectFileWithWarning):
 
 # TODO(antiagainst): now #version in included files results in an error.
 # Fix this after #version in included files are supported.
+# TODO(dneto): I'm not sure what the expected result should be.
 @inside_glslc_testsuite('Include')
 class TestWrongPoundVersionInIncludedFile(expect.ErrorMessage):
     """Tests that warning message for #version directive in the included file
     has the correct filename."""
 
     environment = Directory('.', [
-        File('a.vert', '#include "b.glsl"\nvoid main() {}'),
+        File('a.vert', '#version 140\n#include "b.glsl"\nvoid main() {}'),
         File('b.glsl', '#version 10000000\n')])
     glslc_args = ['-E', 'a.vert']
 

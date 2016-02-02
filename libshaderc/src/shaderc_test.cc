@@ -134,8 +134,8 @@ class CompileStringTest : public testing::Test {
   bool CompilationSuccess(const std::string& shader, shaderc_shader_kind kind,
                           shaderc_compile_options_t options = nullptr) {
     return CompilationResultIsSuccess(
-        Compilation(compiler_.get_compiler_handle(), shader, kind,
-                    "shader", options)
+        Compilation(compiler_.get_compiler_handle(), shader, kind, "shader",
+                    options)
             .result());
   }
 
@@ -151,8 +151,7 @@ class CompileStringTest : public testing::Test {
     return shaderc_module_get_error_message(comp.result());
   };
 
-  // Compiles a shader, expects compilation failure, and returns the warning
-  // messages.
+  // Compiles a shader, expects compilation failure, and returns the messages.
   const std::string CompilationErrors(
       const std::string& shader, shaderc_shader_kind kind,
       const shaderc_compile_options_t options = nullptr) {
@@ -160,6 +159,15 @@ class CompileStringTest : public testing::Test {
                            "shader", options);
     EXPECT_FALSE(CompilationResultIsSuccess(comp.result())) << kind << '\n'
                                                             << shader;
+    return shaderc_module_get_error_message(comp.result());
+  };
+
+  // Compiles a shader and returns the messages.
+  const std::string CompilationMessages(
+      const std::string& shader, shaderc_shader_kind kind,
+      const shaderc_compile_options_t options = nullptr) {
+    const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
+                           "shader", options);
     return shaderc_module_get_error_message(comp.result());
   };
 
@@ -207,6 +215,7 @@ TEST_F(CompileStringTest, GarbageString) {
 TEST_F(CompileStringTest, ReallyLongShader) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   std::string minimal_shader = "";
+  minimal_shader += "#version 140\n";
   minimal_shader += "void foo(){}";
   minimal_shader.append(1024 * 1024 * 8, ' ');  // 8MB of spaces.
   minimal_shader += "void main(){}";
@@ -292,8 +301,8 @@ TEST_F(CompileStringWithOptionsTest, CloneCompilerOptions) {
 TEST_F(CompileStringWithOptionsTest, MacroCompileOptions) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   shaderc_compile_options_add_macro_definition(options_.get(), "E", "main");
-  const std::string kMinimalExpandedShader = "void E(){}";
-  const std::string kMinimalDoubleExpandedShader = "F E(){}";
+  const std::string kMinimalExpandedShader = "#version 140\nvoid E(){}";
+  const std::string kMinimalDoubleExpandedShader = "#version 140\nF E(){}";
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalExpandedShader,
                                  shaderc_glsl_vertex_shader, options_.get()));
   compile_options_ptr cloned_options(
@@ -343,7 +352,9 @@ TEST_F(CompileStringWithOptionsTest, DisassembleMinimalShader) {
 
   const std::string disassembly_text = CompilationOutput(
       kMinimalShader, shaderc_glsl_vertex_shader, options_.get());
-  EXPECT_EQ(kMinimalShaderDisassembly, disassembly_text);
+  for (const auto& substring : kMinimalShaderDisassemblySubstrings) {
+    EXPECT_THAT(disassembly_text, HasSubstr(substring));
+  }
 }
 
 TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileCorrectStd) {
@@ -410,11 +421,11 @@ TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileUnknownVersionStd) {
 TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileVersionsBefore150) {
   // Versions before 150 do not allow a profile token, shaderc_profile_none
   // should be passed down as the profile parameter.
-  shaderc_compile_options_set_forced_version_profile(options_.get(), 100,
+  shaderc_compile_options_set_forced_version_profile(options_.get(), 140,
                                                      shaderc_profile_none);
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  EXPECT_TRUE(CompilationSuccess(kMinimalShader, shaderc_glsl_vertex_shader,
-                                 options_.get()));
+  EXPECT_TRUE(CompilationSuccess(kMinimalShaderWithoutVersion,
+                                 shaderc_glsl_vertex_shader, options_.get()));
 }
 
 TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileRedundantProfileStd) {
@@ -467,6 +478,7 @@ TEST_F(CompileStringWithOptionsTest, PreprocessingOnlyOption) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   shaderc_compile_options_set_preprocessing_only_mode(options_.get());
   const std::string kMinimalShaderWithMacro =
+      "#version 150\n"
       "#define E main\n"
       "void E(){}\n";
   const std::string preprocessed_text = CompilationOutput(
@@ -474,6 +486,7 @@ TEST_F(CompileStringWithOptionsTest, PreprocessingOnlyOption) {
   EXPECT_THAT(preprocessed_text, HasSubstr("void main(){ }"));
 
   const std::string kMinimalShaderWithMacroCloneOption =
+      "#version 150\n"
       "#define E_CLONE_OPTION main\n"
       "void E_CLONE_OPTION(){}\n";
   compile_options_ptr cloned_options(
@@ -639,8 +652,7 @@ TEST_P(IncluderTests, SetIncluderCallbacks) {
       TestIncluder::ReleaseIncluderResponseWrapper, &includer);
 
   const Compilation comp(compiler.get_compiler_handle(), shader,
-                         shaderc_glsl_vertex_shader,
-                         "shader", options.get());
+                         shaderc_glsl_vertex_shader, "shader", options.get());
   // Checks the existence of the expected string.
   EXPECT_THAT(shaderc_module_get_bytes(comp.result()),
               HasSubstr(test_case.expected_substring()));
@@ -663,8 +675,8 @@ TEST_P(IncluderTests, SetIncluderCallbacksClonedOptions) {
       shaderc_compile_options_clone(options.get()));
 
   const Compilation comp(compiler.get_compiler_handle(), shader,
-                         shaderc_glsl_vertex_shader,
-                         "shader", cloned_options.get());
+                         shaderc_glsl_vertex_shader, "shader",
+                         cloned_options.get());
   // Checks the existence of the expected string.
   EXPECT_THAT(shaderc_module_get_bytes(comp.result()),
               HasSubstr(test_case.expected_substring()));
@@ -676,6 +688,7 @@ INSTANTIATE_TEST_CASE_P(CompileStringTest, IncluderTests,
                                 // Fake file system.
                                 {
                                     {"root",
+                                     "#version 150\n"
                                      "void foo() {}\n"
                                      "#include \"path/to/file_1\"\n"},
                                     {"path/to/file_1", "content of file_1\n"},
@@ -683,10 +696,11 @@ INSTANTIATE_TEST_CASE_P(CompileStringTest, IncluderTests,
                                 // Expected output.
                                 "#line 0 \"path/to/file_1\"\n"
                                 " content of file_1\n"
-                                "#line 2"),
+                                "#line 3"),
                             IncluderTestCase(
                                 // Fake file system.
                                 {{"root",
+                                  "#version 150\n"
                                   "void foo() {}\n"
                                   "#include \"path/to/file_1\"\n"},
                                  {"path/to/file_1",
@@ -699,14 +713,15 @@ INSTANTIATE_TEST_CASE_P(CompileStringTest, IncluderTests,
                                 " content of file_2\n"
                                 "#line 1 \"path/to/file_1\"\n"
                                 " content of file_1\n"
-                                "#line 2"),
+                                "#line 3"),
 
                         }));
 
 TEST_F(CompileStringWithOptionsTest, WarningsOnLine) {
-  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  // Some versions of Glslang will return an error, some will return just
+  // warnings.
   EXPECT_THAT(
-      CompilationWarnings(kDeprecatedAttributeShader,
+      CompilationMessages(kDeprecatedAttributeShader,
                           shaderc_glsl_vertex_shader, options_.get()),
       HasSubstr(":2: warning: attribute deprecated in version 130; may be "
                 "removed in future release\n"));
@@ -725,9 +740,11 @@ TEST_F(CompileStringWithOptionsTest, WarningsOnLineAsErrors) {
 TEST_F(CompileStringWithOptionsTest, SuppressWarningsOnLine) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   shaderc_compile_options_set_suppress_warnings(options_.get());
-  EXPECT_EQ("",
-            CompilationWarnings(kDeprecatedAttributeShader,
-                                shaderc_glsl_vertex_shader, options_.get()));
+  EXPECT_THAT(
+      CompilationMessages(kDeprecatedAttributeShader,
+                          shaderc_glsl_vertex_shader, options_.get()),
+      Not(HasSubstr(":2: warning: attribute deprecated in version 130; may be "
+                    "removed in future release\n")));
 }
 
 TEST_F(CompileStringWithOptionsTest, GlobalWarnings) {
@@ -761,15 +778,17 @@ TEST_F(CompileStringWithOptionsTest,
   shaderc_compile_options_set_warnings_as_errors(options_.get());
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
 
-  // Warnings on line should be inhibited.
-  EXPECT_EQ("",
-            CompilationWarnings(kDeprecatedAttributeShader,
-                                shaderc_glsl_vertex_shader, options_.get()));
+  // Warnings on particular lines should be inhibited.
+  Compilation comp_line(compiler_.get_compiler_handle(),
+                        kDeprecatedAttributeShader, shaderc_glsl_vertex_shader,
+                        "shader", options_.get());
+  EXPECT_EQ(0u, shaderc_module_get_num_warnings(comp_line.result()));
 
   // Global warnings should be inhibited.
-  EXPECT_EQ("",
-            CompilationWarnings(kMinimalUnknownVersionShader,
-                                shaderc_glsl_vertex_shader, options_.get()));
+  Compilation comp_global(compiler_.get_compiler_handle(),
+                          kMinimalUnknownVersionShader,
+                          shaderc_glsl_vertex_shader, "shader", options_.get());
+  EXPECT_EQ(0u, shaderc_module_get_num_warnings(comp_global.result()));
 }
 
 TEST_F(CompileStringWithOptionsTest,
@@ -780,21 +799,24 @@ TEST_F(CompileStringWithOptionsTest,
   shaderc_compile_options_set_suppress_warnings(options_.get());
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
 
-  // Warnings on line should be inhibited.
-  EXPECT_EQ("",
-            CompilationWarnings(kDeprecatedAttributeShader,
-                                shaderc_glsl_vertex_shader, options_.get()));
+  // Warnings on particular lines should be inhibited.
+  Compilation comp_line(compiler_.get_compiler_handle(),
+                        kDeprecatedAttributeShader, shaderc_glsl_vertex_shader,
+                        "shader", options_.get());
+  EXPECT_EQ(0u, shaderc_module_get_num_warnings(comp_line.result()));
 
   // Global warnings should be inhibited.
-  EXPECT_EQ("",
-            CompilationWarnings(kMinimalUnknownVersionShader,
-                                shaderc_glsl_vertex_shader, options_.get()));
+  Compilation comp_global(compiler_.get_compiler_handle(),
+                          kMinimalUnknownVersionShader,
+                          shaderc_glsl_vertex_shader, "shader", options_.get());
+  EXPECT_EQ(0u, shaderc_module_get_num_warnings(comp_global.result()));
 }
 
 TEST_F(CompileStringWithOptionsTest, IfDefCompileOption) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   shaderc_compile_options_add_macro_definition(options_.get(), "E", nullptr);
   const std::string kMinimalExpandedShader =
+      "#version 140\n"
       "#ifdef E\n"
       "void main(){}\n"
       "#else\n"
@@ -850,7 +872,10 @@ TEST_F(CompileStringWithOptionsTest,
   // TODO(dneto): Check what happens when targeting Vulkan.
 }
 
-TEST_F(CompileStringWithOptionsTest, TargetEnvIgnoredWhenPreprocessing) {
+TEST_F(CompileStringWithOptionsTest, DISABLED_TargetEnvIgnoredWhenPreprocessing) {
+  // This test is disabled since some versions of glslang may refuse to compile
+  // very old shaders to SPIR-V with OpenGL target.  Re-enable and rewrite this test
+  // once we have a differential set of environments to test.
   shaderc_compile_options_set_preprocessing_only_mode(options_.get());
 
   EXPECT_TRUE(CompilationSuccess(kOpenGLCompatibilityFragmentShader,
@@ -874,7 +899,8 @@ TEST_F(CompileStringWithOptionsTest, TargetEnvIgnoredWhenPreprocessing) {
 
 TEST_F(CompileStringTest, ShaderKindRespected) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  const std::string kVertexShader = "void main(){ gl_Position = vec4(0);}";
+  const std::string kVertexShader =
+      "#version 140\nvoid main(){ gl_Position = vec4(0);}";
   EXPECT_TRUE(CompilationSuccess(kVertexShader, shaderc_glsl_vertex_shader));
   EXPECT_FALSE(CompilationSuccess(kVertexShader, shaderc_glsl_fragment_shader));
 }
@@ -892,7 +918,8 @@ TEST_F(CompileStringTest, MultipleThreadsCalling) {
   std::vector<std::thread> threads;
   for (auto& r : results) {
     threads.emplace_back([&r, this]() {
-      r = CompilationSuccess("void main(){}", shaderc_glsl_vertex_shader);
+      r = CompilationSuccess("#version 140\nvoid main(){}",
+                             shaderc_glsl_vertex_shader);
     });
   }
   for (auto& t : threads) {
@@ -903,13 +930,15 @@ TEST_F(CompileStringTest, MultipleThreadsCalling) {
 
 TEST_F(CompileKindsTest, Vertex) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  const std::string kVertexShader = "void main(){ gl_Position = vec4(0);}";
+  const std::string kVertexShader =
+      "#version 140\nvoid main(){ gl_Position = vec4(0);}";
   EXPECT_TRUE(CompilationSuccess(kVertexShader, shaderc_glsl_vertex_shader));
 }
 
 TEST_F(CompileKindsTest, Fragment) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  const std::string kFragShader = "void main(){ gl_FragColor = vec4(0);}";
+  const std::string kFragShader =
+      "#version 140\nvoid main(){ gl_FragColor = vec4(0);}";
   EXPECT_TRUE(CompilationSuccess(kFragShader, shaderc_glsl_fragment_shader));
 }
 
@@ -991,8 +1020,8 @@ TEST_P(ParseVersionProfileTest, FromNullTerminatedString) {
   const ParseVersionProfileTestCase& test_case = GetParam();
   int version;
   shaderc_profile profile;
-  bool succeed =
-      shaderc_parse_version_profile(test_case.input_string_.c_str(), &version, &profile);
+  bool succeed = shaderc_parse_version_profile(test_case.input_string_.c_str(),
+                                               &version, &profile);
   EXPECT_EQ(test_case.expected_succeed_, succeed);
   // check the return version and profile only when the parsing succeeds.
   if (succeed) {

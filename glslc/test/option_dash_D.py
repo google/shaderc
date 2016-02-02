@@ -31,7 +31,7 @@ class TestDashCapDNoArg(expect.ErrorMessage):
 class TestDashCapDXeqY(expect.ValidObjectFile):
     """Tests -DX=Y."""
 
-    shader = FileShader('void main(){X=vec4(1.);}', '.vert')
+    shader = FileShader('#version 150\nvoid main(){X=vec4(1.);}', '.vert')
     glslc_args = ['-c', '-DX=gl_Position', shader]
 
 
@@ -39,7 +39,7 @@ class TestDashCapDXeqY(expect.ValidObjectFile):
 class TestDashCapDXeq(expect.ValidObjectFile):
     """Tests -DX=."""
 
-    shader = FileShader('void main(){X}', '.vert')
+    shader = FileShader('#version 150\nvoid main(){X}', '.vert')
     glslc_args = ['-c', '-DX=', shader]
 
 
@@ -47,7 +47,7 @@ class TestDashCapDXeq(expect.ValidObjectFile):
 class TestDashCapDX(expect.ValidObjectFile):
     """Tests -DX."""
 
-    shader = FileShader('void main(){X}', '.vert')
+    shader = FileShader('#version 150\nvoid main(){X}', '.vert')
     glslc_args = ['-c', '-DX', shader]
 
 
@@ -59,7 +59,7 @@ class TestDashCapDeq(expect.ErrorMessage):
     causes a preprocessing error.
     """
 
-    shader = FileShader('void main(){}', '.vert')
+    shader = FileShader('#version 150\nvoid main(){}', '.vert')
     glslc_args = ['-c', '-D=', shader]
     # TODO(antiagainst): figure out what should we report as the line number
     # for errors in predefined macros and fix here.
@@ -72,7 +72,7 @@ class TestDashCapDeq(expect.ErrorMessage):
 class TestMultipleDashCapD(expect.ValidObjectFile):
     """Tests multiple -D occurrences."""
 
-    shader = FileShader('void main(){X Y a=Z;}', '.vert')
+    shader = FileShader('#version 150\nvoid main(){X Y a=Z;}', '.vert')
     glslc_args = ['-c', '-DX', '-DY=int', '-DZ=(1+2)', shader]
 
 
@@ -80,7 +80,7 @@ class TestMultipleDashCapD(expect.ValidObjectFile):
 class TestMultipleDashCapDOfSameName(expect.ValidObjectFile):
     """Tests multiple -D occurrences with same macro name."""
 
-    shader = FileShader('void main(){X Y a=Z;}', '.vert')
+    shader = FileShader('#version 150\nvoid main(){X Y a=Z;}', '.vert')
     glslc_args = ['-c', '-DX=main', '-DY=int', '-DZ=(1+2)', '-DX', shader]
 
 
@@ -88,7 +88,7 @@ class TestMultipleDashCapDOfSameName(expect.ValidObjectFile):
 class TestDashCapDGL_(expect.ErrorMessage):
     """Tests that we cannot -D macros beginning with GL_."""
 
-    shader = FileShader('void main(){}', '.vert')
+    shader = FileShader('#version 150\nvoid main(){}', '.vert')
     glslc_args = ['-DGL_ES=1', shader]
     expected_error = [
         "glslc: error: names beginning with 'GL_' cannot be "
@@ -99,7 +99,7 @@ class TestDashCapDGL_(expect.ErrorMessage):
 class TestDashCapDReservedMacro(expect.WarningMessage):
     """Tests that we cannot -D GLSL's predefined macros."""
 
-    shader = FileShader('void main(){}', '.vert')
+    shader = FileShader('#version 150\nvoid main(){}', '.vert')
     # Consecutive underscores are banned anywhere in the name.
     glslc_args = [
         '-D__LINE__=1', '-Dmid__dle', '-Dend__', '-D_single_is_valid_', shader]
@@ -162,13 +162,13 @@ class TestDashCapDWithCommentAfterVersion(expect.ErrorMessage):
 
 
 @inside_glslc_testsuite('OptionCapD')
-class TestDashCapDWithDashStd(expect.ErrorMessage):
+class TestDashCapDWithDashStd(expect.ErrorMessageSubstr):
     """Tests -D works well with -std."""
 
     shader = FileShader('void main(){X}\nvoid foo(){Y}', '.vert')
     glslc_args = ['-DX=', '-DY=return 3;', '-std=310es', shader]
 
-    expected_error = [
+    expected_error_substr = [
         shader, ":2: error: 'return' : void function cannot return a value\n",
         '1 error generated.\n']
 

@@ -23,7 +23,7 @@ class TestOptionDashOConcatenatedArg(expect.SuccessfulReturn,
                                      expect.CorrectObjectFilePreamble):
     """Tests that we can concatenate -o and the output filename."""
 
-    shader = FileShader('void main() {}', '.vert')
+    shader = FileShader('#version 140\nvoid main() {}', '.vert')
     glslc_args = ['-ofoo', shader]
 
     def check_output_foo(self, status):

@@ -19,16 +19,23 @@
 extern "C" {
 #endif
 
-// The minimal shader without #version
-const char kMinimalShader[] = "void main(){}";
+// The minimal shader, without a version directive.
+const char kMinimalShaderWithoutVersion[] = "void main(){}";
+// The minimal shader, with a version directive.
+const char kMinimalShader[] =
+    "#version 140\n"
+    "void main(){}";
 const char kMinimalShaderWithMacro[] =
+    "#version 140\n"
     "#define E main\n"
     "void E(){}\n";
 
 // By default the compiler will emit a warning on line 2 complaining
-// that 'float' is a deprecated attribute in version 130.
+// that 'float' is a deprecated attribute in version 130.  Use verison 140
+// because some versions of glslang will error out for a too-low version
+// when generating SPIR-V.
 const char kDeprecatedAttributeShader[] =
-    "#version 130\n"
+    "#version 140\n"
     "attribute float x;\n"
     "void main() {}\n";
 
@@ -47,19 +54,21 @@ const char kCoreVertShaderWithoutVersion[] =
 // Generated debug information should contain the name of the vector:
 // debug_info_sample.
 const char kMinimalDebugInfoShader[] =
+    "#version 140\n"
     "void main(){\n"
     "vec2 debug_info_sample = vec2(1.0,1.0);\n"
     "}\n";
 
 // Compiler should generate two errors.
 const char kTwoErrorsShader[] =
+    "#version 150\n"
     "#error\n"
     "#error\n"
     "void main(){}\n";
 
 // Compiler should generate two warnings.
 const char kTwoWarningsShader[] =
-    "#version 130\n"
+    "#version 140\n"
     "attribute float x;\n"
     "attribute float y;\n"
     "void main(){}\n";
@@ -75,7 +84,7 @@ const char kOpenGLCompatibilityFragmentShader[] =
 
 // A shader that compiles under OpenGL core profile rules.
 const char kOpenGLVertexShader[] =
-    R"(#version 150
+    R"(#version 140
        void main() { int t = gl_VertexID; })";
 
 // Empty 310 es shader. It is valid for vertex, fragment, compute shader kind.
@@ -163,27 +172,20 @@ const char kVertexOnlyShaderWithInvalidPragma[] =
     "    gl_Position = vec4(1.);\n"
     "}";
 
-// The disassembly for kMinimalShader.
-const char kMinimalShaderDisassembly[] =
+// Parts of a valid disassembly of a minimal shader.  We only check certain
+// parts since Glslang code generation changes in incidental ways.
+const char* kMinimalShaderDisassemblySubstrings[] = {
     "; SPIR-V\n"
     "; Version: 1.0\n"
     "; Generator: Khronos Glslang Reference Front End; 1\n"
-    "; Bound: 6\n"
-    "; Schema: 0\n"
+    "; Bound:",
+
     "               OpCapability Shader\n"
     "          %1 = OpExtInstImport \"GLSL.std.450\"\n"
-    "               OpMemoryModel Logical GLSL450\n"
-    "               OpEntryPoint Vertex %4 \"main\"\n"
-    "               OpSource GLSL 110\n"
-    "               OpSourceExtension \"GL_GOOGLE_cpp_style_line_directive\"\n"
-    "               OpSourceExtension \"GL_GOOGLE_include_directive\"\n"
-    "               OpName %4 \"main\"\n"
-    "          %2 = OpTypeVoid\n"
-    "          %3 = OpTypeFunction %2\n"
-    "          %4 = OpFunction %2 None %3\n"
-    "          %5 = OpLabel\n"
+    "               OpMemoryModel Logical GLSL450\n",
+
     "               OpReturn\n"
-    "               OpFunctionEnd\n";
+    "               OpFunctionEnd\n"};
 
 #ifdef __cplusplus
 }

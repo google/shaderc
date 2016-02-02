@@ -16,6 +16,7 @@ import expect
 from glslc_test_framework import inside_glslc_testsuite
 from placeholder import FileShader
 
+MINIMAL_SHADER = "#version 140\nvoid main(){}"
 
 @inside_glslc_testsuite('OptionDashX')
 class TestDashXNoArg(expect.ErrorMessage):
@@ -31,7 +32,7 @@ class TestDashXNoArg(expect.ErrorMessage):
 class TestDashXGlsl(expect.ValidObjectFile):
     """Tests -x glsl."""
 
-    shader = FileShader('void main(){}', '.vert')
+    shader = FileShader(MINIMAL_SHADER, '.vert')
     glslc_args = ['-x', 'glsl', '-c', shader]
 
 
@@ -39,7 +40,7 @@ class TestDashXGlsl(expect.ValidObjectFile):
 class TestDashXWrongParam(expect.ErrorMessage):
     """Tests -x with wrong parameter."""
 
-    shader = FileShader('void main(){}', '.vert')
+    shader = FileShader(MINIMAL_SHADER, '.vert')
     glslc_args = ['-x', 'gl', shader]
     expected_error = ["glslc: error: language not recognized: 'gl'\n"]
 
@@ -48,7 +49,7 @@ class TestDashXWrongParam(expect.ErrorMessage):
 class TestMultipleDashX(expect.ValidObjectFile):
     """Tests that multiple -x glsl works."""
 
-    shader = FileShader('void main(){}', '.vert')
+    shader = FileShader(MINIMAL_SHADER, '.vert')
     glslc_args = ['-c', '-x', 'glsl', '-x', 'glsl', shader, '-x', 'glsl']
 
 
@@ -56,7 +57,7 @@ class TestMultipleDashX(expect.ValidObjectFile):
 class TestMultipleDashXCorrectWrong(expect.ErrorMessage):
     """Tests -x glsl -x [wrong-language]."""
 
-    shader = FileShader('void main(){}', '.vert')
+    shader = FileShader(MINIMAL_SHADER, '.vert')
     glslc_args = ['-x', 'glsl', '-x', 'foo', shader]
     expected_error = ["glslc: error: language not recognized: 'foo'\n"]
 
@@ -65,7 +66,7 @@ class TestMultipleDashXCorrectWrong(expect.ErrorMessage):
 class TestMultipleDashXWrongCorrect(expect.ErrorMessage):
     """Tests -x [wrong-language] -x glsl."""
 
-    shader = FileShader('void main(){}', '.vert')
+    shader = FileShader(MINIMAL_SHADER, '.vert')
     glslc_args = ['-xbar', '-x', 'glsl', shader]
     expected_error = ["glslc: error: language not recognized: 'bar'\n"]
 
@@ -74,7 +75,7 @@ class TestMultipleDashXWrongCorrect(expect.ErrorMessage):
 class TestDashXGlslConcatenated(expect.ValidObjectFile):
     """Tests -xglsl."""
 
-    shader = FileShader('void main(){}', '.vert')
+    shader = FileShader(MINIMAL_SHADER, '.vert')
     glslc_args = ['-xglsl', shader, '-c']
 
 
@@ -82,7 +83,7 @@ class TestDashXGlslConcatenated(expect.ValidObjectFile):
 class TestDashXWrongParamConcatenated(expect.ErrorMessage):
     """Tests -x concatenated with a wrong language."""
 
-    shader = FileShader('void main(){}', '.vert')
+    shader = FileShader(MINIMAL_SHADER, '.vert')
     glslc_args = ['-xsl', shader]
     expected_error = ["glslc: error: language not recognized: 'sl'\n"]
 
@@ -91,6 +92,6 @@ class TestDashXWrongParamConcatenated(expect.ErrorMessage):
 class TestDashXEmpty(expect.ErrorMessage):
     """Tests -x ''."""
 
-    shader = FileShader('void main(){}', '.vert')
+    shader = FileShader(MINIMAL_SHADER, '.vert')
     glslc_args = ['-x', '', shader]
     expected_error = ["glslc: error: language not recognized: ''\n"]
