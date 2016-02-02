@@ -39,7 +39,7 @@ class TestTargetEnvEqOpenglCompatWithOpenGlCompatShader(expect.ValidObjectFile):
 
 
 @inside_glslc_testsuite('OptionTargetEnv')
-class TestTargetEnvEqOpenglWithOpenGlCompatShader(expect.ErrorMessage):
+class TestTargetEnvEqOpenglWithOpenGlCompatShader(expect.ErrorMessageSubstr):
     """Tests the error message of compiling OpenGL Compatibility Fragment shader
     with --target-env=opengl"""
     shader = FileShader(opengl_compat_fragment_shader(), '.frag')
