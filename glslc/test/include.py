@@ -138,8 +138,7 @@ class VerifyCompileIncludeTwoSiblings(expect.ValidObjectFile):
              #include "c"
              """),
         File('a',
-             """
-             void afun(){}
+             """void afun(){}
              #define BODY {}
              """),
         File('c', 'void main() BODY\n')])
