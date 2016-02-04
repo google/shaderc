@@ -300,7 +300,8 @@ TEST_F(CompileStringWithOptionsTest, CloneCompilerOptions) {
 
 TEST_F(CompileStringWithOptionsTest, MacroCompileOptions) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  shaderc_compile_options_add_macro_definition(options_.get(), "E", "main");
+  shaderc_compile_options_add_macro_definition(options_.get(), "E", 1u, "main",
+                                               4u);
   const std::string kMinimalExpandedShader = "#version 140\nvoid E(){}";
   const std::string kMinimalDoubleExpandedShader = "#version 140\nF E(){}";
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalExpandedShader,
@@ -315,8 +316,8 @@ TEST_F(CompileStringWithOptionsTest, MacroCompileOptions) {
                                   shaderc_glsl_vertex_shader,
                                   cloned_options.get()));
 
-  shaderc_compile_options_add_macro_definition(cloned_options.get(), "F",
-                                               "void");
+  shaderc_compile_options_add_macro_definition(cloned_options.get(), "F", 1u,
+                                               "void", 4u);
   // This should still not work with the original options.
   EXPECT_FALSE(CompilesToValidSpv(compiler_, kMinimalDoubleExpandedShader,
                                   shaderc_glsl_vertex_shader, options_.get()));
@@ -325,6 +326,31 @@ TEST_F(CompileStringWithOptionsTest, MacroCompileOptions) {
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalDoubleExpandedShader,
                                  shaderc_glsl_vertex_shader,
                                  cloned_options.get()));
+}
+
+TEST_F(CompileStringWithOptionsTest, MacroCompileOptionsNotNullTerminated) {
+  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  shaderc_compile_options_add_macro_definition(options_.get(), "EFGH", 1u, "mainnnnnn",
+                                               4u);
+  const std::string kMinimalExpandedShader = "#version 140\nvoid E(){}";
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalExpandedShader,
+                                 shaderc_glsl_vertex_shader, options_.get()));
+}
+
+TEST_F(CompileStringWithOptionsTest, ValuelessMacroCompileOptionsZeroLength) {
+  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  shaderc_compile_options_add_macro_definition(options_.get(), "E", 1u,
+                                               "somthing", 0u);
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kValuelessPredefinitionShader,
+                                 shaderc_glsl_vertex_shader, options_.get()));
+}
+
+TEST_F(CompileStringWithOptionsTest, ValuelessMacroCompileOptionsNullPointer) {
+  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  shaderc_compile_options_add_macro_definition(options_.get(), "E", 1u, nullptr,
+                                               100u);
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kValuelessPredefinitionShader,
+                                 shaderc_glsl_vertex_shader, options_.get()));
 }
 
 TEST_F(CompileStringWithOptionsTest, DisassemblyOption) {
@@ -814,7 +840,8 @@ TEST_F(CompileStringWithOptionsTest,
 
 TEST_F(CompileStringWithOptionsTest, IfDefCompileOption) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  shaderc_compile_options_add_macro_definition(options_.get(), "E", nullptr);
+  shaderc_compile_options_add_macro_definition(options_.get(), "E", 1u, nullptr,
+                                               0u);
   const std::string kMinimalExpandedShader =
       "#version 140\n"
       "#ifdef E\n"

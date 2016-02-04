@@ -136,16 +136,20 @@ shaderc_compile_options_t shaderc_compile_options_clone(
 // NULL to this function, and doing such will have no effect.
 void shaderc_compile_options_release(shaderc_compile_options_t options);
 
-// Adds a predefined macro to the compilation options. This has the
-// same effect as passing -Dname=value to the command-line compiler.
-// If value is NULL, it has the effect same as passing -Dname to the
-// command-line compiler. If a macro definition with the same name has
-// previously been added, the value is replaced with the new value.
-// The null-terminated strings that the name and value parameters point to
-// must remain valid for the duration of the call, but can be modified or
-// deleted after this function has returned.
+// Adds a predefined macro to the compilation options. This has the same
+// effect as passing -Dname=value to the command-line compiler.  If value
+// is NULL, it has the same effect as passing -Dname to the command-line
+// compiler. If a macro definition with the same name has previously been
+// added, the value is replaced with the new value. The macro name and
+// value are passed in with char pointers, which point to their data, and
+// the lengths of their data. The strings that the name and value pointers
+// point to must remain valid for the duration of the call, but can be
+// modified or deleted after this function has returned. In case of adding
+// a valueless macro, the value argument should be a null pointer or the
+// value_length should be 0u.
 void shaderc_compile_options_add_macro_definition(
-    shaderc_compile_options_t options, const char* name, const char* value);
+    shaderc_compile_options_t options, const char* name, size_t name_length,
+    const char* value, size_t value_length);
 
 // Sets the compiler mode to generate debug information in the output.
 void shaderc_compile_options_set_generate_debug_info(

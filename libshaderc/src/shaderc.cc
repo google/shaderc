@@ -225,8 +225,9 @@ void shaderc_compile_options_release(shaderc_compile_options_t options) {
 }
 
 void shaderc_compile_options_add_macro_definition(
-    shaderc_compile_options_t options, const char* name, const char* value) {
-  options->compiler.AddMacroDefinition(name, value);
+    shaderc_compile_options_t options, const char* name, size_t name_length,
+    const char* value, size_t value_length) {
+  options->compiler.AddMacroDefinition(name, name_length, value, value_length);
 }
 
 void shaderc_compile_options_set_generate_debug_info(

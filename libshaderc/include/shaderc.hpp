@@ -109,21 +109,22 @@ class CompileOptions {
     other.options_ = nullptr;
   }
 
-  // Adds a predefined macro to the compilation options.
-  // For further details refer to shaderc_compile_options_add_macro_definition
-  // in shaderc.h
-  void AddMacroDefinition(const char* name, const char* value) {
-    shaderc_compile_options_add_macro_definition(options_, name, value);
+  // Adds a predefined macro to the compilation options. It behaves the same as
+  // shaderc_compile_options_add_macro_definition in shaderc.h.
+  void AddMacroDefinition(const char* name, size_t name_length,
+                          const char* value, size_t value_length) {
+    shaderc_compile_options_add_macro_definition(options_, name, name_length,
+                                                 value, value_length);
   }
 
   // Adds a valueless predefined macro to the compilation options.
   void AddMacroDefinition(const std::string& name) {
-    AddMacroDefinition(name.c_str(), nullptr);
+    AddMacroDefinition(name.c_str(), name.size(), nullptr, 0u);
   }
 
   // Adds a predefined macro to the compilation options.
   void AddMacroDefinition(const std::string& name, const std::string& value) {
-    AddMacroDefinition(name.c_str(), value.c_str());
+    AddMacroDefinition(name.c_str(), name.size(), value.c_str(), value.size());
   }
 
   // Sets the compiler mode to generate debug information in the output.
