@@ -17,7 +17,7 @@ import os.path
 import expect
 from environment import File, Directory
 from glslc_test_framework import inside_glslc_testsuite
-from placeholder import FileShader
+from placeholder import FileShader, TempFileName
 
 MINIMAL_SHADER = '#version 140\nvoid main() {}'
 
@@ -150,12 +150,83 @@ class TestWorkDirEqInArg(expect.ValidNamedObjectFile):
 
 
 @inside_glslc_testsuite('WorkDir')
-class TestWorkDirCompileFileAbsolutePath(expect.ValidObjectFile):
+class TestWorkDirCompileAbsolutePathInput(expect.SuccessfulReturn,
+                                          expect.CorrectObjectFilePreamble):
     """Tests -working-directory=<dir> when compiling input file with absolute
-    path."""
+    path without -o option. The output location should refer to the working
+    directory"""
+
+    shader1 = FileShader(MINIMAL_SHADER, '.vert')
+    shader2 = FileShader(MINIMAL_SHADER, '.vert')
+    environment = Directory('.', [
+        Directory('subdir', []),
+    ])
+    glslc_args = ['-c', '-working-directory=subdir', shader1, shader2]
+
+    def check_output_in_subdir(self, status):
+        for input_filename in status.input_filenames:
+            object_filename = expect.get_object_filename(
+                os.path.basename(input_filename))
+            success, message = self.verify_object_file_preamble(
+                os.path.join(status.directory, 'subdir', object_filename))
+            if not success:
+                return False, message
+        return True, ''
+
+
+@inside_glslc_testsuite('WorkDir')
+class TestWorkDirAbsoluteInputRelativeOutput(expect.SuccessfulReturn,
+                                             expect.CorrectObjectFilePreamble):
+    """Tests -working-directory=<dir> when the input file is provided as absolute
+    path and -o specifies a relative path for output. The output location should
+    refer to the working directory"""
 
     shader = FileShader(MINIMAL_SHADER, '.vert')
-    glslc_args = ['-c', '-working-directory=subdir', shader]
+    environment = Directory('.', [
+        Directory('subdir', []),
+    ])
+    glslc_args = ['-c', '-working-directory=subdir',
+                  shader, '-o', 'output.spv']
+
+    def check_output_in_subdir(self, status):
+        output_name = os.path.join(status.directory, 'subdir', 'output.spv')
+        return self.verify_object_file_preamble(output_name)
+
+
+@inside_glslc_testsuite('WorkDir')
+class TestWorkDirRelativeInputAbsoluteOutput(expect.SuccessfulReturn,
+                                             expect.CorrectObjectFilePreamble):
+    """Tests -working-directory=<dir> the input file is given by relative path,
+    and output file is given by absolute path, we should refer to -working-directory
+    to resolve the input file, but ignore it for output."""
+
+    environment = Directory('.', [EMPTY_SHADER_IN_SUBDIR])
+    output_file = TempFileName('output.spv')
+    glslc_args = ['-c', '-working-directory=subdir',
+                  'shader.vert', '-o', output_file]
+
+    def checkout_output(self, status):
+        output_name = os.path.join(status.directory, 'output.spv')
+        return self.verify_object_file_preamble(output_name)
+
+
+@inside_glslc_testsuite('WorkDir')
+class TestWorkDirAbsoluteInputAbsoluteOutput(expect.SuccessfulReturn,
+                                             expect.CorrectObjectFilePreamble):
+    """Tests -working-directory=<dir> when both input file and output file are
+    provided as absolute paths, we should ignore -working-directory."""
+
+    shader = FileShader(MINIMAL_SHADER, '.vert')
+    environment = Directory('.', [
+        Directory('subdir', []),
+    ])
+    output_file = TempFileName('output.spv')
+    glslc_args = ['-c', '-working-directory=subdir',
+                  shader, '-o', output_file]
+
+    def checkout_output(self, status):
+        output_name = os.path.join(status.directory, 'output.spv')
+        return self.verify_object_file_preamble(output_name)
 
 
 # The -working-directory flag should not affect the placement of the link file.

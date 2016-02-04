@@ -99,7 +99,28 @@ class FileCompiler {
   // compiler_.CompileGlslToSpv().
   shaderc::CompileOptions options_;
 
-  // Returns the name of the output file, given the input_filename string.
+  // Returns the name of the output file, computed as follows.
+  //
+  // Let "target directory" be the user-specified working directory, if
+  // provided, and the current working directory otherwise.
+  // Let "result extension" be ".spv" when generating a SPIR-V binary, and
+  // ".s" when generating SPIR-V assembly text.
+  // Let "resolved input filename" be the input filename if it's absolute,
+  // or the input filename relative to the target directory otherwise.
+  //
+  // If the user specified an output filename, then:
+  //   If the specified output filename is an absolute path, then return that.
+  //   Otherwise, return the specified output filename relative to the target
+  //   directory.
+  // If the user did not specify an output filename, then:
+  //   If linking is performed, return "a.spv" relative to the target
+  //   directory.
+  //   Derive the output filename from the input filename as follows:
+  //     If the input filename has a standard stage extension (e.g. .vert)
+  //     then return the resolved input filename but add the result extension.
+  //     Otherwise, return the resolved input filename but where its extension
+  //     is replaced with the result extension.  (If the resolved input filename
+  //     does not have an extension, then append the result extension.)
   std::string GetOutputFileName(std::string input_filename);
 
   // Resolves relative paths against this working directory. Must always end
