@@ -198,7 +198,7 @@ TEST_F(CompilerTest, DISABLED_RespectTargetEnvOnVulkanShader) {
 }
 
 TEST_F(CompilerTest, AddMacroDefinition) {
-  const std::string kMinimalExpandedShader = "void E(){}";
+  const std::string kMinimalExpandedShader = "#version 140\nvoid E(){}";
   compiler_.AddMacroDefinition("E", 1u, "main", 4u);
   EXPECT_TRUE(SimpleCompilationSucceeds(kMinimalExpandedShader, EShLangVertex));
 }
@@ -216,7 +216,7 @@ TEST_F(CompilerTest, AddValuelessMacroDefinitionZeroLength) {
 }
 
 TEST_F(CompilerTest, AddMacroDefinitionNotNullTerminated) {
-  const std::string kMinimalExpandedShader = "void E(){}";
+  const std::string kMinimalExpandedShader = "#version 140\nvoid E(){}";
   compiler_.AddMacroDefinition("EFGH", 1u, "mainnnnnn", 4u);
   EXPECT_TRUE(SimpleCompilationSucceeds(kMinimalExpandedShader, EShLangVertex));
 }
