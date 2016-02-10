@@ -113,13 +113,6 @@ int main(int argc, char** argv) {
   glslc::FileCompiler compiler;
   bool success = true;
   bool has_stdin_input = false;
-  // Contains all the macro names data. Current libshaderc interface requires
-  // null-terminated string, we need to 'pull out' and copy the macro names and
-  // hold their data here. Besides, as the internal unordered_map in
-  // libshaderc_util is storing string_piece, we need to keep the addresses of
-  // our macros and values unchanged. std::list meets this requirement.
-  std::list<std::string> macro_names;
-  std::list<std::string> macro_values;
 
   compiler.AddIncludeDirectory("");
 
@@ -263,23 +256,15 @@ int main(int argc, char** argv) {
               << arg << std::endl;
         }
 
-        // We have to insert a null terminator at the end of name, as we are
-        // using libshaderc's API instead of libshaderc_util's. Libshaderc API
-        // assumes a const char* string, while libshaderc_util assume a
-        // string_piece one. The original implementation doesn't append '\0' but
-        // works fine with libshaderc_util because it has 'end_' property. But
-        // libshaderc api doesn't know that so the macro 'name' will include the
-        // 'value' if we don't insert '\0'.
-
-        macro_names.emplace_back(name_piece.data(), name_length);
-        macro_values.emplace_back(
-            equal_sign_loc == shaderc_util::string_piece::npos ||
-                    equal_sign_loc == argument.size() - 1
+        const string_piece value_piece =
+            (equal_sign_loc == string_piece::npos ||
+             equal_sign_loc == argument.size() - 1)
                 ? ""
-                : argument.substr(name_length + 1).data());
+                : argument.substr(name_length + 1);
         // TODO(deki): check arg for newlines.
-        compiler.options().AddMacroDefinition(macro_names.back().c_str(),
-                                              macro_values.back().c_str());
+        compiler.options().AddMacroDefinition(
+            name_piece.data(), name_piece.size(), value_piece.data(),
+            value_piece.size());
       }
     } else if (arg.starts_with("-I")) {
       string_piece option_arg;
