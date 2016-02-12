@@ -304,12 +304,13 @@ shaderc_compiler_t shaderc_compiler_initialize() {
 
 void shaderc_compiler_release(shaderc_compiler_t compiler) { delete compiler; }
 
-shaderc_spv_module_t shaderc_compile_into_spv(
+shaderc_compilation_result_t shaderc_compile_into_spv(
     const shaderc_compiler_t compiler, const char* source_text,
     size_t source_text_size, shaderc_shader_kind shader_kind,
     const char* input_file_name, const char* entry_point_name,
     const shaderc_compile_options_t additional_options) {
-  shaderc_spv_module_t result = new (std::nothrow) shaderc_spv_module;
+  shaderc_compilation_result_t result =
+      new (std::nothrow) shaderc_compilation_result;
   if (!result) {
     return nullptr;
   }
@@ -374,32 +375,37 @@ shaderc_spv_module_t shaderc_compile_into_spv(
   return result;
 }
 
-size_t shaderc_module_get_length(const shaderc_spv_module_t module) {
-  return module->output_data_size;
+size_t shaderc_result_get_length(const shaderc_compilation_result_t result) {
+  return result->output_data_size;
 }
 
-size_t shaderc_module_get_num_warnings(const shaderc_spv_module_t module) {
-  return module->num_warnings;
+size_t shaderc_result_get_num_warnings(
+    const shaderc_compilation_result_t result) {
+  return result->num_warnings;
 }
 
-size_t shaderc_module_get_num_errors(const shaderc_spv_module_t module) {
-  return module->num_errors;
+size_t shaderc_result_get_num_errors(
+    const shaderc_compilation_result_t result) {
+  return result->num_errors;
 }
 
-const char* shaderc_module_get_bytes(const shaderc_spv_module_t module) {
-  return reinterpret_cast<const char*>(module->output_data.data());
+const char* shaderc_result_get_bytes(
+    const shaderc_compilation_result_t result) {
+  return reinterpret_cast<const char*>(result->output_data.data());
 }
 
-void shaderc_module_release(shaderc_spv_module_t module) { delete module; }
-
-const char* shaderc_module_get_error_message(
-    const shaderc_spv_module_t module) {
-  return module->messages.c_str();
+void shaderc_result_release(shaderc_compilation_result_t result) {
+  delete result;
 }
 
-shaderc_compilation_status shaderc_module_get_compilation_status(
-    const shaderc_spv_module_t module) {
-  return module->compilation_status;
+const char* shaderc_result_get_error_message(
+    const shaderc_compilation_result_t result) {
+  return result->messages.c_str();
+}
+
+shaderc_compilation_status shaderc_result_get_compilation_status(
+    const shaderc_compilation_result_t result) {
+  return result->compilation_status;
 }
 
 void shaderc_get_spv_version(unsigned int* version, unsigned int* revision) {

@@ -23,77 +23,78 @@
 
 namespace shaderc {
 // Contains the result of a compilation to SPIR-V.
-class SpvModule {
+class CompilationResult {
  public:
-  // Upon creation, the SpvModule takes ownership of the shaderc_spv_module_t.
-  // During destruction of the SpvModule, the shaderc_spv_module_t will be
-  // released.
-  explicit SpvModule(shaderc_spv_module_t module) : module_(module) {}
-  ~SpvModule() { shaderc_module_release(module_); }
+  // Upon creation, the CompilationResult takes ownership of the
+  // shaderc_compilation_result instance. During destruction of the
+  // CompilationResult, the shaderc_compilation_result will be released.
+  explicit CompilationResult(shaderc_compilation_result_t compilation_result)
+      : compilation_result_(compilation_result) {}
+  ~CompilationResult() { shaderc_result_release(compilation_result_); }
 
-  SpvModule(SpvModule&& other) {
-    module_ = other.module_;
-    other.module_ = nullptr;
+  CompilationResult(CompilationResult&& other) {
+    compilation_result_ = other.compilation_result_;
+    other.compilation_result_ = nullptr;
   }
 
   // Returns any error message found during compilation.
   std::string GetErrorMessage() const {
-    if (!module_) {
+    if (!compilation_result_) {
       return "";
     }
-    return shaderc_module_get_error_message(module_);
+    return shaderc_result_get_error_message(compilation_result_);
   }
 
   // Returns the compilation status, indicating whether the compilation
   // succeeded, or failed due to some reasons, like invalid shader stage or
   // compilation errors.
   shaderc_compilation_status GetCompilationStatus() const {
-    if (!module_) {
-      return shaderc_compilation_status_null_result_module;
+    if (!compilation_result_) {
+      return shaderc_compilation_status_null_result_object;
     }
-    return shaderc_module_get_compilation_status(module_);
+    return shaderc_result_get_compilation_status(compilation_result_);
   }
 
   // Returns a pointer to the start of the compiled SPIR-V.
   // It is guaranteed that static_cast<uint32_t> is valid to call on this
   // pointer.
-  // This pointer remains valid only until the SpvModule is destroyed.
+  // This pointer remains valid only until the CompilationResult is destroyed.
   const char* GetData() const {
-    if (!module_) {
+    if (!compilation_result_) {
       return "";
     }
-    return shaderc_module_get_bytes(module_);
+    return shaderc_result_get_bytes(compilation_result_);
   }
 
   // Returns the number of bytes contained in the compiled SPIR-V.
   size_t GetLength() const {
-    if (!module_) {
+    if (!compilation_result_) {
       return 0;
     }
-    return shaderc_module_get_length(module_);
+    return shaderc_result_get_length(compilation_result_);
   }
 
   // Returns the number of warnings generated during the compilation.
   size_t GetNumWarnings() const {
-    if (!module_) {
+    if (!compilation_result_) {
       return 0;
     }
-    return shaderc_module_get_num_warnings(module_);
+    return shaderc_result_get_num_warnings(compilation_result_);
   }
 
   // Returns the number of errors generated during the compilation.
   size_t GetNumErrors() const {
-    if (!module_) {
+    if (!compilation_result_) {
       return 0;
     }
-    return shaderc_module_get_num_errors(module_);
+    return shaderc_result_get_num_errors(compilation_result_);
   }
 
  private:
-  SpvModule(const SpvModule& other) = delete;
-  SpvModule& operator=(const SpvModule& other) = delete;
+  CompilationResult(const CompilationResult& other) = delete;
+  CompilationResult& operator=(const CompilationResult& other) = delete;
 
-  shaderc_spv_module_t module_;
+  shaderc_compilation_result_t compilation_result_;
 };
 
 // Contains any options that can have default values for a compilation.
@@ -160,11 +161,11 @@ class CompileOptions {
         includer_.get());
   }
 
-  // Sets the compiler to emit a disassembly text instead of a binary. In
-  // this mode, the byte array result in the shaderc_spv_module returned
-  // from shaderc_compile_into_spv() will consist of SPIR-V assembly text.
-  // Note the preprocessing only mode overrides this option, and this option
-  // overrides the default mode generating a SPIR-V binary.
+  // Sets the compiler to emit a disassembly text instead of a binary. In this
+  // mode, the byte array result in the shaderc_compilation_result returned from
+  // shaderc_compile_into_spv() will consist of SPIR-V assembly text. Note the
+  // preprocessing only mode overrides this option, and this option overrides
+  // the default mode generating a SPIR-V binary.
   void SetDisassemblyMode() {
     shaderc_compile_options_set_disassembly_mode(options_);
   }
@@ -179,8 +180,8 @@ class CompileOptions {
                                                        profile);
   }
 
-  // Sets the compiler to do only preprocessing. The byte array result in the
-  // module returned by the compilation is the text of the preprocessed shader.
+  // Sets the compiler to do only preprocessing. The byte array in the result
+  // object returned by the compilation is the text of the preprocessed shader.
   // This option overrides all other compilation modes, such as disassembly mode
   // and the default mode of compilation to SPIR-V binary.
   void SetPreprocessingOnlyMode() {
@@ -233,7 +234,7 @@ class Compiler {
 
   bool IsValid() const { return compiler_ != nullptr; }
 
-  // Compiles the given source GLSL into a SPIR-V module.
+  // Compiles the given source GLSL and returns the compilation result.
   // The source_text parameter must be a valid pointer.
   // The source_text_size parameter must be the length of the source text.
   // The shader_kind parameter either forces the compilation to be done with a
@@ -248,18 +249,19 @@ class Compiler {
   // identify the source string in cases like emitting error messages. It
   // doesn't have to be a 'file name'.
   // The compilation is done with default compile options.
-  // It is valid for the returned SpvModule object to outlive this compiler
-  // object.
-  SpvModule CompileGlslToSpv(const char* source_text, size_t source_text_size,
-                             shaderc_shader_kind shader_kind,
-                             const char* input_file_name) const {
-    shaderc_spv_module_t module =
+  // It is valid for the returned CompilationResult object to outlive this
+  // compiler object.
+  CompilationResult CompileGlslToSpv(const char* source_text,
+                                     size_t source_text_size,
+                                     shaderc_shader_kind shader_kind,
+                                     const char* input_file_name) const {
+    shaderc_compilation_result_t compilation_result =
         shaderc_compile_into_spv(compiler_, source_text, source_text_size,
                                  shader_kind, input_file_name, "main", nullptr);
-    return SpvModule(module);
+    return CompilationResult(compilation_result);
   }
 
-  // Compiles the given source GLSL into a SPIR-V module.
+  // Compiles the given source GLSL and returns the compilation result.
   // The source_text parameter must be a valid pointer.
   // The source_text_size parameter must be the length of the source text.
   // The shader_kind parameter either forces the compilation to be done with a
@@ -275,37 +277,39 @@ class Compiler {
   // doesn't have to be a 'file name'.
   // The compilation is passed any options specified in the CompileOptions
   // parameter.
-  // It is valid for the returned SpvModule object to outlive this compiler
-  // object.
+  // It is valid for the returned CompilationResult object to outlive this
+  // compiler object.
   // Note when the options_ has disassembly mode or preprocessing only mode set
-  // on, the returned SpvModule will hold a text string, instead of a SPIR-V
-  // binary generated with default options.
-  SpvModule CompileGlslToSpv(const char* source_text, size_t source_text_size,
-                             shaderc_shader_kind shader_kind,
-                             const char* input_file_name,
-                             const CompileOptions& options) const {
-    shaderc_spv_module_t module = shaderc_compile_into_spv(
+  // on, the returned CompilationResult will hold a text string, instead of a
+  // SPIR-V binary generated with default options.
+  CompilationResult CompileGlslToSpv(const char* source_text,
+                                     size_t source_text_size,
+                                     shaderc_shader_kind shader_kind,
+                                     const char* input_file_name,
+                                     const CompileOptions& options) const {
+    shaderc_compilation_result_t compilation_result = shaderc_compile_into_spv(
         compiler_, source_text, source_text_size, shader_kind, input_file_name,
         "main", options.options_);
-    return SpvModule(module);
+    return CompilationResult(compilation_result);
   }
 
-  // Compiles the given source GLSL into a SPIR-V module by invoking
-  // CompileGlslToSpv(const char*, size_t, shaderc_shader_kind, const char*);
-  SpvModule CompileGlslToSpv(const std::string& source_text,
-                             shaderc_shader_kind shader_kind,
-                             const char* input_file_name) const {
+  // Compiles the given source GLSL and returns the compilation result by
+  // invoking CompileGlslToSpv(const char*, size_t, shaderc_shader_kind, const
+  // char*);
+  CompilationResult CompileGlslToSpv(const std::string& source_text,
+                                     shaderc_shader_kind shader_kind,
+                                     const char* input_file_name) const {
     return CompileGlslToSpv(source_text.data(), source_text.size(), shader_kind,
                             input_file_name);
   }
 
-  // Compiles the given source GLSL into a SPIR-V module by invoking
-  // CompileGlslToSpv(const char*, size_t, shaderc_shader_kind, const char*,
-  // options);
-  SpvModule CompileGlslToSpv(const std::string& source_text,
-                             shaderc_shader_kind shader_kind,
-                             const char* input_file_name,
-                             const CompileOptions& options) const {
+  // Compiles the given source GLSL and returns the compilation result by
+  // invoking CompileGlslToSpv(const char*, size_t, shaderc_shader_kind, const
+  // char*, options);
+  CompilationResult CompileGlslToSpv(const std::string& source_text,
+                                     shaderc_shader_kind shader_kind,
+                                     const char* input_file_name,
+                                     const CompileOptions& options) const {
     return CompileGlslToSpv(source_text.data(), source_text.size(), shader_kind,
                             input_file_name, options);
   }

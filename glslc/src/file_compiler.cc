@@ -67,7 +67,7 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
   const auto& included_files = includer->file_path_trace();
   options_.SetIncluder(std::move(includer));
 
-  shaderc::SpvModule result = compiler_.CompileGlslToSpv(
+  shaderc::CompilationResult result = compiler_.CompileGlslToSpv(
       source_string.data(), source_string.size(), shader_stage,
       error_file_name.data(), options_);
   total_errors_ += result.GetNumErrors();

@@ -22,7 +22,7 @@
 #include <vector>
 
 // Described in shaderc.h.
-struct shaderc_spv_module {
+struct shaderc_compilation_result {
   // Compilation output data. In normal compilation mode, it contains the
   // compiled SPIR-V binary code. In disassembly and preprocessing-only mode, it
   // contains a null-terminated string which is the text output. For text
@@ -39,7 +39,7 @@ struct shaderc_spv_module {
   size_t num_warnings = 0;
   // Compilation status.
   shaderc_compilation_status compilation_status =
-      shaderc_compilation_status_null_result_module;
+      shaderc_compilation_status_null_result_object;
 };
 
 namespace shaderc_util {
