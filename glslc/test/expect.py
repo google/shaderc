@@ -49,7 +49,7 @@ def get_object_filename(source_filename):
 
 def get_assembly_filename(source_filename):
     """Gets the assembly filename for the given source file."""
-    return substitute_file_extension(source_filename, 's')
+    return substitute_file_extension(source_filename, 'spvasm')
 
 
 def verify_file_non_empty(filename):
@@ -313,7 +313,7 @@ class ErrorMessageSubstr(GlslCTest):
                            'signal ' + str(status.returncode))
         if not status.stderr:
             return False, 'Expected error message, but no output on stderr'
-        if not self.expected_error_substr in convert_to_unix_line_endings(status.stderr):
+        if self.expected_error_substr not in convert_to_unix_line_endings(status.stderr):
             return False, ('Incorrect stderr output:\n{act}\n'
                            'Expected substring not found in stderr:\n{exp}'.format(
                                act=status.stderr, exp=self.expected_error_substr))

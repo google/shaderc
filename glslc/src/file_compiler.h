@@ -74,7 +74,7 @@ class FileCompiler {
 
   // Sets the flag to indicate disassembly mode. In this mode, the compiler
   // emits disassembled textual output, instead of outputting object files.
-  // This method also sets the output file extension to ".s" and disables
+  // This method also sets the output file extension to ".spvasm" and disables
   // linking. This mode overrides individual compilation mode, and preprocessing
   // only mode overrides this mode.
   void SetDisassemblyFlag();
@@ -108,8 +108,8 @@ class FileCompiler {
   // If the user did not specify an output filename:
   //  If linking is not required, and the input filename has a
   //  standard stage extension (e.g. .vert) then returns the input filename
-  //  without directory names but with the result extenstion (e.g. .spv or .s)
-  //  appended.
+  //  without directory names but with the result extenstion (e.g. .spv or
+  //  .spvasm) appended.
   //
   //  If linking is not required, and the input file name does not have a
   //  standard stage extension, then also returns the directory-stripped input
@@ -130,7 +130,7 @@ class FileCompiler {
   // If the user did not specify an output filename:
   //  If the input filename has a standard stage extension (e.g. .vert) then
   //  returns the input filename without directory names but with the result
-  //  extenstion (e.g. .spv or .s) appended.
+  //  extenstion (e.g. .spv or .spvasm) appended.
   //
   //  If the input file name does not have a standard stage extension, then also
   //  returns the directory-stripped input filename, but replaces its extension

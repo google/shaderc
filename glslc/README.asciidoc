@@ -70,17 +70,17 @@ Otherwise,
 * If a compilation stage selection option is given (`-S` or `-c`), there will
   be one output file generated per input shader file. The generated output file
   will end with a file extension that matches the compilation stage, which is
-  `.s` for `-S` and `.spv` for `-c`. The name will depend on the original file's
-  name and extension.
+  `.spvasm` for `-S` and `.spv` for `-c`. The name will depend on the original
+  file's name and extension.
 ** If the input file has a <<shader-stage-selection,shader stage selection
    extension>>, the output file will be named as by appending the file extension
    for the compilation stage to the input file's name. E.g., `glslc -c foo.vert`
    will generate `foo.vert.spv`, and `glslc -s bar.frag` will generate
-   `bar.frag.s`.
+   `bar.frag.spvasm`.
 ** Otherwise, the output file will be named as by replacing the input file's
    file extension, if any, with the file extension for the compilation stage.
    E.g., `glslc -c foo` will generate `foo.spv`, and `glslc -s bar.glsl` will
-   generate `bar.s`.
+   generate `bar.spvasm`.
 * If no compilation stage is selected, the output file will be named `a.spv`.
 
 == Command Line Options
@@ -302,7 +302,7 @@ stdout: `target: main.vert <other dependent files>`.
 |glslc -M main.vert -MT target  | <NA> | <Stdout> | target: main.vert
 |glslc -MD main.vert    |a.spv  |main.vert.spv.d|main.vert.spv: main.vert
 |glslc -c -MD main.vert |main.vert.spv|main.vert.spv.d|main.vert.spv: main.vert
-|glslc -S -MD main.vert |main.vert.s  |main.vert.s.d  |main.vert.s: main.vert
+|glslc -S -MD main.vert |main.vert.spvasm  |main.vert.spvasm.d  |main.vert.spvasm: main.vert
 |glslc -c -MD main.vert -MF dep_info  |main.vert.spv|dep_info|main.vert.spv: main.vert
 |glslc -c -MD main.vert -o obj  |obj  |obj.d  |obj: main.vert
 |glslc -c -MD main.vert -o obj -MF dep_info -MT target|obj|dep_info|target: main.vert

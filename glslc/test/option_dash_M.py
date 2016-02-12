@@ -86,7 +86,7 @@ class DependencyInfoStdoutMatch(GlslCTest):
     be specified in the following way:
 
         rule = {'target': <target name>,
-                'target_extension': <.spv, .s or None>,
+                'target_extension': <.spv, .spvasm or None>,
                 'dependency': <dependent file names>}
 
         The 'target_extension' field is optional, its value will be appended to
@@ -546,22 +546,22 @@ class TestDashCapMDMultipleFileDisassemblyMode(expect.ValidNamedAssemblyFile,
     """Tests that -MD generates dependency info file for multiple files in
     disassembly mode.
     e.g. glslc -MD a.vert b.vert -S
-      => <a.vert.s: valid SPIR-V assembly file>
-      => <a.vert.s.d: dependency info: "a.vert.spv: a.vert">
-      => <b.vert.s: valid SPIR-V assembly file>
-      => <b.vert.s.d: dependency info: "b.vert.spv: b.vert">
+      => <a.vert.spvasm: valid SPIR-V assembly file>
+      => <a.vert.spvasm.d: dependency info: "a.vert.spvasm: a.vert">
+      => <b.vert.spvasm: valid SPIR-V assembly file>
+      => <b.vert.spvasm.d: dependency info: "b.vert.spvasm: b.vert">
     """
     environment = Directory('.', [File('a.vert', MINIMAL_SHADER),
                                   File('b.vert', MINIMAL_SHADER)])
     glslc_args = ['-MD', 'a.vert', 'b.vert', '-S']
-    expected_assembly_filenames = ('a.vert.s', 'b.vert.s', )
-    dependency_info_filenames = ['a.vert.s.d', 'b.vert.s.d']
+    expected_assembly_filenames = ('a.vert.spvasm', 'b.vert.spvasm', )
+    dependency_info_filenames = ['a.vert.spvasm.d', 'b.vert.spvasm.d']
 
     dependency_info_files_expected_contents = []
-    dependency_info_files_expected_contents.append([{'target': 'a.vert.s',
+    dependency_info_files_expected_contents.append([{'target': 'a.vert.spvasm',
                                                      'dependency': {'a.vert'}}
                                                     ])
-    dependency_info_files_expected_contents.append([{'target': 'b.vert.s',
+    dependency_info_files_expected_contents.append([{'target': 'b.vert.spvasm',
                                                      'dependency': {'b.vert'}}
                                                     ])
 

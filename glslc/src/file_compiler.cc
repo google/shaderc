@@ -160,7 +160,7 @@ void FileCompiler::SetDisassemblyFlag() {
   if (!preprocess_only_) {
     disassemble_ = true;
     needs_linking_ = false;
-    file_extension_ = ".s";
+    file_extension_ = ".spvasm";
   }
 }
 
