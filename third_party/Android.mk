@@ -1,4 +1,4 @@
-THIRD_PARTY_PATH := $(call my-dir)
+THIRD_PARTY_PATH ?= $(call my-dir)
 
 LOCAL_PATH := $(THIRD_PARTY_PATH)/glslang
 GLSLANG_LOCAL_PATH := $(THIRD_PARTY_PATH)/glslang
@@ -7,7 +7,7 @@ GLSLANG_OS_FLAGS := -DGLSLANG_OSINCLUDE_UNIX
 
 include $(CLEAR_VARS)
 LOCAL_MODULE:=SPIRV
-LOCAL_CXXFLAGS:=-std=c++11 $(GLSLANG_OS_FLAGS)
+LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti $(GLSLANG_OS_FLAGS)
 LOCAL_EXPORT_C_INCLUDES:=$(GLSLANG_LOCAL_PATH)
 LOCAL_SRC_FILES:= \
 	SPIRV/GlslangToSpv.cpp \
@@ -23,7 +23,7 @@ include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE:=OSDependent
-LOCAL_CXXFLAGS:=-std=c++11 $(GLSLANG_OS_FLAGS)
+LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti $(GLSLANG_OS_FLAGS)
 LOCAL_EXPORT_C_INCLUDES:=$(GLSLANG_LOCAL_PATH)
 LOCAL_SRC_FILES:=glslang/OSDependent/Unix/ossource.cpp
 LOCAL_C_INCLUDES:=$(GLSLANG_LOCAL_PATH) $(GLSLANG_LOCAL_PATH)/glslang/OSDependent/Unix/
@@ -32,7 +32,7 @@ include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE:=OGLCompiler
-LOCAL_CXXFLAGS:=-std=c++11 $(GLSLANG_OS_FLAGS)
+LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti $(GLSLANG_OS_FLAGS)
 LOCAL_EXPORT_C_INCLUDES:=$(GLSLANG_LOCAL_PATH)
 LOCAL_SRC_FILES:=OGLCompilersDLL/InitializeDll.cpp
 LOCAL_C_INCLUDES:=$(GLSLANG_LOCAL_PATH)/OGLCompiler
@@ -40,20 +40,26 @@ LOCAL_STATIC_LIBRARIES:=OSDependent
 include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
+
+GLSLANG_OUT_PATH=$(abspath $(TARGET_OUT))
+
 LOCAL_MODULE:=glslang
-LOCAL_CXXFLAGS:=-std=c++11 $(GLSLANG_OS_FLAGS)
+LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti $(GLSLANG_OS_FLAGS)
 LOCAL_EXPORT_C_INCLUDES:=$(GLSLANG_LOCAL_PATH)
-#TODO(awoloszyn) This creates the glslang_tab.cpp/h files in the source tree.
-#                Figure out if there is a way in the android build system
-#                to put them somewhere else.
-$(GLSLANG_LOCAL_PATH)/glslang/MachineIndependent/glslang_tab.cpp : $(GLSLANG_LOCAL_PATH)/glslang/MachineIndependent/glslang.y
-	@bison --defines=$(GLSLANG_LOCAL_PATH)/glslang/MachineIndependent/glslang_tab.cpp.h -t $(GLSLANG_LOCAL_PATH)/glslang/MachineIndependent/glslang.y -o $(GLSLANG_LOCAL_PATH)/glslang/MachineIndependent/glslang_tab.cpp
+define gen_glslang_tab
+$(call generate-file-dir,$(TO)/glslang_tab.cpp)
+$(1)/glslang_tab.cpp : $(GLSLANG_LOCAL_PATH)/glslang/MachineIndependent/glslang.y
+	@bison --defines=$(1)/glslang_tab.cpp.h -t \
+		$(GLSLANG_LOCAL_PATH)/glslang/MachineIndependent/glslang.y \
+		-o $(1)/glslang_tab.cpp
 	@echo "[$(TARGET_ARCH_ABI)] Grammar: glslang_tab.cc <= glslang.y"
 
-$(GLSLANG_LOCAL_PATH)/glslang/MachineIndependent/Scan.cpp:$(GLSLANG_LOCAL_PATH)/glslang/MachineIndependent/glslang_tab.cpp
+$(GLSLANG_LOCAL_PATH)/glslang/MachineIndependent/Scan.cpp:$(1)/glslang_tab.cpp
+endef
 
+$(eval $(call gen_glslang_tab,$(GLSLANG_OUT_PATH)))
 LOCAL_SRC_FILES:= \
-		glslang/MachineIndependent/glslang_tab.cpp \
+		$(GLSLANG_OUT_PATH)/glslang_tab.cpp \
 		glslang/GenericCodeGen/CodeGen.cpp \
 		glslang/GenericCodeGen/Link.cpp \
 		glslang/MachineIndependent/Constant.cpp \
@@ -81,9 +87,11 @@ LOCAL_SRC_FILES:= \
 		glslang/MachineIndependent/preprocessor/PpSymbols.cpp \
 		glslang/MachineIndependent/preprocessor/PpTokens.cpp
 
-LOCAL_C_INCLUDES:=$(GLSLANG_LOCAL_PATH)
+LOCAL_C_INCLUDES:=$(GLSLANG_LOCAL_PATH) \
+	$(GLSLANG_LOCAL_PATH)/glslang/MachineIndependent
 LOCAL_STATIC_LIBRARIES:=OSDependent OGLCompiler SPIRV
 include $(BUILD_STATIC_LIBRARY)
+
 
 LOCAL_PATH := $(THIRD_PARTY_PATH)/spirv-tools
 SPVTOOLS_LOCAL_PATH := $(THIRD_PARTY_PATH)/spirv-tools
@@ -97,13 +105,14 @@ LOCAL_C_INCLUDES := \
 LOCAL_EXPORT_C_INCLUDES := \
 		$(SPVTOOLS_LOCAL_PATH)/include \
 		$(SPVTOOLS_LOCAL_PATH)/external/include
-LOCAL_CXXFLAGS := -std=c++11
+LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti
 LOCAL_SRC_FILES:= \
 		source/assembly_grammar.cpp \
 		source/binary.cpp \
 		source/diagnostic.cpp \
 		source/disassemble.cpp \
 		source/ext_inst.cpp \
+		source/instruction.cpp \
 		source/opcode.cpp \
 		source/operand.cpp \
 		source/print.cpp \
