@@ -23,8 +23,14 @@
 
 // Described in shaderc.h.
 struct shaderc_spv_module {
-  // SPIR-V binary.
-  std::string spirv;
+  // Compilation output data. In normal compilation mode, it contains the
+  // compiled SPIR-V binary code. In disassembly and preprocessing-only mode, it
+  // contains a null-terminated string which is the text output. For text
+  // output, extra bytes with value 0x00 might be appended to complete the last
+  // uint32_t element.
+  std::vector<uint32_t> output_data;
+  // The size of the output data in term of bytes.
+  size_t output_data_size;
   // Compilation messages.
   std::string messages;
   // Number of errors.

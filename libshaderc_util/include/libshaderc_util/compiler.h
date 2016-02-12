@@ -150,7 +150,6 @@ class Compiler {
   void SetForcedVersionProfile(int version, EProfile profile);
 
   // Compiles the shader source in the input_source_string parameter.
-  // The compiled SPIR-V is written to output_stream.
   //
   // If the forced_shader stage parameter is not EShLangCount then
   // the shader is assumed to be of the given stage.
@@ -168,17 +167,23 @@ class Compiler {
   // Any errors are written to the error_stream parameter.
   // total_warnings and total_errors are incremented once for every
   // warning or error encountered respectively.
-  // Returns true if the compilation succeeded and the result could be written
-  // to output, false otherwise.
-  bool Compile(const shaderc_util::string_piece& input_source_string,
-               EShLanguage forced_shader_stage, const std::string& error_tag,
-               const std::function<EShLanguage(std::ostream* error_stream,
-                                               const shaderc_util::string_piece&
-                                                   error_tag)>& stage_callback,
-               const CountingIncluder& includer, std::ostream* output_stream,
-               std::ostream* error_stream, size_t* total_warnings,
-               size_t* total_errors,
-               GlslInitializer* initializer) const;
+  //
+  // Returns a tuple consisting of three fields. 1) a boolean which is true when
+  // the compilation succeeded, and false otherwise; 2) a vector of 32-bit words
+  // which contains the compilation output data, either compiled SPIR-V binary
+  // code, or the text string generated in preprocessing-only or disassembly
+  // mode; 3) the size of the output data in bytes. When the output is SPIR-V
+  // binary code, the size is the number of bytes of valid data in the vector.
+  // If the output is a text string, the size equals the length of that string.
+  std::tuple<bool, std::vector<uint32_t>, size_t> Compile(
+      const shaderc_util::string_piece& input_source_string,
+      EShLanguage forced_shader_stage, const std::string& error_tag,
+      const std::function<EShLanguage(
+          std::ostream* error_stream,
+          const shaderc_util::string_piece& error_tag)>& stage_callback,
+      const CountingIncluder& includer, std::ostream* error_stream,
+      size_t* total_warnings, size_t* total_errors,
+      GlslInitializer* initializer) const;
 
   static EShMessages GetDefaultRules() {
     return static_cast<EShMessages>(EShMsgSpvRules |
@@ -284,6 +289,11 @@ class Compiler {
   // messages as well as the set of available builtins
   EShMessages message_rules_;
 };
+
+// Converts a string to a vector of uint32_t by copying the content of a given
+// string to the vector and returns it. Appends '\0' at the end if extra bytes
+// are required to complete the last element.
+std::vector<uint32_t> ConvertStringToVector(const std::string& str);
 
 }  // namespace shaderc_util
 #endif  // LIBSHADERC_UTIL_INC_COMPILER_H

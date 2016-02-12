@@ -530,7 +530,7 @@ TEST_F(CppInterface, PreprocessingOnlyModeSecondOverridesDisassemblyMode) {
               HasSubstr("void main(){ }"));
 }
 
-// A shader kind test cases needs: 1) A shader text with or without #pragma
+// A shader kind test case needs: 1) A shader text with or without #pragma
 // annotation, 2) shader_kind.
 struct ShaderKindTestCase {
   const char* shader_;

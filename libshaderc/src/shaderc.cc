@@ -315,9 +315,10 @@ shaderc_spv_module_t shaderc_compile_into_spv(
   }
   result->compilation_status = shaderc_compilation_status_invalid_stage;
   bool compilation_succeeded = false;  // In case we exit early.
+  std::vector<uint32_t> compilation_output_data;
+  size_t compilation_output_data_size_in_bytes = 0u;
   if (!compiler->initializer) return result;
   TRY_IF_EXCEPTIONS_ENABLED {
-    std::stringstream output;
     std::stringstream errors;
     size_t total_warnings = 0;
     size_t total_errors = 0;
@@ -327,27 +328,33 @@ shaderc_spv_module_t shaderc_compile_into_spv(
         shaderc_util::string_piece(source_text, source_text + source_text_size);
     StageDeducer stage_deducer(shader_kind);
     if (additional_options) {
-      compilation_succeeded = additional_options->compiler.Compile(
-          source_string, forced_stage, input_file_name_str,
-          // stage_deducer has a flag: error_, which we need to check later.
-          // We need to make this a reference wrapper, so that std::function
-          // won't make a copy for this callable object.
-          std::ref(stage_deducer),
-          InternalFileIncluder(additional_options->get_includer_response,
-                               additional_options->release_includer_response,
-                               additional_options->includer_user_data),
-          &output, &errors, &total_warnings, &total_errors,
-          compiler->initializer);
+      // Depends on return value optimization to avoid extra copy.
+      std::tie(compilation_succeeded, compilation_output_data,
+               compilation_output_data_size_in_bytes) =
+          additional_options->compiler.Compile(
+              source_string, forced_stage, input_file_name_str,
+              // stage_deducer has a flag: error_, which we need to check later.
+              // We need to make this a reference wrapper, so that std::function
+              // won't make a copy for this callable object.
+              std::ref(stage_deducer),
+              InternalFileIncluder(
+                  additional_options->get_includer_response,
+                  additional_options->release_includer_response,
+                  additional_options->includer_user_data),
+              &errors, &total_warnings, &total_errors, compiler->initializer);
     } else {
       // Compile with default options.
-      compilation_succeeded = shaderc_util::Compiler().Compile(
-          source_string, forced_stage, input_file_name_str,
-          std::ref(stage_deducer), InternalFileIncluder(), &output, &errors,
-          &total_warnings, &total_errors, compiler->initializer);
+      std::tie(compilation_succeeded, compilation_output_data,
+               compilation_output_data_size_in_bytes) =
+          shaderc_util::Compiler().Compile(
+              source_string, forced_stage, input_file_name_str,
+              std::ref(stage_deducer), InternalFileIncluder(), &errors,
+              &total_warnings, &total_errors, compiler->initializer);
     }
 
     result->messages = errors.str();
-    result->spirv = output.str();
+    result->output_data = std::move(compilation_output_data);
+    result->output_data_size = compilation_output_data_size_in_bytes;
     result->num_warnings = total_warnings;
     result->num_errors = total_errors;
     if (compilation_succeeded) {
@@ -368,7 +375,7 @@ shaderc_spv_module_t shaderc_compile_into_spv(
 }
 
 size_t shaderc_module_get_length(const shaderc_spv_module_t module) {
-  return module->spirv.size();
+  return module->output_data_size;
 }
 
 size_t shaderc_module_get_num_warnings(const shaderc_spv_module_t module) {
@@ -380,7 +387,7 @@ size_t shaderc_module_get_num_errors(const shaderc_spv_module_t module) {
 }
 
 const char* shaderc_module_get_bytes(const shaderc_spv_module_t module) {
-  return module->spirv.c_str();
+  return reinterpret_cast<const char*>(module->output_data.data());
 }
 
 void shaderc_module_release(shaderc_spv_module_t module) { delete module; }
