@@ -105,10 +105,10 @@ class CompilerTest : public testing::Test {
     size_t total_warnings = 0;
     size_t total_errors = 0;
     shaderc_util::GlslInitializer initializer;
-    const bool result = compiler_.Compile(
-        source, stage,
-        "shader", stage_callback, DummyCountingIncluder(), &out, &errors,
-        &total_warnings, &total_errors, &initializer);
+    bool result = false;
+    std::tie(result, std::ignore, std::ignore) = compiler_.Compile(
+        source, stage, "shader", stage_callback, DummyCountingIncluder(),
+        &errors, &total_warnings, &total_errors, &initializer);
     errors_ = errors.str();
     return result;
   }
@@ -220,5 +220,42 @@ TEST_F(CompilerTest, AddMacroDefinitionNotNullTerminated) {
   compiler_.AddMacroDefinition("EFGH", 1u, "mainnnnnn", 4u);
   EXPECT_TRUE(SimpleCompilationSucceeds(kMinimalExpandedShader, EShLangVertex));
 }
+
+// A convert-string-to-vector test case consists of 1) an input string; 2) an
+// expected vector after the conversion.
+struct ConvertStringToVectorTestCase {
+  const std::string input_str;
+  const std::vector<uint32_t> expected_output_vec;
+};
+
+// Test the shaderc_util::ConvertStringToVector() function. The content of the
+// input string, including the null terminator, should be packed into uint32_t
+// cells and stored in the returned vector of uint32_t. In case extra bytes are
+// required to complete the ending uint32_t element, bytes with value 0x00
+// should be used to fill the space.
+using ConvertStringToVectorTestFixture =
+    testing::TestWithParam<ConvertStringToVectorTestCase>;
+
+TEST_P(ConvertStringToVectorTestFixture, VariousStringSize) {
+  const ConvertStringToVectorTestCase& test_case = GetParam();
+  EXPECT_EQ(test_case.expected_output_vec,
+            shaderc_util::ConvertStringToVector(test_case.input_str))
+      << "test_case.input_str: " << test_case.input_str << std::endl;
+}
+
+INSTANTIATE_TEST_CASE_P(
+    ConvertStringToVectorTest, ConvertStringToVectorTestFixture,
+    testing::ValuesIn(std::vector<ConvertStringToVectorTestCase>{
+        {"", {0x00000000}},
+        {"1", {0x00000031}},
+        {"12", {0x00003231}},
+        {"123", {0x00333231}},
+        {"1234", {0x34333231, 0x00000000}},
+        {"12345", {0x34333231, 0x00000035}},
+        {"123456", {0x34333231, 0x00003635}},
+        {"1234567", {0x34333231, 0x00373635}},
+        {"12345678", {0x34333231, 0x38373635, 0x00000000}},
+        {"123456789", {0x34333231, 0x38373635, 0x00000039}},
+    }));
 
 }  // anonymous namespace

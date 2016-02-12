@@ -17,6 +17,7 @@
 #include <cstdint>
 #include <fstream>
 #include <tuple>
+#include <iostream>
 
 #include "libshaderc_util/format.h"
 #include "libshaderc_util/io.h"
@@ -107,15 +108,25 @@ spv_result_t DisassembleBinary(const std::vector<uint32_t>& binary,
 
 namespace shaderc_util {
 
-bool Compiler::Compile(
-    const string_piece& input_source_string, 
-    EShLanguage forced_shader_stage, const std::string& error_tag,
+std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
+    const string_piece& input_source_string, EShLanguage forced_shader_stage,
+    const std::string& error_tag,
     const std::function<EShLanguage(std::ostream* error_stream,
                                     const string_piece& error_tag)>&
         stage_callback,
-    const CountingIncluder& includer, std::ostream* output_stream,
-    std::ostream* error_stream, size_t* total_warnings,
-    size_t* total_errors, GlslInitializer* initializer) const {
+    const CountingIncluder& includer, std::ostream* error_stream,
+    size_t* total_warnings, size_t* total_errors,
+    GlslInitializer* initializer) const {
+  // Compilation results to be returned:
+  // Initialize the result tuple as a failed compilation. In error cases, we
+  // should return result_tuple directly without setting its members.
+  auto result_tuple =
+      std::make_tuple(false, std::vector<uint32_t>(), (size_t)0u);
+  // Get the reference of the members of the result tuple. We should set their
+  // values for succeeded compilation before returning the result tuple.
+  bool& succeeded = std::get<0>(result_tuple);
+  std::vector<uint32_t>& compilation_output_data = std::get<1>(result_tuple);
+  size_t& compilation_output_data_size_in_bytes = std::get<2>(result_tuple);
 
   auto token = initializer->Acquire(GetMessageRules());
   EShLanguage used_shader_stage = forced_shader_stage;
@@ -140,7 +151,7 @@ bool Compiler::Compile(
                                    /* suppress_warnings = */ true,
                                    glslang_errors.c_str(), total_warnings,
                                    total_errors);
-    if (!success) return false;
+    if (!success) return result_tuple;
     // Because of the behavior change of the #line directive, the #line
     // directive introducing each file's content must use the syntax for the
     // specified version. So we need to probe this shader's version and profile.
@@ -154,20 +165,23 @@ bool Compiler::Compile(
                         includer.num_include_directives(), is_for_next_line);
 
     if (preprocess_only_) {
-      return shaderc_util::WriteFile(output_stream,
-                                     string_piece(preprocessed_shader));
+      // Set the values of the result tuple.
+      succeeded = true;
+      compilation_output_data = ConvertStringToVector(preprocessed_shader);
+      compilation_output_data_size_in_bytes = preprocessed_shader.size();
+      return result_tuple;
     } else if (used_shader_stage == EShLangCount) {
       std::string errors;
       std::tie(used_shader_stage, errors) =
           GetShaderStageFromSourceCode(error_tag, preprocessed_shader);
       if (!errors.empty()) {
         *error_stream << errors;
-        return false;
+        return result_tuple;
       }
       if (used_shader_stage == EShLangCount) {
         if ((used_shader_stage = stage_callback(error_stream, error_tag)) ==
             EShLangCount) {
-          return false;
+          return result_tuple;
         }
       }
     }
@@ -191,7 +205,7 @@ bool Compiler::Compile(
   success &= PrintFilteredErrors(error_tag, error_stream, warnings_as_errors_,
                                  suppress_warnings_, shader.getInfoLog(),
                                  total_warnings, total_errors);
-  if (!success) return false;
+  if (!success) return result_tuple;
 
   glslang::TProgram program;
   program.addShader(&shader);
@@ -199,25 +213,31 @@ bool Compiler::Compile(
   success &= PrintFilteredErrors(error_tag, error_stream, warnings_as_errors_,
                                  suppress_warnings_, program.getInfoLog(),
                                  total_warnings, total_errors);
-  if (!success) return false;
+  if (!success) return result_tuple;
 
-  std::vector<uint32_t> spirv;
+  // 'spirv' is an alias for the compilation_output_data. This alias is added to
+  // serve as an input for the call to DissassemblyBinary.
+  std::vector<uint32_t>& spirv = compilation_output_data;
+  // Note the call to GlslangToSpv also populates compilation_output_data.
   glslang::GlslangToSpv(*program.getIntermediate(used_shader_stage), spirv);
   if (disassemble_) {
     std::string text_or_error;
-    if (DisassembleBinary(spirv, &text_or_error) != SPV_SUCCESS) {
+    if (DisassembleBinary(spirv, &text_or_error) !=
+        SPV_SUCCESS) {
       *error_stream << "shaderc: internal error: compilation succeeded but "
                        "failed to disassemble: "
                     << text_or_error << "\n";
-      return false;
+      return result_tuple;
     }
-    return shaderc_util::WriteFile(output_stream, text_or_error);
+    succeeded = true;
+    compilation_output_data = ConvertStringToVector(text_or_error);
+    compilation_output_data_size_in_bytes = text_or_error.size();
+    return result_tuple;
   } else {
-    return shaderc_util::WriteFile(
-        output_stream,
-        string_piece(
-            reinterpret_cast<const char*>(spirv.data()),
-            reinterpret_cast<const char*>(&spirv.back()) + sizeof(uint32_t)));
+    succeeded = true;
+    // Note compilation_output_data is already populated in GlslangToSpv().
+    compilation_output_data_size_in_bytes = spirv.size() * sizeof(spirv[0]);
+    return result_tuple;
   }
 }
 
@@ -252,7 +272,6 @@ std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
     const std::string& error_tag, const string_piece& shader_source,
     const string_piece& shader_preamble,
     const CountingIncluder& includer) const {
-
   // The stage does not matter for preprocessing.
   glslang::TShader shader(EShLangVertex);
   const char* shader_strings = shader_source.data();
@@ -470,6 +489,19 @@ std::pair<int, EProfile> Compiler::GetVersionProfileFromSourceCode(
     return std::make_pair(0, ENoProfile);
   }
   return std::make_pair(version, profile);
+}
+
+// Converts a string to a vector of uint32_t by copying the content of a given
+// string to a vector<uint32_t> and returns it. Appends '\0' at the end if extra
+// bytes are required to complete the last element.
+std::vector<uint32_t> ConvertStringToVector(const std::string& str) {
+  size_t num_bytes_str = str.size() + 1u;
+  size_t vector_length =
+      (num_bytes_str + sizeof(uint32_t) - 1) / sizeof(uint32_t);
+  std::vector<uint32_t> result_vec(vector_length, 0);
+  std::strncpy(reinterpret_cast<char*>(result_vec.data()), str.c_str(),
+               str.size());
+  return result_vec;
 }
 
 }  // namesapce shaderc_util
