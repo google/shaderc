@@ -275,9 +275,6 @@ shaderc_spv_module_t shaderc_compile_into_spv(
 // further operations.
 void shaderc_module_release(shaderc_spv_module_t module);
 
-// Returns true if the result in module was a successful compilation.
-bool shaderc_module_get_success(const shaderc_spv_module_t module);
-
 // Returns the number of bytes in a SPIR-V module result string. When the module
 // is compiled with disassembly mode or preprocessing only mode, the result
 // string is a char string. Otherwise, the result string is binary string.
