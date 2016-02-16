@@ -29,6 +29,8 @@ namespace glslc {
 // to compile the source code and want the dependency info only.
 class DependencyInfoDumpingHandler {
  public:
+  DependencyInfoDumpingHandler();
+
   // Sets the dependency target explicitly. It's the same as the argument to
   // -MT.
   void SetTarget(const std::string& target_label) {

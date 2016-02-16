@@ -23,6 +23,8 @@
 
 namespace glslc {
 
+DependencyInfoDumpingHandler::DependencyInfoDumpingHandler() : mode_(not_set) {}
+
 bool DependencyInfoDumpingHandler::DumpDependencyInfo(
     std::string compilation_output_file_name, std::string source_file_name,
     std::string* compilation_output_ptr,
