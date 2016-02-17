@@ -1,7 +1,7 @@
-THIRD_PARTY_PATH ?= $(call my-dir)
+THIRD_PARTY_PATH := $(call my-dir)
 
-LOCAL_PATH := $(THIRD_PARTY_PATH)/glslang
 GLSLANG_LOCAL_PATH := $(THIRD_PARTY_PATH)/glslang
+LOCAL_PATH := $(GLSLANG_LOCAL_PATH)
 
 GLSLANG_OS_FLAGS := -DGLSLANG_OSINCLUDE_UNIX
 
@@ -47,7 +47,7 @@ LOCAL_MODULE:=glslang
 LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti $(GLSLANG_OS_FLAGS)
 LOCAL_EXPORT_C_INCLUDES:=$(GLSLANG_LOCAL_PATH)
 define gen_glslang_tab
-$(call generate-file-dir,$(TO)/glslang_tab.cpp)
+$(call generate-file-dir,$(GLSLANG_OUT_PATH)/glslang_tab.cpp)
 $(1)/glslang_tab.cpp : $(GLSLANG_LOCAL_PATH)/glslang/MachineIndependent/glslang.y
 	@bison --defines=$(1)/glslang_tab.cpp.h -t \
 		$(GLSLANG_LOCAL_PATH)/glslang/MachineIndependent/glslang.y \
@@ -93,8 +93,8 @@ LOCAL_STATIC_LIBRARIES:=OSDependent OGLCompiler SPIRV
 include $(BUILD_STATIC_LIBRARY)
 
 
-LOCAL_PATH := $(THIRD_PARTY_PATH)/spirv-tools
 SPVTOOLS_LOCAL_PATH := $(THIRD_PARTY_PATH)/spirv-tools
+LOCAL_PATH := $(SPVTOOLS_LOCAL_PATH)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := SPIRV-Tools
