@@ -17,6 +17,12 @@ add_custom_target(add-copyright
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMENT "Add copyright")
 
+add_custom_target(build-version
+  ${PYTHON_EXE}
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils/update_build_version.py
+  ${shaderc_SOURCE_DIR} ${spirv-tools_SOURCE_DIR} ${glslang_SOURCE_DIR}
+  COMMENT "Update build-version.inc in the Shaderc build directory (if necessary).")
+
 # Configure subdirectories.
 # We depend on these for later projects, so they should come first.
 add_subdirectory(third_party)
