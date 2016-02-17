@@ -27,7 +27,7 @@
 #include "libshaderc_util/string_piece.h"
 #include "libshaderc_util/version_profile.h"
 
-#include "libspirv/libspirv.h"
+#include "spirv-tools/libspirv.h"
 
 #include "SPIRV/GlslangToSpv.h"
 
