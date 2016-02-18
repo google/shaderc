@@ -37,8 +37,8 @@ class FileCompiler {
 
   // Compiles a shader received in input_file, returning true on success and
   // false otherwise. If force_shader_stage is not shaderc_glsl_infer_source or
-  // any default shader stage then the given shader_stage will be used, otherwise
-  // it will be determined from the source or the file type.
+  // any default shader stage then the given shader_stage will be used,
+  // otherwise it will be determined from the source or the file type.
   //
   // Places the compilation output into a new file whose name is derived from
   // input_file according to the rules from glslc/README.asciidoc.
@@ -111,10 +111,11 @@ class FileCompiler {
     PreprocessedText,   // Preprocessed source code.
   };
 
-  // Compiles the given string a the specified shader kind and using stored
-  // options. On success, writes the result to the given output stream and
-  // returns true.  On failure, returns false, and possibly emit messages to
-  // the standard error stream.
+  // Emits the compilation output from the given result to the given output
+  // stream and returns true if the result represents a successful compilation
+  // step.  Otherwise returns false and possibly emits messages to the standard
+  // error stream.  Accumulates error and warning counts for use by the
+  // OutputMessages() method.
   template <typename CompilationResultType>
   bool EmitCompiledResult(
       const CompilationResultType& result, const std::string& input_file_name,
@@ -136,8 +137,8 @@ class FileCompiler {
   //  If linking is not required, and the input file name does not have a
   //  standard stage extension, then also returns the directory-stripped input
   //  filename, but replaces its extension with the result extension. (If the
-  //  resolved input filename does not have an extension, then appends the result
-  //  extension.)
+  //  resolved input filename does not have an extension, then appends the
+  //  result extension.)
   //
   //  If linking is required and output filename is not specified, returns
   //  "a.spv".
@@ -195,9 +196,9 @@ class FileCompiler {
   // Name of the file where the compilation output will go.
   shaderc_util::string_piece output_file_name_;
 
-  // Counts warnings encountered in compilation.
+  // Counts warnings encountered in all compilations via this object.
   size_t total_warnings_;
-  // Counts errors encountered in compilation.
+  // Counts errors encountered in all compilations via this object.
   size_t total_errors_;
 };
 }  // namespace glslc

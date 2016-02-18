@@ -31,6 +31,9 @@ namespace shaderc {
 // Random Access Iterators", Nevin Liber, C++ Library Evolution Working
 // Group Working Paper N3884.
 // http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3884.pdf
+//
+// Methods begin() and end() are also provided to enable range-based for.
+// They are synonyms to cbegin() and cend(), respectively.
 template <typename OutputElementType>
 class CompilationResult {
  public:
@@ -87,6 +90,11 @@ class CompilationResult {
            shaderc_result_get_length(compilation_result_) /
                sizeof(OutputElementType);
   }
+
+  // Returns the same iterator as cbegin().
+  const_iterator begin() const { return cbegin(); }
+  // Returns the same iterator as cend().
+  const_iterator end() const { return cend(); }
 
   // Returns the number of warnings generated during the compilation.
   size_t GetNumWarnings() const {
@@ -188,6 +196,9 @@ class CompileOptions {
   // shaderc_compile_into_spv() will consist of SPIR-V assembly text. Note the
   // preprocessing only mode overrides this option, and this option overrides
   // the default mode generating a SPIR-V binary.
+  //
+  // TODO(dneto): Remove this method. Instead, force disassembly by using
+  // Compiler::CompileGlslToSpvAssembly.
   void SetDisassemblyMode() {
     shaderc_compile_options_set_disassembly_mode(options_);
   }
@@ -206,6 +217,9 @@ class CompileOptions {
   // object returned by the compilation is the text of the preprocessed shader.
   // This option overrides all other compilation modes, such as disassembly mode
   // and the default mode of compilation to SPIR-V binary.
+  //
+  // TODO(dneto): Remove this method. Instead, force preprocessing-only by
+  // using Compiler::PreprocessGlsl.
   void SetPreprocessingOnlyMode() {
     shaderc_compile_options_set_preprocessing_only_mode(options_);
   }
