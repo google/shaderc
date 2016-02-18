@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SHADERC_HPP_
-#define SHADERC_HPP_
+#ifndef SHADERC_SHADERC_HPP_
+#define SHADERC_SHADERC_HPP_
 
 #include <memory>
 #include <string>
@@ -322,4 +322,4 @@ class Compiler {
 };
 };
 
-#endif  // SHADERC_HPP_
+#endif  // SHADERC_SHADERC_HPP_

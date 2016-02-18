@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SHADERC_H_
-#define SHADERC_H_
+#ifndef SHADERC_SHADERC_H_
+#define SHADERC_SHADERC_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -319,4 +319,4 @@ bool shaderc_parse_version_profile(const char* str, int* version,
 }
 #endif  // __cplusplus
 
-#endif  // SHADERC_H_
+#endif  // SHADERC_SHADERC_H_

@@ -21,7 +21,7 @@
 #include <unordered_set>
 
 #include "libshaderc_util/file_finder.h"
-#include "shaderc.hpp"
+#include "shaderc/shaderc.hpp"
 
 namespace glslc {
 

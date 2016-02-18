@@ -15,11 +15,11 @@
 #ifndef LIBSHADERC_SRC_SHADERC_PRIVATE_H_
 #define LIBSHADERC_SRC_SHADERC_PRIVATE_H_
 
-#include "shaderc.h"
-
 #include <cstdint>
 #include <string>
 #include <vector>
+
+#include "shaderc/shaderc.h"
 
 // Described in shaderc.h.
 struct shaderc_compilation_result {
