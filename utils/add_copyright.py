@@ -23,9 +23,11 @@ with status 1 if any such files are found, 0 if none.
 import fileinput
 import fnmatch
 import os
+import re
 import sys
 
-COPYRIGHT = 'Copyright 2015 The Shaderc Authors. All rights reserved.'
+COPYRIGHTRE = re.compile('Copyright \d+ The Shaderc Authors. All rights reserved.')
+COPYRIGHT = 'Copyright 2016 The Shaderc Authors. All rights reserved.'
 LICENSED = """
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -88,13 +90,14 @@ def insert_copyright(glob, comment_prefix):
     for file in filtered_descendants(glob):
         has_copyright = False
         for line in fileinput.input(file, inplace=1):
-            if line == copyright:
-                has_copyright = True
+            has_copyright = has_copyright or COPYRIGHTRE.search(line)
             if not has_copyright and not skip(line):
                 sys.stdout.write(copyright)
                 sys.stdout.write(licensed)
                 has_copyright = True
             sys.stdout.write(line)
+        if not has_copyright:
+            open(file, "a").write(copyright + licensed)
 
 
 def alert_if_no_copyright(glob, comment_prefix):
@@ -111,7 +114,7 @@ def alert_if_no_copyright(glob, comment_prefix):
         has_copyright = False
         with open(file) as contents:
             for line in contents:
-                if COPYRIGHT in line:
+                if COPYRIGHTRE.search(line):
                     has_copyright = True
                     break
         if not has_copyright:
