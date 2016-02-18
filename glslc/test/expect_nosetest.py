@@ -14,8 +14,10 @@
 
 """Tests for the expect module."""
 
-from expect import get_object_filename
-from nose.tools import assert_equal
+import expect
+from glslc_test_framework import TestStatus
+from nose.tools import assert_equal, assert_true, assert_false
+import re
 
 def nosetest_get_object_name():
     """Tests get_object_filename()."""
@@ -27,7 +29,32 @@ def nosetest_get_object_name():
         ('file.uk', 'file.spv'), ('file.vert.', 'file.vert.spv'),
         ('file.vert.bla', 'file.vert.spv')]
     actual_object_names = [
-        get_object_filename(f[0]) for f in source_and_object_names]
+        expect.get_object_filename(f[0]) for f in source_and_object_names]
     expected_object_names = [f[1] for f in source_and_object_names]
 
     assert_equal(actual_object_names, expected_object_names)
+
+
+class TestStdoutMatchADotC(expect.StdoutMatch):
+    expected_stdout = re.compile("a.c")
+
+
+def nosetest_stdout_match_regex_has_match():
+    test = TestStdoutMatchADotC()
+    status = TestStatus(returncode=0, stdout='0abc1', stderr=None,
+                        directory=None, input_filenames=None)
+    assert_true(test.check_stdout_match(status)[0])
+
+
+def nosetest_stdout_match_regex_no_match():
+    test = TestStdoutMatchADotC()
+    status = TestStatus(returncode=0, stdout='ab', stderr=None,
+                        directory=None, input_filenames=None)
+    assert_false(test.check_stdout_match(status)[0])
+
+
+def nosetest_stdout_match_regex_empty_stdout():
+    test = TestStdoutMatchADotC()
+    status = TestStatus(returncode=0, stdout='', stderr=None,
+                        directory=None, input_filenames=None)
+    assert_false(test.check_stdout_match(status)[0])

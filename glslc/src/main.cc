@@ -22,6 +22,7 @@
 #include <utility>
 
 #include "libshaderc_util/string_piece.h"
+#include "spirv-tools/libspirv.h"
 
 #include "file.h"
 #include "file_compiler.h"
@@ -51,6 +52,7 @@ void PrintHelp(std::ostream* out) {
        << "  -g                Generate source-level debug information.\n"
        << "                    Currently this option has no effect.\n"
        << "  --help            Display available options.\n"
+       << "  --version         Display compiler version information.\n"
        << "  -I <value>        Add directory to include search path.\n"
        << "  -o <file>         Write output to <file>.\n"
        << "                    A file name of '-' represents standard output.\n"
@@ -105,6 +107,9 @@ bool GetOptionArgument(int argc, char** argv, int* index,
   }
 }
 
+const char kBuildVersion[] =
+#include "build-version.inc"
+    ;
 }  // anonymous namespace
 
 int main(int argc, char** argv) {
@@ -120,6 +125,12 @@ int main(int argc, char** argv) {
     const string_piece arg = argv[i];
     if (arg == "--help") {
       ::PrintHelp(&std::cout);
+      return 0;
+    } else if (arg == "--version") {
+      std::cout << kBuildVersion << std::endl;
+      std::cout << "Target: SPIR-V " << SPV_SPIRV_VERSION_MAJOR << "."
+                << SPV_SPIRV_VERSION_MINOR << " rev "
+                << SPV_SPIRV_VERSION_REVISION << std::endl;
       return 0;
     } else if (arg.starts_with("-o")) {
       string_piece file_name;
