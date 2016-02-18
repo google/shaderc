@@ -92,6 +92,9 @@ After a successful build, you should have a `glslc` executable somewhere under
 the `$BUILD_DIR/glslc/` directory, as well as a `libshaderc` library somewhere
 under the `$BUILD_DIR/libshaderc/` directory.
 
+See [the libshaderc README](libshaderc/README.md) for more on using the library
+API in your project.
+
 ### Tools you'll need
 
 For building, testing, and profiling Shaderc, the following tools should be
