@@ -88,7 +88,8 @@ LOCAL_SRC_FILES:= \
 		glslang/MachineIndependent/preprocessor/PpTokens.cpp
 
 LOCAL_C_INCLUDES:=$(GLSLANG_LOCAL_PATH) \
-	$(GLSLANG_LOCAL_PATH)/glslang/MachineIndependent
+	$(GLSLANG_LOCAL_PATH)/glslang/MachineIndependent \
+	$(GLSLANG_OUT_PATH)
 LOCAL_STATIC_LIBRARIES:=OSDependent OGLCompiler SPIRV
 include $(BUILD_STATIC_LIBRARY)
 
