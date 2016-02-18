@@ -14,16 +14,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Generates build_version.h in the current directory.
+# Updates build-version.inc in the current directory, unless the update is
+# identical to the existing content.
 #
 # Args: <shaderc_dir> <spirv-tools_dir> <glslang_dir>
 #
-# For each directory, there will be a line in build_version.h containing that
+# For each directory, there will be a line in build-version.inc containing that
 # directory's "git describe" output enclosed in double quotes and appropriately
 # escaped.
 
+import os.path
 import subprocess
 import sys
+
+OUTFILE = 'build-version.inc'
 
 def describe(dir):
     """Runs 'git describe' in dir.  If successful, returns the output; otherwise,
@@ -34,14 +38,16 @@ returns 'unknown: git-describe error'."""
         return 'unknown: git-describe error'
 
 def main():
-    if (len(sys.argv) != 4):
+    if len(sys.argv) != 4:
         print 'usage: {0} <shaderc_dir> <spirv-tools_dir> <glslang_dir>'.format(sys.argv[0])
         sys.exit(1)
-    version_file = open('build-version.h', 'w')
-    version_file.write('"shaderc ' + describe(sys.argv[1]).replace('"', '\\"') + '\\n"\n')
-    version_file.write('"spirv-tools ' + describe(sys.argv[2]).replace('"', '\\"') + '\\n"\n')
-    version_file.write('"glslang ' + describe(sys.argv[3]).replace('"', '\\"') + '\\n"\n')
-    version_file.close()
+
+    new_content = ('"shaderc ' + describe(sys.argv[1]).replace('"', '\\"') + '\\n"\n' +
+                   '"spirv-tools ' + describe(sys.argv[2]).replace('"', '\\"') + '\\n"\n' +
+                   '"glslang ' + describe(sys.argv[3]).replace('"', '\\"') + '\\n"\n')
+    if os.path.isfile(OUTFILE) and new_content == open(OUTFILE, 'r').read():
+        sys.exit(0)
+    open(OUTFILE, 'w').write(new_content)
 
 if __name__ == '__main__':
     main()
