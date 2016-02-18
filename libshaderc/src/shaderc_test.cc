@@ -72,7 +72,7 @@ enum class OutputType {
 // Generate a compilation result object with the given compile,
 // shader source, shader kind, input file name, options, and for the
 // specified output type.
-static shaderc_compilation_result_t MakeCompilationResult(
+shaderc_compilation_result_t MakeCompilationResult(
     const shaderc_compiler_t compiler, const std::string& shader,
     shaderc_shader_kind kind, const char* input_file_name,
     const shaderc_compile_options_t options, OutputType output_type) {
