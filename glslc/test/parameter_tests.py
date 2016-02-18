@@ -62,6 +62,7 @@ Options:
   -g                Generate source-level debug information.
                     Currently this option has no effect.
   --help            Display available options.
+  --version         Display compiler version information.
   -I <value>        Add directory to include search path.
   -o <file>         Write output to <file>.
                     A file name of '-' represents standard output.

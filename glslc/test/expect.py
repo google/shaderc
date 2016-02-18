@@ -19,6 +19,7 @@ as superclass and providing the expected_* variables required by the check_*()
 methods in the mixin classes.
 """
 import os.path
+import re
 from glslc_test_framework import GlslCTest
 
 
@@ -378,8 +379,9 @@ class StdoutMatch(GlslCTest):
     To mix in this class, subclasses need to provide expected_stdout as the
     expected stdout output.
 
-    For expected_stdout, if it's True, then they expect something on stdout,
-    but will not check what it is. If it's a string, expect an exact match.
+    For expected_stdout, if it's True, then they expect something on stdout but
+    will not check what it is. If it's a string, expect an exact match.  If it's
+    anything else, expect expected_stdout.search(stdout) to be true.
     """
 
     def check_stdout_match(self, status):
@@ -389,12 +391,19 @@ class StdoutMatch(GlslCTest):
         if self.expected_stdout is True:
             if not status.stdout:
                 return False, 'Expected something on stdout'
-        else:
+        elif type(self.expected_stdout) == str:
             if self.expected_stdout != convert_to_unix_line_endings(
                 status.stdout):
                 return False, ('Incorrect stdout output:\n{ac}\n'
                                'Expected:\n{ex}'.format(
                                    ac=status.stdout, ex=self.expected_stdout))
+        else:
+            if not self.expected_stdout.search(convert_to_unix_line_endings(
+                status.stdout)):
+                return False, ('Incorrect stdout output:\n{ac}\n'
+                               'Expected to match regex:\n{ex}'.format(
+                                   ac=status.stdout,
+                                   ex=self.expected_stdout.pattern))
         return True, ''
 
 
