@@ -23,6 +23,7 @@
 # directory's "git describe" output enclosed in double quotes and appropriately
 # escaped.
 
+import datetime
 import os.path
 import subprocess
 import sys
@@ -31,11 +32,11 @@ OUTFILE = 'build-version.inc'
 
 def describe(dir):
     """Runs 'git describe' in dir.  If successful, returns the output; otherwise,
-returns 'unknown: git-describe error'."""
+returns 'unknown hash, <date>'."""
     try:
         return subprocess.check_output(["git", "describe"], cwd=dir).rstrip()
     except subprocess.CalledProcessError:
-        return 'unknown: git-describe error'
+        return 'unknown hash, ' + datetime.date.today().isoformat()
 
 def main():
     if len(sys.argv) != 4:
