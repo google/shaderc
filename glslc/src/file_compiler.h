@@ -26,10 +26,14 @@
 namespace glslc {
 
 // Context for managing compilation of source GLSL files into destination
-// SPIR-V files.
+// SPIR-V files or preprocessed output.
 class FileCompiler {
  public:
-  FileCompiler() : needs_linking_(true), total_warnings_(0), total_errors_(0) {}
+  FileCompiler()
+      : output_type_(OutputType::SpirvBinary),
+        needs_linking_(true),
+        total_warnings_(0),
+        total_errors_(0) {}
 
   // Compiles a shader received in input_file, returning true on success and
   // false otherwise. If force_shader_stage is not shaderc_glsl_infer_source or
@@ -101,6 +105,23 @@ class FileCompiler {
   };
 
  private:
+  enum class OutputType {
+    SpirvBinary,  // A binary module, as defined by the SPIR-V specification.
+    SpirvAssemblyText,  // Assembly syntax defined by the SPIRV-Tools project.
+    PreprocessedText,   // Preprocessed source code.
+  };
+
+  // Compiles the given string a the specified shader kind and using stored
+  // options. On success, writes the result to the given output stream and
+  // returns true.  On failure, returns false, and possibly emit messages to
+  // the standard error stream.
+  template <typename CompilationResultType>
+  bool EmitCompiledResult(
+      const CompilationResultType& result, const std::string& input_file_name,
+      shaderc_util::string_piece error_file_name,
+      const std::unordered_set<std::string>& used_source_files,
+      std::ostream* out);
+
   // Returns the final file name to be used for the output file.
   //
   // If an output file name is specified by the SetOutputFileName(), use that
@@ -150,6 +171,9 @@ class FileCompiler {
   // compiler_.CompileGlslToSpv().
   shaderc::CompileOptions options_;
 
+  // What kind of output will be produced?
+  OutputType output_type_;
+
   // A FileFinder used to substitute #include directives in the source code.
   shaderc_util::FileFinder include_file_finder_;
 
@@ -176,5 +200,5 @@ class FileCompiler {
   // Counts errors encountered in compilation.
   size_t total_errors_;
 };
-}
+}  // namespace glslc
 #endif  // GLSLC_FILE_COMPILER_H
