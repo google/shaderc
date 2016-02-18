@@ -154,14 +154,6 @@ void shaderc_compile_options_add_macro_definition(
 void shaderc_compile_options_set_generate_debug_info(
     shaderc_compile_options_t options);
 
-// Sets the compiler mode to emit a disassembly text instead of a binary. In
-// this mode, the byte array result in the shaderc_compilation_result returned
-// from shaderc_compile_into_spv() will consist of SPIR-V assembly text.
-// Note the preprocessing only mode overrides this option, and this option
-// overrides the default mode generating a SPIR-V binary.
-void shaderc_compile_options_set_disassembly_mode(
-    shaderc_compile_options_t options);
-
 // Forces the GLSL language version and profile to a given pair. The version
 // number is the same as would appear in the #version annotation in the source.
 // Version and profile specified here overrides the #version annotation in the
@@ -209,13 +201,6 @@ void shaderc_compile_options_set_includer_callbacks(
     shaderc_compile_options_t options, shaderc_includer_response_get_fn getter,
     shaderc_includer_response_release_fn releaser, void* user_data);
 
-// Sets the compiler mode to do only preprocessing. The byte array stored in the
-// result object returned by the compilation is the text of the preprocessed
-// shader.  This option overrides all other compilation modes, such as
-// disassembly mode and the default mode of compilation to SPIR-V binary.
-void shaderc_compile_options_set_preprocessing_only_mode(
-    shaderc_compile_options_t options);
-
 // Sets the compiler mode to suppress warnings, overriding warnings-as-errors
 // mode. When both suppress-warnings and warnings-as-errors modes are
 // turned on, warning messages will be inhibited, and will not be emitted
@@ -237,7 +222,8 @@ void shaderc_compile_options_set_target_env(shaderc_compile_options_t options,
 void shaderc_compile_options_set_warnings_as_errors(
     shaderc_compile_options_t options);
 
-// An opaque handle to the results of a call to shaderc_compile_into_spv().
+// An opaque handle to the results of a call to any shaderc_compile_into_*()
+// function.
 typedef struct shaderc_compilation_result* shaderc_compilation_result_t;
 
 // Takes a GLSL source string and the associated shader kind, input file
@@ -251,17 +237,32 @@ typedef struct shaderc_compilation_result* shaderc_compilation_result_t;
 // The input_file_name is a null-termintated string. It is used as a tag to
 // identify the source string in cases like emitting error messages. It
 // doesn't have to be a 'file name'.
-// By default the source string will be compiled into SPIR-V binary and a
-// shaderc_compilation_result will be returned to hold the results of the
-// compilation. When disassembly mode or preprocessing only mode is enabled in
-// the additional_options, the source string will be compiled into char strings
-// and held by the returned shaderc_compilation_result. The entry_point_name
-// null-terminated string defines the name of the entry point to associate with
-// this GLSL source. If the additional_options parameter is not NULL, then the
-// compilation is modified by any options present. May be safely called from
-// multiple threads without explicit synchronization. If there was failure in
-// allocating the compiler object NULL will be returned.
+// The source string will be compiled into SPIR-V binary and a
+// shaderc_compilation_result will be returned to hold the results.
+// The entry_point_name null-terminated string defines the name of the entry
+// point to associate with this GLSL source. If the additional_options
+// parameter is not null, then the compilation is modified by any options
+// present.  May be safely called from multiple threads without explicit
+// synchronization. If there was failure in allocating the compiler object,
+// null will be returned.
 shaderc_compilation_result_t shaderc_compile_into_spv(
+    const shaderc_compiler_t compiler, const char* source_text,
+    size_t source_text_size, shaderc_shader_kind shader_kind,
+    const char* input_file_name, const char* entry_point_name,
+    const shaderc_compile_options_t additional_options);
+
+// Like shaderc_compile_into_spv, but the result contains SPIR-V assembly text
+// instead of a SPIR-V binary module.  The SPIR-V assembly syntax is as defined
+// by the SPIRV-Tools open source project.
+shaderc_compilation_result_t shaderc_compile_into_spv_assembly(
+    const shaderc_compiler_t compiler, const char* source_text,
+    size_t source_text_size, shaderc_shader_kind shader_kind,
+    const char* input_file_name, const char* entry_point_name,
+    const shaderc_compile_options_t additional_options);
+
+// Like shaderc_compile_into_spv, but the result contains preprocessed source
+// code instead of a SPIR-V binary module
+shaderc_compilation_result_t shaderc_compile_into_preprocessed_text(
     const shaderc_compiler_t compiler, const char* source_text,
     size_t source_text_size, shaderc_shader_kind shader_kind,
     const char* input_file_name, const char* entry_point_name,
@@ -275,9 +276,7 @@ shaderc_compilation_result_t shaderc_compile_into_spv(
 void shaderc_result_release(shaderc_compilation_result_t result);
 
 // Returns the number of bytes of the compilation output data in a result
-// object. When the source is compiled with disassembly mode or preprocessing
-// only mode, the result string is a char string. Otherwise, the result string
-// is binary string.
+// object.
 size_t shaderc_result_get_length(const shaderc_compilation_result_t result);
 
 // Returns the number of warnings generated during the compilation.
@@ -295,9 +294,9 @@ shaderc_compilation_status shaderc_result_get_compilation_status(
 
 // Returns a pointer to the start of the compilation output data bytes, either
 // SPIR-V binary or char string. When the source string is compiled into SPIR-V
-// binary, this is guaranteed to be castable to a uint32_t*. If the source
-// string is compiled in disassembly mode or preprocessing only mode, the
-// pointer will point to the result char string.
+// binary, this is guaranteed to be castable to a uint32_t*. If the result
+// contains assembly text or preprocessed source text, the pointer will point to
+// the resulting array of characters.
 const char* shaderc_result_get_bytes(const shaderc_compilation_result_t result);
 
 // Returns a null-terminated string that contains any error messages generated

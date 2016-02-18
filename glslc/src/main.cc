@@ -194,11 +194,9 @@ int main(int argc, char** argv) {
     } else if (arg == "-c") {
       compiler.SetIndividualCompilationFlag();
     } else if (arg == "-E") {
-      compiler.options().SetPreprocessingOnlyMode();
       compiler.SetPreprocessingOnlyFlag();
     } else if (arg == "-M" || arg == "-MM") {
       // -M implies -E and -w
-      compiler.options().SetPreprocessingOnlyMode();
       compiler.SetPreprocessingOnlyFlag();
       compiler.options().SetSuppressWarnings();
       if (compiler.GetDependencyDumpingHandler()->DumpingModeNotSet()) {
@@ -240,7 +238,6 @@ int main(int argc, char** argv) {
       compiler.GetDependencyDumpingHandler()->SetTarget(
           std::string(dep_file_name.data(), dep_file_name.size()));
     } else if (arg == "-S") {
-      compiler.options().SetDisassemblyMode();
       compiler.SetDisassemblyFlag();
     } else if (arg.starts_with("-D")) {
       const size_t length = arg.size();

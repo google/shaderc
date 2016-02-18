@@ -235,11 +235,6 @@ void shaderc_compile_options_set_generate_debug_info(
   options->compiler.SetGenerateDebugInfo();
 }
 
-void shaderc_compile_options_set_disassembly_mode(
-    shaderc_compile_options_t options) {
-  options->compiler.SetDisassemblyMode();
-}
-
 void shaderc_compile_options_set_forced_version_profile(
     shaderc_compile_options_t options, int version, shaderc_profile profile) {
   // Transfer the profile parameter from public enum type to glslang internal
@@ -271,11 +266,6 @@ void shaderc_compile_options_set_includer_callbacks(
   options->includer_user_data = user_data;
 }
 
-void shaderc_compile_options_set_preprocessing_only_mode(
-    shaderc_compile_options_t options) {
-  options->compiler.SetPreprocessingOnlyMode();
-}
-
 void shaderc_compile_options_set_suppress_warnings(
     shaderc_compile_options_t options) {
   options->compiler.SetSuppressWarnings();
@@ -304,11 +294,13 @@ shaderc_compiler_t shaderc_compiler_initialize() {
 
 void shaderc_compiler_release(shaderc_compiler_t compiler) { delete compiler; }
 
-shaderc_compilation_result_t shaderc_compile_into_spv(
+namespace {
+shaderc_compilation_result_t CompileToSpecifiedOutputType(
     const shaderc_compiler_t compiler, const char* source_text,
     size_t source_text_size, shaderc_shader_kind shader_kind,
     const char* input_file_name, const char* entry_point_name,
-    const shaderc_compile_options_t additional_options) {
+    const shaderc_compile_options_t additional_options,
+    shaderc_util::Compiler::OutputType output_type) {
   shaderc_compilation_result_t result =
       new (std::nothrow) shaderc_compilation_result;
   if (!result) {
@@ -342,15 +334,16 @@ shaderc_compilation_result_t shaderc_compile_into_spv(
                   additional_options->get_includer_response,
                   additional_options->release_includer_response,
                   additional_options->includer_user_data),
-              &errors, &total_warnings, &total_errors, compiler->initializer);
+              output_type, &errors, &total_warnings, &total_errors,
+              compiler->initializer);
     } else {
       // Compile with default options.
       std::tie(compilation_succeeded, compilation_output_data,
                compilation_output_data_size_in_bytes) =
           shaderc_util::Compiler().Compile(
               source_string, forced_stage, input_file_name_str,
-              std::ref(stage_deducer), InternalFileIncluder(), &errors,
-              &total_warnings, &total_errors, compiler->initializer);
+              std::ref(stage_deducer), InternalFileIncluder(), output_type,
+              &errors, &total_warnings, &total_errors, compiler->initializer);
     }
 
     result->messages = errors.str();
@@ -373,6 +366,40 @@ shaderc_compilation_result_t shaderc_compile_into_spv(
     result->compilation_status = shaderc_compilation_status_internal_error;
   }
   return result;
+}
+}  // anonymous namespace
+
+shaderc_compilation_result_t shaderc_compile_into_spv(
+    const shaderc_compiler_t compiler, const char* source_text,
+    size_t source_text_size, shaderc_shader_kind shader_kind,
+    const char* input_file_name, const char* entry_point_name,
+    const shaderc_compile_options_t additional_options) {
+  return CompileToSpecifiedOutputType(
+      compiler, source_text, source_text_size, shader_kind, input_file_name,
+      entry_point_name, additional_options,
+      shaderc_util::Compiler::OutputType::SpirvBinary);
+}
+
+shaderc_compilation_result_t shaderc_compile_into_spv_assembly(
+    const shaderc_compiler_t compiler, const char* source_text,
+    size_t source_text_size, shaderc_shader_kind shader_kind,
+    const char* input_file_name, const char* entry_point_name,
+    const shaderc_compile_options_t additional_options) {
+  return CompileToSpecifiedOutputType(
+      compiler, source_text, source_text_size, shader_kind, input_file_name,
+      entry_point_name, additional_options,
+      shaderc_util::Compiler::OutputType::SpirvAssemblyText);
+}
+
+shaderc_compilation_result_t shaderc_compile_into_preprocessed_text(
+    const shaderc_compiler_t compiler, const char* source_text,
+    size_t source_text_size, shaderc_shader_kind shader_kind,
+    const char* input_file_name, const char* entry_point_name,
+    const shaderc_compile_options_t additional_options) {
+  return CompileToSpecifiedOutputType(
+      compiler, source_text, source_text_size, shader_kind, input_file_name,
+      entry_point_name, additional_options,
+      shaderc_util::Compiler::OutputType::PreprocessedText);
 }
 
 size_t shaderc_result_get_length(const shaderc_compilation_result_t result) {

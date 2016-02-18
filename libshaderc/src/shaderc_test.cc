@@ -62,16 +62,52 @@ TEST(Init, SPVVersion) {
   EXPECT_EQ(spv::Revision, revision);
 }
 
+// Determines the kind of output required from the compiler.
+enum class OutputType {
+  SpirvBinary,
+  SpirvAssemblyText,
+  PreprocessedText,
+};
+
+// Generate a compilation result object with the given compile,
+// shader source, shader kind, input file name, options, and for the
+// specified output type.
+shaderc_compilation_result_t MakeCompilationResult(
+    const shaderc_compiler_t compiler, const std::string& shader,
+    shaderc_shader_kind kind, const char* input_file_name,
+    const shaderc_compile_options_t options, OutputType output_type) {
+  switch (output_type) {
+    case OutputType::SpirvBinary:
+      return shaderc_compile_into_spv(compiler, shader.c_str(), shader.size(),
+                                      kind, input_file_name, "", options);
+      break;
+    case OutputType::SpirvAssemblyText:
+      return shaderc_compile_into_spv_assembly(compiler, shader.c_str(),
+                                               shader.size(), kind,
+                                               input_file_name, "", options);
+      break;
+    case OutputType::PreprocessedText:
+      return shaderc_compile_into_preprocessed_text(
+          compiler, shader.c_str(), shader.size(), kind, input_file_name, "",
+          options);
+      break;
+  }
+  // We shouldn't reach here.  But some compilers might not know that.
+  // Be a little defensive and produce something.
+  return shaderc_compile_into_spv(compiler, shader.c_str(), shader.size(), kind,
+                                  input_file_name, "", options);
+}
+
 // RAII class for shaderc_compilation_result.
 class Compilation {
  public:
   // Compiles shader, keeping the result.
   Compilation(const shaderc_compiler_t compiler, const std::string& shader,
               shaderc_shader_kind kind, const char* input_file_name,
-              const shaderc_compile_options_t options = nullptr)
-      : compiled_result_(
-            shaderc_compile_into_spv(compiler, shader.c_str(), shader.size(),
-                                     kind, input_file_name, "", options)) {}
+              const shaderc_compile_options_t options = nullptr,
+              OutputType output_type = OutputType::SpirvBinary)
+      : compiled_result_(MakeCompilationResult(
+            compiler, shader, kind, input_file_name, options, output_type)) {}
 
   ~Compilation() { shaderc_result_release(compiled_result_); }
 
@@ -113,7 +149,7 @@ bool CompilesToValidSpv(Compiler& compiler, const std::string& shader,
                         shaderc_shader_kind kind,
                         const shaderc_compile_options_t options = nullptr) {
   const Compilation comp(compiler.get_compiler_handle(), shader, kind, "shader",
-                         options);
+                         options, OutputType::SpirvBinary);
   auto result = comp.result();
   if (!CompilationResultIsSuccess(result)) return false;
   size_t length = shaderc_result_get_length(result);
@@ -132,10 +168,11 @@ class CompileStringTest : public testing::Test {
  protected:
   // Compiles a shader and returns true on success, false on failure.
   bool CompilationSuccess(const std::string& shader, shaderc_shader_kind kind,
-                          shaderc_compile_options_t options = nullptr) {
+                          shaderc_compile_options_t options = nullptr,
+                          OutputType output_type = OutputType::SpirvBinary) {
     return CompilationResultIsSuccess(
         Compilation(compiler_.get_compiler_handle(), shader, kind, "shader",
-                    options)
+                    options, output_type)
             .result());
   }
 
@@ -143,9 +180,10 @@ class CompileStringTest : public testing::Test {
   // messages.
   const std::string CompilationWarnings(
       const std::string& shader, shaderc_shader_kind kind,
-      const shaderc_compile_options_t options = nullptr) {
+      const shaderc_compile_options_t options = nullptr,
+      OutputType output_type = OutputType::SpirvBinary) {
     const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
-                           "shader", options);
+                           "shader", options, output_type);
     EXPECT_TRUE(CompilationResultIsSuccess(comp.result())) << kind << '\n'
                                                            << shader;
     return shaderc_result_get_error_message(comp.result());
@@ -154,9 +192,10 @@ class CompileStringTest : public testing::Test {
   // Compiles a shader, expects compilation failure, and returns the messages.
   const std::string CompilationErrors(
       const std::string& shader, shaderc_shader_kind kind,
-      const shaderc_compile_options_t options = nullptr) {
+      const shaderc_compile_options_t options = nullptr,
+      OutputType output_type = OutputType::SpirvBinary) {
     const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
-                           "shader", options);
+                           "shader", options, output_type);
     EXPECT_FALSE(CompilationResultIsSuccess(comp.result())) << kind << '\n'
                                                             << shader;
     return shaderc_result_get_error_message(comp.result());
@@ -165,9 +204,10 @@ class CompileStringTest : public testing::Test {
   // Compiles a shader and returns the messages.
   const std::string CompilationMessages(
       const std::string& shader, shaderc_shader_kind kind,
-      const shaderc_compile_options_t options = nullptr) {
+      const shaderc_compile_options_t options = nullptr,
+      OutputType output_type = OutputType::SpirvBinary) {
     const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
-                           "shader", options);
+                           "shader", options, output_type);
     return shaderc_result_get_error_message(comp.result());
   };
 
@@ -175,9 +215,10 @@ class CompileStringTest : public testing::Test {
   // bytes.
   const std::string CompilationOutput(
       const std::string& shader, shaderc_shader_kind kind,
-      const shaderc_compile_options_t options = nullptr) {
+      const shaderc_compile_options_t options = nullptr,
+      OutputType output_type = OutputType::SpirvBinary) {
     const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
-                           "shader", options);
+                           "shader", options, output_type);
     EXPECT_TRUE(CompilationResultIsSuccess(comp.result())) << kind << '\n'
                                                            << shader;
     // Use string(const char* s, size_t n) constructor instead of
@@ -355,29 +396,20 @@ TEST_F(CompileStringWithOptionsTest, ValuelessMacroCompileOptionsNullPointer) {
 
 TEST_F(CompileStringWithOptionsTest, DisassemblyOption) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  shaderc_compile_options_set_disassembly_mode(options_.get());
-  // This should work with both the glslang native disassembly format and the
+  // This should work with both the glslang native assembly format and the
   // SPIR-V tools assembly format.
-  const std::string disassembly_text = CompilationOutput(
-      kMinimalShader, shaderc_glsl_vertex_shader, options_.get());
+  const std::string disassembly_text =
+      CompilationOutput(kMinimalShader, shaderc_glsl_vertex_shader,
+                        options_.get(), OutputType::SpirvAssemblyText);
   EXPECT_THAT(disassembly_text, HasSubstr("Capability Shader"));
   EXPECT_THAT(disassembly_text, HasSubstr("MemoryModel"));
-
-  // The mode should be carried into any clone of the original option object.
-  compile_options_ptr cloned_options(
-      shaderc_compile_options_clone(options_.get()));
-  const std::string disassembly_text_cloned_options = CompilationOutput(
-      kMinimalShader, shaderc_glsl_vertex_shader, cloned_options.get());
-  EXPECT_THAT(disassembly_text_cloned_options, HasSubstr("Capability Shader"));
-  EXPECT_THAT(disassembly_text_cloned_options, HasSubstr("MemoryModel"));
 }
 
 TEST_F(CompileStringWithOptionsTest, DisassembleMinimalShader) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  shaderc_compile_options_set_disassembly_mode(options_.get());
-
-  const std::string disassembly_text = CompilationOutput(
-      kMinimalShader, shaderc_glsl_vertex_shader, options_.get());
+  const std::string disassembly_text =
+      CompilationOutput(kMinimalShader, shaderc_glsl_vertex_shader,
+                        options_.get(), OutputType::SpirvAssemblyText);
   for (const auto& substring : kMinimalShaderDisassemblySubstrings) {
     EXPECT_THAT(disassembly_text, HasSubstr(substring));
   }
@@ -489,26 +521,25 @@ TEST_F(CompileStringWithOptionsTest, GenerateDebugInfoBinaryClonedOptions) {
 
 TEST_F(CompileStringWithOptionsTest, GenerateDebugInfoDisassembly) {
   shaderc_compile_options_set_generate_debug_info(options_.get());
-  // Sets compiler to disassembly mode so that we can compare its output as
-  // a string.
-  shaderc_compile_options_set_disassembly_mode(options_.get());
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  // Generate assembly text we can compare its output as a string.
   // The disassembly output should contain the name of the vector:
   // debug_info_sample.
-  EXPECT_THAT(CompilationOutput(kMinimalDebugInfoShader,
-                                shaderc_glsl_vertex_shader, options_.get()),
-              HasSubstr("debug_info_sample"));
+  EXPECT_THAT(
+      CompilationOutput(kMinimalDebugInfoShader, shaderc_glsl_vertex_shader,
+                        options_.get(), OutputType::SpirvAssemblyText),
+      HasSubstr("debug_info_sample"));
 }
 
 TEST_F(CompileStringWithOptionsTest, PreprocessingOnlyOption) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  shaderc_compile_options_set_preprocessing_only_mode(options_.get());
   const std::string kMinimalShaderWithMacro =
       "#version 150\n"
       "#define E main\n"
       "void E(){}\n";
-  const std::string preprocessed_text = CompilationOutput(
-      kMinimalShaderWithMacro, shaderc_glsl_vertex_shader, options_.get());
+  const std::string preprocessed_text =
+      CompilationOutput(kMinimalShaderWithMacro, shaderc_glsl_vertex_shader,
+                        options_.get(), OutputType::PreprocessedText);
   EXPECT_THAT(preprocessed_text, HasSubstr("void main(){ }"));
 
   const std::string kMinimalShaderWithMacroCloneOption =
@@ -517,9 +548,9 @@ TEST_F(CompileStringWithOptionsTest, PreprocessingOnlyOption) {
       "void E_CLONE_OPTION(){}\n";
   compile_options_ptr cloned_options(
       shaderc_compile_options_clone(options_.get()));
-  const std::string preprocessed_text_cloned_options =
-      CompilationOutput(kMinimalShaderWithMacroCloneOption,
-                        shaderc_glsl_vertex_shader, options_.get());
+  const std::string preprocessed_text_cloned_options = CompilationOutput(
+      kMinimalShaderWithMacroCloneOption, shaderc_glsl_vertex_shader,
+      options_.get(), OutputType::PreprocessedText);
   EXPECT_THAT(preprocessed_text_cloned_options, HasSubstr("void main(){ }"));
 }
 
@@ -672,13 +703,13 @@ TEST_P(IncluderTests, SetIncluderCallbacks) {
   TestIncluder includer(fs);
   Compiler compiler;
   compile_options_ptr options(shaderc_compile_options_initialize());
-  shaderc_compile_options_set_preprocessing_only_mode(options.get());
   shaderc_compile_options_set_includer_callbacks(
       options.get(), TestIncluder::GetIncluderResponseWrapper,
       TestIncluder::ReleaseIncluderResponseWrapper, &includer);
 
   const Compilation comp(compiler.get_compiler_handle(), shader,
-                         shaderc_glsl_vertex_shader, "shader", options.get());
+                         shaderc_glsl_vertex_shader, "shader", options.get(),
+                         OutputType::PreprocessedText);
   // Checks the existence of the expected string.
   EXPECT_THAT(shaderc_result_get_bytes(comp.result()),
               HasSubstr(test_case.expected_substring()));
@@ -691,7 +722,6 @@ TEST_P(IncluderTests, SetIncluderCallbacksClonedOptions) {
   TestIncluder includer(fs);
   Compiler compiler;
   compile_options_ptr options(shaderc_compile_options_initialize());
-  shaderc_compile_options_set_preprocessing_only_mode(options.get());
   shaderc_compile_options_set_includer_callbacks(
       options.get(), TestIncluder::GetIncluderResponseWrapper,
       TestIncluder::ReleaseIncluderResponseWrapper, &includer);
@@ -702,7 +732,7 @@ TEST_P(IncluderTests, SetIncluderCallbacksClonedOptions) {
 
   const Compilation comp(compiler.get_compiler_handle(), shader,
                          shaderc_glsl_vertex_shader, "shader",
-                         cloned_options.get());
+                         cloned_options.get(), OutputType::PreprocessedText);
   // Checks the existence of the expected string.
   EXPECT_THAT(shaderc_result_get_bytes(comp.result()),
               HasSubstr(test_case.expected_substring()));
@@ -904,25 +934,29 @@ TEST_F(CompileStringWithOptionsTest,
   // This test is disabled since some versions of glslang may refuse to compile
   // very old shaders to SPIR-V with OpenGL target. Re-enable and rewrite this
   // test once we have a differential set of environments to test.
-  shaderc_compile_options_set_preprocessing_only_mode(options_.get());
+  const auto output_type = OutputType::PreprocessedText;
 
   EXPECT_TRUE(CompilationSuccess(kOpenGLCompatibilityFragmentShader,
-                                 shaderc_glsl_fragment_shader, options_.get()));
+                                 shaderc_glsl_fragment_shader, options_.get(),
+                                 output_type));
 
   shaderc_compile_options_set_target_env(options_.get(),
                                          shaderc_target_env_opengl_compat, 0);
   EXPECT_TRUE(CompilationSuccess(kOpenGLCompatibilityFragmentShader,
-                                 shaderc_glsl_fragment_shader, options_.get()));
+                                 shaderc_glsl_fragment_shader, options_.get(),
+                                 output_type));
 
   shaderc_compile_options_set_target_env(options_.get(),
                                          shaderc_target_env_opengl, 0);
   EXPECT_TRUE(CompilationSuccess(kOpenGLCompatibilityFragmentShader,
-                                 shaderc_glsl_fragment_shader, options_.get()));
+                                 shaderc_glsl_fragment_shader, options_.get(),
+                                 output_type));
 
   shaderc_compile_options_set_target_env(options_.get(),
                                          shaderc_target_env_vulkan, 0);
   EXPECT_TRUE(CompilationSuccess(kOpenGLCompatibilityFragmentShader,
-                                 shaderc_glsl_fragment_shader, options_.get()));
+                                 shaderc_glsl_fragment_shader, options_.get(),
+                                 output_type));
 }
 
 TEST_F(CompileStringTest, ShaderKindRespected) {

@@ -25,13 +25,18 @@
 
 namespace {
 
+using shaderc::AssemblyCompilationResult;
+using shaderc::PreprocessedSourceCompilationResult;
+using shaderc::SpvCompilationResult;
 using shaderc::CompileOptions;
 using testing::Each;
+using testing::Eq;
 using testing::HasSubstr;
 
 // Helper function to check if the compilation result indicates a successful
 // compilation.
-bool CompilationResultIsSuccess(const shaderc::CompilationResult& result) {
+template <typename T>
+bool CompilationResultIsSuccess(const shaderc::CompilationResult<T>& result) {
   return result.GetCompilationStatus() == shaderc_compilation_status_success;
 }
 
@@ -39,12 +44,11 @@ bool CompilationResultIsSuccess(const shaderc::CompilationResult& result) {
 // magic number in the fixed postion of the byte array in the result object.
 // Returns true if the magic number is found at the correct postion, otherwise
 // returns false.
-bool IsValidSpv(const shaderc::CompilationResult& result) {
+bool IsValidSpv(const SpvCompilationResult& result) {
   if (!CompilationResultIsSuccess(result)) return false;
-  size_t length = result.GetLength();
-  if (length < 20) return false;
-  const uint32_t* bytes =
-      static_cast<const uint32_t*>(static_cast<const void*>(result.GetData()));
+  size_t length_in_words = result.cend() - result.cbegin();
+  if (length_in_words < 5) return false;
+  const uint32_t* bytes = result.cbegin();
   return bytes[0] == spv::MagicNumber;
 }
 
@@ -61,6 +65,14 @@ bool CompilesToValidSpv(const shaderc::Compiler& compiler,
                         const std::string& shader, shaderc_shader_kind kind,
                         const CompileOptions& options) {
   return IsValidSpv(compiler.CompileGlslToSpv(shader, kind, "shader", options));
+}
+
+// Returns the compiler's output from a compilation result as a string.
+template <typename T>
+std::string CompilerOutputAsString(
+    const shaderc::CompilationResult<T>& result) {
+  return std::string(reinterpret_cast<const char*>(result.cbegin()),
+                     reinterpret_cast<const char*>(result.cend()));
 }
 
 class CppInterface : public testing::Test {
@@ -126,12 +138,21 @@ class CppInterface : public testing::Test {
     const auto compilation_result =
         compiler_.CompileGlslToSpv(shader, kind, "shader", options);
     EXPECT_TRUE(CompilationResultIsSuccess(compilation_result)) << kind << '\n';
-    // Use string(const char* s, size_t n) constructor instead of
-    // string(const char* s) to make sure the string has complete binary data.
-    // string(const char* s) assumes a null-terminated C-string, which will cut
-    // the binary data when it sees a '\0' byte.
-    return std::string(compilation_result.GetData(),
-                       compilation_result.GetLength());
+    // Need to make sure you get complete binary data, including embedded nulls.
+    return CompilerOutputAsString(compilation_result);
+  }
+
+  // Compiles a shader to SPIR-V assembly, expects compilation success, and
+  // returns the output bytes.
+  // The input file name is set to "shader" by default.
+  std::string AssemblyOutput(const std::string& shader,
+                             shaderc_shader_kind kind,
+                             const CompileOptions& options) const {
+    const auto compilation_result =
+        compiler_.CompileGlslToSpvAssembly(shader, kind, "shader", options);
+    EXPECT_TRUE(CompilationResultIsSuccess(compilation_result)) << kind << '\n';
+    // Need to make sure you get complete binary data, including embedded nulls.
+    return CompilerOutputAsString(compilation_result);
   }
 
   // For compiling shaders in subclass tests:
@@ -183,10 +204,10 @@ TEST_F(CppInterface, EmptyString) {
 }
 
 TEST_F(CppInterface, ResultObjectMoves) {
-  shaderc::CompilationResult result = compiler_.CompileGlslToSpv(
+  SpvCompilationResult result = compiler_.CompileGlslToSpv(
       kMinimalShader, shaderc_glsl_vertex_shader, "shader");
   EXPECT_TRUE(CompilationResultIsSuccess(result));
-  shaderc::CompilationResult result2(std::move(result));
+  const SpvCompilationResult result2(std::move(result));
   EXPECT_FALSE(CompilationResultIsSuccess(result));
   EXPECT_TRUE(CompilationResultIsSuccess(result2));
 }
@@ -227,22 +248,19 @@ TEST_F(CppInterface, MovedOptions) {
 }
 
 TEST_F(CppInterface, StdAndCString) {
-  shaderc::CompilationResult result1 =
+  const SpvCompilationResult result1 =
       compiler_.CompileGlslToSpv(kMinimalShader, strlen(kMinimalShader),
                                  shaderc_glsl_fragment_shader, "shader");
-  shaderc::CompilationResult result2 = compiler_.CompileGlslToSpv(
+  const SpvCompilationResult result2 = compiler_.CompileGlslToSpv(
       std::string(kMinimalShader), shaderc_glsl_fragment_shader, "shader");
   EXPECT_TRUE(CompilationResultIsSuccess(result1));
   EXPECT_TRUE(CompilationResultIsSuccess(result2));
-  EXPECT_EQ(result1.GetLength(), result2.GetLength());
-  EXPECT_EQ(std::vector<char>(result1.GetData(),
-                              result1.GetData() + result1.GetLength()),
-            std::vector<char>(result2.GetData(),
-                              result2.GetData() + result2.GetLength()));
+  EXPECT_EQ(std::vector<uint32_t>(result1.cbegin(), result1.cend()),
+            std::vector<uint32_t>(result2.cbegin(), result2.cend()));
 }
 
 TEST_F(CppInterface, ErrorsReported) {
-  shaderc::CompilationResult result = compiler_.CompileGlslToSpv(
+  const SpvCompilationResult result = compiler_.CompileGlslToSpv(
       "int f(){return wrongname;}", shaderc_glsl_vertex_shader, "shader");
   ASSERT_FALSE(CompilationResultIsSuccess(result));
   EXPECT_THAT(result.GetErrorMessage(), HasSubstr("wrongname"));
@@ -263,11 +281,14 @@ TEST_F(CppInterface, MultipleThreadsCalling) {
 }
 
 TEST_F(CppInterface, AccessorsOnNullResultObject) {
-  shaderc::CompilationResult result(nullptr);
+  const SpvCompilationResult result(nullptr);
   EXPECT_FALSE(CompilationResultIsSuccess(result));
   EXPECT_EQ(std::string(), result.GetErrorMessage());
-  EXPECT_EQ(std::string(), result.GetData());
-  EXPECT_EQ(0u, result.GetLength());
+  EXPECT_EQ(result.cend(), result.cbegin());
+  EXPECT_EQ(nullptr, result.cbegin());
+  EXPECT_EQ(nullptr, result.cend());
+  EXPECT_EQ(nullptr, result.begin());
+  EXPECT_EQ(nullptr, result.end());
 }
 
 TEST_F(CppInterface, MacroCompileOptions) {
@@ -295,34 +316,32 @@ TEST_F(CppInterface, MacroCompileOptions) {
                                  shaderc_glsl_vertex_shader, cloned_options));
 }
 
-TEST_F(CppInterface, DisassemblyOption) {
-  options_.SetDisassemblyMode();
-  shaderc::CompilationResult result = compiler_.CompileGlslToSpv(
+TEST_F(CppInterface, D_DisassemblyOption) {
+  const AssemblyCompilationResult result = compiler_.CompileGlslToSpvAssembly(
       kMinimalShader, shaderc_glsl_vertex_shader, "shader", options_);
   EXPECT_TRUE(CompilationResultIsSuccess(result));
   // This should work with both the glslang native disassembly format and the
   // SPIR-V Tools assembly format.
-  EXPECT_THAT(result.GetData(), HasSubstr("Capability Shader"));
-  EXPECT_THAT(result.GetData(), HasSubstr("MemoryModel"));
+  EXPECT_THAT(CompilerOutputAsString(result), HasSubstr("Capability Shader"));
+  EXPECT_THAT(CompilerOutputAsString(result), HasSubstr("MemoryModel"));
 
   CompileOptions cloned_options(options_);
-  shaderc::CompilationResult result_from_cloned_options =
-      compiler_.CompileGlslToSpv(kMinimalShader, shaderc_glsl_vertex_shader,
-                                 "shader", cloned_options);
+  auto result_from_cloned_options = compiler_.CompileGlslToSpvAssembly(
+      kMinimalShader, shaderc_glsl_vertex_shader, "shader", cloned_options);
   EXPECT_TRUE(CompilationResultIsSuccess(result_from_cloned_options));
   // The mode should be carried into any clone of the original option object.
-  EXPECT_THAT(result_from_cloned_options.GetData(),
+  EXPECT_THAT(CompilerOutputAsString(result_from_cloned_options),
               HasSubstr("Capability Shader"));
-  EXPECT_THAT(result_from_cloned_options.GetData(), HasSubstr("MemoryModel"));
+  EXPECT_THAT(CompilerOutputAsString(result_from_cloned_options),
+              HasSubstr("MemoryModel"));
 }
 
 TEST_F(CppInterface, DisassembleMinimalShader) {
-  options_.SetDisassemblyMode();
-  shaderc::CompilationResult result = compiler_.CompileGlslToSpv(
+  const AssemblyCompilationResult result = compiler_.CompileGlslToSpvAssembly(
       kMinimalShader, shaderc_glsl_vertex_shader, "shader", options_);
   EXPECT_TRUE(CompilationResultIsSuccess(result));
   for (const auto& substring : kMinimalShaderDisassemblySubstrings) {
-    EXPECT_THAT(result.GetData(), HasSubstr(substring));
+    EXPECT_THAT(CompilerOutputAsString(result), HasSubstr(substring));
   }
 }
 
@@ -413,11 +432,10 @@ TEST_F(CppInterface, GenerateDebugInfoBinaryClonedOptions) {
 TEST_F(CppInterface, GenerateDebugInfoDisassembly) {
   options_.SetGenerateDebugInfo();
   // Debug info should also be emitted in disassembly mode.
-  options_.SetDisassemblyMode();
   // The output disassembly should contain the name of the vector:
   // debug_info_sample.
-  EXPECT_THAT(CompilationOutput(kMinimalDebugInfoShader,
-                                shaderc_glsl_vertex_shader, options_),
+  EXPECT_THAT(AssemblyOutput(kMinimalDebugInfoShader,
+                             shaderc_glsl_vertex_shader, options_),
               HasSubstr("debug_info_sample"));
 }
 
@@ -432,7 +450,7 @@ TEST_F(CppInterface, GenerateDebugInfoDisassemblyClonedOptions) {
 
 TEST_F(CppInterface, GetNumErrors) {
   std::string shader(kTwoErrorsShader);
-  const shaderc::CompilationResult compilation_result =
+  const SpvCompilationResult compilation_result =
       compiler_.CompileGlslToSpv(kTwoErrorsShader, strlen(kTwoErrorsShader),
                                  shaderc_glsl_vertex_shader, "shader");
   EXPECT_FALSE(CompilationResultIsSuccess(compilation_result));
@@ -441,7 +459,7 @@ TEST_F(CppInterface, GetNumErrors) {
 }
 
 TEST_F(CppInterface, GetNumWarnings) {
-  const shaderc::CompilationResult compilation_result =
+  const SpvCompilationResult compilation_result =
       compiler_.CompileGlslToSpv(kTwoWarningsShader, strlen(kTwoWarningsShader),
                                  shaderc_glsl_vertex_shader, "shader");
   EXPECT_TRUE(CompilationResultIsSuccess(compilation_result));
@@ -450,7 +468,7 @@ TEST_F(CppInterface, GetNumWarnings) {
 }
 
 TEST_F(CppInterface, ZeroErrorsZeroWarnings) {
-  const shaderc::CompilationResult compilation_result =
+  const SpvCompilationResult compilation_result =
       compiler_.CompileGlslToSpv(kMinimalShader, strlen(kMinimalShader),
                                  shaderc_glsl_vertex_shader, "shader");
   EXPECT_TRUE(CompilationResultIsSuccess(compilation_result));
@@ -461,7 +479,7 @@ TEST_F(CppInterface, ZeroErrorsZeroWarnings) {
 TEST_F(CppInterface, ErrorTypeUnknownShaderStage) {
   // The shader kind/stage can not be determined, the error type field should
   // indicate the error type is shaderc_shader_kind_error.
-  const shaderc::CompilationResult compilation_result =
+  const SpvCompilationResult compilation_result =
       compiler_.CompileGlslToSpv(kMinimalShader, strlen(kMinimalShader),
                                  shaderc_glsl_infer_from_source, "shader");
   EXPECT_EQ(shaderc_compilation_status_invalid_stage,
@@ -471,16 +489,15 @@ TEST_F(CppInterface, ErrorTypeUnknownShaderStage) {
 TEST_F(CppInterface, ErrorTypeCompilationError) {
   // The shader kind is valid, the result object's error type field should
   // indicate this compilaion fails due to compilation errors.
-  const shaderc::CompilationResult compilation_result =
-      compiler_.CompileGlslToSpv(kTwoErrorsShader, shaderc_glsl_vertex_shader,
-                                 "shader");
+  const SpvCompilationResult compilation_result = compiler_.CompileGlslToSpv(
+      kTwoErrorsShader, shaderc_glsl_vertex_shader, "shader");
   EXPECT_EQ(shaderc_compilation_status_compilation_error,
             compilation_result.GetCompilationStatus());
 }
 
 TEST_F(CppInterface, ErrorTagIsInputFileName) {
   std::string shader(kTwoErrorsShader);
-  const shaderc::CompilationResult compilation_result =
+  const SpvCompilationResult compilation_result =
       compiler_.CompileGlslToSpv(kTwoErrorsShader, strlen(kTwoErrorsShader),
                                  shaderc_glsl_vertex_shader, "SampleInputFile");
   // Expects compilation failure errors. The error tag should be
@@ -491,51 +508,22 @@ TEST_F(CppInterface, ErrorTagIsInputFileName) {
 }
 
 TEST_F(CppInterface, PreprocessingOnlyOption) {
-  options_.SetPreprocessingOnlyMode();
-  shaderc::CompilationResult result = compiler_.CompileGlslToSpv(
+  const PreprocessedSourceCompilationResult result = compiler_.PreprocessGlsl(
       kMinimalShaderWithMacro, shaderc_glsl_vertex_shader, "shader", options_);
   EXPECT_TRUE(CompilationResultIsSuccess(result));
-  EXPECT_THAT(result.GetData(), HasSubstr("void main(){ }"));
+  EXPECT_THAT(CompilerOutputAsString(result), HasSubstr("void main(){ }"));
 
   const std::string kMinimalShaderCloneOption =
       "#version 140\n"
       "#define E_CLONE_OPTION main\n"
       "void E_CLONE_OPTION(){}\n";
   CompileOptions cloned_options(options_);
-  shaderc::CompilationResult result_from_cloned_options =
-      compiler_.CompileGlslToSpv(kMinimalShaderCloneOption,
-                                 shaderc_glsl_vertex_shader, "shader",
-                                 cloned_options);
+  const PreprocessedSourceCompilationResult result_from_cloned_options =
+      compiler_.PreprocessGlsl(kMinimalShaderCloneOption,
+                               shaderc_glsl_vertex_shader, "shader",
+                               cloned_options);
   EXPECT_TRUE(CompilationResultIsSuccess(result_from_cloned_options));
-  EXPECT_THAT(result_from_cloned_options.GetData(),
-              HasSubstr("void main(){ }"));
-}
-
-TEST_F(CppInterface, PreprocessingOnlyModeFirstOverridesDisassemblyMode) {
-  // Sets preprocessing only mode first, then sets disassembly mode.
-  // Preprocessing only mode should override disassembly mode.
-  options_.SetPreprocessingOnlyMode();
-  options_.SetDisassemblyMode();
-  shaderc::CompilationResult result_preprocessing_mode_first =
-      compiler_.CompileGlslToSpv(kMinimalShaderWithMacro,
-                                 shaderc_glsl_vertex_shader, "shader",
-                                 options_);
-  EXPECT_TRUE(CompilationResultIsSuccess(result_preprocessing_mode_first));
-  EXPECT_THAT(result_preprocessing_mode_first.GetData(),
-              HasSubstr("void main(){ }"));
-}
-
-TEST_F(CppInterface, PreprocessingOnlyModeSecondOverridesDisassemblyMode) {
-  // Sets disassembly mode first, then preprocessing only mode.
-  // Preprocessing only mode should still override disassembly mode.
-  options_.SetDisassemblyMode();
-  options_.SetPreprocessingOnlyMode();
-  shaderc::CompilationResult result_disassembly_mode_first =
-      compiler_.CompileGlslToSpv(kMinimalShaderWithMacro,
-                                 shaderc_glsl_vertex_shader, "shader",
-                                 options_);
-  EXPECT_TRUE(CompilationResultIsSuccess(result_disassembly_mode_first));
-  EXPECT_THAT(result_disassembly_mode_first.GetData(),
+  EXPECT_THAT(CompilerOutputAsString(result_from_cloned_options),
               HasSubstr("void main(){ }"));
 }
 
@@ -674,12 +662,10 @@ TEST_P(IncluderTests, SetIncluder) {
   shaderc::Compiler compiler;
   CompileOptions options;
   options.SetIncluder(std::unique_ptr<TestIncluder>(new TestIncluder(fs)));
-  options.SetPreprocessingOnlyMode();
-  const shaderc::CompilationResult compilation_result =
-      compiler.CompileGlslToSpv(shader.c_str(), shaderc_glsl_vertex_shader,
-                                "shader", options);
+  const auto compilation_result = compiler.PreprocessGlsl(
+      shader.c_str(), shaderc_glsl_vertex_shader, "shader", options);
   // Checks the existence of the expected string.
-  EXPECT_THAT(compilation_result.GetData(),
+  EXPECT_THAT(CompilerOutputAsString(compilation_result),
               HasSubstr(test_case.expected_substring()));
 }
 
@@ -690,15 +676,13 @@ TEST_P(IncluderTests, SetIncluderClonedOptions) {
   shaderc::Compiler compiler;
   CompileOptions options;
   options.SetIncluder(std::unique_ptr<TestIncluder>(new TestIncluder(fs)));
-  options.SetPreprocessingOnlyMode();
 
   // Cloned options should have all the settings.
   CompileOptions cloned_options(options);
-  const shaderc::CompilationResult compilation_result =
-      compiler.CompileGlslToSpv(shader.c_str(), shaderc_glsl_vertex_shader,
-                                "shader", cloned_options);
+  const auto compilation_result = compiler.PreprocessGlsl(
+      shader.c_str(), shaderc_glsl_vertex_shader, "shader", cloned_options);
   // Checks the existence of the expected string.
-  EXPECT_THAT(compilation_result.GetData(),
+  EXPECT_THAT(CompilerOutputAsString(compilation_result),
               HasSubstr(test_case.expected_substring()));
 }
 
@@ -879,6 +863,44 @@ TEST_F(CppInterface, TargetEnvCompileOptions) {
 
   EXPECT_TRUE(
       CompilationSuccess(kGlslShader, shaderc_glsl_fragment_shader, options_));
+}
+
+TEST_F(CppInterface, BeginAndEndOnSpvCompilationResult) {
+  const SpvCompilationResult compilation_result = compiler_.CompileGlslToSpv(
+      kMinimalShader, shaderc_glsl_vertex_shader, "shader");
+  EXPECT_TRUE(IsValidSpv(compilation_result));
+  // Use range-based for to exercise begin() and end().
+  std::vector<uint32_t> binary_words;
+  for (const auto& element : compilation_result) {
+    binary_words.push_back(element);
+  }
+  EXPECT_THAT(binary_words,
+              Eq(std::vector<uint32_t>(compilation_result.cbegin(),
+                                       compilation_result.cend())));
+}
+
+TEST_F(CppInterface, BeginAndEndOnAssemblyCompilationResult) {
+  const AssemblyCompilationResult compilation_result =
+      compiler_.CompileGlslToSpvAssembly(
+          kMinimalShader, shaderc_glsl_vertex_shader, "shader", options_);
+  const std::string forced_to_be_a_string =
+      CompilerOutputAsString(compilation_result);
+  EXPECT_THAT(forced_to_be_a_string, HasSubstr("MemoryModel"));
+  const std::string string_via_begin_end(compilation_result.begin(),
+                                         compilation_result.end());
+  EXPECT_THAT(string_via_begin_end, Eq(forced_to_be_a_string));
+}
+
+TEST_F(CppInterface, BeginAndEndOnPreprocessedResult) {
+  const PreprocessedSourceCompilationResult compilation_result =
+      compiler_.PreprocessGlsl(kMinimalShader, shaderc_glsl_vertex_shader,
+                               "shader", options_);
+  const std::string forced_to_be_a_string =
+      CompilerOutputAsString(compilation_result);
+  EXPECT_THAT(forced_to_be_a_string, HasSubstr("void main()"));
+  const std::string string_via_begin_end(compilation_result.begin(),
+                                         compilation_result.end());
+  EXPECT_THAT(string_via_begin_end, Eq(forced_to_be_a_string));
 }
 
 }  // anonymous namespace

@@ -26,15 +26,19 @@
 namespace glslc {
 
 // Context for managing compilation of source GLSL files into destination
-// SPIR-V files.
+// SPIR-V files or preprocessed output.
 class FileCompiler {
  public:
-  FileCompiler() : needs_linking_(true), total_warnings_(0), total_errors_(0) {}
+  FileCompiler()
+      : output_type_(OutputType::SpirvBinary),
+        needs_linking_(true),
+        total_warnings_(0),
+        total_errors_(0) {}
 
   // Compiles a shader received in input_file, returning true on success and
   // false otherwise. If force_shader_stage is not shaderc_glsl_infer_source or
-  // any default shader stage then the given shader_stage will be used, otherwise
-  // it will be determined from the source or the file type.
+  // any default shader stage then the given shader_stage will be used,
+  // otherwise it will be determined from the source or the file type.
   //
   // Places the compilation output into a new file whose name is derived from
   // input_file according to the rules from glslc/README.asciidoc.
@@ -101,6 +105,24 @@ class FileCompiler {
   };
 
  private:
+  enum class OutputType {
+    SpirvBinary,  // A binary module, as defined by the SPIR-V specification.
+    SpirvAssemblyText,  // Assembly syntax defined by the SPIRV-Tools project.
+    PreprocessedText,   // Preprocessed source code.
+  };
+
+  // Emits the compilation output from the given result to the given output
+  // stream and returns true if the result represents a successful compilation
+  // step.  Otherwise returns false and possibly emits messages to the standard
+  // error stream.  Accumulates error and warning counts for use by the
+  // OutputMessages() method.
+  template <typename CompilationResultType>
+  bool EmitCompiledResult(
+      const CompilationResultType& result, const std::string& input_file_name,
+      shaderc_util::string_piece error_file_name,
+      const std::unordered_set<std::string>& used_source_files,
+      std::ostream* out);
+
   // Returns the final file name to be used for the output file.
   //
   // If an output file name is specified by the SetOutputFileName(), use that
@@ -115,8 +137,8 @@ class FileCompiler {
   //  If linking is not required, and the input file name does not have a
   //  standard stage extension, then also returns the directory-stripped input
   //  filename, but replaces its extension with the result extension. (If the
-  //  resolved input filename does not have an extension, then appends the result
-  //  extension.)
+  //  resolved input filename does not have an extension, then appends the
+  //  result extension.)
   //
   //  If linking is required and output filename is not specified, returns
   //  "a.spv".
@@ -143,6 +165,9 @@ class FileCompiler {
   //  the extension.
   std::string GetCandidateOutputFileName(std::string input_filename);
 
+  // Returns true if the compiler's output is preprocessed text.
+  bool PreprocessingOnly() { return output_type_ == OutputType::PreprocessedText; }
+
   // Performs actual SPIR-V compilation on the contents of input files.
   shaderc::Compiler compiler_;
 
@@ -150,17 +175,14 @@ class FileCompiler {
   // compiler_.CompileGlslToSpv().
   shaderc::CompileOptions options_;
 
+  // What kind of output will be produced?
+  OutputType output_type_;
+
   // A FileFinder used to substitute #include directives in the source code.
   shaderc_util::FileFinder include_file_finder_;
 
   // Indicates whether linking is needed to generate the final output.
   bool needs_linking_;
-
-  // Flag for disassembly mode.
-  bool disassemble_ = false;
-
-  // Flag for preprocessing only mode.
-  bool preprocess_only_ = false;
 
   // The ownership of dependency dumping handler.
   std::unique_ptr<DependencyInfoDumpingHandler>
@@ -171,10 +193,10 @@ class FileCompiler {
   // Name of the file where the compilation output will go.
   shaderc_util::string_piece output_file_name_;
 
-  // Counts warnings encountered in compilation.
+  // Counts warnings encountered in all compilations via this object.
   size_t total_warnings_;
-  // Counts errors encountered in compilation.
+  // Counts errors encountered in all compilations via this object.
   size_t total_errors_;
 };
-}
+}  // namespace glslc
 #endif  // GLSLC_FILE_COMPILER_H

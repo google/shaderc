@@ -64,12 +64,41 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
       new FileIncluder(&include_file_finder_));
   // Get a reference to the dependency trace before we pass the ownership to
   // shaderc::CompileOptions.
-  const auto& included_files = includer->file_path_trace();
+  const auto& used_source_files = includer->file_path_trace();
   options_.SetIncluder(std::move(includer));
 
-  shaderc::CompilationResult result = compiler_.CompileGlslToSpv(
-      source_string.data(), source_string.size(), shader_stage,
-      error_file_name.data(), options_);
+  switch (output_type_) {
+    case OutputType::SpirvBinary: {
+      const auto result = compiler_.CompileGlslToSpv(
+          source_string.data(), source_string.size(), shader_stage,
+          error_file_name.data(), options_);
+      return EmitCompiledResult(result, input_file, error_file_name,
+                                used_source_files, output_stream);
+    }
+    case OutputType::SpirvAssemblyText: {
+      const auto result = compiler_.CompileGlslToSpvAssembly(
+          source_string.data(), source_string.size(), shader_stage,
+          error_file_name.data(), options_);
+      return EmitCompiledResult(result, input_file, error_file_name,
+                                used_source_files, output_stream);
+    }
+    case OutputType::PreprocessedText: {
+      const auto result = compiler_.PreprocessGlsl(
+          source_string.data(), source_string.size(), shader_stage,
+          error_file_name.data(), options_);
+      return EmitCompiledResult(result, input_file, error_file_name,
+                                used_source_files, output_stream);
+    }
+  }
+  return false;
+}
+
+template <typename CompilationResultType>
+bool FileCompiler::EmitCompiledResult(
+    const CompilationResultType& result, const std::string& input_file,
+    string_piece error_file_name,
+    const std::unordered_set<std::string>& used_source_files,
+    std::ostream* out) {
   total_errors_ += result.GetNumErrors();
   total_warnings_ += result.GetNumWarnings();
 
@@ -104,8 +133,9 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
   // later, if the handler is instantiated to dump as normal compilation output,
   // and the original compilation output should be blocked. Otherwise it won't
   // be touched. The main output stream dumps this string_piece later.
-  string_piece compilation_output(result.GetData(),
-                                  result.GetData() + result.GetLength());
+  string_piece compilation_output(
+      reinterpret_cast<const char*>(result.cbegin()),
+      reinterpret_cast<const char*>(result.cend()));
 
   // If we have dependency info dumping handler instantiated, we should dump
   // dependency info first. This may redirect the compilation output
@@ -114,7 +144,7 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
   if (dependency_info_dumping_handler_) {
     if (!dependency_info_dumping_handler_->DumpDependencyInfo(
             GetCandidateOutputFileName(input_file), error_file_name.data(),
-            &potential_dependency_info_output, included_files)) {
+            &potential_dependency_info_output, used_source_files)) {
       return false;
     }
     if (!potential_dependency_info_output.empty()) {
@@ -127,12 +157,12 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
   }
 
   // Write compilation output to output file.
-  output_stream->write(compilation_output.data(), compilation_output.size());
+  out->write(compilation_output.data(), compilation_output.size());
   // Write error message to std::cerr.
   std::cerr << result.GetErrorMessage();
-  if (output_stream->fail()) {
+  if (out->fail()) {
     // Something wrong happened on output.
-    if (output_stream == &std::cout) {
+    if (out == &std::cout) {
       std::cerr << "glslc: error: error writing to standard output"
                 << std::endl;
     } else {
@@ -150,22 +180,22 @@ void FileCompiler::AddIncludeDirectory(const std::string& path) {
 }
 
 void FileCompiler::SetIndividualCompilationFlag() {
-  if (!disassemble_) {
+  if (output_type_ != OutputType::SpirvAssemblyText) {
     needs_linking_ = false;
     file_extension_ = ".spv";
   }
 }
 
 void FileCompiler::SetDisassemblyFlag() {
-  if (!preprocess_only_) {
-    disassemble_ = true;
+  if (!PreprocessingOnly()) {
+    output_type_ = OutputType::SpirvAssemblyText;
     needs_linking_ = false;
     file_extension_ = ".spvasm";
   }
 }
 
 void FileCompiler::SetPreprocessingOnlyFlag() {
-  preprocess_only_ = true;
+  output_type_ = OutputType::PreprocessedText;
   needs_linking_ = false;
   if (output_file_name_.empty()) {
     output_file_name_ = "-";
@@ -188,8 +218,8 @@ bool FileCompiler::ValidateOptions(size_t num_files) {
   // If we are outputting many object files, we cannot specify -o. Also
   // if we are preprocessing multiple files they must be to stdout.
   if (num_files > 1 &&
-      ((!preprocess_only_ && !needs_linking_ && !output_file_name_.empty()) ||
-       (preprocess_only_ && output_file_name_ != "-"))) {
+      ((!PreprocessingOnly() && !needs_linking_ && !output_file_name_.empty()) ||
+       (PreprocessingOnly() && output_file_name_ != "-"))) {
     std::cerr << "glslc: error: cannot specify -o when generating multiple"
                  " output files"
               << std::endl;
@@ -226,12 +256,12 @@ std::string FileCompiler::GetOutputFileName(std::string input_filename) {
 
 std::string FileCompiler::GetCandidateOutputFileName(
     std::string input_filename) {
-  if (!output_file_name_.empty() && !preprocess_only_) {
+  if (!output_file_name_.empty() && !PreprocessingOnly()) {
     return output_file_name_.str();
   }
 
   std::string extension = file_extension_;
-  if (preprocess_only_ || needs_linking_) {
+  if (PreprocessingOnly() || needs_linking_) {
     extension = ".spv";
   }
 
