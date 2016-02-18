@@ -18,7 +18,7 @@
 #include <ostream>
 
 #include "libshaderc_util/string_piece.h"
-#include "shaderc.h"
+#include "shaderc/shaderc.h"
 
 namespace glslc {
 

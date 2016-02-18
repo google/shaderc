@@ -17,10 +17,11 @@
 
 #include <string>
 
-#include "dependency_info.h"
 #include "libshaderc_util/file_finder.h"
 #include "libshaderc_util/string_piece.h"
-#include "shaderc.hpp"
+#include "shaderc/shaderc.hpp"
+
+#include "dependency_info.h"
 
 namespace glslc {
 

@@ -1,7 +1,7 @@
 project(libshaderc)
 
 add_library(shaderc STATIC
-  include/shaderc.h
+  include/shaderc/shaderc.h
   src/shaderc.cc
   src/shaderc_private.h
 )
