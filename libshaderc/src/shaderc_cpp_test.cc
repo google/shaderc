@@ -142,6 +142,19 @@ class CppInterface : public testing::Test {
     return CompilerOutputAsString(compilation_result);
   }
 
+  // Compiles a shader to SPIR-V assembly, expects compilation success, and
+  // returns the output bytes.
+  // The input file name is set to "shader" by default.
+  std::string AssemblyOutput(const std::string& shader,
+                             shaderc_shader_kind kind,
+                             const CompileOptions& options) const {
+    const auto compilation_result =
+        compiler_.CompileGlslToSpvAssembly(shader, kind, "shader", options);
+    EXPECT_TRUE(CompilationResultIsSuccess(compilation_result)) << kind << '\n';
+    // Need to make sure you get complete binary data, including embedded nulls.
+    return CompilerOutputAsString(compilation_result);
+  }
+
   // For compiling shaders in subclass tests:
   shaderc::Compiler compiler_;
   CompileOptions options_;
@@ -304,7 +317,6 @@ TEST_F(CppInterface, MacroCompileOptions) {
 }
 
 TEST_F(CppInterface, D_DisassemblyOption) {
-  options_.SetDisassemblyMode();
   const AssemblyCompilationResult result = compiler_.CompileGlslToSpvAssembly(
       kMinimalShader, shaderc_glsl_vertex_shader, "shader", options_);
   EXPECT_TRUE(CompilationResultIsSuccess(result));
@@ -314,7 +326,7 @@ TEST_F(CppInterface, D_DisassemblyOption) {
   EXPECT_THAT(CompilerOutputAsString(result), HasSubstr("MemoryModel"));
 
   CompileOptions cloned_options(options_);
-  auto result_from_cloned_options = compiler_.CompileGlslToSpv(
+  auto result_from_cloned_options = compiler_.CompileGlslToSpvAssembly(
       kMinimalShader, shaderc_glsl_vertex_shader, "shader", cloned_options);
   EXPECT_TRUE(CompilationResultIsSuccess(result_from_cloned_options));
   // The mode should be carried into any clone of the original option object.
@@ -325,7 +337,6 @@ TEST_F(CppInterface, D_DisassemblyOption) {
 }
 
 TEST_F(CppInterface, DisassembleMinimalShader) {
-  options_.SetDisassemblyMode();
   const AssemblyCompilationResult result = compiler_.CompileGlslToSpvAssembly(
       kMinimalShader, shaderc_glsl_vertex_shader, "shader", options_);
   EXPECT_TRUE(CompilationResultIsSuccess(result));
@@ -421,11 +432,10 @@ TEST_F(CppInterface, GenerateDebugInfoBinaryClonedOptions) {
 TEST_F(CppInterface, GenerateDebugInfoDisassembly) {
   options_.SetGenerateDebugInfo();
   // Debug info should also be emitted in disassembly mode.
-  options_.SetDisassemblyMode();
   // The output disassembly should contain the name of the vector:
   // debug_info_sample.
-  EXPECT_THAT(CompilationOutput(kMinimalDebugInfoShader,
-                                shaderc_glsl_vertex_shader, options_),
+  EXPECT_THAT(AssemblyOutput(kMinimalDebugInfoShader,
+                             shaderc_glsl_vertex_shader, options_),
               HasSubstr("debug_info_sample"));
 }
 
@@ -498,7 +508,6 @@ TEST_F(CppInterface, ErrorTagIsInputFileName) {
 }
 
 TEST_F(CppInterface, PreprocessingOnlyOption) {
-  options_.SetPreprocessingOnlyMode();
   const PreprocessedSourceCompilationResult result = compiler_.PreprocessGlsl(
       kMinimalShaderWithMacro, shaderc_glsl_vertex_shader, "shader", options_);
   EXPECT_TRUE(CompilationResultIsSuccess(result));
@@ -509,40 +518,12 @@ TEST_F(CppInterface, PreprocessingOnlyOption) {
       "#define E_CLONE_OPTION main\n"
       "void E_CLONE_OPTION(){}\n";
   CompileOptions cloned_options(options_);
-  const SpvCompilationResult result_from_cloned_options = compiler_.CompileGlslToSpv(
-      kMinimalShaderCloneOption, shaderc_glsl_vertex_shader, "shader",
-      cloned_options);
+  const PreprocessedSourceCompilationResult result_from_cloned_options =
+      compiler_.PreprocessGlsl(kMinimalShaderCloneOption,
+                               shaderc_glsl_vertex_shader, "shader",
+                               cloned_options);
   EXPECT_TRUE(CompilationResultIsSuccess(result_from_cloned_options));
   EXPECT_THAT(CompilerOutputAsString(result_from_cloned_options),
-              HasSubstr("void main(){ }"));
-}
-
-TEST_F(CppInterface, PreprocessingOnlyModeFirstOverridesDisassemblyMode) {
-  // Sets preprocessing only mode first, then sets disassembly mode.
-  // Preprocessing only mode should override disassembly mode.
-  options_.SetPreprocessingOnlyMode();
-  options_.SetDisassemblyMode();
-  const PreprocessedSourceCompilationResult result_preprocessing_mode_first =
-      compiler_.PreprocessGlsl(kMinimalShaderWithMacro,
-                               shaderc_glsl_vertex_shader, "shader", options_);
-  EXPECT_TRUE(CompilationResultIsSuccess(result_preprocessing_mode_first));
-  EXPECT_THAT(CompilerOutputAsString(result_preprocessing_mode_first),
-              HasSubstr("void main(){ }"));
-}
-
-// TODO(dneto): Consider removing this test.  The client layer should manage
-// priorities among compiler options.
-TEST_F(CppInterface, PreprocessingOnlyModeSecondOverridesDisassemblyMode) {
-  // Sets disassembly mode first, then preprocessing only mode.
-  // Preprocessing only mode should still override disassembly mode.
-  options_.SetDisassemblyMode();
-  options_.SetPreprocessingOnlyMode();
-  // TODO(dneto): It's dubious whether we should be able to call
-  // CompileGlslToSpv in this case.
-  const auto result_disassembly_mode_first = compiler_.CompileGlslToSpv(
-      kMinimalShaderWithMacro, shaderc_glsl_vertex_shader, "shader", options_);
-  EXPECT_TRUE(CompilationResultIsSuccess(result_disassembly_mode_first));
-  EXPECT_THAT(CompilerOutputAsString(result_disassembly_mode_first),
               HasSubstr("void main(){ }"));
 }
 
@@ -681,7 +662,6 @@ TEST_P(IncluderTests, SetIncluder) {
   shaderc::Compiler compiler;
   CompileOptions options;
   options.SetIncluder(std::unique_ptr<TestIncluder>(new TestIncluder(fs)));
-  options.SetPreprocessingOnlyMode();
   const auto compilation_result = compiler.PreprocessGlsl(
       shader.c_str(), shaderc_glsl_vertex_shader, "shader", options);
   // Checks the existence of the expected string.
@@ -696,7 +676,6 @@ TEST_P(IncluderTests, SetIncluderClonedOptions) {
   shaderc::Compiler compiler;
   CompileOptions options;
   options.SetIncluder(std::unique_ptr<TestIncluder>(new TestIncluder(fs)));
-  options.SetPreprocessingOnlyMode();
 
   // Cloned options should have all the settings.
   CompileOptions cloned_options(options);
@@ -901,24 +880,24 @@ TEST_F(CppInterface, BeginAndEndOnSpvCompilationResult) {
 }
 
 TEST_F(CppInterface, BeginAndEndOnAssemblyCompilationResult) {
-  options_.SetDisassemblyMode();
   const AssemblyCompilationResult compilation_result =
       compiler_.CompileGlslToSpvAssembly(
           kMinimalShader, shaderc_glsl_vertex_shader, "shader", options_);
-  const std::string forced_to_be_a_string = CompilerOutputAsString(compilation_result);
+  const std::string forced_to_be_a_string =
+      CompilerOutputAsString(compilation_result);
   EXPECT_THAT(forced_to_be_a_string, HasSubstr("MemoryModel"));
-  const std::string string_via_begin_end(compilation_result.begin(), compilation_result.end());
+  const std::string string_via_begin_end(compilation_result.begin(),
+                                         compilation_result.end());
   EXPECT_THAT(string_via_begin_end, Eq(forced_to_be_a_string));
 }
 
 TEST_F(CppInterface, BeginAndEndOnPreprocessedResult) {
-  options_.SetDisassemblyMode();
   const PreprocessedSourceCompilationResult compilation_result =
       compiler_.PreprocessGlsl(kMinimalShader, shaderc_glsl_vertex_shader,
                                "shader", options_);
   const std::string forced_to_be_a_string =
       CompilerOutputAsString(compilation_result);
-  EXPECT_THAT(forced_to_be_a_string, HasSubstr("MemoryModel"));
+  EXPECT_THAT(forced_to_be_a_string, HasSubstr("void main()"));
   const std::string string_via_begin_end(compilation_result.begin(),
                                          compilation_result.end());
   EXPECT_THAT(string_via_begin_end, Eq(forced_to_be_a_string));

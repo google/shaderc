@@ -72,8 +72,8 @@ class CompilationResult {
     return shaderc_result_get_compilation_status(compilation_result_);
   }
 
-  // Returns an iterator pointing to the start of the compilation
-  // output.  It is valid for the lifetime of this object.
+  // Returns a random access (contiguous) iterator pointing to the start
+  // of the compilation output.  It is valid for the lifetime of this object.
   // If there is no compilation result, then returns nullptr.
   const_iterator cbegin() const {
     if (!compilation_result_) return nullptr;
@@ -81,8 +81,8 @@ class CompilationResult {
         shaderc_result_get_bytes(compilation_result_));
   }
 
-  // Returns an iterator pointing to the end of the compilation
-  // output.  It is valid for the lifetime of this object.
+  // Returns a random access (contiguous) iterator pointing to the end of
+  // the compilation output.  It is valid for the lifetime of this object.
   // If there is no compilation result, then returns nullptr.
   const_iterator cend() const {
     if (!compilation_result_) return nullptr;
@@ -191,18 +191,6 @@ class CompileOptions {
         includer_.get());
   }
 
-  // Sets the compiler to emit a disassembly text instead of a binary. In this
-  // mode, the byte array result in the shaderc_compilation_result returned from
-  // shaderc_compile_into_spv() will consist of SPIR-V assembly text. Note the
-  // preprocessing only mode overrides this option, and this option overrides
-  // the default mode generating a SPIR-V binary.
-  //
-  // TODO(dneto): Remove this method. Instead, force disassembly by using
-  // Compiler::CompileGlslToSpvAssembly.
-  void SetDisassemblyMode() {
-    shaderc_compile_options_set_disassembly_mode(options_);
-  }
-
   // Forces the GLSL language version and profile to a given pair. The version
   // number is the same as would appear in the #version annotation in the
   // source. Version and profile specified here overrides the #version
@@ -211,17 +199,6 @@ class CompileOptions {
   void SetForcedVersionProfile(int version, shaderc_profile profile) {
     shaderc_compile_options_set_forced_version_profile(options_, version,
                                                        profile);
-  }
-
-  // Sets the compiler to do only preprocessing. The byte array in the result
-  // object returned by the compilation is the text of the preprocessed shader.
-  // This option overrides all other compilation modes, such as disassembly mode
-  // and the default mode of compilation to SPIR-V binary.
-  //
-  // TODO(dneto): Remove this method. Instead, force preprocessing-only by
-  // using Compiler::PreprocessGlsl.
-  void SetPreprocessingOnlyMode() {
-    shaderc_compile_options_set_preprocessing_only_mode(options_);
   }
 
   // Sets the compiler mode to suppress warnings. Note this option overrides
@@ -346,10 +323,10 @@ class Compiler {
       const char* source_text, size_t source_text_size,
       shaderc_shader_kind shader_kind, const char* input_file_name,
       const CompileOptions& options) const {
-    // TODO(dneto): Make and use a different C API function.
-    shaderc_compilation_result_t compilation_result = shaderc_compile_into_spv(
-        compiler_, source_text, source_text_size, shader_kind, input_file_name,
-        "main", options.options_);
+    shaderc_compilation_result_t compilation_result =
+        shaderc_compile_into_spv_assembly(
+            compiler_, source_text, source_text_size, shader_kind,
+            input_file_name, "main", options.options_);
     return AssemblyCompilationResult(compilation_result);
   }
 
@@ -371,10 +348,10 @@ class Compiler {
       const char* source_text, size_t source_text_size,
       shaderc_shader_kind shader_kind, const char* input_file_name,
       const CompileOptions& options) const {
-    // TODO(dneto): Make and use a different C API function.
-    shaderc_compilation_result_t compilation_result = shaderc_compile_into_spv(
-        compiler_, source_text, source_text_size, shader_kind, input_file_name,
-        "main", options.options_);
+    shaderc_compilation_result_t compilation_result =
+        shaderc_compile_into_preprocessed_text(
+            compiler_, source_text, source_text_size, shader_kind,
+            input_file_name, "main", options.options_);
     return PreprocessedSourceCompilationResult(compilation_result);
   }
 

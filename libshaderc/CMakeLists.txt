@@ -1,7 +1,11 @@
 project(libshaderc)
 
+# Even though shaderc.hpp is a headers-only library, adding
+# a dependency here will force clients of the library to rebuild
+# when it changes.
 add_library(shaderc STATIC
   include/shaderc/shaderc.h
+  include/shaderc/shaderc.hpp
   src/shaderc.cc
   src/shaderc_private.h
 )

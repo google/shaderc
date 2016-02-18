@@ -16,8 +16,8 @@
 
 #include <cstdint>
 #include <fstream>
-#include <tuple>
 #include <iostream>
+#include <tuple>
 
 #include "libshaderc_util/format.h"
 #include "libshaderc_util/io.h"
@@ -114,8 +114,8 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
     const std::function<EShLanguage(std::ostream* error_stream,
                                     const string_piece& error_tag)>&
         stage_callback,
-    const CountingIncluder& includer, std::ostream* error_stream,
-    size_t* total_warnings, size_t* total_errors,
+    const CountingIncluder& includer, Compiler::OutputType output_type,
+    std::ostream* error_stream, size_t* total_warnings, size_t* total_errors,
     GlslInitializer* initializer) const {
   // Compilation results to be returned:
   // Initialize the result tuple as a failed compilation. In error cases, we
@@ -138,10 +138,11 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
 
   std::string preprocessed_shader;
 
-  // If it is preprocess_only_, we definitely need to preprocess. Otherwise, if
+  // If only preprocessing, we definitely need to preprocess. Otherwise, if
   // we don't know the stage until now, we need the preprocessed shader to
   // deduce the shader stage.
-  if (preprocess_only_ || used_shader_stage == EShLangCount) {
+  if (output_type == OutputType::PreprocessedText ||
+      used_shader_stage == EShLangCount) {
     bool success;
     std::string glslang_errors;
     std::tie(success, preprocessed_shader, glslang_errors) =
@@ -164,7 +165,7 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
         CleanupPreamble(preprocessed_shader, error_tag, pound_extension,
                         includer.num_include_directives(), is_for_next_line);
 
-    if (preprocess_only_) {
+    if (output_type == OutputType::PreprocessedText) {
       // Set the values of the result tuple.
       succeeded = true;
       compilation_output_data = ConvertStringToVector(preprocessed_shader);
@@ -220,10 +221,9 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   std::vector<uint32_t>& spirv = compilation_output_data;
   // Note the call to GlslangToSpv also populates compilation_output_data.
   glslang::GlslangToSpv(*program.getIntermediate(used_shader_stage), spirv);
-  if (disassemble_) {
+  if (output_type == OutputType::SpirvAssemblyText) {
     std::string text_or_error;
-    if (DisassembleBinary(spirv, &text_or_error) !=
-        SPV_SUCCESS) {
+    if (DisassembleBinary(spirv, &text_or_error) != SPV_SUCCESS) {
       *error_stream << "shaderc: internal error: compilation succeeded but "
                        "failed to disassemble: "
                     << text_or_error << "\n";
@@ -257,10 +257,6 @@ void Compiler::SetForcedVersionProfile(int version, EProfile profile) {
   default_profile_ = profile;
   force_version_profile_ = true;
 }
-
-void Compiler::SetDisassemblyMode() { disassemble_ = true; }
-
-void Compiler::SetPreprocessingOnlyMode() { preprocess_only_ = true; }
 
 void Compiler::SetWarningsAsErrors() { warnings_as_errors_ = true; }
 

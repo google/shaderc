@@ -53,9 +53,9 @@ class GlslInitializer {
       }
     }
 
-    InitializationToken(InitializationToken&& other):
-      initializer_(other.initializer_) {
-        other.initializer_ = nullptr;
+    InitializationToken(InitializationToken&& other)
+        : initializer_(other.initializer_) {
+      other.initializer_ = nullptr;
     }
 
     InitializationToken(const InitializationToken&) = delete;
@@ -85,9 +85,7 @@ class GlslInitializer {
   }
 
  private:
-  void Release() {
-    state_lock_.unlock();
-  }
+  void Release() { state_lock_.unlock(); }
 
   friend class InitializationToken;
 
@@ -108,18 +106,10 @@ class Compiler {
       : default_version_(110),
         default_profile_(ENoProfile),
         force_version_profile_(false),
-        preprocess_only_(false),
-        disassemble_(false),
         warnings_as_errors_(false),
         suppress_warnings_(false),
         generate_debug_info_(false),
         message_rules_(GetDefaultRules()) {}
-
-  // Instead of outputting object files, output the disassembled textual output.
-  virtual void SetDisassemblyMode();
-
-  // Instead of outputting object files, output the preprocessed source files.
-  virtual void SetPreprocessingOnlyMode();
 
   // Requests that the compiler place debug information into the object code,
   // such as identifier names and line numbers.
@@ -148,6 +138,12 @@ class Compiler {
   // subsequent CompileShader() calls.
   void SetForcedVersionProfile(int version, EProfile profile);
 
+  enum class OutputType {
+    SpirvBinary,  // A binary module, as defined by the SPIR-V specification.
+    SpirvAssemblyText,  // Assembly syntax defined by the SPIRV-Tools project.
+    PreprocessedText,   // Preprocessed source code.
+  };
+
   // Compiles the shader source in the input_source_string parameter.
   //
   // If the forced_shader stage parameter is not EShLangCount then
@@ -161,6 +157,9 @@ class Compiler {
   // The initializer parameter must be a valid GlslInitializer object.
   // Acquire will be called on the initializer and the result will be
   // destoryed before the function ends.
+  //
+  // The output_type parameter determines what kind of output should be
+  // produced.
   //
   // Any error messages are written as if the file name were error_tag.
   // Any errors are written to the error_stream parameter.
@@ -180,13 +179,12 @@ class Compiler {
       const std::function<EShLanguage(
           std::ostream* error_stream,
           const shaderc_util::string_piece& error_tag)>& stage_callback,
-      const CountingIncluder& includer, std::ostream* error_stream,
-      size_t* total_warnings, size_t* total_errors,
+      const CountingIncluder& includer, OutputType output_type,
+      std::ostream* error_stream, size_t* total_warnings, size_t* total_errors,
       GlslInitializer* initializer) const;
 
   static EShMessages GetDefaultRules() {
-    return static_cast<EShMessages>(EShMsgSpvRules |
-                                                EShMsgVulkanRules);
+    return static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules);
   }
 
  protected:
@@ -266,11 +264,6 @@ class Compiler {
   // When true, use the default version and profile from eponymous data members.
   bool force_version_profile_;
 
-  // When true, compilation output will be preprocessed source.
-  bool preprocess_only_;
-  // When true, compilation output will be disassembled SPIR-V.
-  bool disassemble_;
-
   // Macro definitions that must be available to reference in the shader source.
   MacroDictionary predefined_macros_;
 
@@ -284,7 +277,8 @@ class Compiler {
   bool generate_debug_info_;
 
   // Sets the glslang EshMessages bitmask for determining which dialect of GLSL
-  // and which SPIR-V codegen semantics are used. This impacts the warning & error
+  // and which SPIR-V codegen semantics are used. This impacts the warning &
+  // error
   // messages as well as the set of available builtins
   EShMessages message_rules_;
 };

@@ -93,9 +93,10 @@ class DummyCountingIncluder : public shaderc_util::CountingIncluder {
 class CompilerTest : public testing::Test {
  public:
   // Returns true if the given compiler successfully compiles the given shader
-  // source for the given shader stage.  No includes are permitted, and shader
-  // stage deduction falls back to an invalid shader stage.
-  bool SimpleCompilationSucceeds(std::string source, EShLanguage stage) {
+  // source for the given shader stage to the specified output type.  No includes
+  // are permitted, and shader stage deduction falls back to an invalid shader stage.
+  bool SimpleCompilationSucceedsForOutputType(
+      std::string source, EShLanguage stage, Compiler::OutputType output_type) {
     std::function<EShLanguage(std::ostream*, const shaderc_util::string_piece&)>
         stage_callback = [](std::ostream*, const shaderc_util::string_piece&) {
           return EShLangCount;
@@ -108,9 +109,16 @@ class CompilerTest : public testing::Test {
     bool result = false;
     std::tie(result, std::ignore, std::ignore) = compiler_.Compile(
         source, stage, "shader", stage_callback, DummyCountingIncluder(),
-        &errors, &total_warnings, &total_errors, &initializer);
+        output_type, &errors, &total_warnings, &total_errors, &initializer);
     errors_ = errors.str();
     return result;
+  }
+
+  // Returns the result of SimpleCompilationSucceedsForOutputType, where
+  // the output type is a SPIR-V binary module.
+  bool SimpleCompilationSucceeds(std::string source, EShLanguage stage) {
+    return SimpleCompilationSucceedsForOutputType(
+        source, stage, Compiler::OutputType::SpirvBinary);
   }
 
  protected:
@@ -119,8 +127,18 @@ class CompilerTest : public testing::Test {
   std::string errors_;
 };
 
-TEST_F(CompilerTest, SimpleVertexShaderCompilesSuccessfully) {
+TEST_F(CompilerTest, SimpleVertexShaderCompilesSuccessfullyToBinary) {
   EXPECT_TRUE(SimpleCompilationSucceeds(kVertexShader, EShLangVertex));
+}
+
+TEST_F(CompilerTest, SimpleVertexShaderCompilesSuccessfullyToAssembly) {
+  EXPECT_TRUE(SimpleCompilationSucceedsForOutputType(
+      kVertexShader, EShLangVertex, Compiler::OutputType::SpirvAssemblyText));
+}
+
+TEST_F(CompilerTest, SimpleVertexShaderPreprocessesSuccessfully) {
+  EXPECT_TRUE(SimpleCompilationSucceedsForOutputType(
+      kVertexShader, EShLangVertex, Compiler::OutputType::PreprocessedText));
 }
 
 TEST_F(CompilerTest, BadVertexShaderFailsCompilation) {
