@@ -21,11 +21,8 @@
 namespace {
 
 // Returns "" if path is empty or ends in '/'.  Otherwise, returns "/".
-std::string MaybeSlash(const std::string path) {
-  if (path.empty() || path.back() == '/')
-    return "";
-  else
-    return "/";
+std::string MaybeSlash(const std::string& path) {
+  return (path.empty() || path.back() == '/') ? "" : "/";
 }
 
 }  // anonymous namespace

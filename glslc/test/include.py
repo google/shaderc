@@ -48,7 +48,7 @@ class VerifyIncludeNotFound(expect.ErrorMessage):
 
     glslc_args = ['-E', 'a.vert']
     expected_error = [
-        "a.vert:3: error: '#include' : Cannot open or find include file.\n",
+        "a.vert:3: error: '#include' : Cannot find or open include file.\n",
         '1 error generated.\n'
     ]
 
