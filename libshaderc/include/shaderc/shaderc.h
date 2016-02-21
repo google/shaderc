@@ -239,12 +239,12 @@ typedef struct shaderc_compilation_result* shaderc_compilation_result_t;
 // doesn't have to be a 'file name'.
 // The source string will be compiled into SPIR-V binary and a
 // shaderc_compilation_result will be returned to hold the results.
-// compilation.  The entry_point_name null-terminated string defines the name
-// of the entry point to associate with this GLSL source. If the
-// additional_options parameter is not NULL, then the compilation is modified
-// by any options present. May be safely called from multiple threads without
-// explicit synchronization. If there was failure in allocating the compiler
-// object NULL will be returned.
+// The entry_point_name null-terminated string defines the name of the entry
+// point to associate with this GLSL source. If the additional_options
+// parameter is not null, then the compilation is modified by any options
+// present.  May be safely called from multiple threads without explicit
+// synchronization. If there was failure in allocating the compiler object,
+// null will be returned.
 shaderc_compilation_result_t shaderc_compile_into_spv(
     const shaderc_compiler_t compiler, const char* source_text,
     size_t source_text_size, shaderc_shader_kind shader_kind,

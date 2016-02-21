@@ -165,6 +165,9 @@ class FileCompiler {
   //  the extension.
   std::string GetCandidateOutputFileName(std::string input_filename);
 
+  // Returns true if the compiler's output is preprocessed text.
+  bool PreprocessingOnly() { return output_type_ == OutputType::PreprocessedText; }
+
   // Performs actual SPIR-V compilation on the contents of input files.
   shaderc::Compiler compiler_;
 
@@ -180,12 +183,6 @@ class FileCompiler {
 
   // Indicates whether linking is needed to generate the final output.
   bool needs_linking_;
-
-  // Flag for disassembly mode.
-  bool disassemble_ = false;
-
-  // Flag for preprocessing only mode.
-  bool preprocess_only_ = false;
 
   // The ownership of dependency dumping handler.
   std::unique_ptr<DependencyInfoDumpingHandler>

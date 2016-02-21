@@ -180,16 +180,15 @@ void FileCompiler::AddIncludeDirectory(const std::string& path) {
 }
 
 void FileCompiler::SetIndividualCompilationFlag() {
-  if (!disassemble_) {
+  if (output_type_ != OutputType::SpirvAssemblyText) {
     needs_linking_ = false;
     file_extension_ = ".spv";
   }
 }
 
 void FileCompiler::SetDisassemblyFlag() {
-  if (!preprocess_only_) {
+  if (!PreprocessingOnly()) {
     output_type_ = OutputType::SpirvAssemblyText;
-    disassemble_ = true;
     needs_linking_ = false;
     file_extension_ = ".spvasm";
   }
@@ -197,7 +196,6 @@ void FileCompiler::SetDisassemblyFlag() {
 
 void FileCompiler::SetPreprocessingOnlyFlag() {
   output_type_ = OutputType::PreprocessedText;
-  preprocess_only_ = true;
   needs_linking_ = false;
   if (output_file_name_.empty()) {
     output_file_name_ = "-";
@@ -220,8 +218,8 @@ bool FileCompiler::ValidateOptions(size_t num_files) {
   // If we are outputting many object files, we cannot specify -o. Also
   // if we are preprocessing multiple files they must be to stdout.
   if (num_files > 1 &&
-      ((!preprocess_only_ && !needs_linking_ && !output_file_name_.empty()) ||
-       (preprocess_only_ && output_file_name_ != "-"))) {
+      ((!PreprocessingOnly() && !needs_linking_ && !output_file_name_.empty()) ||
+       (PreprocessingOnly() && output_file_name_ != "-"))) {
     std::cerr << "glslc: error: cannot specify -o when generating multiple"
                  " output files"
               << std::endl;
@@ -258,12 +256,12 @@ std::string FileCompiler::GetOutputFileName(std::string input_filename) {
 
 std::string FileCompiler::GetCandidateOutputFileName(
     std::string input_filename) {
-  if (!output_file_name_.empty() && !preprocess_only_) {
+  if (!output_file_name_.empty() && !PreprocessingOnly()) {
     return output_file_name_.str();
   }
 
   std::string extension = file_extension_;
-  if (preprocess_only_ || needs_linking_) {
+  if (PreprocessingOnly() || needs_linking_) {
     extension = ".spv";
   }
 
