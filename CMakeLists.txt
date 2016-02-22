@@ -24,6 +24,7 @@ add_subdirectory(third_party)
 add_subdirectory(libshaderc_util)
 add_subdirectory(libshaderc)
 add_subdirectory(glslc)
+add_subdirectory(examples)
 
 add_custom_target(build-version
   ${PYTHON_EXE}

@@ -25,6 +25,7 @@ for more information. See also the [`AUTHORS`](AUTHORS) and
 
 - `android_test/` : a small Android application to verify compilation
 - `cmake/`: CMake utility functions and configuration for Shaderc
+- `examples/`: Example programs
 - `glslc/`: an executable to compile GLSL to SPIR-V
 - `libshaderc/`: a library for compiling shader strings into SPIR-V
 - `libshaderc_util/`: a utility library used by multiple shaderc components
