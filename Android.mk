@@ -26,7 +26,33 @@ $(1)/libshaderc_combined.a: $(addprefix $(1)/, $(ALL_LIBS)) $(1)/combine.ar
 	@cd $(1) && $(2)ar -M < combine.ar && cd -
 	@$(2)objcopy --strip-debug $(1)/libshaderc_combined.a
 
-libshaderc_combined:$(1)/libshaderc_combined.a
+$(NDK_APP_LIBS_OUT)/$(APP_STL)/$(TARGET_ARCH_ABI)/libshaderc.a: \
+		$(1)/libshaderc_combined.a
+	$(call host-mkdir,$(NDK_APP_LIBS_OUT)/$(APP_STL)/$(TARGET_ARCH_ABI))
+	$(call host-cp,$(1)/libshaderc_combined.a \
+		$(NDK_APP_LIBS_OUT)/$(APP_STL)/$(TARGET_ARCH_ABI)/libshaderc.a)
+
+ifndef HEADER_TARGET
+HEADER_TARGET=1
+$(NDK_APP_LIBS_OUT)/../include/shaderc/shaderc.hpp: \
+		$(ROOT_SHADERC_PATH)/libshaderc/include/shaderc/shaderc.hpp
+	$(call host-mkdir,$(NDK_APP_LIBS_OUT)/../include/shaderc)
+	$(call host-cp,$(ROOT_SHADERC_PATH)/libshaderc/include/shaderc/shaderc.hpp \
+		$(NDK_APP_LIBS_OUT)/../include/shaderc/shaderc.hpp)
+
+$(NDK_APP_LIBS_OUT)/../include/shaderc/shaderc.h: \
+	$(ROOT_SHADERC_PATH)/libshaderc/include/shaderc/shaderc.h
+	$(call host-mkdir,$(NDK_APP_LIBS_OUT)/../include/shaderc)
+	$(call host-cp,$(ROOT_SHADERC_PATH)/libshaderc/include/shaderc/shaderc.h \
+		$(NDK_APP_LIBS_OUT)/../include/shaderc/shaderc.h)
+endif
+
+libshaderc_combined: \
+	$(NDK_APP_LIBS_OUT)/$(APP_STL)/$(TARGET_ARCH_ABI)/libshaderc.a
+
 endef
+libshaderc_combined: $(NDK_APP_LIBS_OUT)/../include/shaderc/shaderc.hpp \
+	$(NDK_APP_LIBS_OUT)/../include/shaderc/shaderc.h
 
 $(eval $(call gen_libshaderc,$(TARGET_OUT),$(TOOLCHAIN_PREFIX)))
+
