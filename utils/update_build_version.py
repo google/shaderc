@@ -30,13 +30,37 @@ import sys
 
 OUTFILE = 'build-version.inc'
 
+
+def command_output(cmd, dir):
+    """Runs a command in a directory and returns its standard output stream.
+
+    Captures the standard error stream.
+
+    Raises a RuntimeError if the command fails to launch or otherwise fails.
+    """
+    p = subprocess.Popen(cmd,
+                         cwd=dir,
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE)
+    (stdout, _) = p.communicate()
+    if p.returncode !=0:
+        raise RuntimeError("Failed to run %s in %s" % (cmd, dir))
+    return stdout
+
+
 def describe(dir):
-    """Runs 'git describe' in dir.  If successful, returns the output; otherwise,
-returns 'unknown hash, <date>'."""
+    """Returns a string describing the current Git HEAD version as descriptively
+    as possible.
+
+    Runs 'git describe', or alternately 'git rev-parse HEAD', in dir.  If
+    successful, returns the output; otherwise returns 'unknown hash, <date>'."""
     try:
-        return subprocess.check_output(["git", "describe"], cwd=dir).rstrip()
-    except subprocess.CalledProcessError:
-        return 'unknown hash, ' + datetime.date.today().isoformat()
+        return command_output(["git", "describe"], dir).rstrip()
+    except:
+        try:
+            return command_output(["git", "rev-parse", "HEAD"], dir).rstrip()
+        except:
+            return 'unknown hash, ' + datetime.date.today().isoformat()
 
 def main():
     if len(sys.argv) != 4:
