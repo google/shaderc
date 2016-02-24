@@ -56,7 +56,7 @@ Options:
   -c                Only run preprocess, compile, and assemble steps.
   -Dmacro[=defn]    Add an implicit macro definition.
   -E                Outputs only the results of the preprocessing step.
-                    Output defaults to standard out.
+                    Output defaults to standard output.
   -fshader-stage=<stage>
                     Treat subsequent input files as having stage <stage>.
                     Valid stages are vertex, fragment, tesscontrol, tesseval,
