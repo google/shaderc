@@ -34,55 +34,47 @@ namespace {
 
 // Prints the help message.
 void PrintHelp(std::ostream* out) {
-  *out << "glslc - Compile shaders into SPIR-V\n\n"
-       << "Usage: glslc [options] file...\n\n"
-       << "An input file of - represents standard input.\n\n"
-       << "Options:\n"
-       << "  -c                Only run preprocess, compile, and assemble"
-       << " steps.\n"
-       << "  -Dmacro[=defn]    Add an implicit macro definition.\n"
-       << "  -E                Outputs only the results of the preprocessing"
-       << " step.\n"
-       << "                    Output defaults to standard out.\n"
-       << "  -fshader-stage=<stage>\n"
-       << "                    Treat subsequent input files as having stage "
-       << "<stage>.\n"
-       << "                    Valid stages are vertex, fragment, tesscontrol, "
-       << "tesseval,\n"
-       << "                    geometry, and compute.\n"
-       << "  -g                Generate source-level debug information.\n"
-       << "                    Currently this option has no effect.\n"
-       << "  --help            Display available options.\n"
-       << "  --version         Display compiler version information.\n"
-       << "  -I <value>        Add directory to include search path.\n"
-       << "  -o <file>         Write output to <file>.\n"
-       << "                    A file name of '-' represents standard output.\n"
-       << "  -std=<value>      Version and profile for input files. Possible "
-       << "values\n"
-       << "                    are concatenations of version and profile, e.g. "
-       << "310es,\n"
-       << "                    450core, etc.\n"
-       << "  -M                Generate make dependencies. Implies -E and -w.\n"
-       << "  -MM               An alias for -M.\n"
-       << "  -MD               Generate make dependencies and compile.\n"
-       << "  -MF <file>        Write dependency output to the given file.\n"
-       << "  -MT <target>      Specify the target of the rule emitted by "
-       << "dependency\n"
-       << "                    generation.\n"
-       << "  -S                Only run preprocess and compilation steps.\n"
-       << "  --target-env=<environment>\n"
-       << "                    Set the target shader environment, and the"
-       << " semantics\n"
-       << "                    of warnings and errors. Valid values are "
-       << "'opengl',\n"
-       << "                    'opengl_compat' and 'vulkan'. The default value "
-       << "is 'vulkan'.\n"
-       << "  -w                Suppresses all warning messages.\n"
-       << "  -Werror           Treat all warnings as errors.\n"
-       << "  -x <language>     Treat subsequent input files as having type "
-       << "<language>.\n"
-       << "                    The only supported language is glsl."
-       << std::endl;
+  *out << R"(glslc - Compile shaders into SPIR-V
+
+Usage: glslc [options] file...
+
+An input file of - represents standard input.
+
+Options:
+  -c                Only run preprocess, compile, and assemble steps.
+  -Dmacro[=defn]    Add an implicit macro definition.
+  -E                Outputs only the results of the preprocessing step.
+                    Output defaults to standard output.
+  -fshader-stage=<stage>
+                    Treat subsequent input files as having stage <stage>.
+                    Valid stages are vertex, fragment, tesscontrol, tesseval,
+                    geometry, and compute.
+  -g                Generate source-level debug information.
+                    Currently this option has no effect.
+  --help            Display available options.
+  --version         Display compiler version information.
+  -I <value>        Add directory to include search path.
+  -o <file>         Write output to <file>.
+                    A file name of '-' represents standard output.
+  -std=<value>      Version and profile for input files. Possible values
+                    are concatenations of version and profile, e.g. 310es,
+                    450core, etc.
+  -M                Generate make dependencies. Implies -E and -w.
+  -MM               An alias for -M.
+  -MD               Generate make dependencies and compile.
+  -MF <file>        Write dependency output to the given file.
+  -MT <target>      Specify the target of the rule emitted by dependency
+                    generation.
+  -S                Only run preprocess and compilation steps.
+  --target-env=<environment>
+                    Set the target shader environment, and the semantics
+                    of warnings and errors. Valid values are 'opengl',
+                    'opengl_compat' and 'vulkan'. The default value is 'vulkan'.
+  -w                Suppresses all warning messages.
+  -Werror           Treat all warnings as errors.
+  -x <language>     Treat subsequent input files as having type <language>.
+                    The only supported language is glsl.
+)";
 }
 
 // Gets the option argument for the option at *index in argv in a way consistent
