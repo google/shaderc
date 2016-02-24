@@ -48,7 +48,8 @@ if (CMAKE_CONFIGURATION_TYPES)
 endif()
 
 add_custom_target(copy-tests-if-necessary ALL
-  COMMAND ${PYTHON_EXE} ${shaderc_SOURCE_DIR}/utils/copy-tests-if-necessary.py
+  COMMAND ${PYTHON_EXECUTABLE}
+    ${shaderc_SOURCE_DIR}/utils/copy-tests-if-necessary.py
     ${GLSLANG_TEST_SRC_DIR} ${GLSLANG_TEST_BIN_DIR} ${GLSLANG_CONFIGURATION_DIR}
   COMMENT "Copying and patching glslang tests if needed")
 
