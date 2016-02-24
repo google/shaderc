@@ -35,4 +35,7 @@ shaderc_add_tests(
 
 shaderc_add_asciidoc(glslc_doc_README README)
 
+install(TARGETS glslc_exe
+  RUNTIME DESTINATION bin)
+
 add_subdirectory(test)
