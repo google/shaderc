@@ -46,7 +46,9 @@ class HelpParameters(
 
     glslc_args = ['--help']
 
-    expected_stdout = '''Usage: glslc [options] file...
+    expected_stdout = '''glslc - Compile shaders into SPIR-V
+
+Usage: glslc [options] file...
 
 An input file of - represents standard input.
 

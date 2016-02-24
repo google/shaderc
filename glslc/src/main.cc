@@ -34,7 +34,8 @@ namespace {
 
 // Prints the help message.
 void PrintHelp(std::ostream* out) {
-  *out << "Usage: glslc [options] file...\n\n"
+  *out << "glslc - Compile shaders into SPIR-V\n\n"
+       << "Usage: glslc [options] file...\n\n"
        << "An input file of - represents standard input.\n\n"
        << "Options:\n"
        << "  -c                Only run preprocess, compile, and assemble"
