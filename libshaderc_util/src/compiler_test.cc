@@ -242,8 +242,8 @@ TEST_F(CompilerTest, AddMacroDefinitionNotNullTerminated) {
 // A convert-string-to-vector test case consists of 1) an input string; 2) an
 // expected vector after the conversion.
 struct ConvertStringToVectorTestCase {
-  const std::string input_str;
-  const std::vector<uint32_t> expected_output_vec;
+  std::string input_str;
+  std::vector<uint32_t> expected_output_vec;
 };
 
 // Test the shaderc_util::ConvertStringToVector() function. The content of the
