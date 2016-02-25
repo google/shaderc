@@ -662,7 +662,8 @@ class IncluderTestCase {
 // libshaderc C API.
 class TestIncluder {
  public:
-  TestIncluder(const FakeFS& fake_fs) : fake_fs_(fake_fs), responses_({}){};
+  explicit TestIncluder(const FakeFS& fake_fs)
+      : fake_fs_(fake_fs), responses_({}) {}
 
   // Get path and content from the fake file system.
   shaderc_includer_response* GetInclude(const char* filename) {

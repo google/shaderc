@@ -96,7 +96,8 @@ EShMessages GetMessageRules(shaderc_target_env target) {
 // case.
 class StageDeducer {
  public:
-  StageDeducer(shaderc_shader_kind kind = shaderc_glsl_infer_from_source)
+  explicit StageDeducer(
+      shaderc_shader_kind kind = shaderc_glsl_infer_from_source)
       : kind_(kind), error_(false){};
   // The method that underlying glslang will call to determine the shader stage
   // to be used in current compilation. It is called only when there is neither
@@ -201,7 +202,8 @@ class InternalFileIncluder : public shaderc_util::CountingIncluder {
 }  // anonymous namespace
 
 struct shaderc_compile_options {
-  shaderc_compile_options(){};
+  shaderc_compile_options() : includer_user_data(nullptr) {}
+
   shaderc_util::Compiler compiler;
   shaderc_includer_response_get_fn get_includer_response;
   shaderc_includer_response_release_fn release_includer_response;

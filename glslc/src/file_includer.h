@@ -16,9 +16,9 @@
 #define GLSLC_FILE_INCLUDER_H_
 
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
-#include <unordered_set>
 
 #include "libshaderc_util/file_finder.h"
 #include "shaderc/shaderc.hpp"
@@ -32,7 +32,7 @@ namespace glslc {
 // string, and error message will be passed to the content field.
 class FileIncluder : public shaderc::CompileOptions::IncluderInterface {
  public:
-  FileIncluder(const shaderc_util::FileFinder* file_finder)
+  explicit FileIncluder(const shaderc_util::FileFinder* file_finder)
       : file_finder_(*file_finder) {}
   shaderc_includer_response* GetInclude(const char* filename) override;
   void ReleaseInclude(shaderc_includer_response* data) override;

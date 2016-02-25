@@ -27,17 +27,20 @@ using testing::IsEmpty;
 
 class FormatMap : public testing::Test {
  public:
-  FormatMap() {
-    map1 = std::map<std::string, int>{{"one", 1}};
-    umap1 = std::unordered_map<std::string, int>{map1.begin(), map1.end()};
-    map8 = std::map<int, std::string>{{1, "one"},   {2, "two"},  {3, "three"},
-                                      {4, "four"},  {5, "five"}, {6, "six"},
-                                      {7, "seven"}, {8, "eight"}};
-
-    umap8 = std::unordered_map<int, std::string>{map8.begin(), map8.end()};
-    mmap = std::multimap<int, int>{{1, 100}, {1, 200}, {2, 100}, {2, 200}};
-    ummap = std::unordered_multimap<int, int>{mmap.begin(), mmap.end()};
-  }
+  FormatMap()
+      : map1({{"one", 1}}),
+        umap1({map1.begin(), map1.end()}),
+        map8({{1, "one"},
+              {2, "two"},
+              {3, "three"},
+              {4, "four"},
+              {5, "five"},
+              {6, "six"},
+              {7, "seven"},
+              {8, "eight"}}),
+        umap8({map8.begin(), map8.end()}),
+        mmap({{1, 100}, {1, 200}, {2, 100}, {2, 200}}),
+        ummap({mmap.begin(), mmap.end()}) {}
 
  protected:
   std::map<int, int> empty_map;

@@ -71,12 +71,12 @@ const char kOpenGLVertexShaderDeducibleStage[] =
 // A shader that needs valueless macro predefinition E, to be compiled
 // successfully.
 const std::string kValuelessPredefinitionShader =
-      "#version 140\n"
-      "#ifdef E\n"
-      "void main(){}\n"
-      "#else\n"
-      "#error\n"
-      "#endif";
+    "#version 140\n"
+    "#ifdef E\n"
+    "void main(){}\n"
+    "#else\n"
+    "#error\n"
+    "#endif";
 
 // A CountingIncluder that never returns valid content for a requested
 // file inclusion.
@@ -93,15 +93,15 @@ class DummyCountingIncluder : public shaderc_util::CountingIncluder {
 class CompilerTest : public testing::Test {
  public:
   // Returns true if the given compiler successfully compiles the given shader
-  // source for the given shader stage to the specified output type.  No includes
-  // are permitted, and shader stage deduction falls back to an invalid shader stage.
+  // source for the given shader stage to the specified output type.  No
+  // includes are permitted, and shader stage deduction falls back to an invalid
+  // shader stage.
   bool SimpleCompilationSucceedsForOutputType(
       std::string source, EShLanguage stage, Compiler::OutputType output_type) {
     std::function<EShLanguage(std::ostream*, const shaderc_util::string_piece&)>
         stage_callback = [](std::ostream*, const shaderc_util::string_piece&) {
           return EShLangCount;
         };
-    std::stringstream out;
     std::stringstream errors;
     size_t total_warnings = 0;
     size_t total_errors = 0;
