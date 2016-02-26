@@ -126,6 +126,35 @@ Optionally, the following tools may be installed on any OS:
      `asciidoctor` for syntax highlighting.
  - [`nosetests`](https://nose.readthedocs.org): for testing the Python code.
 
+### Building and running Shderc using Docker
+
+Please make sure you have the Docker engine
+[installed](https://docs.docker.com/engine/installation/) on your machine.
+
+To create a Docker image containing Shaderc command line tools, issue the
+following command in `${SOURCE_DIR}`: `docker build -t <IMAGE-NAME> .`.
+The created image will have all the command line tools installed at
+`/usr/local` interally, and a data volume mounted at `/code`.
+
+Assume `<IMAGE-NAME>` is `shaderc/shaderc` from now on.
+
+To invoke a tool from the above created image in a Docker container:
+
+```bash
+docker run shaderc/shaderc glslc --version
+```
+
+Alternatively, you can mount a host directory (e.g., `example`) containing
+the shaders you want to manipulate and run different kinds of tools via
+an interactive shell in the container:
+
+```bash
+$ docker run -i -t -v `pwd`/example:/code shaderc/shaderc
+/code $ ls
+test.vert
+/code $ glslc -c -o - test.vert | spirv-dis
+```
+
 ## Bug tracking
 
 We track bugs using GitHub -- click on the "Issues" button on
