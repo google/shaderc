@@ -30,6 +30,14 @@ function(shaderc_default_compile_options TARGET)
   shaderc_default_c_compile_options(${TARGET})
   if (NOT "${MSVC}")
     target_compile_options(${TARGET} PRIVATE -std=c++11)
+    if (NOT SHADERC_ENABLE_SHARED_CRT)
+      if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+	# For MinGW cross compile, statically link to the C++ runtime
+	# But it still depends on MSVCRT.dll.
+	set_target_properties(${TARGET} PROPERTIES LINK_FLAGS
+			      -static -static-libgcc -static-libstdc++)
+      endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    endif(NOT SHADERC_ENABLE_SHARED_CRT)
   endif()
 endfunction(shaderc_default_compile_options)
 
@@ -68,34 +76,36 @@ endfunction()
 # INCLUDE_DIRS: (optional) a list of include directories to be searched
 #               for header files.
 function(shaderc_add_tests)
-  cmake_parse_arguments(PARSED_ARGS
-    ""
-    "TEST_PREFIX"
-    "TEST_NAMES;LINK_LIBS;INCLUDE_DIRS"
-    ${ARGN})
-  if (NOT PARSED_ARGS_TEST_NAMES)
-    message(FATAL_ERROR "Tests must have a target")
-  endif()
-  if (NOT PARSED_ARGS_TEST_PREFIX)
-    message(FATAL_ERROR "Tests must have a prefix")
-  endif()
-  foreach(TARGET ${PARSED_ARGS_TEST_NAMES})
-    set(TEST_NAME ${PARSED_ARGS_TEST_PREFIX}_${TARGET}_test)
-    add_executable(${TEST_NAME} src/${TARGET}_test.cc)
-    shaderc_default_compile_options(${TEST_NAME})
-    if (PARSED_ARGS_LINK_LIBS)
-      target_link_libraries(${TEST_NAME} PRIVATE
-        ${PARSED_ARGS_LINK_LIBS})
+  if(${SHADERC_ENABLE_TESTS})
+    cmake_parse_arguments(PARSED_ARGS
+      ""
+      "TEST_PREFIX"
+      "TEST_NAMES;LINK_LIBS;INCLUDE_DIRS"
+      ${ARGN})
+    if (NOT PARSED_ARGS_TEST_NAMES)
+      message(FATAL_ERROR "Tests must have a target")
     endif()
-    if (PARSED_ARGS_INCLUDE_DIRS)
-      target_include_directories(${TEST_NAME} PRIVATE
-        ${PARSED_ARGS_INCLUDE_DIRS})
+    if (NOT PARSED_ARGS_TEST_PREFIX)
+      message(FATAL_ERROR "Tests must have a prefix")
     endif()
-    shaderc_use_gmock(${TEST_NAME})
-    add_test(
-      NAME ${PARSED_ARGS_TEST_PREFIX}_${TARGET}
-      COMMAND ${TEST_NAME})
-  endforeach()
+    foreach(TARGET ${PARSED_ARGS_TEST_NAMES})
+      set(TEST_NAME ${PARSED_ARGS_TEST_PREFIX}_${TARGET}_test)
+      add_executable(${TEST_NAME} src/${TARGET}_test.cc)
+      shaderc_default_compile_options(${TEST_NAME})
+      if (PARSED_ARGS_LINK_LIBS)
+	target_link_libraries(${TEST_NAME} PRIVATE
+	  ${PARSED_ARGS_LINK_LIBS})
+      endif()
+      if (PARSED_ARGS_INCLUDE_DIRS)
+	target_include_directories(${TEST_NAME} PRIVATE
+	  ${PARSED_ARGS_INCLUDE_DIRS})
+      endif()
+      shaderc_use_gmock(${TEST_NAME})
+      add_test(
+	NAME ${PARSED_ARGS_TEST_PREFIX}_${TARGET}
+	COMMAND ${TEST_NAME})
+    endforeach()
+  endif(${SHADERC_ENABLE_TESTS})
 endfunction(shaderc_add_tests)
 
 # Finds all transitive static library dependencies of a given target

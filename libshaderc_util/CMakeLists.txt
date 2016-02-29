@@ -38,8 +38,10 @@ shaderc_add_tests(
     io
     message)
 
-target_include_directories(shaderc_util_counting_includer_test
-  PRIVATE ${glslang_SOURCE_DIR})
+if(${SHADERC_ENABLE_TESTS})
+  target_include_directories(shaderc_util_counting_includer_test
+    PRIVATE ${glslang_SOURCE_DIR})
+endif()
 
 shaderc_add_tests(
   TEST_PREFIX shaderc_util
@@ -52,7 +54,9 @@ shaderc_add_tests(
 add_custom_target(testdata COMMAND
   ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/testdata/copy-to-build.cmake)
 
-add_dependencies(shaderc_util_file_finder_test testdata)
-add_dependencies(shaderc_util_io_test testdata)
+if(${SHADERC_ENABLE_TESTS})
+  add_dependencies(shaderc_util_file_finder_test testdata)
+  add_dependencies(shaderc_util_io_test testdata)
+endif()
 
 add_definitions(-DCURRENT_DIR="${CMAKE_CURRENT_BINARY_DIR}")

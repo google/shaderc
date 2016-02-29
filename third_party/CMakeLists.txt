@@ -2,11 +2,14 @@
 set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS -w)
 
 # Configure third party projects.
-if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/googletest)
-  add_subdirectory(googletest)
-endif()
-if (NOT TARGET gmock)
-  message(FATAL_ERROR "gmock was not found - required for tests")
+
+if(${SHADERC_ENABLE_TESTS})
+  if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/googletest)
+    add_subdirectory(googletest)
+  endif()
+  if (NOT TARGET gmock)
+    message(FATAL_ERROR "gmock was not found - required for tests")
+  endif()
 endif()
 
 set(OLD_PLATFORM_TOOLSET ${CMAKE_GENERATOR_TOOLSET})
