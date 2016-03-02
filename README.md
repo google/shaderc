@@ -93,6 +93,10 @@ After a successful build, you should have a `glslc` executable somewhere under
 the `$BUILD_DIR/glslc/` directory, as well as a `libshaderc` library somewhere
 under the `$BUILD_DIR/libshaderc/` directory.
 
+The default behavior on MSVC is to link with the static CRT. If you would like
+to change this behavior `-DSHADERC_ENABLE_SHARED_CRT` may be passed on the
+cmake configure line.
+
 See [the libshaderc README](libshaderc/README.md) for more on using the library
 API in your project.
 
