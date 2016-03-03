@@ -175,12 +175,12 @@ void shaderc_compile_options_set_forced_version_profile(
 //  go to /path/to/include/b to find the file b.
 //  This needs context info from compiler to client includer, and may needs
 //  interface changes.
-struct shaderc_includer_response {
+typedef struct {
   const char* path;
   size_t path_length;
   const char* content;
   size_t content_length;
-};
+} shaderc_includer_response;
 
 // A function mapping a #include argument to its includer response.  The
 // includer retains memory ownership of the response object.
