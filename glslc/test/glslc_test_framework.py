@@ -45,6 +45,8 @@ If --leave-output was not specified, all temporary files and directories will
 be deleted.
 """
 
+from __future__ import print_function
+
 import argparse
 import fnmatch
 import inspect
@@ -210,11 +212,11 @@ class TestManager:
         self.num_failures += 0 if success else 1
         counter_string = str(
             self.num_successes + self.num_failures) + '/' + str(self.num_tests)
-        print ('%-10s %-40s ' % (counter_string, test_case.test.name()) +
-               ('Passed' if success else '-Failed-'))
+        print('%-10s %-40s ' % (counter_string, test_case.test.name()) +
+              ('Passed' if success else '-Failed-'))
         if not success:
-            print ' '.join(test_case.command)
-            print message
+            print(' '.join(test_case.command))
+            print(message)
 
     def add_test(self, testsuite, test):
         """Add this to the current list of test cases."""

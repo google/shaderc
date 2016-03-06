@@ -23,6 +23,8 @@
 # directory's "git describe" output enclosed in double quotes and appropriately
 # escaped.
 
+from __future__ import print_function
+
 import datetime
 import os.path
 import subprocess
@@ -64,12 +66,16 @@ def describe(dir):
 
 def main():
     if len(sys.argv) != 4:
-        print 'usage: {0} <shaderc_dir> <spirv-tools_dir> <glslang_dir>'.format(sys.argv[0])
+        print('usage: {0} <shaderc_dir> <spirv-tools_dir> <glslang_dir>'.format(sys.argv[0]))
         sys.exit(1)
 
-    new_content = ('"shaderc ' + describe(sys.argv[1]).replace('"', '\\"') + '\\n"\n' +
-                   '"spirv-tools ' + describe(sys.argv[2]).replace('"', '\\"') + '\\n"\n' +
-                   '"glslang ' + describe(sys.argv[3]).replace('"', '\\"') + '\\n"\n')
+    projects = ['shaderc', 'spirv-tools', 'glslang']
+    tags = [
+        describe(p).decode('ascii').replace('"', '\\"')
+        for p in sys.argv[1:]]
+    new_content = ''.join([
+        '"{} {}\\n"\n'.format(p, t)
+        for (p, t) in zip(projects, tags)])
     if os.path.isfile(OUTFILE) and new_content == open(OUTFILE, 'r').read():
         sys.exit(0)
     open(OUTFILE, 'w').write(new_content)
