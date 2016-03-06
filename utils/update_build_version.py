@@ -45,8 +45,8 @@ def command_output(cmd, dir):
                          stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
     (stdout, _) = p.communicate()
-    if p.returncode !=0:
-        raise RuntimeError("Failed to run %s in %s" % (cmd, dir))
+    if p.returncode != 0:
+        raise RuntimeError('Failed to run %s in %s' % (cmd, dir))
     return stdout
 
 
@@ -57,16 +57,18 @@ def describe(dir):
     Runs 'git describe', or alternately 'git rev-parse HEAD', in dir.  If
     successful, returns the output; otherwise returns 'unknown hash, <date>'."""
     try:
-        return command_output(["git", "describe"], dir).rstrip()
+        return command_output(['git', 'describe'], dir).rstrip()
     except:
         try:
-            return command_output(["git", "rev-parse", "HEAD"], dir).rstrip()
+            return command_output(['git', 'rev-parse', 'HEAD'], dir).rstrip()
         except:
             return 'unknown hash, ' + datetime.date.today().isoformat()
 
+
 def main():
     if len(sys.argv) != 4:
-        print('usage: {0} <shaderc_dir> <spirv-tools_dir> <glslang_dir>'.format(sys.argv[0]))
+        print(
+            'usage: {0} <shaderc_dir> <spirv-tools_dir> <glslang_dir>'.format(sys.argv[0]))
         sys.exit(1)
 
     projects = ['shaderc', 'spirv-tools', 'glslang']
