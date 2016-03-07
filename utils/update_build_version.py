@@ -73,6 +73,11 @@ def main():
 
     projects = ['shaderc', 'spirv-tools', 'glslang']
     tags = [
+        # decode() is needed here for Python3 compatibility. In Python2,
+        # str and bytes are the same type, but not in Python3.
+        # Popen.communicate() returns a bytes instance, which needs to be
+        # decoded into text data first in Python3. And this decode() won't
+        # hurt Python2.
         describe(p).decode('ascii').replace('"', '\\"')
         for p in sys.argv[1:]]
     new_content = ''.join([
