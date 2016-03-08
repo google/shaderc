@@ -154,6 +154,7 @@ void shaderc_compile_options_add_macro_definition(
 void shaderc_compile_options_set_generate_debug_info(
     shaderc_compile_options_t options);
 
+
 // Forces the GLSL language version and profile to a given pair. The version
 // number is the same as would appear in the #version annotation in the source.
 // Version and profile specified here overrides the #version annotation in the
@@ -162,44 +163,57 @@ void shaderc_compile_options_set_generate_debug_info(
 void shaderc_compile_options_set_forced_version_profile(
     shaderc_compile_options_t options, int version, shaderc_profile profile);
 
-// Response to a request for #include content.  "Includer" is client code that
-// resolves #include arguments into objects of this type.
-//
-// TODO: File inclusion needs to be context-aware.
-// e.g.
-//  In file: /path/to/main_shader.vert:
-//  #include "include/a"
-//  In file: /path/to/include/a":
-//  #include "b"
-//  When compiling /path/to/main_shader.vert, the compiler should be able to
-//  go to /path/to/include/b to find the file b.
-//  This needs context info from compiler to client includer, and may needs
-//  interface changes.
-typedef struct {
-  const char* path;
-  size_t path_length;
+// Source text inclusion via #include is supported with a pair of callbacks
+// to an "includer" on the client side.  The first callback processes an
+// inclusion request, and returns an include result.  The includer owns
+// the contents of the result, and those contents must remain valid until the
+// second callback is invoked to release the result.  Both callbacks take a
+// user_data argument to specify the client context.
+
+// An include result.
+typedef struct shaderc_include_result {
+  // The name of the source file.  The name should be fully resolved
+  // in the sense that it should be a unique name in the context of the
+  // includer.  For example, if the includer maps source names to files in
+  // a filesystem, then this name should be the absolute path of the file.
+  const char* source_name;
+  size_t source_name_length;
+  // The text contents of the source file.
   const char* content;
   size_t content_length;
-} shaderc_includer_response;
+  // User data to be passed along with this request.
+  void* user_data;
+} shaderc_include_result;
 
-// A function mapping a #include argument to its includer response.  The
-// includer retains memory ownership of the response object.
-typedef shaderc_includer_response* (*shaderc_includer_response_get_fn)(
-    void* user_data, const char* filename);
+// The kinds of include requests.
+enum shaderc_include_type {
+  shaderc_include_type_relative,  // E.g. #include "source"
+  shaderc_include_type_standard   // E.g. #include <source>
+};
 
-// A function to destroy an includer response when it's no longer needed.
-typedef void (*shaderc_includer_response_release_fn)(
-    void* user_data, shaderc_includer_response* data);
+// An includer callback type for mapping an #include request to an include
+// result.  The user_data parameter specifies the client context.  The
+// requested_source parameter specifies the name of the source being requested.
+// The type parameter specifies the kind of inclusion request being made.
+// The requesting_source parameter specifies the name of the source containing
+// the #include request.  The includer owns the result object and its contents,
+// and both must remain valid until the release callback is called on the result object.
+typedef shaderc_include_result* (*shaderc_include_resolve_fn)(
+    void* user_data,
+    const char* requested_source,
+    int type,
+    const char* requesting_source,
+    size_t include_depth);
 
-// Sets includer callback functions. When a compiler encounters a #include in
-// the source, it will query the includer by invoking getter on user_data and
-// the #include argument.  The includer must respond with a
-// shaderc_includer_response object that remains valid until releaser is invoked
-// on it.  When the compiler is done processing the response, it will invoke
-// releaser on user_data and the response pointer.
-void shaderc_compile_options_set_includer_callbacks(
-    shaderc_compile_options_t options, shaderc_includer_response_get_fn getter,
-    shaderc_includer_response_release_fn releaser, void* user_data);
+// An includer callback type for destroying an include result.
+typedef void (*shaderc_include_result_release_fn)(
+    void* user_data, shaderc_include_result* include_result);
+
+// Sets includer callback functions.
+void shaderc_compile_options_set_include_callbacks(
+    shaderc_compile_options_t options, shaderc_include_resolve_fn resolver,
+    shaderc_include_result_release_fn result_releaser, void* user_data);
+
 
 // Sets the compiler mode to suppress warnings, overriding warnings-as-errors
 // mode. When both suppress-warnings and warnings-as-errors modes are
@@ -267,7 +281,6 @@ shaderc_compilation_result_t shaderc_compile_into_preprocessed_text(
     size_t source_text_size, shaderc_shader_kind shader_kind,
     const char* input_file_name, const char* entry_point_name,
     const shaderc_compile_options_t additional_options);
-
 // The following functions, operating on shaderc_compilation_result_t objects,
 // offer only the basic thread-safety guarantee.
 

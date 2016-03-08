@@ -83,10 +83,14 @@ const std::string kValuelessPredefinitionShader =
 class DummyCountingIncluder : public shaderc_util::CountingIncluder {
  private:
   // Returns a pair of empty strings.
-  virtual std::pair<std::string, std::string> include_delegate(
-      const char*) const override {
-    return std::make_pair(std::string(), std::string());
+  virtual glslang::TShader::Includer::IncludeResult* include_delegate(
+      const char*, glslang::TShader::Includer::IncludeType,
+      const char*,
+      size_t) override {
+    return nullptr;
   }
+  virtual void release_delegate(
+      glslang::TShader::Includer::IncludeResult*) override {}
 };
 
 // A test fixture for compiling GLSL shaders.
@@ -107,9 +111,11 @@ class CompilerTest : public testing::Test {
     size_t total_errors = 0;
     shaderc_util::GlslInitializer initializer;
     bool result = false;
+    DummyCountingIncluder dummy_includer;
     std::tie(result, std::ignore, std::ignore) = compiler_.Compile(
-        source, stage, "shader", stage_callback, DummyCountingIncluder(),
-        output_type, &errors, &total_warnings, &total_errors, &initializer);
+        source, stage, "shader", stage_callback, dummy_includer,
+        Compiler::OutputType::SpirvBinary, &errors, &total_warnings,
+        &total_errors, &initializer);
     errors_ = errors.str();
     return result;
   }
@@ -120,7 +126,6 @@ class CompilerTest : public testing::Test {
     return SimpleCompilationSucceedsForOutputType(
         source, stage, Compiler::OutputType::SpirvBinary);
   }
-
  protected:
   Compiler compiler_;
   // The error string from the most recent compilation.
@@ -140,7 +145,6 @@ TEST_F(CompilerTest, SimpleVertexShaderPreprocessesSuccessfully) {
   EXPECT_TRUE(SimpleCompilationSucceedsForOutputType(
       kVertexShader, EShLangVertex, Compiler::OutputType::PreprocessedText));
 }
-
 TEST_F(CompilerTest, BadVertexShaderFailsCompilation) {
   EXPECT_FALSE(SimpleCompilationSucceeds(" bogus ", EShLangVertex));
 }

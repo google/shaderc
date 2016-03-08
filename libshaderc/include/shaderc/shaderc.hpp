@@ -166,27 +166,34 @@ class CompileOptions {
   // A C++ version of the libshaderc includer interface.
   class IncluderInterface {
    public:
-    // Handles shaderc_includer_response_get_fn callbacks.
-    virtual shaderc_includer_response* GetInclude(const char* filename) = 0;
+    // Handles shaderc_include_resolver_fn callbacks.
+    virtual shaderc_include_result* GetInclude(
+        const char* requested_source, shaderc_include_type type,
+        const char* requesting_source,
+        size_t include_depth) = 0;
 
-    // Handles shaderc_includer_response_release_fn callbacks.
-    virtual void ReleaseInclude(shaderc_includer_response* data) = 0;
+    // Handles shaderc_include_result_release_fn callbacks.
+    virtual void ReleaseInclude(shaderc_include_result* data) = 0;
   };
 
-  // Sets the includer instance for libshaderc to call on during compilation, as
-  // described in shaderc_compile_options_set_includer_callbacks().  Callbacks
+  // Sets the includer instance for libshaderc to call during compilation, as
+  // described in shaderc_compile_options_set_include_callbacks().  Callbacks
   // are routed to this includer's methods.
   void SetIncluder(std::unique_ptr<IncluderInterface>&& includer) {
     includer_ = std::move(includer);
-    shaderc_compile_options_set_includer_callbacks(
+    shaderc_compile_options_set_include_callbacks(
         options_,
-        [](void* user_data, const char* filename) {
+        [](void* user_data, const char* requested_source,
+           int type, const char* requesting_source,
+           size_t include_depth) {
           auto* includer = static_cast<IncluderInterface*>(user_data);
-          return includer->GetInclude(filename);
+          return includer->GetInclude(requested_source,
+                                      (shaderc_include_type)type,
+                                      requesting_source, include_depth);
         },
-        [](void* user_data, shaderc_includer_response* data) {
+        [](void* user_data, shaderc_include_result* include_result) {
           auto* includer = static_cast<IncluderInterface*>(user_data);
-          return includer->ReleaseInclude(data);
+          return includer->ReleaseInclude(include_result);
         },
         includer_.get());
   }

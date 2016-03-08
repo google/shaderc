@@ -99,7 +99,6 @@ shaderc_compilation_result_t MakeCompilationResult(
   return shaderc_compile_into_spv(compiler, shader.c_str(), shader.size(), kind,
                                   input_file_name, "", options);
 }
-
 // RAII class for shaderc_compilation_result.
 class Compilation {
  public:
@@ -405,6 +404,7 @@ TEST_F(CompileStringWithOptionsTest, DisassemblyOption) {
                         options_.get(), OutputType::SpirvAssemblyText);
   EXPECT_THAT(disassembly_text, HasSubstr("Capability Shader"));
   EXPECT_THAT(disassembly_text, HasSubstr("MemoryModel"));
+
 }
 
 TEST_F(CompileStringWithOptionsTest, DisassembleMinimalShader) {
@@ -668,32 +668,33 @@ class TestIncluder {
       : fake_fs_(fake_fs), responses_({}) {}
 
   // Get path and content from the fake file system.
-  shaderc_includer_response* GetInclude(const char* filename) {
-    responses_.emplace_back(shaderc_includer_response{
+  shaderc_include_result* GetInclude(const char* filename) {
+    responses_.emplace_back(shaderc_include_result{
         filename, strlen(filename), fake_fs_.at(std::string(filename)).c_str(),
         fake_fs_.at(std::string(filename)).size()});
     return &responses_.back();
   }
 
   // Response data is owned as private property, no need to release explicitly.
-  void ReleaseInclude(shaderc_includer_response*) {}
+  void ReleaseInclude(shaderc_include_result*) {}
 
   // Wrapper for the corresponding member function.
-  static shaderc_includer_response* GetIncluderResponseWrapper(
-      void* user_data, const char* filename) {
+  static shaderc_include_result* GetIncluderResponseWrapper(
+      void* user_data, const char* filename, int,
+      const char* includer, size_t include_depth) {
     return static_cast<TestIncluder*>(user_data)->GetInclude(filename);
   }
 
   // Wrapper for the corresponding member function.
   static void ReleaseIncluderResponseWrapper(void* user_data,
-                                             shaderc_includer_response* data) {
+                                             shaderc_include_result* data) {
     return static_cast<TestIncluder*>(user_data)->ReleaseInclude(data);
   }
 
  private:
   // Includer response data is stored as private property.
   const FakeFS& fake_fs_;
-  std::vector<shaderc_includer_response> responses_;
+  std::vector<shaderc_include_result> responses_;
 };
 
 using IncluderTests = testing::TestWithParam<IncluderTestCase>;
@@ -706,7 +707,7 @@ TEST_P(IncluderTests, SetIncluderCallbacks) {
   TestIncluder includer(fs);
   Compiler compiler;
   compile_options_ptr options(shaderc_compile_options_initialize());
-  shaderc_compile_options_set_includer_callbacks(
+  shaderc_compile_options_set_include_callbacks(
       options.get(), TestIncluder::GetIncluderResponseWrapper,
       TestIncluder::ReleaseIncluderResponseWrapper, &includer);
 
@@ -725,7 +726,7 @@ TEST_P(IncluderTests, SetIncluderCallbacksClonedOptions) {
   TestIncluder includer(fs);
   Compiler compiler;
   compile_options_ptr options(shaderc_compile_options_initialize());
-  shaderc_compile_options_set_includer_callbacks(
+  shaderc_compile_options_set_include_callbacks(
       options.get(), TestIncluder::GetIncluderResponseWrapper,
       TestIncluder::ReleaseIncluderResponseWrapper, &includer);
 

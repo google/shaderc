@@ -642,19 +642,23 @@ class TestIncluder : public shaderc::CompileOptions::IncluderInterface {
       : fake_fs_(fake_fs), responses_({}) {}
 
   // Get path and content from the fake file system.
-  shaderc_includer_response* GetInclude(const char* filename) override {
-    responses_.emplace_back(shaderc_includer_response{
-        filename, strlen(filename), fake_fs_.at(std::string(filename)).c_str(),
-        fake_fs_.at(std::string(filename)).size()});
+  shaderc_include_result* GetInclude(const char* requested_source,
+                                     shaderc_include_type type,
+                                     const char* requesting_source,
+                                     size_t include_depth) override {
+    responses_.emplace_back(shaderc_include_result{
+        requested_source, strlen(requested_source),
+        fake_fs_.at(std::string(requested_source)).c_str(),
+        fake_fs_.at(std::string(requested_source)).size()});
     return &responses_.back();
   }
 
   // Response data is owned as private property, no need to release explicitly.
-  void ReleaseInclude(shaderc_includer_response*) override {}
+  void ReleaseInclude(shaderc_include_result*) override {}
 
  private:
   const FakeFS& fake_fs_;
-  std::vector<shaderc_includer_response> responses_;
+  std::vector<shaderc_include_result> responses_;
 };
 
 using IncluderTests = testing::TestWithParam<IncluderTestCase>;

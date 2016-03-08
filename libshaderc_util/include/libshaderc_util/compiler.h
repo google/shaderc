@@ -111,6 +111,7 @@ class Compiler {
         generate_debug_info_(false),
         message_rules_(GetDefaultRules()) {}
 
+
   // Requests that the compiler place debug information into the object code,
   // such as identifier names and line numbers.
   void SetGenerateDebugInfo();
@@ -143,7 +144,6 @@ class Compiler {
     SpirvAssemblyText,  // Assembly syntax defined by the SPIRV-Tools project.
     PreprocessedText,   // Preprocessed source code.
   };
-
   // Compiles the shader source in the input_source_string parameter.
   //
   // If the forced_shader stage parameter is not EShLangCount then
@@ -179,7 +179,7 @@ class Compiler {
       const std::function<EShLanguage(
           std::ostream* error_stream,
           const shaderc_util::string_piece& error_tag)>& stage_callback,
-      const CountingIncluder& includer, OutputType output_type,
+      CountingIncluder& includer, OutputType output_type,
       std::ostream* error_stream, size_t* total_warnings, size_t* total_errors,
       GlslInitializer* initializer) const;
 
@@ -208,7 +208,7 @@ class Compiler {
       const std::string& error_tag,
       const shaderc_util::string_piece& shader_source,
       const shaderc_util::string_piece& shader_preamble,
-      const CountingIncluder& includer) const;
+      CountingIncluder& includer) const;
 
   // Cleans up the preamble in a given preprocessed shader.
   //
@@ -263,6 +263,7 @@ class Compiler {
   EProfile default_profile_;
   // When true, use the default version and profile from eponymous data members.
   bool force_version_profile_;
+
 
   // Macro definitions that must be available to reference in the shader source.
   MacroDictionary predefined_macros_;

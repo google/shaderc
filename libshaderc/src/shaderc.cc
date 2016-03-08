@@ -23,6 +23,7 @@
 #include "SPIRV/spirv.hpp"
 
 #include "libshaderc_util/compiler.h"
+#include "libshaderc_util/counting_includer.h"
 #include "libshaderc_util/resources.h"
 #include "libshaderc_util/version_profile.h"
 
@@ -160,54 +161,92 @@ class StageDeducer {
 // A bridge between the libshaderc includer and libshaderc_util includer.
 class InternalFileIncluder : public shaderc_util::CountingIncluder {
  public:
-  InternalFileIncluder(
-      const shaderc_includer_response_get_fn get_includer_response,
-      const shaderc_includer_response_release_fn release_includer_response,
-      void* user_data)
-      : get_includer_response_(get_includer_response),
-        release_includer_response_(release_includer_response),
+  InternalFileIncluder(const shaderc_include_resolve_fn resolver,
+                       const shaderc_include_result_release_fn result_releaser,
+                       void* user_data)
+      : resolver_(resolver),
+        result_releaser_(result_releaser),
         user_data_(user_data){};
   InternalFileIncluder()
-      : get_includer_response_(nullptr),
-        release_includer_response_(nullptr),
-        user_data_(nullptr){};
+      : resolver_(nullptr), result_releaser_(nullptr), user_data_(nullptr){};
 
  private:
   // Check the validity of the callbacks.
   bool AreValidCallbacks() const {
-    return get_includer_response_ != nullptr &&
-           release_includer_response_ != nullptr;
+    return resolver_ != nullptr &&
+           result_releaser_ != nullptr;
   }
 
-  // Find filename in search path and returns its contents.
-  std::pair<std::string, std::string> include_delegate(
-      const char* filename) const override {
-    if (!AreValidCallbacks())
-      return std::make_pair<std::string, std::string>(
-          "", "unexpected include directive");
-    shaderc_includer_response* data =
-        get_includer_response_(user_data_, filename);
-    std::pair<std::string, std::string> entry =
-        std::make_pair(std::string(data->path, data->path_length),
-                       std::string(data->content, data->content_length));
-    release_includer_response_(user_data_, data);
-    return entry;
+  // Maps a shaderc_include_type to the correpsonding Glslang include type.
+  shaderc_include_type GetIncludeType(
+      glslang::TShader::Includer::IncludeType type) {
+    switch (type) {
+      case glslang::TShader::Includer::EIncludeRelative:
+        return shaderc_include_type_relative;
+      case glslang::TShader::Includer::EIncludeStandard:
+        return shaderc_include_type_standard;
+      default:
+        break;
+    }
+    assert(0 && "Unhandled shaderc_include_type");
+    return shaderc_include_type_relative;
   }
 
-  const shaderc_includer_response_get_fn get_includer_response_;
-  const shaderc_includer_response_release_fn release_includer_response_;
+  // Resolves an include request for the requested source of the given
+  // type in the context of the specified requesting source.  On success,
+  // returns a newly allocated IncludeResponse containing the fully resolved
+  // name of the requested source and the contents of that source.
+  // On failure, returns a newly allocated IncludeResponse where the
+  // resolved name member is an empty string, and the contents members
+  // contains error details.
+  virtual glslang::TShader::Includer::IncludeResult* include_delegate(
+      const char* requested_source,
+      glslang::TShader::Includer::IncludeType type,
+      const char* requesting_source,
+      size_t include_depth) override {
+    if (!AreValidCallbacks()) {
+      const char kUnexpectedIncludeError[] =
+          "#error unexpected include directive";
+      return new glslang::TShader::Includer::IncludeResult{
+          "", kUnexpectedIncludeError, strlen(kUnexpectedIncludeError),
+          nullptr};
+    }
+    shaderc_include_result* include_result =
+        resolver_(user_data_, requested_source, GetIncludeType(type),
+                  requesting_source, include_depth);
+    // Make a glslang IncludeResult from a shaderc_include_result.  The
+    // user_data member of the IncludeResult is a pointer to the
+    // shaderc_include_result object, so we can later release the latter.
+    return new glslang::TShader::Includer::IncludeResult{
+        std::string(include_result->source_name,
+                    include_result->source_name_length),
+        include_result->content, include_result->content_length,
+        include_result};
+  }
+
+  // Releases the given IncludeResult.
+  virtual void release_delegate(
+      glslang::TShader::Includer::IncludeResult* result) override {
+    if (result && result_releaser_) {
+      result_releaser_(user_data_,
+                       static_cast<shaderc_include_result*>(result->user_data));
+    }
+    delete result;
+  }
+
+  const shaderc_include_resolve_fn resolver_;
+  const shaderc_include_result_release_fn result_releaser_;
   void* user_data_;
 };
 
 }  // anonymous namespace
 
 struct shaderc_compile_options {
-  shaderc_compile_options() : includer_user_data(nullptr) {}
-
+  shaderc_compile_options() : include_user_data(nullptr) {}
   shaderc_util::Compiler compiler;
-  shaderc_includer_response_get_fn get_includer_response;
-  shaderc_includer_response_release_fn release_includer_response;
-  void* includer_user_data;
+  shaderc_include_resolve_fn include_resolver;
+  shaderc_include_result_release_fn include_result_releaser;
+  void* include_user_data;
 };
 
 shaderc_compile_options_t shaderc_compile_options_initialize() {
@@ -237,6 +276,7 @@ void shaderc_compile_options_set_generate_debug_info(
   options->compiler.SetGenerateDebugInfo();
 }
 
+
 void shaderc_compile_options_set_forced_version_profile(
     shaderc_compile_options_t options, int version, shaderc_profile profile) {
   // Transfer the profile parameter from public enum type to glslang internal
@@ -258,15 +298,16 @@ void shaderc_compile_options_set_forced_version_profile(
   }
 }
 
-void shaderc_compile_options_set_includer_callbacks(
+void shaderc_compile_options_set_include_callbacks(
     shaderc_compile_options_t options,
-    shaderc_includer_response_get_fn get_includer_response,
-    shaderc_includer_response_release_fn release_includer_response,
+    shaderc_include_resolve_fn resolver,
+    shaderc_include_result_release_fn result_releaser,
     void* user_data) {
-  options->get_includer_response = get_includer_response;
-  options->release_includer_response = release_includer_response;
-  options->includer_user_data = user_data;
+  options->include_resolver = resolver;
+  options->include_result_releaser = result_releaser;
+  options->include_user_data = user_data;
 }
+
 
 void shaderc_compile_options_set_suppress_warnings(
     shaderc_compile_options_t options) {
@@ -323,6 +364,10 @@ shaderc_compilation_result_t CompileToSpecifiedOutputType(
         shaderc_util::string_piece(source_text, source_text + source_text_size);
     StageDeducer stage_deducer(shader_kind);
     if (additional_options) {
+      InternalFileIncluder includer(
+                  additional_options->include_resolver,
+                  additional_options->include_result_releaser,
+                  additional_options->include_user_data);
       // Depends on return value optimization to avoid extra copy.
       std::tie(compilation_succeeded, compilation_output_data,
                compilation_output_data_size_in_bytes) =
@@ -332,19 +377,17 @@ shaderc_compilation_result_t CompileToSpecifiedOutputType(
               // We need to make this a reference wrapper, so that std::function
               // won't make a copy for this callable object.
               std::ref(stage_deducer),
-              InternalFileIncluder(
-                  additional_options->get_includer_response,
-                  additional_options->release_includer_response,
-                  additional_options->includer_user_data),
+              includer,
               output_type, &errors, &total_warnings, &total_errors,
               compiler->initializer);
     } else {
       // Compile with default options.
+      InternalFileIncluder includer;
       std::tie(compilation_succeeded, compilation_output_data,
                compilation_output_data_size_in_bytes) =
           shaderc_util::Compiler().Compile(
               source_string, forced_stage, input_file_name_str,
-              std::ref(stage_deducer), InternalFileIncluder(), output_type,
+              std::ref(stage_deducer), includer, output_type,
               &errors, &total_warnings, &total_errors, compiler->initializer);
     }
 

@@ -14,35 +14,48 @@
 
 #include "file_includer.h"
 
+#include <mutex>
+#include <utility>
+
 #include "libshaderc_util/io.h"
 
 namespace glslc {
 
-shaderc_includer_response* FileIncluder::GetInclude(const char* filename) {
-  file_full_path_ = file_finder_.FindReadableFilepath(filename);
-  source_files_used_.insert(file_full_path_);
-  if (!file_full_path_.empty() &&
-      shaderc_util::ReadFile(file_full_path_, &file_content_)) {
-    response_ = {
-        file_full_path_.c_str(), file_full_path_.length(), file_content_.data(),
-        file_content_.size(),
-    };
-  } else {
-    const char error_msg[] = "Cannot find or open include file.";
-    file_content_.assign(std::begin(error_msg), std::end(error_msg));
-    response_ = {
-        "", 0u, file_content_.data(), file_content_.size(),
-    };
-  }
-  return &response_;
+shaderc_include_result* MakeErrorIncludeResult(const char* message) {
+  return new shaderc_include_result{"", 0, message, strlen(message)};
 }
 
-void FileIncluder::ReleaseInclude(shaderc_includer_response*) {
-  response_ = {
-      nullptr, 0u, nullptr, 0u,
-  };
-  file_content_.clear();
-  file_full_path_.clear();
+shaderc_include_result* FileIncluder::GetInclude(const char* requested_source,
+                                                 shaderc_include_type,
+                                                 const char*, size_t) {
+  // TODO(dneto): Be sensitive to requesting_source
+  // We don't actually care about the include type.
+  const std::string full_path =
+      file_finder_.FindReadableFilepath(requested_source);
+  if (full_path.empty())
+    return MakeErrorIncludeResult("Cannot find or open include file.");
+
+  // In principle, several threads could be resolving includes at the same
+  // time.  Protect the included_files.
+
+  // Read the file and save its full path and contents into stable addresses.
+  FileInfo* new_file_info = new FileInfo{full_path, {}};
+  if (!shaderc_util::ReadFile(full_path, &(new_file_info->contents))) {
+    return MakeErrorIncludeResult("Cannot read file");
+  }
+
+  included_files_.insert(full_path);
+
+  return new shaderc_include_result{
+      new_file_info->full_path.data(), new_file_info->full_path.length(),
+      new_file_info->contents.data(), new_file_info->contents.size(),
+      new_file_info};
+}
+
+void FileIncluder::ReleaseInclude(shaderc_include_result* include_result) {
+  FileInfo* info = static_cast<FileInfo*>(include_result->user_data);
+  delete info;
+  delete include_result;
 }
 
 }  // namespace glslc

@@ -107,14 +107,13 @@ spv_result_t DisassembleBinary(const std::vector<uint32_t>& binary,
 }  // anonymous namespace
 
 namespace shaderc_util {
-
 std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
     const string_piece& input_source_string, EShLanguage forced_shader_stage,
     const std::string& error_tag,
     const std::function<EShLanguage(std::ostream* error_stream,
                                     const string_piece& error_tag)>&
         stage_callback,
-    const CountingIncluder& includer, Compiler::OutputType output_type,
+    CountingIncluder& includer, OutputType output_type,
     std::ostream* error_stream, size_t* total_warnings, size_t* total_errors,
     GlslInitializer* initializer) const {
   // Compilation results to be returned:
@@ -155,7 +154,8 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
     if (!success) return result_tuple;
     // Because of the behavior change of the #line directive, the #line
     // directive introducing each file's content must use the syntax for the
-    // specified version. So we need to probe this shader's version and profile.
+    // specified version. So we need to probe this shader's version and
+    // profile.
     int version;
     EProfile profile;
     std::tie(version, profile) = DeduceVersionProfile(preprocessed_shader);
@@ -216,7 +216,8 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
                                  total_warnings, total_errors);
   if (!success) return result_tuple;
 
-  // 'spirv' is an alias for the compilation_output_data. This alias is added to
+  // 'spirv' is an alias for the compilation_output_data. This alias is added
+  // to
   // serve as an input for the call to DissassemblyBinary.
   std::vector<uint32_t>& spirv = compilation_output_data;
   // Note the call to GlslangToSpv also populates compilation_output_data.
@@ -266,8 +267,7 @@ void Compiler::SetSuppressWarnings() { suppress_warnings_ = true; }
 
 std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
     const std::string& error_tag, const string_piece& shader_source,
-    const string_piece& shader_preamble,
-    const CountingIncluder& includer) const {
+    const string_piece& shader_preamble, CountingIncluder& includer) const {
   // The stage does not matter for preprocessing.
   glslang::TShader shader(EShLangVertex);
   const char* shader_strings = shader_source.data();

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef LIBSHADERC_UTIL_INCLUDER_H
-#define LIBSHADERC_UTIL_INCLUDER_H
+#ifndef LIBSHADERC_UTIL_COUNTING_INCLUDER_H
+#define LIBSHADERC_UTIL_COUNTING_INCLUDER_H
 
 #include <atomic>
 
@@ -33,26 +33,40 @@ class CountingIncluder : public glslang::TShader::Includer {
     num_include_directives_.store(0);
   }
 
-  // Bumps num_include_directives and returns the results of
+  // Resolves an include request for a source by name, type, and name of the
+  // requesting source.  For the semantics of the result, see the base class.
+  // Also increments num_include_directives and returns the results of
   // include_delegate(filename).  Subclasses should override include_delegate()
-  // instead of this one.  Also see the base-class version.
-  std::pair<std::string, std::string> include(
-      const char* filename) const final {
+  // instead of this method.
+  glslang::TShader::Includer::IncludeResult* include(
+      const char* requested_source, glslang::TShader::Includer::IncludeType type,
+      const char* requesting_source,
+      size_t include_depth) final {
     ++num_include_directives_;
-    return include_delegate(filename);
+    return include_delegate(requested_source, type, requesting_source, include_depth);
+  }
+
+  // Releases the given IncludeResult.
+  void releaseInclude(glslang::TShader::Includer::IncludeResult* result) final {
+    release_delegate(result);
   }
 
   int num_include_directives() const { return num_include_directives_.load(); }
 
  private:
   // Invoked by this class to provide results to
-  // TShader::Includer::include(filename).
-  virtual std::pair<std::string, std::string> include_delegate(
-      const char* filename) const = 0;
+  // glslang::TShader::Includer::include.
+  virtual glslang::TShader::Includer::IncludeResult* include_delegate(
+      const char* requested_source, glslang::TShader::Includer::IncludeType type,
+      const char* requesting_source, size_t include_depth) = 0;
+
+  // Release the given IncludeResult.
+  virtual void release_delegate(
+      glslang::TShader::Includer::IncludeResult* result) = 0;
 
   // The number of #include directive encountered.
-  mutable std::atomic_int num_include_directives_;
+  std::atomic_int num_include_directives_;
 };
 }
 
-#endif  // LIBSHADERC_UTIL_INCLUDER_H
+#endif  // LIBSHADERC_UTIL_COUNTING_INCLUDER_H
