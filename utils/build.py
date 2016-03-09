@@ -53,13 +53,13 @@ def quote(string):
     return '"%s"' % string.replace('"', '\\"')
 
 
-def cmake_batline(cmake_command):
-    """Transforms cmake_command (a list of strings) into a single string
-    suitable for inserting into a .bat script.
+def quote_some(command, indices):
+    """Transforms command (a list of strings) into a single string by
+    joining its elements, but with quotes around those elements in the
+    indices list.
     """
-    args_to_quote = [0, 1, 4]
-    quoted =[ (quote(e) if i in args_to_quote else e)
-              for (i, e) in enumerate(cmake_command) ]
+    quoted =[ (quote(e) if i in indices else e)
+              for (i, e) in enumerate(command) ]
     return ' '.join(quoted)
 
 
@@ -103,13 +103,13 @@ def build(args):
                      '-DCMAKE_INSTALL_PREFIX=%s' % (args.installdir)]
 
     if (OS == 'Windows' or OS.startswith('CYGWIN')):
-        bat_content = '''
-call "%VS140COMNTOOLS%..\..\VC\\vcvarsall.bat"
+        bat_content = R'''
+call "%VS140COMNTOOLS%..\..\VC\vcvarsall.bat"
 {cmake_batline}
 {ninja} install
 {ctest}
-        '''.strip().format(cmake_batline=cmake_batline(cmake_command),
-                           ninja=ninja, ctest=ctest)
+        '''.strip().format(cmake_batline=quote_some(cmake_command, [0, 1, 4]),
+                           ninja=quote(ninja), ctest=quote(ctest))
         bat_filename = os.path.join(args.builddir, 'build.bat')
         open(bat_filename, 'w').write(bat_content)
         run(bat_filename, args.builddir, args.dry_run)
