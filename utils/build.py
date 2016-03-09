@@ -14,8 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Builds the Shaderc project, on Linux, Mac, or Windows.
+"""Builds the Shaderc project, on Linux, Mac, or Windows.
 """
 
 from __future__ import print_function
@@ -46,7 +45,7 @@ def run(cmd, cwd, justprint):
     p = subprocess.Popen(cmd, cwd=cwd)
     (_, _) = p.communicate()
     if p.returncode != 0:
-        raise RuntimeError("Failed to run %s in %s" % (cmd, cwd))
+        raise RuntimeError('Failed to run %s in %s' % (cmd, cwd))
 
 
 def quote(string):
@@ -58,8 +57,8 @@ def quote_some(command, indices):
     joining its elements, but with quotes around those elements in the
     indices list.
     """
-    quoted =[ (quote(e) if i in indices else e)
-              for (i, e) in enumerate(command) ]
+    quoted = [(quote(e) if i in indices else e)
+              for (i, e) in enumerate(command)]
     return ' '.join(quoted)
 
 
@@ -76,7 +75,7 @@ def build(args):
     """
 
     if not os.path.isdir(args.srcdir):
-        raise RuntimeError("Soure directory %s does not exist" % (args.srcdir))
+        raise RuntimeError('Soure directory %s does not exist' % (args.srcdir))
 
     # Make paths absolute, and ensure directories exist.
     for d in [args.builddir, args.installdir]:
@@ -124,11 +123,11 @@ def main():
     files, level of parallelism, and whether it's a dry run that should
     skip actual compilation and installation."""
 
-    parser = argparse.ArgumentParser(description="Build Shaderc simply")
+    parser = argparse.ArgumentParser(description='Build Shaderc simply')
     parser.add_argument('-n', '--dry_run', dest='dry_run', default=False,
                         action='store_true',
                         help='Dry run: Make dirs and only print commands '
-                             ' to be run')
+                        ' to be run')
     parser.add_argument('-j', type=int, dest='j', default=4,
                         help='Number of parallel build processes. Default is 4')
     parser.add_argument('--srcdir', dest='srcdir', default='src/shaderc',
