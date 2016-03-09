@@ -31,7 +31,7 @@ if(MSVC)
         string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
       endif(${flag_var} MATCHES "/MD")
     endforeach(flag_var)
-  endif(SHADERC_ENABLE_SHARED_CRT)
+  endif(NOT SHADERC_ENABLE_SHARED_CRT)
 endif(MSVC)
 
 # Configure subdirectories.

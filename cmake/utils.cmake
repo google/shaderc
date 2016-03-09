@@ -7,9 +7,9 @@ function (shaderc_use_gmock TARGET)
   target_link_libraries(${TARGET} PRIVATE gmock gtest_main)
 endfunction(shaderc_use_gmock)
 
-function(shaderc_default_compile_options TARGET)
+function(shaderc_default_c_compile_options TARGET)
   if (NOT "${MSVC}")
-    target_compile_options(${TARGET} PRIVATE -std=c++11 -fPIC -Wall -Werror)
+    target_compile_options(${TARGET} PRIVATE -Wall -Werror)
     if (ENABLE_CODE_COVERAGE)
       # The --coverage option is a synonym for -fprofile-arcs -ftest-coverage
       # when compiling.
@@ -23,6 +23,13 @@ function(shaderc_default_compile_options TARGET)
     # disable warning C4800: 'int' : forcing value to bool 'true' or 'false'
     # (performance warning)
     target_compile_options(${TARGET} PRIVATE /wd4800)
+  endif()
+endfunction(shaderc_default_c_compile_options)
+
+function(shaderc_default_compile_options TARGET)
+  shaderc_default_c_compile_options(${TARGET})
+  if (NOT "${MSVC}")
+    target_compile_options(${TARGET} PRIVATE -std=c++11)
   endif()
 endfunction(shaderc_default_compile_options)
 

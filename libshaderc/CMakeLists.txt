@@ -37,3 +37,10 @@ INCLUDE_DIRS include ${glslang_SOURCE_DIR}
 TEST_NAMES
   shaderc
   shaderc_cpp)
+
+add_executable(shaderc_c_smoke_test ./src/shaderc_c_smoke_test.c)
+shaderc_default_c_compile_options(shaderc_c_smoke_test)
+
+target_link_libraries(shaderc_c_smoke_test PRIVATE shaderc)
+add_test(NAME shaderc_c_smoke_test COMMAND shaderc_c_smoke_test)
+
