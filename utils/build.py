@@ -23,7 +23,9 @@ import argparse
 import os
 import platform
 import subprocess
-import sys
+
+
+OS = platform.system()
 
 
 def run(cmd, cwd, justprint):
@@ -47,6 +49,20 @@ def run(cmd, cwd, justprint):
         raise RuntimeError("Failed to run %s in %s" % (cmd, cwd))
 
 
+def quote(string):
+    return '"%s"' % string.replace('"', '\\"')
+
+
+def cmake_batline(cmake_command):
+    """Transforms cmake_command (a list of strings) into a single string
+    suitable for inserting into a .bat script.
+    """
+    args_to_quote = [0, 1, 4]
+    quoted =[ (quote(e) if i in args_to_quote else e)
+              for (i, e) in enumerate(cmake_command) ]
+    return ' '.join(quoted)
+
+
 def build(args):
     """ Builds Shaderc under specified conditions.
 
@@ -62,12 +78,16 @@ def build(args):
     if not os.path.isdir(args.srcdir):
         raise RuntimeError("Soure directory %s does not exist" % (args.srcdir))
 
-    # Make paths absolute, and enusre directories exist.
+    # Make paths absolute, and ensure directories exist.
     for d in [args.builddir, args.installdir]:
         if not os.path.isdir(d):
             os.makedirs(d)
-    cmake = os.path.abspath(args.cmake) if args.cmake else 'cmake'
-    ninja = os.path.abspath(args.ninja) if args.ninja else 'ninja'
+    cmake = (os.path.abspath(args.cmake)
+             if os.path.isfile(args.cmake) else 'cmake')
+    ctest = 'ctest' if cmake == 'cmake' else os.path.join(
+        os.path.dirname(cmake), 'ctest')
+    ninja = (os.path.abspath(args.ninja)
+             if os.path.isfile(args.ninja) else 'ninja')
     args.srcdir = os.path.abspath(args.srcdir)
     args.builddir = os.path.abspath(args.builddir)
     args.installdir = os.path.abspath(args.installdir)
@@ -82,20 +102,21 @@ def build(args):
                      '-DCMAKE_BUILD_TYPE=%s' % args.buildtype,
                      '-DCMAKE_INSTALL_PREFIX=%s' % (args.installdir)]
 
-    if (platform.system() == 'Windows'):
+    if (OS == 'Windows' or OS.startswith('CYGWIN')):
         bat_content = '''
 call "%VS140COMNTOOLS%..\..\VC\\vcvarsall.bat"
-{cmake_command}
+{cmake_batline}
 {ninja} install
-        '''.strip().format(cmake_command=' '.join(cmake_command), ninja=ninja)
-        script = '%s/build.bat' % args.builddir
-        open(script, 'w').write(bat_content)
-        run(script, args.builddir, args.dry_run)
+{ctest}
+        '''.strip().format(cmake_batline=cmake_batline(cmake_command),
+                           ninja=ninja, ctest=ctest)
+        bat_filename = os.path.join(args.builddir, 'build.bat')
+        open(bat_filename, 'w').write(bat_content)
+        run(bat_filename, args.builddir, args.dry_run)
     else:
-        # Configure the project.
         run(cmake_command, args.builddir, args.dry_run)
-        # Install, after building necessary components.
         run([ninja, 'install'], args.builddir, args.dry_run)
+        run([ctest], args.builddir, args.dry_run)
 
 
 def main():
@@ -110,21 +131,38 @@ def main():
                              ' to be run')
     parser.add_argument('-j', type=int, dest='j', default=4,
                         help='Number of parallel build processes. Default is 4')
-    parser.add_argument('--cmake', dest='cmake', default=False,
-                        help='Path to the cmake executable. If absent, cmake '
-                        'must be in PATH.')
-    parser.add_argument('--ninja', dest='ninja', default=False,
-                        help='Path to the ninja executable. If absent, ninja '
-                        'must be in PATH.')
-    parser.add_argument('--srcdir', dest='srcdir', default='.',
-                        help='Shaderc source directory. Default is current '
-                        'directory.')
-    parser.add_argument('--builddir', dest='builddir', required=True,
-                        help='Build directory. Required.')
+    parser.add_argument('--srcdir', dest='srcdir', default='src/shaderc',
+                        help='Shaderc source directory. Default "src/shaderc".')
+    parser.add_argument('--builddir', dest='builddir', default='out',
+                        help='Build directory. Default is "out".')
     parser.add_argument('--installdir', dest='installdir', required=True,
                         help='Installation directory. Required.')
     parser.add_argument('--type', dest='buildtype', default='RelWithDebInfo',
                         help='Build type. Default is RelWithDebInfo')
+
+    arch = None
+    if (OS == 'Windows'):
+        arch = 'windows-x86'
+    if (OS.startswith('CYGWIN')):
+        arch = 'windows-x86'
+    if (OS == 'Linux'):
+        arch = 'linux-x86'
+    if (OS == 'Darwin'):
+        arch = 'darwin-x86'
+    if (arch is None):
+        raise RuntimeError('Unknown OS: %s' % OS)
+
+    cmake_default = os.path.join('prebuilts', 'cmake', arch, 'bin', 'cmake')
+    parser.add_argument('--cmake', dest='cmake',
+                        default=os.path.join(os.getcwd(), cmake_default),
+                        help='Path to the cmake executable. Default is %s.'
+                        % cmake_default)
+
+    ninja_default = os.path.join('prebuilts', 'ninja', arch, 'ninja')
+    parser.add_argument('--ninja', dest='ninja',
+                        default=os.path.join(os.getcwd(), ninja_default),
+                        help='Path to the ninja executable. Default is %s.'
+                        % ninja_default)
 
     args = parser.parse_args()
 
