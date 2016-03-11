@@ -57,10 +57,16 @@ def describe(dir):
     Runs 'git describe', or alternately 'git rev-parse HEAD', in dir.  If
     successful, returns the output; otherwise returns 'unknown hash, <date>'."""
     try:
-        return command_output(['git', 'describe'], dir).rstrip()
+        # decode() is needed here for Python3 compatibility. In Python2,
+        # str and bytes are the same type, but not in Python3.
+        # Popen.communicate() returns a bytes instance, which needs to be
+        # decoded into text data first in Python3. And this decode() won't
+        # hurt Python2.
+        return command_output(['git', 'describe'], dir).rstrip().decode()
     except:
         try:
-            return command_output(['git', 'rev-parse', 'HEAD'], dir).rstrip()
+            return command_output(
+                ['git', 'rev-parse', 'HEAD'], dir).rstrip().decode()
         except:
             return 'unknown hash, ' + datetime.date.today().isoformat()
 
@@ -72,14 +78,8 @@ def main():
         sys.exit(1)
 
     projects = ['shaderc', 'spirv-tools', 'glslang']
-    tags = [
-        # decode() is needed here for Python3 compatibility. In Python2,
-        # str and bytes are the same type, but not in Python3.
-        # Popen.communicate() returns a bytes instance, which needs to be
-        # decoded into text data first in Python3. And this decode() won't
-        # hurt Python2.
-        describe(p).decode('ascii').replace('"', '\\"')
-        for p in sys.argv[1:]]
+    tags = [describe(p).replace('"', '\\"')
+            for p in sys.argv[1:]]
     new_content = ''.join([
         '"{} {}\\n"\n'.format(p, t)
         for (p, t) in zip(projects, tags)])
