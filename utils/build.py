@@ -99,7 +99,8 @@ def build(args):
     print('   Install dir: ', args.installdir)
     cmake_command = [cmake, args.srcdir, '-GNinja',
                      '-DCMAKE_BUILD_TYPE=%s' % args.buildtype,
-                     '-DCMAKE_INSTALL_PREFIX=%s' % (args.installdir)]
+                     '-DCMAKE_INSTALL_PREFIX=%s' % args.installdir,
+                     '-DCMAKE_MAKE_PROGRAM=%s' % ninja]
 
     if (OS == 'Windows' or OS.startswith('CYGWIN')):
         bat_content = R'''
@@ -107,7 +108,7 @@ call "%VS140COMNTOOLS%..\..\VC\vcvarsall.bat"
 {cmake_batline}
 {ninja} install
 {ctest}
-        '''.strip().format(cmake_batline=quote_some(cmake_command, [0, 1, 4]),
+        '''.strip().format(cmake_batline=quote_some(cmake_command, [0, 1, 4, 5]),
                            ninja=quote(ninja), ctest=quote(ctest))
         bat_filename = os.path.join(args.builddir, 'build.bat')
         open(bat_filename, 'w').write(bat_content)
