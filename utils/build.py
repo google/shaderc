@@ -27,7 +27,7 @@ import subprocess
 OS = platform.system()
 
 
-def run(cmd, cwd, justprint):
+def run(cmd, cwd, env, justprint):
     """Prints a command to run, and optionally runs it.
 
     Raises a RuntimeError if the command does not launch or otherwise fails.
@@ -37,12 +37,13 @@ def run(cmd, cwd, justprint):
                    command after printing it.
       cmd:       List of words in the command.
       cwd:       Working directory for the command.
+      env:       Environment to pass to subprocess.
     """
     print(cmd)
     if justprint:
         return
 
-    p = subprocess.Popen(cmd, cwd=cwd)
+    p = subprocess.Popen(cmd, cwd=cwd, env=env)
     (_, _) = p.communicate()
     if p.returncode != 0:
         raise RuntimeError('Failed to run %s in %s' % (cmd, cwd))
@@ -102,21 +103,16 @@ def build(args):
                      '-DCMAKE_INSTALL_PREFIX=%s' % args.installdir,
                      '-DCMAKE_MAKE_PROGRAM=%s' % ninja]
 
+    env = None
     if (OS == 'Windows' or OS.startswith('CYGWIN')):
-        bat_content = R'''
-call "%VS140COMNTOOLS%..\..\VC\vcvarsall.bat"
-{cmake_batline}
-{ninja} install
-{ctest}
-        '''.strip().format(cmake_batline=quote_some(cmake_command, [0, 1, 4, 5]),
-                           ninja=quote(ninja), ctest=quote(ctest))
-        bat_filename = os.path.join(args.builddir, 'build.bat')
-        open(bat_filename, 'w').write(bat_content)
-        run(bat_filename, args.builddir, args.dry_run)
-    else:
-        run(cmake_command, args.builddir, args.dry_run)
-        run([ninja, 'install'], args.builddir, args.dry_run)
-        run([ctest], args.builddir, args.dry_run)
+        p = subprocess.Popen(
+            '"%VS140COMNTOOLS%..\\..\\VC\\vcvarsall.bat" & set',
+            stdout=subprocess.PIPE, cwd=args.builddir, shell=True)
+        env = dict([tuple(line.split('='))
+                    for line in p.communicate()[0].splitlines()])
+    run(cmake_command, args.builddir, env, args.dry_run)
+    run([ninja, 'install'], args.builddir, env, args.dry_run)
+    run([ctest], args.builddir, env, args.dry_run)
 
 
 def main():
