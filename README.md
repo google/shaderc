@@ -89,6 +89,18 @@ cmake --build . --config {Release|Debug|MinSizeRel|RelWithDebInfo}
 ctest -C {Release|Debug|MinSizeRel|RelWithDebInfo}
 ```
 
+4c) Or build with MinGW on Linux for Windows:
+(Skip building threaded unit tests due to
+[Googletest bug 606](https://github.com/google/googletest/issues/606))
+
+```sh
+cd $BUILD_DIR
+cmake -GNinja -DCMAKE_BUILD_TYPE={Debug|Release|RelWithDebInfo} $SOURCE_DIR \
+   -DCMAKE_TOOLCHAIN_FILE=$SOURCE_DIR/cmake/linux-mingw-toolchain.cmake \
+   -Dgtest_disable_pthreads=ON
+ninja
+```
+
 After a successful build, you should have a `glslc` executable somewhere under
 the `$BUILD_DIR/glslc/` directory, as well as a `libshaderc` library somewhere
 under the `$BUILD_DIR/libshaderc/` directory.
@@ -116,6 +128,10 @@ On Linux, the following tools should be installed:
     for `gcov`, provided by the `lcov` package on Ubuntu.
 - [`genhtml`](http://linux.die.net/man/1/genhtml): for creating reports in html
     format from `lcov` output, provided by the `lcov` package on Ubuntu.
+
+On Linux, if cross compiling to Windows:
+- [`mingw`](http://www.mingw.org): A GCC-based cross compiler targeting Windows
+    so that generated executables use the Micrsoft C runtime libraries.
 
 On Windows, the following tools should be installed and available on your path:
 
