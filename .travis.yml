@@ -1,19 +1,20 @@
 # Linux Build Configuration for Travis
 
-sudo: false # Use Travis docker infrastructure
-
 language: cpp
 
 os:
   - linux
 
+# Use Ubuntu 14.04 LTS (Trusty) as the Linux testing environment.
+sudo: required
+dist: trusty
+
 env:
-  matrix:
-    # Each line is a set of environment variables set before a build.
-    # Thus each line represents a different build configuration.
-    - SHADERC_BUILD_TYPE=Release SHADERC_CODE_COVERAGE=OFF
-    - SHADERC_BUILD_TYPE=Debug SHADERC_CODE_COVERAGE=OFF
-    - SHADERC_BUILD_TYPE=Debug SHADERC_CODE_COVERAGE=ON
+  # Each line is a set of environment variables set before a build.
+  # Thus each line represents a different build configuration.
+  - SHADERC_BUILD_TYPE=Release SHADERC_CODE_COVERAGE=OFF
+  - SHADERC_BUILD_TYPE=Debug   SHADERC_CODE_COVERAGE=OFF
+  - SHADERC_BUILD_TYPE=Debug   SHADERC_CODE_COVERAGE=ON
 
 compiler:
   - clang
@@ -26,20 +27,9 @@ branches:
   only:
     - master
 
-# Travis CI is powered with Ubuntu 12.04, whose toolchain is outdated.
 addons:
   apt:
-    # Travis white list of ppa.
-    # https://github.com/travis-ci/apt-source-whitelist/blob/master/ubuntu.json
-    sources:
-      - ubuntu-toolchain-r-test     # For gcc 4.9
-      - kubuntu-backports           # For cmake 2.8.12
-      - llvm-toolchain-precise-3.6  # For clang 3.6
-    # Travis whitelist of packages.
-    # https://github.com/travis-ci/apt-package-whitelist/blob/master/ubuntu-precise
     packages:
-      - cmake
-      - g++-4.9
       - clang-3.6
       - ninja-build
       - lcov
@@ -49,34 +39,30 @@ install:
   - pip install --user cpp-coveralls
 
   - export PATH=$HOME/.local/bin:$PATH # Make sure we can find the above Python packages
-  - if [ "$CC" = "gcc"   ]; then export CC=gcc-4.9 CXX=g++-4.9; fi       # Make sure that gcc-4.9 is selected.
   - if [ "$CC" = "clang" ]; then export CC=clang-3.6 CXX=clang++-3.6; fi # Make sure that clang-3.6 is selected.
 
 before_script:
-  - git clone https://github.com/google/googletest.git third_party/googletest
-  - git clone https://github.com/google/glslang.git third_party/glslang
+  - git clone https://github.com/google/googletest.git        third_party/googletest
+  - git clone https://github.com/google/glslang.git           third_party/glslang
   - git clone https://github.com/KhronosGroup/SPIRV-Tools.git third_party/spirv-tools
 
 script:
   - mkdir build && cd build
   - cmake -GNinja -DCMAKE_BUILD_TYPE=${SHADERC_BUILD_TYPE} -DENABLE_CODE_COVERAGE=${SHADERC_CODE_COVERAGE} ..
-    # Sometimes g++-4.9 flakes with an internal compiler error.
-    # This may result from out-of-memory scenarios when expanding many templates.
-    # If we fail the build the first time, then try to continue in single-process mode.
-  - ninja || ninja -j 1
+  - ninja
   - ctest -j`nproc` --output-on-failure
 
 after_success:
   # Collect coverage and push to coveralls.info.
   # Ignore third party source code and tests.
-  - if [ "$CC" = "gcc-4.9" -a "$SHADERC_CODE_COVERAGE" = "ON" ]; then
+  - if [ "$CC" = "gcc" -a "$SHADERC_CODE_COVERAGE" = "ON" ]; then
       coveralls
         --root ../
         --build-root ./
         --exclude-pattern '.+/third_party/'
         --exclude-pattern '.+/.+_test\.cc'
         --exclude-pattern '.+/CMakeFiles/'
-        --gcov /usr/bin/gcov-4.9
+        --gcov /usr/bin/gcov
         --gcov-options '\--long-file-names --preserve-paths'
         --verbose;
     fi
