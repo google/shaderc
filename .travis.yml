@@ -4,6 +4,7 @@ language: cpp
 
 os:
   - linux
+  - osx
 
 # Use Ubuntu 14.04 LTS (Trusty) as the Linux testing environment.
 sudo: required
@@ -20,6 +21,12 @@ compiler:
   - clang
   - gcc
 
+matrix:
+  exclude:
+    # Skip GCC builds on Mac OS X.
+    - os: osx
+      compiler: gcc
+
 cache:
   apt: true
 
@@ -34,12 +41,19 @@ addons:
       - ninja-build
       - lcov
 
+before_install:
+  # Install ninja on Mac OS X.
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update && brew install ninja; fi
+
 install:
   - pip install --user nose
   - pip install --user cpp-coveralls
 
   - export PATH=$HOME/.local/bin:$PATH # Make sure we can find the above Python packages
-  - if [ "$CC" = "clang" ]; then export CC=clang-3.6 CXX=clang++-3.6; fi # Make sure that clang-3.6 is selected.
+    # Make sure that clang-3.6 is selected.
+  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$CC" == "clang" ]]; then
+      export CC=clang-3.6 CXX=clang++-3.6;
+    fi
 
 before_script:
   - git clone https://github.com/google/googletest.git        third_party/googletest
@@ -55,7 +69,7 @@ script:
 after_success:
   # Collect coverage and push to coveralls.info.
   # Ignore third party source code and tests.
-  - if [ "$CC" = "gcc" -a "$SHADERC_CODE_COVERAGE" = "ON" ]; then
+  - if [[ "$CC" == "gcc" && "$SHADERC_CODE_COVERAGE" == "ON" ]]; then
       coveralls
         --root ../
         --build-root ./
