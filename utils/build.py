@@ -49,18 +49,13 @@ def run(cmd, cwd, env, justprint):
         raise RuntimeError('Failed to run %s in %s' % (cmd, cwd))
 
 
-def quote(string):
-    return '"%s"' % string.replace('"', '\\"')
-
-
-def quote_some(command, indices):
-    """Transforms command (a list of strings) into a single string by
-    joining its elements, but with quotes around those elements in the
-    indices list.
+def parse_output_into_env(command, cwd):
+    """Runs command in cwd, expecting it to produce name=value lines on
+    output.  Parses those lines into a dictionary object.
     """
-    quoted = [(quote(e) if i in indices else e)
-              for (i, e) in enumerate(command)]
-    return ' '.join(quoted)
+    p = subprocess.Popen(command, stdout=subprocess.PIPE, cwd=cwd, shell=True)
+    return dict([tuple(line.split('=', 1))
+                 for line in p.communicate()[0].splitlines()])
 
 
 def build(args):
@@ -104,12 +99,14 @@ def build(args):
                      '-DCMAKE_MAKE_PROGRAM=%s' % ninja]
 
     env = None
-    if (OS == 'Windows' or OS.startswith('CYGWIN')):
-        p = subprocess.Popen(
+    if OS == 'Windows':
+        env = parse_output_into_env(
             '"%VS140COMNTOOLS%..\\..\\VC\\vcvarsall.bat" & set',
-            stdout=subprocess.PIPE, cwd=args.builddir, shell=True)
-        env = dict([tuple(line.split('='))
-                    for line in p.communicate()[0].splitlines()])
+            args.builddir)
+    elif OS.startswith('CYGWIN'):
+        env = parse_output_into_env(
+            'cmd /c call "$VS140COMNTOOLS../../VC/vcvarsall.bat" \\& set',
+            args.builddir)
     run(cmake_command, args.builddir, env, args.dry_run)
     run([ninja, 'install'], args.builddir, env, args.dry_run)
     run([ctest], args.builddir, env, args.dry_run)
