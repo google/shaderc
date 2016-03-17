@@ -22,6 +22,7 @@ import argparse
 import os
 import platform
 import subprocess
+import sys
 
 
 OS = platform.system()
@@ -49,27 +50,11 @@ def run(cmd, cwd, env, justprint):
         raise RuntimeError('Failed to run %s in %s' % (cmd, cwd))
 
 
-def quote(string):
-    return '"%s"' % string.replace('"', '\\"')
-
-
-def quote_some(command, indices):
-    """Transforms command (a list of strings) into a single string by
-    joining its elements, but with quotes around those elements in the
-    indices list.
-    """
-    quoted = [(quote(e) if i in indices else e)
-              for (i, e) in enumerate(command)]
-    return ' '.join(quoted)
-
-
 def build(args):
     """ Builds Shaderc under specified conditions.
 
     Args:
         args: An object with attributes:
-            cmake: path to the cmake executable
-            ninja: path to the ninja executable
             srcdir: where Shaderc source can be found
             builddir: build working directory
             installdir: install directory
@@ -82,37 +67,28 @@ def build(args):
     for d in [args.builddir, args.installdir]:
         if not os.path.isdir(d):
             os.makedirs(d)
-    cmake = (os.path.abspath(args.cmake)
-             if os.path.isfile(args.cmake) else 'cmake')
-    ctest = 'ctest' if cmake == 'cmake' else os.path.join(
-        os.path.dirname(cmake), 'ctest')
-    ninja = (os.path.abspath(args.ninja)
-             if os.path.isfile(args.ninja) else 'ninja')
     args.srcdir = os.path.abspath(args.srcdir)
     args.builddir = os.path.abspath(args.builddir)
     args.installdir = os.path.abspath(args.installdir)
 
     print('Building Shaderc:')
     print('   Source     : ', args.srcdir)
-    print('   Cmake      : ', cmake)
-    print('   Ninja      : ', ninja)
     print('   Build dir  : ', args.builddir)
     print('   Install dir: ', args.installdir)
-    cmake_command = [cmake, args.srcdir, '-GNinja',
+    cmake_command = ['cmake', args.srcdir, '-GNinja',
                      '-DCMAKE_BUILD_TYPE=%s' % args.buildtype,
-                     '-DCMAKE_INSTALL_PREFIX=%s' % args.installdir,
-                     '-DCMAKE_MAKE_PROGRAM=%s' % ninja]
+                     '-DCMAKE_INSTALL_PREFIX=%s' % args.installdir]
 
     env = None
-    if (OS == 'Windows' or OS.startswith('CYGWIN')):
+    if OS == 'Windows':
         p = subprocess.Popen(
             '"%VS140COMNTOOLS%..\\..\\VC\\vcvarsall.bat" & set',
             stdout=subprocess.PIPE, cwd=args.builddir, shell=True)
-        env = dict([tuple(line.split('='))
+        env = dict([tuple(line.split('=', 1))
                     for line in p.communicate()[0].splitlines()])
     run(cmake_command, args.builddir, env, args.dry_run)
-    run([ninja, 'install'], args.builddir, env, args.dry_run)
-    run([ctest], args.builddir, env, args.dry_run)
+    run(['ninja', 'install'], args.builddir, env, args.dry_run)
+    run(['ctest', '--output-on-failure'], args.builddir, env, args.dry_run)
 
 
 def main():
@@ -125,8 +101,6 @@ def main():
                         action='store_true',
                         help='Dry run: Make dirs and only print commands '
                         ' to be run')
-    parser.add_argument('-j', type=int, dest='j', default=4,
-                        help='Number of parallel build processes. Default is 4')
     parser.add_argument('--srcdir', dest='srcdir', default='src/shaderc',
                         help='Shaderc source directory. Default "src/shaderc".')
     parser.add_argument('--builddir', dest='builddir', default='out',
@@ -137,30 +111,37 @@ def main():
                         help='Build type. Default is RelWithDebInfo')
 
     arch = None
-    if (OS == 'Windows'):
+    if (OS == 'Windows' or OS.startswith('CYGWIN')):
         arch = 'windows-x86'
-    if (OS.startswith('CYGWIN')):
-        arch = 'windows-x86'
-    if (OS == 'Linux'):
+    if OS == 'Linux':
         arch = 'linux-x86'
-    if (OS == 'Darwin'):
+    if OS == 'Darwin':
         arch = 'darwin-x86'
-    if (arch is None):
+    if arch is None:
         raise RuntimeError('Unknown OS: %s' % OS)
 
-    cmake_default = os.path.join('prebuilts', 'cmake', arch, 'bin', 'cmake')
-    parser.add_argument('--cmake', dest='cmake',
-                        default=os.path.join(os.getcwd(), cmake_default),
-                        help='Path to the cmake executable. Default is %s.'
-                        % cmake_default)
-
-    ninja_default = os.path.join('prebuilts', 'ninja', arch, 'ninja')
-    parser.add_argument('--ninja', dest='ninja',
-                        default=os.path.join(os.getcwd(), ninja_default),
-                        help='Path to the ninja executable. Default is %s.'
-                        % ninja_default)
+    path_default = (os.path.join(os.getcwd(), 'prebuilts', 'cmake', arch, 'bin')
+                    + os.pathsep +
+                    os.path.join(os.getcwd(), 'prebuilts', 'ninja', arch)
+                    + os.pathsep +
+                    os.path.join(os.getcwd(), 'prebuilts', 'python', arch,
+                                 'x64'))
+    parser.add_argument('--path', dest='path',
+                        default=path_default,
+                        help='Extra directories to prepend to the system path, '
+                        'separated by your system\'s path delimiter (typically '
+                        '":" or ";"). After prepending, path must contain '
+                        'cmake, ninja, and python. On Cygwin, the native '
+                        'Windows Python must come first. Default is %s.'
+                        % path_default)
 
     args = parser.parse_args()
+
+    if args.path:
+        os.putenv('PATH', args.path + os.pathsep + os.getenv('PATH'))
+
+    if OS.startswith('CYGWIN'):
+        os.execlp('python', 'python', *sys.argv) # Escape to Windows.
 
     build(args)
 
