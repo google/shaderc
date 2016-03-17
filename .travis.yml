@@ -11,21 +11,25 @@ sudo: required
 dist: trusty
 
 env:
-  # Each line is a set of environment variables set before a build.
-  # Thus each line represents a different build configuration.
-  - SHADERC_BUILD_TYPE=Release SHADERC_CODE_COVERAGE=OFF
-  - SHADERC_BUILD_TYPE=Debug   SHADERC_CODE_COVERAGE=OFF
-  - SHADERC_BUILD_TYPE=Debug   SHADERC_CODE_COVERAGE=ON
+  - SHADERC_BUILD_TYPE=Release
+  - SHADERC_BUILD_TYPE=Debug
 
 compiler:
   - clang
   - gcc
 
 matrix:
+  fast_finish: true # Show final status immediately if a test fails.
   exclude:
     # Skip GCC builds on Mac OS X.
     - os: osx
       compiler: gcc
+  include:
+    # Additional GCC builds for code coverage.
+    - os: linux
+      compiler: gcc
+      env: SHADERC_CODE_COVERAGE=ON
+
 
 cache:
   apt: true
@@ -62,7 +66,7 @@ before_script:
 
 script:
   - mkdir build && cd build
-  - cmake -GNinja -DCMAKE_BUILD_TYPE=${SHADERC_BUILD_TYPE} -DENABLE_CODE_COVERAGE=${SHADERC_CODE_COVERAGE} ..
+  - cmake -GNinja -DCMAKE_BUILD_TYPE=${SHADERC_BUILD_TYPE:-Debug} -DENABLE_CODE_COVERAGE=${SHADERC_CODE_COVERAGE:-OFF} ..
   - ninja
   - ctest -j`nproc` --output-on-failure
 
