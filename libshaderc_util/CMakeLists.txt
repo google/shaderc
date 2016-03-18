@@ -5,6 +5,7 @@ add_library(shaderc_util STATIC
   include/libshaderc_util/file_finder.h
   include/libshaderc_util/format.h
   include/libshaderc_util/io.h
+  include/libshaderc_util/mutex.h
   include/libshaderc_util/message.h
   include/libshaderc_util/resources.h
   include/libshaderc_util/string_piece.h
@@ -36,7 +37,8 @@ shaderc_add_tests(
     format
     file_finder
     io
-    message)
+    message
+    mutex)
 
 if(${SHADERC_ENABLE_TESTS})
   target_include_directories(shaderc_util_counting_includer_test

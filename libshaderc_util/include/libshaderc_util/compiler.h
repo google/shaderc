@@ -16,7 +16,6 @@
 #define LIBSHADERC_UTIL_INC_COMPILER_H
 
 #include <functional>
-#include <mutex>
 #include <ostream>
 #include <string>
 #include <unordered_map>
@@ -26,6 +25,7 @@
 
 #include "counting_includer.h"
 #include "file_finder.h"
+#include "mutex.h"
 #include "string_piece.h"
 
 namespace shaderc_util {
@@ -90,7 +90,7 @@ class GlslInitializer {
   friend class InitializationToken;
 
   EShMessages last_messages_;
-  std::mutex state_lock_;
+  mutex state_lock_;
 };
 
 // Maps macro names to their definitions.  Stores string_pieces, so the

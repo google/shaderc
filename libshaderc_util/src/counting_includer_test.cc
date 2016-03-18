@@ -54,6 +54,7 @@ TEST(CountingIncluderTest, ManyIncludes) {
   EXPECT_EQ(100, includer.num_include_directives());
 }
 
+#ifndef SHADERC_DISABLE_THREADED_TESTS
 TEST(CountingIncluderTest, ThreadedIncludes) {
   ConcreteCountingIncluder includer;
   std::thread t1([&includer]() { includer.include("name1"); });
@@ -64,5 +65,6 @@ TEST(CountingIncluderTest, ThreadedIncludes) {
   t3.join();
   EXPECT_EQ(3, includer.num_include_directives());
 }
+#endif // SHADERC_DISABLE_THREADED_TESTS
 
 }  // anonymous namespace

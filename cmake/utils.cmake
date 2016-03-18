@@ -92,18 +92,21 @@ function(shaderc_add_tests)
       set(TEST_NAME ${PARSED_ARGS_TEST_PREFIX}_${TARGET}_test)
       add_executable(${TEST_NAME} src/${TARGET}_test.cc)
       shaderc_default_compile_options(${TEST_NAME})
+      if (MINGW)
+        target_compile_options(${TARGET} PRIVATE -DSHADERC_DISABLE_THREADED_TESTS)
+      endif()
       if (PARSED_ARGS_LINK_LIBS)
-	target_link_libraries(${TEST_NAME} PRIVATE
-	  ${PARSED_ARGS_LINK_LIBS})
+        target_link_libraries(${TEST_NAME} PRIVATE
+        ${PARSED_ARGS_LINK_LIBS})
       endif()
       if (PARSED_ARGS_INCLUDE_DIRS)
-	target_include_directories(${TEST_NAME} PRIVATE
-	  ${PARSED_ARGS_INCLUDE_DIRS})
+        target_include_directories(${TEST_NAME} PRIVATE
+        ${PARSED_ARGS_INCLUDE_DIRS})
       endif()
       shaderc_use_gmock(${TEST_NAME})
       add_test(
-	NAME ${PARSED_ARGS_TEST_PREFIX}_${TARGET}
-	COMMAND ${TEST_NAME})
+        NAME ${PARSED_ARGS_TEST_PREFIX}_${TARGET}
+        COMMAND ${TEST_NAME})
     endforeach()
   endif(${SHADERC_ENABLE_TESTS})
 endfunction(shaderc_add_tests)
