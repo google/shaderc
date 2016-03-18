@@ -34,7 +34,7 @@ def run(cmd, cwd, env, justprint):
     Raises a RuntimeError if the command does not launch or otherwise fails.
 
     Args:
-      justprint: If true, then only print the command. Otherwise run the 
+      justprint: If true, then only print the command. Otherwise run the
                    command after printing it.
       cmd:       List of words in the command.
       cwd:       Working directory for the command.
@@ -120,12 +120,11 @@ def main():
     if arch is None:
         raise RuntimeError('Unknown OS: %s' % OS)
 
-    path_default = (os.path.join(os.getcwd(), 'prebuilts', 'cmake', arch, 'bin')
-                    + os.pathsep +
-                    os.path.join(os.getcwd(), 'prebuilts', 'ninja', arch)
-                    + os.pathsep +
-                    os.path.join(os.getcwd(), 'prebuilts', 'python', arch,
-                                 'x64'))
+    path_default = os.pathsep.join([
+        os.path.join(os.getcwd(), 'prebuilts', 'cmake', arch, 'bin'),
+        os.path.join(os.getcwd(), 'prebuilts', 'ninja', arch),
+        os.path.join(os.getcwd(), 'prebuilts', 'python', arch, 'x64')])
+
     parser.add_argument('--path', dest='path',
                         default=path_default,
                         help='Extra directories to prepend to the system path, '
@@ -138,10 +137,10 @@ def main():
     args = parser.parse_args()
 
     if args.path:
-        os.putenv('PATH', args.path + os.pathsep + os.getenv('PATH'))
+        os.environ['PATH'] = os.pathsep.join([args.path, os.getenv('PATH')])
 
     if OS.startswith('CYGWIN'):
-        os.execlp('python', 'python', *sys.argv) # Escape to Windows.
+        os.execlp('python', 'python', *sys.argv)  # Escape to Windows.
 
     build(args)
 
