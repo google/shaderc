@@ -171,6 +171,7 @@ TEST_F(CppInterface, MultipleCalls) {
   EXPECT_TRUE(compiler3.IsValid());
 }
 
+#ifndef SHADERC_DISABLE_THREADED_TESTS
 TEST_F(CppInterface, MultipleThreadsInitializing) {
   std::unique_ptr<shaderc::Compiler> compiler1;
   std::unique_ptr<shaderc::Compiler> compiler2;
@@ -191,6 +192,7 @@ TEST_F(CppInterface, MultipleThreadsInitializing) {
   EXPECT_TRUE(compiler2->IsValid());
   EXPECT_TRUE(compiler3->IsValid());
 }
+#endif
 
 TEST_F(CppInterface, CompilerMoves) {
   shaderc::Compiler compiler2(std::move(compiler_));
@@ -266,6 +268,7 @@ TEST_F(CppInterface, ErrorsReported) {
   EXPECT_THAT(result.GetErrorMessage(), HasSubstr("wrongname"));
 }
 
+#ifndef SHADERC_DISABLE_THREADED_TESTS
 TEST_F(CppInterface, MultipleThreadsCalling) {
   bool results[10];
   std::vector<std::thread> threads;
@@ -279,6 +282,7 @@ TEST_F(CppInterface, MultipleThreadsCalling) {
   }
   EXPECT_THAT(results, Each(true));
 }
+#endif
 
 TEST_F(CppInterface, AccessorsOnNullResultObject) {
   const SpvCompilationResult result(nullptr);

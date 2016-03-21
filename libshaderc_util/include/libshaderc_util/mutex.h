@@ -23,7 +23,10 @@
 #ifdef _WIN32
 // windows.h #defines min and max if we don't define this.
 // this means things like std::min and std::max break
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
+
 #include <windows.h>
 namespace shaderc_util {
 

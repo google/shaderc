@@ -38,6 +38,7 @@ TEST(Init, MultipleCalls) {
   shaderc_compiler_release(compiler3);
 }
 
+#ifndef SHADERC_DISABLE_THREADED_TESTS
 TEST(Init, MultipleThreadsCalling) {
   shaderc_compiler_t compiler1, compiler2, compiler3;
   std::thread t1([&compiler1]() { compiler1 = shaderc_compiler_initialize(); });
@@ -53,6 +54,7 @@ TEST(Init, MultipleThreadsCalling) {
   shaderc_compiler_release(compiler2);
   shaderc_compiler_release(compiler3);
 }
+#endif
 
 TEST(Init, SPVVersion) {
   unsigned int version = 0;
@@ -975,6 +977,7 @@ TEST_F(CompileStringTest, ErrorsReported) {
               HasSubstr("wrongname"));
 }
 
+#ifndef SHADERC_DISABLE_THREADED_TESTS
 TEST_F(CompileStringTest, MultipleThreadsCalling) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   bool results[10];
@@ -990,6 +993,7 @@ TEST_F(CompileStringTest, MultipleThreadsCalling) {
   }
   EXPECT_THAT(results, Each(true));
 }
+#endif
 
 TEST_F(CompileKindsTest, Vertex) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());

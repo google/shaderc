@@ -93,7 +93,7 @@ function(shaderc_add_tests)
       add_executable(${TEST_NAME} src/${TARGET}_test.cc)
       shaderc_default_compile_options(${TEST_NAME})
       if (MINGW)
-        target_compile_options(${TARGET} PRIVATE -DSHADERC_DISABLE_THREADED_TESTS)
+        target_compile_options(${TEST_NAME} PRIVATE -DSHADERC_DISABLE_THREADED_TESTS)
       endif()
       if (PARSED_ARGS_LINK_LIBS)
         target_link_libraries(${TEST_NAME} PRIVATE
