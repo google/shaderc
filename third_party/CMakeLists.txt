@@ -1,11 +1,19 @@
 # Suppress all warnings from third-party projects.
 set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS -w)
 
-# Configure third party projects.
+set(SHADERC_THIRD_PARTY_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}" CACHE STRING
+  "Root location of all third_party projects")
+set(SHADERC_GOOGLE_TEST_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/googletest" CACHE STRING
+  "Location of googletest source")
+set(SHADERC_SPIRV_TOOLS_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/spirv-tools" CACHE STRING
+  "Location of spirv-tools source")
+set(SHADERC_GLSLANG_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/glslang" CACHE STRING
+  "Location of glslang source")
 
+# Configure third party projects.
 if(${SHADERC_ENABLE_TESTS})
-  if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/googletest)
-    add_subdirectory(googletest)
+  if (IS_DIRECTORY ${SHADERC_GOOGLE_TEST_DIR})
+    add_subdirectory(${SHADERC_GOOGLE_TEST_DIR} googletest)
   endif()
   if (NOT TARGET gmock)
     message(FATAL_ERROR "gmock was not found - required for tests")
@@ -14,8 +22,8 @@ endif()
 
 set(OLD_PLATFORM_TOOLSET ${CMAKE_GENERATOR_TOOLSET})
 
-if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/glslang)
-  add_subdirectory(glslang)
+if (IS_DIRECTORY ${SHADERC_GLSLANG_DIR})
+  add_subdirectory(${SHADERC_GLSLANG_DIR} glslang)
 endif()
 if (NOT TARGET glslang)
   message(FATAL_ERROR "glslang was not found - required for compilation")
@@ -28,8 +36,8 @@ if(WIN32)
       "Platform Toolset" FORCE)
 endif()
 
-if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/spirv-tools)
-  add_subdirectory(spirv-tools)
+if (IS_DIRECTORY ${SHADERC_SPIRV_TOOLS_DIR})
+  add_subdirectory(${SHADERC_SPIRV_TOOLS_DIR} spirv-tools)
 endif()
 if (NOT TARGET SPIRV-Tools)
   message(FATAL_ERROR "SPIRV-Tools was not found - required for compilation")
@@ -40,7 +48,7 @@ endif()
 # The runtests script assumes the glslangValidator executable exists in
 # a location inside the source tree, but we build it elsewhere.
 # We need to copy the test files, fix the path references, and then run tests.
-set(GLSLANG_TEST_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/glslang/Test)
+set(GLSLANG_TEST_SRC_DIR ${SHADERC_GLSLANG_DIR}/Test)
 set(GLSLANG_TEST_BIN_DIR
       ${CMAKE_CURRENT_BINARY_DIR}/test-glslang/${CMAKE_CFG_INTDIR})
 
