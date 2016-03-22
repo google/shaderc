@@ -91,6 +91,10 @@ def build(args):
     run(['ctest', '--output-on-failure'], args.builddir, env, args.dry_run)
 
 
+def cygpath(f):
+    p = subprocess.Popen(['cygpath', '-w', f], stdout=subprocess.PIPE)
+    return p.communicate()[0].rstrip()
+
 def main():
     """Builds Shaderc after parsing argument specifying locations of
     files, level of parallelism, and whether it's a dry run that should
@@ -100,7 +104,7 @@ def main():
     parser.add_argument('-n', '--dry_run', dest='dry_run', default=False,
                         action='store_true',
                         help='Dry run: Make dirs and only print commands '
-                        ' to be run')
+                        'to be run')
     parser.add_argument('--srcdir', dest='srcdir', default='src/shaderc',
                         help='Shaderc source directory. Default "src/shaderc".')
     parser.add_argument('--builddir', dest='builddir', default='out',
@@ -140,7 +144,20 @@ def main():
         os.environ['PATH'] = os.pathsep.join([args.path, os.getenv('PATH')])
 
     if OS.startswith('CYGWIN'):
-        os.execlp('python', 'python', *sys.argv)  # Escape to Windows.
+        # Escape to Windows.
+        winargv = []
+        args_dict = vars(args)
+        for k in args_dict:
+            if k=='path' or k.endswith('dir'):
+                winargv.extend(['--%s' % k, cygpath(args_dict[k])])
+            elif k=='buildtype':
+                winargv.extend(['--type', args.buildtype])
+            elif k=='dry_run':
+                if args.dry_run:
+                    winargv.append('-n')
+            else:
+                winargv.extend(['--%s' % k, args_dict[k]])
+        os.execlp('python', 'python', sys.argv[0], *winargv)
 
     build(args)
 
