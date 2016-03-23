@@ -1,6 +1,8 @@
 # Shaderc
 
-[![Linux Build Status](https://travis-ci.org/google/shaderc.svg)](https://travis-ci.org/google/shaderc "Linux Build Status") [![Windows Build status](https://ci.appveyor.com/api/projects/status/g6c372blna7vnk1l?svg=true)](https://ci.appveyor.com/project/dneto0/shaderc "Windows Build Status") [![Coverage Status](https://coveralls.io/repos/google/shaderc/badge.svg?branch=master&service=github)](https://coveralls.io/github/google/shaderc?branch=master)
+[![Linux and Mac Build Status](https://travis-ci.org/google/shaderc.svg)](https://travis-ci.org/google/shaderc "Linux and Mac Build Status")
+[![Windows Build status](https://ci.appveyor.com/api/projects/status/g6c372blna7vnk1l?svg=true)](https://ci.appveyor.com/project/dneto0/shaderc "Windows Build Status")
+[![Coverage Status](https://coveralls.io/repos/google/shaderc/badge.svg?branch=master&service=github)](https://coveralls.io/github/google/shaderc?branch=master)
 
 A collection of tools, libraries and tests for shader compilation.
 At the moment it includes:
