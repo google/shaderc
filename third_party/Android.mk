@@ -46,23 +46,12 @@ GLSLANG_OUT_PATH=$(abspath $(TARGET_OUT))
 LOCAL_MODULE:=glslang
 LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti $(GLSLANG_OS_FLAGS)
 LOCAL_EXPORT_C_INCLUDES:=$(GLSLANG_LOCAL_PATH)
-define gen_glslang_tab
-$(call generate-file-dir,$(GLSLANG_OUT_PATH)/glslang_tab.cpp)
-$(1)/glslang_tab.cpp : $(GLSLANG_LOCAL_PATH)/glslang/MachineIndependent/glslang.y
-	@bison --defines=$(1)/glslang_tab.cpp.h -t \
-		$(GLSLANG_LOCAL_PATH)/glslang/MachineIndependent/glslang.y \
-		-o $(1)/glslang_tab.cpp
-	@echo "[$(TARGET_ARCH_ABI)] Grammar: glslang_tab.cc <= glslang.y"
 
-$(GLSLANG_LOCAL_PATH)/glslang/MachineIndependent/Scan.cpp:$(1)/glslang_tab.cpp
-endef
-
-$(eval $(call gen_glslang_tab,$(GLSLANG_OUT_PATH)))
 LOCAL_SRC_FILES:= \
-		$(GLSLANG_OUT_PATH)/glslang_tab.cpp \
 		glslang/GenericCodeGen/CodeGen.cpp \
 		glslang/GenericCodeGen/Link.cpp \
 		glslang/MachineIndependent/Constant.cpp \
+		glslang/MachineIndependent/glslang_tab.cpp \
 		glslang/MachineIndependent/InfoSink.cpp \
 		glslang/MachineIndependent/Initialize.cpp \
 		glslang/MachineIndependent/Intermediate.cpp \
