@@ -14,6 +14,7 @@
 
 import expect
 from glslc_test_framework import inside_glslc_testsuite
+from placeholder import SpecializedString
 from environment import File, Directory
 
 
@@ -306,3 +307,255 @@ class TestWrongPoundVersionInIncludedFile(expect.ErrorMessage):
         "b.glsl:1: error: '#version' : must occur first in shader\n",
         '1 error generated.\n'
     ]
+
+
+@inside_glslc_testsuite('Include')
+class VerifyRelativeInclude(expect.StdoutMatch):
+    """Tests #including a relative sibling."""
+
+    environment = Directory('.', [
+        File('a.vert', '#version 140\ncontent a\n#include "foo/b.glsl"\n'),
+        Directory('foo', [
+            File('b.glsl', '#include "c.glsl"\ncontent b\n'),
+            File('c.glsl', 'content c\n')
+        ])])
+
+    glslc_args = ['-E', 'a.vert']
+
+    expected_stdout = \
+"""#version 140
+#extension GL_GOOGLE_include_directive : enable
+#line 0 "a.vert"
+
+content a
+#line 0 "foo/b.glsl"
+#line 0 "foo/c.glsl"
+ content c
+#line 1 "foo/b.glsl"
+ content b
+#line 3 "a.vert"
+
+"""
+
+@inside_glslc_testsuite('Include')
+class VerifyNestedRelativeInclude(expect.StdoutMatch):
+    """Tests #including a relative child file."""
+
+    environment = Directory('.', [
+        File('a.vert', '#version 140\ncontent a\n#include "foo/b.glsl"\n'),
+        Directory('foo', [
+            File('b.glsl', '#include "bar/c.glsl"\ncontent b\n'),
+            Directory('bar', [
+                File('c.glsl', 'content c\n')
+            ])
+        ])
+    ])
+
+    glslc_args = ['-E', 'a.vert']
+
+    expected_stdout = \
+"""#version 140
+#extension GL_GOOGLE_include_directive : enable
+#line 0 "a.vert"
+
+content a
+#line 0 "foo/b.glsl"
+#line 0 "foo/bar/c.glsl"
+ content c
+#line 1 "foo/b.glsl"
+ content b
+#line 3 "a.vert"
+
+"""
+
+
+@inside_glslc_testsuite('Include')
+class VerifyRelativeIncludeWithDashI(expect.StdoutMatch):
+    """Tests #including a relative file from a -I directory."""
+
+    environment = Directory('.', [
+        File('a.vert', '#version 140\ncontent a\n#include "bar/b.glsl"\n'),
+        Directory('foo', [
+            Directory('bar', [
+                File('b.glsl', '#include "c.glsl"\ncontent b\n'),
+            ]),
+            File('c.glsl', 'content c\n')
+        ])
+    ])
+
+    glslc_args = ['-E', 'a.vert', '-Ifoo']
+
+    expected_stdout = \
+"""#version 140
+#extension GL_GOOGLE_include_directive : enable
+#line 0 "a.vert"
+
+content a
+#line 0 "foo/bar/b.glsl"
+#line 0 "foo/c.glsl"
+ content c
+#line 1 "foo/bar/b.glsl"
+ content b
+#line 3 "a.vert"
+
+"""
+
+
+@inside_glslc_testsuite('Include')
+class VerifyRelativeOverridesDashI(expect.StdoutMatch):
+    """Tests that relative includes override -I parameters."""
+
+    environment = Directory('.', [
+        File('a.vert', '#version 140\ncontent a\n#include "b.glsl"\n'),
+        File('b.glsl', 'content base_b\n'),
+        Directory('foo', [
+            File('b.glsl', '#include "c.glsl"\ncontent b\n'),
+            File('c.glsl', 'content c\n')
+        ])
+    ])
+
+    glslc_args = ['-E', 'a.vert', '-Ifoo']
+
+    expected_stdout = \
+"""#version 140
+#extension GL_GOOGLE_include_directive : enable
+#line 0 "a.vert"
+
+content a
+#line 0 "b.glsl"
+ content base_b
+#line 3 "a.vert"
+
+"""
+
+
+@inside_glslc_testsuite('Include')
+class VerifyRelativeParent(expect.StdoutMatch):
+    """Tests #including a parent file."""
+
+    environment = Directory('.', [
+        File('a.vert', '#version 140\ncontent a\n#include "b.glsl"\n'),
+        File('c.glsl', 'content c\n'),
+        Directory('foo', [
+            File('b.glsl', '#include "../c.glsl"\ncontent b\n')
+        ])
+    ])
+
+    glslc_args = ['-E', 'a.vert', '-Ifoo']
+
+    expected_stdout = \
+"""#version 140
+#extension GL_GOOGLE_include_directive : enable
+#line 0 "a.vert"
+
+content a
+#line 0 "foo/b.glsl"
+#line 0 "foo/../c.glsl"
+ content c
+#line 1 "foo/b.glsl"
+ content b
+#line 3 "a.vert"
+
+"""
+
+
+@inside_glslc_testsuite('Include')
+class VerifyRelativeNeighbourDirectory(expect.StdoutMatch):
+    """Tests #including a relative file in a neighbour directory."""
+
+    environment = Directory('.', [
+        File('a.vert', '#version 140\ncontent a\n#include "foo/b.glsl"\n'),
+        Directory('foo', [
+            File('b.glsl', '#include "../bar/c.glsl"\ncontent b\n')
+        ]),
+        Directory('bar', [
+            File('c.glsl', 'content c\n')
+        ])
+    ])
+
+    glslc_args = ['-E', 'a.vert']
+
+    expected_stdout = \
+"""#version 140
+#extension GL_GOOGLE_include_directive : enable
+#line 0 "a.vert"
+
+content a
+#line 0 "foo/b.glsl"
+#line 0 "foo/../bar/c.glsl"
+ content c
+#line 1 "foo/b.glsl"
+ content b
+#line 3 "a.vert"
+
+"""
+
+
+@inside_glslc_testsuite('Include')
+class VerifyRelativeOnlyToSelf(expect.ErrorMessage):
+    """Tests that a relative includes are only relative to yourself."""
+
+    environment = Directory('.', [
+        File('a.vert', '#version 140\ncontent a\n#include "foo/b.glsl"\n'),
+        File('c.glsl', 'content c\n'),
+        Directory('foo', [
+            File('b.glsl', '#include "c.glsl"\ncontent b\n')
+        ]),
+    ])
+
+    glslc_args = ['-E', 'a.vert']
+
+    expected_error = [
+        "foo/b.glsl:1: error: '#include' : Cannot find or open include file.\n",
+        '1 error generated.\n'
+    ]
+
+
+@inside_glslc_testsuite('Include')
+class VerifyRelativeFromAbsolutePath(expect.StdoutMatch):
+    """Tests that absolute files can relatively include."""
+
+    environment = Directory('.', [
+        File('a.vert', '#version 140\ncontent a\n#include "b.glsl"\n'),
+        File('b.glsl', 'content b\n')
+    ])
+
+    glslc_args = ['-E', SpecializedString('$directory/a.vert')]
+
+    expected_stdout = SpecializedString(
+"""#version 140
+#extension GL_GOOGLE_include_directive : enable
+#line 0 "$directory/a.vert"
+
+content a
+#line 0 "$directory/b.glsl"
+ content b
+#line 3 "$directory/a.vert"
+
+""")
+
+
+@inside_glslc_testsuite('Include')
+class VerifyDashIAbsolutePath(expect.StdoutMatch):
+    """Tests that -I parameters can be absolute paths."""
+
+    environment = Directory('.', [
+        File('a.vert', '#version 140\ncontent a\n#include "b.glsl"\n'),
+        Directory('foo', {
+            File('b.glsl', 'content b\n')
+        })
+    ])
+
+    glslc_args = ['-E', 'a.vert', '-I', SpecializedString('$directory/foo')]
+
+    expected_stdout = SpecializedString(
+"""#version 140
+#extension GL_GOOGLE_include_directive : enable
+#line 0 "a.vert"
+
+content a
+#line 0 "$directory/foo/b.glsl"
+ content b
+#line 3 "a.vert"
+
+""")

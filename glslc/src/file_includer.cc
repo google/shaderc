@@ -25,13 +25,16 @@ shaderc_include_result* MakeErrorIncludeResult(const char* message) {
   return new shaderc_include_result{"", 0, message, strlen(message)};
 }
 
-shaderc_include_result* FileIncluder::GetInclude(const char* requested_source,
-                                                 shaderc_include_type,
-                                                 const char*, size_t) {
-  // TODO(dneto): Be sensitive to requesting_source
-  // We don't actually care about the include type.
+shaderc_include_result* FileIncluder::GetInclude(
+    const char* requested_source, shaderc_include_type include_type,
+    const char* requesting_source, size_t) {
+
   const std::string full_path =
-      file_finder_.FindReadableFilepath(requested_source);
+      (include_type == shaderc_include_type_relative)
+          ? file_finder_.FindRelativeReadableFilepath(requesting_source,
+                                                      requested_source)
+          : file_finder_.FindReadableFilepath(requested_source);
+
   if (full_path.empty())
     return MakeErrorIncludeResult("Cannot find or open include file.");
 

@@ -269,6 +269,10 @@ class TestCase:
                 setattr(
                     self.test, expectation_name,
                     ''.join(expanded_expections))
+            elif isinstance(expectation, PlaceHolder):
+                setattr(self.test, expectation_name,
+                        expectation.instantiate_for_expectation(self))
+
 
     def tearDown(self):
         """Removes the directory if we were not instructed to do otherwise."""

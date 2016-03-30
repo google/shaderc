@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "libshaderc_util/file_finder.h"
+#include "libshaderc_util/string_piece.h"
 
 #include <cassert>
 #include <fstream>
@@ -21,7 +22,7 @@
 namespace {
 
 // Returns "" if path is empty or ends in '/'.  Otherwise, returns "/".
-std::string MaybeSlash(const std::string& path) {
+std::string MaybeSlash(const shaderc_util::string_piece& path) {
   return (path.empty() || path.back() == '/') ? "" : "/";
 }
 
@@ -40,6 +41,31 @@ std::string FileFinder::FindReadableFilepath(
     if (opener.open(prefixed_filename, for_reading)) return prefixed_filename;
   }
   return "";
+}
+
+std::string FileFinder::FindRelativeReadableFilepath(
+    const std::string& requesting_file, const std::string& filename) const {
+  assert(!filename.empty());
+
+  string_piece dir_name(requesting_file);
+
+  size_t last_slash = requesting_file.find_last_of("/\\");
+  if (last_slash != std::string::npos) {
+    dir_name = string_piece(requesting_file.c_str(),
+                            requesting_file.c_str() + last_slash);
+  }
+
+  if (dir_name.size() == requesting_file.size()) {
+    dir_name.clear();
+  }
+
+  static const auto for_reading = std::ios_base::in;
+  std::filebuf opener;
+  const std::string relative_filename =
+      dir_name.str() + MaybeSlash(dir_name) + filename;
+  if (opener.open(relative_filename, for_reading)) return relative_filename;
+
+  return FindReadableFilepath(filename);
 }
 
 }  // namespace shaderc_util

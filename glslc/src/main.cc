@@ -112,8 +112,6 @@ int main(int argc, char** argv) {
   bool success = true;
   bool has_stdin_input = false;
 
-  compiler.AddIncludeDirectory("");
-
   for (int i = 1; i < argc; ++i) {
     const string_piece arg = argv[i];
     if (arg == "--help") {

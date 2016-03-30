@@ -22,6 +22,7 @@ argument to the instantiate_*() methods.
 """
 import os
 import tempfile
+from string import Template
 
 
 class PlaceHolderException(Exception):
@@ -115,3 +116,24 @@ class TempFileName(PlaceHolder):
 
     def instantiate_for_expectation(self, testcase):
         return os.path.join(testcase.directory, self.filename)
+
+
+class SpecializedString(PlaceHolder):
+    """Returns a string that has been specialized based on TestCase.
+
+    The string is specialized by expanding it as a string.Template
+    with all of the specialization being done with each $param replaced
+    by the associated member on TestCase.
+    """
+
+    def __init__(self, filename):
+        assert isinstance(filename, str)
+        assert filename != ''
+        self.filename = filename
+
+    def instantiate_for_glslc_args(self, testcase):
+        return Template(self.filename).substitute(vars(testcase))
+
+    def instantiate_for_expectation(self, testcase):
+        return Template(self.filename).substitute(vars(testcase))
+

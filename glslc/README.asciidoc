@@ -210,7 +210,10 @@ empty value.
 
 `-I` adds the specified directory to the search path for include files.
 
-WARNING: Implementation is not complete yet.
+Only `""` style includes are permitted. When searching for included files, first
+the directory of the current file is attempted. If this fails each directory
+supplied via `-I` on the command line is searched in the given order for the
+file.
 
 === Code Generation Options
 
@@ -386,3 +389,11 @@ output.
 
 The `GL_GOOGLE_cpp_style_line_directive` extension is implicitly turned on by
 the `GL_GOOGLE_include_directive` extension.
+
+It is invalid to have any '\' or '/' characters in any filename provided to
+an `#include` directive. The presence of any such characters may lead to
+unexpected behavior on different systems.
+
+Furthermore it is not possible to escape any characters in an `#include`
+directive and as such, any special characters that would have to be escaped in
+C may not show up in file names either.

@@ -43,7 +43,8 @@ class CountingIncluder : public glslang::TShader::Includer {
       const char* requesting_source,
       size_t include_depth) final {
     ++num_include_directives_;
-    return include_delegate(requested_source, type, requesting_source, include_depth);
+    return include_delegate(requested_source, type, requesting_source,
+                            include_depth);
   }
 
   // Releases the given IncludeResult.
