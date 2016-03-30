@@ -83,7 +83,7 @@ void OutputSpvToolsDiagnostic(spv_diagnostic diagnostic, std::string* dest) {
 // error message to *text_or_error.
 spv_result_t DisassembleBinary(const std::vector<uint32_t>& binary,
                                std::string* text_or_error) {
-  auto spvtools_context = spvContextCreate();
+  auto spvtools_context = spvContextCreate(SPV_ENV_UNIVERSAL_1_0);
   spv_text disassembled_text = nullptr;
   spv_diagnostic spvtools_diagnostic = nullptr;
 
