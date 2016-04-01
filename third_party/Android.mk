@@ -85,13 +85,29 @@ include $(BUILD_STATIC_LIBRARY)
 
 SPVTOOLS_LOCAL_PATH := $(THIRD_PARTY_PATH)/spirv-tools
 LOCAL_PATH := $(SPVTOOLS_LOCAL_PATH)
+SPVTOOLS_OUT_PATH=$(abspath $(TARGET_OUT))
+
+define gen_spvtools_grammar_tables
+$(call generate-file-dir,$(SPVTOOLS_OUT_PATH)/opcode.inc)
+$(1)/opcode.inc $(1)/operand.inc: $(SPVTOOLS_LOCAL_PATH)/utils/generate_grammar_tables.py \
+                                  $(SPVTOOLS_LOCAL_PATH)/source/grammar.json
+		@$(HOST_PYTHON) $(SPVTOOLS_LOCAL_PATH)/utils/generate_grammar_tables.py \
+		                $(SPVTOOLS_LOCAL_PATH)/source/grammar.json \
+		                --opcode-file=$(1)/opcode.inc \
+		                --operand-file=$(1)/operand.inc
+		@echo "[$(TARGET_ARCH_ABI)] Grammar        : opcode.inc & operand.inc <= grammar.json"
+$(SPVTOOLS_LOCAL_PATH)/source/opcode.cpp: $(1)/opcode.inc
+$(SPVTOOLS_LOCAL_PATH)/source/operand.cpp: $(1)/operand.inc
+endef
+$(eval $(call gen_spvtools_grammar_tables,$(SPVTOOLS_OUT_PATH)))
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := SPIRV-Tools
 LOCAL_C_INCLUDES := \
 		$(SPVTOOLS_LOCAL_PATH)/include \
 		$(SPVTOOLS_LOCAL_PATH)/external/include \
-		$(SPVTOOLS_LOCAL_PATH)/source
+		$(SPVTOOLS_LOCAL_PATH)/source \
+		$(SPVTOOLS_OUT_PATH)
 LOCAL_EXPORT_C_INCLUDES := \
 		$(SPVTOOLS_LOCAL_PATH)/include \
 		$(SPVTOOLS_LOCAL_PATH)/external/include
