@@ -123,11 +123,12 @@ LOCAL_SRC_FILES:= \
 		source/operand.cpp \
 		source/print.cpp \
 		source/spirv_endian.cpp \
+		source/spirv_target_env.cpp \
 		source/table.cpp \
 		source/text.cpp \
 		source/text_handler.cpp \
-		source/validate_cfg.cpp \
 		source/validate.cpp \
+		source/validate_cfg.cpp \
 		source/validate_id.cpp \
 		source/validate_instruction.cpp \
 		source/validate_layout.cpp \
