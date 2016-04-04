@@ -119,9 +119,9 @@ int main(int argc, char** argv) {
       return 0;
     } else if (arg == "--version") {
       std::cout << kBuildVersion << std::endl;
-      std::cout << "Target: SPIR-V " << SPV_SPIRV_VERSION_MAJOR << "."
-                << SPV_SPIRV_VERSION_MINOR << " rev "
-                << SPV_SPIRV_VERSION_REVISION << std::endl;
+      std::cout << "Target: "
+                << spvTargetEnvDescription(SPV_ENV_UNIVERSAL_1_0_4)
+                << std::endl;
       return 0;
     } else if (arg.starts_with("-o")) {
       string_piece file_name;
