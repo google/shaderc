@@ -208,12 +208,9 @@ empty value.
 
 ==== `-I`
 
-`-I` adds the specified directory to the search path for include files.
-
-Only `""` style includes are permitted. When searching for included files, first
-the directory of the current file is attempted. If this fails each directory
-supplied via `-I` on the command line is searched in the given order for the
-file.
+`-Idirectory' or `-I directory` adds the specified directory to the search path
+for include files.  The directory may be an absolute path or a relative path to
+the current working directory.
 
 === Code Generation Options
 
@@ -381,8 +378,6 @@ The glslc compiler extends GLSL with the include syntax by turning on the
 
 WARNING: This section is still evolving. Expect changes.
 
-TODO: Expected behaviors of the `#include` directive.
-
 If `#include` directives are used in a shader, there will be an `#extension
 GL_GOOGLE_include_directive : enable` line generated into the preprocessed
 output.
@@ -390,10 +385,19 @@ output.
 The `GL_GOOGLE_cpp_style_line_directive` extension is implicitly turned on by
 the `GL_GOOGLE_include_directive` extension.
 
-It is invalid to have any '\' or '/' characters in any filename provided to
-an `#include` directive. The presence of any such characters may lead to
-unexpected behavior on different systems.
+The file argument to `#include` must be enclosed in double quotes.  It must be a
+relative path, using whatever path separator the OS supports.  However, the last
+path element -- the name of the file itself -- must not contain either '/' or
+'\', regardless of which path separator is used.  This will not be flagged as an
+error but will instead trigger undefined behavior.  For example, let's say there
+is a file named `f\ilename.vert` on a Unix OS.  It is not possible to craft a
+`#include` that includes that file.
 
-Furthermore it is not possible to escape any characters in an `#include`
-directive and as such, any special characters that would have to be escaped in
-C may not show up in file names either.
+Furthermore, it is not possible to escape any characters in a `#include`
+directive, so the file argument cannot contain any special characters that need
+escaping in C.
+
+The file argument is a relative path that is matched first against the including
+file's own directory and then against all `-I` arguments in order of their
+appearance on the command line.  If the file cannot be found, `glslc` aborts
+with an error.
