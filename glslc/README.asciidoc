@@ -388,9 +388,10 @@ the `GL_GOOGLE_include_directive` extension.
 The file argument to `#include` must be enclosed in double quotes.  It must be a
 relative path, using whatever path separator the OS supports.  However, the last
 path element -- the name of the file itself -- must not contain either '/' or
-'\', regardless of which path separator is used.  For example, the following is
-invalid: `#include "dir\subdir\subsubdir\filen/ame.vert"`.  This will not be
-flagged as an error but will instead trigger undefined behavior.
+'\', regardless of which path separator is used.  This will not be flagged as an
+error but will instead trigger undefined behavior.  For example, let's say there
+is a file named `f\ilename.vert` on a Unix OS.  It is not possible to craft a
+`#include` that includes that file.
 
 Furthermore, it is not possible to escape any characters in a `#include`
 directive, so the file argument cannot contain any special characters that need
