@@ -268,14 +268,8 @@ class TestDashCapMDashCapMT(DependencyInfoStdoutMatch):
     dependency_rules_expected = [{'target': 'target',
                                   'dependency': {'shader.vert'}}]
 
-# TODO:(qining) Add tests for absolute input path with #include directives, the
-# dependent file should also be represented in absolute path.
-# e.g. glslc -M /usr/local/a.vert
-#   => a.vert.spv: /usr/local/a.vert /usr/local/b.vert /usr/local/subdir/c.vert
-# These tests needs to be enabled after we have full-fledged includer.
 
-
-# @inside_glslc_testsuite('OptionsCapM')
+@inside_glslc_testsuite('OptionsCapM')
 class TestDashCapMInputAbsolutePathWithInclude(DependencyInfoStdoutMatch):
     """Tests -M have included files represented in absolute paths when the input
     file is represented in absolute path.
@@ -283,17 +277,28 @@ class TestDashCapMInputAbsolutePathWithInclude(DependencyInfoStdoutMatch):
          glslc -M /usr/local/a.vert
       => a.vert.spv: /usr/local/a.vert /usr/local/b.vert
     """
-    shader_a = FileShader('#version 140\n#include "b.vert"\nvoid main(){}\n',
-                          '.vert')
-    shader_b = FileShader('void foo(){}\n', '.vert')
+    environment = Directory('.', [File('b.vert', 'void foo(){}\n')])
+    shader_main = FileShader(
+        '#version 140\n#include "b.vert"\nvoid main(){}\n', '.vert')
 
-    glslc_args = ['-M', shader_a]
-    dependency_rules_expected = [{'target': shader_a,
-                                  'target_extension': '.spv',
-                                  'dependency': {shader_a, shader_b}}]
+    glslc_args = ['-M', shader_main]
+    dependency_rules_expected = [{
+        'target': shader_main,
+        'target_extension': '.spv',
+        'dependency': {shader_main}
+        # The dependency here is not complete.  we can not get the absolute path
+        # of b.vert here. It will be added in check_stdout_dependency_info()
+    }]
+
+    def check_stdout_dependency_info(self, status):
+        # Add the absolute path of b.vert to the dependency set
+        self.dependency_rules_expected[0]['dependency'].add(os.path.dirname(
+            self.shader_main.filename) + '/b.vert')
+        return DependencyInfoStdoutMatch.check_stdout_dependency_info(self,
+                                                                      status)
 
 
-# @inside_glslc_testsuite('OptionsCapM')
+@inside_glslc_testsuite('OptionsCapM')
 class TestDashCapMSingleInputAbsolutePathWithIncludeSubdir(
         DependencyInfoStdoutMatch):
     """Tests -M with single input file which does #include another file in a
