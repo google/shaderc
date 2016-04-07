@@ -12,6 +12,7 @@
 ----
 glslc [-c|-S|-E]
       [-Dmacroname[=value]...]
+      [-Idirectory...]
       [-std=standard] [-x glsl]
       [-fshader-stage=...]
       [--target-env=...]
