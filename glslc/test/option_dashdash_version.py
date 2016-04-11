@@ -41,4 +41,4 @@ class TestVersionContainsGlslang(expect.StdoutMatch, expect.ReturnCodeIsZero):
 class TestVersionContainsTarget(expect.StdoutMatch, expect.ReturnCodeIsZero):
     """Tests --version output contains 'Target:'."""
     glslc_args = ['--version']
-    expected_stdout = re.compile('\nTarget: SPIR-V \d+\.\d+ rev \d+')
+    expected_stdout = re.compile('\nTarget: SPIR-V \d+\.\d+')
