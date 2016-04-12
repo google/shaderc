@@ -68,6 +68,12 @@ const char kOpenGLVertexShaderDeducibleStage[] =
        #pragma shader_stage(vertex)
        void main() { int t = gl_VertexID; })";
 
+// A shader that compiles under Vulkan rules.
+// See the GL_KHR_vuklan_glsl extension to GLSL.
+const char kVulkanVertexShader[] =
+    R"(#version 310 es
+       void main() { int t = gl_VertexIndex; })";
+
 // A shader that needs valueless macro predefinition E, to be compiled
 // successfully.
 const std::string kValuelessPredefinitionShader =
@@ -145,8 +151,13 @@ TEST_F(CompilerTest, SimpleVertexShaderPreprocessesSuccessfully) {
   EXPECT_TRUE(SimpleCompilationSucceedsForOutputType(
       kVertexShader, EShLangVertex, Compiler::OutputType::PreprocessedText));
 }
+
 TEST_F(CompilerTest, BadVertexShaderFailsCompilation) {
   EXPECT_FALSE(SimpleCompilationSucceeds(" bogus ", EShLangVertex));
+}
+
+TEST_F(CompilerTest, SimpleVulkanShaderCompilesWithDefaultCompilerSettings) {
+  EXPECT_TRUE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
 }
 
 TEST_F(CompilerTest, RespectTargetEnvOnOpenGLCompatibilityShader) {
@@ -197,8 +208,6 @@ TEST_F(CompilerTest, RespectTargetEnvOnOpenGLShader) {
 
   compiler_.SetMessageRules(kOpenGLRules);
   EXPECT_TRUE(SimpleCompilationSucceeds(kOpenGLVertexShader, stage));
-
-  // TODO(dneto): Check Vulkan rules.
 }
 
 TEST_F(CompilerTest, RespectTargetEnvOnOpenGLShaderWhenDeducingStage) {
@@ -211,12 +220,43 @@ TEST_F(CompilerTest, RespectTargetEnvOnOpenGLShaderWhenDeducingStage) {
   compiler_.SetMessageRules(kOpenGLRules);
   EXPECT_TRUE(
       SimpleCompilationSucceeds(kOpenGLVertexShaderDeducibleStage, stage));
-
-  // TODO(dneto): Check Vulkan rules.
 }
 
-TEST_F(CompilerTest, DISABLED_RespectTargetEnvOnVulkanShader) {
-  // TODO(dneto): Add test for a shader that should only compile for Vulkan.
+TEST_F(CompilerTest, RespectTargetEnvOnVulkanShader) {
+  compiler_.SetMessageRules(kVulkanRules);
+  EXPECT_TRUE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
+}
+
+TEST_F(CompilerTest, VulkanSpecificShaderFailsUnderOpenGLCompatibilityRules) {
+  compiler_.SetMessageRules(kOpenGLCompatibilityRules);
+  EXPECT_FALSE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
+}
+
+TEST_F(CompilerTest, DISABLED_VulkanSpecificShaderFailsUnderOpenGLRules) {
+  // This test is disabled due to an apparent bug in Glslang.
+  // https://github.com/KhronosGroup/glslang/issues/229
+  compiler_.SetMessageRules(kOpenGLRules);
+  EXPECT_FALSE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
+}
+
+TEST_F(CompilerTest, OpenGLCompatibilitySpecificShaderFailsUnderDefaultRules) {
+  EXPECT_FALSE(SimpleCompilationSucceeds(kOpenGLCompatibilityFragShader,
+                                         EShLangFragment));
+}
+
+TEST_F(CompilerTest, OpenGLSpecificShaderFailsUnderDefaultRules) {
+  EXPECT_FALSE(SimpleCompilationSucceeds(kOpenGLVertexShader, EShLangVertex));
+}
+
+TEST_F(CompilerTest, OpenGLCompatibilitySpecificShaderFailsUnderVulkanRules) {
+  compiler_.SetMessageRules(kVulkanRules);
+  EXPECT_FALSE(SimpleCompilationSucceeds(kOpenGLCompatibilityFragShader,
+                                         EShLangFragment));
+}
+
+TEST_F(CompilerTest, OpenGLSpecificShaderFailsUnderVulkanRules) {
+  compiler_.SetMessageRules(kVulkanRules);
+  EXPECT_FALSE(SimpleCompilationSucceeds(kOpenGLVertexShader, EShLangVertex));
 }
 
 TEST_F(CompilerTest, AddMacroDefinition) {

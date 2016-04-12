@@ -30,6 +30,11 @@ def opengl_vertex_shader():
 void main() { int t = gl_VertexID; }"""
 
 
+def vulkan_vertex_shader():
+    return """#version 310 es
+void main() { int t = gl_VertexIndex; }"""
+
+
 @inside_glslc_testsuite('OptionTargetEnv')
 class TestTargetEnvEqOpenglCompatWithOpenGlCompatShader(expect.ValidObjectFile):
     """Tests that compiling OpenGL Compatibility Fragment shader with
@@ -63,6 +68,28 @@ class TestTargetEnvEqOpenglWithOpenGlVertexShader(expect.ValidObjectFile):
     generates valid SPIR-V code"""
     shader = FileShader(opengl_vertex_shader(), '.vert')
     glslc_args = ['--target-env=opengl', '-c', shader]
+
+
+@inside_glslc_testsuite('OptionTargetEnv')
+class TestDefaultTargetEnvWithVulkanShader(expect.ValidObjectFile):
+    """Tests that compiling a Vulkan-specific shader with a default
+    target environment succeeds"""
+    shader = FileShader(vulkan_vertex_shader(), '.vert')
+    glslc_args = ['-c', shader]
+
+
+@inside_glslc_testsuite('OptionTargetEnv')
+class TestTargetEnvEqVulkanWithVulkanShader(expect.ValidObjectFile):
+    """Tests that compiling a Vulkan-specific shader succeeds with
+    --target-env=vulkan"""
+    shader = FileShader(vulkan_vertex_shader(), '.vert')
+    glslc_args = ['--target-env=vulkan', '-c', shader]
+
+
+# Note: Negative tests are covered in the libshaderc_util unit tests.
+# For example, that an OpenGL-specific shader should fail to compile
+# for Vulkan, or a Vulkan-specific shader should fail to compile for
+# OpenGL.
 
 
 @inside_glslc_testsuite('OptionTargetEnv')
