@@ -10,6 +10,7 @@ ALL_LIBS:=libglslang.a \
 	libshaderc.a \
 	libshaderc_util.a \
 	libSPIRV.a \
+	libHLSL.a \
 	libSPIRV-Tools.a
 
 define gen_libshaderc

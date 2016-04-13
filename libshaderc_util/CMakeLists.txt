@@ -25,7 +25,7 @@ target_include_directories(shaderc_util
   PUBLIC include PRIVATE ${glslang_SOURCE_DIR})
 find_package(Threads)
 target_link_libraries(shaderc_util PRIVATE
-  glslang OSDependent OGLCompiler glslang SPIRV
+  glslang OSDependent OGLCompiler HLSL glslang SPIRV
   SPIRV-Tools ${CMAKE_THREAD_LIBS_INIT})
 
 shaderc_add_tests(

@@ -39,6 +39,20 @@ LOCAL_C_INCLUDES:=$(GLSLANG_LOCAL_PATH)/OGLCompiler
 LOCAL_STATIC_LIBRARIES:=OSDependent
 include $(BUILD_STATIC_LIBRARY)
 
+
+# Build Glslang's HLSL parser library.
+include $(CLEAR_VARS)
+LOCAL_MODULE:=HLSL
+LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti
+LOCAL_SRC_FILES:= \
+		hlsl/hlslGrammar.cpp \
+		hlsl/hlslParseHelper.cpp \
+		hlsl/hlslScanContext.cpp
+LOCAL_C_INCLUDES:=$(GLSLANG_LOCAL_PATH) \
+	$(GLSLANG_LOCAL_PATH)/hlsl
+include $(BUILD_STATIC_LIBRARY)
+
+
 include $(CLEAR_VARS)
 
 GLSLANG_OUT_PATH=$(abspath $(TARGET_OUT))
@@ -79,7 +93,7 @@ LOCAL_SRC_FILES:= \
 LOCAL_C_INCLUDES:=$(GLSLANG_LOCAL_PATH) \
 	$(GLSLANG_LOCAL_PATH)/glslang/MachineIndependent \
 	$(GLSLANG_OUT_PATH)
-LOCAL_STATIC_LIBRARIES:=OSDependent OGLCompiler SPIRV
+LOCAL_STATIC_LIBRARIES:=OSDependent OGLCompiler SPIRV HLSL
 include $(BUILD_STATIC_LIBRARY)
 
 
@@ -113,12 +127,10 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := SPIRV-Tools
 LOCAL_C_INCLUDES := \
 		$(SPVTOOLS_LOCAL_PATH)/include \
-		$(SPVTOOLS_LOCAL_PATH)/external/include \
 		$(SPVTOOLS_LOCAL_PATH)/source \
 		$(SPVTOOLS_OUT_PATH)
 LOCAL_EXPORT_C_INCLUDES := \
-		$(SPVTOOLS_LOCAL_PATH)/include \
-		$(SPVTOOLS_LOCAL_PATH)/external/include
+		$(SPVTOOLS_LOCAL_PATH)/include
 LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti
 LOCAL_SRC_FILES:= \
 		source/assembly_grammar.cpp \
