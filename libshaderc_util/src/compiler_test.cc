@@ -232,9 +232,7 @@ TEST_F(CompilerTest, VulkanSpecificShaderFailsUnderOpenGLCompatibilityRules) {
   EXPECT_FALSE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
 }
 
-TEST_F(CompilerTest, DISABLED_VulkanSpecificShaderFailsUnderOpenGLRules) {
-  // This test is disabled due to an apparent bug in Glslang.
-  // https://github.com/KhronosGroup/glslang/issues/229
+TEST_F(CompilerTest, VulkanSpecificShaderFailsUnderOpenGLRules) {
   compiler_.SetMessageRules(kOpenGLRules);
   EXPECT_FALSE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
 }
