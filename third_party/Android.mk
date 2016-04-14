@@ -102,24 +102,32 @@ LOCAL_PATH := $(SPVTOOLS_LOCAL_PATH)
 SPVTOOLS_OUT_PATH=$(abspath $(TARGET_OUT))
 
 define gen_spvtools_grammar_tables
-$(call generate-file-dir,$(1)/core.insts.inc)
-$(1)/core.insts.inc $(1)/operand.kinds.inc $(1)/glsl.std.450.insts.inc $(1)/opencl.std.insts.inc: \
+$(call generate-file-dir,$(1)/core.insts-1-0.inc)
+$(1)/core.insts-1-0.inc $(1)/operand.kinds-1-0.inc $(1)/glsl.std.450.insts-1-0.inc $(1)/opencl.std.insts-1-0.inc: \
         $(SPVTOOLS_LOCAL_PATH)/utils/generate_grammar_tables.py \
-        $(SPVTOOLS_LOCAL_PATH)/source/spirv.core.grammar.json \
-        $(SPVTOOLS_LOCAL_PATH)/source/extinst.glsl.std.450.grammar.json \
-        $(SPVTOOLS_LOCAL_PATH)/source/extinst.opencl.std.grammar.json
+        $(SPVTOOLS_LOCAL_PATH)/source/spirv-1-0.core.grammar.json \
+        $(SPVTOOLS_LOCAL_PATH)/source/extinst-1-0.glsl.std.450.grammar.json \
+        $(SPVTOOLS_LOCAL_PATH)/source/extinst-1-0.opencl.std.grammar.json
 		@$(HOST_PYTHON) $(SPVTOOLS_LOCAL_PATH)/utils/generate_grammar_tables.py \
-		                --spirv-core-grammar=$(SPVTOOLS_LOCAL_PATH)/source/spirv.core.grammar.json \
-		                --extinst-glsl-grammar=$(SPVTOOLS_LOCAL_PATH)/source/extinst.glsl.std.450.grammar.json \
-		                --extinst-opencl-grammar=$(SPVTOOLS_LOCAL_PATH)/source/extinst.opencl.std.grammar.json \
-		                --core-insts-output=$(1)/core.insts.inc \
-		                --glsl-insts-output=$(1)/glsl.std.450.insts.inc \
-		                --opencl-insts-output=$(1)/opencl.std.insts.inc \
-		                --operand-kinds-output=$(1)/operand.kinds.inc
-		@echo "[$(TARGET_ARCH_ABI)] Grammar        : instructions & operands <= grammar JSON files"
-$(SPVTOOLS_LOCAL_PATH)/source/opcode.cpp: $(1)/core.insts.inc
-$(SPVTOOLS_LOCAL_PATH)/source/operand.cpp: $(1)/operand.kinds.inc
-$(SPVTOOLS_LOCAL_PATH)/source/ext_inst.cpp: $(1)/glsl.std.450.insts.inc $(1)/opencl.std.insts.inc
+		                --spirv-core-grammar=$(SPVTOOLS_LOCAL_PATH)/source/spirv-1-0.core.grammar.json \
+		                --extinst-glsl-grammar=$(SPVTOOLS_LOCAL_PATH)/source/extinst-1-0.glsl.std.450.grammar.json \
+		                --extinst-opencl-grammar=$(SPVTOOLS_LOCAL_PATH)/source/extinst-1-0.opencl.std.grammar.json \
+		                --core-insts-output=$(1)/core.insts-1-0.inc \
+		                --glsl-insts-output=$(1)/glsl.std.450.insts-1-0.inc \
+		                --opencl-insts-output=$(1)/opencl.std.insts-1-0.inc \
+		                --operand-kinds-output=$(1)/operand.kinds-1-0.inc
+		@echo "[$(TARGET_ARCH_ABI)] Grammar v1.0   : instructions & operands <= grammar JSON files"
+$(1)/core.insts-1-1.inc $(1)/operand.kinds-1-1.inc: \
+        $(SPVTOOLS_LOCAL_PATH)/utils/generate_grammar_tables.py \
+        $(SPVTOOLS_LOCAL_PATH)/source/spirv-1-1.core.grammar.json
+		@$(HOST_PYTHON) $(SPVTOOLS_LOCAL_PATH)/utils/generate_grammar_tables.py \
+		                --spirv-core-grammar=$(SPVTOOLS_LOCAL_PATH)/source/spirv-1-1.core.grammar.json \
+		                --core-insts-output=$(1)/core.insts-1-1.inc \
+		                --operand-kinds-output=$(1)/operand.kinds-1-1.inc
+		@echo "[$(TARGET_ARCH_ABI)] Grammar v1.1   : instructions & operands <= grammar JSON files"
+$(SPVTOOLS_LOCAL_PATH)/source/opcode.cpp: $(1)/core.insts-1-0.inc $(1)/core.insts-1-1.inc
+$(SPVTOOLS_LOCAL_PATH)/source/operand.cpp: $(1)/operand.kinds-1-0.inc $(1)/operand.kinds-1-1.inc
+$(SPVTOOLS_LOCAL_PATH)/source/ext_inst.cpp: $(1)/glsl.std.450.insts-1-0.inc $(1)/opencl.std.insts-1-0.inc
 endef
 $(eval $(call gen_spvtools_grammar_tables,$(SPVTOOLS_OUT_PATH)))
 
