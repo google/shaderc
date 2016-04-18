@@ -194,11 +194,13 @@ class CompileStringTest : public testing::Test {
   const std::string CompilationErrors(
       const std::string& shader, shaderc_shader_kind kind,
       const shaderc_compile_options_t options = nullptr,
-      OutputType output_type = OutputType::SpirvBinary) {
+      OutputType output_type = OutputType::SpirvBinary,
+      const char* source_name = "shader") {
     const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
-                           "shader", options, output_type);
+                           source_name, options, output_type);
     EXPECT_FALSE(CompilationResultIsSuccess(comp.result())) << kind << '\n'
                                                             << shader;
+    EXPECT_EQ(0u, shaderc_result_get_length(comp.result()));
     return shaderc_result_get_error_message(comp.result());
   };
 
@@ -1115,5 +1117,24 @@ INSTANTIATE_TEST_CASE_P(
         ParseVersionProfileTestCase("450wrongprofile", false),
         ParseVersionProfileTestCase("", false),
     }));
+
+TEST_F(CompileStringTest, NullSourceNameFailsCompilingToBinary) {
+  EXPECT_THAT(CompilationErrors(kEmpty310ESShader, shaderc_glsl_vertex_shader,
+                                nullptr, OutputType::SpirvBinary, nullptr),
+              HasSubstr("Input file name string was null."));
+}
+
+TEST_F(CompileStringTest, NullSourceNameFailsCompilingToAssemblyText) {
+  EXPECT_THAT(
+      CompilationErrors(kEmpty310ESShader, shaderc_glsl_vertex_shader, nullptr,
+                        OutputType::SpirvAssemblyText, nullptr),
+      HasSubstr("Input file name string was null."));
+}
+
+TEST_F(CompileStringTest, NullSourceNameFailsCompilingToPreprocessedText) {
+  EXPECT_THAT(CompilationErrors(kEmpty310ESShader, shaderc_glsl_vertex_shader,
+                                nullptr, OutputType::PreprocessedText, nullptr),
+              HasSubstr("Input file name string was null."));
+}
 
 }  // anonymous namespace
