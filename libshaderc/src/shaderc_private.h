@@ -30,7 +30,7 @@ struct shaderc_compilation_result {
   // uint32_t element.
   std::vector<uint32_t> output_data;
   // The size of the output data in term of bytes.
-  size_t output_data_size;
+  size_t output_data_size = 0;
   // Compilation messages.
   std::string messages;
   // Number of errors.

@@ -349,6 +349,12 @@ shaderc_compilation_result_t CompileToSpecifiedOutputType(
   if (!result) {
     return nullptr;
   }
+  if (!input_file_name) {
+    result->messages = "Input file name string was null.";
+    result->num_errors = 1;
+    result->compilation_status = shaderc_compilation_status_compilation_error;
+    return result;
+  }
   result->compilation_status = shaderc_compilation_status_invalid_stage;
   bool compilation_succeeded = false;  // In case we exit early.
   std::vector<uint32_t> compilation_output_data;
