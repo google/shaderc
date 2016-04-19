@@ -16,7 +16,8 @@ find_package(Threads)
 target_link_libraries(shaderc PRIVATE
   glslang OSDependent OGLCompiler glslang ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(shaderc PRIVATE shaderc_util)
-target_link_libraries(shaderc PRIVATE SPIRV)
+target_link_libraries(shaderc PRIVATE SPIRV)  # from glslang
+target_link_libraries(shaderc PRIVATE SPIRV-Tools)
 
 
 shaderc_add_tests(

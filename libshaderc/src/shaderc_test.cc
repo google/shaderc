@@ -99,10 +99,10 @@ shaderc_compilation_result_t MakeCompilationResult(
   return shaderc_compile_into_spv(compiler, shader.c_str(), shader.size(), kind,
                                   input_file_name, "", options);
 }
-// RAII class for shaderc_compilation_result.
+// RAII class for shaderc_compilation_result. Used for shader compilation.
 class Compilation {
  public:
-  // Compiles shader, keeping the result.
+  // Compiles shader and keeps the result.
   Compilation(const shaderc_compiler_t compiler, const std::string& shader,
               shaderc_shader_kind kind, const char* input_file_name,
               const shaderc_compile_options_t options = nullptr,
@@ -111,6 +111,22 @@ class Compilation {
             compiler, shader, kind, input_file_name, options, output_type)) {}
 
   ~Compilation() { shaderc_result_release(compiled_result_); }
+
+  shaderc_compilation_result_t result() const { return compiled_result_; }
+
+ private:
+  shaderc_compilation_result_t compiled_result_;
+};
+
+// RAII class for shaderc_compilation_result. Used for shader assembling.
+class Assembling {
+ public:
+  // Assembles shader and keeps the result.
+  Assembling(const shaderc_compiler_t compiler, const std::string& assembly)
+      : compiled_result_(shaderc_assemble_into_spv(compiler, assembly.data(),
+                                                   assembly.size())) {}
+
+  ~Assembling() { shaderc_result_release(compiled_result_); }
 
   shaderc_compilation_result_t result() const { return compiled_result_; }
 
@@ -145,19 +161,24 @@ bool CompilationResultIsSuccess(const shaderc_compilation_result_t result) {
          shaderc_compilation_status_success;
 }
 
-// Compiles a shader and returns true if the result is valid SPIR-V.
-bool CompilesToValidSpv(Compiler& compiler, const std::string& shader,
-                        shaderc_shader_kind kind,
-                        const shaderc_compile_options_t options = nullptr) {
-  const Compilation comp(compiler.get_compiler_handle(), shader, kind, "shader",
-                         options, OutputType::SpirvBinary);
-  auto result = comp.result();
+// Returns true if the given result contains a SPIR-V module that contains
+// at least the number of bytes of the header and the correct magic number.
+bool ResultContainsValidSpv(shaderc_compilation_result_t result) {
   if (!CompilationResultIsSuccess(result)) return false;
   size_t length = shaderc_result_get_length(result);
   if (length < 20) return false;
   const uint32_t* bytes = static_cast<const uint32_t*>(
       static_cast<const void*>(shaderc_result_get_bytes(result)));
   return bytes[0] == spv::MagicNumber;
+}
+
+// Compiles a shader and returns true if the result is valid SPIR-V.
+bool CompilesToValidSpv(Compiler& compiler, const std::string& shader,
+                        shaderc_shader_kind kind,
+                        const shaderc_compile_options_t options = nullptr) {
+  const Compilation comp(compiler.get_compiler_handle(), shader, kind, "shader",
+                         options, OutputType::SpirvBinary);
+  return ResultContainsValidSpv(comp.result());
 }
 
 // A testing class to test the compilation of a string with or without options.
@@ -239,6 +260,27 @@ class CompileStringTest : public testing::Test {
   CompileStringTest() : options_(shaderc_compile_options_initialize()) {}
 };
 
+// A testing class to test the assembling of a string.
+// This class wraps the initailization of compiler and groups the result
+// checking methods. Subclass tests can access the compiler object to set their
+// properties.
+class AssembleStringTest : public testing::Test {
+ protected:
+  // Assembles the given assembly and returns true on success.
+  bool AssemblingSuccess(const std::string& assembly) {
+    return CompilationResultIsSuccess(
+        Assembling(compiler_.get_compiler_handle(), assembly).result());
+  }
+
+  bool AssemblingValid(const std::string& assembly) {
+    const auto assembling =
+        Assembling(compiler_.get_compiler_handle(), assembly);
+    return ResultContainsValidSpv(assembling.result());
+  }
+
+  Compiler compiler_;
+};
+
 // Name holders so that we have test cases being grouped with only one real
 // compilation class.
 using CompileStringWithOptionsTest = CompileStringTest;
@@ -250,10 +292,23 @@ TEST_F(CompileStringTest, EmptyString) {
   EXPECT_FALSE(CompilationSuccess("", shaderc_glsl_fragment_shader));
 }
 
+TEST_F(AssembleStringTest, EmptyString) {
+  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  EXPECT_TRUE(AssemblingSuccess(""));
+}
+
 TEST_F(CompileStringTest, GarbageString) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   EXPECT_FALSE(CompilationSuccess("jfalkds", shaderc_glsl_vertex_shader));
   EXPECT_FALSE(CompilationSuccess("jfalkds", shaderc_glsl_fragment_shader));
+}
+
+TEST_F(AssembleStringTest, GarbageString) {
+  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  auto assembling = Assembling(compiler_.get_compiler_handle(), "jfalkds");
+  EXPECT_FALSE(CompilationResultIsSuccess(assembling.result()));
+  EXPECT_EQ(1u, shaderc_result_get_num_errors(assembling.result()));
+  EXPECT_EQ(0u, shaderc_result_get_num_warnings(assembling.result()));
 }
 
 TEST_F(CompileStringTest, ReallyLongShader) {
@@ -275,6 +330,11 @@ TEST_F(CompileStringTest, MinimalShader) {
                                  shaderc_glsl_vertex_shader));
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
                                  shaderc_glsl_fragment_shader));
+}
+
+TEST_F(AssembleStringTest, MinimalShader) {
+  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  EXPECT_TRUE(AssemblingValid(kMinimalShaderAssembly));
 }
 
 TEST_F(CompileStringTest, WorksWithCompileOptions) {
@@ -406,7 +466,6 @@ TEST_F(CompileStringWithOptionsTest, DisassemblyOption) {
                         options_.get(), OutputType::SpirvAssemblyText);
   EXPECT_THAT(disassembly_text, HasSubstr("Capability Shader"));
   EXPECT_THAT(disassembly_text, HasSubstr("MemoryModel"));
-
 }
 
 TEST_F(CompileStringWithOptionsTest, DisassembleMinimalShader) {
@@ -682,8 +741,8 @@ class TestIncluder {
 
   // Wrapper for the corresponding member function.
   static shaderc_include_result* GetIncluderResponseWrapper(
-      void* user_data, const char* filename, int,
-      const char* includer, size_t include_depth) {
+      void* user_data, const char* filename, int, const char* includer,
+      size_t include_depth) {
     return static_cast<TestIncluder*>(user_data)->GetInclude(filename);
   }
 

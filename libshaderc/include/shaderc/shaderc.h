@@ -70,6 +70,7 @@ typedef enum {
   shaderc_compilation_status_compilation_error,
   shaderc_compilation_status_internal_error,  // unexpected failure
   shaderc_compilation_status_null_result_object,
+  shaderc_compilation_status_invalid_assembly,
 } shaderc_compilation_status;
 
 // Usage examples:
@@ -154,7 +155,6 @@ void shaderc_compile_options_add_macro_definition(
 void shaderc_compile_options_set_generate_debug_info(
     shaderc_compile_options_t options);
 
-
 // Forces the GLSL language version and profile to a given pair. The version
 // number is the same as would appear in the #version annotation in the source.
 // Version and profile specified here overrides the #version annotation in the
@@ -197,13 +197,11 @@ enum shaderc_include_type {
 // The type parameter specifies the kind of inclusion request being made.
 // The requesting_source parameter specifies the name of the source containing
 // the #include request.  The includer owns the result object and its contents,
-// and both must remain valid until the release callback is called on the result object.
+// and both must remain valid until the release callback is called on the result
+// object.
 typedef shaderc_include_result* (*shaderc_include_resolve_fn)(
-    void* user_data,
-    const char* requested_source,
-    int type,
-    const char* requesting_source,
-    size_t include_depth);
+    void* user_data, const char* requested_source, int type,
+    const char* requesting_source, size_t include_depth);
 
 // An includer callback type for destroying an include result.
 typedef void (*shaderc_include_result_release_fn)(
@@ -213,7 +211,6 @@ typedef void (*shaderc_include_result_release_fn)(
 void shaderc_compile_options_set_include_callbacks(
     shaderc_compile_options_t options, shaderc_include_resolve_fn resolver,
     shaderc_include_result_release_fn result_releaser, void* user_data);
-
 
 // Sets the compiler mode to suppress warnings, overriding warnings-as-errors
 // mode. When both suppress-warnings and warnings-as-errors modes are
@@ -281,6 +278,18 @@ shaderc_compilation_result_t shaderc_compile_into_preprocessed_text(
     size_t source_text_size, shaderc_shader_kind shader_kind,
     const char* input_file_name, const char* entry_point_name,
     const shaderc_compile_options_t additional_options);
+
+// Takes an assembly string of the format defined in the SPIRV-Tools project
+// (https://github.com/KhronosGroup/SPIRV-Tools/blob/master/syntax.md),
+// assembles it into SPIR-V binary and a shaderc_compilation_result will be
+// returned to hold the results.
+// May be safely called from multiple threads without explicit synchronization.
+// If there was failure in allocating the compiler object, null will be
+// returned.
+shaderc_compilation_result_t shaderc_assemble_into_spv(
+    const shaderc_compiler_t compiler, const char* source_assembly,
+    size_t source_assembly_size);
+
 // The following functions, operating on shaderc_compilation_result_t objects,
 // offer only the basic thread-safety guarantee.
 

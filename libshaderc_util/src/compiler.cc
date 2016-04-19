@@ -184,7 +184,7 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   glslang::GlslangToSpv(*program.getIntermediate(used_shader_stage), spirv);
   if (output_type == OutputType::SpirvAssemblyText) {
     std::string text_or_error;
-    if (DisassembleBinary(spirv, &text_or_error) != SPV_SUCCESS) {
+    if (!SpirvToolsDisassemble(spirv, &text_or_error)) {
       *error_stream << "shaderc: internal error: compilation succeeded but "
                        "failed to disassemble: "
                     << text_or_error << "\n";

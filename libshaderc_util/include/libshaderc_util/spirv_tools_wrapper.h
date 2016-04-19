@@ -18,14 +18,22 @@
 #include <string>
 #include <vector>
 
+#include "libshaderc_util/string_piece.h"
+
 #include "spirv-tools/libspirv.h"
 
 namespace shaderc_util {
-// Disassembles the given binary. Returns SPV_SUCCESS and writes the
-// disassembled text to *text_or_error if successful. Otherwise, writes the
-// error message to *text_or_error.
-spv_result_t DisassembleBinary(const std::vector<uint32_t>& binary,
-                               std::string* text_or_error);
+// Assembles the given assembly. On success, returns true, writes the assembled
+// binary to *binary, and clears *errors. Otherwise, writes the error message
+// into *errors.
+bool SpirvToolsAssemble(const string_piece assembly, spv_binary* binary,
+                        std::string* errors);
+
+// Disassembles the given binary. Returns true and writes the disassembled text
+// to *text_or_error if successful. Otherwise, writes the error message to
+// *text_or_error.
+bool SpirvToolsDisassemble(const std::vector<uint32_t>& binary,
+                           std::string* text_or_error);
 }  // namespace shaderc_util
 
 #endif  // LIBSHADERC_UTIL_INC_SPIRV_TOOLS_WRAPPER_H

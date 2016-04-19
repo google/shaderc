@@ -167,10 +167,10 @@ class CompileOptions {
   class IncluderInterface {
    public:
     // Handles shaderc_include_resolver_fn callbacks.
-    virtual shaderc_include_result* GetInclude(
-        const char* requested_source, shaderc_include_type type,
-        const char* requesting_source,
-        size_t include_depth) = 0;
+    virtual shaderc_include_result* GetInclude(const char* requested_source,
+                                               shaderc_include_type type,
+                                               const char* requesting_source,
+                                               size_t include_depth) = 0;
 
     // Handles shaderc_include_result_release_fn callbacks.
     virtual void ReleaseInclude(shaderc_include_result* data) = 0;
@@ -183,9 +183,8 @@ class CompileOptions {
     includer_ = std::move(includer);
     shaderc_compile_options_set_include_callbacks(
         options_,
-        [](void* user_data, const char* requested_source,
-           int type, const char* requesting_source,
-           size_t include_depth) {
+        [](void* user_data, const char* requested_source, int type,
+           const char* requesting_source, size_t include_depth) {
           auto* includer = static_cast<IncluderInterface*>(user_data);
           return includer->GetInclude(requested_source,
                                       (shaderc_include_type)type,
@@ -321,6 +320,27 @@ class Compiler {
                                         const char* input_file_name) const {
     return CompileGlslToSpv(source_text.data(), source_text.size(), shader_kind,
                             input_file_name);
+  }
+
+  // Assembles the given SPIR-V assembly and returns a SPIR-V binary module
+  // compilation result.
+  // The assembly should follow the syntax defined in the SPIRV-Tools project
+  // (https://github.com/KhronosGroup/SPIRV-Tools/blob/master/syntax.md).
+  // It is valid for the returned CompilationResult object to outlive this
+  // compiler object.
+  SpvCompilationResult AssembleToSpv(const char* source_assembly,
+                                     size_t source_assembly_size) const {
+    return SpvCompilationResult(shaderc_assemble_into_spv(
+        compiler_, source_assembly, source_assembly_size));
+  }
+
+  // Assembles the given SPIR-V assembly and returns a SPIR-V binary module
+  // compilation result.
+  // Like the first AssembleToSpv method but the source is provided as a
+  // std::string.
+  SpvCompilationResult AssembleToSpv(const std::string& source_assembly) const {
+    return SpvCompilationResult(shaderc_assemble_into_spv(
+        compiler_, source_assembly.data(), source_assembly.size()));
   }
 
   // Compiles the given source GLSL and returns the SPIR-V assembly text

@@ -129,6 +129,18 @@ class CppInterface : public testing::Test {
     return compilation_result.GetErrorMessage();
   }
 
+  // Assembles the given SPIR-V assembly and returns true on success.
+  bool AssemblingSuccess(const std::string& shader) const {
+    return compiler_.AssembleToSpv(shader).GetCompilationStatus() ==
+           shaderc_compilation_status_success;
+  }
+
+  // Assembles the given SPIR-V assembly and returns true if the result contains
+  // a valid SPIR-V module.
+  bool AssemblingValid(const std::string& shader) const {
+    return IsValidSpv(compiler_.AssembleToSpv(shader));
+  }
+
   // Compiles a shader, expects compilation success, and returns the output
   // bytes.
   // The input file name is set to "shader" by default.
@@ -205,6 +217,10 @@ TEST_F(CppInterface, EmptyString) {
   EXPECT_FALSE(CompilationSuccess("", shaderc_glsl_fragment_shader));
 }
 
+TEST_F(CppInterface, AssembleEmptyString) {
+  EXPECT_TRUE(AssemblingSuccess(""));
+}
+
 TEST_F(CppInterface, ResultObjectMoves) {
   SpvCompilationResult result = compiler_.CompileGlslToSpv(
       kMinimalShader, shaderc_glsl_vertex_shader, "shader");
@@ -219,11 +235,22 @@ TEST_F(CppInterface, GarbageString) {
   EXPECT_FALSE(CompilationSuccess("jfalkds", shaderc_glsl_fragment_shader));
 }
 
+TEST_F(CppInterface, AssembleGarbageString) {
+  const auto result = compiler_.AssembleToSpv("jfalkds");
+  EXPECT_FALSE(CompilationResultIsSuccess(result));
+  EXPECT_EQ(0u, result.GetNumWarnings());
+  EXPECT_EQ(1u, result.GetNumErrors());
+}
+
 TEST_F(CppInterface, MinimalShader) {
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
                                  shaderc_glsl_vertex_shader));
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kMinimalShader,
                                  shaderc_glsl_fragment_shader));
+}
+
+TEST_F(CppInterface, AssembleMinimalShader) {
+  EXPECT_TRUE(AssemblingValid(kMinimalShaderAssembly));
 }
 
 TEST_F(CppInterface, BasicOptions) {

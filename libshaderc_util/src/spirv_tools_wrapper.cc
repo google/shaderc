@@ -21,11 +21,15 @@ namespace {
 
 // Writes the message contained in the diagnostic parameter to *dest. Assumes
 // the diagnostic message is reported for a binary location.
-void OutputSpvToolsDiagnostic(spv_diagnostic diagnostic, std::string* dest) {
-  assert(!diagnostic->isTextSource);
-
+void SpirvToolsOutputDiagnostic(spv_diagnostic diagnostic, std::string* dest) {
   std::ostringstream os;
-  os << diagnostic->position.index << ": " << diagnostic->error;
+  if (diagnostic->isTextSource) {
+    os << diagnostic->position.line + 1 << ":"
+       << diagnostic->position.column + 1;
+  } else {
+    os << diagnostic->position.index;
+  }
+  os << ": " << diagnostic->error;
   *dest = os.str();
 }
 
@@ -33,24 +37,43 @@ void OutputSpvToolsDiagnostic(spv_diagnostic diagnostic, std::string* dest) {
 
 namespace shaderc_util {
 
-spv_result_t DisassembleBinary(const std::vector<uint32_t>& binary,
-                               std::string* text_or_error) {
-  auto spvtools_context = spvContextCreate(SPV_ENV_UNIVERSAL_1_0);
+bool SpirvToolsDisassemble(const std::vector<uint32_t>& binary,
+                           std::string* text_or_error) {
+  auto spvtools_context = spvContextCreate(SPV_ENV_VULKAN_1_0);
   spv_text disassembled_text = nullptr;
   spv_diagnostic spvtools_diagnostic = nullptr;
 
-  spv_result_t result =
+  const bool result =
       spvBinaryToText(spvtools_context, binary.data(), binary.size(),
                       SPV_BINARY_TO_TEXT_OPTION_INDENT, &disassembled_text,
-                      &spvtools_diagnostic);
-  if (result == SPV_SUCCESS) {
+                      &spvtools_diagnostic) == SPV_SUCCESS;
+  if (result) {
     text_or_error->assign(disassembled_text->str, disassembled_text->length);
   } else {
-    OutputSpvToolsDiagnostic(spvtools_diagnostic, text_or_error);
+    SpirvToolsOutputDiagnostic(spvtools_diagnostic, text_or_error);
   }
 
   spvDiagnosticDestroy(spvtools_diagnostic);
   spvTextDestroy(disassembled_text);
+  spvContextDestroy(spvtools_context);
+
+  return result;
+}
+
+bool SpirvToolsAssemble(const string_piece assembly, spv_binary* binary,
+                        std::string* errors) {
+  auto spvtools_context = spvContextCreate(SPV_ENV_VULKAN_1_0);
+  spv_diagnostic spvtools_diagnostic = nullptr;
+
+  *binary = nullptr;
+  errors->clear();
+
+  const bool result =
+      spvTextToBinary(spvtools_context, assembly.data(), assembly.size(),
+                      binary, &spvtools_diagnostic) == SPV_SUCCESS;
+  if (!result) SpirvToolsOutputDiagnostic(spvtools_diagnostic, errors);
+
+  spvDiagnosticDestroy(spvtools_diagnostic);
   spvContextDestroy(spvtools_context);
 
   return result;

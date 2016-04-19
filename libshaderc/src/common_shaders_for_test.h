@@ -32,12 +32,12 @@ const char kMinimalShaderWithMacro[] =
 
 // The minimal shader that needs valueless predefinition of 'E' to compile.
 const char kValuelessPredefinitionShader[] =
-      "#version 140\n"
-      "#ifdef E\n"
-      "void main(){}\n"
-      "#else\n"
-      "#error\n"
-      "#endif";
+    "#version 140\n"
+    "#ifdef E\n"
+    "void main(){}\n"
+    "#else\n"
+    "#error\n"
+    "#endif";
 
 // By default the compiler will emit a warning on line 2 complaining
 // that 'float' is a deprecated attribute in version 130.  Use verison 140
@@ -195,6 +195,26 @@ const char* kMinimalShaderDisassemblySubstrings[] = {
 
     "               OpReturn\n"
     "               OpFunctionEnd\n"};
+
+const char kMinimalShaderAssembly[] = R"(
+    ; SPIR-V
+    ; Version: 1.0
+    ; Generator: Khronos Glslang Reference Front End; 1
+    ; Bound: 6
+    ; Schema: 0
+
+         OpCapability Shader
+    %1 = OpExtInstImport "GLSL.std.450"
+         OpMemoryModel Logical GLSL450
+         OpEntryPoint Vertex %4 "main"
+         OpSource ESSL 310
+         OpName %4 "main"
+    %2 = OpTypeVoid
+    %3 = OpTypeFunction %2
+    %4 = OpFunction %2 None %3
+    %5 = OpLabel
+         OpReturn
+         OpFunctionEnd)";
 
 #ifdef __cplusplus
 }
