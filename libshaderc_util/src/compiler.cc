@@ -15,8 +15,6 @@
 #include "libshaderc_util/compiler.h"
 
 #include <cstdint>
-#include <fstream>
-#include <iostream>
 #include <tuple>
 
 #include "libshaderc_util/format.h"
@@ -24,10 +22,9 @@
 #include "libshaderc_util/message.h"
 #include "libshaderc_util/resources.h"
 #include "libshaderc_util/shader_stage.h"
+#include "libshaderc_util/spirv_tools_wrapper.h"
 #include "libshaderc_util/string_piece.h"
 #include "libshaderc_util/version_profile.h"
-
-#include "spirv-tools/libspirv.h"
 
 #include "SPIRV/GlslangToSpv.h"
 
@@ -67,43 +64,6 @@ std::pair<int, string_piece> DecodeLineDirective(string_piece directive) {
   directive = directive.strip("\" \n");
   return std::make_pair(line, directive);
 }
-
-// Writes the message contained in the diagnostic parameter to *dest. Assumes
-// the diagnostic message is reported for a binary location.
-void OutputSpvToolsDiagnostic(spv_diagnostic diagnostic, std::string* dest) {
-  assert(!diagnostic->isTextSource);
-
-  std::ostringstream os;
-  os << diagnostic->position.index << ": " << diagnostic->error;
-  *dest = os.str();
-}
-
-// Disassembles the given binary. Returns SPV_SUCCESS and writes the
-// disassembled text to *text_or_error if successful. Otherwise, writes the
-// error message to *text_or_error.
-spv_result_t DisassembleBinary(const std::vector<uint32_t>& binary,
-                               std::string* text_or_error) {
-  auto spvtools_context = spvContextCreate(SPV_ENV_UNIVERSAL_1_0);
-  spv_text disassembled_text = nullptr;
-  spv_diagnostic spvtools_diagnostic = nullptr;
-
-  spv_result_t result =
-      spvBinaryToText(spvtools_context, binary.data(), binary.size(),
-                      SPV_BINARY_TO_TEXT_OPTION_INDENT, &disassembled_text,
-                      &spvtools_diagnostic);
-  if (result == SPV_SUCCESS) {
-    text_or_error->assign(disassembled_text->str, disassembled_text->length);
-  } else {
-    OutputSpvToolsDiagnostic(spvtools_diagnostic, text_or_error);
-  }
-
-  spvDiagnosticDestroy(spvtools_diagnostic);
-  spvTextDestroy(disassembled_text);
-  spvContextDestroy(spvtools_context);
-
-  return result;
-}
-
 }  // anonymous namespace
 
 namespace shaderc_util {

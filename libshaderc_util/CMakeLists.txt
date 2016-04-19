@@ -8,6 +8,7 @@ add_library(shaderc_util STATIC
   include/libshaderc_util/mutex.h
   include/libshaderc_util/message.h
   include/libshaderc_util/resources.h
+  include/libshaderc_util/spirv_tools_wrapper.h
   include/libshaderc_util/string_piece.h
   include/libshaderc_util/universal_unistd.h
   include/libshaderc_util/version_profile.h
@@ -17,6 +18,7 @@ add_library(shaderc_util STATIC
   src/message.cc
   src/resources.cc
   src/shader_stage.cc
+  src/spirv_tools_wrapper.cc
   src/version_profile.cc
 )
 
