@@ -147,7 +147,7 @@ class TestStatus:
         self.stderr = stderr
         # temporary directory where the test runs
         self.directory = directory
-        # the names of input shader files (without path)
+        # the names of input shader files (potentially including paths)
         self.input_filenames = input_filenames
 
 

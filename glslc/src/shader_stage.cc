@@ -60,7 +60,9 @@ shaderc_shader_kind DeduceDefaultShaderKindFromFileName(
       {"tesc", shaderc_glsl_default_tess_control_shader},
       {"tese", shaderc_glsl_default_tess_evaluation_shader},
       {"geom", shaderc_glsl_default_geometry_shader},
-      {"comp", shaderc_glsl_default_compute_shader}};
+      {"comp", shaderc_glsl_default_compute_shader},
+      {"spvasm", shaderc_spirv_assembly},
+  };
 
   const string_piece extension = glslc::GetFileExtension(file_name);
   shaderc_shader_kind stage = shaderc_glsl_infer_from_source;

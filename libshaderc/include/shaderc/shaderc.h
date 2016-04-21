@@ -44,6 +44,7 @@ typedef enum {
   shaderc_glsl_default_geometry_shader,
   shaderc_glsl_default_tess_control_shader,
   shaderc_glsl_default_tess_evaluation_shader,
+  shaderc_spirv_assembly,
 } shaderc_shader_kind;
 
 typedef enum {

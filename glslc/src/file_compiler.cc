@@ -54,10 +54,10 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
     error_file_name = "<stdin>";
   }
 
-  string_piece source_string;
+  string_piece source_string = "";
   if (!input_data.empty()) {
-    source_string = string_piece(&(*input_data.begin()),
-                                 &(*input_data.begin()) + input_data.size());
+    source_string = {&input_data.front(),
+                     &input_data.front() + input_data.size()};
   }
 
   std::unique_ptr<FileIncluder> includer(
@@ -66,6 +66,18 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
   // shaderc::CompileOptions.
   const auto& used_source_files = includer->file_path_trace();
   options_.SetIncluder(std::move(includer));
+
+  if (shader_stage == shaderc_spirv_assembly) {
+    // Only act if the requested target is SPIR-V binary.
+    if (output_type_ == OutputType::SpirvBinary) {
+      const auto result =
+          compiler_.AssembleToSpv(source_string.data(), source_string.size());
+      return EmitCompiledResult(result, input_file, error_file_name,
+                                used_source_files, output_stream);
+    } else {
+      return true;
+    }
+  }
 
   switch (output_type_) {
     case OutputType::SpirvBinary: {
@@ -217,9 +229,9 @@ bool FileCompiler::ValidateOptions(size_t num_files) {
 
   // If we are outputting many object files, we cannot specify -o. Also
   // if we are preprocessing multiple files they must be to stdout.
-  if (num_files > 1 &&
-      ((!PreprocessingOnly() && !needs_linking_ && !output_file_name_.empty()) ||
-       (PreprocessingOnly() && output_file_name_ != "-"))) {
+  if (num_files > 1 && ((!PreprocessingOnly() && !needs_linking_ &&
+                         !output_file_name_.empty()) ||
+                        (PreprocessingOnly() && output_file_name_ != "-"))) {
     std::cerr << "glslc: error: cannot specify -o when generating multiple"
                  " output files"
               << std::endl;

@@ -63,6 +63,7 @@ EShLanguage GetForcedStage(shaderc_shader_kind kind) {
     case shaderc_glsl_default_geometry_shader:
     case shaderc_glsl_default_tess_control_shader:
     case shaderc_glsl_default_tess_evaluation_shader:
+    case shaderc_spirv_assembly:
       return EShLangCount;
   }
   assert(0 && "Unhandled shaderc_shader_kind");
@@ -150,6 +151,8 @@ class StageDeducer {
         return EShLangTessControl;
       case shaderc_glsl_default_tess_evaluation_shader:
         return EShLangTessEvaluation;
+    case shaderc_spirv_assembly:
+        return EShLangCount;
     }
     assert(0 && "Unhandled shaderc_shader_kind");
     return EShLangCount;
