@@ -23,9 +23,13 @@ glslc [-c|-S|-E]
 
 == Description
 
-=== Shader stage specification
+=== Input file languages
 
-glslc provides three ways to specify the shader stage of an input shader file:
+glslc accepts both GLSL source and SPIR-V assembly files as inputs.
+
+==== Shader stage specification
+
+glslc provides three ways to specify the shader stage of a GLSL source file:
 `-fshader-stage=<stage>`, `#pragma shader_stage(<stage>)`, and file extension.
 The `-fshader-stage=` option overrides `#pragma shader_stage()`, which overrides
 the file extension.
@@ -61,6 +65,16 @@ expansion. It must be exactly one of the ``stage``s in the above table.
 * If there is more than one `#pragma shader_stage()` directive in the same
   translation unit, all the ``stage``s specified must be the same. Otherwise,
   glslc will issue an error.
+
+==== SPIR-V assembly files
+
+SPIR-V assembly input files should follow the
+https://github.com/KhronosGroup/SPIRV-Tools/blob/master/syntax.md[syntax]
+defined in the https://github.com/KhronosGroup/SPIRV-Tools[SPIRV-Tools]
+project and have the `.spvasm` extension. Command line options treat SPIR-V
+assembly files differently; some may ignore them, e.g., `<<option-cap-e,-E>>`,
+`<<option-cap-s,-S>>`, and some may even treat them not as SPIR-V assembly
+files, e.g., `<<shader-stage-with-spirv-assembly,-fshader-stage\=>>`.
 
 [[output-file-naming]]
 === Output file naming
@@ -124,6 +138,15 @@ Shader Stage Selection>> table.
   extension, the file extension is ignored and the `-fshader-stage=` argument
   is used instead.
 
+[[shader-stage-with-spirv-assembly]]
+CAUTION: `-fshader-stage=` overrides file extension; that means it should not
+be used together with SPIR-V assembly files because glslc will treat the given
+SPIR-V assembly files as GLSL source code of the given shader stage. If you
+need to supply both SPIR-V assembly files and `-fshader-stage=` on the same
+command line, please put SPIR-V assembly files ahead of the first
+`-fshader-stage=`, since `-fshader-stage=` only affects the treatment of
+subsequent files.
+
 ==== `-std=`
 
 `-std=<value>` lets you specify a shader version and profile on the command
@@ -177,6 +200,7 @@ Each input shader file results in a SPIR-V binary file; these SPIR-V binary
 files are named by the rules in the <<output-file-naming,Output File Naming>>
 section.
 
+[[option-cap-e]]
 ==== `-E`
 
 `-E` tells the glslc compiler to run only the preprocessing stage. It overrides
@@ -185,12 +209,17 @@ preprocessing errors are written to standard error. If multiple input shader
 files are given, their preprocessed output are all written to standard output,
 in the order specified on the command line.
 
+glslc will do nothing for SPIR-V assembly files with this option.
+
+[[option-cap-s]]
 ==== `-S`
 
 `-S` tells the glslc compiler to run the preprocessing, compiling, and then
 disassembling stage. It overrides `-c`. Each input shader file results in a
 SPIR-V assembly file; these SPIR-V assembly files are named by the rules in the
 <<output-file-naming,Output File Naming>> section.
+
+glslc will do nothing for SPIR-V assembly files with this option.
 
 ==== No Compilation Stage Selection
 
