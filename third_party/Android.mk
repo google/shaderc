@@ -150,6 +150,7 @@ LOCAL_SRC_FILES:= \
 		source/opcode.cpp \
 		source/operand.cpp \
 		source/print.cpp \
+		source/software_version.cpp \
 		source/spirv_endian.cpp \
 		source/spirv_target_env.cpp \
 		source/table.cpp \
