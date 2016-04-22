@@ -131,6 +131,18 @@ $(SPVTOOLS_LOCAL_PATH)/source/ext_inst.cpp: $(1)/glsl.std.450.insts-1-0.inc $(1)
 endef
 $(eval $(call gen_spvtools_grammar_tables,$(SPVTOOLS_OUT_PATH)))
 
+define gen_spvtools_build_version_inc
+$(call generate-file-dir,$(1)/dummy_filename)
+$(1)/build-version.inc: \
+        $(SPVTOOLS_LOCAL_PATH)/utils/update_build_version.py \
+        $(SPVTOOLS_LOCAL_PATH)/CHANGES
+		@$(HOST_PYTHON) $(SPVTOOLS_LOCAL_PATH)/utils/update_build_version.py \
+		                $(SPVTOOLS_LOCAL_PATH) $(1)/build-version.inc
+		@echo "[$(TARGET_ARCH_ABI)] Generate       : build-version.inc <= CHANGES"
+$(SPVTOOLS_LOCAL_PATH)/source/software_version.cpp: $(1)/build-version.inc
+endef
+$(eval $(call gen_spvtools_build_version_inc,$(SPVTOOLS_OUT_PATH)))
+
 include $(CLEAR_VARS)
 LOCAL_MODULE := SPIRV-Tools
 LOCAL_C_INCLUDES := \
