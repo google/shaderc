@@ -79,6 +79,7 @@ LOCAL_SRC_FILES:= \
 		glslang/MachineIndependent/parseConst.cpp \
 		glslang/MachineIndependent/ParseHelper.cpp \
 		glslang/MachineIndependent/PoolAlloc.cpp \
+		glslang/MachineIndependent/propagateNoContraction.cpp \
 		glslang/MachineIndependent/reflection.cpp \
 		glslang/MachineIndependent/RemoveTree.cpp \
 		glslang/MachineIndependent/Scan.cpp \
