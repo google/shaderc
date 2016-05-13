@@ -147,6 +147,13 @@ Optionally, the following tools may be installed on any OS:
    - [`pygments.rb`](https://rubygems.org/gems/pygments.rb) required by
      `asciidoctor` for syntax highlighting.
  - [`nosetests`](https://nose.readthedocs.org): for testing the Python code.
+ - [`ninja`](https://ninja-build.org/): for building (and testing),
+   provided by the `ninja-build` package on Ubuntu.
+
+Other platform-specific [CMake Generators](https://cmake.org/cmake/help/v3.0/manual/cmake-generators.7.html#command-line-build-tool-generators)
+can also be used:
+ - The output of `cmake --help` lists available generators on the current platform.
+ - Use its `-G` option to specify the generator for a new build tree.
 
 ### Building and running Shderc using Docker
 
