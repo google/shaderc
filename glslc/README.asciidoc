@@ -252,6 +252,39 @@ code, such as identifier names and line numbers.
 NOTE: Currently this option has no effect.  Full functionality depends on
 glslang support for generating debug info.
 
+==== `-mfmt=<format>`
+
+`-mfmt=<format>` selects output format for compilation output in SPIR-V binary
+code form.  Supported options are listed in the
+<<binary-output-format-options,binary output format options>> table. This
+option is only valid to be used when the compilation output is SPIR-V binary
+code. Specifying any options listed below when the output is not SPIR-V binary
+code, like disassembly (with `-S` specified), text (with `-M`, `-MM` or `-E`
+specified) will trigger an error.
+
+[[binary-output-format-options]]
+.Binary Output Format Options
+[cols="20%,80%"]
+|===
+|Format option  |Description
+
+|bin            |Output SPIR-V binary code as a sequence of binary 32-bitwords
+                 in host native endianness. This is the default format for
+                 SPIR-V binary compilation output.
+|num            |Output SPIR-V binary code as a text file containing a list of
+                 comma-separated hex numbers. +
+                 Example: `glslc -c -mfmt=num main.vert -o output_file.txt` +
+                 Content of the output_file.txt: +
+                 0x07230203,0x00010000,0x00080001,0x00000006...
+|c              |Output SPIR-V binary code as a text file containing C-style +
+                 initializer list. +
+                 This is just wrapping the output of `num` option with curly
+                 brackets. +
+                 Example: `glslc -c -mfmt=c main.vert -o output_file.txt` +
+                 Content of output_file.txt: +
+                 {0x07230203, 0x00010000, 0x00080001, 0x00000006...}
+|===
+
 === Warning and Error Options
 
 ==== `-w`
