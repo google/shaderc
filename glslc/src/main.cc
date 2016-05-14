@@ -59,6 +59,10 @@ Options:
   -std=<value>      Version and profile for input files. Possible values
                     are concatenations of version and profile, e.g. 310es,
                     450core, etc.
+  -mfmt=<format>    Output SPIR-V binary code using the selected format. This
+                    option may be specified only when the compilation output is
+                    in SPIR-V binary code form. Available options include bin, c
+                    and num. By default the binary output format is bin.
   -M                Generate make dependencies. Implies -E and -w.
   -MM               An alias for -M.
   -MD               Generate make dependencies and compile.
@@ -167,6 +171,23 @@ int main(int argc, char** argv) {
         return 1;
       }
       compiler.options().SetTargetEnvironment(target_env, 0);
+    } else if (arg.starts_with("-mfmt=")) {
+      const string_piece binary_output_format =
+          arg.substr(std::strlen("-mfmt="));
+      if (binary_output_format == "bin") {
+        compiler.SetSpirvBinaryOutputFormat(
+            glslc::FileCompiler::SpirvBinaryEmissionFormat::Binary);
+      } else if (binary_output_format == "num") {
+        compiler.SetSpirvBinaryOutputFormat(
+            glslc::FileCompiler::SpirvBinaryEmissionFormat::Numbers);
+      } else if (binary_output_format == "c") {
+        compiler.SetSpirvBinaryOutputFormat(
+            glslc::FileCompiler::SpirvBinaryEmissionFormat::CInitList);
+      } else {
+        std::cerr << "glslc: error: invalid value '" << binary_output_format
+                  << "' in '-mfmt=" << binary_output_format << "'" << std::endl;
+        return 1;
+      }
     } else if (arg.starts_with("-x")) {
       string_piece option_arg;
       if (!GetOptionArgument(argc, argv, &i, "-x", &option_arg)) {

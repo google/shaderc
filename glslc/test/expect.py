@@ -19,6 +19,7 @@ as superclass and providing the expected_* variables required by the check_*()
 methods in the mixin classes.
 """
 import os
+import re
 from glslc_test_framework import GlslCTest
 
 
@@ -238,11 +239,20 @@ class ValidFileContents(GlslCTest):
             return False, 'Cannot find file: ' + target_filename
         with open(target_filename, 'r') as target_file:
             file_contents = target_file.read()
-            if file_contents == self.expected_file_contents:
-                return True, ''
-            return False, ('Incorrect file output: \n{act}\nExpected:\n{exp}'
-                           ''.format(act=file_contents,
-                                     exp=self.expected_file_contents))
+            if type(self.expected_file_contents) == str:
+                if file_contents == self.expected_file_contents:
+                    return True, ''
+                return False, ('Incorrect file output: \n{act}\nExpected:\n{exp}'
+                               ''.format(act=file_contents,
+                                         exp=self.expected_file_contents))
+            elif isinstance(self.expected_file_contents, type(re.compile(''))):
+                if self.expected_file_contents.search(file_contents):
+                    return True, ''
+                return False, (
+                    'Incorrect file output: \n{act}\n'
+                    'Expected matching regex pattern:\n{exp}'.format(
+                        act=file_contents,
+                        exp=self.expected_file_contents.pattern))
         return False, ('Could not open target file ' + target_filename +
                        ' for reading')
 

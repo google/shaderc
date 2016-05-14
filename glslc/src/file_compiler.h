@@ -29,8 +29,19 @@ namespace glslc {
 // SPIR-V files or preprocessed output.
 class FileCompiler {
  public:
+  enum class SpirvBinaryEmissionFormat {
+    Unspecified,  // No binary output format specified, this is the only valid
+                  // option when the compilation output is not in SPIR-V binary
+                  // code form.
+    Binary,       // Emits SPIR-V binary code directly.
+    Numbers,      // Emits SPIR-V binary code as a list of hex numbers.
+    CInitList,    // Emits SPIR-V bianry code as a C-style initializer list
+                  // of hex numbers.
+  };
+
   FileCompiler()
       : output_type_(OutputType::SpirvBinary),
+        binary_emission_format_(SpirvBinaryEmissionFormat::Unspecified),
         needs_linking_(true),
         total_warnings_(0),
         total_errors_(0) {}
@@ -61,6 +72,11 @@ class FileCompiler {
   // Sets the output filename. A name of "-" indicates standard output.
   void SetOutputFileName(const shaderc_util::string_piece& file) {
     output_file_name_ = file;
+  }
+
+  // Sets the format for SPIR-V binary compilation output.
+  void SetSpirvBinaryOutputFormat(SpirvBinaryEmissionFormat format) {
+    binary_emission_format_ = format;
   }
 
   // Returns false if any options are incompatible. The num_files parameter
@@ -166,7 +182,9 @@ class FileCompiler {
   std::string GetCandidateOutputFileName(std::string input_filename);
 
   // Returns true if the compiler's output is preprocessed text.
-  bool PreprocessingOnly() { return output_type_ == OutputType::PreprocessedText; }
+  bool PreprocessingOnly() {
+    return output_type_ == OutputType::PreprocessedText;
+  }
 
   // Performs actual SPIR-V compilation on the contents of input files.
   shaderc::Compiler compiler_;
@@ -177,6 +195,10 @@ class FileCompiler {
 
   // What kind of output will be produced?
   OutputType output_type_;
+
+  // The Flag to indicate to which format the output SPIR-V binary code should
+  // be emitted.
+  SpirvBinaryEmissionFormat binary_emission_format_;
 
   // A FileFinder used to substitute #include directives in the source code.
   shaderc_util::FileFinder include_file_finder_;

@@ -71,6 +71,10 @@ Options:
   -std=<value>      Version and profile for input files. Possible values
                     are concatenations of version and profile, e.g. 310es,
                     450core, etc.
+  -mfmt=<format>    Output SPIR-V binary code using the selected format. This
+                    option may be specified only when the compilation output is
+                    in SPIR-V binary code form. Available options include bin, c
+                    and num. By default the binary output format is bin.
   -M                Generate make dependencies. Implies -E and -w.
   -MM               An alias for -M.
   -MD               Generate make dependencies and compile.
