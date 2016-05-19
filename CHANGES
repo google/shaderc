@@ -1,0 +1,16 @@
+Revision history for Shaderc
+
+v2016.0-dev 2016-05-19
+
+ - Adds v<year>.<index> versioning, with "-dev" indicating
+   work in progress.  The intent is to more easly report
+   and summarize functionality when SPIRV-Tools is incorporated
+   in downstream projects.
+
+ - Summary of functionality (See the README.md for more):
+   - Compiles GLSL to SPIR-V binary through both command line and API calls
+   - Supports compiling GLSL to SPIR-V assembly code
+   - Supports compiling SPIR-V assembly code to SPIR-V binary
+   - Supports OpenGL, OpenGL Compatible and Vulkan semantics
+   - Supports user-definined macros
+   - Supports dependency information dumpping
