@@ -51,7 +51,7 @@ def command_output(cmd, dir):
     return stdout
 
 
-def deduceSoftwareVersion(dir):
+def deduce_software_version(dir):
     """Returns a software version number parsed from the CHANGES file
     in the given dir.
 
@@ -89,12 +89,12 @@ def describe(dir):
             return 'unknown hash, ' + datetime.date.today().isoformat()
 
 
-def getVersionString(project, dir):
+def get_version_string(project, dir):
     """Returns a detailed version string for a given project with its directory,
     which consists of software version string and git description string."""
     detailed_version_string_lst = [project]
     if project != 'glslang':
-        detailed_version_string_lst.append(deduceSoftwareVersion(dir))
+        detailed_version_string_lst.append(deduce_software_version(dir))
     detailed_version_string_lst.append(describe(dir).replace('"', '\\"'))
     return ' '.join(detailed_version_string_lst)
 
@@ -108,7 +108,7 @@ def main():
 
     projects = ['shaderc', 'spirv-tools', 'glslang']
     new_content = ''.join([
-        '"{}\\n"\n'.format(getVersionString(p, d))
+        '"{}\\n"\n'.format(get_version_string(p, d))
         for (p, d) in zip(projects, sys.argv[1:])
     ])
     if os.path.isfile(OUTFILE) and new_content == open(OUTFILE, 'r').read():
