@@ -27,6 +27,7 @@ from __future__ import print_function
 
 import datetime
 import os.path
+import re
 import subprocess
 import sys
 
@@ -50,6 +51,23 @@ def command_output(cmd, dir):
     return stdout
 
 
+def deduce_software_version(dir):
+    """Returns a software version number parsed from the CHANGES file
+    in the given dir.
+
+    The CHANGES file describes most recent versions first.
+    """
+
+    pattern = re.compile('(v\d+\.\d+(-dev)) \d\d\d\d-\d\d-\d\d$')
+    changes_file = os.path.join(dir, 'CHANGES')
+    with open(changes_file) as f:
+        for line in f.readlines():
+            match = pattern.match(line)
+            if match:
+                return match.group(1)
+    raise Exception('No version number found in {}'.format(changes_file))
+
+
 def describe(dir):
     """Returns a string describing the current Git HEAD version as descriptively
     as possible.
@@ -71,21 +89,32 @@ def describe(dir):
             return 'unknown hash, ' + datetime.date.today().isoformat()
 
 
+def get_version_string(project, dir):
+    """Returns a detailed version string for a given project with its directory,
+    which consists of software version string and git description string."""
+    detailed_version_string_lst = [project]
+    if project != 'glslang':
+        detailed_version_string_lst.append(deduce_software_version(dir))
+    detailed_version_string_lst.append(describe(dir).replace('"', '\\"'))
+    return ' '.join(detailed_version_string_lst)
+
+
 def main():
     if len(sys.argv) != 4:
         print(
-            'usage: {0} <shaderc_dir> <spirv-tools_dir> <glslang_dir>'.format(sys.argv[0]))
+            'usage: {0} <shaderc_dir> <spirv-tools_dir> <glslang_dir>'.format(
+                sys.argv[0]))
         sys.exit(1)
 
     projects = ['shaderc', 'spirv-tools', 'glslang']
-    tags = [describe(p).replace('"', '\\"')
-            for p in sys.argv[1:]]
     new_content = ''.join([
-        '"{} {}\\n"\n'.format(p, t)
-        for (p, t) in zip(projects, tags)])
+        '"{}\\n"\n'.format(get_version_string(p, d))
+        for (p, d) in zip(projects, sys.argv[1:])
+    ])
     if os.path.isfile(OUTFILE) and new_content == open(OUTFILE, 'r').read():
         sys.exit(0)
     open(OUTFILE, 'w').write(new_content)
+
 
 if __name__ == '__main__':
     main()

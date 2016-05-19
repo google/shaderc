@@ -1,0 +1,17 @@
+Revision history for Shaderc
+
+v2016.0-dev 2016-05-19
+
+ - Adds v<year>.<index> versioning, with "-dev" suffix to indicate work in
+   progress. The intent is to summarize and report functionalities more easily
+   for incorporating into downstream projects.
+
+ - Summary of functionalities (See the README.md for more details):
+   - Provides libraries and command line tools for generating SPIR-V modules
+   - Supports GLSL source code or SPIR-V assembly as input
+   - Supports SPIR-V binary or assembly text as output
+   - Command line options follow GCC/Clang conventions
+   - Supports various semantics (OpenGL, OpenGL Compatible and Vulkan)
+   - Supports #include
+   - Supports user-defined macros
+   - Supports dependency information dumping
