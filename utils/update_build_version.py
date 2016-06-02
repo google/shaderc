@@ -58,7 +58,7 @@ def deduce_software_version(dir):
     The CHANGES file describes most recent versions first.
     """
 
-    pattern = re.compile('(v\d+\.\d+(-dev)) \d\d\d\d-\d\d-\d\d$')
+    pattern = re.compile('(v\d+\.\d+(-dev)?) \d\d\d\d-\d\d-\d\d$')
     changes_file = os.path.join(dir, 'CHANGES')
     with open(changes_file) as f:
         for line in f.readlines():
