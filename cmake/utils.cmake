@@ -19,6 +19,14 @@ function(shaderc_default_c_compile_options TARGET)
       # requires clang to be built with compiler-rt.
       target_link_libraries(${TARGET} PRIVATE --coverage)
     endif()
+    if (NOT SHADERC_ENABLE_SHARED_CRT)
+      if (WIN32)
+	# For MinGW cross compile, statically link to the libgcc runtime.
+	# But it still depends on MSVCRT.dll.
+	set_target_properties(${TARGET} PROPERTIES
+		LINK_FLAGS "-static -static-libgcc")
+      endif(WIN32)
+    endif(NOT SHADERC_ENABLE_SHARED_CRT)
   else()
     # disable warning C4800: 'int' : forcing value to bool 'true' or 'false'
     # (performance warning)
@@ -31,12 +39,12 @@ function(shaderc_default_compile_options TARGET)
   if (NOT "${MSVC}")
     target_compile_options(${TARGET} PRIVATE -std=c++11)
     if (NOT SHADERC_ENABLE_SHARED_CRT)
-      if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-	# For MinGW cross compile, statically link to the C++ runtime
+      if (WIN32)
+	# For MinGW cross compile, statically link to the C++ runtime.
 	# But it still depends on MSVCRT.dll.
-	set_target_properties(${TARGET} PROPERTIES LINK_FLAGS
-			      -static -static-libgcc -static-libstdc++)
-      endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+	set_target_properties(${TARGET} PROPERTIES
+		LINK_FLAGS "-static -static-libgcc -static-libstdc++")
+      endif(WIN32)
     endif(NOT SHADERC_ENABLE_SHARED_CRT)
   endif()
 endfunction(shaderc_default_compile_options)
