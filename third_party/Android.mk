@@ -48,6 +48,7 @@ LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti
 LOCAL_SRC_FILES:= \
 		hlsl/hlslGrammar.cpp \
 		hlsl/hlslOpMap.cpp \
+		hlsl/hlslParseables.cpp \
 		hlsl/hlslParseHelper.cpp \
 		hlsl/hlslScanContext.cpp \
 		hlsl/hlslTokenStream.cpp
