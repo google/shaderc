@@ -173,11 +173,14 @@ LOCAL_SRC_FILES:= \
 		source/table.cpp \
 		source/text.cpp \
 		source/text_handler.cpp \
-		source/validate.cpp \
+		source/val/BasicBlock.cpp \
+		source/val/Construct.cpp \
+		source/val/Function.cpp \
+		source/val/ValidationState.cpp \
 		source/validate_cfg.cpp \
+		source/validate.cpp \
 		source/validate_id.cpp \
 		source/validate_instruction.cpp \
 		source/validate_layout.cpp \
-		source/validate_ssa.cpp \
-		source/validate_types.cpp
+		source/validate_ssa.cpp
 include $(BUILD_STATIC_LIBRARY)
