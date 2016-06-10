@@ -153,6 +153,7 @@ LOCAL_MODULE := SPIRV-Tools
 LOCAL_C_INCLUDES := \
 		$(SPVTOOLS_LOCAL_PATH)/include \
 		$(SPVTOOLS_LOCAL_PATH)/source \
+		$(SPVTOOLS_LOCAL_PATH)/external/spirv-headers/include \
 		$(SPVTOOLS_OUT_PATH)
 LOCAL_EXPORT_C_INCLUDES := \
 		$(SPVTOOLS_LOCAL_PATH)/include
