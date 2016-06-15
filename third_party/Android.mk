@@ -105,34 +105,42 @@ include $(BUILD_STATIC_LIBRARY)
 SPVTOOLS_LOCAL_PATH := $(THIRD_PARTY_PATH)/spirv-tools
 LOCAL_PATH := $(SPVTOOLS_LOCAL_PATH)
 SPVTOOLS_OUT_PATH=$(abspath $(TARGET_OUT))
+SPVHEADERS_LOCAL_PATH := $(THIRD_PARTY_PATH)/spirv-tools/external/spirv-headers
+
+# Locations of grammar files.
+SPV_CORE10_GRAMMAR=$(SPVHEADERS_LOCAL_PATH)/include/spirv/1.0/spirv.core.grammar.json
+SPV_CORE11_GRAMMAR=$(SPVHEADERS_LOCAL_PATH)/include/spirv/1.1/spirv.core.grammar.json
+SPV_GLSL_GRAMMAR=$(SPVHEADERS_LOCAL_PATH)/include/spirv/1.0/extinst.glsl.std.450.grammar.json
+# OpenCL grammar has not yet been published to SPIRV-Headers
+SPV_OPENCL_GRAMMAR=$(SPVTOOLS_LOCAL_PATH)/source/extinst-1.0.opencl.std.grammar.json
 
 define gen_spvtools_grammar_tables
-$(call generate-file-dir,$(1)/core.insts-1-0.inc)
-$(1)/core.insts-1-0.inc $(1)/operand.kinds-1-0.inc $(1)/glsl.std.450.insts-1-0.inc $(1)/opencl.std.insts-1-0.inc: \
+$(call generate-file-dir,$(1)/core.insts-1.0.inc)
+$(1)/core.insts-1.0.inc $(1)/operand.kinds-1.0.inc $(1)/glsl.std.450.insts-1.0.inc $(1)/opencl.std.insts-1.0.inc: \
         $(SPVTOOLS_LOCAL_PATH)/utils/generate_grammar_tables.py \
-        $(SPVTOOLS_LOCAL_PATH)/source/spirv-1-0.core.grammar.json \
-        $(SPVTOOLS_LOCAL_PATH)/source/extinst-1-0.glsl.std.450.grammar.json \
-        $(SPVTOOLS_LOCAL_PATH)/source/extinst-1-0.opencl.std.grammar.json
+        $(SPV_CORE10_GRAMMAR) \
+        $(SPV_GLSL_GRAMMAR) \
+        $(SPV_OPENCL_GRAMMAR)
 		@$(HOST_PYTHON) $(SPVTOOLS_LOCAL_PATH)/utils/generate_grammar_tables.py \
-		                --spirv-core-grammar=$(SPVTOOLS_LOCAL_PATH)/source/spirv-1-0.core.grammar.json \
-		                --extinst-glsl-grammar=$(SPVTOOLS_LOCAL_PATH)/source/extinst-1-0.glsl.std.450.grammar.json \
-		                --extinst-opencl-grammar=$(SPVTOOLS_LOCAL_PATH)/source/extinst-1-0.opencl.std.grammar.json \
-		                --core-insts-output=$(1)/core.insts-1-0.inc \
-		                --glsl-insts-output=$(1)/glsl.std.450.insts-1-0.inc \
-		                --opencl-insts-output=$(1)/opencl.std.insts-1-0.inc \
-		                --operand-kinds-output=$(1)/operand.kinds-1-0.inc
+		                --spirv-core-grammar=$(SPV_CORE10_GRAMMAR) \
+		                --extinst-glsl-grammar=$(SPV_GLSL_GRAMMAR) \
+		                --extinst-opencl-grammar=$(SPV_OPENCL_GRAMMAR) \
+		                --core-insts-output=$(1)/core.insts-1.0.inc \
+		                --glsl-insts-output=$(1)/glsl.std.450.insts-1.0.inc \
+		                --opencl-insts-output=$(1)/opencl.std.insts-1.0.inc \
+		                --operand-kinds-output=$(1)/operand.kinds-1.0.inc
 		@echo "[$(TARGET_ARCH_ABI)] Grammar v1.0   : instructions & operands <= grammar JSON files"
-$(1)/core.insts-1-1.inc $(1)/operand.kinds-1-1.inc: \
+$(1)/core.insts-1.1.inc $(1)/operand.kinds-1.1.inc: \
         $(SPVTOOLS_LOCAL_PATH)/utils/generate_grammar_tables.py \
-        $(SPVTOOLS_LOCAL_PATH)/source/spirv-1-1.core.grammar.json
+        $(SPV_CORE11_GRAMMAR)
 		@$(HOST_PYTHON) $(SPVTOOLS_LOCAL_PATH)/utils/generate_grammar_tables.py \
-		                --spirv-core-grammar=$(SPVTOOLS_LOCAL_PATH)/source/spirv-1-1.core.grammar.json \
-		                --core-insts-output=$(1)/core.insts-1-1.inc \
-		                --operand-kinds-output=$(1)/operand.kinds-1-1.inc
+		                --spirv-core-grammar=$(SPV_CORE11_GRAMMAR) \
+		                --core-insts-output=$(1)/core.insts-1.1.inc \
+		                --operand-kinds-output=$(1)/operand.kinds-1.1.inc
 		@echo "[$(TARGET_ARCH_ABI)] Grammar v1.1   : instructions & operands <= grammar JSON files"
-$(SPVTOOLS_LOCAL_PATH)/source/opcode.cpp: $(1)/core.insts-1-0.inc $(1)/core.insts-1-1.inc
-$(SPVTOOLS_LOCAL_PATH)/source/operand.cpp: $(1)/operand.kinds-1-0.inc $(1)/operand.kinds-1-1.inc
-$(SPVTOOLS_LOCAL_PATH)/source/ext_inst.cpp: $(1)/glsl.std.450.insts-1-0.inc $(1)/opencl.std.insts-1-0.inc
+$(SPVTOOLS_LOCAL_PATH)/source/opcode.cpp: $(1)/core.insts-1.0.inc $(1)/core.insts-1.1.inc
+$(SPVTOOLS_LOCAL_PATH)/source/operand.cpp: $(1)/operand.kinds-1.0.inc $(1)/operand.kinds-1.1.inc
+$(SPVTOOLS_LOCAL_PATH)/source/ext_inst.cpp: $(1)/glsl.std.450.insts-1.0.inc $(1)/opencl.std.insts-1.0.inc
 endef
 $(eval $(call gen_spvtools_grammar_tables,$(SPVTOOLS_OUT_PATH)))
 
