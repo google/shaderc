@@ -147,7 +147,7 @@ Optionally, the following tools may be installed on any OS:
  - [`asciidoctor`](http://asciidoctor.org/): for generating documenation.
    - [`pygments.rb`](https://rubygems.org/gems/pygments.rb) required by
      `asciidoctor` for syntax highlighting.
- - [`nosetests`](https://nose.readthedocs.org): for testing the Python code.
+ - [`nosetests`](https://nose.readthedocs.io): for testing the Python code.
 
 ### Building and running Shderc using Docker
 
