@@ -181,11 +181,11 @@ class TestDashCapDWithDashStdAndVersion(expect.ErrorMessage):
         """#version 310 es
         void main(){X}
         void foo(){Y}""", '.vert')
-    glslc_args = ['-DX=', '-DY=return 3;', '-std=450compatibility', shader]
+    glslc_args = ['-DX=', '-DY=return 3;', '-std=450core', shader]
 
     expected_error = [
         shader, ': warning: (version, profile) forced to be (450, ',
-        'compatibility), while in source code it is (310, es)\n',
+        'core), while in source code it is (310, es)\n',
         shader, ":3: error: 'return' : void function cannot return a value\n",
         '1 warning and 1 error generated.\n']
 

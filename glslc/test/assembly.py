@@ -124,10 +124,8 @@ class TestShaderStageWithAssemblyFile(expect.ErrorMessage):
     glslc_args = ['-c', '-fshader-stage=vertex', shader]
 
     expected_error = [
-        shader, ': error: #version: Desktop shaders for SPIR-V require '
-        'version 140 or higher\n',
         shader, ":2: error: '' :  syntax error\n",
-        '2 errors generated.\n']
+        '1 error generated.\n']
 
 
 @inside_glslc_testsuite('SpirvAssembly')

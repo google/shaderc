@@ -112,11 +112,11 @@ class TestMultipleFiles(expect.ValidObjectFileWithWarning):
     shader2 = FileShader(core_vert_shader_without_version(), '.vert')
     shader3 = FileShader(
         '#version 310 es\n' + core_frag_shader_without_version(), '.frag')
-    glslc_args = ['-c', '-std=450compatibility', shader1, shader2, shader3]
+    glslc_args = ['-c', '-std=450core', shader1, shader2, shader3]
 
     expected_warning = [
         shader3, ': warning: (version, profile) forced to be (450, '
-        'compatibility), while in source code it is (310, es)\n'
+        'core), while in source code it is (310, es)\n'
         '1 warning generated.\n']
 
 
