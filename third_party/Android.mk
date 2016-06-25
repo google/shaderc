@@ -193,3 +193,16 @@ LOCAL_SRC_FILES:= \
 		source/validate_layout.cpp \
 		source/validate_ssa.cpp
 include $(BUILD_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := SPIRV-Tools-opt
+LOCAL_C_INCLUDES := \
+		$(SPVTOOLS_LOCAL_PATH)/include \
+		$(SPVTOOLS_LOCAL_PATH)/source \
+		$(SPVTOOLS_LOCAL_PATH)/external/spirv-headers/include
+LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti
+LOCAL_SRC_FILES:= \
+		source/opt/function.cpp \
+		source/opt/instruction.cpp \
+		source/opt/module.cpp
+include $(BUILD_STATIC_LIBRARY)
