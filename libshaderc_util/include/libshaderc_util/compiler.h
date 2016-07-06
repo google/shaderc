@@ -37,9 +37,7 @@ namespace shaderc_util {
 //                  remove this class.
 class GlslInitializer {
  public:
-  GlslInitializer() : last_messages_(EShMsgDefault) {
-    glslang::InitializeProcess();
-  }
+  GlslInitializer() { glslang::InitializeProcess(); }
 
   ~GlslInitializer() { glslang::FinalizeProcess(); }
 
@@ -70,17 +68,8 @@ class GlslInitializer {
 
   // Obtains exclusive access to the glslang state. The state remains
   // exclusive until the Initialization Token has been destroyed.
-  // Re-initializes glsl state iff the previous messages and the current
-  // messages are incompatible.
-  InitializationToken Acquire(EShMessages new_messages) {
+  InitializationToken Acquire() {
     state_lock_.lock();
-
-    if ((last_messages_ ^ new_messages) &
-        (EShMsgVulkanRules | EShMsgSpvRules)) {
-      glslang::FinalizeProcess();
-      glslang::InitializeProcess();
-    }
-    last_messages_ = new_messages;
     return InitializationToken(this);
   }
 
@@ -89,7 +78,6 @@ class GlslInitializer {
 
   friend class InitializationToken;
 
-  EShMessages last_messages_;
   mutex state_lock_;
 };
 
