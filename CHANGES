@@ -1,6 +1,6 @@
 Revision history for Shaderc
 
-v2016.0-dev 2016-05-19
+v2016.0 2016-07-07
 
  - Adds v<year>.<index> versioning, with "-dev" suffix to indicate work in
    progress. The intent is to summarize and report functionalities more easily
