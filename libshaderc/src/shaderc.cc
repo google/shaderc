@@ -72,20 +72,16 @@ EShLanguage GetForcedStage(shaderc_shader_kind kind) {
 
 // Converts shaderc_target_env to EShMessages
 EShMessages GetMessageRules(shaderc_target_env target) {
-  EShMessages msgs = EShMsgDefault;
-
   switch (target) {
     case shaderc_target_env_opengl_compat:
       break;
     case shaderc_target_env_opengl:
-      msgs = EShMsgSpvRules;
-      break;
+      return static_cast<EShMessages>(EShMsgSpvRules | EShMsgCascadingErrors);
     case shaderc_target_env_vulkan:
-      msgs = static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules);
-      break;
+      return static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules |
+                                      EShMsgCascadingErrors);
   }
-
-  return msgs;
+  return EShMsgCascadingErrors;
 }
 
 // A wrapper functor class to be used as stage deducer for libshaderc_util
@@ -151,7 +147,7 @@ class StageDeducer {
         return EShLangTessControl;
       case shaderc_glsl_default_tess_evaluation_shader:
         return EShLangTessEvaluation;
-    case shaderc_spirv_assembly:
+      case shaderc_spirv_assembly:
         return EShLangCount;
     }
     assert(0 && "Unhandled shaderc_shader_kind");

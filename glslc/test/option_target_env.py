@@ -18,7 +18,7 @@ from placeholder import FileShader
 
 
 def opengl_compat_fragment_shader():
-    return """#version 140
+    return """#version 330
 uniform highp sampler2D tex;
 void main() {
   gl_FragColor = texture2D(tex, vec2(0.0, 0.0));
@@ -26,7 +26,7 @@ void main() {
 
 
 def opengl_vertex_shader():
-    return """#version 150
+    return """#version 330
 void main() { int t = gl_VertexID; }"""
 
 

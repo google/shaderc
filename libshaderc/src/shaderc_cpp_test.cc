@@ -535,7 +535,7 @@ TEST_F(CppInterface, ErrorTagIsInputFileName) {
   // 'SampleInputFile'
   EXPECT_FALSE(CompilationResultIsSuccess(compilation_result));
   EXPECT_THAT(compilation_result.GetErrorMessage(),
-              HasSubstr("SampleInputFile:4: error:"));
+              HasSubstr("SampleInputFile:3: error:"));
 }
 
 TEST_F(CppInterface, PreprocessingOnlyOption) {

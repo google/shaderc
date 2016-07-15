@@ -52,6 +52,7 @@ class TestStdEqSpaceArg(expect.ErrorMessage):
     glslc_args = ['-c', '-std=', '450core', shader]
     expected_error = ["glslc: error: invalid value '' in '-std='\n"]
 
+
 # TODO(dneto): The error message changes with different versions of glslang.
 @inside_glslc_testsuite('OptionStd')
 class TestMissingVersionAndStd(expect.ErrorMessageSubstr):

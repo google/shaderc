@@ -350,10 +350,11 @@ void main() {
 
 # OpenGL compatibility fragment shader. Can be compiled to SPIR-V successfully
 # when target environment is set to opengl_compat. Compilation will fail when
-# target environment is set to other values. But preprocessing should succeed
-# with any target environment values.
+# target environment is set to other values. (gl_FragColor is predefined only
+# in the compatibility profile.) But preprocessing should succeed with any
+# target environment values.
 def opengl_compat_frag_shader():
-    return '''#version 140
+    return '''#version 330
 uniform highp sampler2D tex;
 void main(){
   gl_FragColor = texture2D(tex, vec2(0.0, 0.0));
@@ -375,4 +376,4 @@ class TestDashCapEIgnoresTargetEnvOpenglCompat(expect.StdoutMatch):
 
     shader = FileShader(opengl_compat_frag_shader(), '.frag')
     expected_stdout = opengl_compat_frag_shader()
-    glslc_args = ['-E', '--target-env=vulkan', shader]
+    glslc_args = ['-E', '--target-env=opengl_compat', shader]

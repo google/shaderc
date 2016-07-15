@@ -99,7 +99,6 @@ class Compiler {
         generate_debug_info_(false),
         message_rules_(GetDefaultRules()) {}
 
-
   // Requests that the compiler place debug information into the object code,
   // such as identifier names and line numbers.
   void SetGenerateDebugInfo();
@@ -172,7 +171,8 @@ class Compiler {
       GlslInitializer* initializer) const;
 
   static EShMessages GetDefaultRules() {
-    return static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules);
+    return static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules |
+                                    EShMsgCascadingErrors);
   }
 
  protected:
@@ -251,7 +251,6 @@ class Compiler {
   EProfile default_profile_;
   // When true, use the default version and profile from eponymous data members.
   bool force_version_profile_;
-
 
   // Macro definitions that must be available to reference in the shader source.
   MacroDictionary predefined_macros_;

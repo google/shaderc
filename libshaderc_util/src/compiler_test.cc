@@ -58,13 +58,13 @@ const char kOpenGLCompatibilityFragShaderDeducibleStage[] =
 
 // A shader that compiles under OpenGL core profile rules.
 const char kOpenGLVertexShader[] =
-    R"(#version 150
+    R"(#version 330
        void main() { int t = gl_VertexID; })";
 
 // A shader that compiles under OpenGL core profile rules, even when
 // deducing the stage.
 const char kOpenGLVertexShaderDeducibleStage[] =
-    R"(#version 150
+    R"(#version 330
        #pragma shader_stage(vertex)
        void main() { int t = gl_VertexID; })";
 

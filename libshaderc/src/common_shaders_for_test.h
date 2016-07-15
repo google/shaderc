@@ -93,7 +93,7 @@ const char kOpenGLCompatibilityFragmentShader[] =
 
 // A shader that compiles under OpenGL core profile rules.
 const char kOpenGLVertexShader[] =
-    R"(#version 140
+    R"(#version 330
        void main() { int t = gl_VertexID; })";
 
 // Empty 310 es shader. It is valid for vertex, fragment, compute shader kind.
