@@ -110,9 +110,13 @@ def main():
         '"{}\\n"\n'.format(get_version_string(p, d))
         for (p, d) in zip(projects, sys.argv[1:])
     ])
-    if os.path.isfile(OUTFILE) and new_content == open(OUTFILE, 'r').read():
-        sys.exit(0)
-    open(OUTFILE, 'w').write(new_content)
+
+    if os.path.isfile(OUTFILE):
+        with open(OUTFILE, 'r') as f:
+            if new_content == f.read():
+                return
+    with open(OUTFILE, 'w') as f:
+        f.write(new_content)
 
 
 if __name__ == '__main__':
