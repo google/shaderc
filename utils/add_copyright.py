@@ -12,7 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Adds copyright notices to all the files that need them under the current directory.
+"""Adds copyright notices to all the files that need them under the
+current directory.
 
 usage: add_copyright.py [--check]
 
@@ -29,7 +30,7 @@ import re
 import sys
 
 COPYRIGHTRE = re.compile(
-    'Copyright \d+ The Shaderc Authors. All rights reserved.')
+    r'Copyright \d+ The Shaderc Authors. All rights reserved.')
 COPYRIGHT = 'Copyright 2016 The Shaderc Authors. All rights reserved.'
 LICENSED = """
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,7 +47,8 @@ limitations under the License."""
 
 
 def find(top, filename_glob, skip_glob_list):
-    """Returns files in the tree rooted at top matching filename_glob but not in directories matching skip_glob_list."""
+    """Returns files in the tree rooted at top matching filename_glob but not
+    in directories matching skip_glob_list."""
 
     file_list = []
     for path, dirs, files in os.walk(top):
@@ -59,7 +61,8 @@ def find(top, filename_glob, skip_glob_list):
 
 
 def filtered_descendants(glob):
-    """Returns glob-matching filenames under the current directory, but skips some irrelevant paths."""
+    """Returns glob-matching filenames under the current directory, but skips
+    some irrelevant paths."""
     return find('.', glob, ['third_party', 'ext', 'build*', 'out*'])
 
 
