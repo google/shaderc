@@ -21,10 +21,10 @@ function(shaderc_default_c_compile_options TARGET)
     endif()
     if (NOT SHADERC_ENABLE_SHARED_CRT)
       if (WIN32)
-	# For MinGW cross compile, statically link to the libgcc runtime.
-	# But it still depends on MSVCRT.dll.
-	set_target_properties(${TARGET} PROPERTIES
-		LINK_FLAGS "-static -static-libgcc")
+        # For MinGW cross compile, statically link to the libgcc runtime.
+        # But it still depends on MSVCRT.dll.
+        set_target_properties(${TARGET} PROPERTIES
+          LINK_FLAGS "-static -static-libgcc")
       endif(WIN32)
     endif(NOT SHADERC_ENABLE_SHARED_CRT)
   else()
@@ -40,10 +40,10 @@ function(shaderc_default_compile_options TARGET)
     target_compile_options(${TARGET} PRIVATE -std=c++11)
     if (NOT SHADERC_ENABLE_SHARED_CRT)
       if (WIN32)
-	# For MinGW cross compile, statically link to the C++ runtime.
-	# But it still depends on MSVCRT.dll.
-	set_target_properties(${TARGET} PROPERTIES
-		LINK_FLAGS "-static -static-libgcc -static-libstdc++")
+        # For MinGW cross compile, statically link to the C++ runtime.
+        # But it still depends on MSVCRT.dll.
+        set_target_properties(${TARGET} PROPERTIES
+          LINK_FLAGS "-static -static-libgcc -static-libstdc++")
       endif(WIN32)
     endif(NOT SHADERC_ENABLE_SHARED_CRT)
   endif()
@@ -67,7 +67,7 @@ endfunction()
 # and functions whose names start with "nosetest". The test name will be
 # ${PREFIX}_nosetests.
 function(shaderc_add_nosetests PREFIX)
-  if(NOSETESTS_EXE)
+  if("${SHADERC_ENABLE_TESTS}" AND NOSETESTS_EXE)
     add_test(
       NAME ${PREFIX}_nosetests
       COMMAND ${NOSETESTS_EXE} -m "^[Nn]ose[Tt]est" -v

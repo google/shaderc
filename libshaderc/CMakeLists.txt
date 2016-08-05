@@ -32,16 +32,16 @@ shaderc_add_tests(
 shaderc_combine_static_lib(shaderc_combined shaderc)
 
 shaderc_add_tests(
-TEST_PREFIX shaderc_combined
-LINK_LIBS shaderc_combined ${CMAKE_THREAD_LIBS_INIT}
-INCLUDE_DIRS include ${glslang_SOURCE_DIR}
-TEST_NAMES
-  shaderc
-  shaderc_cpp)
+  TEST_PREFIX shaderc_combined
+  LINK_LIBS shaderc_combined ${CMAKE_THREAD_LIBS_INIT}
+  INCLUDE_DIRS include ${glslang_SOURCE_DIR}
+  TEST_NAMES
+    shaderc
+    shaderc_cpp)
 
-add_executable(shaderc_c_smoke_test ./src/shaderc_c_smoke_test.c)
-shaderc_default_c_compile_options(shaderc_c_smoke_test)
-
-target_link_libraries(shaderc_c_smoke_test PRIVATE shaderc)
-add_test(NAME shaderc_c_smoke_test COMMAND shaderc_c_smoke_test)
-
+if(${SHADERC_ENABLE_TESTS})
+  add_executable(shaderc_c_smoke_test ./src/shaderc_c_smoke_test.c)
+  shaderc_default_c_compile_options(shaderc_c_smoke_test)
+  target_link_libraries(shaderc_c_smoke_test PRIVATE shaderc)
+  add_test(NAME shaderc_c_smoke_test COMMAND shaderc_c_smoke_test)
+endif()

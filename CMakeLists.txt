@@ -4,16 +4,14 @@ enable_testing()
 
 message(STATUS "Shaderc: build type is \"${CMAKE_BUILD_TYPE}\".")
 
-option(SHADERC_SKIP_TESTS
-       "Skip building unit tests based on googlemock and googletest"
-       ${SHADERC_SKIP_TESTS})
+option(SHADERC_SKIP_TESTS "Skip building tests" ${SHADERC_SKIP_TESTS})
 if(NOT ${SHADERC_SKIP_TESTS})
   set(SHADERC_ENABLE_TESTS ON)
 endif()
 if(${SHADERC_ENABLE_TESTS})
-  message(STATUS "Configuring Shaderc to build unit tests.")
+  message(STATUS "Configuring Shaderc to build tests.")
 else()
-  message(STATUS "Configuring Shaderc to avoid building unit tests.")
+  message(STATUS "Configuring Shaderc to avoid building tests.")
 endif()
 
 include(cmake/setup_build.cmake)
