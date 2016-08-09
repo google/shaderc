@@ -186,7 +186,7 @@ LOCAL_SRC_FILES:= \
 		source/val/BasicBlock.cpp \
 		source/val/Construct.cpp \
 		source/val/Function.cpp \
-		source/val/Id.cpp \
+		source/val/Instruction.cpp \
 		source/val/ValidationState.cpp \
 		source/validate.cpp \
 		source/validate_cfg.cpp \
