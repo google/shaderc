@@ -18,13 +18,13 @@ include(cmake/setup_build.cmake)
 include(cmake/utils.cmake)
 
 add_custom_target(check-copyright ALL
-  ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/add_copyright.py
+  ${PYTHON_EXE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/add_copyright.py
   --check
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMENT "Check copyright")
 
 add_custom_target(add-copyright
-  ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/add_copyright.py
+  ${PYTHON_EXE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/add_copyright.py
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMENT "Add copyright")
 
@@ -54,7 +54,7 @@ add_subdirectory(glslc)
 add_subdirectory(examples)
 
 add_custom_target(build-version
-  ${PYTHON_EXECUTABLE}
+  ${PYTHON_EXE}
   ${CMAKE_CURRENT_SOURCE_DIR}/utils/update_build_version.py
   ${shaderc_SOURCE_DIR} ${spirv-tools_SOURCE_DIR} ${glslang_SOURCE_DIR}
   COMMENT "Update build-version.inc in the Shaderc build directory (if necessary).")

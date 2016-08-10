@@ -2,6 +2,8 @@ Revision history for Shaderc
 
 v2016.1-dev 2016-07-08
  - Start v2016.1
+ - Fixes issues:
+   #238: Fix invocation of python scripts during build
 
 v2016.0 2016-07-07
 

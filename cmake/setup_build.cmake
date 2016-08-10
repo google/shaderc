@@ -71,7 +71,7 @@ if (ENABLE_CODE_COVERAGE)
     # The symptom is that some .gcno files are wrong after code change and
     # recompiling. We don't know the exact reason yet. Figure it out.
     # Remove all .gcno files in the directory recursively.
-    COMMAND ${PYTHON_EXECUTABLE}
+    COMMAND ${PYTHON_EXE}
     ${shaderc_SOURCE_DIR}/utils/remove-file-by-suffix.py . ".gcno"
     # .gcno files are not tracked by CMake. So no recompiling is triggered
     # even if they are missing. Unfortunately, we just removed all of them
