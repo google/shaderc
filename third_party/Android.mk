@@ -78,6 +78,7 @@ LOCAL_SRC_FILES:= \
 		glslang/MachineIndependent/limits.cpp \
 		glslang/MachineIndependent/linkValidate.cpp \
 		glslang/MachineIndependent/parseConst.cpp \
+		glslang/MachineIndependent/ParseContextBase.cpp \
 		glslang/MachineIndependent/ParseHelper.cpp \
 		glslang/MachineIndependent/PoolAlloc.cpp \
 		glslang/MachineIndependent/propagateNoContraction.cpp \
