@@ -170,6 +170,7 @@ LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti
 LOCAL_SRC_FILES:= \
 		source/assembly_grammar.cpp \
 		source/binary.cpp \
+		source/capability_set.cpp \
 		source/diagnostic.cpp \
 		source/disassemble.cpp \
 		source/ext_inst.cpp \
