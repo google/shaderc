@@ -174,6 +174,7 @@ LOCAL_SRC_FILES:= \
 		source/disassemble.cpp \
 		source/ext_inst.cpp \
 		source/instruction.cpp \
+		source/libspirv.cpp \
 		source/name_mapper.cpp \
 		source/opcode.cpp \
 		source/operand.cpp \
@@ -195,4 +196,31 @@ LOCAL_SRC_FILES:= \
 		source/validate_id.cpp \
 		source/validate_instruction.cpp \
 		source/validate_layout.cpp
+include $(BUILD_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := SPIRV-Tools-opt
+LOCAL_C_INCLUDES := \
+		$(SPVTOOLS_LOCAL_PATH)/include \
+		$(SPVTOOLS_LOCAL_PATH)/source \
+		$(SPVTOOLS_LOCAL_PATH)/external/spirv-headers/include
+LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti
+LOCAL_STATIC_LIBRARIES:=SPIRV-Tools
+LOCAL_SRC_FILES:= \
+		source/opt/build_module.cpp \
+		source/opt/def_use_manager.cpp \
+		source/opt/eliminate_dead_constant_pass.cpp \
+		source/opt/fold_spec_constant_op_and_composite_pass.cpp \
+		source/opt/freeze_spec_constant_value_pass.cpp \
+		source/opt/function.cpp \
+		source/opt/instruction.cpp \
+		source/opt/ir_loader.cpp \
+		source/opt/module.cpp \
+		source/opt/optimizer.cpp \
+		source/opt/pass_manager.cpp \
+		source/opt/set_spec_constant_default_value_pass.cpp \
+		source/opt/strip_debug_info_pass.cpp \
+		source/opt/type_manager.cpp \
+		source/opt/types.cpp \
+		source/opt/unify_const_pass.cpp
 include $(BUILD_STATIC_LIBRARY)

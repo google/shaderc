@@ -11,7 +11,8 @@ ALL_LIBS:=libglslang.a \
 	libshaderc_util.a \
 	libSPIRV.a \
 	libHLSL.a \
-	libSPIRV-Tools.a
+	libSPIRV-Tools.a \
+	libSPIRV-Tools-opt.a
 
 define gen_libshaderc
 $(1)/combine.ar: $(addprefix $(1)/, $(ALL_LIBS))
