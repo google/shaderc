@@ -274,6 +274,20 @@ void shaderc_compile_options_set_generate_debug_info(
   options->compiler.SetGenerateDebugInfo();
 }
 
+void shaderc_compile_options_set_optimization_level(
+    shaderc_compile_options_t options, shaderc_optimization_level level) {
+  auto opt_level = shaderc_util::Compiler::OptimizationLevel::Zero;
+  switch (level) {
+    case shaderc_optimization_level_size:
+      opt_level = shaderc_util::Compiler::OptimizationLevel::Size;
+      break;
+    default:
+      break;
+  }
+
+  options->compiler.SetOptimizationLevel(opt_level);
+}
+
 void shaderc_compile_options_set_forced_version_profile(
     shaderc_compile_options_t options, int version, shaderc_profile profile) {
   // Transfer the profile parameter from public enum type to glslang internal

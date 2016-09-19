@@ -22,6 +22,7 @@
 #include <utility>
 
 #include "glslang/Public/ShaderLang.h"
+#include "libshaderc_util/spirv_tools_wrapper.h"
 
 #include "counting_includer.h"
 #include "file_finder.h"
@@ -88,6 +89,18 @@ using MacroDictionary = std::unordered_map<std::string, std::string>;
 // Holds all of the state required to compile source GLSL into SPIR-V.
 class Compiler {
  public:
+  enum class OutputType {
+    SpirvBinary,  // A binary module, as defined by the SPIR-V specification.
+    SpirvAssemblyText,  // Assembly syntax defined by the SPIRV-Tools project.
+    PreprocessedText,   // Preprocessed source code.
+  };
+
+  // Supported optimization levels.
+  enum class OptimizationLevel {
+    Zero,  // No optimization.
+    Size,  // Optimization towards reducing code size.
+  };
+
   Compiler()
       // The default version for glsl is 110, or 100 if you are using an es
       // profile. But we want to default to a non-es profile.
@@ -97,11 +110,16 @@ class Compiler {
         warnings_as_errors_(false),
         suppress_warnings_(false),
         generate_debug_info_(false),
+        enabled_opt_passes_(),
         message_rules_(GetDefaultRules()) {}
 
   // Requests that the compiler place debug information into the object code,
   // such as identifier names and line numbers.
   void SetGenerateDebugInfo();
+
+  // Sets the optimization level to the given level. Only the last one takes
+  // effect if multiple calls of this method exist.
+  void SetOptimizationLevel(OptimizationLevel level);
 
   // When a warning is encountered it treat it as an error.
   void SetWarningsAsErrors();
@@ -126,11 +144,6 @@ class Compiler {
   // subsequent CompileShader() calls.
   void SetForcedVersionProfile(int version, EProfile profile);
 
-  enum class OutputType {
-    SpirvBinary,  // A binary module, as defined by the SPIR-V specification.
-    SpirvAssemblyText,  // Assembly syntax defined by the SPIRV-Tools project.
-    PreprocessedText,   // Preprocessed source code.
-  };
   // Compiles the shader source in the input_source_string parameter.
   //
   // If the forced_shader stage parameter is not EShLangCount then
@@ -264,10 +277,12 @@ class Compiler {
   // output.
   bool generate_debug_info_;
 
+  // Optimization passes to be applied.
+  std::vector<PassId> enabled_opt_passes_;
+
   // Sets the glslang EshMessages bitmask for determining which dialect of GLSL
   // and which SPIR-V codegen semantics are used. This impacts the warning &
-  // error
-  // messages as well as the set of available builtins
+  // error messages as well as the set of available builtins
   EShMessages message_rules_;
 };
 

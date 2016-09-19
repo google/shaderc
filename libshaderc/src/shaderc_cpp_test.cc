@@ -479,6 +479,72 @@ TEST_F(CppInterface, GenerateDebugInfoDisassemblyClonedOptions) {
               HasSubstr("debug_info_sample"));
 }
 
+TEST_F(CppInterface, CompileAndOptimizeWithLevelZero) {
+  options_.SetOptimizationLevel(shaderc_optimization_level_zero);
+  const std::string disassembly_text =
+      AssemblyOutput(kMinimalShader, shaderc_glsl_vertex_shader, options_);
+  for (const auto& substring : kMinimalShaderDisassemblySubstrings) {
+    EXPECT_THAT(disassembly_text, HasSubstr(substring));
+  }
+  // Check that we still have debug instructions.
+  EXPECT_THAT(disassembly_text, HasSubstr("OpName"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpSource"));
+}
+
+TEST_F(CppInterface, CompileAndOptimizeWithLevelSize) {
+  options_.SetOptimizationLevel(shaderc_optimization_level_size);
+  const std::string disassembly_text =
+      AssemblyOutput(kMinimalShader, shaderc_glsl_vertex_shader, options_);
+  for (const auto& substring : kMinimalShaderDisassemblySubstrings) {
+    EXPECT_THAT(disassembly_text, HasSubstr(substring));
+  }
+  // Check that we do not have debug instructions.
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpName")));
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpSource")));
+}
+
+TEST_F(CppInterface, FollowingOptLevelOverridesPreviousOne) {
+  options_.SetOptimizationLevel(shaderc_optimization_level_size);
+  // Optimization level settings overridden by
+  options_.SetOptimizationLevel(shaderc_optimization_level_zero);
+  const std::string disassembly_text =
+      AssemblyOutput(kMinimalShader, shaderc_glsl_vertex_shader, options_);
+  for (const auto& substring : kMinimalShaderDisassemblySubstrings) {
+    EXPECT_THAT(disassembly_text, HasSubstr(substring));
+  }
+  // Check that we still have debug instructions.
+  EXPECT_THAT(disassembly_text, HasSubstr("OpName"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpSource"));
+}
+
+TEST_F(CppInterface, GenerateDebugInfoOverridesOptimizationLevel) {
+  options_.SetOptimizationLevel(shaderc_optimization_level_size);
+  // Optimization level settings overridden by
+  options_.SetGenerateDebugInfo();
+  const std::string disassembly_text =
+      AssemblyOutput(kMinimalShader, shaderc_glsl_vertex_shader, options_);
+  for (const auto& substring : kMinimalShaderDisassemblySubstrings) {
+    EXPECT_THAT(disassembly_text, HasSubstr(substring));
+  }
+  // Check that we still have debug instructions.
+  EXPECT_THAT(disassembly_text, HasSubstr("OpName"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpSource"));
+}
+
+TEST_F(CppInterface, GenerateDebugInfoProhibitsOptimizationLevel) {
+  // Setting generate debug info first also works.
+  options_.SetGenerateDebugInfo();
+  options_.SetOptimizationLevel(shaderc_optimization_level_size);
+  const std::string disassembly_text =
+      AssemblyOutput(kMinimalShader, shaderc_glsl_vertex_shader, options_);
+  for (const auto& substring : kMinimalShaderDisassemblySubstrings) {
+    EXPECT_THAT(disassembly_text, HasSubstr(substring));
+  }
+  // Check that we still have debug instructions.
+  EXPECT_THAT(disassembly_text, HasSubstr("OpName"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpSource"));
+}
+
 TEST_F(CppInterface, GetNumErrors) {
   std::string shader(kTwoErrorsShader);
   const SpvCompilationResult compilation_result =

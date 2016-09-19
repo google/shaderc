@@ -20,7 +20,7 @@
 
 #include "libshaderc_util/string_piece.h"
 
-#include "spirv-tools/libspirv.h"
+#include "spirv-tools/libspirv.hpp"
 
 namespace shaderc_util {
 // Assembles the given assembly. On success, returns true, writes the assembled
@@ -34,6 +34,21 @@ bool SpirvToolsAssemble(const string_piece assembly, spv_binary* binary,
 // *text_or_error.
 bool SpirvToolsDisassemble(const std::vector<uint32_t>& binary,
                            std::string* text_or_error);
+
+// The ids of a list of supported optimization passes.
+enum class PassId {
+  kNullPass,
+  kStripDebugInfo,
+  kUnifyConstant,
+};
+
+// Optimizes the given binary. Passes are registered in the exact order as shown
+// in enabled_passes, without de-duplication. Returns true and writes the
+// optimized binary back to *binary if successful. Otherwise, writes errors to
+// *errors and the content of binary may be in an invalid state.
+bool SpirvToolsOptimize(const std::vector<PassId>& enabled_passes,
+                        std::vector<uint32_t>* binary, std::string* errors);
+
 }  // namespace shaderc_util
 
 #endif  // LIBSHADERC_UTIL_INC_SPIRV_TOOLS_WRAPPER_H

@@ -22,7 +22,6 @@
 #include "libshaderc_util/message.h"
 #include "libshaderc_util/resources.h"
 #include "libshaderc_util/shader_stage.h"
-#include "libshaderc_util/spirv_tools_wrapper.h"
 #include "libshaderc_util/string_piece.h"
 #include "libshaderc_util/version_profile.h"
 
@@ -177,11 +176,21 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   if (!success) return result_tuple;
 
   // 'spirv' is an alias for the compilation_output_data. This alias is added
-  // to
-  // serve as an input for the call to DissassemblyBinary.
+  // to serve as an input for the call to DissassemblyBinary.
   std::vector<uint32_t>& spirv = compilation_output_data;
   // Note the call to GlslangToSpv also populates compilation_output_data.
   glslang::GlslangToSpv(*program.getIntermediate(used_shader_stage), spirv);
+
+  if (!enabled_opt_passes_.empty()) {
+    std::string opt_errors;
+    if (!SpirvToolsOptimize(enabled_opt_passes_, &spirv, &opt_errors)) {
+      *error_stream << "shaderc: internal error: compilation succeeded but "
+                       "failed to optimize: "
+                    << opt_errors << "\n";
+      return result_tuple;
+    }
+  }
+
   if (output_type == OutputType::SpirvAssemblyText) {
     std::string text_or_error;
     if (!SpirvToolsDisassemble(spirv, &text_or_error)) {
@@ -221,7 +230,30 @@ void Compiler::SetForcedVersionProfile(int version, EProfile profile) {
 
 void Compiler::SetWarningsAsErrors() { warnings_as_errors_ = true; }
 
-void Compiler::SetGenerateDebugInfo() { generate_debug_info_ = true; }
+void Compiler::SetGenerateDebugInfo() {
+  generate_debug_info_ = true;
+  for (size_t i = 0; i < enabled_opt_passes_.size(); ++i) {
+    if (enabled_opt_passes_[i] == PassId::kStripDebugInfo) {
+      enabled_opt_passes_[i] = PassId::kNullPass;
+    }
+  }
+}
+
+void Compiler::SetOptimizationLevel(Compiler::OptimizationLevel level) {
+  // Clear previous settings first.
+  enabled_opt_passes_.clear();
+
+  switch (level) {
+    case OptimizationLevel::Size:
+      if (!generate_debug_info_) {
+        enabled_opt_passes_.push_back(PassId::kStripDebugInfo);
+      }
+      enabled_opt_passes_.push_back(PassId::kUnifyConstant);
+      break;
+    default:
+      break;
+  }
+}
 
 void Compiler::SetSuppressWarnings() { suppress_warnings_ = true; }
 

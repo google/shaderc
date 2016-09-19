@@ -163,6 +163,12 @@ class CompileOptions {
     shaderc_compile_options_set_generate_debug_info(options_);
   }
 
+  // Sets the compiler optimization level to the given level. Only the last one
+  // takes effect if multiple calls of this function exist.
+  void SetOptimizationLevel(shaderc_optimization_level level) {
+    shaderc_compile_options_set_optimization_level(options_, level);
+  }
+
   // A C++ version of the libshaderc includer interface.
   class IncluderInterface {
    public:

@@ -14,8 +14,11 @@
 
 #include "libshaderc_util/spirv_tools_wrapper.h"
 
+#include <algorithm>
 #include <cassert>
 #include <sstream>
+
+#include "spirv-tools/optimizer.hpp"
 
 namespace {
 
@@ -77,6 +80,43 @@ bool SpirvToolsAssemble(const string_piece assembly, spv_binary* binary,
   spvContextDestroy(spvtools_context);
 
   return result;
+}
+
+bool SpirvToolsOptimize(const std::vector<PassId>& enabled_passes,
+                        std::vector<uint32_t>* binary, std::string* errors) {
+  errors->clear();
+  if (enabled_passes.empty()) return true;
+  if (std::all_of(
+          enabled_passes.cbegin(), enabled_passes.cend(),
+          [](const PassId& pass) { return pass == PassId::kNullPass; })) {
+    return true;
+  }
+
+  spvtools::Optimizer optimizer(SPV_ENV_VULKAN_1_0);
+  std::ostringstream oss;
+  optimizer.SetMessageConsumer(
+      [&oss](spv_message_level_t, const char*, const spv_position_t&,
+             const char* message) { oss << message << "\n"; });
+
+  for (const auto& pass : enabled_passes) {
+    switch (pass) {
+      case PassId::kNullPass:
+        // We actually don't need to do anything for null pass.
+        break;
+      case PassId::kStripDebugInfo:
+        optimizer.RegisterPass(spvtools::CreateStripDebugInfoPass());
+        break;
+      case PassId::kUnifyConstant:
+        optimizer.RegisterPass(spvtools::CreateUnifyConstantPass());
+        break;
+    }
+  }
+
+  if (!optimizer.Run(binary->data(), binary->size(), binary)) {
+    *errors = oss.str();
+    return false;
+  }
+  return true;
 }
 
 }  // namespace shaderc_util

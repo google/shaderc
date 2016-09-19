@@ -74,6 +74,12 @@ typedef enum {
   shaderc_compilation_status_invalid_assembly,
 } shaderc_compilation_status;
 
+// Optimization level.
+typedef enum {
+  shaderc_optimization_level_zero,  // no optimization
+  shaderc_optimization_level_size,  // optimize towards reducing code size
+} shaderc_optimization_level;
+
 // Usage examples:
 //
 // Aggressively release compiler resources, but spend time in initialization
@@ -155,6 +161,11 @@ void shaderc_compile_options_add_macro_definition(
 // Sets the compiler mode to generate debug information in the output.
 void shaderc_compile_options_set_generate_debug_info(
     shaderc_compile_options_t options);
+
+// Sets the compiler optimization level to the given level. Only the last one
+// takes effect if multiple calls of this function exist.
+void shaderc_compile_options_set_optimization_level(
+    shaderc_compile_options_t options, shaderc_optimization_level level);
 
 // Forces the GLSL language version and profile to a given pair. The version
 // number is the same as would appear in the #version annotation in the source.
