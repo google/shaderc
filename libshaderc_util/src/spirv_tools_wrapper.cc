@@ -15,53 +15,26 @@
 #include "libshaderc_util/spirv_tools_wrapper.h"
 
 #include <algorithm>
-#include <cassert>
 #include <sstream>
 
 #include "spirv-tools/optimizer.hpp"
-
-namespace {
-
-// Writes the message contained in the diagnostic parameter to *dest. Assumes
-// the diagnostic message is reported for a binary location.
-void SpirvToolsOutputDiagnostic(spv_diagnostic diagnostic, std::string* dest) {
-  std::ostringstream os;
-  if (diagnostic->isTextSource) {
-    os << diagnostic->position.line + 1 << ":"
-       << diagnostic->position.column + 1;
-  } else {
-    os << diagnostic->position.index;
-  }
-  os << ": " << diagnostic->error;
-  *dest = os.str();
-}
-
-}  // anonymous namespace
 
 namespace shaderc_util {
 
 bool SpirvToolsDisassemble(const std::vector<uint32_t>& binary,
                            std::string* text_or_error) {
-  auto spvtools_context = spvContextCreate(SPV_ENV_VULKAN_1_0);
-  spv_text disassembled_text = nullptr;
-  spv_diagnostic spvtools_diagnostic = nullptr;
-
-  const bool result =
-      spvBinaryToText(spvtools_context, binary.data(), binary.size(),
-                      (SPV_BINARY_TO_TEXT_OPTION_INDENT |
-                       SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES),
-                      &disassembled_text, &spvtools_diagnostic) == SPV_SUCCESS;
-  if (result) {
-    text_or_error->assign(disassembled_text->str, disassembled_text->length);
-  } else {
-    SpirvToolsOutputDiagnostic(spvtools_diagnostic, text_or_error);
+  spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_0);
+  std::ostringstream oss;
+  tools.SetMessageConsumer([&oss](
+      spv_message_level_t, const char*, const spv_position_t& position,
+      const char* message) { oss << position.index << ": " << message; });
+  const bool success = tools.Disassemble(
+      binary, text_or_error, SPV_BINARY_TO_TEXT_OPTION_INDENT |
+                                 SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES);
+  if (!success) {
+    *text_or_error = oss.str();
   }
-
-  spvDiagnosticDestroy(spvtools_diagnostic);
-  spvTextDestroy(disassembled_text);
-  spvContextDestroy(spvtools_context);
-
-  return result;
+  return success;
 }
 
 bool SpirvToolsAssemble(const string_piece assembly, spv_binary* binary,
@@ -72,15 +45,21 @@ bool SpirvToolsAssemble(const string_piece assembly, spv_binary* binary,
   *binary = nullptr;
   errors->clear();
 
-  const bool result =
+  const bool success =
       spvTextToBinary(spvtools_context, assembly.data(), assembly.size(),
                       binary, &spvtools_diagnostic) == SPV_SUCCESS;
-  if (!result) SpirvToolsOutputDiagnostic(spvtools_diagnostic, errors);
+  if (!success) {
+    std::ostringstream oss;
+    oss << spvtools_diagnostic->position.line + 1 << ":"
+        << spvtools_diagnostic->position.column + 1 << ": "
+        << spvtools_diagnostic->error;
+    *errors = oss.str();
+  }
 
   spvDiagnosticDestroy(spvtools_diagnostic);
   spvContextDestroy(spvtools_context);
 
-  return result;
+  return success;
 }
 
 bool SpirvToolsOptimize(const std::vector<PassId>& enabled_passes,

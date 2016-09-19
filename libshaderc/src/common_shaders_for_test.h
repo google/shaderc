@@ -189,11 +189,10 @@ const char* kMinimalShaderDisassemblySubstrings[] = {
     "; Generator: Khronos Glslang Reference Front End; 1\n"
     "; Bound:",
 
-    "               OpCapability Shader\n"
-    "          %1 = OpExtInstImport \"GLSL.std.450\"\n"
+    "               OpCapability Shader\n",
+    "          %1 = OpExtInstImport \"GLSL.std.450\"\n",
     "               OpMemoryModel Logical GLSL450\n",
-
-    "               OpReturn\n"
+    "               OpReturn\n",
     "               OpFunctionEnd\n"};
 
 const char kMinimalShaderAssembly[] = R"(
