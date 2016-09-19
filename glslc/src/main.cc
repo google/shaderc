@@ -297,6 +297,19 @@ int main(int argc, char** argv) {
       }
     } else if (arg == "-g") {
       compiler.options().SetGenerateDebugInfo();
+    } else if (arg.starts_with("-O")) {
+      if (arg == "-Os") {
+        compiler.options().SetOptimizationLevel(
+            shaderc_optimization_level_size);
+      } else if (arg == "-O0") {
+        compiler.options().SetOptimizationLevel(
+            shaderc_optimization_level_zero);
+      } else {
+        std::cerr << "glslc: error: invalid value '"
+                  << arg.substr(std::strlen("-O")) << "' in '" << arg << "'"
+                  << std::endl;
+        return 1;
+      }
     } else if (arg == "-w") {
       compiler.options().SetSuppressWarnings();
     } else if (arg == "-Werror") {
