@@ -23,7 +23,7 @@ class MultipleErrors(expect.ErrorMessage):
     shader = FileShader('#version 140\nint main() {}', '.vert')
     glslc_args = ['-c', shader]
     expected_error = [
-        shader, ":2: error: 'int' :  main function cannot return a value\n",
+        shader, ":2: error: 'int' :  entry point cannot return a value\n",
         shader, ":2: error: '' : function does not return a value: main\n",
         '2 errors generated.\n']
 
@@ -178,7 +178,7 @@ class WarningAndError(expect.ErrorMessage):
     expected_error = [
         shader, ':2: warning: attribute deprecated in version 130; ',
         'may be removed in future release\n',
-        shader, ":3: error: 'int' :  main function cannot return a value\n",
+        shader, ":3: error: 'int' :  entry point cannot return a value\n",
         shader, ":3: error: '' : function does not return a value: main\n",
         '1 warning and 2 errors generated.\n']
 
@@ -195,7 +195,7 @@ class SuppressedWarningAndError(expect.ErrorMessage):
     glslc_args = ['-c', shader, '-w']
 
     expected_error = [
-        shader, ":3: error: 'int' :  main function cannot return a value\n",
+        shader, ":3: error: 'int' :  entry point cannot return a value\n",
         shader, ":3: error: '' : function does not return a value: main\n",
         '2 errors generated.\n']
 
@@ -214,7 +214,7 @@ class WarningAsErrorAndError(expect.ErrorMessage):
     expected_error = [
         shader, ':2: error: attribute deprecated in version 130; ',
         'may be removed in future release\n',
-        shader, ":3: error: 'int' :  main function cannot return a value\n",
+        shader, ":3: error: 'int' :  entry point cannot return a value\n",
         shader, ":3: error: '' : function does not return a value: main\n",
         '3 errors generated.\n']
 
