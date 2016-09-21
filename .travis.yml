@@ -29,6 +29,8 @@ matrix:
     - os: linux
       compiler: gcc
       env: SHADERC_CODE_COVERAGE=ON
+    # Additional build using Android NDK
+    - env: BUILD_NDK=ON
 
 
 cache:
@@ -48,6 +50,12 @@ addons:
 before_install:
   # Install ninja on Mac OS X.
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update && brew install ninja; fi
+  - if [[ "$BUILD_NDK" == "ON" ]]; then
+      git clone --depth=1 https://github.com/urho3d/android-ndk.git $HOME/android-ndk;
+      export ANDROID_NDK=$HOME/android-ndk;
+      git clone --depth=1 https://github.com/taka-no-me/android-cmake.git $HOME/android-cmake;
+      export TOOLCHAIN_PATH=$HOME/android-cmake/android.toolchain.cmake;
+    fi
 
 install:
   - pip install --user nose
@@ -67,9 +75,20 @@ before_script:
 
 script:
   - mkdir build && cd build
-  - cmake -GNinja -DCMAKE_BUILD_TYPE=${SHADERC_BUILD_TYPE:-Debug} -DENABLE_CODE_COVERAGE=${SHADERC_CODE_COVERAGE:-OFF} ..
+  - if [[ "$BUILD_NDK" == "ON" ]]; then
+      cmake -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_PATH}
+            -DANDROID_NATIVE_API_LEVEL=android-9
+            -DCMAKE_BUILD_TYPE=Release
+            -DANDROID_ABI="armeabi-v7a with NEON"
+            -DSHADERC_SKIP_TESTS=ON
+            -GNinja ..;
+    else
+      cmake -DCMAKE_BUILD_TYPE=${SHADERC_BUILD_TYPE:-Debug}
+            -DENABLE_CODE_COVERAGE=${SHADERC_CODE_COVERAGE:-OFF}
+            -GNinja ..;
+    fi
   - ninja
-  - ctest -j`nproc` --output-on-failure
+  - if [[ "$BUILD_NDK" != "ON" ]]; then ctest -j`nproc` --output_on_failure; fi
 
 after_success:
   # Collect coverage and push to coveralls.info.
