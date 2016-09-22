@@ -75,6 +75,7 @@ LOCAL_SRC_FILES:= \
 		glslang/MachineIndependent/Intermediate.cpp \
 		glslang/MachineIndependent/intermOut.cpp \
 		glslang/MachineIndependent/IntermTraverse.cpp \
+		glslang/MachineIndependent/iomapper.cpp \
 		glslang/MachineIndependent/limits.cpp \
 		glslang/MachineIndependent/linkValidate.cpp \
 		glslang/MachineIndependent/parseConst.cpp \
