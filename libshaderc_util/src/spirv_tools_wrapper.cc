@@ -48,8 +48,9 @@ bool SpirvToolsDisassemble(const std::vector<uint32_t>& binary,
 
   const bool result =
       spvBinaryToText(spvtools_context, binary.data(), binary.size(),
-                      SPV_BINARY_TO_TEXT_OPTION_INDENT, &disassembled_text,
-                      &spvtools_diagnostic) == SPV_SUCCESS;
+                      (SPV_BINARY_TO_TEXT_OPTION_INDENT |
+                       SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES),
+                      &disassembled_text, &spvtools_diagnostic) == SPV_SUCCESS;
   if (result) {
     text_or_error->assign(disassembled_text->str, disassembled_text->length);
   } else {
