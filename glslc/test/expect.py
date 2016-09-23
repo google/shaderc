@@ -18,6 +18,7 @@ A test case can use these checks by declaring their enclosing mixin classes
 as superclass and providing the expected_* variables required by the check_*()
 methods in the mixin classes.
 """
+import difflib
 import os
 import re
 from glslc_test_framework import GlslCTest
@@ -239,12 +240,19 @@ class ValidFileContents(GlslCTest):
             return False, 'Cannot find file: ' + target_filename
         with open(target_filename, 'r') as target_file:
             file_contents = target_file.read()
-            if type(self.expected_file_contents) == str:
+            if isinstance(self.expected_file_contents, str):
                 if file_contents == self.expected_file_contents:
                     return True, ''
-                return False, ('Incorrect file output: \n{act}\nExpected:\n{exp}'
-                               ''.format(act=file_contents,
-                                         exp=self.expected_file_contents))
+                return False, ('Incorrect file output: \n{act}\n'
+                               'Expected:\n{exp}'
+                               'With diff:\n{diff}'.format(
+                                   act=file_contents,
+                                   exp=self.expected_file_contents,
+                                   diff='\n'.join(list(difflib.unified_diff(
+                                       self.expected_file_contents.split('\n'),
+                                       file_contents.split('\n'),
+                                       fromfile='expected_output',
+                                       tofile='actual_output')))))
             elif isinstance(self.expected_file_contents, type(re.compile(''))):
                 if self.expected_file_contents.search(file_contents):
                     return True, ''
