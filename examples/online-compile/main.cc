@@ -19,6 +19,7 @@
 //  - Preprocessing GLSL source text
 //  - Compiling a shader to SPIR-V assembly text
 //  - Compliing a shader to a SPIR-V binary module
+//  - Performing optimization with compilation
 //  - Setting basic options: setting a preprocessor symbol.
 //  - Checking compilation status and extracting an error message.
 
@@ -38,86 +39,109 @@ std::string preprocess_shader(const std::string& source_name,
   // Like -DMY_DEFINE=1
   options.AddMacroDefinition("MY_DEFINE", "1");
 
-  shaderc::PreprocessedSourceCompilationResult result = compiler.PreprocessGlsl(
-      source.c_str(), source.size(), kind, source_name.c_str(), options);
+  shaderc::PreprocessedSourceCompilationResult result =
+      compiler.PreprocessGlsl(source, kind, source_name.c_str(), options);
 
   if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
     std::cerr << result.GetErrorMessage();
     return "";
   }
 
-  return std::string(result.cbegin(), result.cend());
+  return {result.cbegin(), result.cend()};
 }
 
 // Compiles a shader to SPIR-V assembly. Returns the assembly text
 // as a string.
 std::string compile_file_to_assembly(const std::string& source_name,
                                      shaderc_shader_kind kind,
-                                     const std::string& source) {
+                                     const std::string& source,
+                                     bool optimize = false) {
   shaderc::Compiler compiler;
   shaderc::CompileOptions options;
 
   // Like -DMY_DEFINE=1
   options.AddMacroDefinition("MY_DEFINE", "1");
+  if (optimize) options.SetOptimizationLevel(shaderc_optimization_level_size);
 
   shaderc::AssemblyCompilationResult result = compiler.CompileGlslToSpvAssembly(
-      source.c_str(), source.size(), kind, source_name.c_str(), options);
+      source, kind, source_name.c_str(), options);
 
   if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
     std::cerr << result.GetErrorMessage();
     return "";
   }
 
-  return std::string(result.cbegin(), result.cend());
+  return {result.cbegin(), result.cend()};
 }
 
 // Compiles a shader to a SPIR-V binary. Returns the binary as
 // a vector of 32-bit words.
 std::vector<uint32_t> compile_file(const std::string& source_name,
                                    shaderc_shader_kind kind,
-                                   const std::string& source) {
+                                   const std::string& source,
+                                   bool optimize = false) {
   shaderc::Compiler compiler;
   shaderc::CompileOptions options;
 
   // Like -DMY_DEFINE=1
   options.AddMacroDefinition("MY_DEFINE", "1");
+  if (optimize) options.SetOptimizationLevel(shaderc_optimization_level_size);
 
-  shaderc::SpvCompilationResult module = compiler.CompileGlslToSpv(
-      source.c_str(), source.size(), kind, source_name.c_str(), options);
+  shaderc::SpvCompilationResult module =
+      compiler.CompileGlslToSpv(source, kind, source_name.c_str(), options);
 
   if (module.GetCompilationStatus() != shaderc_compilation_status_success) {
     std::cerr << module.GetErrorMessage();
     return std::vector<uint32_t>();
   }
 
-  std::vector<uint32_t> result(module.cbegin(), module.cend());
-  return result;
+  return {module.cbegin(), module.cend()};
 }
 
 int main() {
   const char kShaderSource[] =
-      "#version 310 es\nvoid main() {int x = MY_DEFINE; }\n";
+      "#version 310 es\n"
+      "void main() { int x = MY_DEFINE; }\n";
 
-  auto preprocessed = preprocess_shader(
-      "shader_src", shaderc_glsl_vertex_shader, kShaderSource);
-  std::cout << "Compiled a vertex shader resulting in preprocessed text:"
-            << std::endl
-            << preprocessed << std::endl;
+  {  // Preprocessing
+    auto preprocessed = preprocess_shader(
+        "shader_src", shaderc_glsl_vertex_shader, kShaderSource);
+    std::cout << "Compiled a vertex shader resulting in preprocessed text:"
+              << std::endl
+              << preprocessed << std::endl;
+  }
 
-  auto assembly = compile_file_to_assembly(
-      "shader_src", shaderc_glsl_vertex_shader, kShaderSource);
-  std::cout << "SPIR-V assembly:" << std::endl << assembly << std::endl;
+  {  // Compiling
+    auto assembly = compile_file_to_assembly(
+        "shader_src", shaderc_glsl_vertex_shader, kShaderSource);
+    std::cout << "SPIR-V assembly:" << std::endl << assembly << std::endl;
 
-  auto spirv =
-      compile_file("shader_src", shaderc_glsl_vertex_shader, kShaderSource);
-  std::cout << "Compiled to a binary module with " << spirv.size() << " words."
-            << std::endl;
+    auto spirv =
+        compile_file("shader_src", shaderc_glsl_vertex_shader, kShaderSource);
+    std::cout << "Compiled to a binary module with " << spirv.size()
+              << " words." << std::endl;
+  }
 
-  const char kBadShaderSource[] =
-      "#version 310 es\nint main() { int main_should_be_void; }\n";
+  {  // Compiling with optimizing
+    auto assembly =
+        compile_file_to_assembly("shader_src", shaderc_glsl_vertex_shader,
+                                 kShaderSource, /* optimize = */ true);
+    std::cout << "Optimized SPIR-V assembly:" << std::endl
+              << assembly << std::endl;
 
-  std::cout << std::endl << "Compiling a bad shader:" << std::endl;
-  compile_file("bad_src", shaderc_glsl_vertex_shader, kBadShaderSource);
+    auto spirv = compile_file("shader_src", shaderc_glsl_vertex_shader,
+                              kShaderSource, /* optimize = */ true);
+    std::cout << "Compiled to an optimized binary module with " << spirv.size()
+              << " words." << std::endl;
+  }
+
+  {  // Error case
+    const char kBadShaderSource[] =
+        "#version 310 es\nint main() { int main_should_be_void; }\n";
+
+    std::cout << std::endl << "Compiling a bad shader:" << std::endl;
+    compile_file("bad_src", shaderc_glsl_vertex_shader, kBadShaderSource);
+  }
 
   return 0;
 }
