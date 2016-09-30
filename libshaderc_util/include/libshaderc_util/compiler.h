@@ -111,6 +111,8 @@ class Compiler {
     Size,  // Optimization towards reducing code size.
   };
 
+  // Creates an default compiler instance targeting at Vulkan environment. Uses
+  // version 110 and no profile specification as the default for GLSL.
   Compiler()
       // The default version for glsl is 110, or 100 if you are using an es
       // profile. But we want to default to a non-es profile.
