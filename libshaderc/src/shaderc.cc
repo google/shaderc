@@ -70,20 +70,6 @@ EShLanguage GetForcedStage(shaderc_shader_kind kind) {
   return EShLangCount;
 }
 
-// Converts shaderc_target_env to EShMessages
-EShMessages GetMessageRules(shaderc_target_env target) {
-  switch (target) {
-    case shaderc_target_env_opengl_compat:
-      break;
-    case shaderc_target_env_opengl:
-      return static_cast<EShMessages>(EShMsgSpvRules | EShMsgCascadingErrors);
-    case shaderc_target_env_vulkan:
-      return static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules |
-                                      EShMsgCascadingErrors);
-  }
-  return EShMsgCascadingErrors;
-}
-
 // A wrapper functor class to be used as stage deducer for libshaderc_util
 // Compile() interface. When the given shader kind is one of the default shader
 // kinds, this functor will be called if #pragma is not found in the source
@@ -237,14 +223,29 @@ class InternalFileIncluder : public shaderc_util::CountingIncluder {
   void* user_data_;
 };
 
+// Converts the target env to the corresponding one in shaderc_util::Compiler.
+shaderc_util::Compiler::TargetEnv GetCompilerTargetEnv(shaderc_target_env env) {
+  switch (env) {
+    case shaderc_target_env_opengl:
+      return shaderc_util::Compiler::TargetEnv::OpenGL;
+    case shaderc_target_env_opengl_compat:
+      return shaderc_util::Compiler::TargetEnv::OpenGLCompat;
+    case shaderc_target_env_vulkan:
+    default:
+      break;
+  }
+
+  return shaderc_util::Compiler::TargetEnv::Vulkan;
+}
+
 }  // anonymous namespace
 
 struct shaderc_compile_options {
-  shaderc_compile_options() : include_user_data(nullptr) {}
+  shaderc_target_env target_env = shaderc_target_env_default;
   shaderc_util::Compiler compiler;
-  shaderc_include_resolve_fn include_resolver;
-  shaderc_include_result_release_fn include_result_releaser;
-  void* include_user_data;
+  shaderc_include_resolve_fn include_resolver = nullptr;
+  shaderc_include_result_release_fn include_result_releaser = nullptr;
+  void* include_user_data = nullptr;
 };
 
 shaderc_compile_options_t shaderc_compile_options_initialize() {
@@ -327,7 +328,8 @@ void shaderc_compile_options_set_target_env(shaderc_compile_options_t options,
                                             uint32_t version) {
   // "version" reserved for future use, intended to distinguish between
   // different versions of a target environment
-  options->compiler.SetMessageRules(GetMessageRules(target));
+  options->target_env = target;
+  options->compiler.SetTargetEnv(GetCompilerTargetEnv(target));
 }
 
 void shaderc_compile_options_set_warnings_as_errors(
@@ -459,7 +461,7 @@ shaderc_compilation_result_t shaderc_compile_into_preprocessed_text(
 shaderc_compilation_result_t shaderc_assemble_into_spv(
     const shaderc_compiler_t compiler, const char* source_assembly,
     size_t source_assembly_size,
-    const shaderc_compile_options_t /* additional_options */) {
+    const shaderc_compile_options_t additional_options) {
   auto* result = new (std::nothrow) shaderc_compilation_result_spv_binary;
   if (!result) return nullptr;
   result->compilation_status = shaderc_compilation_status_invalid_assembly;
@@ -469,7 +471,10 @@ shaderc_compilation_result_t shaderc_assemble_into_spv(
   TRY_IF_EXCEPTIONS_ENABLED {
     spv_binary assembling_output_data = nullptr;
     std::string errors;
+    const auto target_env = additional_options ? additional_options->target_env
+                                               : shaderc_target_env_default;
     const bool assembling_succeeded = shaderc_util::SpirvToolsAssemble(
+        GetCompilerTargetEnv(target_env),
         {source_assembly, source_assembly + source_assembly_size},
         &assembling_output_data, &errors);
     result->num_errors = !assembling_succeeded;

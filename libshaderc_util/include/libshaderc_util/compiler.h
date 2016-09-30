@@ -22,7 +22,6 @@
 #include <utility>
 
 #include "glslang/Public/ShaderLang.h"
-#include "libshaderc_util/spirv_tools_wrapper.h"
 
 #include "counting_includer.h"
 #include "file_finder.h"
@@ -30,6 +29,10 @@
 #include "string_piece.h"
 
 namespace shaderc_util {
+
+// To break recursive including. This header is already included in
+// spirv_tools_wrapper.h, so cannot include spirv_tools_wrapper.h here.
+enum class PassId;
 
 // Initializes glslang on creation, and destroys it on completion.
 // This object is expected to be a singleton, so that internal
@@ -89,6 +92,13 @@ using MacroDictionary = std::unordered_map<std::string, std::string>;
 // Holds all of the state required to compile source GLSL into SPIR-V.
 class Compiler {
  public:
+  // Target environment.
+  enum class TargetEnv {
+    Vulkan,
+    OpenGL,
+    OpenGLCompat,
+  };
+
   enum class OutputType {
     SpirvBinary,  // A binary module, as defined by the SPIR-V specification.
     SpirvAssemblyText,  // Assembly syntax defined by the SPIRV-Tools project.
@@ -111,7 +121,7 @@ class Compiler {
         suppress_warnings_(false),
         generate_debug_info_(false),
         enabled_opt_passes_(),
-        message_rules_(GetDefaultRules()) {}
+        target_env_(TargetEnv::Vulkan) {}
 
   // Requests that the compiler place debug information into the object code,
   // such as identifier names and line numbers.
@@ -134,11 +144,8 @@ class Compiler {
   void AddMacroDefinition(const char* macro, size_t macro_length,
                           const char* definition, size_t definition_length);
 
-  // Sets message rules to be used when generating compiler warnings/errors
-  void SetMessageRules(EShMessages rules);
-
-  // Gets the message rules when generating compiler warnings/error.
-  EShMessages GetMessageRules() const;
+  // Sets the target environment.
+  void SetTargetEnv(TargetEnv env);
 
   // Forces (without any verification) the default version and profile for
   // subsequent CompileShader() calls.
@@ -174,11 +181,11 @@ class Compiler {
   // binary code, the size is the number of bytes of valid data in the vector.
   // If the output is a text string, the size equals the length of that string.
   std::tuple<bool, std::vector<uint32_t>, size_t> Compile(
-      const shaderc_util::string_piece& input_source_string,
-      EShLanguage forced_shader_stage, const std::string& error_tag,
-      const std::function<EShLanguage(
-          std::ostream* error_stream,
-          const shaderc_util::string_piece& error_tag)>& stage_callback,
+      const string_piece& input_source_string, EShLanguage forced_shader_stage,
+      const std::string& error_tag,
+      const std::function<EShLanguage(std::ostream* error_stream,
+                                      const string_piece& error_tag)>&
+          stage_callback,
       CountingIncluder& includer, OutputType output_type,
       std::ostream* error_stream, size_t* total_warnings, size_t* total_errors,
       GlslInitializer* initializer) const;
@@ -206,10 +213,8 @@ class Compiler {
   // to be default_version_/default_profile_ regardless of the #version
   // directive in the source code.
   std::tuple<bool, std::string, std::string> PreprocessShader(
-      const std::string& error_tag,
-      const shaderc_util::string_piece& shader_source,
-      const shaderc_util::string_piece& shader_preamble,
-      CountingIncluder& includer) const;
+      const std::string& error_tag, const string_piece& shader_source,
+      const string_piece& shader_preamble, CountingIncluder& includer) const;
 
   // Cleans up the preamble in a given preprocessed shader.
   //
@@ -225,11 +230,11 @@ class Compiler {
   // delete the #extension directive we injected via preamble. Otherwise, we
   // need to adjust it if there exists a #version directive in the original
   // shader source code.
-  std::string CleanupPreamble(
-      const shaderc_util::string_piece& preprocessed_shader,
-      const shaderc_util::string_piece& error_tag,
-      const shaderc_util::string_piece& pound_extension,
-      int num_include_directives, bool is_for_next_line) const;
+  std::string CleanupPreamble(const string_piece& preprocessed_shader,
+                              const string_piece& error_tag,
+                              const string_piece& pound_extension,
+                              int num_include_directives,
+                              bool is_for_next_line) const;
 
   // Determines version and profile from command line, or the source code.
   // Returns the decoded version and profile pair on success. Otherwise,
@@ -243,8 +248,7 @@ class Compiler {
   // EShLangCount.  If errors occur, the second element in the pair is the
   // error message.  Otherwise, it's an empty string.
   std::pair<EShLanguage, std::string> GetShaderStageFromSourceCode(
-      shaderc_util::string_piece filename,
-      const std::string& preprocessed_shader) const;
+      string_piece filename, const std::string& preprocessed_shader) const;
 
   // Determines version and profile from command line, or the source code.
   // Returns the decoded version and profile pair on success. Otherwise,
@@ -280,10 +284,12 @@ class Compiler {
   // Optimization passes to be applied.
   std::vector<PassId> enabled_opt_passes_;
 
-  // Sets the glslang EshMessages bitmask for determining which dialect of GLSL
-  // and which SPIR-V codegen semantics are used. This impacts the warning &
-  // error messages as well as the set of available builtins
-  EShMessages message_rules_;
+  // The target environment to compile with. This controls the glslang
+  // EshMessages bitmask, which determines which dialect of GLSL and which
+  // SPIR-V codegen semantics are used. This impacts the warning & error
+  // messages as well as the set of available builtins, as per the
+  // implementation of glslang.
+  TargetEnv target_env_;
 };
 
 // Converts a string to a vector of uint32_t by copying the content of a given

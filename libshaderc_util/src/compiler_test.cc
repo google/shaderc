@@ -25,13 +25,6 @@ namespace {
 
 using shaderc_util::Compiler;
 
-// These are the flag combinations Glslang uses to set language
-// rules based on the target environment.
-const EShMessages kOpenGLCompatibilityRules = EShMsgDefault;
-const EShMessages kOpenGLRules = EShMsgSpvRules;
-const EShMessages kVulkanRules =
-    static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules);
-
 // A trivial vertex shader
 const char kVertexShader[] =
     "#version 140\n"
@@ -90,8 +83,7 @@ class DummyCountingIncluder : public shaderc_util::CountingIncluder {
  private:
   // Returns a pair of empty strings.
   virtual glslang::TShader::Includer::IncludeResult* include_delegate(
-      const char*, glslang::TShader::Includer::IncludeType,
-      const char*,
+      const char*, glslang::TShader::Includer::IncludeType, const char*,
       size_t) override {
     return nullptr;
   }
@@ -132,6 +124,7 @@ class CompilerTest : public testing::Test {
     return SimpleCompilationSucceedsForOutputType(
         source, stage, Compiler::OutputType::SpirvBinary);
   }
+
  protected:
   Compiler compiler_;
   // The error string from the most recent compilation.
@@ -163,12 +156,12 @@ TEST_F(CompilerTest, SimpleVulkanShaderCompilesWithDefaultCompilerSettings) {
 TEST_F(CompilerTest, RespectTargetEnvOnOpenGLCompatibilityShader) {
   const EShLanguage stage = EShLangFragment;
 
-  compiler_.SetMessageRules(kOpenGLCompatibilityRules);
+  compiler_.SetTargetEnv(Compiler::TargetEnv::OpenGLCompat);
   EXPECT_TRUE(SimpleCompilationSucceeds(kOpenGLCompatibilityFragShader, stage));
-  compiler_.SetMessageRules(kOpenGLRules);
+  compiler_.SetTargetEnv(Compiler::TargetEnv::OpenGL);
   EXPECT_FALSE(
       SimpleCompilationSucceeds(kOpenGLCompatibilityFragShader, stage));
-  compiler_.SetMessageRules(kVulkanRules);
+  compiler_.SetTargetEnv(Compiler::TargetEnv::Vulkan);
   EXPECT_FALSE(
       SimpleCompilationSucceeds(kOpenGLCompatibilityFragShader, stage));
   // Default compiler.
@@ -181,15 +174,15 @@ TEST_F(CompilerTest,
        RespectTargetEnvOnOpenGLCompatibilityShaderWhenDeducingStage) {
   const EShLanguage stage = EShLangCount;
 
-  compiler_.SetMessageRules(kOpenGLCompatibilityRules);
+  compiler_.SetTargetEnv(Compiler::TargetEnv::OpenGLCompat);
   EXPECT_TRUE(SimpleCompilationSucceeds(
       kOpenGLCompatibilityFragShaderDeducibleStage, stage))
       << errors_;
-  compiler_.SetMessageRules(kOpenGLRules);
+  compiler_.SetTargetEnv(Compiler::TargetEnv::OpenGL);
   EXPECT_FALSE(SimpleCompilationSucceeds(
       kOpenGLCompatibilityFragShaderDeducibleStage, stage))
       << errors_;
-  compiler_.SetMessageRules(kVulkanRules);
+  compiler_.SetTargetEnv(Compiler::TargetEnv::Vulkan);
   EXPECT_FALSE(SimpleCompilationSucceeds(
       kOpenGLCompatibilityFragShaderDeducibleStage, stage))
       << errors_;
@@ -203,37 +196,37 @@ TEST_F(CompilerTest,
 TEST_F(CompilerTest, RespectTargetEnvOnOpenGLShader) {
   const EShLanguage stage = EShLangVertex;
 
-  compiler_.SetMessageRules(kOpenGLCompatibilityRules);
+  compiler_.SetTargetEnv(Compiler::TargetEnv::OpenGLCompat);
   EXPECT_TRUE(SimpleCompilationSucceeds(kOpenGLVertexShader, stage));
 
-  compiler_.SetMessageRules(kOpenGLRules);
+  compiler_.SetTargetEnv(Compiler::TargetEnv::OpenGL);
   EXPECT_TRUE(SimpleCompilationSucceeds(kOpenGLVertexShader, stage));
 }
 
 TEST_F(CompilerTest, RespectTargetEnvOnOpenGLShaderWhenDeducingStage) {
   const EShLanguage stage = EShLangCount;
 
-  compiler_.SetMessageRules(kOpenGLCompatibilityRules);
+  compiler_.SetTargetEnv(Compiler::TargetEnv::OpenGLCompat);
   EXPECT_TRUE(
       SimpleCompilationSucceeds(kOpenGLVertexShaderDeducibleStage, stage));
 
-  compiler_.SetMessageRules(kOpenGLRules);
+  compiler_.SetTargetEnv(Compiler::TargetEnv::OpenGL);
   EXPECT_TRUE(
       SimpleCompilationSucceeds(kOpenGLVertexShaderDeducibleStage, stage));
 }
 
 TEST_F(CompilerTest, RespectTargetEnvOnVulkanShader) {
-  compiler_.SetMessageRules(kVulkanRules);
+  compiler_.SetTargetEnv(Compiler::TargetEnv::Vulkan);
   EXPECT_TRUE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
 }
 
 TEST_F(CompilerTest, VulkanSpecificShaderFailsUnderOpenGLCompatibilityRules) {
-  compiler_.SetMessageRules(kOpenGLCompatibilityRules);
+  compiler_.SetTargetEnv(Compiler::TargetEnv::OpenGLCompat);
   EXPECT_FALSE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
 }
 
 TEST_F(CompilerTest, VulkanSpecificShaderFailsUnderOpenGLRules) {
-  compiler_.SetMessageRules(kOpenGLRules);
+  compiler_.SetTargetEnv(Compiler::TargetEnv::OpenGL);
   EXPECT_FALSE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
 }
 
@@ -247,13 +240,13 @@ TEST_F(CompilerTest, OpenGLSpecificShaderFailsUnderDefaultRules) {
 }
 
 TEST_F(CompilerTest, OpenGLCompatibilitySpecificShaderFailsUnderVulkanRules) {
-  compiler_.SetMessageRules(kVulkanRules);
+  compiler_.SetTargetEnv(Compiler::TargetEnv::Vulkan);
   EXPECT_FALSE(SimpleCompilationSucceeds(kOpenGLCompatibilityFragShader,
                                          EShLangFragment));
 }
 
 TEST_F(CompilerTest, OpenGLSpecificShaderFailsUnderVulkanRules) {
-  compiler_.SetMessageRules(kVulkanRules);
+  compiler_.SetTargetEnv(Compiler::TargetEnv::Vulkan);
   EXPECT_FALSE(SimpleCompilationSucceeds(kOpenGLVertexShader, EShLangVertex));
 }
 

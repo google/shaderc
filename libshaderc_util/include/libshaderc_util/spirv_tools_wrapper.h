@@ -18,21 +18,23 @@
 #include <string>
 #include <vector>
 
-#include "libshaderc_util/string_piece.h"
-
 #include "spirv-tools/libspirv.hpp"
+
+#include "libshaderc_util/compiler.h"
+#include "libshaderc_util/string_piece.h"
 
 namespace shaderc_util {
 // Assembles the given assembly. On success, returns true, writes the assembled
 // binary to *binary, and clears *errors. Otherwise, writes the error message
 // into *errors.
-bool SpirvToolsAssemble(const string_piece assembly, spv_binary* binary,
-                        std::string* errors);
+bool SpirvToolsAssemble(Compiler::TargetEnv env, const string_piece assembly,
+                        spv_binary* binary, std::string* errors);
 
 // Disassembles the given binary. Returns true and writes the disassembled text
 // to *text_or_error if successful. Otherwise, writes the error message to
 // *text_or_error.
-bool SpirvToolsDisassemble(const std::vector<uint32_t>& binary,
+bool SpirvToolsDisassemble(Compiler::TargetEnv env,
+                           const std::vector<uint32_t>& binary,
                            std::string* text_or_error);
 
 // The ids of a list of supported optimization passes.
@@ -46,7 +48,8 @@ enum class PassId {
 // in enabled_passes, without de-duplication. Returns true and writes the
 // optimized binary back to *binary if successful. Otherwise, writes errors to
 // *errors and the content of binary may be in an invalid state.
-bool SpirvToolsOptimize(const std::vector<PassId>& enabled_passes,
+bool SpirvToolsOptimize(Compiler::TargetEnv env,
+                        const std::vector<PassId>& enabled_passes,
                         std::vector<uint32_t>* binary, std::string* errors);
 
 }  // namespace shaderc_util

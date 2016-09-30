@@ -21,7 +21,25 @@
 
 namespace shaderc_util {
 
-bool SpirvToolsDisassemble(const std::vector<uint32_t>& binary,
+namespace {
+
+// Gets the corresponding target environment used in SPIRV-Tools.
+spv_target_env GetSpirvToolsTargetEnv(Compiler::TargetEnv env) {
+  switch (env) {
+    case Compiler::TargetEnv::Vulkan:
+      return SPV_ENV_VULKAN_1_0;
+    case Compiler::TargetEnv::OpenGL:
+      return SPV_ENV_OPENGL_4_5;
+    case Compiler::TargetEnv::OpenGLCompat:
+      return SPV_ENV_OPENGL_4_5;  // TODO(antiagainst): is this correct?
+  }
+  return SPV_ENV_VULKAN_1_0;
+}
+
+}  // anonymous namespace
+
+bool SpirvToolsDisassemble(Compiler::TargetEnv env,
+                           const std::vector<uint32_t>& binary,
                            std::string* text_or_error) {
   spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_0);
   std::ostringstream oss;
@@ -37,9 +55,9 @@ bool SpirvToolsDisassemble(const std::vector<uint32_t>& binary,
   return success;
 }
 
-bool SpirvToolsAssemble(const string_piece assembly, spv_binary* binary,
-                        std::string* errors) {
-  auto spvtools_context = spvContextCreate(SPV_ENV_VULKAN_1_0);
+bool SpirvToolsAssemble(Compiler::TargetEnv env, const string_piece assembly,
+                        spv_binary* binary, std::string* errors) {
+  auto spvtools_context = spvContextCreate(GetSpirvToolsTargetEnv(env));
   spv_diagnostic spvtools_diagnostic = nullptr;
 
   *binary = nullptr;
@@ -62,7 +80,8 @@ bool SpirvToolsAssemble(const string_piece assembly, spv_binary* binary,
   return success;
 }
 
-bool SpirvToolsOptimize(const std::vector<PassId>& enabled_passes,
+bool SpirvToolsOptimize(Compiler::TargetEnv env,
+                        const std::vector<PassId>& enabled_passes,
                         std::vector<uint32_t>* binary, std::string* errors) {
   errors->clear();
   if (enabled_passes.empty()) return true;
@@ -72,7 +91,7 @@ bool SpirvToolsOptimize(const std::vector<PassId>& enabled_passes,
     return true;
   }
 
-  spvtools::Optimizer optimizer(SPV_ENV_VULKAN_1_0);
+  spvtools::Optimizer optimizer(GetSpirvToolsTargetEnv(env));
   std::ostringstream oss;
   optimizer.SetMessageConsumer(
       [&oss](spv_message_level_t, const char*, const spv_position_t&,

@@ -266,11 +266,16 @@ class CompileStringTest : public testing::Test {
 // checking methods. Subclass tests can access the compiler object to set their
 // properties.
 class AssembleStringTest : public testing::Test {
+ public:
+  AssembleStringTest() : options_(shaderc_compile_options_initialize()) {}
+  ~AssembleStringTest() { shaderc_compile_options_release(options_); }
+
  protected:
   // Assembles the given assembly and returns true on success.
   bool AssemblingSuccess(const std::string& assembly) {
     return CompilationResultIsSuccess(
-        Assembling(compiler_.get_compiler_handle(), assembly).result());
+        Assembling(compiler_.get_compiler_handle(), assembly, options_)
+            .result());
   }
 
   bool AssemblingValid(const std::string& assembly) {
@@ -280,6 +285,7 @@ class AssembleStringTest : public testing::Test {
   }
 
   Compiler compiler_;
+  shaderc_compile_options_t options_;
 };
 
 // Name holders so that we have test cases being grouped with only one real
@@ -310,6 +316,16 @@ TEST_F(AssembleStringTest, GarbageString) {
   EXPECT_FALSE(CompilationResultIsSuccess(assembling.result()));
   EXPECT_EQ(1u, shaderc_result_get_num_errors(assembling.result()));
   EXPECT_EQ(0u, shaderc_result_get_num_warnings(assembling.result()));
+}
+
+// TODO(antiagainst): right now there is no assembling difference for all the
+// target environments exposed by shaderc. So the following is just testing the
+// target environment is accepted.
+TEST_F(AssembleStringTest, AcceptTargetEnv) {
+  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  shaderc_compile_options_set_target_env(options_, shaderc_target_env_opengl,
+                                         /* version = */ 0);
+  EXPECT_TRUE(AssemblingSuccess("OpCapability Shader"));
 }
 
 TEST_F(CompileStringTest, ReallyLongShader) {
