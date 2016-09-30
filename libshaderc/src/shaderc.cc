@@ -458,7 +458,8 @@ shaderc_compilation_result_t shaderc_compile_into_preprocessed_text(
 
 shaderc_compilation_result_t shaderc_assemble_into_spv(
     const shaderc_compiler_t compiler, const char* source_assembly,
-    size_t source_assembly_size) {
+    size_t source_assembly_size,
+    const shaderc_compile_options_t /* additional_options */) {
   auto* result = new (std::nothrow) shaderc_compilation_result_spv_binary;
   if (!result) return nullptr;
   result->compilation_status = shaderc_compilation_status_invalid_assembly;

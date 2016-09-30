@@ -295,12 +295,15 @@ shaderc_compilation_result_t shaderc_compile_into_preprocessed_text(
 // (https://github.com/KhronosGroup/SPIRV-Tools/blob/master/syntax.md),
 // assembles it into SPIR-V binary and a shaderc_compilation_result will be
 // returned to hold the results.
+// The assembling will pick options suitable for assembling specified in the
+// additional_options parameter.
 // May be safely called from multiple threads without explicit synchronization.
 // If there was failure in allocating the compiler object, null will be
 // returned.
 shaderc_compilation_result_t shaderc_assemble_into_spv(
     const shaderc_compiler_t compiler, const char* source_assembly,
-    size_t source_assembly_size);
+    size_t source_assembly_size,
+    const shaderc_compile_options_t additional_options);
 
 // The following functions, operating on shaderc_compilation_result_t objects,
 // offer only the basic thread-safety guarantee.

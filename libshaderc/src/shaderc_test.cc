@@ -122,9 +122,10 @@ class Compilation {
 class Assembling {
  public:
   // Assembles shader and keeps the result.
-  Assembling(const shaderc_compiler_t compiler, const std::string& assembly)
+  Assembling(const shaderc_compiler_t compiler, const std::string& assembly,
+             const shaderc_compile_options_t options = nullptr)
       : compiled_result_(shaderc_assemble_into_spv(compiler, assembly.data(),
-                                                   assembly.size())) {}
+                                                   assembly.size(), options)) {}
 
   ~Assembling() { shaderc_result_release(compiled_result_); }
 
