@@ -10,9 +10,25 @@ At the moment it includes:
 - [`glslc`](glslc), a command line compiler for GLSL to SPIR-V, and
 - `libshaderc` a library API for doing the same.
 
+Shaderc wraps around core functionality in
+[Glslang](https://github.com/KhronosGroup/glslang)
+and [SPIRV-Tools](https://github.com/KhronosGroup/SPIRV-Tools).  Shaderc aims to
+to provide:
+* a command line compiler with GCC- and Clang-like usage, for better
+  integration with build systems
+* an API where functionality can be added without breaking existing clients
+* an API supporting standard concurrency patterns across multiple
+  operating systems
+* increased functionality such as file `#include` support
+
 ## Status
 
-Shaderc is experimental, and subject to significant incompatible changes.
+Shaderc is approaching maturity, but is still subject to incompatible changes.
+
+Shaderc has been shipping in the
+[Android NDK](https://developer.android.com/ndk/index.html) since version r12b.
+(The NDK build uses sources from https://android.googlesource.com/platform/external/shaderc/.
+Those repos are downstream from GitHub.)
 
 For licensing terms, please see the [`LICENSE`](LICENSE) file.  If interested in
 contributing to this project, please see [`CONTRIBUTING.md`](CONTRIBUTING.md)
