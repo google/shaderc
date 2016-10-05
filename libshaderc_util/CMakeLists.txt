@@ -65,5 +65,3 @@ if(${SHADERC_ENABLE_TESTS})
   add_dependencies(shaderc_util_file_finder_test testdata)
   add_dependencies(shaderc_util_io_test testdata)
 endif()
-
-add_definitions(-DCURRENT_DIR="${CMAKE_CURRENT_BINARY_DIR}")
