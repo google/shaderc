@@ -1,5 +1,7 @@
 Revision history for Shaderc
 
+v2016.2-dev 2016-10-12
+
 v2016.1 2016-10-12
  - C API for assembling now takes an options object
  - Support compilation options to optimize for size.
