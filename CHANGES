@@ -1,7 +1,11 @@
 Revision history for Shaderc
 
-v2016.1-dev 2016-07-08
- - Start v2016.1
+v2016.1 2016-10-12
+ - C API for assembling now takes an options object
+ - Support compilation options to optimize for size.
+ - Maintain compatibility with recent SPIRV-Tools and Glslang versions.
+ - Update examples.
+ - Build cleanups.
  - Fixes issues:
    #238: Fix invocation of python scripts during build
 
