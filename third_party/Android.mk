@@ -59,7 +59,7 @@ include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
-GLSLANG_OUT_PATH=$(abspath $(TARGET_OUT))
+GLSLANG_OUT_PATH=$(if $(call host-path-is-absolute,$(TARGET_OUT)),$(TARGET_OUT),$(abspath $(TARGET_OUT)))
 
 LOCAL_MODULE:=glslang
 LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti $(GLSLANG_OS_FLAGS)
@@ -106,7 +106,7 @@ include $(BUILD_STATIC_LIBRARY)
 
 SPVTOOLS_LOCAL_PATH := $(THIRD_PARTY_PATH)/spirv-tools
 LOCAL_PATH := $(SPVTOOLS_LOCAL_PATH)
-SPVTOOLS_OUT_PATH=$(abspath $(TARGET_OUT))
+SPVTOOLS_OUT_PATH=$(if $(call host-path-is-absolute,$(TARGET_OUT)),$(TARGET_OUT),$(abspath $(TARGET_OUT)))
 SPVHEADERS_LOCAL_PATH := $(THIRD_PARTY_PATH)/spirv-tools/external/spirv-headers
 
 # Locations of grammar files.
