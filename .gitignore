@@ -8,3 +8,4 @@ cscope.*
 third_party/glslang/
 third_party/googletest/
 third_party/spirv-tools/
+.DS_Store
