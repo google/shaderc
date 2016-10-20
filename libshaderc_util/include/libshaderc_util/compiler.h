@@ -39,11 +39,11 @@ enum class PassId;
 // glslang state can be correctly handled.
 // TODO(awoloszyn): Once glslang no longer has static global mutable state
 //                  remove this class.
-class GlslInitializer {
+class GlslangInitializer {
  public:
-  GlslInitializer() { glslang::InitializeProcess(); }
+  GlslangInitializer() { glslang::InitializeProcess(); }
 
-  ~GlslInitializer() { glslang::FinalizeProcess(); }
+  ~GlslangInitializer() { glslang::FinalizeProcess(); }
 
   // Calls release on GlslangInitializer used to intialize this object
   // when it is destroyed.
@@ -63,11 +63,11 @@ class GlslInitializer {
     InitializationToken(const InitializationToken&) = delete;
 
    private:
-    InitializationToken(GlslInitializer* initializer)
+    InitializationToken(GlslangInitializer* initializer)
         : initializer_(initializer) {}
 
-    friend class GlslInitializer;
-    GlslInitializer* initializer_;
+    friend class GlslangInitializer;
+    GlslangInitializer* initializer_;
   };
 
   // Obtains exclusive access to the glslang state. The state remains
@@ -163,7 +163,7 @@ class Compiler {
   // from the shader text. Any #include directives are parsed with the given
   // includer.
   //
-  // The initializer parameter must be a valid GlslInitializer object.
+  // The initializer parameter must be a valid GlslangInitializer object.
   // Acquire will be called on the initializer and the result will be
   // destoryed before the function ends.
   //
@@ -190,7 +190,7 @@ class Compiler {
           stage_callback,
       CountingIncluder& includer, OutputType output_type,
       std::ostream* error_stream, size_t* total_warnings, size_t* total_errors,
-      GlslInitializer* initializer) const;
+      GlslangInitializer* initializer) const;
 
   static EShMessages GetDefaultRules() {
     return static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules |

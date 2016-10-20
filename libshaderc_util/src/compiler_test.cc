@@ -107,7 +107,7 @@ class CompilerTest : public testing::Test {
     std::stringstream errors;
     size_t total_warnings = 0;
     size_t total_errors = 0;
-    shaderc_util::GlslInitializer initializer;
+    shaderc_util::GlslangInitializer initializer;
     bool result = false;
     DummyCountingIncluder dummy_includer;
     std::tie(result, std::ignore, std::ignore) = compiler_.Compile(

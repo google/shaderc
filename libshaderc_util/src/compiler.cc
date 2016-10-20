@@ -91,7 +91,7 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
         stage_callback,
     CountingIncluder& includer, OutputType output_type,
     std::ostream* error_stream, size_t* total_warnings, size_t* total_errors,
-    GlslInitializer* initializer) const {
+    GlslangInitializer* initializer) const {
   // Compilation results to be returned:
   // Initialize the result tuple as a failed compilation. In error cases, we
   // should return result_tuple directly without setting its members.
