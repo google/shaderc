@@ -84,11 +84,11 @@ class shaderc_compilation_result_spv_binary
 };
 
 namespace shaderc_util {
-class GlslInitializer;
+class GlslangInitializer;
 }
 
 struct shaderc_compiler {
-  shaderc_util::GlslInitializer* initializer;
+  shaderc_util::GlslangInitializer* initializer;
 };
 
 #endif  // LIBSHADERC_SRC_SHADERC_PRIVATE_H_

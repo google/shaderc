@@ -338,8 +338,8 @@ void shaderc_compile_options_set_warnings_as_errors(
 }
 
 shaderc_compiler_t shaderc_compiler_initialize() {
-  static shaderc_util::GlslInitializer* initializer =
-      new shaderc_util::GlslInitializer;
+  static shaderc_util::GlslangInitializer* initializer =
+      new shaderc_util::GlslangInitializer;
   shaderc_compiler_t compiler = new (std::nothrow) shaderc_compiler;
   compiler->initializer = initializer;
   return compiler;
