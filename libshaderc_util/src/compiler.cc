@@ -65,19 +65,26 @@ std::pair<int, string_piece> DecodeLineDirective(string_piece directive) {
   return std::make_pair(line, directive);
 }
 
-// Gets the corresponding message rules for the given target environment.
-EShMessages GetMessageRules(shaderc_util::Compiler::TargetEnv env) {
+// Returns the Glslang message rules for the given target environment
+// and source language.  We assume only valid combinations are used.
+EShMessages GetMessageRules(shaderc_util::Compiler::TargetEnv env,
+                            shaderc_util::Compiler::SourceLanguage lang) {
   using shaderc_util::Compiler;
+  EShMessages result = EShMsgCascadingErrors;
+  if (lang == Compiler::SourceLanguage::HLSL) {
+    result = static_cast<EShMessages>(result | EShMsgReadHlsl);
+  }
   switch (env) {
     case Compiler::TargetEnv::OpenGLCompat:
       break;
     case Compiler::TargetEnv::OpenGL:
-      return static_cast<EShMessages>(EShMsgSpvRules | EShMsgCascadingErrors);
+      result = static_cast<EShMessages>(result | EShMsgSpvRules);
+      break;
     case Compiler::TargetEnv::Vulkan:
-      return static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules |
-                                      EShMsgCascadingErrors);
+      result = static_cast<EShMessages>(result | EShMsgSpvRules | EShMsgVulkanRules);
+      break;
   }
-  return EShMsgCascadingErrors;
+  return result;
 }
 
 }  // anonymous namespace
@@ -177,7 +184,8 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   bool success = shader.parse(&shaderc_util::kDefaultTBuiltInResource,
                               default_version_, default_profile_,
                               force_version_profile_, kNotForwardCompatible,
-                              GetMessageRules(target_env_), includer);
+                              GetMessageRules(target_env_, source_language_),
+                              includer);
 
   success &= PrintFilteredErrors(error_tag, error_stream, warnings_as_errors_,
                                  suppress_warnings_, shader.getInfoLog(),
@@ -238,6 +246,8 @@ void Compiler::AddMacroDefinition(const char* macro, size_t macro_length,
 
 void Compiler::SetTargetEnv(Compiler::TargetEnv env) { target_env_ = env; }
 
+void Compiler::SetSourceLanguage(Compiler::SourceLanguage lang) { source_language_ = lang; }
+
 void Compiler::SetForcedVersionProfile(int version, EProfile profile) {
   default_version_ = version;
   default_profile_ = profile;
@@ -289,7 +299,7 @@ std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
   // So combine the existing rules with the just-give-me-preprocessor-output
   // flag.
   const auto rules = static_cast<EShMessages>(EShMsgOnlyPreprocessor |
-                                              GetMessageRules(target_env_));
+                                              GetMessageRules(target_env_, source_language_));
 
   std::string preprocessed_shader;
   const bool success = shader.preprocess(

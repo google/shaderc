@@ -23,6 +23,12 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
+// Source language kind.
+typedef enum {
+  shaderc_source_language_glsl,
+  shaderc_source_language_hlsl,
+} shaderc_source_language;
+
 typedef enum {
   // Forced shader kinds. These shader kinds force the compiler to compile the
   // source code as the specified kind of shader.
@@ -157,6 +163,10 @@ void shaderc_compile_options_release(shaderc_compile_options_t options);
 void shaderc_compile_options_add_macro_definition(
     shaderc_compile_options_t options, const char* name, size_t name_length,
     const char* value, size_t value_length);
+
+// Sets the source language.  The default is GLSL.
+void shaderc_compile_options_set_source_language(
+    shaderc_compile_options_t options, shaderc_source_language lang);
 
 // Sets the compiler mode to generate debug information in the output.
 void shaderc_compile_options_set_generate_debug_info(

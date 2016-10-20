@@ -77,6 +77,11 @@ const std::string kValuelessPredefinitionShader =
     "#error\n"
     "#endif";
 
+// An HLSL vertex shader.
+const char kHlslVertexShader[] =
+    R"(float4 EntryPoint(uint index : SV_VERTEXID) : SV_POSITION
+       { return float4(1.0, 2.0, 3.0, 4.0); })";
+
 // A CountingIncluder that never returns valid content for a requested
 // file inclusion.
 class DummyCountingIncluder : public shaderc_util::CountingIncluder {
@@ -310,5 +315,27 @@ INSTANTIATE_TEST_CASE_P(
         {"12345678", {0x34333231, 0x38373635, 0x00000000}},
         {"123456789", {0x34333231, 0x38373635, 0x00000039}},
     }));
+
+TEST_F(CompilerTest, SetSourceLanguageToGLSLSucceeds) {
+  compiler_.SetSourceLanguage(Compiler::SourceLanguage::GLSL);
+  EXPECT_TRUE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
+}
+
+TEST_F(CompilerTest, SetSourceLanguageToGLSLFailsOnHLSL) {
+  compiler_.SetSourceLanguage(Compiler::SourceLanguage::GLSL);
+  EXPECT_FALSE(SimpleCompilationSucceeds(kHlslVertexShader, EShLangVertex));
+}
+
+TEST_F(CompilerTest, SetSourceLanguageToHLSLSucceeds) {
+  compiler_.SetSourceLanguage(Compiler::SourceLanguage::HLSL);
+  EXPECT_TRUE(SimpleCompilationSucceeds(kHlslVertexShader, EShLangVertex))
+      << errors_;
+}
+
+TEST_F(CompilerTest, SetSourceLanguageToHLSLFailsOnGLSL) {
+  compiler_.SetSourceLanguage(Compiler::SourceLanguage::HLSL);
+  EXPECT_FALSE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
+}
+
 
 }  // anonymous namespace

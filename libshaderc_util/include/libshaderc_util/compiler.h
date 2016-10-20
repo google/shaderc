@@ -92,6 +92,12 @@ using MacroDictionary = std::unordered_map<std::string, std::string>;
 // Holds all of the state required to compile source GLSL into SPIR-V.
 class Compiler {
  public:
+  // Source language
+  enum class SourceLanguage {
+    GLSL, // The default
+    HLSL,
+  };
+
   // Target environment.
   enum class TargetEnv {
     Vulkan,
@@ -123,7 +129,8 @@ class Compiler {
         suppress_warnings_(false),
         generate_debug_info_(false),
         enabled_opt_passes_(),
-        target_env_(TargetEnv::Vulkan) {}
+        target_env_(TargetEnv::Vulkan),
+        source_language_(SourceLanguage::GLSL) {}
 
   // Requests that the compiler place debug information into the object code,
   // such as identifier names and line numbers.
@@ -149,6 +156,9 @@ class Compiler {
   // Sets the target environment.
   void SetTargetEnv(TargetEnv env);
 
+  // Sets the souce language.
+  void SetSourceLanguage(SourceLanguage lang);
+
   // Forces (without any verification) the default version and profile for
   // subsequent CompileShader() calls.
   void SetForcedVersionProfile(int version, EProfile profile);
@@ -165,7 +175,7 @@ class Compiler {
   //
   // The initializer parameter must be a valid GlslangInitializer object.
   // Acquire will be called on the initializer and the result will be
-  // destoryed before the function ends.
+  // destroyed before the function ends.
   //
   // The output_type parameter determines what kind of output should be
   // produced.
@@ -292,6 +302,9 @@ class Compiler {
   // messages as well as the set of available builtins, as per the
   // implementation of glslang.
   TargetEnv target_env_;
+
+  // The source language.  Defaults to GLSL.
+  SourceLanguage source_language_;
 };
 
 // Converts a string to a vector of uint32_t by copying the content of a given

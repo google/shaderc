@@ -1015,4 +1015,32 @@ TEST_F(CppInterface, BeginAndEndOnPreprocessedResult) {
   EXPECT_THAT(string_via_begin_end, Eq(forced_to_be_a_string));
 }
 
+TEST_F(CppInterface, SourceLangGlslMinimalGlslVertexShaderSucceeds) {
+  options_.SetSourceLanguage(shaderc_source_language_glsl);
+  EXPECT_TRUE(CompilationSuccess(kVertexOnlyShader,
+                                 shaderc_glsl_vertex_shader,
+                                 options_));
+}
+
+TEST_F(CppInterface, SourceLangGlslMinimalHlslVertexShaderFails) {
+  options_.SetSourceLanguage(shaderc_source_language_glsl);
+  EXPECT_FALSE(CompilationSuccess(kMinimalHlslShader,
+                                  shaderc_glsl_vertex_shader,
+                                  options_));
+}
+
+TEST_F(CppInterface, SourceLangHlslMinimalGlslVertexShaderFails) {
+  options_.SetSourceLanguage(shaderc_source_language_hlsl);
+  EXPECT_FALSE(CompilationSuccess(kVertexOnlyShader,
+                                  shaderc_glsl_vertex_shader,
+                                  options_));
+}
+
+TEST_F(CppInterface, SourceLangHlslMinimalHlslVertexShaderSucceeds) {
+  options_.SetSourceLanguage(shaderc_source_language_hlsl);
+  EXPECT_TRUE(CompilationSuccess(kMinimalHlslShader,
+                                 shaderc_glsl_vertex_shader,
+                                 options_));
+}
+
 }  // anonymous namespace

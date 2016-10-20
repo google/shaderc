@@ -270,6 +270,15 @@ void shaderc_compile_options_add_macro_definition(
   options->compiler.AddMacroDefinition(name, name_length, value, value_length);
 }
 
+void shaderc_compile_options_set_source_language(
+    shaderc_compile_options_t options,
+    shaderc_source_language set_lang) {
+  auto lang = shaderc_util::Compiler::SourceLanguage::GLSL;
+  if (set_lang == shaderc_source_language_hlsl)
+    lang = shaderc_util::Compiler::SourceLanguage::HLSL;
+  options->compiler.SetSourceLanguage(lang);
+}
+
 void shaderc_compile_options_set_generate_debug_info(
     shaderc_compile_options_t options) {
   options->compiler.SetGenerateDebugInfo();

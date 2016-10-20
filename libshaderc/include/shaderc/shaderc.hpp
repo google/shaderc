@@ -221,6 +221,11 @@ class CompileOptions {
     shaderc_compile_options_set_suppress_warnings(options_);
   }
 
+  // Sets the source language. The default is GLSL.
+  void SetSourceLanguage(shaderc_source_language lang) {
+    shaderc_compile_options_set_source_language(options_, lang);
+  }
+
   // Sets the target shader environment, affecting which warnings or errors will
   // be issued.
   // The version will be for distinguishing between different versions of the

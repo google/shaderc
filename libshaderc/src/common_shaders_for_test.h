@@ -25,6 +25,9 @@ const char kMinimalShaderWithoutVersion[] = "void main(){}";
 const char kMinimalShader[] =
     "#version 140\n"
     "void main(){}";
+const char kMinimalHlslShader[] =
+    "float4 EntryPoint(uint index : SV_VERTEXID) : SV_POSITION\n"
+    "{ return float4(1.0, 2.0, 3.0, 4.0); }";
 const char kMinimalShaderWithMacro[] =
     "#version 140\n"
     "#define E main\n"

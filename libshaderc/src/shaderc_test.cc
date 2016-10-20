@@ -1292,4 +1292,44 @@ TEST_F(CompileStringTest, NullSourceNameFailsCompilingToPreprocessedText) {
               HasSubstr("Input file name string was null."));
 }
 
+const char kGlslVertexShader[] =
+      "#version 140\nvoid main(){ gl_Position = vec4(0);}";
+
+const char kHlslVertexShader[] =
+    "float4 EntryPoint(uint index : SV_VERTEXID) : SV_POSITION\n"
+    "{ return float4(1.0, 2.0, 3.0, 4.0); }";
+
+TEST_F(CompileStringTest, LangGlslOnGlslVertexSucceeds) {
+  shaderc_compile_options_set_source_language(options_.get(),
+                                              shaderc_source_language_glsl);
+  EXPECT_TRUE(CompilationSuccess(kGlslVertexShader,
+                                 shaderc_glsl_vertex_shader,
+                                 options_.get()));
+}
+
+TEST_F(CompileStringTest, LangGlslOnHlslVertexFails) {
+  shaderc_compile_options_set_source_language(options_.get(),
+                                              shaderc_source_language_glsl);
+  EXPECT_FALSE(CompilationSuccess(kHlslVertexShader,
+                                  shaderc_glsl_vertex_shader,
+                                  options_.get()));
+}
+
+TEST_F(CompileStringTest, LangHlslOnGlslVertexFails) {
+  shaderc_compile_options_set_source_language(options_.get(),
+                                              shaderc_source_language_hlsl);
+  EXPECT_FALSE(CompilationSuccess(kGlslVertexShader,
+                                  shaderc_glsl_vertex_shader,
+                                  options_.get()));
+}
+
+TEST_F(CompileStringTest, LangHlslOnHlslVertexSucceeds) {
+  shaderc_compile_options_set_source_language(options_.get(),
+                                              shaderc_source_language_hlsl);
+  EXPECT_TRUE(CompilationSuccess(kHlslVertexShader,
+                                 shaderc_glsl_vertex_shader,
+                                 options_.get()));
+}
+
+
 }  // anonymous namespace
