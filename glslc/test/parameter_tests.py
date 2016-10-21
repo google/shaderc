@@ -89,7 +89,9 @@ Options:
   -w                Suppresses all warning messages.
   -Werror           Treat all warnings as errors.
   -x <language>     Treat subsequent input files as having type <language>.
-                    The only supported language is glsl.
+                    Valid languages are: glsl, hlsl.
+                    For files ending in .hlsl the default is hlsl.
+                    Otherwise the default is glsl.
 '''
 
     expected_stderr = ''

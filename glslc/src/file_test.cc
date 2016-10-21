@@ -14,14 +14,15 @@
 
 #include "file.h"
 
-#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 namespace {
 
 using glslc::GetFileExtension;
 using glslc::IsStageFile;
-using glslc::IsGlslFile;
+using glslc::GetGlslOrHlslExtension;
 using shaderc_util::string_piece;
+using testing::Eq;
 
 class FileExtensionTest : public testing::Test {
  protected:
@@ -36,7 +37,10 @@ class FileExtensionTest : public testing::Test {
   string_piece geom_ext = "shader.geom";
   string_piece comp_ext = "shader.comp";
   string_piece glsl_ext = "shader.glsl";
+  string_piece hlsl_ext = "shader.hlsl";
   string_piece multi_dot = "shader.some..ext";
+  string_piece both_hg_ext = "shader.hlsl.glsl";
+  string_piece both_gh_ext = "shader.glsl.hlsl";
 };
 
 TEST_F(FileExtensionTest, GetFileExtension) {
@@ -52,21 +56,26 @@ TEST_F(FileExtensionTest, GetFileExtension) {
   EXPECT_EQ("comp", GetFileExtension(comp_ext));
   EXPECT_EQ("glsl", GetFileExtension(glsl_ext));
   EXPECT_EQ("ext", GetFileExtension(multi_dot));
+  EXPECT_EQ("glsl", GetFileExtension(both_hg_ext));
+  EXPECT_EQ("hlsl", GetFileExtension(both_gh_ext));
 }
 
-TEST_F(FileExtensionTest, IsGlslFile) {
-  EXPECT_FALSE(IsGlslFile(empty));
-  EXPECT_FALSE(IsGlslFile(dot));
-  EXPECT_FALSE(IsGlslFile(no_ext));
-  EXPECT_FALSE(IsGlslFile(trailing_dot));
-  EXPECT_FALSE(IsGlslFile(vert_ext));
-  EXPECT_FALSE(IsGlslFile(frag_ext));
-  EXPECT_FALSE(IsGlslFile(tesc_ext));
-  EXPECT_FALSE(IsGlslFile(tese_ext));
-  EXPECT_FALSE(IsGlslFile(geom_ext));
-  EXPECT_FALSE(IsGlslFile(comp_ext));
-  EXPECT_TRUE(IsGlslFile(glsl_ext));
-  EXPECT_FALSE(IsGlslFile(multi_dot));
+TEST_F(FileExtensionTest, GetGlslOrHlslExtension) {
+  EXPECT_THAT(GetGlslOrHlslExtension(empty), Eq(""));
+  EXPECT_THAT(GetGlslOrHlslExtension(dot), Eq(""));
+  EXPECT_THAT(GetGlslOrHlslExtension(no_ext), Eq(""));
+  EXPECT_THAT(GetGlslOrHlslExtension(trailing_dot), Eq(""));
+  EXPECT_THAT(GetGlslOrHlslExtension(vert_ext), Eq(""));
+  EXPECT_THAT(GetGlslOrHlslExtension(frag_ext), Eq(""));
+  EXPECT_THAT(GetGlslOrHlslExtension(tesc_ext), Eq(""));
+  EXPECT_THAT(GetGlslOrHlslExtension(tese_ext), Eq(""));
+  EXPECT_THAT(GetGlslOrHlslExtension(geom_ext), Eq(""));
+  EXPECT_THAT(GetGlslOrHlslExtension(comp_ext), Eq(""));
+  EXPECT_THAT(GetGlslOrHlslExtension(glsl_ext), Eq("glsl"));
+  EXPECT_THAT(GetGlslOrHlslExtension(hlsl_ext), Eq("hlsl"));
+  EXPECT_THAT(GetGlslOrHlslExtension(multi_dot), Eq(""));
+  EXPECT_THAT(GetGlslOrHlslExtension(both_hg_ext), Eq("glsl"));
+  EXPECT_THAT(GetGlslOrHlslExtension(both_gh_ext), Eq("hlsl"));
 }
 
 TEST_F(FileExtensionTest, IsStageFile) {

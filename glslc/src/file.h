@@ -32,9 +32,13 @@ inline bool IsStageFile(const shaderc_util::string_piece& filename) {
          extension == "tese" || extension == "geom" || extension == "comp";
 }
 
-// Returns true if the given file name has extension "glsl".
-inline bool IsGlslFile(const shaderc_util::string_piece& filename) {
-  return glslc::GetFileExtension(filename) == "glsl";
+// Returns the file extension if is either "glsl" or "hlsl", or an empty
+// string otherwise.
+inline std::string GetGlslOrHlslExtension(
+    const shaderc_util::string_piece& filename) {
+  auto extension = glslc::GetFileExtension(filename);
+  if ((extension == "glsl") || (extension == "hlsl")) return extension.str();
+  return "";
 }
 
 }  // namespace glslc

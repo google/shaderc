@@ -12,6 +12,7 @@
 ----
 glslc [-c|-S|-E]
       [-x glsl] [-std=standard]
+      [-x hlsl]
       [-fshader-stage=...]
       [--target-env=...]
       [-g]
@@ -189,8 +190,9 @@ under Vulkan semantics.
 
 ==== `-x`
 
-`-x` lets you specify the language of the input shader files. Right now, the
-only accepted argument is `glsl`.
+`-x` lets you specify the language of the input shader files. Valid languages
+are 'glsl' and 'hlsl'.  If the file extension is `hlsl` then the default language
+is HLSL.  Otherwise the default is 'glsl'.
 
 [[compilation-stage-selection-options]]
 === Compilation Stage Selection Options
