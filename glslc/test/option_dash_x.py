@@ -17,6 +17,10 @@ from glslc_test_framework import inside_glslc_testsuite
 from placeholder import FileShader
 
 MINIMAL_SHADER = "#version 140\nvoid main(){}"
+# This one is valid GLSL but not valid HLSL.
+GLSL_VERTEX_SHADER = "#version 140\nvoid main(){ gl_Position = vec4(1.0);}"
+# This one is valid HLSL but not valid GLSL.
+HLSL_VERTEX_SHADER = "float4 EntryPoint() : SV_POSITION { return float4(1.0); }"
 
 @inside_glslc_testsuite('OptionDashX')
 class TestDashXNoArg(expect.ErrorMessage):
@@ -29,11 +33,38 @@ class TestDashXNoArg(expect.ErrorMessage):
 
 
 @inside_glslc_testsuite('OptionDashX')
-class TestDashXGlsl(expect.ValidObjectFile):
-    """Tests -x glsl."""
+class TestDashXGlslOnGlslShader(expect.ValidObjectFile):
+    """Tests -x glsl on a GLSL shader."""
 
-    shader = FileShader(MINIMAL_SHADER, '.vert')
+    shader = FileShader(GLSL_VERTEX_SHADER, '.vert')
     glslc_args = ['-x', 'glsl', '-c', shader]
+
+
+@inside_glslc_testsuite('OptionDashX')
+class TestDashXGlslOnHlslShader(expect.ErrorMessageSubstr):
+    """Tests -x glsl on an HLSL shader."""
+
+    shader = FileShader(HLSL_VERTEX_SHADER, '.vert')
+    glslc_args = ['-x', 'glsl', '-c', shader]
+    expected_error_substr = ["error: #version: Desktop shaders for Vulkan SPIR-V"
+                             " require version 140 or higher\n"]
+
+
+@inside_glslc_testsuite('OptionDashX')
+class TestDashXHlslOnHlslShader(expect.ValidObjectFile):
+    """Tests -x hlsl on an HLSL shader."""
+
+    shader = FileShader(HLSL_VERTEX_SHADER, '.vert')
+    glslc_args = ['-x', 'hlsl', '-c', shader]
+
+
+@inside_glslc_testsuite('OptionDashX')
+class TestDashXHlslOnGlslShader(expect.ErrorMessageSubstr):
+    """Tests -x hlsl on a GLSL shader."""
+
+    shader = FileShader(GLSL_VERTEX_SHADER, '.vert')
+    glslc_args = ['-x', 'hlsl', '-c', shader]
+    expected_error_substr = ["error: 'vec4' : no matching overloaded function found\n"]
 
 
 @inside_glslc_testsuite('OptionDashX')
@@ -47,10 +78,22 @@ class TestDashXWrongParam(expect.ErrorMessage):
 
 @inside_glslc_testsuite('OptionDashX')
 class TestMultipleDashX(expect.ValidObjectFile):
-    """Tests that multiple -x glsl works."""
+    """Tests that multiple -x works with a single language."""
 
-    shader = FileShader(MINIMAL_SHADER, '.vert')
+    shader = FileShader(GLSL_VERTEX_SHADER, '.vert')
     glslc_args = ['-c', '-x', 'glsl', '-x', 'glsl', shader, '-x', 'glsl']
+
+
+@inside_glslc_testsuite('OptionDashX')
+class TestMultipleDashXMixedLanguages(expect.ValidObjectFile):
+    """Tests that multiple -x works with different languages."""
+
+    glsl_shader = FileShader(GLSL_VERTEX_SHADER, '.vert')
+    hlsl_shader = FileShader(HLSL_VERTEX_SHADER, '.vert')
+    glslc_args = ['-c', '-x', 'hlsl', hlsl_shader,
+                  '-x', 'glsl', glsl_shader,
+                  '-x', 'hlsl', hlsl_shader,
+                  '-x', 'glsl', glsl_shader]
 
 
 @inside_glslc_testsuite('OptionDashX')

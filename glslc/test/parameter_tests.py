@@ -68,9 +68,9 @@ Options:
   -I <value>        Add directory to include search path.
   -o <file>         Write output to <file>.
                     A file name of '-' represents standard output.
-  -std=<value>      Version and profile for input files. Possible values
+  -std=<value>      Version and profile for GLSL input files. Possible values
                     are concatenations of version and profile, e.g. 310es,
-                    450core, etc.
+                    450core, etc.  Ignored for HLSL files.
   -mfmt=<format>    Output SPIR-V binary code using the selected format. This
                     option may be specified only when the compilation output is
                     in SPIR-V binary code form. Available options include bin, c
@@ -89,7 +89,9 @@ Options:
   -w                Suppresses all warning messages.
   -Werror           Treat all warnings as errors.
   -x <language>     Treat subsequent input files as having type <language>.
-                    The only supported language is glsl.
+                    Valid languages are: glsl, hlsl.
+                    For files ending in .hlsl the default is hlsl.
+                    Otherwise the default is glsl.
 '''
 
     expected_stderr = ''

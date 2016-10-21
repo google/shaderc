@@ -24,6 +24,10 @@ def simple_vertex_shader():
     }"""
 
 
+def simple_hlsl_vertex_shader():
+    return """float4 EntryPoint() : SV_POSITION { return float4(1.0); } """
+
+
 def simple_fragment_shader():
     return """#version 310 es
     void main() {
@@ -62,6 +66,14 @@ class TestShaderStageWithGlslExtension(expect.ValidObjectFile):
     """Tests -fshader-stage with .glsl extension."""
 
     shader = FileShader(simple_vertex_shader(), '.glsl')
+    glslc_args = ['-c', '-fshader-stage=vertex', shader]
+
+
+@inside_glslc_testsuite('OptionShaderStage')
+class TestShaderStageWithHlslExtension(expect.ValidObjectFile):
+    """Tests -fshader-stage with .hlsl extension."""
+
+    shader = FileShader(simple_hlsl_vertex_shader(), '.hlsl')
     glslc_args = ['-c', '-fshader-stage=vertex', shader]
 
 
@@ -185,6 +197,18 @@ class TestShaderStageGlslExtensionMissingShaderStage(expect.ErrorMessage):
     expected_error = [
         "glslc: error: '", shader,
         "': .glsl file encountered but no -fshader-stage specified ahead\n"]
+
+
+@inside_glslc_testsuite('OptionShaderStage')
+class TestShaderStageHlslExtensionMissingShaderStage(expect.ErrorMessage):
+    """Tests that missing -fshader-stage for .hlsl extension results in
+    an error."""
+
+    shader = FileShader(simple_hlsl_vertex_shader(), '.hlsl')
+    glslc_args = ['-c', '-x', 'hlsl', shader]
+    expected_error = [
+        "glslc: error: '", shader,
+        "': .hlsl file encountered but no -fshader-stage specified ahead\n"]
 
 
 @inside_glslc_testsuite('OptionShaderStage')

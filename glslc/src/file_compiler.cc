@@ -63,7 +63,8 @@ bool EmitSpirvBinaryAsCommaSeparatedNumbers(const CompilationResultType& result,
 
 namespace glslc {
 bool FileCompiler::CompileShaderFile(const std::string& input_file,
-                                     shaderc_shader_kind shader_stage) {
+                                     shaderc_shader_kind shader_stage,
+                                     shaderc_source_language lang) {
   std::vector<char> input_data;
   std::string path = input_file;
   if (!shaderc_util::ReadFile(path, &input_data)) {
@@ -111,6 +112,11 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
     }
   }
 
+  // Set the language.  Since we only use the options object in this
+  // method, then it's ok to always set it without resetting it after
+  // compilation.  A subsequent compilation will set it again anyway.
+  options_.SetSourceLanguage(lang);
+
   switch (output_type_) {
     case OutputType::SpirvBinary: {
       const auto result = compiler_.CompileGlslToSpv(
@@ -152,11 +158,12 @@ bool FileCompiler::EmitCompiledResult(
   // Handle the error message for failing to deduce the shader kind.
   if (result.GetCompilationStatus() ==
       shaderc_compilation_status_invalid_stage) {
-    if (IsGlslFile(error_file_name)) {
+    auto glsl_or_hlsl_extension = GetGlslOrHlslExtension(error_file_name);
+    if (glsl_or_hlsl_extension != "") {
       std::cerr << "glslc: error: "
                 << "'" << error_file_name << "': "
-                << ".glsl file encountered but no -fshader-stage "
-                   "specified ahead";
+                << "." << glsl_or_hlsl_extension
+                << " file encountered but no -fshader-stage specified ahead";
     } else if (error_file_name == "<stdin>") {
       std::cerr
           << "glslc: error: '-': -fshader-stage required when input is from "

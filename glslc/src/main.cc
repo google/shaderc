@@ -22,6 +22,7 @@
 #include <utility>
 
 #include "libshaderc_util/string_piece.h"
+#include "shaderc/shaderc.h"
 #include "spirv-tools/libspirv.h"
 
 #include "file.h"
@@ -31,6 +32,13 @@
 using shaderc_util::string_piece;
 
 namespace {
+
+// Describes an input file to be compiled.
+struct InputFileSpec {
+  std::string name;
+  shaderc_shader_kind stage;
+  shaderc_source_language language;
+};
 
 // Prints the help message.
 void PrintHelp(std::ostream* out) {
@@ -56,9 +64,9 @@ Options:
   -I <value>        Add directory to include search path.
   -o <file>         Write output to <file>.
                     A file name of '-' represents standard output.
-  -std=<value>      Version and profile for input files. Possible values
+  -std=<value>      Version and profile for GLSL input files. Possible values
                     are concatenations of version and profile, e.g. 310es,
-                    450core, etc.
+                    450core, etc.  Ignored for HLSL files.
   -mfmt=<format>    Output SPIR-V binary code using the selected format. This
                     option may be specified only when the compilation output is
                     in SPIR-V binary code form. Available options include bin, c
@@ -77,7 +85,9 @@ Options:
   -w                Suppresses all warning messages.
   -Werror           Treat all warnings as errors.
   -x <language>     Treat subsequent input files as having type <language>.
-                    The only supported language is glsl.
+                    Valid languages are: glsl, hlsl.
+                    For files ending in .hlsl the default is hlsl.
+                    Otherwise the default is glsl.
 )";
 }
 
@@ -110,8 +120,11 @@ const char kBuildVersion[] =
 }  // anonymous namespace
 
 int main(int argc, char** argv) {
-  std::vector<std::pair<std::string, shaderc_shader_kind>> input_files;
+  std::vector<InputFileSpec> input_files;
   shaderc_shader_kind current_fshader_stage = shaderc_glsl_infer_from_source;
+  bool source_language_forced = false;
+  shaderc_source_language current_source_language =
+      shaderc_source_language_glsl;
   glslc::FileCompiler compiler;
   bool success = true;
   bool has_stdin_input = false;
@@ -196,11 +209,16 @@ int main(int argc, char** argv) {
             << std::endl;
         success = false;
       } else {
-        if (option_arg != "glsl") {
+        if (option_arg == "glsl") {
+          current_source_language = shaderc_source_language_glsl;
+        } else if (option_arg == "hlsl") {
+          current_source_language = shaderc_source_language_hlsl;
+        } else {
           std::cerr << "glslc: error: language not recognized: '" << option_arg
                     << "'" << std::endl;
           return 1;
         }
+        source_language_forced = true;
       }
     } else if (arg == "-c") {
       compiler.SetIndividualCompilationFlag();
@@ -329,15 +347,22 @@ int main(int argc, char** argv) {
         has_stdin_input = true;
       }
 
+      const auto language = source_language_forced
+                                ? current_source_language
+                                : ((glslc::GetFileExtension(arg) == "hlsl")
+                                       ? shaderc_source_language_hlsl
+                                       : shaderc_source_language_glsl);
+
       // If current_fshader_stage is shaderc_glsl_infer_from_source, that means
       // we didn't set forced shader kinds (otherwise an error should have
       // already been emitted before). So we should deduce the shader kind
       // from the file name. If current_fshader_stage is specifed to one of
       // the forced shader kinds, use that for the following compilation.
-      input_files.emplace_back(
-          arg.str(), current_fshader_stage == shaderc_glsl_infer_from_source
-                         ? glslc::DeduceDefaultShaderKindFromFileName(arg)
-                         : current_fshader_stage);
+      input_files.emplace_back(InputFileSpec{
+          arg.str(), (current_fshader_stage == shaderc_glsl_infer_from_source
+                          ? glslc::DeduceDefaultShaderKindFromFileName(arg)
+                          : current_fshader_stage),
+          language});
     }
   }
 
@@ -346,10 +371,8 @@ int main(int argc, char** argv) {
   if (!success) return 1;
 
   for (const auto& input_file : input_files) {
-    const std::string& name = input_file.first;
-    const shaderc_shader_kind stage = input_file.second;
-
-    success &= compiler.CompileShaderFile(name, stage);
+    success &= compiler.CompileShaderFile(input_file.name, input_file.stage,
+                                          input_file.language);
   }
 
   compiler.OutputMessages();
