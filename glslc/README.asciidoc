@@ -158,7 +158,8 @@ GLSL, e.g., `450`.
 
 `-std=` behaves as follows:
 
-* `-std=` affects the version of all inputs passed to `glslc`.
+* `-std=` affects the version of all GLSL inputs passed to `glslc`.
+* `-std=` is ignored for HLSL inputs.
 * `-std=` overwrites `#version` directives in all input shaders, including those
   preceding the argument.
 * If a `-std=` argument specifies a different version from a `#version`
