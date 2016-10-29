@@ -21,6 +21,7 @@ methods in the mixin classes.
 import difflib
 import os
 import re
+import subprocess
 from glslc_test_framework import GlslCTest
 
 
@@ -212,6 +213,33 @@ class ValidObjectFile(SuccessfulReturn, CorrectObjectFilePreamble):
         return True, ''
 
 
+class ValidObjectFileWithAssemblySubstr(SuccessfulReturn, CorrectObjectFilePreamble):
+    """Mixin class for checking that every input file generates a valid object
+    file following the object file naming rule, there is no output on
+    stdout/stderr, and the disassmbly contains a specified substring per input."""
+
+    def check_object_file_disassembly(self, status):
+        for an_input in status.inputs:
+            object_filename = get_object_filename(an_input.filename)
+            obj_file = str(os.path.join(status.directory, object_filename))
+            success, message = self.verify_object_file_preamble(obj_file)
+            if not success:
+                return False, message
+            cmd = [status.test_manager.disassembler_path, '--no-color', obj_file]
+            process = subprocess.Popen(
+                args=cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE, cwd=status.directory)
+            output = process.communicate(None)
+            disassembly = output[0]
+            if not isinstance(an_input.assembly_substr, str):
+                return False, "Missing assembly_substr member"
+            if an_input.assembly_substr not in disassembly:
+                return False, ('Incorrect disassembly output:\n{asm}\n'
+                    'Expected substring not found:\n{exp}'.format(
+                    asm=disassembly, exp=an_input.assembly_substr))
+        return True, ''
+
+
 class ValidNamedObjectFile(SuccessfulReturn, CorrectObjectFilePreamble):
     """Mixin class for checking that a list of object files with the given
     names are correctly generated, and there is no output on stdout/stderr.
@@ -277,6 +305,32 @@ class ValidAssemblyFile(SuccessfulReturn, CorrectAssemblyFilePreamble):
                 os.path.join(status.directory, assembly_filename))
             if not success:
                 return False, message
+        return True, ''
+
+
+class ValidAssemblyFileWithSubstr(ValidAssemblyFile):
+    """Mixin class for checking that every input file generates a valid assembly
+    file following the assembly file naming rule, there is no output on
+    stdout/stderr, and all assembly files have the given substring specified
+    by expected_assembly_substr.
+
+    To mix in this class, subclasses need to provde expected_assembly_substr
+    as the expected substring.
+    """
+
+    def check_assembly_with_substr(self, status):
+        for input_filename in status.input_filenames:
+            assembly_filename = get_assembly_filename(input_filename)
+            success, message = self.verify_assembly_file_preamble(
+                os.path.join(status.directory, assembly_filename))
+            if not success:
+                return False, message
+            with open(assembly_filename, 'r') as f:
+                content = f.read()
+                if self.expected_assembly_substr not in convert_to_unix_line_endings(content):
+                   return False, ('Incorrect assembly output:\n{asm}\n'
+                                  'Expected substring not found:\n{exp}'.format(
+                                  asm=content, exp=self.expected_assembly_substr))
         return True, ''
 
 

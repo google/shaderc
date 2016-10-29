@@ -59,12 +59,15 @@ class PlaceHolder(object):
 class FileShader(PlaceHolder):
     """Stands for a shader whose source code is in a file."""
 
-    def __init__(self, source, suffix):
+    def __init__(self, source, suffix, assembly_substr=None):
         assert isinstance(source, str)
         assert isinstance(suffix, str)
         self.source = source
         self.suffix = suffix
         self.filename = None
+        # If provided, this is a substring which is expected to be in
+        # the disassembly of the module generated from this input file.
+        self.assembly_substr = assembly_substr
 
     def instantiate_for_glslc_args(self, testcase):
         """Creates a temporary file and writes the source into it.

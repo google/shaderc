@@ -28,7 +28,7 @@ case is then run by the following steps:
      The transformed list elements are then supplied as glslc arguments.
   3. If the environment member variable exists, its write() method will be
      invoked.
-  4. All expected_* member varibles will be inspected and all placeholders in
+  4. All expected_* member variables will be inspected and all placeholders in
      them will be expanded by calling instantiate_for_expectation() on those
      placeholders. After placeholder expansion, if the expected_* variable is
      a list, its element will be joined together with '' to form a single
@@ -141,12 +141,15 @@ class GlslCTest:
 class TestStatus:
     """A struct for holding run status of a test case."""
 
-    def __init__(self, returncode, stdout, stderr, directory, input_filenames):
+    def __init__(self, test_manager, returncode, stdout, stderr, directory, inputs, input_filenames):
+        self.test_manager = test_manager
         self.returncode = returncode
         self.stdout = stdout
         self.stderr = stderr
         # temporary directory where the test runs
         self.directory = directory
+        # List of inputs, as PlaceHolder objects.
+        self.inputs = inputs
         # the names of input shader files (potentially including paths)
         self.input_filenames = input_filenames
 
@@ -198,8 +201,9 @@ def inside_glslc_testsuite(testsuite_name):
 class TestManager:
     """Manages and runs a set of tests."""
 
-    def __init__(self, executable_path):
+    def __init__(self, executable_path, disassembler_path):
         self.executable_path = executable_path
+        self.disassembler_path = disassembler_path
         self.num_successes = 0
         self.num_failures = 0
         self.num_tests = 0
@@ -236,7 +240,8 @@ class TestCase:
     def __init__(self, test, test_manager):
         self.test = test
         self.test_manager = test_manager
-        self.file_shaders = []  # filenames of shader files
+        self.inputs = []  # inputs, as PlaceHolder objects.
+        self.file_shaders = []  # filenames of shader files.
         self.stdin_shader = None  # text to be passed to glslc as stdin
 
     def setUp(self):
@@ -250,8 +255,8 @@ class TestCase:
             if isinstance(arg, PlaceHolder) else arg
             for arg in self.test.glslc_args]
         # Get all shader files' names
-        self.file_shaders = [
-            arg.filename for arg in glslc_args if isinstance(arg, PlaceHolder)]
+        self.inputs = [arg for arg in glslc_args if isinstance(arg, PlaceHolder)]
+        self.file_shaders = [arg.filename for arg in self.inputs]
 
         if 'environment' in get_all_variables(self.test):
             self.test.environment.write(self.directory)
@@ -294,8 +299,9 @@ class TestCase:
                 cwd=self.directory)
             output = process.communicate(self.stdin_shader)
             test_status = TestStatus(
+                self.test_manager,
                 process.returncode, output[0], output[1],
-                self.directory, self.file_shaders)
+                self.directory, self.inputs, self.file_shaders)
             run_results = [getattr(self.test, test_method)(test_status)
                            for test_method in get_all_test_methods(
                                self.test.__class__)]
@@ -313,6 +319,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('glslc', metavar='path/to/glslc', type=str, nargs=1,
                         help='Path to glslc')
+    parser.add_argument('spirvdis', metavar='path/to/glslc', type=str, nargs=1,
+                        help='Path to spirv-dis')
     parser.add_argument('--leave-output', action='store_const', const=1,
                         help='Do not clean up temporary directories')
     parser.add_argument('--test-dir', nargs=1,
@@ -322,7 +330,7 @@ def main():
     root_dir = os.getcwd()
     if args.test_dir:
         root_dir = args.test_dir[0]
-    manager = TestManager(args.glslc[0])
+    manager = TestManager(args.glslc[0], args.spirvdis[0])
     if args.leave_output:
         manager.leave_output = True
     for root, _, filenames in os.walk(root_dir):

@@ -51,14 +51,6 @@ class TestDashXGlslOnHlslShader(expect.ErrorMessageSubstr):
 
 
 @inside_glslc_testsuite('OptionDashX')
-class TestDashXHlslOnHlslShader(expect.ValidObjectFile):
-    """Tests -x hlsl on an HLSL shader."""
-
-    shader = FileShader(HLSL_VERTEX_SHADER, '.vert')
-    glslc_args = ['-x', 'hlsl', '-c', shader]
-
-
-@inside_glslc_testsuite('OptionDashX')
 class TestDashXHlslOnGlslShader(expect.ErrorMessageSubstr):
     """Tests -x hlsl on a GLSL shader."""
 

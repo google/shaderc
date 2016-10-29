@@ -14,6 +14,7 @@ Clang-compatible arguments.
 glslc [-c|-S|-E]
       [-x ...] [-std=standard]
       [-fshader-stage=...]
+      [-fentry-point=...]
       [--target-env=...]
       [-g]
       [-O0|-Os]
@@ -149,6 +150,12 @@ need to supply both SPIR-V assembly files and `-fshader-stage=` on the same
 command line, please put SPIR-V assembly files ahead of the first
 `-fshader-stage=`, since `-fshader-stage=` only affects the treatment of
 subsequent files.
+
+[[option-f-entry-point]]
+==== `-fentry-point=`
+
+`-fentry-point=<name>` lets you specify the entry point name.  This is only
+significant for HLSL compilation.  The default is "main".
 
 ==== `-std=`
 

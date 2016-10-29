@@ -25,6 +25,14 @@
 
 namespace glslc {
 
+// Describes an input file to be compiled.
+struct InputFileSpec {
+  std::string name;
+  shaderc_shader_kind stage;
+  shaderc_source_language language;
+  std::string entry_point_name;
+};
+
 // Context for managing compilation of source GLSL files into destination
 // SPIR-V files or preprocessed output.
 class FileCompiler {
@@ -46,10 +54,11 @@ class FileCompiler {
         total_warnings_(0),
         total_errors_(0) {}
 
-  // Compiles a shader received in input_file, returning true on success and
-  // false otherwise. If force_shader_stage is not shaderc_glsl_infer_source or
-  // any default shader stage then the given shader_stage will be used,
-  // otherwise it will be determined from the source or the file type.
+  // Compiles a shader received as specified by input_file, returning true
+  // on success and false otherwise. If force_shader_stage is not
+  // shaderc_glsl_infer_source or any default shader stage then the given
+  // shader_stage will be used, otherwise it will be determined from the source
+  // or the file type.
   //
   // Places the compilation output into a new file whose name is derived from
   // input_file according to the rules from glslc/README.asciidoc.
@@ -59,9 +68,7 @@ class FileCompiler {
   //
   // Any errors/warnings found in the shader source will be output to std::cerr
   // and increment the counts reported by OutputMessages().
-  bool CompileShaderFile(const std::string& input_file,
-                         shaderc_shader_kind shader_stage,
-                         shaderc_source_language lang);
+  bool CompileShaderFile(const InputFileSpec& input_file);
 
   // Adds a directory to be searched when processing #include directives.
   //
