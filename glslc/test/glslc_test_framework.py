@@ -141,7 +141,8 @@ class GlslCTest:
 class TestStatus:
     """A struct for holding run status of a test case."""
 
-    def __init__(self, returncode, stdout, stderr, directory, input_filenames):
+    def __init__(self, test_manager, returncode, stdout, stderr, directory, input_filenames):
+        self.test_manager = test_manager
         self.returncode = returncode
         self.stdout = stdout
         self.stderr = stderr
@@ -198,8 +199,9 @@ def inside_glslc_testsuite(testsuite_name):
 class TestManager:
     """Manages and runs a set of tests."""
 
-    def __init__(self, executable_path):
+    def __init__(self, executable_path, disassembler_path):
         self.executable_path = executable_path
+        self.disassembler_path = disassembler_path
         self.num_successes = 0
         self.num_failures = 0
         self.num_tests = 0
@@ -294,6 +296,7 @@ class TestCase:
                 cwd=self.directory)
             output = process.communicate(self.stdin_shader)
             test_status = TestStatus(
+                self.test_manager,
                 process.returncode, output[0], output[1],
                 self.directory, self.file_shaders)
             run_results = [getattr(self.test, test_method)(test_status)
@@ -313,6 +316,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('glslc', metavar='path/to/glslc', type=str, nargs=1,
                         help='Path to glslc')
+    parser.add_argument('spirvdis', metavar='path/to/glslc', type=str, nargs=1,
+                        help='Path to spirv-dis')
     parser.add_argument('--leave-output', action='store_const', const=1,
                         help='Do not clean up temporary directories')
     parser.add_argument('--test-dir', nargs=1,
@@ -322,7 +327,7 @@ def main():
     root_dir = os.getcwd()
     if args.test_dir:
         root_dir = args.test_dir[0]
-    manager = TestManager(args.glslc[0])
+    manager = TestManager(args.glslc[0], args.spirvdis[0])
     if args.leave_output:
         manager.leave_output = True
     for root, _, filenames in os.walk(root_dir):

@@ -62,16 +62,14 @@ bool EmitSpirvBinaryAsCommaSeparatedNumbers(const CompilationResultType& result,
 }  // anonymous namespace
 
 namespace glslc {
-bool FileCompiler::CompileShaderFile(const std::string& input_file,
-                                     shaderc_shader_kind shader_stage,
-                                     shaderc_source_language lang) {
+bool FileCompiler::CompileShaderFile(const InputFileSpec& input_file) {
   std::vector<char> input_data;
-  std::string path = input_file;
+  std::string path = input_file.name;
   if (!shaderc_util::ReadFile(path, &input_data)) {
     return false;
   }
 
-  std::string output_name = GetOutputFileName(input_file);
+  std::string output_name = GetOutputFileName(input_file.name);
 
   std::ofstream potential_file_stream;
   std::ostream* output_stream =
@@ -80,7 +78,7 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
     // An error message has already been emitted to the stderr stream.
     return false;
   }
-  string_piece error_file_name = input_file;
+  string_piece error_file_name = input_file.name;
 
   if (error_file_name == "-") {
     // If the input file was stdin, we want to output errors as <stdin>.
@@ -100,12 +98,12 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
   const auto& used_source_files = includer->file_path_trace();
   options_.SetIncluder(std::move(includer));
 
-  if (shader_stage == shaderc_spirv_assembly) {
+  if (input_file.stage == shaderc_spirv_assembly) {
     // Only act if the requested target is SPIR-V binary.
     if (output_type_ == OutputType::SpirvBinary) {
       const auto result =
           compiler_.AssembleToSpv(source_string.data(), source_string.size());
-      return EmitCompiledResult(result, input_file, error_file_name,
+      return EmitCompiledResult(result, input_file.name, error_file_name,
                                 used_source_files, output_stream);
     } else {
       return true;
@@ -115,28 +113,30 @@ bool FileCompiler::CompileShaderFile(const std::string& input_file,
   // Set the language.  Since we only use the options object in this
   // method, then it's ok to always set it without resetting it after
   // compilation.  A subsequent compilation will set it again anyway.
-  options_.SetSourceLanguage(lang);
+  options_.SetSourceLanguage(input_file.language);
 
   switch (output_type_) {
     case OutputType::SpirvBinary: {
       const auto result = compiler_.CompileGlslToSpv(
-          source_string.data(), source_string.size(), shader_stage,
-          error_file_name.data(), options_);
-      return EmitCompiledResult(result, input_file, error_file_name,
+          source_string.data(), source_string.size(), input_file.stage,
+          error_file_name.data(), input_file.entry_point_name.c_str(),
+          options_);
+      return EmitCompiledResult(result, input_file.name, error_file_name,
                                 used_source_files, output_stream);
     }
     case OutputType::SpirvAssemblyText: {
       const auto result = compiler_.CompileGlslToSpvAssembly(
-          source_string.data(), source_string.size(), shader_stage,
-          error_file_name.data(), options_);
-      return EmitCompiledResult(result, input_file, error_file_name,
+          source_string.data(), source_string.size(), input_file.stage,
+          error_file_name.data(), input_file.entry_point_name.c_str(),
+          options_);
+      return EmitCompiledResult(result, input_file.name, error_file_name,
                                 used_source_files, output_stream);
     }
     case OutputType::PreprocessedText: {
       const auto result = compiler_.PreprocessGlsl(
-          source_string.data(), source_string.size(), shader_stage,
+          source_string.data(), source_string.size(), input_file.stage,
           error_file_name.data(), options_);
-      return EmitCompiledResult(result, input_file, error_file_name,
+      return EmitCompiledResult(result, input_file.name, error_file_name,
                                 used_source_files, output_stream);
     }
   }

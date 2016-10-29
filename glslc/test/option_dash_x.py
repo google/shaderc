@@ -51,11 +51,41 @@ class TestDashXGlslOnHlslShader(expect.ErrorMessageSubstr):
 
 
 @inside_glslc_testsuite('OptionDashX')
-class TestDashXHlslOnHlslShader(expect.ValidObjectFile):
-    """Tests -x hlsl on an HLSL shader."""
+class TestDashXHlslOnHlslShaderWithSpecifiedEntryPointInAssembly(expect.ValidAssemblyFileWithSubstr):
+    """Tests -x hlsl on an HLSL shader with -fentry-point and -S."""
 
     shader = FileShader(HLSL_VERTEX_SHADER, '.vert')
-    glslc_args = ['-x', 'hlsl', '-c', shader]
+    glslc_args = ['-x', 'hlsl', '-fentry-point=EntryPoint', '-S', '-c', shader]
+    expected_assembly_substr = "OpEntryPoint Vertex %EntryPoint \"EntryPoint\""
+
+
+@inside_glslc_testsuite('OptionDashX')
+class TestDashXHlslOnHlslShaderWithSpecifiedEntryPointInDisassembly(expect.ValidObjectFileWithAssemblySubstr):
+    """Tests -x hlsl on an HLSL shader with -fentry-point."""
+
+    shader = FileShader(HLSL_VERTEX_SHADER, '.vert')
+    glslc_args = ['-x', 'hlsl', '-fentry-point=EntryPoint', '-c', shader]
+    expected_assembly_substr = "OpEntryPoint Vertex %EntryPoint \"EntryPoint\""
+
+
+@inside_glslc_testsuite('OptionDashX')
+class TestDashXHlslDashFEntryPointAffectsAllLaterFiles(expect.ValidObjectFileWithAssemblySubstr):
+    """Tests -x hlsl on an HLSL shader with -fentry-point."""
+
+    shader1 = FileShader(HLSL_VERTEX_SHADER, '.vert')
+    shader2 = FileShader(HLSL_VERTEX_SHADER, '.vert')
+    glslc_args = ['-x', 'hlsl', '-fentry-point=EntryPoint', '-c', shader1, shader2]
+    expected_assembly_substr = "OpEntryPoint Vertex %EntryPoint \"EntryPoint\""
+
+
+@inside_glslc_testsuite('OptionDashX')
+class TestDashXHlslDashFEntryOverridesItself(expect.ValidObjectFileWithAssemblySubstr):
+    """Tests -x hlsl on an HLSL shader with -fentry-point."""
+
+    shader = FileShader(HLSL_VERTEX_SHADER, '.vert')
+    glslc_args = ['-x', 'hlsl', '-fentry-point=foobar', '-fentry-point=EntryPoint',
+                  '-c', shader]
+    expected_assembly_substr = "OpEntryPoint Vertex %EntryPoint \"EntryPoint\""
 
 
 @inside_glslc_testsuite('OptionDashX')

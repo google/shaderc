@@ -61,6 +61,9 @@ Options:
                     Treat subsequent input files as having stage <stage>.
                     Valid stages are vertex, fragment, tesscontrol, tesseval,
                     geometry, and compute.
+  -fentry-point=<name>
+                    Specify the entry point name for HLSL compilation, for
+                    all subsequent source files.  Default is "main".
   -g                Generate source-level debug information.
                     Currently this option has no effect.
   --help            Display available options.

@@ -33,13 +33,6 @@ using shaderc_util::string_piece;
 
 namespace {
 
-// Describes an input file to be compiled.
-struct InputFileSpec {
-  std::string name;
-  shaderc_shader_kind stage;
-  shaderc_source_language language;
-};
-
 // Prints the help message.
 void PrintHelp(std::ostream* out) {
   *out << R"(glslc - Compile shaders into SPIR-V
@@ -57,6 +50,9 @@ Options:
                     Treat subsequent input files as having stage <stage>.
                     Valid stages are vertex, fragment, tesscontrol, tesseval,
                     geometry, and compute.
+  -fentry-point=<name>
+                    Specify the entry point name for HLSL compilation, for
+                    all subsequent source files.  Default is "main".
   -g                Generate source-level debug information.
                     Currently this option has no effect.
   --help            Display available options.
@@ -120,11 +116,12 @@ const char kBuildVersion[] =
 }  // anonymous namespace
 
 int main(int argc, char** argv) {
-  std::vector<InputFileSpec> input_files;
+  std::vector<glslc::InputFileSpec> input_files;
   shaderc_shader_kind current_fshader_stage = shaderc_glsl_infer_from_source;
   bool source_language_forced = false;
   shaderc_source_language current_source_language =
       shaderc_source_language_glsl;
+  std::string current_entry_point_name("main");
   glslc::FileCompiler compiler;
   bool success = true;
   bool has_stdin_input = false;
@@ -156,6 +153,9 @@ int main(int argc, char** argv) {
                   << std::endl;
         return 1;
       }
+    } else if (arg.starts_with("-fentry-point=")) {
+      current_entry_point_name =
+          arg.substr(std::strlen("-fentry-point=")).str();
     } else if (arg.starts_with("-std=")) {
       const string_piece standard = arg.substr(std::strlen("-std="));
       int version;
@@ -358,11 +358,11 @@ int main(int argc, char** argv) {
       // already been emitted before). So we should deduce the shader kind
       // from the file name. If current_fshader_stage is specifed to one of
       // the forced shader kinds, use that for the following compilation.
-      input_files.emplace_back(InputFileSpec{
+      input_files.emplace_back(glslc::InputFileSpec{
           arg.str(), (current_fshader_stage == shaderc_glsl_infer_from_source
                           ? glslc::DeduceDefaultShaderKindFromFileName(arg)
                           : current_fshader_stage),
-          language});
+          language, current_entry_point_name});
     }
   }
 
@@ -371,8 +371,7 @@ int main(int argc, char** argv) {
   if (!success) return 1;
 
   for (const auto& input_file : input_files) {
-    success &= compiler.CompileShaderFile(input_file.name, input_file.stage,
-                                          input_file.language);
+    success &= compiler.CompileShaderFile(input_file);
   }
 
   compiler.OutputMessages();
