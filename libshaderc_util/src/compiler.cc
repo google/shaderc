@@ -81,7 +81,8 @@ EShMessages GetMessageRules(shaderc_util::Compiler::TargetEnv env,
       result = static_cast<EShMessages>(result | EShMsgSpvRules);
       break;
     case Compiler::TargetEnv::Vulkan:
-      result = static_cast<EShMessages>(result | EShMsgSpvRules | EShMsgVulkanRules);
+      result =
+          static_cast<EShMessages>(result | EShMsgSpvRules | EShMsgVulkanRules);
       break;
   }
   return result;
@@ -92,7 +93,7 @@ EShMessages GetMessageRules(shaderc_util::Compiler::TargetEnv env,
 namespace shaderc_util {
 std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
     const string_piece& input_source_string, EShLanguage forced_shader_stage,
-    const std::string& error_tag,
+    const std::string& error_tag, const char* entry_point_name,
     const std::function<EShLanguage(std::ostream* error_stream,
                                     const string_piece& error_tag)>&
         stage_callback,
@@ -179,13 +180,13 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   shader.setStringsWithLengthsAndNames(&shader_strings, &shader_lengths,
                                        &string_names, 1);
   shader.setPreamble(preamble.c_str());
+  shader.setEntryPoint(entry_point_name);
 
   // TODO(dneto): Generate source-level debug info if requested.
-  bool success = shader.parse(&shaderc_util::kDefaultTBuiltInResource,
-                              default_version_, default_profile_,
-                              force_version_profile_, kNotForwardCompatible,
-                              GetMessageRules(target_env_, source_language_),
-                              includer);
+  bool success = shader.parse(
+      &shaderc_util::kDefaultTBuiltInResource, default_version_,
+      default_profile_, force_version_profile_, kNotForwardCompatible,
+      GetMessageRules(target_env_, source_language_), includer);
 
   success &= PrintFilteredErrors(error_tag, error_stream, warnings_as_errors_,
                                  suppress_warnings_, shader.getInfoLog(),
@@ -246,7 +247,9 @@ void Compiler::AddMacroDefinition(const char* macro, size_t macro_length,
 
 void Compiler::SetTargetEnv(Compiler::TargetEnv env) { target_env_ = env; }
 
-void Compiler::SetSourceLanguage(Compiler::SourceLanguage lang) { source_language_ = lang; }
+void Compiler::SetSourceLanguage(Compiler::SourceLanguage lang) {
+  source_language_ = lang;
+}
 
 void Compiler::SetForcedVersionProfile(int version, EProfile profile) {
   default_version_ = version;
@@ -298,8 +301,8 @@ std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
   // The preprocessor might be sensitive to the target environment.
   // So combine the existing rules with the just-give-me-preprocessor-output
   // flag.
-  const auto rules = static_cast<EShMessages>(EShMsgOnlyPreprocessor |
-                                              GetMessageRules(target_env_, source_language_));
+  const auto rules = static_cast<EShMessages>(
+      EShMsgOnlyPreprocessor | GetMessageRules(target_env_, source_language_));
 
   std::string preprocessed_shader;
   const bool success = shader.preprocess(

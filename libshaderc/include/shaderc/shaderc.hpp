@@ -279,6 +279,9 @@ class Compiler {
   // The input_file_name is a null-termintated string. It is used as a tag to
   // identify the source string in cases like emitting error messages. It
   // doesn't have to be a 'file name'.
+  // The entry_point_name parameter is a null-terminated string specifying
+  // the entry point name for HLSL compilation.  For GLSL compilation, the
+  // entry point name is assumed to be "main".
   // The compilation is passed any options specified in the CompileOptions
   // parameter.
   // It is valid for the returned CompilationResult object to outlive this
@@ -290,16 +293,30 @@ class Compiler {
                                         size_t source_text_size,
                                         shaderc_shader_kind shader_kind,
                                         const char* input_file_name,
+                                        const char* entry_point_name,
                                         const CompileOptions& options) const {
     shaderc_compilation_result_t compilation_result = shaderc_compile_into_spv(
         compiler_, source_text, source_text_size, shader_kind, input_file_name,
-        "main", options.options_);
+        entry_point_name, options.options_);
     return SpvCompilationResult(compilation_result);
+  }
+
+  // Compiles the given source shader and returns a SPIR-V binary module
+  // compilation result.
+  // Like the first CompileGlslToSpv method but assumes the entry point name
+  // is "main".
+  SpvCompilationResult CompileGlslToSpv(const char* source_text,
+                                        size_t source_text_size,
+                                        shaderc_shader_kind shader_kind,
+                                        const char* input_file_name,
+                                        const CompileOptions& options) const {
+    return CompileGlslToSpv(source_text, source_text_size, shader_kind,
+                            input_file_name, "main", options);
   }
 
   // Compiles the given source GLSL and returns a SPIR-V binary module
   // compilation result.
-  // Like the first CompileGlslToSpv method but uses default options.
+  // Like the previous CompileGlslToSpv method but uses default options.
   SpvCompilationResult CompileGlslToSpv(const char* source_text,
                                         size_t source_text_size,
                                         shaderc_shader_kind shader_kind,
@@ -310,10 +327,10 @@ class Compiler {
     return SpvCompilationResult(compilation_result);
   }
 
-  // Compiles the given source GLSL and returns a SPIR-V binary module
+  // Compiles the given source shader and returns a SPIR-V binary module
   // compilation result.
   // Like the first CompileGlslToSpv method but the source is provided as
-  // a std::string.
+  // a std::string, and we assume the entry point is "main".
   SpvCompilationResult CompileGlslToSpv(const std::string& source_text,
                                         shaderc_shader_kind shader_kind,
                                         const char* input_file_name,
@@ -322,10 +339,23 @@ class Compiler {
                             input_file_name, options);
   }
 
-  // Compiles the given source GLSL and returns a SPIR-V binary module
+  // Compiles the given source shader and returns a SPIR-V binary module
   // compilation result.
   // Like the first CompileGlslToSpv method but the source is provided as
-  // a std::string and also uses default compiler options.
+  // a std::string.
+  SpvCompilationResult CompileGlslToSpv(const std::string& source_text,
+                                        shaderc_shader_kind shader_kind,
+                                        const char* input_file_name,
+                                        const char* entry_point_name,
+                                        const CompileOptions& options) const {
+    return CompileGlslToSpv(source_text.data(), source_text.size(), shader_kind,
+                            input_file_name, entry_point_name, options);
+  }
+
+  // Compiles the given source GLSL and returns a SPIR-V binary module
+  // compilation result.
+  // Like the previous CompileGlslToSpv method but assumes the entry point
+  // name is "main".
   SpvCompilationResult CompileGlslToSpv(const std::string& source_text,
                                         shaderc_shader_kind shader_kind,
                                         const char* input_file_name) const {
@@ -383,12 +413,23 @@ class Compiler {
   AssemblyCompilationResult CompileGlslToSpvAssembly(
       const char* source_text, size_t source_text_size,
       shaderc_shader_kind shader_kind, const char* input_file_name,
-      const CompileOptions& options) const {
+      const char* entry_point_name, const CompileOptions& options) const {
     shaderc_compilation_result_t compilation_result =
         shaderc_compile_into_spv_assembly(
             compiler_, source_text, source_text_size, shader_kind,
-            input_file_name, "main", options.options_);
+            input_file_name, entry_point_name, options.options_);
     return AssemblyCompilationResult(compilation_result);
+  }
+
+  // Compiles the given source GLSL and returns the SPIR-V assembly text
+  // compilation result.
+  // Similare to the previous method, but assumes entry point name is "main".
+  AssemblyCompilationResult CompileGlslToSpvAssembly(
+      const char* source_text, size_t source_text_size,
+      shaderc_shader_kind shader_kind, const char* input_file_name,
+      const CompileOptions& options) const {
+    return CompileGlslToSpvAssembly(source_text, source_text_size, shader_kind,
+                                    input_file_name, "main", options);
   }
 
   // Compiles the given source GLSL and returns the SPIR-V assembly text
@@ -397,9 +438,21 @@ class Compiler {
   // the first CompileToSpv method.
   AssemblyCompilationResult CompileGlslToSpvAssembly(
       const std::string& source_text, shaderc_shader_kind shader_kind,
-      const char* input_file_name, const CompileOptions& options) const {
+      const char* input_file_name, const char* entry_point_name,
+      const CompileOptions& options) const {
     return CompileGlslToSpvAssembly(source_text.data(), source_text.size(),
-                                    shader_kind, input_file_name, options);
+                                    shader_kind, input_file_name,
+                                    entry_point_name, options);
+  }
+
+  // Compiles the given source GLSL and returns the SPIR-V assembly text
+  // result. Like the previous  CompileGlslToSpvAssembly method but assumes
+  // the entry point name is "main".
+  AssemblyCompilationResult CompileGlslToSpvAssembly(
+      const std::string& source_text, shaderc_shader_kind shader_kind,
+      const char* input_file_name, const CompileOptions& options) const {
+    return CompileGlslToSpvAssembly(source_text, shader_kind, input_file_name,
+                                    "main", options);
   }
 
   // Preprocesses the given source GLSL and returns the preprocessed

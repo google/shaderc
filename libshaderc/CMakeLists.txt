@@ -23,7 +23,7 @@ target_link_libraries(shaderc PRIVATE SPIRV-Tools)
 shaderc_add_tests(
   TEST_PREFIX shaderc
   LINK_LIBS shaderc
-  INCLUDE_DIRS include ${glslang_SOURCE_DIR}
+  INCLUDE_DIRS include ${glslang_SOURCE_DIR} ${spirv-tools_SOURCE_DIR}/include
   TEST_NAMES
     shaderc
     shaderc_cpp)
@@ -34,7 +34,7 @@ shaderc_combine_static_lib(shaderc_combined shaderc)
 shaderc_add_tests(
   TEST_PREFIX shaderc_combined
   LINK_LIBS shaderc_combined ${CMAKE_THREAD_LIBS_INIT}
-  INCLUDE_DIRS include ${glslang_SOURCE_DIR}
+  INCLUDE_DIRS include ${glslang_SOURCE_DIR} ${spirv-tools_SOURCE_DIR}/include
   TEST_NAMES
     shaderc
     shaderc_cpp)

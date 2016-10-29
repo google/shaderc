@@ -394,7 +394,7 @@ shaderc_compilation_result_t CompileToSpecifiedOutputType(
       std::tie(compilation_succeeded, compilation_output_data,
                compilation_output_data_size_in_bytes) =
           additional_options->compiler.Compile(
-              source_string, forced_stage, input_file_name_str,
+              source_string, forced_stage, input_file_name_str, entry_point_name,
               // stage_deducer has a flag: error_, which we need to check later.
               // We need to make this a reference wrapper, so that std::function
               // won't make a copy for this callable object.
@@ -406,7 +406,7 @@ shaderc_compilation_result_t CompileToSpecifiedOutputType(
       std::tie(compilation_succeeded, compilation_output_data,
                compilation_output_data_size_in_bytes) =
           shaderc_util::Compiler().Compile(
-              source_string, forced_stage, input_file_name_str,
+              source_string, forced_stage, input_file_name_str, entry_point_name,
               std::ref(stage_deducer), includer, output_type, &errors,
               &total_warnings, &total_errors, compiler->initializer);
     }

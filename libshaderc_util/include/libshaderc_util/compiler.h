@@ -94,7 +94,7 @@ class Compiler {
  public:
   // Source language
   enum class SourceLanguage {
-    GLSL, // The default
+    GLSL,  // The default
     HLSL,
   };
 
@@ -168,6 +168,11 @@ class Compiler {
   // If the forced_shader stage parameter is not EShLangCount then
   // the shader is assumed to be of the given stage.
   //
+  // For HLSL compilation, entry_point_name is the null-terminated string for
+  // the
+  // entry point.  For GLSL compilation, entry_point_name is ignored, and
+  // compilation assumes the entry point is named "main".
+  //
   // The stage_callback function will be called if a shader_stage has
   // not been forced and the stage can not be determined
   // from the shader text. Any #include directives are parsed with the given
@@ -194,7 +199,7 @@ class Compiler {
   // If the output is a text string, the size equals the length of that string.
   std::tuple<bool, std::vector<uint32_t>, size_t> Compile(
       const string_piece& input_source_string, EShLanguage forced_shader_stage,
-      const std::string& error_tag,
+      const std::string& error_tag, const char* entry_point_name,
       const std::function<EShLanguage(std::ostream* error_stream,
                                       const string_piece& error_tag)>&
           stage_callback,

@@ -72,43 +72,49 @@ enum class OutputType {
 };
 
 // Generate a compilation result object with the given compile,
-// shader source, shader kind, input file name, options, and for the
-// specified output type.
+// shader source, shader kind, input file name, entry point name, options,
+// and for the specified output type.  The entry point name is only significant
+// for HLSL compilation.
 shaderc_compilation_result_t MakeCompilationResult(
     const shaderc_compiler_t compiler, const std::string& shader,
     shaderc_shader_kind kind, const char* input_file_name,
-    const shaderc_compile_options_t options, OutputType output_type) {
+    const char* entry_point_name, const shaderc_compile_options_t options,
+    OutputType output_type) {
   switch (output_type) {
     case OutputType::SpirvBinary:
       return shaderc_compile_into_spv(compiler, shader.c_str(), shader.size(),
-                                      kind, input_file_name, "", options);
+                                      kind, input_file_name, entry_point_name,
+                                      options);
       break;
     case OutputType::SpirvAssemblyText:
-      return shaderc_compile_into_spv_assembly(compiler, shader.c_str(),
-                                               shader.size(), kind,
-                                               input_file_name, "", options);
+      return shaderc_compile_into_spv_assembly(
+          compiler, shader.c_str(), shader.size(), kind, input_file_name,
+          entry_point_name, options);
       break;
     case OutputType::PreprocessedText:
       return shaderc_compile_into_preprocessed_text(
-          compiler, shader.c_str(), shader.size(), kind, input_file_name, "",
-          options);
+          compiler, shader.c_str(), shader.size(), kind, input_file_name,
+          entry_point_name, options);
       break;
   }
   // We shouldn't reach here.  But some compilers might not know that.
   // Be a little defensive and produce something.
   return shaderc_compile_into_spv(compiler, shader.c_str(), shader.size(), kind,
-                                  input_file_name, "", options);
+                                  input_file_name, entry_point_name, options);
 }
+
 // RAII class for shaderc_compilation_result. Used for shader compilation.
 class Compilation {
  public:
   // Compiles shader and keeps the result.
   Compilation(const shaderc_compiler_t compiler, const std::string& shader,
               shaderc_shader_kind kind, const char* input_file_name,
+              const char* entry_point_name,
               const shaderc_compile_options_t options = nullptr,
               OutputType output_type = OutputType::SpirvBinary)
-      : compiled_result_(MakeCompilationResult(
-            compiler, shader, kind, input_file_name, options, output_type)) {}
+      : compiled_result_(
+            MakeCompilationResult(compiler, shader, kind, input_file_name,
+                                  entry_point_name, options, output_type)) {}
 
   ~Compilation() { shaderc_result_release(compiled_result_); }
 
@@ -155,6 +161,17 @@ class Compiler {
   shaderc_compiler_t compiler;
 };
 
+// RAII class for shader_compiler_options_t
+class Options {
+ public:
+  Options() : options_(shaderc_compile_options_initialize()) {}
+  ~Options() { shaderc_compile_options_release(options_); }
+  shaderc_compile_options_t get() { return options_; }
+
+ private:
+  shaderc_compile_options_t options_;
+};
+
 // Helper function to check if the compilation result indicates a successful
 // compilation.
 bool CompilationResultIsSuccess(const shaderc_compilation_result_t result) {
@@ -178,7 +195,7 @@ bool CompilesToValidSpv(Compiler& compiler, const std::string& shader,
                         shaderc_shader_kind kind,
                         const shaderc_compile_options_t options = nullptr) {
   const Compilation comp(compiler.get_compiler_handle(), shader, kind, "shader",
-                         options, OutputType::SpirvBinary);
+                         "main", options, OutputType::SpirvBinary);
   return ResultContainsValidSpv(comp.result());
 }
 
@@ -195,7 +212,7 @@ class CompileStringTest : public testing::Test {
                           OutputType output_type = OutputType::SpirvBinary) {
     return CompilationResultIsSuccess(
         Compilation(compiler_.get_compiler_handle(), shader, kind, "shader",
-                    options, output_type)
+                    "main", options, output_type)
             .result());
   }
 
@@ -206,7 +223,7 @@ class CompileStringTest : public testing::Test {
       const shaderc_compile_options_t options = nullptr,
       OutputType output_type = OutputType::SpirvBinary) {
     const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
-                           "shader", options, output_type);
+                           "shader", "main", options, output_type);
     EXPECT_TRUE(CompilationResultIsSuccess(comp.result())) << kind << '\n'
                                                            << shader;
     return shaderc_result_get_error_message(comp.result());
@@ -219,7 +236,7 @@ class CompileStringTest : public testing::Test {
       OutputType output_type = OutputType::SpirvBinary,
       const char* source_name = "shader") {
     const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
-                           source_name, options, output_type);
+                           source_name, "main", options, output_type);
     EXPECT_FALSE(CompilationResultIsSuccess(comp.result())) << kind << '\n'
                                                             << shader;
     EXPECT_EQ(0u, shaderc_result_get_length(comp.result()));
@@ -232,7 +249,7 @@ class CompileStringTest : public testing::Test {
       const shaderc_compile_options_t options = nullptr,
       OutputType output_type = OutputType::SpirvBinary) {
     const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
-                           "shader", options, output_type);
+                           "shader", "main", options, output_type);
     return shaderc_result_get_error_message(comp.result());
   };
 
@@ -243,7 +260,7 @@ class CompileStringTest : public testing::Test {
       const shaderc_compile_options_t options = nullptr,
       OutputType output_type = OutputType::SpirvBinary) {
     const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
-                           "shader", options, output_type);
+                           "shader", "main", options, output_type);
     EXPECT_TRUE(CompilationResultIsSuccess(comp.result())) << kind << '\n'
                                                            << shader;
     // Use string(const char* s, size_t n) constructor instead of
@@ -362,7 +379,7 @@ TEST_F(CompileStringTest, WorksWithCompileOptions) {
 
 TEST_F(CompileStringTest, GetNumErrors) {
   Compilation comp(compiler_.get_compiler_handle(), kTwoErrorsShader,
-                   shaderc_glsl_vertex_shader, "shader");
+                   shaderc_glsl_vertex_shader, "shader", "main");
   // Expects compilation failure and two errors.
   EXPECT_FALSE(CompilationResultIsSuccess(comp.result()));
   EXPECT_EQ(2u, shaderc_result_get_num_errors(comp.result()));
@@ -372,7 +389,7 @@ TEST_F(CompileStringTest, GetNumErrors) {
 
 TEST_F(CompileStringTest, GetNumWarnings) {
   Compilation comp(compiler_.get_compiler_handle(), kTwoWarningsShader,
-                   shaderc_glsl_vertex_shader, "shader");
+                   shaderc_glsl_vertex_shader, "shader", "main");
   // Expects compilation success with two warnings.
   EXPECT_TRUE(CompilationResultIsSuccess(comp.result()));
   EXPECT_EQ(2u, shaderc_result_get_num_warnings(comp.result()));
@@ -382,7 +399,7 @@ TEST_F(CompileStringTest, GetNumWarnings) {
 
 TEST_F(CompileStringTest, ZeroErrorsZeroWarnings) {
   Compilation comp(compiler_.get_compiler_handle(), kMinimalShader,
-                   shaderc_glsl_vertex_shader, "shader");
+                   shaderc_glsl_vertex_shader, "shader", "main");
   // Expects compilation success with zero warnings.
   EXPECT_TRUE(CompilationResultIsSuccess(comp.result()));
   EXPECT_EQ(0u, shaderc_result_get_num_warnings(comp.result()));
@@ -394,7 +411,7 @@ TEST_F(CompileStringTest, ErrorTypeUnknownShaderStage) {
   // The shader kind/stage can not be determined, the error type field should
   // indicate the error type is shaderc_shader_kind_error.
   Compilation comp(compiler_.get_compiler_handle(), kMinimalShader,
-                   shaderc_glsl_infer_from_source, "shader");
+                   shaderc_glsl_infer_from_source, "shader", "main");
   EXPECT_EQ(shaderc_compilation_status_invalid_stage,
             shaderc_result_get_compilation_status(comp.result()));
 }
@@ -402,7 +419,7 @@ TEST_F(CompileStringTest, ErrorTypeCompilationError) {
   // The shader kind is valid, the result object's error type field should
   // indicate this compilaion fails due to compilation errors.
   Compilation comp(compiler_.get_compiler_handle(), kTwoErrorsShader,
-                   shaderc_glsl_vertex_shader, "shader");
+                   shaderc_glsl_vertex_shader, "shader", "main");
   EXPECT_EQ(shaderc_compilation_status_compilation_error,
             shaderc_result_get_compilation_status(comp.result()));
 }
@@ -869,8 +886,8 @@ TEST_P(IncluderTests, SetIncluderCallbacks) {
       TestIncluder::ReleaseIncluderResponseWrapper, &includer);
 
   const Compilation comp(compiler.get_compiler_handle(), shader,
-                         shaderc_glsl_vertex_shader, "shader", options.get(),
-                         OutputType::PreprocessedText);
+                         shaderc_glsl_vertex_shader, "shader", "main",
+                         options.get(), OutputType::PreprocessedText);
   // Checks the existence of the expected string.
   EXPECT_THAT(shaderc_result_get_bytes(comp.result()),
               HasSubstr(test_case.expected_substring()));
@@ -892,7 +909,7 @@ TEST_P(IncluderTests, SetIncluderCallbacksClonedOptions) {
       shaderc_compile_options_clone(options.get()));
 
   const Compilation comp(compiler.get_compiler_handle(), shader,
-                         shaderc_glsl_vertex_shader, "shader",
+                         shaderc_glsl_vertex_shader, "shader", "main",
                          cloned_options.get(), OutputType::PreprocessedText);
   // Checks the existence of the expected string.
   EXPECT_THAT(shaderc_result_get_bytes(comp.result()),
@@ -998,13 +1015,13 @@ TEST_F(CompileStringWithOptionsTest,
   // Warnings on particular lines should be inhibited.
   Compilation comp_line(compiler_.get_compiler_handle(),
                         kDeprecatedAttributeShader, shaderc_glsl_vertex_shader,
-                        "shader", options_.get());
+                        "shader", "main", options_.get());
   EXPECT_EQ(0u, shaderc_result_get_num_warnings(comp_line.result()));
 
   // Global warnings should be inhibited.
-  Compilation comp_global(compiler_.get_compiler_handle(),
-                          kMinimalUnknownVersionShader,
-                          shaderc_glsl_vertex_shader, "shader", options_.get());
+  Compilation comp_global(
+      compiler_.get_compiler_handle(), kMinimalUnknownVersionShader,
+      shaderc_glsl_vertex_shader, "shader", "main", options_.get());
   EXPECT_EQ(0u, shaderc_result_get_num_warnings(comp_global.result()));
 }
 
@@ -1019,13 +1036,13 @@ TEST_F(CompileStringWithOptionsTest,
   // Warnings on particular lines should be inhibited.
   Compilation comp_line(compiler_.get_compiler_handle(),
                         kDeprecatedAttributeShader, shaderc_glsl_vertex_shader,
-                        "shader", options_.get());
+                        "shader", "main", options_.get());
   EXPECT_EQ(0u, shaderc_result_get_num_warnings(comp_line.result()));
 
   // Global warnings should be inhibited.
-  Compilation comp_global(compiler_.get_compiler_handle(),
-                          kMinimalUnknownVersionShader,
-                          shaderc_glsl_vertex_shader, "shader", options_.get());
+  Compilation comp_global(
+      compiler_.get_compiler_handle(), kMinimalUnknownVersionShader,
+      shaderc_glsl_vertex_shader, "shader", "main", options_.get());
   EXPECT_EQ(0u, shaderc_result_get_num_warnings(comp_global.result()));
 }
 
@@ -1325,6 +1342,35 @@ TEST_F(CompileStringTest, LangHlslOnHlslVertexSucceeds) {
                                               shaderc_source_language_hlsl);
   EXPECT_TRUE(CompilationSuccess(kHlslVertexShader, shaderc_glsl_vertex_shader,
                                  options_.get()));
+}
+
+TEST(EntryPointTest,
+     LangGlslOnHlslVertexSucceedsButAssumesEntryPointNameIsMain) {
+  Compiler compiler;
+  Options options;
+  auto compilation =
+      Compilation(compiler.get_compiler_handle(), kGlslVertexShader,
+                  shaderc_glsl_vertex_shader, "shader", "blah blah blah",
+                  options.get(), OutputType::SpirvAssemblyText);
+
+  EXPECT_THAT(shaderc_result_get_bytes(compilation.result()),
+              HasSubstr("OpEntryPoint Vertex %main \"main\""))
+      << std::string(shaderc_result_get_bytes(compilation.result()));
+}
+
+TEST(EntryPointTest, LangHlslOnHlslVertexSucceedsWithGivenEntryPointName) {
+  Compiler compiler;
+  Options options;
+  shaderc_compile_options_set_source_language(options.get(),
+                                              shaderc_source_language_hlsl);
+  auto compilation =
+      Compilation(compiler.get_compiler_handle(), kHlslVertexShader,
+                  shaderc_glsl_vertex_shader, "shader", "EntryPoint",
+                  options.get(), OutputType::SpirvAssemblyText);
+
+  EXPECT_THAT(shaderc_result_get_bytes(compilation.result()),
+              HasSubstr("OpEntryPoint Vertex %EntryPoint \"EntryPoint\""))
+      << std::string(shaderc_result_get_bytes(compilation.result()));
 }
 
 }  // anonymous namespace

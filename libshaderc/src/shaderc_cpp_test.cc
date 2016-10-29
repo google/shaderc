@@ -19,6 +19,7 @@
 #include <unordered_map>
 
 #include "SPIRV/spirv.hpp"
+#include "spirv-tools/libspirv.hpp"
 
 #include "common_shaders_for_test.h"
 #include "shaderc/shaderc.hpp"
@@ -1017,30 +1018,86 @@ TEST_F(CppInterface, BeginAndEndOnPreprocessedResult) {
 
 TEST_F(CppInterface, SourceLangGlslMinimalGlslVertexShaderSucceeds) {
   options_.SetSourceLanguage(shaderc_source_language_glsl);
-  EXPECT_TRUE(CompilationSuccess(kVertexOnlyShader,
-                                 shaderc_glsl_vertex_shader,
+  EXPECT_TRUE(CompilationSuccess(kVertexOnlyShader, shaderc_glsl_vertex_shader,
                                  options_));
 }
 
 TEST_F(CppInterface, SourceLangGlslMinimalHlslVertexShaderFails) {
   options_.SetSourceLanguage(shaderc_source_language_glsl);
   EXPECT_FALSE(CompilationSuccess(kMinimalHlslShader,
-                                  shaderc_glsl_vertex_shader,
-                                  options_));
+                                  shaderc_glsl_vertex_shader, options_));
 }
 
 TEST_F(CppInterface, SourceLangHlslMinimalGlslVertexShaderFails) {
   options_.SetSourceLanguage(shaderc_source_language_hlsl);
-  EXPECT_FALSE(CompilationSuccess(kVertexOnlyShader,
-                                  shaderc_glsl_vertex_shader,
+  EXPECT_FALSE(CompilationSuccess(kVertexOnlyShader, shaderc_glsl_vertex_shader,
                                   options_));
 }
 
 TEST_F(CppInterface, SourceLangHlslMinimalHlslVertexShaderSucceeds) {
   options_.SetSourceLanguage(shaderc_source_language_hlsl);
-  EXPECT_TRUE(CompilationSuccess(kMinimalHlslShader,
-                                 shaderc_glsl_vertex_shader,
+  EXPECT_TRUE(CompilationSuccess(kMinimalHlslShader, shaderc_glsl_vertex_shader,
                                  options_));
+}
+
+TEST(
+    EntryPointTest,
+    SourceLangHlslMinimalHlslVertexShaderAsConstCharPtrSucceedsWithEntryPointName) {
+  shaderc::Compiler compiler;
+  CompileOptions options;
+  options.SetSourceLanguage(shaderc_source_language_hlsl);
+  auto result = compiler.CompileGlslToSpv(
+      kMinimalHlslShader, strlen(kMinimalHlslShader),
+      shaderc_glsl_vertex_shader, "shader", "EntryPoint", options);
+  std::vector<uint32_t> binary(result.begin(), result.end());
+  std::string assembly;
+  spvtools::SpirvTools(SPV_ENV_UNIVERSAL_1_0).Disassemble(binary, &assembly);
+  EXPECT_THAT(assembly,
+              HasSubstr("OpEntryPoint Vertex %EntryPoint \"EntryPoint\""))
+      << assembly;
+}
+
+TEST(
+    EntryPointTest,
+    SourceLangHlslMinimalHlslVertexShaderAsStdStringSucceedsWithEntryPointName) {
+  shaderc::Compiler compiler;
+  CompileOptions options;
+  options.SetSourceLanguage(shaderc_source_language_hlsl);
+  std::string shader(kMinimalHlslShader);
+  auto result = compiler.CompileGlslToSpv(shader, shaderc_glsl_vertex_shader,
+                                          "shader", "EntryPoint", options);
+  std::vector<uint32_t> binary(result.begin(), result.end());
+  std::string assembly;
+  spvtools::SpirvTools(SPV_ENV_UNIVERSAL_1_0).Disassemble(binary, &assembly);
+  EXPECT_THAT(assembly,
+              HasSubstr("OpEntryPoint Vertex %EntryPoint \"EntryPoint\""))
+      << assembly;
+}
+
+TEST(
+    EntryPointTest,
+    SourceLangHlslMinimalHlslVertexShaderAsConstCharPtrSucceedsToAssemblyWithEntryPointName) {
+  shaderc::Compiler compiler;
+  CompileOptions options;
+  options.SetSourceLanguage(shaderc_source_language_hlsl);
+  auto assembly = compiler.CompileGlslToSpvAssembly(
+      kMinimalHlslShader, strlen(kMinimalHlslShader),
+      shaderc_glsl_vertex_shader, "shader", "EntryPoint", options);
+  EXPECT_THAT(std::string(assembly.begin(), assembly.end()),
+              HasSubstr("OpEntryPoint Vertex %EntryPoint \"EntryPoint\""));
+}
+
+TEST(
+    EntryPointTest,
+    SourceLangHlslMinimalHlslVertexShaderAsStdStringSucceedsToAssemblyWithEntryPointName) {
+  shaderc::Compiler compiler;
+  CompileOptions options;
+  options.SetSourceLanguage(shaderc_source_language_hlsl);
+  std::string shader(kMinimalHlslShader);
+  auto assembly = compiler.CompileGlslToSpvAssembly(
+      shader, shaderc_glsl_vertex_shader, "shader", "EntryPoint", options);
+  EXPECT_THAT(std::string(assembly.begin(), assembly.end()),
+              HasSubstr("OpEntryPoint Vertex %EntryPoint \"EntryPoint\""));
 }
 
 }  // anonymous namespace

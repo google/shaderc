@@ -16,7 +16,7 @@
 
 #include <sstream>
 
-#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #include "death_test.h"
 #include "libshaderc_util/counting_includer.h"
@@ -24,6 +24,7 @@
 namespace {
 
 using shaderc_util::Compiler;
+using ::testing::HasSubstr;
 
 // A trivial vertex shader
 const char kVertexShader[] =
@@ -105,10 +106,6 @@ class CompilerTest : public testing::Test {
   // shader stage.
   bool SimpleCompilationSucceedsForOutputType(
       std::string source, EShLanguage stage, Compiler::OutputType output_type) {
-    std::function<EShLanguage(std::ostream*, const shaderc_util::string_piece&)>
-        stage_callback = [](std::ostream*, const shaderc_util::string_piece&) {
-          return EShLangCount;
-        };
     std::stringstream errors;
     size_t total_warnings = 0;
     size_t total_errors = 0;
@@ -116,7 +113,7 @@ class CompilerTest : public testing::Test {
     bool result = false;
     DummyCountingIncluder dummy_includer;
     std::tie(result, std::ignore, std::ignore) = compiler_.Compile(
-        source, stage, "shader", stage_callback, dummy_includer,
+        source, stage, "shader", "main", dummy_stage_callback_, dummy_includer,
         Compiler::OutputType::SpirvBinary, &errors, &total_warnings,
         &total_errors, &initializer);
     errors_ = errors.str();
@@ -134,6 +131,11 @@ class CompilerTest : public testing::Test {
   Compiler compiler_;
   // The error string from the most recent compilation.
   std::string errors_;
+  std::function<EShLanguage(std::ostream*, const shaderc_util::string_piece&)>
+      dummy_stage_callback_ =
+          [](std::ostream*, const shaderc_util::string_piece&) {
+            return EShLangCount;
+          };
 };
 
 TEST_F(CompilerTest, SimpleVertexShaderCompilesSuccessfullyToBinary) {
@@ -337,5 +339,25 @@ TEST_F(CompilerTest, SetSourceLanguageToHLSLFailsOnGLSL) {
   EXPECT_FALSE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
 }
 
+TEST_F(CompilerTest, EntryPointParameterTakesEffectForHLSL) {
+  compiler_.SetSourceLanguage(Compiler::SourceLanguage::HLSL);
+  std::stringstream errors;
+  size_t total_warnings = 0;
+  size_t total_errors = 0;
+  shaderc_util::GlslangInitializer initializer;
+  bool result = false;
+  DummyCountingIncluder dummy_includer;
+  std::vector<uint32_t> words;
+  std::tie(result, words, std::ignore) =
+      compiler_.Compile(kHlslVertexShader, EShLangVertex, "shader",
+                        "EntryPoint", dummy_stage_callback_, dummy_includer,
+                        Compiler::OutputType::SpirvAssemblyText, &errors,
+                        &total_warnings, &total_errors, &initializer);
+  EXPECT_TRUE(result);
+  std::string assembly(reinterpret_cast<char*>(words.data()));
+  EXPECT_THAT(assembly,
+              HasSubstr("OpEntryPoint Vertex %EntryPoint \"EntryPoint\""))
+      << assembly;
+}
 
 }  // anonymous namespace
