@@ -48,6 +48,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE:=HLSL
 LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti
 LOCAL_SRC_FILES:= \
+		hlsl/hlslAttributes.cpp \
 		hlsl/hlslGrammar.cpp \
 		hlsl/hlslOpMap.cpp \
 		hlsl/hlslParseables.cpp \
