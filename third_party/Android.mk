@@ -189,11 +189,11 @@ LOCAL_SRC_FILES:= \
 		source/text.cpp \
 		source/text_handler.cpp \
 		source/util/parse_number.cpp \
-		source/val/BasicBlock.cpp \
-		source/val/Construct.cpp \
-		source/val/Function.cpp \
-		source/val/Instruction.cpp \
-		source/val/ValidationState.cpp \
+		source/val/basic_block.cpp \
+		source/val/construct.cpp \
+		source/val/function.cpp \
+		source/val/instruction.cpp \
+		source/val/validation_state.cpp \
 		source/validate.cpp \
 		source/validate_cfg.cpp \
 		source/validate_datarules.cpp \
