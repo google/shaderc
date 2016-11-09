@@ -196,6 +196,7 @@ LOCAL_SRC_FILES:= \
 		source/val/ValidationState.cpp \
 		source/validate.cpp \
 		source/validate_cfg.cpp \
+		source/validate_datarules.cpp \
 		source/validate_id.cpp \
 		source/validate_instruction.cpp \
 		source/validate_layout.cpp
