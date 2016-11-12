@@ -57,13 +57,21 @@ Options:
   -Dmacro[=defn]    Add an implicit macro definition.
   -E                Outputs only the results of the preprocessing step.
                     Output defaults to standard output.
+  -fentry-point=<name>
+                    Specify the entry point name for HLSL compilation, for
+                    all subsequent source files.  Default is "main".
+  -flimit=<settings>
+                    Specify resource limits. Each limit is specified by a limit
+                    name followed by an integer value.  Tokens should be
+                    separated by whitespace.  If the same limit is specified
+                    several times, only the last setting takes effect.
+  --show-limits     Display available limit names and their default values.
+  -flimit-file <file>
+                    Set limits as specified in the given file.
   -fshader-stage=<stage>
                     Treat subsequent input files as having stage <stage>.
                     Valid stages are vertex, fragment, tesscontrol, tesseval,
                     geometry, and compute.
-  -fentry-point=<name>
-                    Specify the entry point name for HLSL compilation, for
-                    all subsequent source files.  Default is "main".
   -g                Generate source-level debug information.
                     Currently this option has no effect.
   --help            Display available options.
@@ -182,3 +190,96 @@ class StdinWithoutShaderStage(expect.StdoutMatch, expect.StderrMatch):
     expected_stderr = [
         "glslc: error: '-': -fshader-stage required when input is from "
         'standard input "-"\n']
+
+
+@inside_glslc_testsuite('Parameters')
+class LimitsHelp(expect.StdoutMatch, expect.StderrMatch):
+    """Tests --show-limits shows correct output."""
+
+    glslc_args = ['--show-limits']
+
+    expected_stderr = ''
+    expected_stdout = """MaxLights 8
+MaxClipPlanes 6
+MaxTextureUnits 2
+MaxTextureCoords 8
+MaxVertexAttribs 16
+MaxVertexUniformComponents 4096
+MaxVaryingFloats 60
+MaxVertexTextureImageUnits 16
+MaxCombinedTextureImageUnits 80
+MaxTextureImageUnits 16
+MaxFragmentUniformComponents 1024
+MaxDrawBuffers 2
+MaxVertexUniformVectors 256
+MaxVaryingVectors 15
+MaxFragmentUniformVectors 256
+MaxVertexOutputVectors 16
+MaxFragmentInputVectors 15
+MinProgramTexelOffset -8
+MaxProgramTexelOffset 7
+MaxClipDistances 8
+MaxComputeWorkGroupCountX 65535
+MaxComputeWorkGroupCountY 65535
+MaxComputeWorkGroupCountZ 65535
+MaxComputeWorkGroupSizeX 1024
+MaxComputeWorkGroupSizeY 1024
+MaxComputeWorkGroupSizeZ 64
+MaxComputeUniformComponents 512
+MaxComputeTextureImageUnits 16
+MaxComputeImageUniforms 8
+MaxComputeAtomicCounters 8
+MaxComputeAtomicCounterBuffers 1
+MaxVaryingComponents 60
+MaxVertexOutputComponents 64
+MaxGeometryInputComponents 64
+MaxGeometryOutputComponents 128
+MaxFragmentInputComponents 128
+MaxImageUnits 8
+MaxCombinedImageUnitsAndFragmentOutputs 8
+MaxCombinedShaderOutputResources 8
+MaxImageSamples 0
+MaxVertexImageUniforms 0
+MaxTessControlImageUniforms 0
+MaxTessEvaluationImageUniforms 0
+MaxGeometryImageUniforms 0
+MaxFragmentImageUniforms 8
+MaxCombinedImageUniforms 8
+MaxGeometryTextureImageUnits 16
+MaxGeometryOutputVertices 256
+MaxGeometryTotalOutputComponents 1024
+MaxGeometryUniformComponents 512
+MaxGeometryVaryingComponents 60
+MaxTessControlInputComponents 128
+MaxTessControlOutputComponents 128
+MaxTessControlTextureImageUnits 16
+MaxTessControlUniformComponents 1024
+MaxTessControlTotalOutputComponents 4096
+MaxTessEvaluationInputComponents 128
+MaxTessEvaluationOutputComponents 128
+MaxTessEvaluationTextureImageUnits 16
+MaxTessEvaluationUniformComponents 1024
+MaxTessPatchComponents 120
+MaxPatchVertices 32
+MaxTessGenLevel 64
+MaxViewports 16
+MaxVertexAtomicCounters 0
+MaxTessControlAtomicCounters 0
+MaxTessEvaluationAtomicCounters 0
+MaxGeometryAtomicCounters 0
+MaxFragmentAtomicCounters 8
+MaxCombinedAtomicCounters 8
+MaxAtomicCounterBindings 1
+MaxVertexAtomicCounterBuffers 0
+MaxTessControlAtomicCounterBuffers 0
+MaxTessEvaluationAtomicCounterBuffers 0
+MaxGeometryAtomicCounterBuffers 0
+MaxFragmentAtomicCounterBuffers 0
+MaxCombinedAtomicCounterBuffers 1
+MaxAtomicCounterBufferSize 32
+MaxTransformFeedbackBuffers 4
+MaxTransformFeedbackInterleavedComponents 64
+MaxCullDistances 8
+MaxCombinedClipAndCullDistances 8
+MaxSamples 4
+"""

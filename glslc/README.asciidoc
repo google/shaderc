@@ -11,10 +11,15 @@ Clang-compatible arguments.
 == Synopsis
 
 ----
+glslc [--help]
+
+glslc [--show-limits]
+
 glslc [-c|-S|-E]
       [-x ...] [-std=standard]
-      [-fshader-stage=...]
       [-fentry-point=...]
+      [-flimit=...]
+      [-fshader-stage=...]
       [--target-env=...]
       [-g]
       [-O0|-Os]
@@ -110,12 +115,46 @@ Otherwise,
 
 `--help` tells the glslc compiler to display all available options and exit.
 
+==== `--show-limits`
+
+`--show-limits` shows default resource limits for shader compilation.  The syntax
+is the same as accepted by `-flimit=` and for the contents of the file specified
+by `-flimit-file`.
+
 ==== `-o`
 
 `-o` lets you specify the output file's name. It cannot be used when there are
 multiple files generated. A filename of `-` represents standard output.
 
 === Language and Mode Selection Options
+
+[[option-f-entry-point]]
+==== `-fentry-point=`
+
+`-fentry-point=<name>` lets you specify the entry point name.  This is only
+significant for HLSL compilation.  The default is "main".
+
+[[option-f-limit]]
+==== `-flimit=`
+
+`-flimit=<resource-limits>` lets you specify resource limits.
+The argument should be a sequence of limit name, integer value pairs.  Tokens
+should be separated by whitespace.  If the same limit is specified several
+times, only the last setting takes effect.
+
+Use `--show-limits` to show the default values, and example syntax.
+
+This option affects all compiled shaders.
+
+[[option-f-limit-file]]
+==== `-flimit-file`
+
+`-flimit-file <resource-limits-file>` lets you specify resource limits in a file.
+The syntax of the file contents is the same as the argument to `-flimit=` and
+the output of `--show-limits`.  This option accepts Glslang resource configuration
+files, e.g. as emitted by `glslangValidator -c`.
+
+This option affects all compiled shaders.
 
 [[option-f-shader-stage]]
 ==== `-fshader-stage=`
@@ -150,12 +189,6 @@ need to supply both SPIR-V assembly files and `-fshader-stage=` on the same
 command line, please put SPIR-V assembly files ahead of the first
 `-fshader-stage=`, since `-fshader-stage=` only affects the treatment of
 subsequent files.
-
-[[option-f-entry-point]]
-==== `-fentry-point=`
-
-`-fentry-point=<name>` lets you specify the entry point name.  This is only
-significant for HLSL compilation.  The default is "main".
 
 ==== `-std=`
 
