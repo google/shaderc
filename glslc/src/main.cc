@@ -21,12 +21,14 @@
 #include <string>
 #include <utility>
 
+#include "libshaderc_util/compiler.h"
 #include "libshaderc_util/string_piece.h"
 #include "shaderc/shaderc.h"
 #include "spirv-tools/libspirv.h"
 
 #include "file.h"
 #include "file_compiler.h"
+#include "resource_parse.h"
 #include "shader_stage.h"
 
 using shaderc_util::string_piece;
@@ -46,13 +48,19 @@ Options:
   -Dmacro[=defn]    Add an implicit macro definition.
   -E                Outputs only the results of the preprocessing step.
                     Output defaults to standard output.
+  -fentry-point=<name>
+                    Specify the entry point name for HLSL compilation, for
+                    all subsequent source files.  Default is "main".
+  -flimit=<settings>
+                    Specify resource limits. Each limit is specified by a limit
+                    name followed by an integer value.  Tokens should be
+                    separated by whitespace.  If the same limit is specified
+                    several times, only the last setting takes effect.
+  --show-limits     Display available limit names and their default values.
   -fshader-stage=<stage>
                     Treat subsequent input files as having stage <stage>.
                     Valid stages are vertex, fragment, tesscontrol, tesseval,
                     geometry, and compute.
-  -fentry-point=<name>
-                    Specify the entry point name for HLSL compilation, for
-                    all subsequent source files.  Default is "main".
   -g                Generate source-level debug information.
                     Currently this option has no effect.
   --help            Display available options.
@@ -131,6 +139,20 @@ int main(int argc, char** argv) {
     if (arg == "--help") {
       ::PrintHelp(&std::cout);
       return 0;
+    } else if (arg == "--show-limits") {
+      shaderc_util::Compiler default_compiler;
+// The static cast here depends on us keeping the shaderc_limit enum in
+// lockstep with the shaderc_util::Compiler::Limit enum.  The risk of mismatch
+// is low since both are generated from the same resources.inc file.
+#define RESOURCE(NAME, FIELD, ENUM)                            \
+  std::cout << #NAME << " "                                    \
+            << default_compiler.GetLimit(                      \
+                   static_cast<shaderc_util::Compiler::Limit>( \
+                       shaderc_limit_##ENUM))                  \
+            << std::endl;
+#include "libshaderc_util/resources.inc"
+#undef RESOURCE
+      return 0;
     } else if (arg == "--version") {
       std::cout << kBuildVersion << std::endl;
       std::cout << "Target: " << spvTargetEnvDescription(SPV_ENV_UNIVERSAL_1_0)
@@ -156,6 +178,18 @@ int main(int argc, char** argv) {
     } else if (arg.starts_with("-fentry-point=")) {
       current_entry_point_name =
           arg.substr(std::strlen("-fentry-point=")).str();
+    } else if (arg.starts_with("-flimit=")) {
+      std::vector<glslc::ResourceSetting> settings;
+      std::string err;
+      if ((arg != "-flimit=") &&
+          !ParseResourceSettings(arg.substr(std::strlen("-flimit=")).str(),
+                                 &settings, &err)) {
+        std::cerr << "glslc: -flimit error: " << err << std::endl;
+        return 1;
+      }
+      for (const auto& setting : settings) {
+        compiler.options().SetLimit(setting.limit, setting.value);
+      }
     } else if (arg.starts_with("-std=")) {
       const string_piece standard = arg.substr(std::strlen("-std="));
       int version;

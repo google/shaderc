@@ -72,5 +72,4 @@ bool ParseResourceSettings(const std::string& input,
 
   return true;
 }
-
 }
