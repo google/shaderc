@@ -7,6 +7,9 @@ add_library(glslc STATIC
   src/file.h
   src/file_includer.cc
   src/file_includer.h
+  src/resource_parse.h
+  src/resource_parse.cc
+  src/shader_stage.cc
   src/shader_stage.cc
   src/shader_stage.h
   src/dependency_info.cc
@@ -31,6 +34,7 @@ shaderc_add_tests(
   LINK_LIBS glslc shaderc_util shaderc
   TEST_NAMES
     file
+    resource_parse
     stage)
 
 shaderc_add_asciidoc(glslc_doc_README README)
