@@ -14,6 +14,7 @@
 
 #include "resource_parse.h"
 
+#include <algorithm>
 #include <cstring>
 #include <iterator>
 #include <sstream>
@@ -34,6 +35,24 @@ bool StringToLimit(const std::string& str, shaderc_limit* limit) {
 #undef RESOURCE
   return false;
 }
+
+// Returns true if we should ignore the setting.
+bool IgnoreSetting(const std::string& str) {
+  const std::string ignore_list[] = {
+      "nonInductiveForLoops",
+      "whileLoops",
+      "doWhileLoops",
+      "generalUniformIndexing",
+      "generalAttributeMatrixVectorIndexing",
+      "generalVaryingIndexing",
+      "generalSamplerIndexing",
+      "generalVariableIndexing",
+      "generalConstantMatrixVectorIndexing",
+  };
+  return std::find(std::begin(ignore_list), std::end(ignore_list), str) !=
+         std::end(ignore_list);
+}
+
 }  //  anonymous namespace
 
 namespace glslc {
@@ -53,8 +72,11 @@ bool ParseResourceSettings(const std::string& input,
   while (pos != std::istream_iterator<std::string>()) {
     const std::string limit_name = *pos++;
     shaderc_limit limit = static_cast<shaderc_limit>(0);
-    if (!StringToLimit(limit_name, &limit))
-      return failure(std::string("Invalid resource limit: " + limit_name));
+    bool ignore = IgnoreSetting(limit_name);
+    if (!ignore) {
+      if (!StringToLimit(limit_name, &limit))
+        return failure(std::string("Invalid resource limit: " + limit_name));
+    }
 
     if (pos == std::istream_iterator<std::string>())
       return failure(std::string("Missing value after limit: ") + limit_name);
@@ -66,10 +88,10 @@ bool ParseResourceSettings(const std::string& input,
     if (value_stream.bad() || !value_stream.eof() || value_stream.fail())
       return failure(std::string("Invalid integer: ") + value_str);
 
-    limits->push_back({limit, value});
+    if (!ignore) limits->push_back({limit, value});
     ++pos;
   }
 
   return true;
 }
-}
+}  // anonymous namespace

@@ -41,7 +41,16 @@ inline bool operator==(const ResourceSetting& lhs, const ResourceSetting& rhs) {
 // is a limit name followed by a decimal integer.  Tokens should be separated
 // by whitespace.  In particular, this function accepts Glslang's configuration
 // file syntax.  If a limit is mentioned multiple times, then the last setting
-// takes effect.
+// takes effect.  Ignore settings for:
+//   nonInductiveForLoops
+//   whileLoops
+//   doWhileLoops
+//   generalUniformIndexing
+//   generalAttributeMatrixVectorIndexing
+//   generalVaryingIndexing
+//   generalSamplerIndexing
+//   generalVariableIndexing
+//   generalConstantMatrixVectorIndexing
 bool ParseResourceSettings(const std::string& input,
                            std::vector<ResourceSetting>* limits,
                            std::string* err);

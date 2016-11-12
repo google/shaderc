@@ -73,3 +73,13 @@ class TestFLimitLowerThanDefaultMinOffset(expect.ValidObjectFile):
 
     shader = shader_with_tex_offset(-9);
     glslc_args = ['-c', shader, '-flimit= MinProgramTexelOffset -9 ']
+
+
+@inside_glslc_testsuite('OptionFLimit')
+class TestFLimitIgnoredLangFeatureSettingSample(expect.ValidObjectFile):
+    """Tests -flimit= an ignored option."""
+
+    shader = FileShader("#version 150\nvoid main() { while(true); }", '.vert')
+    glslc_args = ['-c', shader, '-flimit=whileLoops 0']
+
+

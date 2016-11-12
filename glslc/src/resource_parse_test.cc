@@ -57,6 +57,19 @@ INSTANTIATE_TEST_CASE_P(ParseResources, ParseResourceSettingsTest,
     {" \tMaxLights \n 12 \t ", true, {{shaderc_limit_max_lights, 12}}, ""},
     // Test more than one limit setting.
     {"MinProgramTexelOffset -10 MaxLights 4", true, {{shaderc_limit_min_program_texel_offset, -10}, {shaderc_limit_max_lights, 4}}, ""},
+    // Check ignore cases.
+    {"nonInductiveForLoops", false, {}, "Missing value after limit: nonInductiveForLoops"},
+    {"nonInductiveForLoops 1", true, {}, ""},
+    {"whileLoops 1", true, {}, ""},
+    {"doWhileLoops 1", true, {}, ""},
+    {"generalUniformIndexing 1", true, {}, ""},
+    {"generalAttributeMatrixVectorIndexing 1", true, {}, ""},
+    {"generalVaryingIndexing 1", true, {}, ""},
+    {"generalSamplerIndexing 1", true, {}, ""},
+    {"generalVariableIndexing 1", true, {}, ""},
+    {"generalConstantMatrixVectorIndexing 1", true, {}, ""},
+    // Check an ignore case with a regular case
+    {"whileLoops 1 MaxLights 99", true, {{shaderc_limit_max_lights, 99}}, ""},
   }), );
 
 }  // anonymous namespace
