@@ -66,6 +66,8 @@ Options:
                     separated by whitespace.  If the same limit is specified
                     several times, only the last setting takes effect.
   --show-limits     Display available limit names and their default values.
+  -flimit-file <file>
+                    Set limits as specified in the given file.
   -fshader-stage=<stage>
                     Treat subsequent input files as having stage <stage>.
                     Valid stages are vertex, fragment, tesscontrol, tesseval,

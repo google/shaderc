@@ -83,3 +83,44 @@ class TestFLimitIgnoredLangFeatureSettingSample(expect.ValidObjectFile):
     glslc_args = ['-c', shader, '-flimit=whileLoops 0']
 
 
+@inside_glslc_testsuite('OptionFLimit')
+class TestFLimitLowerThanDefaultMinOffset(expect.ValidObjectFile):
+    """Tests -flimit= with lower than default argument.  The shader uses that offset."""
+
+    shader = shader_with_tex_offset(-9);
+    glslc_args = ['-c', shader, '-flimit= MinProgramTexelOffset -9 ']
+
+
+@inside_glslc_testsuite('OptionFLimitFile')
+class TestFLimitFileNoArg(expect.ErrorMessage):
+    """Tests -flimit-file without an argument"""
+
+    shader = shader_with_tex_offset(-9);
+    glslc_args = ['-c', shader, '-flimit-file']
+    expected_error = "glslc: error: argument to '-flimit-file' is missing\n"
+
+
+@inside_glslc_testsuite('OptionFLimitFile')
+class TestFLimitFileSetsLowerMinTexelOffset(expect.SuccessfulReturn,
+                                            expect.CorrectObjectFilePreamble):
+    """Tests -flimit-file with lower than default argument.  The shader uses that offset."""
+
+    limits_file = FileShader('MinProgramTexelOffset -9', '.txt')
+    shader = shader_with_tex_offset(-9);
+    glslc_args = [ '-c', shader, '-flimit-file', limits_file ]
+
+    # We don't want to treat the limits_file as if it has a corresponding .spv output
+    # So we need a custom check.
+    def check_object_file(self, status):
+        output_name = status.input_filenames[0] + ".spv"
+        return self.verify_object_file_preamble(output_name)
+
+
+@inside_glslc_testsuite('OptionFLimitFile')
+class TestFLimitFileInvalidContents(expect.ErrorMessage):
+    """Tests -flimit-file bad file contents."""
+
+    limits_file = FileShader('thisIsBad', '.txt')
+    shader = shader_with_tex_offset(-9);
+    glslc_args = ['-c', shader, '-flimit-file', limits_file]
+    expected_error = 'glslc: -flimit-file error: Invalid resource limit: thisIsBad\n'

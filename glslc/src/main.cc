@@ -22,6 +22,7 @@
 #include <utility>
 
 #include "libshaderc_util/compiler.h"
+#include "libshaderc_util/io.h"
 #include "libshaderc_util/string_piece.h"
 #include "shaderc/shaderc.h"
 #include "spirv-tools/libspirv.h"
@@ -57,6 +58,8 @@ Options:
                     separated by whitespace.  If the same limit is specified
                     several times, only the last setting takes effect.
   --show-limits     Display available limit names and their default values.
+  -flimit-file <file>
+                    Set limits as specified in the given file.
   -fshader-stage=<stage>
                     Treat subsequent input files as having stage <stage>.
                     Valid stages are vertex, fragment, tesscontrol, tesseval,
@@ -116,6 +119,22 @@ bool GetOptionArgument(int argc, char** argv, int* index,
     *option_argument = argv[*index];
     return true;
   }
+}
+
+// Sets resource limits according to the given string. The string
+// should be formated as required for ParseResourceSettings.
+// Returns true on success.  Otherwise returns false and sets err
+// to a descriptive error message.
+bool SetResourceLimits(const std::string& str, shaderc::CompileOptions* options,
+                       std::string* err) {
+  std::vector<glslc::ResourceSetting> settings;
+  if (!ParseResourceSettings(str, &settings, err)) {
+    return false;
+  }
+  for (const auto& setting : settings) {
+    options->SetLimit(setting.limit, setting.value);
+  }
+  return true;
 }
 
 const char kBuildVersion[] =
@@ -179,16 +198,32 @@ int main(int argc, char** argv) {
       current_entry_point_name =
           arg.substr(std::strlen("-fentry-point=")).str();
     } else if (arg.starts_with("-flimit=")) {
-      std::vector<glslc::ResourceSetting> settings;
       std::string err;
-      if ((arg != "-flimit=") &&
-          !ParseResourceSettings(arg.substr(std::strlen("-flimit=")).str(),
-                                 &settings, &err)) {
+      if (!SetResourceLimits(arg.substr(std::strlen("-flimit=")).str(),
+                             &compiler.options(), &err)) {
         std::cerr << "glslc: -flimit error: " << err << std::endl;
         return 1;
       }
-      for (const auto& setting : settings) {
-        compiler.options().SetLimit(setting.limit, setting.value);
+    } else if (arg.starts_with("-flimit-file")) {
+      std::string err;
+      string_piece limits_file;
+      if (!GetOptionArgument(argc, argv, &i, "-flimit-file", &limits_file)) {
+        std::cerr << "glslc: error: argument to '-flimit-file' is missing"
+                  << std::endl;
+        return 1;
+      }
+      std::vector<char> contents;
+      if (!shaderc_util::ReadFile(limits_file.str(), &contents)) {
+        std::cerr << "glslc: Can't read limits file: " << limits_file
+                  << std::endl;
+        return 1;
+      }
+      if (!SetResourceLimits(
+              string_piece(contents.data(), contents.data() + contents.size())
+                  .str(),
+              &compiler.options(), &err)) {
+        std::cerr << "glslc: -flimit-file error: " << err << std::endl;
+        return 1;
       }
     } else if (arg.starts_with("-std=")) {
       const string_piece standard = arg.substr(std::strlen("-std="));
