@@ -7,12 +7,11 @@
 A collection of tools, libraries and tests for shader compilation.
 At the moment it includes:
 
-- [`glslc`](glslc), a command line compiler for GLSL to SPIR-V, and
-- `libshaderc` a library API for doing the same.
+- [`glslc`](glslc), a command line compiler for GLSL/HLSL to SPIR-V, and
+- [`libshaderc`](libshaderc), a library API for doing the same.
 
-Shaderc wraps around core functionality in
-[Glslang](https://github.com/KhronosGroup/glslang)
-and [SPIRV-Tools](https://github.com/KhronosGroup/SPIRV-Tools).  Shaderc aims to
+Shaderc wraps around core functionality in [glslang][khr-glslang]
+and [SPIRV-Tools][spirv-tools].  Shaderc aims to
 to provide:
 * a command line compiler with GCC- and Clang-like usage, for better
   integration with build systems
@@ -31,7 +30,7 @@ Shaderc has been shipping in the
 Those repos are downstream from GitHub.)
 
 For licensing terms, please see the [`LICENSE`](LICENSE) file.  If interested in
-contributing to this project, please see [`CONTRIBUTING.md`](CONTRIBUTING.md)
+contributing to this project, please see [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 This is not an official Google product (experimental or otherwise), it is just
 code that happens to be owned by Google.  That may change if Shaderc gains
@@ -50,18 +49,17 @@ for more information. See also the [`AUTHORS`](AUTHORS) and
 - `third_party/`: third party open source packages; see below
 - `utils/`: utility scripts for Shaderc
 
-Shaderc depends on `glslang`, the Khronos reference compiler for GLSL.
+Shaderc depends on glslang, the Khronos reference compiler for GLSL.
 Sometimes a change updates both Shaderc and glslang.  In that case the
-glslang change will appear in [google/glslang](https://github.com/google/glslang)
-before it appears upstream in
-[KhronosGroup/glslang](https://github.com/KhronosGroup/glslang).
+glslang change will appear in [google/glslang][google-glslang]
+before it appears upstream in [KhronosGroup/glslang][khr-glslang]
 We intend to upstream all changes to glslang. We maintain the separate
 copy only to stage those changes for review, and to provide something for
 Shaderc to build against in the meantime.  Please see
 [DEVELOPMENT.howto.md](DEVELOPMENT.howto.md) for more details.
 
-Shaderc depends on [SPIRV-Tools](https://github.com/KhronosGroup/SPIRV-Tools)
-for assembling and disassembling SPIR-V binaries.
+Shaderc depends on [SPIRV-Tools][spirv-tools] for assembling, disassembling,
+and transforming SPIR-V binaries.
 
 Shaderc depends on the [Google Test](https://github.com/google/googletest)
 testing framework.
@@ -212,3 +210,7 @@ ninja report-coverage
 
 Then the coverage report can be found under the `$BUILD_DIR/coverage-report`
 directory.
+
+[khr-glslang]: https://github.com/KhronosGroup/glslang
+[google-glslang]: https://github.com/google/glslang
+[spirv-tools]: https://github.com/KhronosGroup/SPIRV-Tools

@@ -5,7 +5,8 @@
 
 == Name
 
-`glslc` - A command-line GLSL to SPIR-V compiler with Clang-compatible arguments.
+`glslc` - A command-line GLSL/HLSL to SPIR-V compiler with
+Clang-compatible arguments.
 
 == Synopsis
 
@@ -27,7 +28,7 @@ glslc [-c|-S|-E]
 
 === Input file languages
 
-glslc accepts both GLSL source and SPIR-V assembly files as inputs.
+glslc accepts both GLSL/HLSL source and SPIR-V assembly files as inputs.
 
 ==== Shader stage specification
 
