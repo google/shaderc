@@ -216,11 +216,11 @@ class ValidObjectFile(SuccessfulReturn, CorrectObjectFilePreamble):
 class ValidObjectFileWithAssemblySubstr(SuccessfulReturn, CorrectObjectFilePreamble):
     """Mixin class for checking that every input file generates a valid object
     file following the object file naming rule, there is no output on
-    stdout/stderr, and the disassmbly contains a specified substring."""
+    stdout/stderr, and the disassmbly contains a specified substring per input."""
 
     def check_object_file_disassembly(self, status):
-        for input_filename in status.input_filenames:
-            object_filename = get_object_filename(input_filename)
+        for an_input in status.inputs:
+            object_filename = get_object_filename(an_input.filename)
             obj_file = str(os.path.join(status.directory, object_filename))
             success, message = self.verify_object_file_preamble(obj_file)
             if not success:
@@ -231,10 +231,12 @@ class ValidObjectFileWithAssemblySubstr(SuccessfulReturn, CorrectObjectFilePream
                 stderr=subprocess.PIPE, cwd=status.directory)
             output = process.communicate(None)
             disassembly = output[0]
-        if self.expected_assembly_substr not in disassembly :
-           return False, ('Incorrect disassembly output:\n{asm}\n'
-                  'Expected substring not found:\n{exp}'.format(
-                  asm=disassembly, exp=self.expected_assembly_substr))
+            if not isinstance(an_input.assembly_substr, str):
+                return False, "Missing assembly_substr member"
+            if an_input.assembly_substr not in disassembly:
+                return False, ('Incorrect disassembly output:\n{asm}\n'
+                    'Expected substring not found:\n{exp}'.format(
+                    asm=disassembly, exp=an_input.assembly_substr))
         return True, ''
 
 

@@ -41,20 +41,20 @@ class TestStdoutMatchADotC(expect.StdoutMatch):
 
 def nosetest_stdout_match_regex_has_match():
     test = TestStdoutMatchADotC()
-    status = TestStatus(returncode=0, stdout='0abc1', stderr=None,
-                        directory=None, input_filenames=None)
+    status = TestStatus(test_manager=None, returncode=0, stdout='0abc1',
+                        stderr=None, directory=None, inputs=None, input_filenames=None)
     assert_true(test.check_stdout_match(status)[0])
 
 
 def nosetest_stdout_match_regex_no_match():
     test = TestStdoutMatchADotC()
-    status = TestStatus(returncode=0, stdout='ab', stderr=None,
-                        directory=None, input_filenames=None)
+    status = TestStatus(test_manager=None, returncode=0, stdout='ab',
+                        stderr=None, directory=None, inputs=None, input_filenames=None)
     assert_false(test.check_stdout_match(status)[0])
 
 
 def nosetest_stdout_match_regex_empty_stdout():
     test = TestStdoutMatchADotC()
-    status = TestStatus(returncode=0, stdout='', stderr=None,
-                        directory=None, input_filenames=None)
+    status = TestStatus(test_manager=None, returncode=0, stdout='', stderr=None,
+                        directory=None, inputs=None, input_filenames=None)
     assert_false(test.check_stdout_match(status)[0])
