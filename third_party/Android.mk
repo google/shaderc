@@ -181,6 +181,7 @@ LOCAL_SRC_FILES:= \
 		source/name_mapper.cpp \
 		source/opcode.cpp \
 		source/operand.cpp \
+		source/parsed_operand.cpp \
 		source/print.cpp \
 		source/software_version.cpp \
 		source/spirv_endian.cpp \
