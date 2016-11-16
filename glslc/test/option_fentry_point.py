@@ -1,4 +1,4 @@
-# Copyright 2015 The Shaderc Authors. All rights reserved.
+# Copyright 2016 The Shaderc Authors. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ class TestEntryPointDefaultsToMainForGlsl(expect.ValidAssemblyFileWithSubstr):
 
     shader = FileShader(GLSL_VERTEX_SHADER, '.vert')
     glslc_args = ['-S', shader]
-    expected_assembly_substr = "OpEntryPoint Vertex %main \"main\""
+    expected_assembly_substr = ASSEMBLY_MAIN
 
 
 @inside_glslc_testsuite('OptionFEntryPoint')
@@ -45,7 +45,7 @@ class TestEntryPointDefaultsToMainForHlsl(expect.ValidAssemblyFileWithSubstr):
 
     shader = FileShader(HLSL_VERTEX_SHADER_WITH_MAIN, '.vert')
     glslc_args = ['-x', 'hlsl', '-S', shader]
-    expected_assembly_substr = "OpEntryPoint Vertex %main \"main\""
+    expected_assembly_substr = ASSEMBLY_MAIN
 
 
 @inside_glslc_testsuite('OptionFEntryPoint')
@@ -54,7 +54,7 @@ class TestFEntryPointMainOnGlslShader(expect.ValidAssemblyFileWithSubstr):
 
     shader = FileShader(GLSL_VERTEX_SHADER, '.vert')
     glslc_args = ['-fentry-point=main', '-S', shader]
-    expected_assembly_substr = "OpEntryPoint Vertex %main \"main\""
+    expected_assembly_substr = ASSEMBLY_MAIN
 
 
 @inside_glslc_testsuite('OptionFEntryPoint')
@@ -63,10 +63,10 @@ class TestFEntryPointMainOnHlslShader(expect.ValidAssemblyFileWithSubstr):
 
     shader = FileShader(HLSL_VERTEX_SHADER, '.vert')
     glslc_args = ['-x', 'hlsl', '-fentry-point=main', '-S', shader]
-    expected_assembly_substr = "OpEntryPoint Vertex %main \"main\""
+    expected_assembly_substr = ASSEMBLY_MAIN
 
 
-@inside_glslc_testsuite('OptionDashFEntryPoint')
+@inside_glslc_testsuite('OptionFEntryPoint')
 class TestFEntryPointSpecifiedOnHlslShaderInDisassembly(expect.ValidObjectFileWithAssemblySubstr):
     """Tests -x hlsl on an HLSL shader with -fentry-point=EntryPoint."""
 
@@ -74,7 +74,7 @@ class TestFEntryPointSpecifiedOnHlslShaderInDisassembly(expect.ValidObjectFileWi
     glslc_args = ['-x', 'hlsl', '-fentry-point=EntryPoint', '-c', shader]
 
 
-@inside_glslc_testsuite('OptionDashFEntryPoint')
+@inside_glslc_testsuite('OptionFEntryPoint')
 class TestFEntryPointAffectsSubsequentShaderFiles(expect.ValidObjectFileWithAssemblySubstr):
     """Tests -x hlsl affects several subsequent shader source files."""
 
@@ -83,7 +83,7 @@ class TestFEntryPointAffectsSubsequentShaderFiles(expect.ValidObjectFileWithAsse
     glslc_args = ['-x', 'hlsl', '-fentry-point=EntryPoint', '-c', shader1, shader2]
 
 
-@inside_glslc_testsuite('OptionDashFEntryPoint')
+@inside_glslc_testsuite('OptionFEntryPoint')
 class TestFEntryPointOverridesItself(expect.ValidObjectFileWithAssemblySubstr):
     """Tests that a later -fentry-point option overrides an earlier use."""
 
@@ -92,7 +92,7 @@ class TestFEntryPointOverridesItself(expect.ValidObjectFileWithAssemblySubstr):
                   '-c', shader]
 
 
-@inside_glslc_testsuite('OptionDashFEntryPoint')
+@inside_glslc_testsuite('OptionFEntryPoint')
 class TestFEntryPointDefaultAndTwoOthers(expect.ValidObjectFileWithAssemblySubstr):
     """Tests three shaders with different entry point names. The first uses "main"
     with default entry point processing, and the remaining shaders get their
