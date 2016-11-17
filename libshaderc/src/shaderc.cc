@@ -238,6 +238,20 @@ shaderc_util::Compiler::TargetEnv GetCompilerTargetEnv(shaderc_target_env env) {
   return shaderc_util::Compiler::TargetEnv::Vulkan;
 }
 
+// Returns the Compiler::Limit enum for the given shaderc_limit enum.
+shaderc_util::Compiler::Limit CompilerLimit(shaderc_limit limit) {
+  switch (limit) {
+#define RESOURCE(NAME,FIELD,CNAME) \
+     case shaderc_limit_##CNAME: return shaderc_util::Compiler::Limit::NAME;
+#include "libshaderc_util/resources.inc"
+#undef RESOURCE
+    default:
+      break;
+  }
+  assert(0 && "Should not have reached here");
+  return static_cast<shaderc_util::Compiler::Limit>(0);
+}
+
 }  // anonymous namespace
 
 struct shaderc_compile_options {
@@ -344,6 +358,11 @@ void shaderc_compile_options_set_target_env(shaderc_compile_options_t options,
 void shaderc_compile_options_set_warnings_as_errors(
     shaderc_compile_options_t options) {
   options->compiler.SetWarningsAsErrors();
+}
+
+void shaderc_compile_options_set_limit(
+    shaderc_compile_options_t options, shaderc_limit limit, int value) {
+  options->compiler.SetLimit(CompilerLimit(limit), value);
 }
 
 shaderc_compiler_t shaderc_compiler_initialize() {

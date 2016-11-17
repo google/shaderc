@@ -25,6 +25,7 @@ namespace {
 
 using shaderc_util::Compiler;
 using ::testing::HasSubstr;
+using ::testing::Eq;
 
 // A trivial vertex shader
 const char kVertexShader[] =
@@ -358,6 +359,75 @@ TEST_F(CompilerTest, EntryPointParameterTakesEffectForHLSL) {
   EXPECT_THAT(assembly,
               HasSubstr("OpEntryPoint Vertex %EntryPoint \"EntryPoint\""))
       << assembly;
+}
+
+// A test case for setting resource limits.
+struct SetLimitCase {
+  Compiler::Limit limit;
+  int default_value;
+  int value;
+};
+
+using LimitTest = testing::TestWithParam<SetLimitCase>;
+
+TEST_P(LimitTest, Sample) {
+  Compiler compiler;
+  EXPECT_THAT(compiler.GetLimit(GetParam().limit),
+              Eq(GetParam().default_value));
+  compiler.SetLimit(GetParam().limit, GetParam().value);
+  EXPECT_THAT(compiler.GetLimit(GetParam().limit), Eq(GetParam().value));
+}
+
+#define CASE(LIMIT, DEFAULT, NEW) \
+  { Compiler::Limit::LIMIT, DEFAULT, NEW }
+INSTANTIATE_TEST_CASE_P(
+    CompilerTest, LimitTest,
+    // See resources.cc for the defaults.
+    testing::ValuesIn(std::vector<SetLimitCase>{
+        // clang-format off
+        // This is just a sampling of the possible values.
+        CASE(MaxLights, 8, 99),
+        CASE(MaxClipPlanes, 6, 10929),
+        CASE(MaxTessControlAtomicCounters, 0, 72),
+        CASE(MaxSamples, 4, 8),
+        // clang-format on
+    }), );
+#undef CASE
+
+// Returns a fragment shader accessing a texture with the given
+// offset.
+std::string ShaderWithTexOffset(int offset) {
+  std::ostringstream oss;
+  oss << "#version 150\n"
+         "uniform sampler1D tex;\n"
+         "void main() { vec4 x = textureOffset(tex, 1.0, "
+      << offset << "); }\n";
+  return oss.str();
+}
+
+// Ensure compilation is sensitive to limit setting.  Sample just
+// two particular limits.  The default minimum texel offset is -8,
+// and the default maximum texel offset is 7.
+TEST_F(CompilerTest, TexelOffsetDefaults) {
+  const EShLanguage stage = EShLangFragment;
+  EXPECT_FALSE(SimpleCompilationSucceeds(ShaderWithTexOffset(-9), stage));
+  EXPECT_TRUE(SimpleCompilationSucceeds(ShaderWithTexOffset(-8), stage));
+  EXPECT_TRUE(SimpleCompilationSucceeds(ShaderWithTexOffset(7), stage));
+  EXPECT_FALSE(SimpleCompilationSucceeds(ShaderWithTexOffset(8), stage));
+}
+
+TEST_F(CompilerTest, TexelOffsetLowerTheMinimum) {
+  const EShLanguage stage = EShLangFragment;
+  compiler_.SetLimit(Compiler::Limit::MinProgramTexelOffset, -99);
+  EXPECT_FALSE(SimpleCompilationSucceeds(ShaderWithTexOffset(-100), stage));
+  EXPECT_TRUE(SimpleCompilationSucceeds(ShaderWithTexOffset(-99), stage));
+}
+
+TEST_F(CompilerTest, TexelOffsetRaiseTheMaximum) {
+  const EShLanguage stage = EShLangFragment;
+  compiler_.SetLimit(Compiler::Limit::MaxProgramTexelOffset, 100);
+  EXPECT_TRUE(SimpleCompilationSucceeds(ShaderWithTexOffset(100), stage));
+  EXPECT_FALSE(SimpleCompilationSucceeds(ShaderWithTexOffset(101), stage));
 }
 
 }  // anonymous namespace

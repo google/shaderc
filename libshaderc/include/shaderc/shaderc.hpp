@@ -243,6 +243,11 @@ class CompileOptions {
     shaderc_compile_options_set_warnings_as_errors(options_);
   }
 
+  // Sets a resource limit.
+  void SetLimit(shaderc_limit limit, int value) {
+    shaderc_compile_options_set_limit(options_, limit, value);
+  }
+
  private:
   CompileOptions& operator=(const CompileOptions& other) = delete;
   shaderc_compile_options_t options_;

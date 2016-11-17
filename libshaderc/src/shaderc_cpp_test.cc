@@ -1100,4 +1100,52 @@ TEST(
               HasSubstr("OpEntryPoint Vertex %EntryPoint \"EntryPoint\""));
 }
 
+// Returns a fragment shader accessing a texture with the given
+// offset.
+std::string ShaderWithTexOffset(int offset) {
+  std::ostringstream oss;
+  oss <<
+    "#version 150\n"
+    "uniform sampler1D tex;\n"
+    "void main() { vec4 x = textureOffset(tex, 1.0, " << offset << "); }\n";
+  return oss.str();
+}
+
+// Ensure compilation is sensitive to limit setting.  Sample just
+// two particular limits.
+TEST_F(CppInterface, LimitsTexelOffsetDefault) {
+  EXPECT_FALSE(CompilationSuccess(ShaderWithTexOffset(-9).c_str(),
+                                  shaderc_glsl_fragment_shader,
+                                  options_));
+  EXPECT_TRUE(CompilationSuccess(ShaderWithTexOffset(-8).c_str(),
+                                 shaderc_glsl_fragment_shader,
+                                 options_));
+  EXPECT_TRUE(CompilationSuccess(ShaderWithTexOffset(7).c_str(),
+                                 shaderc_glsl_fragment_shader,
+                                 options_));
+  EXPECT_FALSE(CompilationSuccess(ShaderWithTexOffset(8).c_str(),
+                                  shaderc_glsl_fragment_shader,
+                                  options_));
+}
+
+TEST_F(CppInterface, LimitsTexelOffsetLowerMinimum) {
+  options_.SetLimit(shaderc_limit_min_program_texel_offset, -99);
+  EXPECT_FALSE(CompilationSuccess(ShaderWithTexOffset(-100).c_str(),
+                                  shaderc_glsl_fragment_shader,
+                                  options_));
+  EXPECT_TRUE(CompilationSuccess(ShaderWithTexOffset(-99).c_str(),
+                                 shaderc_glsl_fragment_shader,
+                                 options_));
+}
+
+TEST_F(CppInterface, LimitsTexelOffsetHigherMaximum) {
+  options_.SetLimit(shaderc_limit_max_program_texel_offset, 10);
+  EXPECT_TRUE(CompilationSuccess(ShaderWithTexOffset(10).c_str(),
+                                 shaderc_glsl_fragment_shader,
+                                 options_));
+  EXPECT_FALSE(CompilationSuccess(ShaderWithTexOffset(11).c_str(),
+                                  shaderc_glsl_fragment_shader,
+                                  options_));
+}
+
 }  // anonymous namespace

@@ -26,6 +26,7 @@
 #include "counting_includer.h"
 #include "file_finder.h"
 #include "mutex.h"
+#include "resources.h"
 #include "string_piece.h"
 
 namespace shaderc_util {
@@ -117,6 +118,13 @@ class Compiler {
     Size,  // Optimization towards reducing code size.
   };
 
+  // Resource limits.  These map to the "max*" fields in glslang::TBuiltInResource.
+  enum class Limit {
+#define RESOURCE(NAME,FIELD,CNAME) NAME,
+#include "resources.inc"
+#undef RESOURCE
+  };
+
   // Creates an default compiler instance targeting at Vulkan environment. Uses
   // version 110 and no profile specification as the default for GLSL.
   Compiler()
@@ -130,7 +138,8 @@ class Compiler {
         generate_debug_info_(false),
         enabled_opt_passes_(),
         target_env_(TargetEnv::Vulkan),
-        source_language_(SourceLanguage::GLSL) {}
+        source_language_(SourceLanguage::GLSL),
+        limits_(kDefaultTBuiltInResource) {}
 
   // Requests that the compiler place debug information into the object code,
   // such as identifier names and line numbers.
@@ -163,14 +172,19 @@ class Compiler {
   // subsequent CompileShader() calls.
   void SetForcedVersionProfile(int version, EProfile profile);
 
+  // Sets a resource limit.
+  void SetLimit(Limit limit, int value);
+
+  // Returns the current limit.
+  int GetLimit(Limit limit) const;
+
   // Compiles the shader source in the input_source_string parameter.
   //
   // If the forced_shader stage parameter is not EShLangCount then
   // the shader is assumed to be of the given stage.
   //
   // For HLSL compilation, entry_point_name is the null-terminated string for
-  // the
-  // entry point.  For GLSL compilation, entry_point_name is ignored, and
+  // the entry point.  For GLSL compilation, entry_point_name is ignored, and
   // compilation assumes the entry point is named "main".
   //
   // The stage_callback function will be called if a shader_stage has
@@ -310,6 +324,9 @@ class Compiler {
 
   // The source language.  Defaults to GLSL.
   SourceLanguage source_language_;
+
+  // The resource limits to be used.
+  TBuiltInResource limits_;
 };
 
 // Converts a string to a vector of uint32_t by copying the content of a given

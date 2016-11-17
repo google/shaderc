@@ -91,6 +91,29 @@ EShMessages GetMessageRules(shaderc_util::Compiler::TargetEnv env,
 }  // anonymous namespace
 
 namespace shaderc_util {
+
+void Compiler::SetLimit(Compiler::Limit limit, int value) {
+  switch (limit) {
+#define RESOURCE(NAME, FIELD, CNAME) \
+  case Limit::NAME:                  \
+    limits_.FIELD = value;           \
+    break;
+#include "libshaderc_util/resources.inc"
+#undef RESOURCE
+  }
+}
+
+int Compiler::GetLimit(Compiler::Limit limit) const {
+  switch (limit) {
+#define RESOURCE(NAME, FIELD, CNAME) \
+  case Limit::NAME:                  \
+    return limits_.FIELD;
+#include "libshaderc_util/resources.inc"
+#undef RESOURCE
+  }
+  return 0;  // Unreachable
+}
+
 std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
     const string_piece& input_source_string, EShLanguage forced_shader_stage,
     const std::string& error_tag, const char* entry_point_name,
@@ -183,10 +206,10 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   shader.setEntryPoint(entry_point_name);
 
   // TODO(dneto): Generate source-level debug info if requested.
-  bool success = shader.parse(
-      &shaderc_util::kDefaultTBuiltInResource, default_version_,
-      default_profile_, force_version_profile_, kNotForwardCompatible,
-      GetMessageRules(target_env_, source_language_), includer);
+  bool success =
+      shader.parse(&limits_, default_version_, default_profile_,
+                   force_version_profile_, kNotForwardCompatible,
+                   GetMessageRules(target_env_, source_language_), includer);
 
   success &= PrintFilteredErrors(error_tag, error_stream, warnings_as_errors_,
                                  suppress_warnings_, shader.getInfoLog(),
@@ -306,9 +329,8 @@ std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
 
   std::string preprocessed_shader;
   const bool success = shader.preprocess(
-      &shaderc_util::kDefaultTBuiltInResource, default_version_,
-      default_profile_, force_version_profile_, kNotForwardCompatible, rules,
-      &preprocessed_shader, includer);
+      &limits_, default_version_, default_profile_, force_version_profile_,
+      kNotForwardCompatible, rules, &preprocessed_shader, includer);
 
   if (success) {
     return std::make_tuple(true, preprocessed_shader, shader.getInfoLog());

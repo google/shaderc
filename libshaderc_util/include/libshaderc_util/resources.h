@@ -15,9 +15,12 @@
 #ifndef LIBSHADERC_UTIL_RESOURCES_H_
 #define LIBSHADERC_UTIL_RESOURCES_H_
 
-struct TBuiltInResource;
+// We want TBuiltInResource
+#include "glslang/Include/ResourceLimits.h"
 
 namespace shaderc_util {
+
+using TBuiltInResource = ::TBuiltInResource;
 
 // A set of suitable defaults.
 extern const TBuiltInResource kDefaultTBuiltInResource;
