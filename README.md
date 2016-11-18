@@ -22,7 +22,9 @@ to provide:
 
 ## Status
 
-Shaderc is approaching maturity, but is still subject to incompatible changes.
+Shaderc has maintained backward compatibility for quite some time, and we
+don't anticipate any breaking changes.
+Ongoing enhancements are described in the [CHANGES](CHANGES) file.
 
 Shaderc has been shipping in the
 [Android NDK](https://developer.android.com/ndk/index.html) since version r12b.

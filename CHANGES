@@ -1,6 +1,7 @@
 Revision history for Shaderc
 
 v2016.2-dev 2016-10-12
+ - Describe Shaderc's level of stability.
  - Support HLSL compilation, exposing functionality in Glslang.
    - Supported in C, C++ API
    - glslc accepts "-x hlsl", and assumes .hlsl files are HLSL.
