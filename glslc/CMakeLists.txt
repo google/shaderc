@@ -10,7 +10,6 @@ add_library(glslc STATIC
   src/resource_parse.h
   src/resource_parse.cc
   src/shader_stage.cc
-  src/shader_stage.cc
   src/shader_stage.h
   src/dependency_info.cc
   src/dependency_info.h

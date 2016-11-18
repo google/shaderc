@@ -75,18 +75,18 @@ bool ParseResourceSettings(const std::string& input,
     bool ignore = IgnoreSetting(limit_name);
     if (!ignore) {
       if (!StringToLimit(limit_name, &limit))
-        return failure(std::string("Invalid resource limit: " + limit_name));
+        return failure(std::string("invalid resource limit: " + limit_name));
     }
 
     if (pos == std::istream_iterator<std::string>())
-      return failure(std::string("Missing value after limit: ") + limit_name);
+      return failure(std::string("missing value after limit: ") + limit_name);
 
     const std::string value_str = *pos;
     int value;
     std::istringstream value_stream(value_str);
     value_stream >> value;
     if (value_stream.bad() || !value_stream.eof() || value_stream.fail())
-      return failure(std::string("Invalid integer: ") + value_str);
+      return failure(std::string("invalid integer: ") + value_str);
 
     if (!ignore) limits->push_back({limit, value});
     ++pos;
