@@ -201,7 +201,7 @@ int main(int argc, char** argv) {
       std::string err;
       if (!SetResourceLimits(arg.substr(std::strlen("-flimit=")).str(),
                              &compiler.options(), &err)) {
-        std::cerr << "glslc: -flimit error: " << err << std::endl;
+        std::cerr << "glslc: error: -flimit error: " << err << std::endl;
         return 1;
       }
     } else if (arg.starts_with("-flimit-file")) {
@@ -214,7 +214,7 @@ int main(int argc, char** argv) {
       }
       std::vector<char> contents;
       if (!shaderc_util::ReadFile(limits_file.str(), &contents)) {
-        std::cerr << "glslc: Can't read limits file: " << limits_file
+        std::cerr << "glslc: cannot read limits file: " << limits_file
                   << std::endl;
         return 1;
       }
@@ -222,7 +222,7 @@ int main(int argc, char** argv) {
               string_piece(contents.data(), contents.data() + contents.size())
                   .str(),
               &compiler.options(), &err)) {
-        std::cerr << "glslc: -flimit-file error: " << err << std::endl;
+        std::cerr << "glslc: error: -flimit-file error: " << err << std::endl;
         return 1;
       }
     } else if (arg.starts_with("-std=")) {

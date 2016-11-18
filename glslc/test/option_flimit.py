@@ -13,17 +13,23 @@
 # limitations under the License.
 
 import expect
+from environment import File, Directory
 from glslc_test_framework import inside_glslc_testsuite
 from placeholder import FileShader
+
+
+def shader_source_with_tex_offset(offset):
+    """Returns a vertex shader using a texture access with the given offset."""
+
+    return """#version 150
+              uniform sampler1D tex;
+              void main() { vec4 x = textureOffset(tex, 1.0, """ + str(offset) + "); }"
 
 
 def shader_with_tex_offset(offset):
     """Returns a vertex FileShader using a texture access with the given offset."""
 
-    source = """#version 150
-              uniform sampler1D tex;
-              void main() { vec4 x = textureOffset(tex, 1.0, """ + str(offset) + "); }"
-    return FileShader(source, ".vert")
+    return FileShader(shader_source_with_tex_offset(offset), ".vert")
 
 
 @inside_glslc_testsuite('OptionFLimit')
@@ -101,26 +107,31 @@ class TestFLimitFileNoArg(expect.ErrorMessage):
 
 
 @inside_glslc_testsuite('OptionFLimitFile')
-class TestFLimitFileSetsLowerMinTexelOffset(expect.SuccessfulReturn,
-                                            expect.CorrectObjectFilePreamble):
+class TestFLimitFileMissingFile(expect.ErrorMessageSubstr):
+    """Tests -flimit-file without an argument"""
+
+    shader = shader_with_tex_offset(-9);
+    glslc_args = ['-c', shader, '-flimit-file', 'i do not exist']
+    expected_error_substr = "glslc: error: cannot open input file: 'i do not exist'";
+
+
+@inside_glslc_testsuite('OptionFLimitFile')
+class TestFLimitFileSetsLowerMinTexelOffset(expect.ValidObjectFile):
     """Tests -flimit-file with lower than default argument.  The shader uses that offset."""
 
-    limits_file = FileShader('MinProgramTexelOffset -9', '.txt')
-    shader = shader_with_tex_offset(-9);
-    glslc_args = [ '-c', shader, '-flimit-file', limits_file ]
-
-    # We don't want to treat the limits_file as if it has a corresponding .spv output
-    # So we need a custom check.
-    def check_object_file(self, status):
-        output_name = status.input_filenames[0] + ".spv"
-        return self.verify_object_file_preamble(output_name)
+    limits_file = File('limits.txt', 'MinProgramTexelOffset -9')
+    shader = File('shader.vert', shader_source_with_tex_offset(-9));
+    environment = Directory('.', [limits_file, shader])
+    print("sHHHH is: " + shader.name)
+    glslc_args = ['-c', shader.name, '-flimit-file', limits_file.name]
 
 
 @inside_glslc_testsuite('OptionFLimitFile')
 class TestFLimitFileInvalidContents(expect.ErrorMessage):
     """Tests -flimit-file bad file contents."""
 
-    limits_file = FileShader('thisIsBad', '.txt')
-    shader = shader_with_tex_offset(-9);
-    glslc_args = ['-c', shader, '-flimit-file', limits_file]
-    expected_error = 'glslc: -flimit-file error: Invalid resource limit: thisIsBad\n'
+    limits_file = File('limits.txt', 'thisIsBad')
+    shader = File('shader.vert', shader_source_with_tex_offset(-9));
+    environment = Directory('.', [limits_file, shader])
+    glslc_args = ['-c', shader.name, '-flimit-file', limits_file.name]
+    expected_error = 'glslc: error: -flimit-file error: invalid resource limit: thisIsBad\n'
