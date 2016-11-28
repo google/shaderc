@@ -20,7 +20,8 @@ MINIMAL_SHADER = "#version 140\nvoid main(){}"
 # This one is valid GLSL but not valid HLSL.
 GLSL_VERTEX_SHADER = "#version 140\nvoid main(){ gl_Position = vec4(1.0);}"
 # This one is valid HLSL but not valid GLSL.
-HLSL_VERTEX_SHADER = "float4 EntryPoint() : SV_POSITION { return float4(1.0); }"
+# Use entry point "main" so we don't have to specify -fentry-point
+HLSL_VERTEX_SHADER = "float4 main() : SV_POSITION { return float4(1.0); }"
 
 @inside_glslc_testsuite('OptionDashX')
 class TestDashXNoArg(expect.ErrorMessage):

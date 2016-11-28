@@ -58,17 +58,21 @@ class TestFEntryPointMainOnGlslShader(expect.ValidAssemblyFileWithSubstr):
 
 
 @inside_glslc_testsuite('OptionFEntryPoint')
-class TestFEntryPointMainOnHlslShader(expect.ValidAssemblyFileWithSubstr):
-    """Tests -x hlsl on an HLSL shader with -fentry-point=main and -S."""
+class TestFEntryPointMainOnHlslShaderNotMatchingSource(expect.ValidObjectFileWithWarning):
+    """Tests -x hlsl on an HLSL shader with -fentry-point=main
+    not matching the source."""
 
     shader = FileShader(HLSL_VERTEX_SHADER, '.vert')
-    glslc_args = ['-x', 'hlsl', '-fentry-point=main', '-S', shader]
-    expected_assembly_substr = ASSEMBLY_MAIN
+    glslc_args = ['-x', 'hlsl', '-fentry-point=main', '-c', shader]
+    expected_warning = [shader,
+                        ': warning: Linking vertex stage: Entry point not found\n'
+                        '1 warning generated.\n']
 
 
 @inside_glslc_testsuite('OptionFEntryPoint')
 class TestFEntryPointSpecifiedOnHlslShaderInDisassembly(expect.ValidObjectFileWithAssemblySubstr):
-    """Tests -x hlsl on an HLSL shader with -fentry-point=EntryPoint."""
+    """Tests -x hlsl on an HLSL shader with -fentry-point=EntryPoint
+    matching source."""
 
     shader = FileShader(HLSL_VERTEX_SHADER, '.vert', assembly_substr=ASSEMBLY_ENTRY_POINT)
     glslc_args = ['-x', 'hlsl', '-fentry-point=EntryPoint', '-c', shader]

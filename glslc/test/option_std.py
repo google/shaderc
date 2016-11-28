@@ -29,7 +29,8 @@ def core_frag_shader_without_version():
 
 
 def hlsl_compute_shader_with_barriers():
-    return 'void Entry() { AllMemoryBarrierWithGroupSync(); }'
+    # Use "main" to avoid the need for -fentry-point
+    return 'void main() { AllMemoryBarrierWithGroupSync(); }'
 
 
 @inside_glslc_testsuite('OptionStd')

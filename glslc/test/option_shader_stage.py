@@ -25,7 +25,8 @@ def simple_vertex_shader():
 
 
 def simple_hlsl_vertex_shader():
-    return """float4 EntryPoint() : SV_POSITION { return float4(1.0); } """
+    # Use "main" so we don't have to specify -fentry-point
+    return """float4 main() : SV_POSITION { return float4(1.0); } """
 
 
 def simple_fragment_shader():
