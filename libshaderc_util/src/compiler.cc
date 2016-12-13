@@ -230,6 +230,14 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   // Note the call to GlslangToSpv also populates compilation_output_data.
   glslang::GlslangToSpv(*program.getIntermediate(used_shader_stage), spirv);
 
+  // Set the tool field (the top 16-bits) in the generator word to
+  // 'Shaderc over Glslang'.
+  const uint32_t shaderc_generator_word = 13; // From SPIR-V XML Registry
+  const uint32_t generator_word_index = 2; // SPIR-V 2.3: Physical layout
+  assert(spirv.size() > generator_word_index);
+  spirv[generator_word_index] =
+      (spirv[generator_word_index] & 0xffff) | (shaderc_generator_word << 16);
+
   if (!enabled_opt_passes_.empty()) {
     std::string opt_errors;
     if (!SpirvToolsOptimize(target_env_, enabled_opt_passes_, &spirv,

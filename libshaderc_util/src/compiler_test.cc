@@ -128,6 +128,25 @@ class CompilerTest : public testing::Test {
         source, stage, Compiler::OutputType::SpirvBinary);
   }
 
+  // Returns the SPIR-V binary for a successful compilation of a shader.
+  std::vector<uint32_t> SimpleCompilationBinary(std::string source,
+                                                EShLanguage stage) {
+    std::stringstream errors;
+    size_t total_warnings = 0;
+    size_t total_errors = 0;
+    shaderc_util::GlslangInitializer initializer;
+    bool result = false;
+    DummyCountingIncluder dummy_includer;
+    std::vector<uint32_t> words;
+    std::tie(result, words, std::ignore) = compiler_.Compile(
+        source, stage, "shader", "main", dummy_stage_callback_, dummy_includer,
+        Compiler::OutputType::SpirvBinary, &errors, &total_warnings,
+        &total_errors, &initializer);
+    errors_ = errors.str();
+    EXPECT_TRUE(result);
+    return words;
+  }
+
  protected:
   Compiler compiler_;
   // The error string from the most recent compilation.
@@ -428,6 +447,13 @@ TEST_F(CompilerTest, TexelOffsetRaiseTheMaximum) {
   compiler_.SetLimit(Compiler::Limit::MaxProgramTexelOffset, 100);
   EXPECT_TRUE(SimpleCompilationSucceeds(ShaderWithTexOffset(100), stage));
   EXPECT_FALSE(SimpleCompilationSucceeds(ShaderWithTexOffset(101), stage));
+}
+
+TEST_F(CompilerTest, GeneratorWordIsShadercOverGlslang) {
+  const auto words = SimpleCompilationBinary(kVertexShader, EShLangVertex);
+  const uint32_t shaderc_over_glslang = 13; // From SPIR-V XML Registry
+  const uint32_t generator_word_index = 2; // From SPIR-V binary layout
+  EXPECT_EQ(shaderc_over_glslang, words[generator_word_index] >> 16u);
 }
 
 }  // anonymous namespace
