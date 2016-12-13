@@ -9,7 +9,7 @@ GLSLANG_DEFINES:= -DAMD_EXTENSIONS $(GLSLANG_OS_FLAGS)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE:=SPIRV
-LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti $(GLSLANG_DEFINES)
+LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti -Werror $(GLSLANG_DEFINES)
 LOCAL_EXPORT_C_INCLUDES:=$(GLSLANG_LOCAL_PATH)
 LOCAL_SRC_FILES:= \
 	SPIRV/GlslangToSpv.cpp \
@@ -183,7 +183,7 @@ LOCAL_C_INCLUDES := \
 		$(SPVTOOLS_OUT_PATH)
 LOCAL_EXPORT_C_INCLUDES := \
 		$(SPVTOOLS_LOCAL_PATH)/include
-LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti
+LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti -Werror
 LOCAL_SRC_FILES:= \
 		source/assembly_grammar.cpp \
 		source/binary.cpp \
@@ -222,7 +222,7 @@ LOCAL_C_INCLUDES := \
 		$(SPVTOOLS_LOCAL_PATH)/include \
 		$(SPVTOOLS_LOCAL_PATH)/source \
 		$(SPVTOOLS_LOCAL_PATH)/external/spirv-headers/include
-LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti
+LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti -Werror
 LOCAL_STATIC_LIBRARIES:=SPIRV-Tools
 LOCAL_SRC_FILES:= \
 		source/opt/build_module.cpp \
