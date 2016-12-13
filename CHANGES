@@ -1,6 +1,6 @@
 Revision history for Shaderc
 
-v2016.2-dev 2016-10-12
+v2016.2 2016-12-13
  - Describe Shaderc's level of stability.
  - Support HLSL compilation, exposing functionality in Glslang.
    - Supported in C, C++ API
@@ -14,6 +14,10 @@ v2016.2-dev 2016-10-12
      limit syntax.
    - glslc adds "-flimit-file <file>" support to read Glslang resource
      configuration files, i.e. the output of "glslangValidator -c".
+ - Enable AMD extensions by default in GLSL compilation
+ - Fixes issues:
+   #281: Work around Android build issue with abspath on Windows
+   #283: Increase default maxDrawBuffers to 4, to match Vulkan/GLES3.0
 
 v2016.1 2016-10-12
  - C API for assembling now takes an options object
