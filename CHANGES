@@ -1,5 +1,7 @@
 Revision history for Shaderc
 
+v2016.3-dev 2016-12-13
+
 v2016.2 2016-12-13
  - Describe Shaderc's level of stability.
  - Support HLSL compilation, exposing functionality in Glslang.
