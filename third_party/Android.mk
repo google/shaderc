@@ -161,6 +161,19 @@ $(SPVTOOLS_LOCAL_PATH)/source/software_version.cpp: $(1)/build-version.inc
 endef
 $(eval $(call gen_spvtools_build_version_inc,$(SPVTOOLS_OUT_PATH)))
 
+define gen_spvtools_generators_inc
+$(call generate-file-dir,$(1)/dummy_filename)
+$(1)/generators.inc: \
+        $(SPVTOOLS_LOCAL_PATH)/utils/generate_registry_tables.py \
+        $(SPVHEADERS_LOCAL_PATH)/include/spirv/spir-v.xml
+		@$(HOST_PYTHON) $(SPVTOOLS_LOCAL_PATH)/utils/generate_registry_tables.py \
+		                --xml=$(SPVHEADERS_LOCAL_PATH)/include/spirv/spir-v.xml \
+				--generator-output=$(1)/generators.inc
+		@echo "[$(TARGET_ARCH_ABI)] Generate       : generators.inc <= spir-v.xml"
+$(SPVTOOLS_LOCAL_PATH)/source/opcode.cpp: $(1)/generators.inc
+endef
+$(eval $(call gen_spvtools_generators_inc,$(SPVTOOLS_OUT_PATH)))
+
 include $(CLEAR_VARS)
 LOCAL_MODULE := SPIRV-Tools
 LOCAL_C_INCLUDES := \
