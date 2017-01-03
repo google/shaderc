@@ -90,13 +90,13 @@ bool ReadFile(const std::string& input_file_name,
 }
 
 std::ostream* GetOutputStream(const string_piece& output_filename,
-                              std::ofstream* file_stream) {
+                              std::ofstream* file_stream, std::ostream* err) {
   std::ostream* stream = &std::cout;
   if (output_filename != "-") {
     file_stream->open(output_filename.str(), std::ios_base::binary);
     stream = file_stream;
     if (file_stream->fail()) {
-      std::cerr << "glslc: error: cannot open output file: '" << output_filename
+      *err << "glslc: error: cannot open output file: '" << output_filename
                 << "'";
       if (access(output_filename.str().c_str(), W_OK) != 0) {
         OutputFileErrorMessage(errno);

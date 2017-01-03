@@ -73,7 +73,7 @@ bool FileCompiler::CompileShaderFile(const InputFileSpec& input_file) {
 
   std::ofstream potential_file_stream;
   std::ostream* output_stream =
-      shaderc_util::GetOutputStream(output_name, &potential_file_stream);
+      shaderc_util::GetOutputStream(output_name, &potential_file_stream, &std::cerr);
   if (!output_stream) {
     // An error message has already been emitted to the stderr stream.
     return false;

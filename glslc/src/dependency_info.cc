@@ -49,7 +49,7 @@ bool DependencyInfoDumpingHandler::DumpDependencyInfo(
   } else if (mode_ == dump_as_extra_file) {
     std::ofstream potential_file_stream_for_dep_info_dump;
     std::ostream* dep_file_stream = shaderc_util::GetOutputStream(
-        dep_file_name, &potential_file_stream_for_dep_info_dump);
+        dep_file_name, &potential_file_stream_for_dep_info_dump, &std::cerr);
     *dep_file_stream << dep_string_stream.str();
     if (dep_file_stream->fail()) {
       std::cerr << "glslc: error: error writing dependent_files info to output "

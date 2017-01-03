@@ -25,6 +25,8 @@ using shaderc_util::ReadFile;
 using shaderc_util::WriteFile;
 using shaderc_util::GetOutputStream;
 using shaderc_util::GetBaseFileName;
+using testing::Eq;
+using testing::HasSubstr;
 
 std::string ToString(const std::vector<char>& v) {
   return std::string(v.data(), v.size());
@@ -105,18 +107,23 @@ TEST_F(ReadFileTest, EmptyFilename) { EXPECT_FALSE(ReadFile("", &read_data)); }
 
 TEST(WriteFiletest, BadStream) {
   std::ofstream fstream;
+  std::ostringstream err;
   std::ostream* output_stream = GetOutputStream(
-      "/this/should/not/be/writable/asdfasdfasdfasdf", &fstream);
+      "/this/should/not/be/writable/asdfasdfasdfasdf", &fstream, &err);
   EXPECT_EQ(nullptr, output_stream);
   EXPECT_TRUE(fstream.fail());
+  EXPECT_EQ(nullptr, output_stream);
+  EXPECT_THAT(err.str(), HasSubstr("cannot open output file"));
 }
 
 TEST(WriteFileTest, Roundtrip) {
   const std::string content = "random content 12345";
   const std::string filename = "WriteFileTestOutput.tmp";
   std::ofstream fstream;
-  std::ostream* output_stream = GetOutputStream(filename, &fstream);
+  std::ostringstream err;
+  std::ostream* output_stream = GetOutputStream(filename, &fstream, &err);
   ASSERT_EQ(output_stream, &fstream);
+  EXPECT_THAT(err.str(), Eq(""));
   ASSERT_TRUE(WriteFile(output_stream, content));
   std::vector<char> read_data;
   ASSERT_TRUE(ReadFile(filename, &read_data));
@@ -125,7 +132,9 @@ TEST(WriteFileTest, Roundtrip) {
 
 TEST(OutputStreamTest, Stdout) {
   std::ofstream fstream;
-  std::ostream* output_stream = GetOutputStream("-", &fstream);
+  std::ostringstream err;
+  std::ostream* output_stream = GetOutputStream("-", &fstream, &err);
   EXPECT_EQ(&std::cout, output_stream);
+  EXPECT_THAT(err.str(), Eq(""));
 }
 }  // anonymous namespace
