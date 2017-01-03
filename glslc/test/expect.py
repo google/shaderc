@@ -537,3 +537,31 @@ class StdoutNoWiderThan80Columns(GlslCTest):
                     return False, ('Stdout line longer than 80 columns: %s'
                                    % line)
         return True, ''
+
+
+class NoObjectFile(GlslCTest):
+    """Mixin class for checking that no input file has a corresponding object
+    file."""
+
+    def check_no_object_file(self, status):
+        for input_filename in status.input_filenames:
+            object_filename = get_object_filename(input_filename)
+            full_object_file = os.path.join(status.directory, object_filename)
+            print("checking %s" % full_object_file)
+            if os.path.isfile(full_object_file):
+                return False, ('Expected no object file, but found: %s'
+                               % full_object_file)
+        return True, ''
+
+
+class NoNamedOutputFiles(GlslCTest):
+    """Mixin class for checking that no specified output files exist.
+
+    The expected_output_filenames member should be full pathnames."""
+
+    def check_no_named_output_files(self, status):
+        for object_filename in self.expected_output_filenames:
+            if os.path.isfile(object_filename):
+                return False, ('Expected no output file, but found: %s'
+                               % object_filename)
+        return True, ''

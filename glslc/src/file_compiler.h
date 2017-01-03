@@ -136,16 +136,16 @@ class FileCompiler {
   };
 
   // Emits the compilation output from the given result to the given output
-  // stream and returns true if the result represents a successful compilation
-  // step.  Otherwise returns false and possibly emits messages to the standard
-  // error stream.  Accumulates error and warning counts for use by the
-  // OutputMessages() method.
+  // file and returns true if the result represents a successful compilation
+  // step.  Otherwise returns false, possibly emits messages to the standard
+  // error stream, and does not produce an output file.  Accumulates error
+  // and warning counts for use by the OutputMessages() method.
   template <typename CompilationResultType>
   bool EmitCompiledResult(
       const CompilationResultType& result, const std::string& input_file_name,
+      const std::string& output_file_name,
       shaderc_util::string_piece error_file_name,
-      const std::unordered_set<std::string>& used_source_files,
-      std::ostream* out);
+      const std::unordered_set<std::string>& used_source_files);
 
   // Returns the final file name to be used for the output file.
   //

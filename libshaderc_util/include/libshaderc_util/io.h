@@ -51,8 +51,7 @@ bool ReadFile(const std::string& input_file_name,
 // not be opened for writing.  If the output refers to a file, and the open
 // failed for writing, file_stream is left with its fail_bit set.
 std::ostream* GetOutputStream(const string_piece& output_filename,
-                              std::ofstream* file_stream,
-                              std::ostream* err);
+                              std::ofstream* file_stream, std::ostream* err);
 
 // Writes output_data to a file, overwriting if it exists.  If output_file_name
 // is "-", writes to std::cout.

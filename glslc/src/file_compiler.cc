@@ -69,15 +69,7 @@ bool FileCompiler::CompileShaderFile(const InputFileSpec& input_file) {
     return false;
   }
 
-  std::string output_name = GetOutputFileName(input_file.name);
-
-  std::ofstream potential_file_stream;
-  std::ostream* output_stream =
-      shaderc_util::GetOutputStream(output_name, &potential_file_stream, &std::cerr);
-  if (!output_stream) {
-    // An error message has already been emitted to the stderr stream.
-    return false;
-  }
+  std::string output_file_name = GetOutputFileName(input_file.name);
   string_piece error_file_name = input_file.name;
 
   if (error_file_name == "-") {
@@ -103,8 +95,8 @@ bool FileCompiler::CompileShaderFile(const InputFileSpec& input_file) {
     if (output_type_ == OutputType::SpirvBinary) {
       const auto result =
           compiler_.AssembleToSpv(source_string.data(), source_string.size());
-      return EmitCompiledResult(result, input_file.name, error_file_name,
-                                used_source_files, output_stream);
+      return EmitCompiledResult(result, input_file.name, output_file_name,
+                                error_file_name, used_source_files);
     } else {
       return true;
     }
@@ -121,23 +113,23 @@ bool FileCompiler::CompileShaderFile(const InputFileSpec& input_file) {
           source_string.data(), source_string.size(), input_file.stage,
           error_file_name.data(), input_file.entry_point_name.c_str(),
           options_);
-      return EmitCompiledResult(result, input_file.name, error_file_name,
-                                used_source_files, output_stream);
+      return EmitCompiledResult(result, input_file.name, output_file_name,
+                                error_file_name, used_source_files);
     }
     case OutputType::SpirvAssemblyText: {
       const auto result = compiler_.CompileGlslToSpvAssembly(
           source_string.data(), source_string.size(), input_file.stage,
           error_file_name.data(), input_file.entry_point_name.c_str(),
           options_);
-      return EmitCompiledResult(result, input_file.name, error_file_name,
-                                used_source_files, output_stream);
+      return EmitCompiledResult(result, input_file.name, output_file_name,
+                                error_file_name, used_source_files);
     }
     case OutputType::PreprocessedText: {
       const auto result = compiler_.PreprocessGlsl(
           source_string.data(), source_string.size(), input_file.stage,
           error_file_name.data(), options_);
-      return EmitCompiledResult(result, input_file.name, error_file_name,
-                                used_source_files, output_stream);
+      return EmitCompiledResult(result, input_file.name, output_file_name,
+                                error_file_name, used_source_files);
     }
   }
   return false;
@@ -146,9 +138,8 @@ bool FileCompiler::CompileShaderFile(const InputFileSpec& input_file) {
 template <typename CompilationResultType>
 bool FileCompiler::EmitCompiledResult(
     const CompilationResultType& result, const std::string& input_file,
-    string_piece error_file_name,
-    const std::unordered_set<std::string>& used_source_files,
-    std::ostream* out) {
+    const std::string& output_file_name, string_piece error_file_name,
+    const std::unordered_set<std::string>& used_source_files) {
   total_errors_ += result.GetNumErrors();
   total_warnings_ += result.GetNumWarnings();
 
@@ -207,43 +198,54 @@ bool FileCompiler::EmitCompiledResult(
     }
   }
 
-  // Write compilation output to output file. If an output format for SPIR-V
-  // binary code is specified, it is handled here.
-  switch (binary_emission_format_) {
-    case SpirvBinaryEmissionFormat::Unspecified:
-    case SpirvBinaryEmissionFormat::Binary:
-      // The output format is unspecified or specified as binary output.
-      out->write(compilation_output.data(), compilation_output.size());
-      break;
-    case SpirvBinaryEmissionFormat::Numbers:
-      // The output format is specified to be a list of hex numbers, the
-      // compilation output must be in SPIR-V binary code form.
-      assert(output_type_ == OutputType::SpirvBinary);
-      if (EmitSpirvBinaryAsCommaSeparatedNumbers(result, out)) {
-        // Only emits the end-of-line character when the emitted compilation
-        // result is not empty.
-        *out << std::endl;
-      }
-      break;
-    case SpirvBinaryEmissionFormat::CInitList:
-      // The output format is specified to be a C-style initializer list, the
-      // compilation output must be in SPIR-V binary code form.
-      assert(output_type_ == OutputType::SpirvBinary);
-      if (result.begin() != result.end()) {
-        // Only emits the '{' when the compilation result is not empty.
-        *out << "{";
-      }
-      if (EmitSpirvBinaryAsCommaSeparatedNumbers(result, out)) {
-        // Only emits the end-of-line character when the emitted compilation
-        // result is not empty.
-        *out << "}" << std::endl;
-      }
-      break;
+  std::ostream* out = nullptr;
+  std::ofstream potential_file_stream;
+  if (compilation_success) {
+    out = shaderc_util::GetOutputStream(output_file_name,
+                                        &potential_file_stream, &std::cerr);
+    if (!out || out->fail()) {
+      // An error message has already been emitted to the stderr stream.
+      return false;
+    }
+
+    // Write compilation output to output file. If an output format for SPIR-V
+    // binary code is specified, it is handled here.
+    switch (binary_emission_format_) {
+      case SpirvBinaryEmissionFormat::Unspecified:
+      case SpirvBinaryEmissionFormat::Binary:
+        // The output format is unspecified or specified as binary output.
+        out->write(compilation_output.data(), compilation_output.size());
+        break;
+      case SpirvBinaryEmissionFormat::Numbers:
+        // The output format is specified to be a list of hex numbers, the
+        // compilation output must be in SPIR-V binary code form.
+        assert(output_type_ == OutputType::SpirvBinary);
+        if (EmitSpirvBinaryAsCommaSeparatedNumbers(result, out)) {
+          // Only emits the end-of-line character when the emitted compilation
+          // result is not empty.
+          *out << std::endl;
+        }
+        break;
+      case SpirvBinaryEmissionFormat::CInitList:
+        // The output format is specified to be a C-style initializer list, the
+        // compilation output must be in SPIR-V binary code form.
+        assert(output_type_ == OutputType::SpirvBinary);
+        if (result.begin() != result.end()) {
+          // Only emits the '{' when the compilation result is not empty.
+          *out << "{";
+        }
+        if (EmitSpirvBinaryAsCommaSeparatedNumbers(result, out)) {
+          // Only emits the end-of-line character when the emitted compilation
+          // result is not empty.
+          *out << "}" << std::endl;
+        }
+        break;
+    }
   }
 
   // Write error message to std::cerr.
   std::cerr << result.GetErrorMessage();
-  if (out->fail()) {
+  if (out && out->fail()) {
     // Something wrong happened on output.
     if (out == &std::cout) {
       std::cerr << "glslc: error: error writing to standard output"

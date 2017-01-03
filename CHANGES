@@ -1,6 +1,8 @@
 Revision history for Shaderc
 
-v2016.3-dev 2016-12-13
+v2017.1-dev 2017-01-02
+ - Fixes issues:
+   #289: Don't output an object file when compilation fails.
 
 v2016.2 2016-12-13
  - Describe Shaderc's level of stability.
