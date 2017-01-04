@@ -58,7 +58,11 @@ def deduce_software_version(directory):
     The CHANGES file describes most recent versions first.
     """
 
-    pattern = re.compile(r'(v\d+\.\d+(-dev)?) \d\d\d\d-\d\d-\d\d$')
+    # Match the first well-formed version-and-date line.
+    # Allow trailing whitespace in the checked-out source code has
+    # unexpected carriage returns on a linefeed-only system such as
+    # Linux.
+    pattern = re.compile(r'^(v\d+\.\d+(-dev)?) \d\d\d\d-\d\d-\d\d\s*$')
     changes_file = os.path.join(directory, 'CHANGES')
     with open(changes_file) as f:
         for line in f.readlines():
