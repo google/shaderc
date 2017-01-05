@@ -309,7 +309,7 @@ class TestDashCapMSingleInputAbsolutePathWithIncludeSubdir(
     environment = Directory('.', [
         Directory('include', [File('b.vert', 'void foo(){}\n')]),
     ])
-    shader_main = FileShader('#version 140\n#include "include/b.vert"',
+    shader_main = FileShader('#version 140\n#include "include/b.vert"\n',
                              '.vert')
     glslc_args = ['-M', shader_main]
     dependency_rules_expected = [{

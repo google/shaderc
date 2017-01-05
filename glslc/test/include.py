@@ -49,7 +49,7 @@ class VerifyIncludeNotFound(expect.ErrorMessage):
 
     glslc_args = ['-E', 'a.vert']
     expected_error = [
-        "a.vert:3: error: '#include' : Cannot find or open include file.\n",
+        "a.vert:3: error: '#include' : Cannot find or open include file. for header name: b\n",
         '1 error generated.\n'
     ]
 
@@ -64,7 +64,7 @@ class VerifyCompileIncludeOneSibling(expect.ValidObjectFile):
     glslc_args = ['a.vert']
 
 @inside_glslc_testsuite('Include')
-class VerifyIncludeWithoutNewline(expect.StdoutMatch):
+class VerifyIncludeWithoutNewline(expect.ErrorMessageSubstr):
     """Tests a #include without a newline."""
 
     environment = Directory('.', [
@@ -73,16 +73,8 @@ class VerifyIncludeWithoutNewline(expect.StdoutMatch):
 
     glslc_args = ['-E', 'a.vert']
 
-    expected_stdout = \
-"""#version 140
-#extension GL_GOOGLE_include_directive : enable
-#line 0 "a.vert"
+    expected_error_substr = 'expected newline after header name: b'
 
-#line 0 "b"
-content b
-#line 2 "a.vert"
-
-"""
 
 @inside_glslc_testsuite('Include')
 class VerifyCompileIncludeWithoutNewline(expect.ValidObjectFile):
@@ -506,7 +498,8 @@ class VerifyRelativeOnlyToSelf(expect.ErrorMessage):
     glslc_args = ['-E', 'a.vert']
 
     expected_error = [
-        "foo/b.glsl:1: error: '#include' : Cannot find or open include file.\n",
+        "foo/b.glsl:1: error: '#include' : "
+        'Cannot find or open include file. for header name: c.glsl\n',
         '1 error generated.\n'
     ]
 

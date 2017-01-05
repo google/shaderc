@@ -243,7 +243,8 @@ class TestErrorsFromMultipleFiles(expect.ErrorMessage):
     including_file = '''#version 310 es
 #include "error.glsl"
 int no_return() {}
-#include "main.glsl"'''
+#include "main.glsl"
+'''
 
     environment = Directory('.', [
         File('a.vert', including_file),
@@ -272,7 +273,8 @@ int plus1(int a) { return a + 1; }
 #include "inc.glsl"
 int plus2(int a) { return a + 2; }
 #line 55555
-#include "main.glsl"'''
+#include "main.glsl"
+'''
 
     environment = Directory('.', [
         File('a.vert', including_file),
