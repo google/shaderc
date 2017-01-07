@@ -162,18 +162,18 @@ class InternalFileIncluder : public shaderc_util::CountingIncluder {
     return resolver_ != nullptr && result_releaser_ != nullptr;
   }
 
-  // Maps a shaderc_include_type to the correpsonding Glslang include type.
-  shaderc_include_type GetIncludeType(
-      glslang::TShader::Includer::IncludeType type) {
+  // Maps CountingIncluder IncludeType value to a shaderc_include_type
+  // value.
+  shaderc_include_type GetIncludeType(IncludeType type) {
     switch (type) {
-      case glslang::TShader::Includer::EIncludeRelative:
+      case IncludeType::Local:
         return shaderc_include_type_relative;
-      case glslang::TShader::Includer::EIncludeStandard:
+      case IncludeType::System:
         return shaderc_include_type_standard;
       default:
         break;
     }
-    assert(0 && "Unhandled shaderc_include_type");
+    assert(0 && "Unhandled IncludeType");
     return shaderc_include_type_relative;
   }
 
@@ -185,9 +185,8 @@ class InternalFileIncluder : public shaderc_util::CountingIncluder {
   // resolved name member is an empty string, and the contents members
   // contains error details.
   virtual glslang::TShader::Includer::IncludeResult* include_delegate(
-      const char* requested_source,
-      glslang::TShader::Includer::IncludeType type,
-      const char* requesting_source, size_t include_depth) override {
+      const char* requested_source, const char* requesting_source,
+      IncludeType type, size_t include_depth) override {
     if (!AreValidCallbacks()) {
       const char kUnexpectedIncludeError[] =
           "#error unexpected include directive";
@@ -213,7 +212,7 @@ class InternalFileIncluder : public shaderc_util::CountingIncluder {
       glslang::TShader::Includer::IncludeResult* result) override {
     if (result && result_releaser_) {
       result_releaser_(user_data_,
-                       static_cast<shaderc_include_result*>(result->user_data));
+                       static_cast<shaderc_include_result*>(result->userData));
     }
     delete result;
   }

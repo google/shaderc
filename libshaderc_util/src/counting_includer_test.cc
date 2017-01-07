@@ -19,16 +19,12 @@
 
 namespace {
 
-const auto kRelative = glslang::TShader::Includer::EIncludeRelative;
-const auto kStandard = glslang::TShader::Includer::EIncludeStandard;
-
 // A trivial implementation of CountingIncluder's virtual methods, so tests can
 // instantiate.
 class ConcreteCountingIncluder : public shaderc_util::CountingIncluder {
  public:
   virtual glslang::TShader::Includer::IncludeResult* include_delegate(
-      const char* requested, glslang::TShader::Includer::IncludeType,
-      const char* requestor,
+      const char* requested, const char* requestor, IncludeType,
       size_t) override {
     const char kError[] = "Unexpected #include";
     return new glslang::TShader::Includer::IncludeResult{
@@ -44,36 +40,37 @@ TEST(CountingIncluderTest, InitialCount) {
   EXPECT_EQ(0, ConcreteCountingIncluder().num_include_directives());
 }
 
-TEST(CountingIncluderTest, OneInclude) {
+TEST(CountingIncluderTest, OneIncludeLocal) {
   ConcreteCountingIncluder includer;
-  includer.include("random file name", kRelative, "from me", 0);
+  includer.includeLocal("random file name", "from me", 0);
   EXPECT_EQ(1, includer.num_include_directives());
 }
 
 TEST(CountingIncluderTest, TwoIncludesAnyIncludeType) {
   ConcreteCountingIncluder includer;
-  includer.include("name1", kRelative, "from me", 0);
-  includer.include("name2", kStandard, "me", 0);
+  includer.includeSystem("name1", "from me", 0);
+  includer.includeLocal("name2", "me", 0);
   EXPECT_EQ(2, includer.num_include_directives());
 }
 
 TEST(CountingIncluderTest, ManyIncludes) {
   ConcreteCountingIncluder includer;
   for (int i = 0; i < 100; ++i) {
-    includer.include("filename", kRelative, "from me", i);
+    includer.includeLocal("filename", "from me", i);
+    includer.includeSystem("filename", "from me", i);
   }
-  EXPECT_EQ(100, includer.num_include_directives());
+  EXPECT_EQ(200, includer.num_include_directives());
 }
 
 #ifndef SHADERC_DISABLE_THREADED_TESTS
 TEST(CountingIncluderTest, ThreadedIncludes) {
   ConcreteCountingIncluder includer;
   std::thread t1(
-      [&includer]() { includer.include("name1", kRelative, "me", 0); });
+      [&includer]() { includer.includeLocal("name1", "me", 0); });
   std::thread t2(
-      [&includer]() { includer.include("name2", kRelative, "me", 1); });
+      [&includer]() { includer.includeSystem("name2", "me", 1); });
   std::thread t3(
-      [&includer]() { includer.include("name3", kRelative, "me", 2); });
+      [&includer]() { includer.includeLocal("name3", "me", 2); });
   t1.join();
   t2.join();
   t3.join();

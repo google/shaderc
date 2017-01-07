@@ -90,8 +90,7 @@ class DummyCountingIncluder : public shaderc_util::CountingIncluder {
  private:
   // Returns a pair of empty strings.
   virtual glslang::TShader::Includer::IncludeResult* include_delegate(
-      const char*, glslang::TShader::Includer::IncludeType, const char*,
-      size_t) override {
+      const char*, const char*, IncludeType, size_t) override {
     return nullptr;
   }
   virtual void release_delegate(
