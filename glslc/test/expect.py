@@ -335,6 +335,32 @@ class ValidAssemblyFileWithSubstr(ValidAssemblyFile):
         return True, ''
 
 
+class ValidAssemblyFileWithoutSubstr(ValidAssemblyFile):
+    """Mixin class for checking that every input file generates a valid assembly
+    file following the assembly file naming rule, there is no output on
+    stdout/stderr, and no assembly files have the given substring specified
+    by unexpected_assembly_substr.
+
+    To mix in this class, subclasses need to provde unexpected_assembly_substr
+    as the substring we expect not to see.
+    """
+
+    def check_assembly_for_substr(self, status):
+        for input_filename in status.input_filenames:
+            assembly_filename = get_assembly_filename(input_filename)
+            success, message = self.verify_assembly_file_preamble(
+                os.path.join(status.directory, assembly_filename))
+            if not success:
+                return False, message
+            with open(assembly_filename, 'r') as f:
+                content = f.read()
+                if self.unexpected_assembly_substr in convert_to_unix_line_endings(content):
+                   return False, ('Incorrect assembly output:\n{asm}\n'
+                                  'Unexpected substring found:\n{unexp}'.format(
+                                  asm=content, exp=self.unexpected_assembly_substr))
+        return True, ''
+
+
 class ValidNamedAssemblyFile(SuccessfulReturn, CorrectAssemblyFilePreamble):
     """Mixin class for checking that a list of assembly files with the given
     names are correctly generated, and there is no output on stdout/stderr.

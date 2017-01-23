@@ -1,6 +1,8 @@
 Revision history for Shaderc
 
 v2017.1-dev 2017-01-02
+ - Add option to automatically assign bindings to uniform variables
+   that don't have an explicit 'binding' layout in the shader source.
  - Fixes issues:
    #289: Don't output an object file when compilation fails.
 

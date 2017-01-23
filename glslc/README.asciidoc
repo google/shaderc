@@ -17,6 +17,7 @@ glslc [--show-limits]
 
 glslc [-c|-S|-E]
       [-x ...] [-std=standard]
+      [-fauto-bind-uniforms]
       [-fentry-point=...]
       [-flimit=...]
       [-fshader-stage=...]
@@ -127,6 +128,20 @@ by `-flimit-file`.
 multiple files generated. A filename of `-` represents standard output.
 
 === Language and Mode Selection Options
+
+[[option-f-auto-bind-uniforms]]
+==== `-fauto-bind-uniforms`
+
+Option `-fauto-bind-uniforms` directs the compiler to automatically assign
+binding numbers to uniform variables, when an explicit binding is not
+specified in the shader source.
+
+An explicit binding number can be specified in the shader source by using
+a `binding` layout qualifier.  For example:
+
+----
+layout(binding = 12) uniform texture2D;
+----
 
 [[option-f-entry-point]]
 ==== `-fentry-point=`

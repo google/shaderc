@@ -49,6 +49,10 @@ Options:
   -Dmacro[=defn]    Add an implicit macro definition.
   -E                Outputs only the results of the preprocessing step.
                     Output defaults to standard output.
+  -fauto-bind-uniforms
+                    Automatically assign bindings to uniform variables that
+                    don't have an explicit 'binding' layout in the shader
+                    source.
   -fentry-point=<name>
                     Specify the entry point name for HLSL compilation, for
                     all subsequent source files.  Default is "main".
@@ -194,6 +198,8 @@ int main(int argc, char** argv) {
                   << std::endl;
         return 1;
       }
+    } else if (arg == "-fauto-bind-uniforms") {
+      compiler.options().SetAutoBindUniforms(true);
     } else if (arg.starts_with("-fentry-point=")) {
       current_entry_point_name =
           arg.substr(std::strlen("-fentry-point=")).str();
