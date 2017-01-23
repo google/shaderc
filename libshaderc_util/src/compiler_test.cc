@@ -20,12 +20,14 @@
 
 #include "death_test.h"
 #include "libshaderc_util/counting_includer.h"
+#include "libshaderc_util/spirv_tools_wrapper.h"
 
 namespace {
 
 using shaderc_util::Compiler;
 using ::testing::HasSubstr;
 using ::testing::Eq;
+using ::testing::Not;
 
 // A trivial vertex shader
 const char kVertexShader[] =
@@ -83,6 +85,28 @@ const std::string kValuelessPredefinitionShader =
 const char kHlslVertexShader[] =
     R"(float4 EntryPoint(uint index : SV_VERTEXID) : SV_POSITION
        { return float4(1.0, 2.0, 3.0, 4.0); })";
+
+// A GLSL vertex shader without bindings for its uniforms.
+const char kGlslFragShaderNoExplicitBinding[] =
+    R"(#version 450
+       #extension GL_ARB_sparse_texture2: enable
+       uniform texture2D my_tex;
+       uniform sampler my_sam;
+       layout(rgba32f) uniform image2D my_img;
+       void main() {
+         texture(sampler2D(my_tex,my_sam),vec2(1.0));
+         vec4 t = vec4(1.0);
+         sparseImageLoadARB(my_img,ivec2(0),t);
+       })";
+
+// Returns the disassembly of the given SPIR-V binary, as a string.
+// Assumes the disassembly will be successful when targeting Vulkan.
+std::string Disassemble(const std::vector<uint32_t> binary) {
+  std::string result;
+  shaderc_util::SpirvToolsDisassemble(Compiler::TargetEnv::Vulkan, binary,
+                                      &result);
+  return result;
+}
 
 // A CountingIncluder that never returns valid content for a requested
 // file inclusion.
@@ -453,6 +477,37 @@ TEST_F(CompilerTest, GeneratorWordIsShadercOverGlslang) {
   const uint32_t shaderc_over_glslang = 13; // From SPIR-V XML Registry
   const uint32_t generator_word_index = 2; // From SPIR-V binary layout
   EXPECT_EQ(shaderc_over_glslang, words[generator_word_index] >> 16u);
+}
+
+TEST_F(CompilerTest, DefaultsDoNotSetBindings) {
+  const auto words = SimpleCompilationBinary(kGlslFragShaderNoExplicitBinding,
+                                             EShLangFragment);
+  const auto disassembly = Disassemble(words);
+  EXPECT_THAT(disassembly, Not(HasSubstr("OpDecorate %my_tex Binding 0")));
+  EXPECT_THAT(disassembly, Not(HasSubstr("OpDecorate %my_sam Binding 1")));
+  EXPECT_THAT(disassembly, Not(HasSubstr("OpDecorate %my_img Binding 2")));
+}
+
+TEST_F(CompilerTest, NoAutoMapBindingsDoesNotSetBindings) {
+  compiler_.SetAutoBindUniforms(false);
+  const auto words = SimpleCompilationBinary(kGlslFragShaderNoExplicitBinding,
+                                             EShLangFragment);
+  const auto disassembly = Disassemble(words);
+  EXPECT_THAT(disassembly, Not(HasSubstr("OpDecorate %my_tex Binding")))
+      << disassembly;
+  EXPECT_THAT(disassembly, Not(HasSubstr("OpDecorate %my_sam Binding")));
+  EXPECT_THAT(disassembly, Not(HasSubstr("OpDecorate %my_img Binding")));
+}
+
+TEST_F(CompilerTest, AutoMapBindingsSetsBindings) {
+  compiler_.SetAutoBindUniforms(true);
+  const auto words = SimpleCompilationBinary(kGlslFragShaderNoExplicitBinding,
+                                             EShLangFragment);
+  const auto disassembly = Disassemble(words);
+  EXPECT_THAT(disassembly, HasSubstr("OpDecorate %my_tex Binding 0"))
+      << disassembly;
+  EXPECT_THAT(disassembly, HasSubstr("OpDecorate %my_sam Binding 1"));
+  EXPECT_THAT(disassembly, HasSubstr("OpDecorate %my_img Binding 2"));
 }
 
 }  // anonymous namespace

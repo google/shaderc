@@ -178,6 +178,10 @@ class Compiler {
   // Returns the current limit.
   int GetLimit(Limit limit) const;
 
+  // Set whether the compiler automatically assigns bindings to
+  // uniform variables that don't have explicit bindings.
+  void SetAutoBindUniforms(bool auto_bind) const {};
+
   // Compiles the shader source in the input_source_string parameter.
   //
   // If the forced_shader stage parameter is not EShLangCount then
