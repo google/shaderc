@@ -125,6 +125,14 @@ class Compiler {
 #undef RESOURCE
   };
 
+  // Types of uniform variables.
+  enum class UniformKind {
+    Image = 0,  // Also applies to "image buffers".
+    Sampler = 1,
+    Texture = 2,
+    Buffer = 3, // Uniform Buffer Object, or UBO
+  };
+
   // Creates an default compiler instance targeting at Vulkan environment. Uses
   // version 110 and no profile specification as the default for GLSL.
   Compiler()
@@ -140,7 +148,8 @@ class Compiler {
         target_env_(TargetEnv::Vulkan),
         source_language_(SourceLanguage::GLSL),
         limits_(kDefaultTBuiltInResource),
-        auto_bind_uniforms_(false) {}
+        auto_bind_uniforms_(false),
+        auto_binding_base_() {}
 
   // Requests that the compiler place debug information into the object code,
   // such as identifier names and line numbers.
@@ -182,6 +191,12 @@ class Compiler {
   // Set whether the compiler automatically assigns bindings to
   // uniform variables that don't have explicit bindings.
   void SetAutoBindUniforms(bool auto_bind) { auto_bind_uniforms_ = auto_bind; }
+
+  // Sets the lowest binding number used when automatically assigning bindings
+  // for uniform resources of the given type.  The default is zero.
+  void SetAutoBindingBase(UniformKind kind, uint32_t base) {
+    auto_binding_base_[static_cast<int>(kind)] = base;
+  }
 
   // Compiles the shader source in the input_source_string parameter.
   //
@@ -336,6 +351,12 @@ class Compiler {
   // True if the compiler should automatically bind uniforms that don't
   // have explicit bindings.
   bool auto_bind_uniforms_;
+
+  // The base binding number per uniform type, used when automatically binding
+  // uniforms that don't hzve explicit bindings in the shader source.
+  // the default is zero.
+  // Note: The array size must track the set of enum values.
+  uint32_t auto_binding_base_[static_cast<int>(UniformKind::Buffer) + 1] = {0};
 };
 
 // Converts a string to a vector of uint32_t by copying the content of a given
