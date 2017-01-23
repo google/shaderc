@@ -204,6 +204,7 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
                                        &string_names, 1);
   shader.setPreamble(preamble.c_str());
   shader.setEntryPoint(entry_point_name);
+  shader.setAutoMapBindings(auto_bind_uniforms_);
 
   // TODO(dneto): Generate source-level debug info if requested.
   bool success =
@@ -218,7 +219,7 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
 
   glslang::TProgram program;
   program.addShader(&shader);
-  success = program.link(EShMsgDefault);
+  success = program.link(EShMsgDefault) && program.mapIO();
   success &= PrintFilteredErrors(error_tag, error_stream, warnings_as_errors_,
                                  suppress_warnings_, program.getInfoLog(),
                                  total_warnings, total_errors);

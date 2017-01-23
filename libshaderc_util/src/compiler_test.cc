@@ -510,4 +510,25 @@ TEST_F(CompilerTest, AutoMapBindingsSetsBindings) {
   EXPECT_THAT(disassembly, HasSubstr("OpDecorate %my_img Binding 2"));
 }
 
+TEST_F(CompilerTest, EmitMessageTextOnlyOnce) {
+  // Emit a warning by compiling a shader without a default entry point name.
+  // The warning should only be emitted once even though we do parsing, linking,
+  // and IO mapping.
+  Compiler c;
+  std::stringstream errors;
+  size_t total_warnings = 0;
+  size_t total_errors = 0;
+  shaderc_util::GlslangInitializer initializer;
+  bool result = false;
+  DummyCountingIncluder dummy_includer;
+  std::tie(result, std::ignore, std::ignore) = c.Compile(
+      "#version 150\nvoid MyEntryPoint(){}", EShLangVertex, "shader", "",
+      dummy_stage_callback_, dummy_includer, Compiler::OutputType::SpirvBinary,
+      &errors, &total_warnings, &total_errors, &initializer);
+  const std::string errs = errors.str();
+  EXPECT_THAT(errs, Eq("shader: error: Linking vertex stage: Missing entry "
+                       "point: Each stage requires one entry point\n"))
+      << errs;
+}
+
 }  // anonymous namespace
