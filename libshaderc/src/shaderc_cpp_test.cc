@@ -33,6 +33,7 @@ using shaderc::CompileOptions;
 using testing::Each;
 using testing::Eq;
 using testing::HasSubstr;
+using testing::Not;
 
 // Helper function to check if the compilation result indicates a successful
 // compilation.
@@ -1146,6 +1147,34 @@ TEST_F(CppInterface, LimitsTexelOffsetHigherMaximum) {
   EXPECT_FALSE(CompilationSuccess(ShaderWithTexOffset(11).c_str(),
                                   shaderc_glsl_fragment_shader,
                                   options_));
+}
+
+TEST_F(CppInterface, UniformsWithoutBindingsHaveNoBindingsByDefault) {
+  CompileOptions options;
+  const std::string disassembly_text = AssemblyOutput(
+      kShaderWithUniformsWithoutBindings, shaderc_glsl_vertex_shader, options);
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_tex Binding")));
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_sam Binding")));
+}
+
+TEST_F(CppInterface,
+       UniformsWithoutBindingsOptionSetNoBindingsHaveNoBindings) {
+  CompileOptions options;
+  options.SetAutoBindUniforms(false);
+  const std::string disassembly_text = AssemblyOutput(
+      kShaderWithUniformsWithoutBindings, shaderc_glsl_vertex_shader, options);
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_tex Binding")));
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_sam Binding")));
+}
+
+TEST_F(CppInterface,
+       UniformsWithoutBindingsOptionSetAutoBindingsAssignsBindings) {
+  CompileOptions options;
+  options.SetAutoBindUniforms(true);
+  const std::string disassembly_text = AssemblyOutput(
+      kShaderWithUniformsWithoutBindings, shaderc_glsl_vertex_shader, options);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_tex Binding 0"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_sam Binding 1"));
 }
 
 }  // anonymous namespace

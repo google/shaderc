@@ -248,6 +248,12 @@ class CompileOptions {
     shaderc_compile_options_set_limit(options_, limit, value);
   }
 
+  // Sets whether the compiler should automatically assign bindings to uniforms
+  // that aren't already explicitly bound in the shader source.
+  void SetAutoBindUniforms(bool auto_bind) {
+    shaderc_compile_options_set_auto_bind_uniforms(options_, auto_bind);
+  }
+
  private:
   CompileOptions& operator=(const CompileOptions& other) = delete;
   shaderc_compile_options_t options_;

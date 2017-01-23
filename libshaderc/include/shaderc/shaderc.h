@@ -346,6 +346,11 @@ void shaderc_compile_options_set_warnings_as_errors(
 void shaderc_compile_options_set_limit(
     shaderc_compile_options_t options, shaderc_limit limit, int value);
 
+// Sets whether the compiler should automatically assign bindings to uniforms
+// that aren't already explicitly bound in the shader source.
+void shaderc_compile_options_set_auto_bind_uniforms(
+    shaderc_compile_options_t options, bool auto_bind);
+
 // An opaque handle to the results of a call to any shaderc_compile_into_*()
 // function.
 typedef struct shaderc_compilation_result* shaderc_compilation_result_t;

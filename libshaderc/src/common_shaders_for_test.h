@@ -218,6 +218,14 @@ const char kMinimalShaderAssembly[] = R"(
          OpReturn
          OpFunctionEnd)";
 
+const char kShaderWithUniformsWithoutBindings[] =
+    R"(#version 450
+       uniform texture2D my_tex;
+       uniform sampler my_sam;
+       void main() {
+         texture(sampler2D(my_tex,my_sam),vec2(1.0));
+       })";
+
 #ifdef __cplusplus
 }
 #endif  // __cplusplus

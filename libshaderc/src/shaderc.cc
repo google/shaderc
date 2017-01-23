@@ -364,6 +364,11 @@ void shaderc_compile_options_set_limit(
   options->compiler.SetLimit(CompilerLimit(limit), value);
 }
 
+void shaderc_compile_options_set_auto_bind_uniforms(
+    shaderc_compile_options_t options, bool auto_bind) {
+  options->compiler.SetAutoBindUniforms(auto_bind);
+}
+
 shaderc_compiler_t shaderc_compiler_initialize() {
   static shaderc_util::GlslangInitializer* initializer =
       new shaderc_util::GlslangInitializer;

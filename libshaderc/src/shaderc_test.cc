@@ -27,6 +27,7 @@ namespace {
 
 using testing::Each;
 using testing::HasSubstr;
+using testing::Not;
 
 TEST(Init, MultipleCalls) {
   shaderc_compiler_t compiler1, compiler2, compiler3;
@@ -1423,6 +1424,46 @@ TEST_F(CompileStringTest, LimitsTexelOffsetHigherMaximum) {
   EXPECT_FALSE(CompilationSuccess(ShaderWithTexOffset(11).c_str(),
                                   shaderc_glsl_fragment_shader,
                                   options_.get()));
+}
+
+TEST_F(CompileStringWithOptionsTest,
+       UniformsWithoutBindingsHaveNoBindingsByDefault) {
+  const std::string disassembly_text = CompilationOutput(
+      kShaderWithUniformsWithoutBindings, shaderc_glsl_vertex_shader,
+      options_.get(), OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_tex Binding")));
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_sam Binding")));
+}
+
+TEST_F(CompileStringWithOptionsTest,
+       UniformsWithoutBindingsOptionSetNoBindingsHaveNoBindings) {
+  shaderc_compile_options_set_auto_bind_uniforms(options_.get(), false);
+  const std::string disassembly_text = CompilationOutput(
+      kShaderWithUniformsWithoutBindings, shaderc_glsl_vertex_shader,
+      options_.get(), OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_tex Binding")));
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_sam Binding")));
+}
+
+TEST_F(CompileStringWithOptionsTest,
+       UniformsWithoutBindingsOptionSetAutoBindingsAssignsBindings) {
+  shaderc_compile_options_set_auto_bind_uniforms(options_.get(), true);
+  const std::string disassembly_text = CompilationOutput(
+      kShaderWithUniformsWithoutBindings, shaderc_glsl_vertex_shader,
+      options_.get(), OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_tex Binding 0"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_sam Binding 1"));
+}
+
+TEST_F(CompileStringWithOptionsTest, AutoBindUniformsOptionsSurvivesCloning) {
+  shaderc_compile_options_set_auto_bind_uniforms(options_.get(), true);
+  compile_options_ptr cloned_options(
+      shaderc_compile_options_clone(options_.get()));
+  const std::string disassembly_text = CompilationOutput(
+      kShaderWithUniformsWithoutBindings, shaderc_glsl_vertex_shader,
+      cloned_options.get(), OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_tex Binding 0"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_sam Binding 1"));
 }
 
 }  // anonymous namespace
