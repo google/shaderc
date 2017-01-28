@@ -251,6 +251,22 @@ shaderc_util::Compiler::Limit CompilerLimit(shaderc_limit limit) {
   return static_cast<shaderc_util::Compiler::Limit>(0);
 }
 
+// Returns the Compiler::UniformKind for the given shaderc_uniform_kind.
+shaderc_util::Compiler::UniformKind GetUniformKind(shaderc_uniform_kind kind) {
+  switch (kind) {
+    case shaderc_uniform_kind_texture:
+      return shaderc_util::Compiler::UniformKind::Texture;
+    case shaderc_uniform_kind_sampler:
+      return shaderc_util::Compiler::UniformKind::Sampler;
+    case shaderc_uniform_kind_image:
+      return shaderc_util::Compiler::UniformKind::Image;
+    case shaderc_uniform_kind_buffer:
+      return shaderc_util::Compiler::UniformKind::Buffer;
+  }
+  assert(0 && "Should not have reached here");
+  return static_cast<shaderc_util::Compiler::UniformKind>(0);
+}
+
 }  // anonymous namespace
 
 struct shaderc_compile_options {
@@ -367,6 +383,12 @@ void shaderc_compile_options_set_limit(
 void shaderc_compile_options_set_auto_bind_uniforms(
     shaderc_compile_options_t options, bool auto_bind) {
   options->compiler.SetAutoBindUniforms(auto_bind);
+}
+
+void shaderc_compile_options_set_binding_base(shaderc_compile_options_t options,
+                                              shaderc_uniform_kind kind,
+                                              uint32_t base) {
+  options->compiler.SetAutoBindingBase(GetUniformKind(kind), base);
 }
 
 shaderc_compiler_t shaderc_compiler_initialize() {

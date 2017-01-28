@@ -254,6 +254,13 @@ class CompileOptions {
     shaderc_compile_options_set_auto_bind_uniforms(options_, auto_bind);
   }
 
+  // When automatically assigning bindings for uniforms, sets the lowest
+  // automatically assigned binding number for uniform resources of the given
+  // type.
+  void SetBindingBase(shaderc_uniform_kind kind, uint32_t base) {
+    shaderc_compile_options_set_binding_base(options_, kind, base);
+  }
+
  private:
   CompileOptions& operator=(const CompileOptions& other) = delete;
   shaderc_compile_options_t options_;

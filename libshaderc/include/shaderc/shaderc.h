@@ -173,6 +173,16 @@ typedef enum {
   shaderc_limit_max_samples,
 } shaderc_limit;
 
+// Uniform resource kinds.
+// In Vulkan, uniform resources are bound to the pipeline via descriptors
+// with numbered bindings and sets.
+typedef enum {
+  shaderc_uniform_kind_image, // This also applies to uniform image buffers.
+  shaderc_uniform_kind_sampler,
+  shaderc_uniform_kind_texture,
+  shaderc_uniform_kind_buffer, // Uniform Buffer Object, or UBO
+} shaderc_uniform_kind;
+
 // Usage examples:
 //
 // Aggressively release compiler resources, but spend time in initialization
@@ -356,6 +366,12 @@ void shaderc_compile_options_set_limit(
 // that aren't already explicitly bound in the shader source.
 void shaderc_compile_options_set_auto_bind_uniforms(
     shaderc_compile_options_t options, bool auto_bind);
+
+// When automatically assigning bindings for uniforms, sets the lowest automatically
+// assigned binding number for uniform resources of the given type.
+void shaderc_compile_options_set_binding_base(shaderc_compile_options_t options,
+                                              shaderc_uniform_kind kind,
+                                              uint32_t base);
 
 // An opaque handle to the results of a call to any shaderc_compile_into_*()
 // function.

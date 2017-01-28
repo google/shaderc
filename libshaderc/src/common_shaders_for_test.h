@@ -220,10 +220,18 @@ const char kMinimalShaderAssembly[] = R"(
 
 const char kShaderWithUniformsWithoutBindings[] =
     R"(#version 450
+       #extension GL_ARB_sparse_texture2 : enable
        uniform texture2D my_tex;
        uniform sampler my_sam;
+       layout(rgba32f) uniform image2D my_img;
+       layout(rgba32f) uniform imageBuffer my_imbuf;
+       uniform block { float x; float y; } my_ubo;
        void main() {
          texture(sampler2D(my_tex,my_sam),vec2(1.0));
+         vec4 t;
+         sparseImageLoadARB(my_img,ivec2(0),t);
+         imageLoad(my_imbuf,42);
+         float x = my_ubo.x;
        })";
 
 #ifdef __cplusplus

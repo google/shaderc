@@ -1433,6 +1433,9 @@ TEST_F(CompileStringWithOptionsTest,
       options_.get(), OutputType::SpirvAssemblyText);
   EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_tex Binding")));
   EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_sam Binding")));
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_img Binding")));
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_imbuf Binding")));
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_ubo Binding")));
 }
 
 TEST_F(CompileStringWithOptionsTest,
@@ -1443,6 +1446,9 @@ TEST_F(CompileStringWithOptionsTest,
       options_.get(), OutputType::SpirvAssemblyText);
   EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_tex Binding")));
   EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_sam Binding")));
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_img Binding")));
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_imbuf Binding")));
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_ubo Binding")));
 }
 
 TEST_F(CompileStringWithOptionsTest,
@@ -1453,6 +1459,9 @@ TEST_F(CompileStringWithOptionsTest,
       options_.get(), OutputType::SpirvAssemblyText);
   EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_tex Binding 0"));
   EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_sam Binding 1"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_img Binding 2"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_imbuf Binding 3"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_ubo Binding 4"));
 }
 
 TEST_F(CompileStringWithOptionsTest, AutoBindUniformsOptionsSurvivesCloning) {
@@ -1464,6 +1473,111 @@ TEST_F(CompileStringWithOptionsTest, AutoBindUniformsOptionsSurvivesCloning) {
       cloned_options.get(), OutputType::SpirvAssemblyText);
   EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_tex Binding 0"));
   EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_sam Binding 1"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_img Binding 2"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_imbuf Binding 3"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_ubo Binding 4"));
+}
+
+TEST_F(CompileStringWithOptionsTest,
+       SetBindingBaseForTextureAdjustsTextureBindingsOnly) {
+  shaderc_compile_options_set_auto_bind_uniforms(options_.get(), true);
+  shaderc_compile_options_set_binding_base(options_.get(),
+                                           shaderc_uniform_kind_texture, 44);
+  const std::string disassembly_text = CompilationOutput(
+      kShaderWithUniformsWithoutBindings, shaderc_glsl_vertex_shader,
+      options_.get(), OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_tex Binding 44"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_sam Binding 0"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_img Binding 1"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_imbuf Binding 2"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_ubo Binding 3"));
+}
+
+TEST_F(CompileStringWithOptionsTest,
+       SetBindingBaseForSamplerAdjustsSamplerBindingsOnly) {
+  shaderc_compile_options_set_auto_bind_uniforms(options_.get(), true);
+  shaderc_compile_options_set_binding_base(options_.get(),
+                                           shaderc_uniform_kind_sampler, 44);
+  const std::string disassembly_text = CompilationOutput(
+      kShaderWithUniformsWithoutBindings, shaderc_glsl_vertex_shader,
+      options_.get(), OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_tex Binding 0"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_sam Binding 44"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_img Binding 1"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_imbuf Binding 2"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_ubo Binding 3"));
+}
+
+TEST_F(CompileStringWithOptionsTest,
+       SetBindingBaseForImageAdjustsImageBindingsOnly) {
+  shaderc_compile_options_set_auto_bind_uniforms(options_.get(), true);
+  shaderc_compile_options_set_binding_base(options_.get(),
+                                           shaderc_uniform_kind_image, 44);
+  const std::string disassembly_text = CompilationOutput(
+      kShaderWithUniformsWithoutBindings, shaderc_glsl_vertex_shader,
+      options_.get(), OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_tex Binding 0"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_sam Binding 1"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_img Binding 44"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_imbuf Binding 45"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_ubo Binding 2"));
+}
+
+TEST_F(CompileStringWithOptionsTest,
+       SetBindingBaseForBufferAdjustsBufferBindingsOnly) {
+  shaderc_compile_options_set_auto_bind_uniforms(options_.get(), true);
+  shaderc_compile_options_set_binding_base(options_.get(),
+                                           shaderc_uniform_kind_buffer, 44);
+  const std::string disassembly_text = CompilationOutput(
+      kShaderWithUniformsWithoutBindings, shaderc_glsl_vertex_shader,
+      options_.get(), OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_tex Binding 0"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_sam Binding 1"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_img Binding 2"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_imbuf Binding 3"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_ubo Binding 44"));
+}
+
+TEST_F(CompileStringWithOptionsTest, SetBindingBaseSurvivesCloning) {
+  shaderc_compile_options_set_auto_bind_uniforms(options_.get(), true);
+  shaderc_compile_options_set_binding_base(options_.get(),
+                                           shaderc_uniform_kind_texture, 40);
+  shaderc_compile_options_set_binding_base(options_.get(),
+                                           shaderc_uniform_kind_sampler, 50);
+  shaderc_compile_options_set_binding_base(options_.get(),
+                                           shaderc_uniform_kind_image, 60);
+  shaderc_compile_options_set_binding_base(options_.get(),
+                                           shaderc_uniform_kind_buffer, 70);
+  compile_options_ptr cloned_options(
+      shaderc_compile_options_clone(options_.get()));
+  const std::string disassembly_text = CompilationOutput(
+      kShaderWithUniformsWithoutBindings, shaderc_glsl_vertex_shader,
+      cloned_options.get(), OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_tex Binding 40"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_sam Binding 50"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_img Binding 60"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_imbuf Binding 61"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_ubo Binding 70"));
+}
+
+TEST_F(CompileStringWithOptionsTest, SetBindingBaseIgnoredWhenNotAutoBinding) {
+  shaderc_compile_options_set_auto_bind_uniforms(options_.get(), false);
+  shaderc_compile_options_set_binding_base(options_.get(),
+                                           shaderc_uniform_kind_texture, 40);
+  shaderc_compile_options_set_binding_base(options_.get(),
+                                           shaderc_uniform_kind_sampler, 50);
+  shaderc_compile_options_set_binding_base(options_.get(),
+                                           shaderc_uniform_kind_image, 60);
+  shaderc_compile_options_set_binding_base(options_.get(),
+                                           shaderc_uniform_kind_buffer, 70);
+  const std::string disassembly_text = CompilationOutput(
+      kShaderWithUniformsWithoutBindings, shaderc_glsl_vertex_shader,
+      options_.get(), OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_tex Binding")));
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_sam Binding")));
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_img Binding")));
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_imbuf Binding")));
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_ubo Binding")));
 }
 
 TEST(Compiler, IncludeWithoutOptionsReturnsValidError) {
