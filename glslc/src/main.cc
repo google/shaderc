@@ -16,9 +16,12 @@
 #include <cctype>
 #include <cstdint>
 #include <cstring>
+#include <iomanip>
 #include <iostream>
 #include <list>
+#include <tuple>
 #include <string>
+#include <sstream>
 #include <utility>
 
 #include "libshaderc_util/compiler.h"
@@ -53,6 +56,18 @@ Options:
                     Automatically assign bindings to uniform variables that
                     don't have an explicit 'binding' layout in the shader
                     source.
+  -fimage-binding-base=<value>
+                    Sets the lowest automatically assigned binding number for
+                    images.
+  -ftexture-binding-base=<value>
+                    Sets the lowest automatically assigned binding number for
+                    textures.
+  -fsampler-binding-base=<value>
+                    Sets the lowest automatically assigned binding number for
+                    samplers.
+  -fubo-binding-base=<value>
+                    Sets the lowest automatically assigned binding number for
+                    uniform buffer objects (UBO).
   -fentry-point=<name>
                     Specify the entry point name for HLSL compilation, for
                     all subsequent source files.  Default is "main".
@@ -144,6 +159,70 @@ bool SetResourceLimits(const std::string& str, shaderc::CompileOptions* options,
 const char kBuildVersion[] =
 #include "build-version.inc"
     ;
+
+// Parses the given string as a number of the specified type.  Returns a pair
+// where the first member is true if parsing succeeded, and the second
+// member is the parsed value.  (I've worked out the general case for this
+// in SPIRV-Tools source/util/parse_number.h
+std::pair<bool, uint32_t> ParseUint32(std::string str) {
+  std::istringstream iss(str);
+
+  iss >> std::setbase(0);
+  uint32_t parsed_number{};
+  iss >> parsed_number;
+
+  // We should have read something.
+  bool ok = !str.empty() && !iss.bad();
+  // It should have been all the text.
+  ok = ok && iss.eof();
+  // It should have been in range.
+  ok = ok && !iss.fail();
+
+  // Work around a bug in GNU C++11 library.  It happily parses -1 as
+  // the maximum unsigned value.  The string "-0" should map to 0, but
+  // all other numbers with a leading minus should fail to parse.
+  if (str[0] == '-') ok = (parsed_number == 0);
+
+  return std::make_pair(ok, parsed_number);
+}
+
+// Gets an optional stage name followed by required offset argument.  Returns
+// false and emits a message to *errs if any errors occur.  After calling this
+// function, *index will be the index of the last command line argument
+// consumed.  If no stage name is provided, then *stage contains
+// shaderc_glsl_infer_from_source.
+bool GetOptionalStageThenOffsetArgument(const shaderc_util::string_piece option,
+                                        std::ostream* errs, int argc,
+                                        char** argv, int* index,
+                                        shaderc_shader_kind* shader_kind,
+                                        uint32_t* offset) {
+  int& argi = *index;
+  if (argi + 1 >= argc) {
+    *errs << "glslc: error: Option " << option
+          << " requires at least one argument" << std::endl;
+    return false;
+  }
+  auto stage = glslc::MapStageNameToForcedKind(argv[argi + 1]);
+  if (stage != shaderc_glsl_infer_from_source) {
+    ++argi;
+    if (argi + 1 >= argc) {
+      *errs << "glslc: error: Option " << option << " with stage "
+            << argv[argi - 1] << " requires an offset argument" << std::endl;
+      return false;
+    }
+  }
+  auto num_parse = ParseUint32(argv[argi + 1]);
+  if (!num_parse.first) {
+    *errs << "glslc: error: invalid offset value " << argv[argi + 1] << " for "
+          << option << std::endl;
+    return false;
+  }
+  ++argi;
+  *shader_kind = stage;
+  *offset = num_parse.second;
+  return true;
+}
+
 }  // anonymous namespace
 
 int main(int argc, char** argv) {
@@ -200,6 +279,50 @@ int main(int argc, char** argv) {
       }
     } else if (arg == "-fauto-bind-uniforms") {
       compiler.options().SetAutoBindUniforms(true);
+    } else if (arg.starts_with("-fimage-binding-base=")) {
+      auto result = ParseNumber<uint32_t>(
+          arg.substr(std::strlen("-fimage-binding-base=")).str());
+      if (result.first) {
+        compiler.options().SetBindingBase(shaderc_uniform_kind_image,
+                                          result.second);
+      } else {
+        std::cerr << "glslc: error: invalid value for -fimage-binding-base"
+                  << std::endl;
+        return 1;
+      }
+    } else if (arg.starts_with("-ftexture-binding-base=")) {
+      auto result = ParseNumber<uint32_t>(
+          arg.substr(std::strlen("-ftexture-binding-base=")).str());
+      if (result.first) {
+        compiler.options().SetBindingBase(shaderc_uniform_kind_texture,
+                                          result.second);
+      } else {
+        std::cerr << "glslc: error: invalid value for -ftexture-binding-base"
+                  << std::endl;
+        return 1;
+      }
+    } else if (arg.starts_with("-fsampler-binding-base=")) {
+      auto result = ParseNumber<uint32_t>(
+          arg.substr(std::strlen("-fsampler-binding-base=")).str());
+      if (result.first) {
+        compiler.options().SetBindingBase(shaderc_uniform_kind_sampler,
+                                          result.second);
+      } else {
+        std::cerr << "glslc: error: invalid value for -fsampler-binding-base"
+                  << std::endl;
+        return 1;
+      }
+    } else if (arg.starts_with("-fubo-binding-base=")) {
+      auto result = ParseNumber<uint32_t>(
+          arg.substr(std::strlen("-fubo-binding-base=")).str());
+      if (result.first) {
+        compiler.options().SetBindingBase(shaderc_uniform_kind_buffer,
+                                          result.second);
+      } else {
+        std::cerr << "glslc: error: invalid value for -fubo-binding-base"
+                  << std::endl;
+        return 1;
+      }
     } else if (arg.starts_with("-fentry-point=")) {
       current_entry_point_name =
           arg.substr(std::strlen("-fentry-point=")).str();

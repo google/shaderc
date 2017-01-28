@@ -61,6 +61,18 @@ Options:
                     Automatically assign bindings to uniform variables that
                     don't have an explicit 'binding' layout in the shader
                     source.
+  -fimage-binding-base=<value>
+                    Sets the lowest automatically assigned binding number for
+                    images.
+  -ftexture-binding-base=<value>
+                    Sets the lowest automatically assigned binding number for
+                    textures.
+  -fsampler-binding-base=<value>
+                    Sets the lowest automatically assigned binding number for
+                    samplers.
+  -fubo-binding-base=<value>
+                    Sets the lowest automatically assigned binding number for
+                    uniform buffer objects (UBO).
   -fentry-point=<name>
                     Specify the entry point name for HLSL compilation, for
                     all subsequent source files.  Default is "main".
