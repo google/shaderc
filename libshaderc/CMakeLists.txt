@@ -12,6 +12,11 @@ add_library(shaderc STATIC
 
 shaderc_default_compile_options(shaderc)
 target_include_directories(shaderc PUBLIC include PRIVATE ${glslang_SOURCE_DIR})
+
+install(TARGETS shaderc
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib)
+
 find_package(Threads)
 target_link_libraries(shaderc PRIVATE
   glslang OSDependent OGLCompiler glslang ${CMAKE_THREAD_LIBS_INIT})
@@ -30,6 +35,11 @@ shaderc_add_tests(
 
 
 shaderc_combine_static_lib(shaderc_combined shaderc)
+
+# Since shaderc_combined is defined as an imported library, we cannot use the
+# install() directive to install it. Install it like a normal file.
+get_target_property(shaderc_combined_location shaderc_combined LOCATION)
+install(FILES ${shaderc_combined_location} DESTINATION lib)
 
 shaderc_add_tests(
   TEST_PREFIX shaderc_combined
