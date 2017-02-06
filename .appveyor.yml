@@ -38,8 +38,8 @@ build:
 
 build_script:
   - mkdir build && cd build
-  - cmake ..
-  - cmake --build . --config %CONFIGURATION%
+  - cmake .. -DCMAKE_INSTALL_PREFIX=install
+  - cmake --build . --target install --config %CONFIGURATION%
 
 test_script:
   - ctest -C %CONFIGURATION% --output-on-failure

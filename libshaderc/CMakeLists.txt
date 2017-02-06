@@ -38,8 +38,18 @@ shaderc_combine_static_lib(shaderc_combined shaderc)
 
 # Since shaderc_combined is defined as an imported library, we cannot use the
 # install() directive to install it. Install it like a normal file.
-get_target_property(shaderc_combined_location shaderc_combined LOCATION)
-install(FILES ${shaderc_combined_location} DESTINATION lib)
+get_target_property(generated_location shaderc_combined LOCATION)
+string(REGEX MATCH "Visual Studio .*" vs_generator "${CMAKE_GENERATOR}")
+if (NOT "${vs_generator}" STREQUAL "")
+  # With Visual Studio generators, the LOCATION property is not properly
+  # expanded according to the current build configuration. We need to work
+  # around this problem by manually substitution.
+  string(REPLACE "$(Configuration)" "\${CMAKE_INSTALL_CONFIG_NAME}"
+    install_location "${generated_location}")
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${install_location} DESTINATION lib)
+else()
+  install(FILES ${generated_location} DESTINATION lib)
+endif()
 
 shaderc_add_tests(
   TEST_PREFIX shaderc_combined
