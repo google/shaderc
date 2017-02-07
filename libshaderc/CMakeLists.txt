@@ -13,6 +13,13 @@ add_library(shaderc STATIC
 shaderc_default_compile_options(shaderc)
 target_include_directories(shaderc PUBLIC include PRIVATE ${glslang_SOURCE_DIR})
 
+install(
+  FILES
+    include/shaderc/shaderc.h
+    include/shaderc/shaderc.hpp
+  DESTINATION
+    include/shaderc)
+
 install(TARGETS shaderc
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib)
