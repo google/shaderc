@@ -4,8 +4,8 @@ GLSLANG_LOCAL_PATH := $(THIRD_PARTY_PATH)/glslang
 LOCAL_PATH := $(GLSLANG_LOCAL_PATH)
 
 GLSLANG_OS_FLAGS := -DGLSLANG_OSINCLUDE_UNIX
-# AMD extensions are turned on by default in upstream Glslang.
-GLSLANG_DEFINES:= -DAMD_EXTENSIONS $(GLSLANG_OS_FLAGS)
+# AMD and NV extensions are turned on by default in upstream Glslang.
+GLSLANG_DEFINES:= -DAMD_EXTENSIONS -DNV_EXTENSIONS $(GLSLANG_OS_FLAGS)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE:=SPIRV
