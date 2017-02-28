@@ -199,6 +199,7 @@ LOCAL_SRC_FILES:= \
 		source/software_version.cpp \
 		source/spirv_endian.cpp \
 		source/spirv_target_env.cpp \
+		source/spirv_validator_options.cpp \
 		source/table.cpp \
 		source/text.cpp \
 		source/text_handler.cpp \
