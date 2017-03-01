@@ -215,7 +215,8 @@ LOCAL_SRC_FILES:= \
 		source/validate_decorations.cpp \
 		source/validate_id.cpp \
 		source/validate_instruction.cpp \
-		source/validate_layout.cpp
+		source/validate_layout.cpp \
+		source/validate_type_unique.cpp
 include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
