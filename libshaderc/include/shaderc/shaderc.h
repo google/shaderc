@@ -278,6 +278,8 @@ void shaderc_compile_options_set_forced_version_profile(
 // the contents of the result, and those contents must remain valid until the
 // second callback is invoked to release the result.  Both callbacks take a
 // user_data argument to specify the client context.
+// To return an error, set the source_name to an empty string and put your
+// error message in content.
 
 // An include result.
 typedef struct shaderc_include_result {
