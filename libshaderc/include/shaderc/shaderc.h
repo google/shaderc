@@ -179,7 +179,8 @@ typedef enum {
 // for each new use.
 //      shaderc_compiler_t compiler = shaderc_compiler_initialize();
 //      shaderc_compilation_result_t result = shaderc_compile_into_spv(
-//          compiler, "int main() {}", 13, shaderc_glsl_vertex_shader, "main");
+//          compiler, "#version 450\nvoid main() {}", 27,
+//          shaderc_glsl_vertex_shader, "main.vert", "main", nullptr);
 //      // Do stuff with compilation results.
 //      shaderc_result_release(result);
 //      shaderc_compiler_release(compiler);
@@ -189,7 +190,8 @@ typedef enum {
 //      shaderc_compiler_t compiler = shaderc_compiler_initialize();
 //      // On the same, other or multiple simultaneous threads.
 //      shaderc_compilation_result_t result = shaderc_compile_into_spv(
-//          compiler, "int main() {}", 13, shaderc_glsl_vertex_shader, "main");
+//          compiler, "#version 450\nvoid main() {}", 27,
+//          shaderc_glsl_vertex_shader, "main.vert", "main", nullptr);
 //      // Do stuff with compilation results.
 //      shaderc_result_release(result);
 //      // Once no more compilations are to happen.

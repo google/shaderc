@@ -23,6 +23,7 @@
 //  - Setting basic options: setting a preprocessor symbol.
 //  - Checking compilation status and extracting an error message.
 
+#include <cstring>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -141,6 +142,29 @@ int main() {
 
     std::cout << std::endl << "Compiling a bad shader:" << std::endl;
     compile_file("bad_src", shaderc_glsl_vertex_shader, kBadShaderSource);
+  }
+
+  {  // Compile using the C API.
+    std::cout << "\n\nCompiling with the C API" << std::endl;
+
+    // The first example has a compilation problem.  The second does not.
+    const char source[2][80] = {"void main() {}", "#version 450\nvoid main() {}"};
+
+    shaderc_compiler_t compiler = shaderc_compiler_initialize();
+    for (int i = 0; i < 2; ++i) {
+      std::cout << "  Source is:\n---\n" << source[i] << "\n---\n";
+      shaderc_compilation_result_t result = shaderc_compile_into_spv(
+          compiler, source[i], std::strlen(source[i]), shaderc_glsl_vertex_shader,
+          "main.vert", "main", nullptr);
+      auto status = shaderc_result_get_compilation_status(result);
+      std::cout << "  Result code " << int(status) << std::endl;
+      if (status != shaderc_compilation_status_success) {
+        std::cout << "error: " << shaderc_result_get_error_message(result)
+                  << std::endl;
+      }
+      shaderc_result_release(result);
+    }
+    shaderc_compiler_release(compiler);
   }
 
   return 0;
