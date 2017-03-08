@@ -216,3 +216,7 @@ directory.
 [khr-glslang]: https://github.com/KhronosGroup/glslang
 [google-glslang]: https://github.com/google/glslang
 [spirv-tools]: https://github.com/KhronosGroup/SPIRV-Tools
+
+## Bindings
+
+**Python:** [pyshaderc](https://github.com/realitix/pyshaderc)
