@@ -219,4 +219,8 @@ directory.
 
 ## Bindings
 
+Bindings are maintained by third parties, may contain content
+offered under a different license, and may reference or contain
+older versions of Shaderc and its dependencies.
+
 **Python:** [pyshaderc](https://github.com/realitix/pyshaderc)
