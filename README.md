@@ -83,6 +83,17 @@ git clone https://github.com/KhronosGroup/SPIRV-Headers.git spirv-tools/external
 cd $SOURCE_DIR/
 ```
 
+**Note:** The [known-good](https://github.com/google/shaderc/tree/known-good)
+branch of the repository contains a
+[known_good.json](https://github.com/google/shaderc/blob/known-good/known_good.json)
+file describing a set of repo URLs and specific commits that have been
+tested together.  This information is updated periodically, and typically
+matches the latest update of these sources in the development branch
+of the Android NDK.
+The `known-good` branch also contains a
+[update_shaderc.py](https://github.com/google/shaderc/blob/known-good/update_shaderc_sources.py)
+script that will read the JSON file and checkout those specific commits for you.
+
 2) Ensure you have the requisite tools -- see the tools subsection below.
 
 3) Decide where to place the build output. In the following steps, we'll call it
@@ -165,7 +176,7 @@ Optionally, the following tools may be installed on any OS:
      `asciidoctor` for syntax highlighting.
  - [`nosetests`](https://nose.readthedocs.io): for testing the Python code.
 
-### Building and running Shderc using Docker
+### Building and running Shaderc using Docker
 
 Please make sure you have the Docker engine
 [installed](https://docs.docker.com/engine/installation/) on your machine.
