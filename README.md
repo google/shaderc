@@ -213,14 +213,17 @@ ninja report-coverage
 Then the coverage report can be found under the `$BUILD_DIR/coverage-report`
 directory.
 
-[khr-glslang]: https://github.com/KhronosGroup/glslang
-[google-glslang]: https://github.com/google/glslang
-[spirv-tools]: https://github.com/KhronosGroup/SPIRV-Tools
-
 ## Bindings
 
 Bindings are maintained by third parties, may contain content
 offered under a different license, and may reference or contain
 older versions of Shaderc and its dependencies.
 
-**Python:** [pyshaderc](https://github.com/realitix/pyshaderc)
+* **Python:** [pyshaderc][pyshaderc]
+* **Rust:** [shaderc-rs][shaderc-rs]
+
+[khr-glslang]: https://github.com/KhronosGroup/glslang
+[google-glslang]: https://github.com/google/glslang
+[spirv-tools]: https://github.com/KhronosGroup/SPIRV-Tools
+[pyshaderc]: https://github.com/realitix/pyshaderc
+[shaderc-rs]: https://github.com/google/shaderc-rs
