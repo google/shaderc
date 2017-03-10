@@ -1,5 +1,7 @@
 Revision history for Shaderc
 
+v2017.2-dev 2017-03-10
+
 v2017.1 2017-03-10
  - Add option to automatically assign bindings to uniform variables
    that don't have an explicit 'binding' layout in the shader source.
