@@ -4,8 +4,12 @@ v2017.1-dev 2017-01-02
  - Add option to automatically assign bindings to uniform variables
    that don't have an explicit 'binding' layout in the shader source.
  - Enable NVIDIA extensions by default in GLSL compilation
+ - README mentions language bindings provided by 3rd parties.
+ - README describes the known-good branch on GitHub
+ - Fixed examples in shaderc.h; added C API use to examples/online-compile
  - Fixes issues:
    #289: Don't output an object file when compilation fails.
+   #296: Enable use of the CMake in Android Studio.
 
 v2016.2 2016-12-13
  - Describe Shaderc's level of stability.
