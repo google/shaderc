@@ -188,7 +188,7 @@ class InternalFileIncluder : public shaderc_util::CountingIncluder {
       const char* requested_source, const char* requesting_source,
       IncludeType type, size_t include_depth) override {
     if (!AreValidCallbacks()) {
-      const char kUnexpectedIncludeError[] =
+      static const char kUnexpectedIncludeError[] =
           "#error unexpected include directive";
       return new glslang::TShader::Includer::IncludeResult{
           "", kUnexpectedIncludeError, strlen(kUnexpectedIncludeError),

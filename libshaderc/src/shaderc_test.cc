@@ -1466,4 +1466,19 @@ TEST_F(CompileStringWithOptionsTest, AutoBindUniformsOptionsSurvivesCloning) {
   EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_sam Binding 1"));
 }
 
+TEST(Compiler, IncludeWithoutOptionsReturnsValidError) {
+  auto compiler = shaderc_compiler_initialize();
+  const char source[] = "#version 450\n#include \"no where\"";
+  auto result = shaderc_compile_into_spv(compiler, source, strlen(source),
+                                         shaderc_glsl_vertex_shader, "file",
+                                         "main", nullptr);
+  EXPECT_EQ(shaderc_compilation_status_compilation_error,
+            shaderc_result_get_compilation_status(result));
+  EXPECT_THAT(shaderc_result_get_error_message(result),
+              HasSubstr("error: '#include' : #error unexpected include "
+                        "directive for header name: no where"));
+
+  shaderc_result_release(result);
+  shaderc_compiler_release(compiler);
+}
 }  // anonymous namespace
