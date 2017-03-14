@@ -204,6 +204,7 @@ LOCAL_SRC_FILES:= \
 		source/text.cpp \
 		source/text_handler.cpp \
 		source/util/parse_number.cpp \
+		source/util/string_utils.cpp \
 		source/val/basic_block.cpp \
 		source/val/construct.cpp \
 		source/val/function.cpp \
