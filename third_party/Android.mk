@@ -148,6 +148,21 @@ $(SPVTOOLS_LOCAL_PATH)/source/ext_inst.cpp: $(1)/glsl.std.450.insts-1.0.inc $(1)
 endef
 $(eval $(call gen_spvtools_grammar_tables,$(SPVTOOLS_OUT_PATH)))
 
+define gen_spvtools_enum_string_mapping
+$(call generate-file-dir,$(1)/extension_enum.inc.inc)
+$(1)/extension_enum.inc $(1)/enum_string_mapping.inc: \
+        $(SPVTOOLS_LOCAL_PATH)/utils/generate_grammar_tables.py \
+        $(SPV_CORE11_GRAMMAR)
+		@$(HOST_PYTHON) $(SPVTOOLS_LOCAL_PATH)/utils/generate_grammar_tables.py \
+		                --spirv-core-grammar=$(SPV_CORE11_GRAMMAR) \
+		                --extension-enum-output=$(1)/extension_enum.inc \
+		                --enum-string-mapping-output=$(1)/enum_string_mapping.inc
+		@echo "[$(TARGET_ARCH_ABI)] Enum<->string mapping <= grammar JSON files"
+$(SPVTOOLS_LOCAL_PATH)/source/extension.h: $(1)/extension_enum.inc
+$(SPVTOOLS_LOCAL_PATH)/source/enum_string_mapping.cpp: $(1)/enum_string_mapping.inc
+endef
+$(eval $(call gen_spvtools_enum_string_mapping,$(SPVTOOLS_OUT_PATH)))
+
 define gen_spvtools_build_version_inc
 $(call generate-file-dir,$(1)/dummy_filename)
 $(1)/build-version.inc: \
@@ -189,7 +204,9 @@ LOCAL_SRC_FILES:= \
 		source/diagnostic.cpp \
 		source/disassemble.cpp \
 		source/ext_inst.cpp \
+		source/enum_string_mapping.cpp \
 		source/extensions.cpp \
+		source/extensions.h \
 		source/libspirv.cpp \
 		source/name_mapper.cpp \
 		source/opcode.cpp \
@@ -225,7 +242,8 @@ LOCAL_MODULE := SPIRV-Tools-opt
 LOCAL_C_INCLUDES := \
 		$(SPVTOOLS_LOCAL_PATH)/include \
 		$(SPVTOOLS_LOCAL_PATH)/source \
-		$(SPVTOOLS_LOCAL_PATH)/external/spirv-headers/include
+		$(SPVTOOLS_LOCAL_PATH)/external/spirv-headers/include \
+		$(SPVTOOLS_OUT_PATH)
 LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti -Werror
 LOCAL_STATIC_LIBRARIES:=SPIRV-Tools
 LOCAL_SRC_FILES:= \
