@@ -229,6 +229,7 @@ LOCAL_SRC_FILES:= \
 		source/val/validation_state.cpp \
 		source/validate.cpp \
 		source/validate_cfg.cpp \
+		source/validate_capability.cpp \
 		source/validate_datarules.cpp \
 		source/validate_decorations.cpp \
 		source/validate_id.cpp \
