@@ -85,6 +85,10 @@ class GoodCommit(object):
         if len(command_output(['git', 'remote', 'get-url', 'known-good'], self.subdir, fail_ok=True)) == 0:
             command_output(['git', 'remote', 'add', 'known-good', self.GetUrl()], self.subdir)
 
+    def HasCommit(self):
+        """Check if the repository contains the known-good commit."""
+        return 0 == subprocess.call(['git', 'rev-parse', '--verify', '--quiet', self.commit], cwd=self.subdir)
+
     def Clone(self):
         distutils.dir_util.mkpath(self.subdir)
         command_output(['git', 'clone', self.GetUrl(), '.'], self.subdir)
@@ -96,7 +100,8 @@ class GoodCommit(object):
         if not os.path.exists(os.path.join(self.subdir,'.git')):
             self.Clone()
         self.AddRemote()
-        self.Fetch()
+        if not self.HasCommit():
+            self.Fetch()
         command_output(['git', 'checkout', self.commit], self.subdir)
 
 
