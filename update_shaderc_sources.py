@@ -45,8 +45,7 @@ def command_output(cmd, directory):
         print('In {d}: {cmd}'.format(d=directory, cmd=cmd))
     p = subprocess.Popen(cmd,
                          cwd=directory,
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE)
+                         stdout=subprocess.PIPE)
     (stdout, _) = p.communicate()
     if p.returncode != 0:
         raise RuntimeError('Failed to run {} in {}'.format(cmd, directory))
