@@ -34,7 +34,7 @@ SITE_TO_HOST = { 'github' : 'github.com' }
 VERBOSE = True
 
 
-def command_output(cmd, directory):
+def command_output(cmd, directory, fail_ok=False):
     """Runs a command in a directory and returns its standard output stream.
 
     Captures the standard error stream.
@@ -47,7 +47,7 @@ def command_output(cmd, directory):
                          cwd=directory,
                          stdout=subprocess.PIPE)
     (stdout, _) = p.communicate()
-    if p.returncode != 0:
+    if p.returncode != 0 and not fail_ok:
         raise RuntimeError('Failed to run {} in {}'.format(cmd, directory))
     if VERBOSE:
         print(stdout)
@@ -80,10 +80,14 @@ class GoodCommit(object):
                     sep=sep,
                     subrepo=self.subrepo)
 
+    def AddRemote(self):
+        """Add the remote 'known-good' if it does not exist."""
+        if len(command_output(['git', 'remote', 'get-url', 'known-good'], self.subdir, fail_ok=True)) == 0:
+            command_output(['git', 'remote', 'add', 'known-good', self.GetUrl()], self.subdir)
+
     def Clone(self):
         distutils.dir_util.mkpath(self.subdir)
         command_output(['git', 'clone', self.GetUrl(), '.'], self.subdir)
-        command_output(['git', 'remote', 'add', 'known-good', self.GetUrl()], self.subdir)
 
     def Fetch(self):
         command_output(['git', 'fetch', 'known-good'], self.subdir)
@@ -91,6 +95,7 @@ class GoodCommit(object):
     def Checkout(self):
         if not os.path.exists(os.path.join(self.subdir,'.git')):
             self.Clone()
+        self.AddRemote()
         self.Fetch()
         command_output(['git', 'checkout', self.commit], self.subdir)
 
