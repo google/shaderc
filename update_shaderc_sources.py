@@ -90,7 +90,7 @@ class GoodCommit(object):
         command_output(['git', 'fetch', 'known-good'], self.subdir)
 
     def Checkout(self):
-        if not os.path.isdir(os.path.join(self.subdir,'.git')):
+        if not os.path.exists(os.path.join(self.subdir,'.git')):
             self.Clone()
         self.Fetch()
         command_output(['git', 'checkout', self.commit], self.subdir)
