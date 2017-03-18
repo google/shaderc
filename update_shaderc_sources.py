@@ -81,6 +81,10 @@ class GoodCommit(object):
                     sep=sep,
                     subrepo=self.subrepo)
 
+    def HasCommit(self):
+        """Check if the repository contains the known-good commit."""
+        return 0 == subprocess.call(['git', 'rev-parse', '--verify', '--quiet', self.commit], cwd=self.subdir)
+
     def Clone(self):
         distutils.dir_util.mkpath(self.subdir)
         command_output(['git', 'clone', self.GetUrl(), '.'], self.subdir)
@@ -92,7 +96,8 @@ class GoodCommit(object):
     def Checkout(self):
         if not os.path.isdir(os.path.join(self.subdir,'.git')):
             self.Clone()
-        self.Fetch()
+        if not self.HasCommit():
+            self.Fetch()
         command_output(['git', 'checkout', self.commit], self.subdir)
 
 
