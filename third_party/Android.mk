@@ -203,6 +203,21 @@ $(SPVTOOLS_LOCAL_PATH)/source/ext_inst.cpp: $(1)/glsl.std.450.insts-1.0.inc $(1)
 endef
 $(eval $(call gen_spvtools_grammar_tables,$(SPVTOOLS_OUT_PATH)))
 
+define gen_spvtools_vendor_tables
+$(call generate-file-dir,$(1)/$(2).insts.inc)
+$(1)/$(2).insts.inc : \
+        $(SPVTOOLS_LOCAL_PATH)/utils/generate_grammar_tables.py \
+        $(SPVTOOLS_LOCAL_PATH)/source/extinst.$(2).grammar.json
+		@$(HOST_PYTHON) $(SPVTOOLS_LOCAL_PATH)/utils/generate_grammar_tables.py \
+		    --extinst-vendor-grammar=$(SPVTOOLS_LOCAL_PATH)/source/extinst.$(2).grammar.json \
+		    --vendor-insts-output=$(1)/$(2).insts.inc
+		@echo "[$(TARGET_ARCH_ABI)] Vendor extended instruction set: $(2) tables <= grammar"
+$(SPVTOOLS_LOCAL_PATH)/source/ext_inst.cpp: $(1)/$(2).insts.inc
+endef
+# Vendor extended instruction sets, with grammars from SPIRV-Tools source tree.
+SPV_NONSTANDARD_EXTINST_GRAMMARS=$(foreach F,$(wildcard $(SPVTOOLS_LOCAL_PATH)/source/extinst.*.grammar.json),$(patsubst extinst.%.grammar.json,%,$(notdir $F)))
+$(foreach E,$(SPV_NONSTANDARD_EXTINST_GRAMMARS),$(eval $(call gen_spvtools_vendor_tables,$(SPVTOOLS_OUT_PATH),$E)))
+
 define gen_spvtools_enum_string_mapping
 $(call generate-file-dir,$(1)/extension_enum.inc.inc)
 $(1)/extension_enum.inc $(1)/enum_string_mapping.inc: \
