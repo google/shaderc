@@ -321,6 +321,15 @@ bool FileCompiler::ValidateOptions(size_t num_files) {
                 << std::endl;
       return false;
     }
+
+    if (output_file_name_ == "-") {
+        std::cerr << "glslc: error: options -M* and '-o -' are incompatible"
+                  << std::endl;
+        std::cerr << "glslc: error: cannot generate dependency info when"
+                     " compilation is written stdout"
+                  << std::endl;
+        return false;
+    }
   }
 
   // If the output format is specified to be a binary, a list of hex numbers or
