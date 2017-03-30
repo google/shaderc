@@ -50,8 +50,8 @@ class TestTargetEnvEqOpenglWithOpenGlCompatShader(expect.ErrorMessageSubstr):
     shader = FileShader(opengl_compat_fragment_shader(), '.frag')
     glslc_args = ['--target-env=opengl', shader]
     expected_error_substr = [shader, ":4: error: 'assign' :  ",
-                             "cannot convert from 'const float' to ",
-                             "'fragColor"]
+                             "cannot convert from ' const float' to ",
+                             "' fragColor"]
 
 
 @inside_glslc_testsuite('OptionTargetEnv')

@@ -257,8 +257,8 @@ int no_return() {}
         "error.glsl:1: error: 'return' : type does not match, or is not "
         "convertible to, the function's return type\n",
         "a.vert:3: error: '' : function does not return a value: no_return\n",
-        "main.glsl:2: error: '=' :  cannot convert from 'const float' to "
-        "'temp highp int'\n",
+        "main.glsl:2: error: '=' :  cannot convert from ' const float' to "
+        "' temp highp int'\n",
         "4 errors generated.\n"]
 
 
