@@ -151,12 +151,14 @@ SPVTOOLS_SRC_FILES := \
 		source/validate_type_unique.cpp
 
 SPVTOOLS_OPT_SRC_FILES := \
+		source/opt/basic_block.cpp \
 		source/opt/build_module.cpp \
 		source/opt/def_use_manager.cpp \
 		source/opt/eliminate_dead_constant_pass.cpp \
 		source/opt/fold_spec_constant_op_and_composite_pass.cpp \
 		source/opt/freeze_spec_constant_value_pass.cpp \
 		source/opt/function.cpp \
+		source/opt/inline_pass.cpp \
 		source/opt/instruction.cpp \
 		source/opt/ir_loader.cpp \
 		source/opt/module.cpp \
