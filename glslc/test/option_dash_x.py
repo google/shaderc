@@ -19,6 +19,9 @@ from placeholder import FileShader
 MINIMAL_SHADER = "#version 140\nvoid main(){}"
 # This one is valid GLSL but not valid HLSL.
 GLSL_VERTEX_SHADER = "#version 140\nvoid main(){ gl_Position = vec4(1.0);}"
+# This one is GLSL but without leading #version.  Should result in
+# a parser error when compiled as HLSL.
+GLSL_VERTEX_SHADER_WITHOUT_VERSION = "void main(){ gl_Position = vec4(1.0);}"
 # This one is valid HLSL but not valid GLSL.
 # Use entry point "main" so we don't have to specify -fentry-point
 HLSL_VERTEX_SHADER = "float4 main() : SV_POSITION { return float4(1.0); }"
@@ -56,6 +59,17 @@ class TestDashXHlslOnGlslShader(expect.ErrorMessageSubstr):
     """Tests -x hlsl on a GLSL shader."""
 
     shader = FileShader(GLSL_VERTEX_SHADER, '.vert')
+    glslc_args = ['-x', 'hlsl', '-c', shader]
+    # This is not a terribly good error message since HLSL doesn't support
+    # #version anyway.
+    expected_error_substr = ["error: '#version' : must occur first in shader\n"]
+
+
+@inside_glslc_testsuite('OptionDashX')
+class TestDashXHlslOnGlslShaderWithoutVertex(expect.ErrorMessageSubstr):
+    """Tests -x hlsl on a GLSL shader."""
+
+    shader = FileShader(GLSL_VERTEX_SHADER_WITHOUT_VERSION, '.vert')
     glslc_args = ['-x', 'hlsl', '-c', shader]
     expected_error_substr = ["error: 'vec4' : no matching overloaded function found\n"]
 
