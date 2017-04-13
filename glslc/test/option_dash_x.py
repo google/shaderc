@@ -60,14 +60,12 @@ class TestDashXHlslOnGlslShader(expect.ErrorMessageSubstr):
 
     shader = FileShader(GLSL_VERTEX_SHADER, '.vert')
     glslc_args = ['-x', 'hlsl', '-c', shader]
-    # This is not a terribly good error message since HLSL doesn't support
-    # #version anyway.
-    expected_error_substr = ["error: '#version' : must occur first in shader\n"]
+    expected_error_substr = ["error: '#version' : invalid preprocessor command\n"]
 
 
 @inside_glslc_testsuite('OptionDashX')
 class TestDashXHlslOnGlslShaderWithoutVertex(expect.ErrorMessageSubstr):
-    """Tests -x hlsl on a GLSL shader."""
+    """Tests -x hlsl on a GLSL shader without leading #version."""
 
     shader = FileShader(GLSL_VERTEX_SHADER_WITHOUT_VERSION, '.vert')
     glslc_args = ['-x', 'hlsl', '-c', shader]
