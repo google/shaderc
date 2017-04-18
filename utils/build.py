@@ -65,7 +65,7 @@ def build(args):
 
     # Make paths absolute, and ensure directories exist.
     for d in [args.builddir, args.installdir]:
-        if not os.path.isdir(d):
+        if not os.path.exists(d):
             os.makedirs(d)
     args.srcdir = os.path.abspath(args.srcdir)
     args.builddir = os.path.abspath(args.builddir)
