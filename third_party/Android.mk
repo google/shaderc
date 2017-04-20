@@ -153,6 +153,7 @@ SPVTOOLS_SRC_FILES := \
 SPVTOOLS_OPT_SRC_FILES := \
 		source/opt/basic_block.cpp \
 		source/opt/build_module.cpp \
+		source/opt/compact_ids_pass.cpp \
 		source/opt/def_use_manager.cpp \
 		source/opt/eliminate_dead_constant_pass.cpp \
 		source/opt/flatten_decoration_pass.cpp \
