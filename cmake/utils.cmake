@@ -103,6 +103,11 @@ function(shaderc_add_tests)
       if (MINGW)
         target_compile_options(${TEST_NAME} PRIVATE -DSHADERC_DISABLE_THREADED_TESTS)
       endif()
+      if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+        # Disable this warning, which is useless in test code.
+        # Fixes https://github.com/google/shaderc/issues/334
+        target_compile_options(${TEST_NAME} PRIVATE -Wno-noexcept-type)
+      endif()
       if (PARSED_ARGS_LINK_LIBS)
         target_link_libraries(${TEST_NAME} PRIVATE
         ${PARSED_ARGS_LINK_LIBS})
