@@ -126,7 +126,7 @@ class TestShaderStageWithAssemblyFile(expect.ErrorMessage):
     expected_error = [
         shader, ": error: #version: Desktop shaders for Vulkan SPIR-V require "
         "version 140 or higher\n",
-        shader, ":2: error: '' :  syntax error\n",
+        shader, ":2: error: '' :  syntax error, unexpected SEMICOLON\n",
         '2 errors generated.\n']
 
 
