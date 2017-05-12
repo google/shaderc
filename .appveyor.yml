@@ -49,7 +49,6 @@ notifications:
     to:
       - antiagainst@google.com
       - awoloszyn@google.com
-      - deki@google.com
       - dneto@google.com
       - qining@google.com
     subject: 'Shaderc Windows Build #{{buildVersion}}: {{status}}'
