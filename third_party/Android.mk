@@ -133,6 +133,7 @@ SPVTOOLS_SRC_FILES := \
 		source/table.cpp \
 		source/text.cpp \
 		source/text_handler.cpp \
+		source/util/bit_stream.cpp \
 		source/util/parse_number.cpp \
 		source/util/string_utils.cpp \
 		source/val/basic_block.cpp \
