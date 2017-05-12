@@ -14,8 +14,10 @@
 
 #include "libshaderc_util/counting_includer.h"
 
-#include <gmock/gmock.h>
 #include <thread>
+#include <vector>
+
+#include <gmock/gmock.h>
 
 namespace {
 
@@ -23,17 +25,27 @@ namespace {
 // instantiate.
 class ConcreteCountingIncluder : public shaderc_util::CountingIncluder {
  public:
-  virtual glslang::TShader::Includer::IncludeResult* include_delegate(
+  using IncludeResult = glslang::TShader::Includer::IncludeResult;
+  ~ConcreteCountingIncluder() {
+    // Avoid leaks.
+    for (auto result : results_) {
+      release_delegate(result);
+    }
+  }
+  virtual IncludeResult* include_delegate(
       const char* requested, const char* requestor, IncludeType,
       size_t) override {
     const char kError[] = "Unexpected #include";
-    return new glslang::TShader::Includer::IncludeResult{
-        "", kError, strlen(kError), nullptr};
+    results_.push_back(new IncludeResult{"", kError, strlen(kError), nullptr});
+    return results_.back();
   }
-  virtual void release_delegate(
-      glslang::TShader::Includer::IncludeResult* include_result) override {
+  virtual void release_delegate(IncludeResult* include_result) override {
     delete include_result;
   }
+
+ private:
+  // All the results we've returned so far.
+  std::vector<IncludeResult*> results_;
 };
 
 TEST(CountingIncluderTest, InitialCount) {
