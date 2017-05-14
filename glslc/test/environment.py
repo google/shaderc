@@ -33,6 +33,7 @@ were written in a test framework that handles clean-up at a higher level.
 """
 
 import os
+import stat
 
 class Directory:
     """Specifies a directory or a subdirectory."""
@@ -62,11 +63,16 @@ class Directory:
 
 class File:
     """Specifies a file by name and content."""
-    def __init__(self, name, content):
+    def __init__(self, name, content, readable=True):
         self.name = name
         self.content = content
+        self.readable = readable
 
     def write(self, directory):
         """Writes content to directory/name."""
-        with open(os.path.join(directory, self.name), 'w') as f:
+        full_path = os.path.join(directory, self.name)
+        with open(full_path, 'w') as f:
             f.write(self.content)
+        if not self.readable:
+          access_bits = stat.S_IMODE(os.stat(full_path).st_mode)
+          os.chmod(full_path, access_bits & ~stat.S_IRUSR)

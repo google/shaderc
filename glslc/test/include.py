@@ -54,6 +54,20 @@ class VerifyIncludeNotFound(expect.ErrorMessage):
     ]
 
 @inside_glslc_testsuite('Include')
+class VerifyIncludeCannotOpen(expect.ErrorMessage):
+    """Tests #including an existing but not readable sibling file."""
+
+    environment = Directory('.', [
+        File('a.vert', 'content a\n#include "b"\n'),
+        File('b', 'content b\n', readable=False)])
+
+    glslc_args = ['-E', 'a.vert']
+    expected_error = [
+        "a.vert:2: error: '#include' : Cannot open or find include file.\n",
+        '1 error generated.\n'
+    ]
+
+@inside_glslc_testsuite('Include')
 class VerifyCompileIncludeOneSibling(expect.ValidObjectFile):
     """Tests #including a sibling file via full compilation."""
 
