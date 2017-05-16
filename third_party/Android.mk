@@ -202,8 +202,16 @@ $(1)/core.insts-1.1.inc $(1)/operand.kinds-1.1.inc: \
 		                --core-insts-output=$(1)/core.insts-1.1.inc \
 		                --operand-kinds-output=$(1)/operand.kinds-1.1.inc
 		@echo "[$(TARGET_ARCH_ABI)] Grammar v1.1   : instructions & operands <= grammar JSON files"
-$(SPVTOOLS_LOCAL_PATH)/source/opcode.cpp: $(1)/core.insts-1.0.inc $(1)/core.insts-1.1.inc
-$(SPVTOOLS_LOCAL_PATH)/source/operand.cpp: $(1)/operand.kinds-1.0.inc $(1)/operand.kinds-1.1.inc
+$(1)/core.insts-1.2.inc $(1)/operand.kinds-1.2.inc: \
+        $(SPVTOOLS_LOCAL_PATH)/utils/generate_grammar_tables.py \
+        $(SPV_CORE11_GRAMMAR)
+		@$(HOST_PYTHON) $(SPVTOOLS_LOCAL_PATH)/utils/generate_grammar_tables.py \
+		                --spirv-core-grammar=$(SPV_CORE11_GRAMMAR) \
+		                --core-insts-output=$(1)/core.insts-1.2.inc \
+		                --operand-kinds-output=$(1)/operand.kinds-1.2.inc
+		@echo "[$(TARGET_ARCH_ABI)] Grammar v1.2   : instructions & operands <= grammar JSON files"
+$(SPVTOOLS_LOCAL_PATH)/source/opcode.cpp: $(1)/core.insts-1.0.inc $(1)/core.insts-1.1.inc $(1)/core.insts-1.2.inc
+$(SPVTOOLS_LOCAL_PATH)/source/operand.cpp: $(1)/operand.kinds-1.0.inc $(1)/operand.kinds-1.1.inc $(1)/operand.kinds-1.2.inc
 $(SPVTOOLS_LOCAL_PATH)/source/ext_inst.cpp: $(1)/glsl.std.450.insts-1.0.inc $(1)/opencl.std.insts-1.0.inc
 endef
 $(eval $(call gen_spvtools_grammar_tables,$(SPVTOOLS_OUT_PATH)))
