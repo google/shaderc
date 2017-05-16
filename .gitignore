@@ -8,4 +8,5 @@ cscope.*
 third_party/glslang/
 third_party/googletest/
 third_party/spirv-tools/
+android_test/libs
 .DS_Store
