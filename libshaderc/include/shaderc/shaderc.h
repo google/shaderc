@@ -32,12 +32,19 @@ typedef enum {
 typedef enum {
   // Forced shader kinds. These shader kinds force the compiler to compile the
   // source code as the specified kind of shader.
-  shaderc_glsl_vertex_shader,
-  shaderc_glsl_fragment_shader,
-  shaderc_glsl_compute_shader,
-  shaderc_glsl_geometry_shader,
-  shaderc_glsl_tess_control_shader,
-  shaderc_glsl_tess_evaluation_shader,
+  shaderc_vertex_shader,
+  shaderc_fragment_shader,
+  shaderc_compute_shader,
+  shaderc_geometry_shader,
+  shaderc_tess_control_shader,
+  shaderc_tess_evaluation_shader,
+
+  shaderc_glsl_vertex_shader = shaderc_vertex_shader,
+  shaderc_glsl_fragment_shader = shaderc_fragment_shader,
+  shaderc_glsl_compute_shader = shaderc_compute_shader,
+  shaderc_glsl_geometry_shader = shaderc_geometry_shader,
+  shaderc_glsl_tess_control_shader = shaderc_tess_control_shader,
+  shaderc_glsl_tess_evaluation_shader = shaderc_tess_evaluation_shader,
   // Deduce the shader kind from #pragma annotation in the source code. Compiler
   // will emit error if #pragma annotation is not found.
   shaderc_glsl_infer_from_source,
