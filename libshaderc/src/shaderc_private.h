@@ -15,12 +15,14 @@
 #ifndef LIBSHADERC_SRC_SHADERC_PRIVATE_H_
 #define LIBSHADERC_SRC_SHADERC_PRIVATE_H_
 
+#include <cassert>
 #include <cstdint>
 #include <string>
 #include <vector>
 
 #include "shaderc/shaderc.h"
 
+#include "libshaderc_util/compiler.h"
 #include "spirv-tools/libspirv.h"
 
 // Described in shaderc.h.
@@ -90,5 +92,32 @@ class GlslangInitializer;
 struct shaderc_compiler {
   shaderc_util::GlslangInitializer* initializer;
 };
+
+// Converts a shader stage from shaderc_shader_kind into a shaderc_util::Compiler::Stage.
+// This is only valid for a specifically named shader stage, e.g. vertex through fragment,
+// or compute.
+inline shaderc_util::Compiler::Stage shaderc_convert_specific_stage(
+    shaderc_shader_kind kind) {
+  switch (kind) {
+    case shaderc_vertex_shader:
+      return shaderc_util::Compiler::Stage::Vertex;
+    case shaderc_fragment_shader:
+      return shaderc_util::Compiler::Stage::Fragment;
+    case shaderc_tess_control_shader:
+      return shaderc_util::Compiler::Stage::TessControl;
+    case shaderc_tess_evaluation_shader:
+      return shaderc_util::Compiler::Stage::TessEval;
+    case shaderc_geometry_shader:
+      return shaderc_util::Compiler::Stage::Geometry;
+    case shaderc_compute_shader:
+      return shaderc_util::Compiler::Stage::Compute;
+    default:
+      // We don't care about the other kinds.
+      break;
+  }
+  // This should not occur.
+  assert(false && "Should have specified a specific stage");
+  return shaderc_util::Compiler::Stage::TessEval;
+}
 
 #endif  // LIBSHADERC_SRC_SHADERC_PRIVATE_H_

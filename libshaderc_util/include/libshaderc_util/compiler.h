@@ -133,6 +133,18 @@ class Compiler {
     Buffer = 3, // Uniform Buffer Object, or UBO
   };
 
+  // Shader pipeline stage.
+  // TODO(dneto): Replaces interface uses of EShLanguage with this enum.
+  enum class Stage {
+    Vertex,
+    TessEval,
+    TessControl,
+    Geometry,
+    Fragment,
+    Compute,
+  };
+  enum { kNumStageKinds = int(Stage::Compute) + 1 };
+
   // Creates an default compiler instance targeting at Vulkan environment. Uses
   // version 110 and no profile specification as the default for GLSL.
   Compiler()
