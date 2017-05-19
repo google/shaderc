@@ -116,7 +116,7 @@ SPVTOOLS_SRC_FILES := \
 		source/assembly_grammar.cpp \
 		source/binary.cpp \
 		source/diagnostic.cpp \
-		source/disassemble.cpp \
+		source/disas.cpp \
 		source/ext_inst.cpp \
 		source/enum_string_mapping.cpp \
 		source/extensions.cpp \
@@ -152,7 +152,6 @@ SPVTOOLS_SRC_FILES := \
 		source/validate_type_unique.cpp
 
 SPVTOOLS_OPT_SRC_FILES := \
-		source/opt/basic_block.cpp \
 		source/opt/build_module.cpp \
 		source/opt/compact_ids_pass.cpp \
 		source/opt/def_use_manager.cpp \
@@ -160,11 +159,12 @@ SPVTOOLS_OPT_SRC_FILES := \
 		source/opt/flatten_decoration_pass.cpp \
 		source/opt/fold_spec_constant_op_and_composite_pass.cpp \
 		source/opt/freeze_spec_constant_value_pass.cpp \
-		source/opt/function.cpp \
 		source/opt/inline_pass.cpp \
-		source/opt/instruction.cpp \
 		source/opt/ir_loader.cpp \
-		source/opt/module.cpp \
+		source/opt/opt_basic_block.cpp \
+		source/opt/opt_function.cpp \
+		source/opt/opt_instruction.cpp \
+		source/opt/opt_module.cpp \
 		source/opt/optimizer.cpp \
 		source/opt/pass_manager.cpp \
 		source/opt/set_spec_constant_default_value_pass.cpp \
