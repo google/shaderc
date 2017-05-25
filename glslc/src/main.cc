@@ -70,7 +70,7 @@ Options:
                     geometry, and compute.
   -g                Generate source-level debug information.
                     Currently this option has no effect.
-  --help            Display available options.
+  -h, --help        Display available options.
   --version         Display compiler version information.
   -I <value>        Add directory to include search path.
   -o <file>         Write output to <file>.
@@ -159,7 +159,7 @@ int main(int argc, char** argv) {
 
   for (int i = 1; i < argc; ++i) {
     const string_piece arg = argv[i];
-    if (arg == "--help") {
+    if (arg == "--help" || arg == "-h") {
       ::PrintHelp(&std::cout);
       return 0;
     } else if (arg == "--show-limits") {

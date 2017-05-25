@@ -17,36 +17,7 @@ import os.path
 from glslc_test_framework import inside_glslc_testsuite
 from placeholder import FileShader, StdinShader, TempFileName
 
-
-@inside_glslc_testsuite('File')
-class SimpleFileCompiled(expect.ValidObjectFile):
-    """Tests whether or not a simple glsl file compiles."""
-
-    shader = FileShader('#version 310 es\nvoid main() {}', '.frag')
-    glslc_args = ['-c', shader]
-
-
-@inside_glslc_testsuite('File')
-class NotSpecifyingOutputName(expect.SuccessfulReturn,
-                              expect.CorrectObjectFilePreamble):
-    """Tests that when there is no -o and -E/-S/-c specified, output as a.spv."""
-
-    shader = FileShader('#version 140\nvoid main() {}', '.frag')
-    glslc_args = [shader]
-
-    def check_output_a_spv(self, status):
-        output_name = os.path.join(status.directory, 'a.spv')
-        return self.verify_object_file_preamble(output_name)
-
-
-@inside_glslc_testsuite('Parameters')
-class HelpParameters(
-    expect.ReturnCodeIsZero, expect.StdoutMatch, expect.StderrMatch):
-    """Tests the --help flag outputs correctly and does not produce and error."""
-
-    glslc_args = ['--help']
-
-    expected_stdout = '''glslc - Compile shaders into SPIR-V
+HELP_MESSAGE = '''glslc - Compile shaders into SPIR-V
 
 Usage: glslc [options] file...
 
@@ -78,7 +49,7 @@ Options:
                     geometry, and compute.
   -g                Generate source-level debug information.
                     Currently this option has no effect.
-  --help            Display available options.
+  -h, --help        Display available options.
   --version         Display compiler version information.
   -I <value>        Add directory to include search path.
   -o <file>         Write output to <file>.
@@ -109,6 +80,44 @@ Options:
                     Otherwise the default is glsl.
 '''
 
+@inside_glslc_testsuite('File')
+class SimpleFileCompiled(expect.ValidObjectFile):
+    """Tests whether or not a simple glsl file compiles."""
+
+    shader = FileShader('#version 310 es\nvoid main() {}', '.frag')
+    glslc_args = ['-c', shader]
+
+
+@inside_glslc_testsuite('File')
+class NotSpecifyingOutputName(expect.SuccessfulReturn,
+                              expect.CorrectObjectFilePreamble):
+    """Tests that when there is no -o and -E/-S/-c specified, output as a.spv."""
+
+    shader = FileShader('#version 140\nvoid main() {}', '.frag')
+    glslc_args = [shader]
+
+    def check_output_a_spv(self, status):
+        output_name = os.path.join(status.directory, 'a.spv')
+        return self.verify_object_file_preamble(output_name)
+
+
+@inside_glslc_testsuite('Parameters')
+class HelpParametersHelp(
+    expect.ReturnCodeIsZero, expect.StdoutMatch, expect.StderrMatch):
+    """Tests the --help flag outputs correctly and does not produce and error."""
+
+    glslc_args = ['--help']
+    expected_stdout = HELP_MESSAGE
+    expected_stderr = ''
+
+
+@inside_glslc_testsuite('Parameters')
+class HelpParametersH(
+    expect.ReturnCodeIsZero, expect.StdoutMatch, expect.StderrMatch):
+    """Tests the --h flag outputs correctly and does not produce and error."""
+
+    glslc_args = ['-h']
+    expected_stdout = HELP_MESSAGE
     expected_stderr = ''
 
 
