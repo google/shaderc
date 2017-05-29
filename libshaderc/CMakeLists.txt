@@ -3,15 +3,23 @@ project(libshaderc)
 # Even though shaderc.hpp is a headers-only library, adding
 # a dependency here will force clients of the library to rebuild
 # when it changes.
-add_library(shaderc STATIC
+set(shaderc_src
   include/shaderc/shaderc.h
   include/shaderc/shaderc.hpp
   src/shaderc.cc
   src/shaderc_private.h
 )
 
+add_library(shaderc STATIC ${shaderc_src})
 shaderc_default_compile_options(shaderc)
 target_include_directories(shaderc PUBLIC include PRIVATE ${glslang_SOURCE_DIR})
+
+add_library(shaderc_shared SHARED ${shaderc_src})
+shaderc_default_compile_options(shaderc_shared)
+target_include_directories(shaderc_shared PUBLIC include PRIVATE ${glslang_SOURCE_DIR})
+set_target_properties(shaderc_shared PROPERTIES
+                      WINDOWS_EXPORT_ALL_SYMBOLS true
+                      C_VISIBILITY_PRESET visible)
 
 install(
   FILES
@@ -20,17 +28,20 @@ install(
   DESTINATION
     include/shaderc)
 
-install(TARGETS shaderc
+install(TARGETS shaderc shaderc_shared
+  RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib)
 
 find_package(Threads)
-target_link_libraries(shaderc PRIVATE
-  glslang OSDependent OGLCompiler glslang ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(shaderc PRIVATE shaderc_util)
-target_link_libraries(shaderc PRIVATE SPIRV)  # from glslang
-target_link_libraries(shaderc PRIVATE SPIRV-Tools)
+list(APPEND shaderc_link_libs
+  glslang OSDependent OGLCompiler glslang ${CMAKE_THREAD_LIBS_INIT}
+  shaderc_util
+  SPIRV # from glslang
+  SPIRV-Tools)
 
+target_link_libraries(shaderc PRIVATE ${shaderc_link_libs})
+target_link_libraries(shaderc_shared PRIVATE ${shaderc_link_libs})
 
 shaderc_add_tests(
   TEST_PREFIX shaderc
@@ -39,7 +50,6 @@ shaderc_add_tests(
   TEST_NAMES
     shaderc
     shaderc_cpp)
-
 
 shaderc_combine_static_lib(shaderc_combined shaderc)
 
@@ -61,6 +71,15 @@ endif()
 shaderc_add_tests(
   TEST_PREFIX shaderc_combined
   LINK_LIBS shaderc_combined ${CMAKE_THREAD_LIBS_INIT}
+  INCLUDE_DIRS include ${glslang_SOURCE_DIR} ${spirv-tools_SOURCE_DIR}/include
+  TEST_NAMES
+    shaderc
+    shaderc_cpp)
+
+shaderc_add_tests(
+  TEST_PREFIX shaderc_shared
+  # xxxnsubtil: test code generates references to symbols coming from SPIRV-Tools which are not exported by the shared library
+  LINK_LIBS shaderc_shared ${CMAKE_THREAD_LIBS_INIT} SPIRV-Tools
   INCLUDE_DIRS include ${glslang_SOURCE_DIR} ${spirv-tools_SOURCE_DIR}/include
   TEST_NAMES
     shaderc
