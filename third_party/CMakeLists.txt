@@ -53,9 +53,11 @@ if(${SHADERC_ENABLE_TESTS})
   # The runtests script assumes the glslangValidator executable exists in
   # a location inside the source tree, but we build it elsewhere.
   # We need to copy the test files, fix the path references, and then run tests.
+  # Use test directory named "Test" to match Glslangs Test directory, so
+  # that we get the right relative path names in the "include" test output.
   set(GLSLANG_TEST_SRC_DIR ${SHADERC_GLSLANG_DIR}/Test)
   set(GLSLANG_TEST_BIN_DIR
-        ${CMAKE_CURRENT_BINARY_DIR}/test-glslang/${CMAKE_CFG_INTDIR})
+        ${CMAKE_CURRENT_BINARY_DIR}/Test/${CMAKE_CFG_INTDIR})
 
   # If we are building in a multi-configuration setting we have
   # to put the glslang tests into their respective subdirectories.
@@ -71,15 +73,15 @@ if(${SHADERC_ENABLE_TESTS})
 
   if (CMAKE_CONFIGURATION_TYPES)
     # If we are running a multi-configuration project,
-    # the tests will be in test-glslang/${Configuration}
+    # the tests will be in Test/${Configuration}
     add_test(NAME glslang-testsuite
       COMMAND bash runtests
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test-glslang/$<CONFIGURATION>
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Test/$<CONFIGURATION>
     )
   else()
     add_test(NAME glslang-testsuite
       COMMAND bash runtests
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test-glslang/
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Test/
     )
   endif()
 endif()
