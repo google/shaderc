@@ -205,14 +205,11 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   shader.setPreamble(preamble.c_str());
   shader.setEntryPoint(entry_point_name);
   shader.setAutoMapBindings(auto_bind_uniforms_);
-  shader.setShiftImageBinding(
-      auto_binding_base_[static_cast<int>(UniformKind::Image)]);
-  shader.setShiftSamplerBinding(
-      auto_binding_base_[static_cast<int>(UniformKind::Sampler)]);
-  shader.setShiftTextureBinding(
-      auto_binding_base_[static_cast<int>(UniformKind::Texture)]);
-  shader.setShiftUboBinding(
-      auto_binding_base_[static_cast<int>(UniformKind::Buffer)]);
+  const auto& bases = auto_binding_base_[static_cast<int>(used_shader_stage)];
+  shader.setShiftImageBinding(bases[static_cast<int>(UniformKind::Image)]);
+  shader.setShiftSamplerBinding(bases[static_cast<int>(UniformKind::Sampler)]);
+  shader.setShiftTextureBinding(bases[static_cast<int>(UniformKind::Texture)]);
+  shader.setShiftUboBinding(bases[static_cast<int>(UniformKind::Buffer)]);
 
   // TODO(dneto): Generate source-level debug info if requested.
   bool success =

@@ -15,6 +15,8 @@
 #ifndef LIBSHADERC_UTIL_INC_COMPILER_H
 #define LIBSHADERC_UTIL_INC_COMPILER_H
 
+#include <array>
+#include <cassert>
 #include <functional>
 #include <ostream>
 #include <string>
@@ -130,8 +132,9 @@ class Compiler {
     Image = 0,  // Also applies to "image buffers".
     Sampler = 1,
     Texture = 2,
-    Buffer = 3, // Uniform Buffer Object, or UBO
+    Buffer = 3,  // Uniform Buffer Object, or UBO
   };
+  enum { kNumUniformKinds = int(UniformKind::Buffer) + 1 };
 
   // Shader pipeline stage.
   // TODO(dneto): Replaces interface uses of EShLanguage with this enum.
@@ -143,7 +146,15 @@ class Compiler {
     Fragment,
     Compute,
   };
-  enum { kNumStageKinds = int(Stage::Compute) + 1 };
+  enum { kNumStages = int(Stage::Compute) + 1 };
+
+  // Returns a std::array of all the Stage values.
+  const std::array<Stage, kNumStages>& stages() const {
+    static std::array<Stage, kNumStages> values{
+        {Stage::Vertex, Stage::TessEval, Stage::TessControl, Stage::Geometry,
+         Stage::Fragment, Stage::Compute}};
+    return values;
+  }
 
   // Creates an default compiler instance targeting at Vulkan environment. Uses
   // version 110 and no profile specification as the default for GLSL.
@@ -205,9 +216,20 @@ class Compiler {
   void SetAutoBindUniforms(bool auto_bind) { auto_bind_uniforms_ = auto_bind; }
 
   // Sets the lowest binding number used when automatically assigning bindings
-  // for uniform resources of the given type.  The default is zero.
+  // for uniform resources of the given type, for all shader stages.  The default
+  // base is zero.
   void SetAutoBindingBase(UniformKind kind, uint32_t base) {
-    auto_binding_base_[static_cast<int>(kind)] = base;
+    for (auto stage : stages()) {
+      SetAutoBindingBaseForStage(stage, kind, base);
+    }
+  }
+
+  // Sets the lowest binding number used when automatically assigning bindings
+  // for uniform resources of the given type for a specific shader stage.  The
+  // default base is zero.
+  void SetAutoBindingBaseForStage(Stage stage, UniformKind kind,
+                                  uint32_t base) {
+    auto_binding_base_[static_cast<int>(stage)][static_cast<int>(kind)] = base;
   }
 
   // Compiles the shader source in the input_source_string parameter.
@@ -364,17 +386,38 @@ class Compiler {
   // have explicit bindings.
   bool auto_bind_uniforms_;
 
-  // The base binding number per uniform type, used when automatically binding
-  // uniforms that don't hzve explicit bindings in the shader source.
-  // the default is zero.
-  // Note: The array size must track the set of enum values.
-  uint32_t auto_binding_base_[static_cast<int>(UniformKind::Buffer) + 1] = {0};
+  // The base binding number per uniform type, per stage, used when automatically
+  // binding uniforms that don't hzve explicit bindings in the shader source.
+  // The default is zero.
+  uint32_t auto_binding_base_[kNumStages][kNumUniformKinds];
 };
 
 // Converts a string to a vector of uint32_t by copying the content of a given
 // string to the vector and returns it. Appends '\0' at the end if extra bytes
 // are required to complete the last element.
 std::vector<uint32_t> ConvertStringToVector(const std::string& str);
+
+// Converts a valid Glslang shader stage value to a Compiler::Stage value.
+inline Compiler::Stage ConvertToStage(EShLanguage stage) {
+  switch (stage) {
+    case EShLangVertex:
+      return Compiler::Stage::Vertex;
+    case EShLangTessControl:
+      return Compiler::Stage::TessEval;
+    case EShLangTessEvaluation:
+      return Compiler::Stage::TessControl;
+    case EShLangGeometry:
+      return Compiler::Stage::Geometry;
+    case EShLangFragment:
+      return Compiler::Stage::Fragment;
+    case EShLangCompute:
+      return Compiler::Stage::Compute;
+    default:
+      break;
+  }
+  assert(false && "Invalid case");
+  return Compiler::Stage::Compute;
+}
 
 }  // namespace shaderc_util
 #endif  // LIBSHADERC_UTIL_INC_COMPILER_H
