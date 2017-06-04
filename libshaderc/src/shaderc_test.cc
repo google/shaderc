@@ -1595,4 +1595,38 @@ TEST(Compiler, IncludeWithoutOptionsReturnsValidError) {
   shaderc_result_release(result);
   shaderc_compiler_release(compiler);
 }
+
+TEST_F(
+    CompileStringWithOptionsTest,
+    SetBindingBaseForTextureForVertexAdjustsTextureBindingsOnlyCompilingAsVertex) {
+  shaderc_compile_options_set_auto_bind_uniforms(options_.get(), true);
+  shaderc_compile_options_set_binding_base_for_stage(
+      options_.get(), shaderc_vertex_shader, shaderc_uniform_kind_texture, 100);
+  const std::string disassembly_text = CompilationOutput(
+      kShaderWithUniformsWithoutBindings, shaderc_vertex_shader, options_.get(),
+      OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_tex Binding 100")) << disassembly_text;
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_sam Binding 0"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_img Binding 1"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_imbuf Binding 2"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_ubo Binding 3"));
+}
+
+TEST_F(
+    CompileStringWithOptionsTest,
+    SetBindingBaseForTextureForVertexIgnoredWhenCompilingAsFragment) {
+  shaderc_compile_options_set_auto_bind_uniforms(options_.get(), true);
+// This is ignored since we're compiling as a different stage.
+  shaderc_compile_options_set_binding_base_for_stage(
+      options_.get(), shaderc_vertex_shader, shaderc_uniform_kind_texture, 100);
+  const std::string disassembly_text = CompilationOutput(
+      kShaderWithUniformsWithoutBindings, shaderc_fragment_shader,
+      options_.get(), OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_tex Binding 0"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_sam Binding 1"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_img Binding 2"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_imbuf Binding 3"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_ubo Binding 4"));
+}
+
 }  // anonymous namespace

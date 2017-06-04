@@ -380,6 +380,13 @@ void shaderc_compile_options_set_binding_base(shaderc_compile_options_t options,
                                               shaderc_uniform_kind kind,
                                               uint32_t base);
 
+// When automatically assigning bindings for uniforms, sets the lowest automatically
+// assigned binding number for uniform resources of the given type, when compiling
+// for the given shader stage.
+void shaderc_compile_options_set_binding_base_for_stage(
+    shaderc_compile_options_t options, shaderc_shader_kind shader_kind,
+    shaderc_uniform_kind kind, uint32_t base);
+
 // An opaque handle to the results of a call to any shaderc_compile_into_*()
 // function.
 typedef struct shaderc_compilation_result* shaderc_compilation_result_t;
