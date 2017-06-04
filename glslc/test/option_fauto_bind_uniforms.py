@@ -24,12 +24,14 @@ GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS = """#version 450
   layout(rgba32f) uniform image2D my_img;
   layout(rgba32f) uniform imageBuffer my_imbuf;
   uniform block { float x; float y; } my_ubo;
+  buffer B { float z; } my_ssbo;
   void main() {
     texture(sampler2D(my_tex,my_sam),vec2(1.0));
     vec4 t;
     sparseImageLoadARB(my_img,ivec2(0),t);
     imageLoad(my_imbuf,42);
     float x = my_ubo.x;
+    my_ssbo.z = 1.1;
   }"""
 
 @inside_glslc_testsuite('OptionFAutoBindUniforms')
@@ -94,6 +96,15 @@ class FUboBindingBaseOptionRespectedOnBuffer(expect.ValidAssemblyFileWithSubstr)
 
     shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.vert')
     glslc_args = ['-S', shader, '-fauto-bind-uniforms', '-fubo-binding-base', '44']
+    expected_assembly_substr = "OpDecorate %my_ubo Binding 44"
+
+
+@inside_glslc_testsuite('OptionFAutoBindUniforms')
+class FCbufferBindingBaseOptionRespectedOnBuffer(expect.ValidAssemblyFileWithSubstr):
+    """Tests that -fcbuffer-binding-base value is respected."""
+
+    shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.vert')
+    glslc_args = ['-S', shader, '-fauto-bind-uniforms', '-fcbuffer-binding-base', '44']
     expected_assembly_substr = "OpDecorate %my_ubo Binding 44"
 
 
@@ -231,3 +242,31 @@ class FImageBindingBaseForFragOptionRespectedOnImageCompileAsFrag(expect.ValidAs
     shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', shader, '-fauto-bind-uniforms', '-fimage-binding-base', 'frag', '44']
     expected_assembly_substr = "OpDecorate %my_img Binding 44"
+
+
+@inside_glslc_testsuite('OptionFAutoBindUniforms')
+class FSsboBindingBaseRespectedOnSsboCompileAsFrag(expect.ValidAssemblyFileWithSubstr):
+    """Tests that -fssbo-binding-base with frag stage value is respected on SSBOs."""
+
+    shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.frag')
+    glslc_args = ['-S', shader, '-fauto-bind-uniforms', '-fssbo-binding-base', '100']
+    expected_assembly_substr = "OpDecorate %my_ssbo Binding 100"
+
+
+@inside_glslc_testsuite('OptionFAutoBindUniforms')
+class FSsboBindingBaseForFragOptionRespectedOnSsboCompileAsFrag(expect.ValidAssemblyFileWithSubstr):
+    """Tests that -fssbo-binding-base with frag stage value is respected on SSBOs."""
+
+    shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.frag')
+    glslc_args = ['-S', shader, '-fauto-bind-uniforms', '-fssbo-binding-base', 'frag', '100']
+    expected_assembly_substr = "OpDecorate %my_ssbo Binding 100"
+
+
+@inside_glslc_testsuite('OptionFAutoBindUniforms')
+class FSsboBindingBaseForFragOptionIgnoredOnSsboCompileAsVert(expect.ValidAssemblyFileWithSubstr):
+    """Tests that -fssbo-binding-base with frag stage value is ignored on SSBOs
+    when compiling as a vertex shader."""
+
+    shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.vert')
+    glslc_args = ['-S', shader, '-fauto-bind-uniforms', '-fssbo-binding-base', 'frag', '100']
+    expected_assembly_substr = "OpDecorate %my_ssbo Binding 5"

@@ -74,6 +74,12 @@ Options:
                     Sets the lowest automatically assigned binding number for
                     uniform buffer objects (UBO).  Optionally only set it for
                     a single shader stage.
+  -fcbuffer-binding-base [stage] <value>
+                    Same as -fubo-binding-base.
+  -fssbo-binding-base [stage] <value>
+                    Sets the lowest automatically assigned binding number for
+                    shader storage buffer objects (SSBO).  Optionally only set
+                    it for a single shader stage.  Only affects GLSL.
   -fentry-point=<name>
                     Specify the entry point name for HLSL compilation, for
                     all subsequent source files.  Default is "main".

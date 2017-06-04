@@ -133,8 +133,9 @@ class Compiler {
     Sampler = 1,
     Texture = 2,
     Buffer = 3,  // Uniform Buffer Object, or UBO
+    StorageBuffer = 4,  // Shader Storage Buffer Object, or SSBO
   };
-  enum { kNumUniformKinds = int(UniformKind::Buffer) + 1 };
+  enum { kNumUniformKinds = int(UniformKind::StorageBuffer) + 1 };
 
   // Shader pipeline stage.
   // TODO(dneto): Replaces interface uses of EShLanguage with this enum.

@@ -210,6 +210,7 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   shader.setShiftSamplerBinding(bases[static_cast<int>(UniformKind::Sampler)]);
   shader.setShiftTextureBinding(bases[static_cast<int>(UniformKind::Texture)]);
   shader.setShiftUboBinding(bases[static_cast<int>(UniformKind::Buffer)]);
+  shader.setShiftSsboBinding(bases[static_cast<int>(UniformKind::StorageBuffer)]);
 
   // TODO(dneto): Generate source-level debug info if requested.
   bool success =

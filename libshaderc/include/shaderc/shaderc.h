@@ -188,6 +188,7 @@ typedef enum {
   shaderc_uniform_kind_sampler,
   shaderc_uniform_kind_texture,
   shaderc_uniform_kind_buffer, // Uniform Buffer Object, or UBO
+  shaderc_uniform_kind_storage_buffer, // Shader Storage Buffer Object, or SSBO
 } shaderc_uniform_kind;
 
 // Usage examples:

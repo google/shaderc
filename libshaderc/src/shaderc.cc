@@ -262,6 +262,8 @@ shaderc_util::Compiler::UniformKind GetUniformKind(shaderc_uniform_kind kind) {
       return shaderc_util::Compiler::UniformKind::Image;
     case shaderc_uniform_kind_buffer:
       return shaderc_util::Compiler::UniformKind::Buffer;
+    case shaderc_uniform_kind_storage_buffer:
+      return shaderc_util::Compiler::UniformKind::StorageBuffer;
   }
   assert(0 && "Should not have reached here");
   return static_cast<shaderc_util::Compiler::UniformKind>(0);
