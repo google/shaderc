@@ -33,11 +33,17 @@ namespace glslc {
 shaderc_shader_kind MapStageNameToForcedKind(const string_piece& stage_name) {
   const StageMapping string_to_kind[] = {
       {"vertex", shaderc_glsl_vertex_shader},
+      {"vert", shaderc_glsl_vertex_shader},
       {"fragment", shaderc_glsl_fragment_shader},
+      {"frag", shaderc_glsl_fragment_shader},
       {"tesscontrol", shaderc_glsl_tess_control_shader},
+      {"tesc", shaderc_glsl_tess_control_shader},
       {"tesseval", shaderc_glsl_tess_evaluation_shader},
+      {"tese", shaderc_glsl_tess_evaluation_shader},
       {"geometry", shaderc_glsl_geometry_shader},
-      {"compute", shaderc_glsl_compute_shader}};
+      {"geom", shaderc_glsl_geometry_shader},
+      {"compute", shaderc_glsl_compute_shader},
+      {"comp", shaderc_glsl_compute_shader}};
   for (const auto& entry : string_to_kind) {
     if (stage_name == entry.id) return entry.stage;
   }

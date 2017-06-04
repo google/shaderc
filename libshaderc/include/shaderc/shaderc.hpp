@@ -261,6 +261,17 @@ class CompileOptions {
     shaderc_compile_options_set_binding_base(options_, kind, base);
   }
 
+  // When automatically assigning bindings for uniforms, sets the lowest
+  // automatically assigned binding number for uniform resources of the given
+  // type, when compiling for the given shader stage.  The stage is assumed to
+  // be one of vertex, fragment, tessellation evaluation, tesselation control,
+  // geometry, or compute.
+  void SetBindingBaseForStage(shaderc_shader_kind shader_kind,
+                              shaderc_uniform_kind kind, uint32_t base) {
+    shaderc_compile_options_set_binding_base_for_stage(options_, shader_kind,
+                                                       kind, base);
+  }
+
  private:
   CompileOptions& operator=(const CompileOptions& other) = delete;
   shaderc_compile_options_t options_;

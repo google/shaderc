@@ -57,7 +57,7 @@ class FImageBindingBaseOptionRespectedOnImage(expect.ValidAssemblyFileWithSubstr
     """Tests that -fimage-binding-base value is respected on images."""
 
     shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.vert')
-    glslc_args = ['-S', shader, '-fauto-bind-uniforms', '-fimage-binding-base=44']
+    glslc_args = ['-S', shader, '-fauto-bind-uniforms', '-fimage-binding-base', '44']
     expected_assembly_substr = "OpDecorate %my_img Binding 44"
 
 
@@ -66,7 +66,7 @@ class FImageBindingBaseOptionRespectedOnImageBuffer(expect.ValidAssemblyFileWith
     """Tests that -fimage-binding-base value is respected on image buffers."""
 
     shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.vert')
-    glslc_args = ['-S', shader, '-fauto-bind-uniforms', '-fimage-binding-base=44']
+    glslc_args = ['-S', shader, '-fauto-bind-uniforms', '-fimage-binding-base', '44']
     expected_assembly_substr = "OpDecorate %my_imbuf Binding 45"
 
 
@@ -75,7 +75,7 @@ class FTextureBindingBaseOptionRespected(expect.ValidAssemblyFileWithSubstr):
     """Tests that -ftexture-binding-base value is respected."""
 
     shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.vert')
-    glslc_args = ['-S', shader, '-fauto-bind-uniforms', '-ftexture-binding-base=44']
+    glslc_args = ['-S', shader, '-fauto-bind-uniforms', '-ftexture-binding-base', '44']
     expected_assembly_substr = "OpDecorate %my_tex Binding 44"
 
 
@@ -84,7 +84,7 @@ class FSamplerBindingBaseOptionRespected(expect.ValidAssemblyFileWithSubstr):
     """Tests that -fsampler-binding-base value is respected."""
 
     shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.vert')
-    glslc_args = ['-S', shader, '-fauto-bind-uniforms', '-fsampler-binding-base=44']
+    glslc_args = ['-S', shader, '-fauto-bind-uniforms', '-fsampler-binding-base', '44']
     expected_assembly_substr = "OpDecorate %my_sam Binding 44"
 
 
@@ -93,7 +93,7 @@ class FUboBindingBaseOptionRespectedOnBuffer(expect.ValidAssemblyFileWithSubstr)
     """Tests that -fubo-binding-base value is respected."""
 
     shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.vert')
-    glslc_args = ['-S', shader, '-fauto-bind-uniforms', '-fubo-binding-base=44']
+    glslc_args = ['-S', shader, '-fauto-bind-uniforms', '-fubo-binding-base', '44']
     expected_assembly_substr = "OpDecorate %my_ubo Binding 44"
 
 
@@ -102,8 +102,8 @@ class FImageBindingBaseNeedsValue(expect.ErrorMessageSubstr):
     """Tests that -fimage-binding-base requires a value."""
 
     shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.vert')
-    glslc_args = ['-S', shader, '-fimage-binding-base=']
-    expected_error_substr = "error: invalid value for -fimage-binding-base"
+    glslc_args = ['-S', shader, '-fimage-binding-base']
+    expected_error_substr = "error: Option -fimage-binding-base requires at least one argument"
 
 
 @inside_glslc_testsuite('OptionFAutoBindUniforms')
@@ -111,8 +111,8 @@ class FTextureBindingBaseNeedsValue(expect.ErrorMessageSubstr):
     """Tests that -ftexture-binding-base requires a value."""
 
     shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.vert')
-    glslc_args = ['-S', shader, '-ftexture-binding-base=']
-    expected_error_substr = "error: invalid value for -ftexture-binding-base"
+    glslc_args = ['-S', shader, '-ftexture-binding-base']
+    expected_error_substr = "error: Option -ftexture-binding-base requires at least one argument"
 
 
 @inside_glslc_testsuite('OptionFAutoBindUniforms')
@@ -120,8 +120,8 @@ class FSamplerBindingBaseNeedsValue(expect.ErrorMessageSubstr):
     """Tests that -fsampler-binding-base requires a value."""
 
     shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.vert')
-    glslc_args = ['-S', shader, '-fsampler-binding-base=']
-    expected_error_substr = "error: invalid value for -fsampler-binding-base"
+    glslc_args = ['-S', shader, '-fsampler-binding-base']
+    expected_error_substr = "error: Option -fsampler-binding-base requires at least one argument"
 
 
 @inside_glslc_testsuite('OptionFAutoBindUniforms')
@@ -129,17 +129,17 @@ class FUboBindingBaseNeedsValue(expect.ErrorMessageSubstr):
     """Tests that -fubo-binding-base requires a value."""
 
     shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.vert')
-    glslc_args = ['-S', shader, '-fubo-binding-base=']
-    expected_error_substr = "error: invalid value for -fubo-binding-base"
+    glslc_args = ['-S', shader, '-fubo-binding-base']
+    expected_error_substr = "error: Option -fubo-binding-base requires at least one argument"
 
 
 @inside_glslc_testsuite('OptionFAutoBindUniforms')
-class FImageBindingBaseNeedsNumberValue(expect.ErrorMessageSubstr):
+class FImageBindingBaseNeedsNumberValueIfNotStage(expect.ErrorMessageSubstr):
     """Tests that -fimage-binding-base requires a number value."""
 
     shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.vert')
-    glslc_args = ['-S', shader, '-fimage-binding-base=9x']
-    expected_error_substr = "error: invalid value for -fimage-binding-base"
+    glslc_args = ['-S', shader, '-fimage-binding-base', '9x']
+    expected_error_substr = "error: invalid offset value 9x for -fimage-binding-base"
 
 
 @inside_glslc_testsuite('OptionFAutoBindUniforms')
@@ -147,8 +147,8 @@ class FTextureBindingBaseNeedsNumberValue(expect.ErrorMessageSubstr):
     """Tests that -ftexture-binding-base requires a number value."""
 
     shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.vert')
-    glslc_args = ['-S', shader, '-ftexture-binding-base=9x']
-    expected_error_substr = "error: invalid value for -ftexture-binding-base"
+    glslc_args = ['-S', shader, '-ftexture-binding-base', '9x']
+    expected_error_substr = "error: invalid offset value 9x for -ftexture-binding-base"
 
 
 @inside_glslc_testsuite('OptionFAutoBindUniforms')
@@ -156,8 +156,8 @@ class FSamplerBindingBaseNeedsNumberValue(expect.ErrorMessageSubstr):
     """Tests that -fsampler-binding-base requires a number value."""
 
     shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.vert')
-    glslc_args = ['-S', shader, '-fsampler-binding-base=9x']
-    expected_error_substr = "error: invalid value for -fsampler-binding-base"
+    glslc_args = ['-S', shader, '-fsampler-binding-base', '9x']
+    expected_error_substr = "error: invalid offset value 9x for -fsampler-binding-base"
 
 
 @inside_glslc_testsuite('OptionFAutoBindUniforms')
@@ -165,8 +165,8 @@ class FUboBindingBaseNeedsNumberValue(expect.ErrorMessageSubstr):
     """Tests that -fubo-binding-base requires a number value."""
 
     shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.vert')
-    glslc_args = ['-S', shader, '-fubo-binding-base=9x']
-    expected_error_substr = "error: invalid value for -fubo-binding-base"
+    glslc_args = ['-S', shader, '-fubo-binding-base', '9x']
+    expected_error_substr = "error: invalid offset value 9x for -fubo-binding-base"
 
 
 @inside_glslc_testsuite('OptionFAutoBindUniforms')
@@ -174,8 +174,8 @@ class FImageBindingBaseNeedsUnsignedNumberValue(expect.ErrorMessageSubstr):
     """Tests that -fimage-binding-base requires an unsigned number value."""
 
     shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.vert')
-    glslc_args = ['-S', shader, '-fimage-binding-base=-6']
-    expected_error_substr = "error: invalid value for -fimage-binding-base"
+    glslc_args = ['-S', shader, '-fimage-binding-base', '-6']
+    expected_error_substr = "error: invalid offset value -6 for -fimage-binding-base"
 
 
 @inside_glslc_testsuite('OptionFAutoBindUniforms')
@@ -183,8 +183,8 @@ class FTextureBindingBaseNeedsUnsignedNumberValue(expect.ErrorMessageSubstr):
     """Tests that -ftexture-binding-base requires an unsigned number value."""
 
     shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.vert')
-    glslc_args = ['-S', shader, '-ftexture-binding-base=-6']
-    expected_error_substr = "error: invalid value for -ftexture-binding-base"
+    glslc_args = ['-S', shader, '-ftexture-binding-base', '-6']
+    expected_error_substr = "error: invalid offset value -6 for -ftexture-binding-base"
 
 
 @inside_glslc_testsuite('OptionFAutoBindUniforms')
@@ -192,8 +192,8 @@ class FSamplerBindingBaseNeedsUnsignedNumberValue(expect.ErrorMessageSubstr):
     """Tests that -fsampler-binding-base requires an unsigned value."""
 
     shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.vert')
-    glslc_args = ['-S', shader, '-fsampler-binding-base=-6']
-    expected_error_substr = "error: invalid value for -fsampler-binding-base"
+    glslc_args = ['-S', shader, '-fsampler-binding-base', '-6']
+    expected_error_substr = "error: invalid offset value -6 for -fsampler-binding-base"
 
 
 @inside_glslc_testsuite('OptionFAutoBindUniforms')
@@ -201,5 +201,33 @@ class FUboBindingBaseNeedsUnsignedNumberValue(expect.ErrorMessageSubstr):
     """Tests that -fubo-binding-base requires an unsigned value."""
 
     shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.vert')
-    glslc_args = ['-S', shader, '-fubo-binding-base=-6']
-    expected_error_substr = "error: invalid value for -fubo-binding-base"
+    glslc_args = ['-S', shader, '-fubo-binding-base', '-6']
+    expected_error_substr = "error: invalid offset value -6 for -fubo-binding-base"
+
+
+@inside_glslc_testsuite('OptionFAutoBindUniforms')
+class FImageBindingBaseForVertOptionRespectedOnImageCompileAsVert(expect.ValidAssemblyFileWithSubstr):
+    """Tests that -fimage-binding-base with vert stage value is respected on images."""
+
+    shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.vert')
+    glslc_args = ['-S', shader, '-fauto-bind-uniforms', '-fimage-binding-base', 'vert', '44']
+    expected_assembly_substr = "OpDecorate %my_img Binding 44"
+
+
+@inside_glslc_testsuite('OptionFAutoBindUniforms')
+class FImageBindingBaseForVertOptionIgnoredOnImageCompileAsFrag(expect.ValidAssemblyFileWithSubstr):
+    """Tests that -fimage-binding-base with vert stage value is ignored when cmopiled as
+    fragment."""
+
+    shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.frag')
+    glslc_args = ['-S', shader, '-fauto-bind-uniforms', '-fimage-binding-base', 'vert', '44']
+    expected_assembly_substr = "OpDecorate %my_img Binding 2"
+
+
+@inside_glslc_testsuite('OptionFAutoBindUniforms')
+class FImageBindingBaseForFragOptionRespectedOnImageCompileAsFrag(expect.ValidAssemblyFileWithSubstr):
+    """Tests that -fimage-binding-base with frag stage value is respected on images."""
+
+    shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.frag')
+    glslc_args = ['-S', shader, '-fauto-bind-uniforms', '-fimage-binding-base', 'frag', '44']
+    expected_assembly_substr = "OpDecorate %my_img Binding 44"

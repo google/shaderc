@@ -56,18 +56,19 @@ Options:
                     Automatically assign bindings to uniform variables that
                     don't have an explicit 'binding' layout in the shader
                     source.
-  -fimage-binding-base=<value>
+  -fimage-binding-base [stage] <value>
                     Sets the lowest automatically assigned binding number for
-                    images.
-  -ftexture-binding-base=<value>
+                    images.  Optionally only set it for a single shader stage.
+  -ftexture-binding-base [stage] <value>
                     Sets the lowest automatically assigned binding number for
-                    textures.
-  -fsampler-binding-base=<value>
+                    textures.  Optionally only set it for a single shader stage.
+  -fsampler-binding-base [stage] <value>
                     Sets the lowest automatically assigned binding number for
-                    samplers.
-  -fubo-binding-base=<value>
+                    samplers  Optionally only set it for a single shader stage.
+  -fubo-binding-base [stage] <value>
                     Sets the lowest automatically assigned binding number for
-                    uniform buffer objects (UBO).
+                    uniform buffer objects (UBO).  Optionally only set it for
+                    a single shader stage.
   -fentry-point=<name>
                     Specify the entry point name for HLSL compilation, for
                     all subsequent source files.  Default is "main".
@@ -81,8 +82,8 @@ Options:
                     Set limits as specified in the given file.
   -fshader-stage=<stage>
                     Treat subsequent input files as having stage <stage>.
-                    Valid stages are vertex, fragment, tesscontrol, tesseval,
-                    geometry, and compute.
+                    Valid stages are vertex, vert, fragment, frag, tesscontrol,
+                    tesc, tesseval, tese, geometry, geom, compute, and comp.
   -g                Generate source-level debug information.
                     Currently this option has no effect.
   --help            Display available options.
@@ -120,7 +121,7 @@ Options:
 // Gets the option argument for the option at *index in argv in a way consistent
 // with clang/gcc. On success, returns true and writes the parsed argument into
 // *option_argument. Returns false if any errors occur. After calling this
-// function, *index will the index of the last command line argument consumed.
+// function, *index will be the index of the last command line argument consumed.
 bool GetOptionArgument(int argc, char** argv, int* index,
                        const std::string& option,
                        string_piece* option_argument) {
@@ -235,6 +236,8 @@ int main(int argc, char** argv) {
   glslc::FileCompiler compiler;
   bool success = true;
   bool has_stdin_input = false;
+  shaderc_shader_kind arg_stage;  // Shader stage for a single option.
+  uint32_t arg_base;              // binding base for a single option.
 
   for (int i = 1; i < argc; ++i) {
     const string_piece arg = argv[i];
@@ -279,50 +282,46 @@ int main(int argc, char** argv) {
       }
     } else if (arg == "-fauto-bind-uniforms") {
       compiler.options().SetAutoBindUniforms(true);
-    } else if (arg.starts_with("-fimage-binding-base=")) {
-      auto result = ParseNumber<uint32_t>(
-          arg.substr(std::strlen("-fimage-binding-base=")).str());
-      if (result.first) {
-        compiler.options().SetBindingBase(shaderc_uniform_kind_image,
-                                          result.second);
-      } else {
-        std::cerr << "glslc: error: invalid value for -fimage-binding-base"
-                  << std::endl;
+    } else if (arg == "-fimage-binding-base") {
+      const auto kind = shaderc_uniform_kind_image;
+      if (!GetOptionalStageThenOffsetArgument(arg, &std::cerr, argc, argv, &i,
+                                              &arg_stage, &arg_base)) {
         return 1;
       }
-    } else if (arg.starts_with("-ftexture-binding-base=")) {
-      auto result = ParseNumber<uint32_t>(
-          arg.substr(std::strlen("-ftexture-binding-base=")).str());
-      if (result.first) {
-        compiler.options().SetBindingBase(shaderc_uniform_kind_texture,
-                                          result.second);
-      } else {
-        std::cerr << "glslc: error: invalid value for -ftexture-binding-base"
-                  << std::endl;
+      if (arg_stage == shaderc_glsl_infer_from_source)
+        compiler.options().SetBindingBase(kind, arg_base);
+      else
+        compiler.options().SetBindingBaseForStage(arg_stage, kind, arg_base);
+    } else if (arg == "-ftexture-binding-base") {
+      const auto kind = shaderc_uniform_kind_texture;
+      if (!GetOptionalStageThenOffsetArgument(arg, &std::cerr, argc, argv, &i,
+                                              &arg_stage, &arg_base)) {
         return 1;
       }
-    } else if (arg.starts_with("-fsampler-binding-base=")) {
-      auto result = ParseNumber<uint32_t>(
-          arg.substr(std::strlen("-fsampler-binding-base=")).str());
-      if (result.first) {
-        compiler.options().SetBindingBase(shaderc_uniform_kind_sampler,
-                                          result.second);
-      } else {
-        std::cerr << "glslc: error: invalid value for -fsampler-binding-base"
-                  << std::endl;
+      if (arg_stage == shaderc_glsl_infer_from_source)
+        compiler.options().SetBindingBase(kind, arg_base);
+      else
+        compiler.options().SetBindingBaseForStage(arg_stage, kind, arg_base);
+    } else if (arg == "-fsampler-binding-base") {
+      const auto kind = shaderc_uniform_kind_sampler;
+      if (!GetOptionalStageThenOffsetArgument(arg, &std::cerr, argc, argv, &i,
+                                              &arg_stage, &arg_base)) {
         return 1;
       }
-    } else if (arg.starts_with("-fubo-binding-base=")) {
-      auto result = ParseNumber<uint32_t>(
-          arg.substr(std::strlen("-fubo-binding-base=")).str());
-      if (result.first) {
-        compiler.options().SetBindingBase(shaderc_uniform_kind_buffer,
-                                          result.second);
-      } else {
-        std::cerr << "glslc: error: invalid value for -fubo-binding-base"
-                  << std::endl;
+      if (arg_stage == shaderc_glsl_infer_from_source)
+        compiler.options().SetBindingBase(kind, arg_base);
+      else
+        compiler.options().SetBindingBaseForStage(arg_stage, kind, arg_base);
+    } else if (arg == "-fubo-binding-base") {
+      const auto kind = shaderc_uniform_kind_buffer;
+      if (!GetOptionalStageThenOffsetArgument(arg, &std::cerr, argc, argv, &i,
+                                              &arg_stage, &arg_base)) {
         return 1;
       }
+      if (arg_stage == shaderc_glsl_infer_from_source)
+        compiler.options().SetBindingBase(kind, arg_base);
+      else
+        compiler.options().SetBindingBaseForStage(arg_stage, kind, arg_base);
     } else if (arg.starts_with("-fentry-point=")) {
       current_entry_point_name =
           arg.substr(std::strlen("-fentry-point=")).str();

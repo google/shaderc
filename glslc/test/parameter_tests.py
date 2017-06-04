@@ -61,18 +61,19 @@ Options:
                     Automatically assign bindings to uniform variables that
                     don't have an explicit 'binding' layout in the shader
                     source.
-  -fimage-binding-base=<value>
+  -fimage-binding-base [stage] <value>
                     Sets the lowest automatically assigned binding number for
-                    images.
-  -ftexture-binding-base=<value>
+                    images.  Optionally only set it for a single shader stage.
+  -ftexture-binding-base [stage] <value>
                     Sets the lowest automatically assigned binding number for
-                    textures.
-  -fsampler-binding-base=<value>
+                    textures.  Optionally only set it for a single shader stage.
+  -fsampler-binding-base [stage] <value>
                     Sets the lowest automatically assigned binding number for
-                    samplers.
-  -fubo-binding-base=<value>
+                    samplers  Optionally only set it for a single shader stage.
+  -fubo-binding-base [stage] <value>
                     Sets the lowest automatically assigned binding number for
-                    uniform buffer objects (UBO).
+                    uniform buffer objects (UBO).  Optionally only set it for
+                    a single shader stage.
   -fentry-point=<name>
                     Specify the entry point name for HLSL compilation, for
                     all subsequent source files.  Default is "main".
@@ -86,8 +87,8 @@ Options:
                     Set limits as specified in the given file.
   -fshader-stage=<stage>
                     Treat subsequent input files as having stage <stage>.
-                    Valid stages are vertex, fragment, tesscontrol, tesseval,
-                    geometry, and compute.
+                    Valid stages are vertex, vert, fragment, frag, tesscontrol,
+                    tesc, tesseval, tese, geometry, geom, compute, and comp.
   -g                Generate source-level debug information.
                     Currently this option has no effect.
   --help            Display available options.

@@ -22,10 +22,15 @@
 
 namespace glslc {
 
+// Maps a shader stage name to a forced shader stage enum value.  Returns
+// 'shaderc_glsl_infer_from_source' if the stage name is unrecognized.
+shaderc_shader_kind MapStageNameToForcedKind(
+    const shaderc_util::string_piece& f_shader_stage_str);
+
 // Parse the string piece from command line to get the force shader stage.
 // If the 'f_shader_stage_str' cannot be parsed to a valid force shader stage,
-// returns 'shaderc_glsl_infer_from_source' and an error should be emitted at
-// the caller site.
+// returns 'shaderc_glsl_infer_from_source'.  Requires the string to begin with
+// '='.
 shaderc_shader_kind GetForcedShaderKindFromCmdLine(
     const shaderc_util::string_piece& f_shader_stage_str);
 
