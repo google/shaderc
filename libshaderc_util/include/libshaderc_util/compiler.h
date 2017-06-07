@@ -129,13 +129,23 @@ class Compiler {
 
   // Types of uniform variables.
   enum class UniformKind {
-    Image = 0,  // Also applies to "image buffers".
+    // Image, and image buffer.
+    Image = 0,
+    // Pure sampler.
     Sampler = 1,
+    // Sampled texture in GLSL.
+    // Shader Resource View, for HLSL.  (Read-only image or storage buffer.)
     Texture = 2,
-    Buffer = 3,  // Uniform Buffer Object, or UBO
-    StorageBuffer = 4,  // Shader Storage Buffer Object, or SSBO
+    // Uniform Buffer Object, or UBO, in GLSL.
+    // Also a Cbuffer in HLSL.
+    Buffer = 3,
+    // Shader Storage Buffer Object, or SSBO
+    StorageBuffer = 4,
+    // Uniform Access View, in HLSL.  (Writable storage image or storage
+    // buffer.)
+    UnorderedAccessView = 5,
   };
-  enum { kNumUniformKinds = int(UniformKind::StorageBuffer) + 1 };
+  enum { kNumUniformKinds = int(UniformKind::UnorderedAccessView) + 1 };
 
   // Shader pipeline stage.
   // TODO(dneto): Replaces interface uses of EShLanguage with this enum.
@@ -173,7 +183,8 @@ class Compiler {
         source_language_(SourceLanguage::GLSL),
         limits_(kDefaultTBuiltInResource),
         auto_bind_uniforms_(false),
-        auto_binding_base_() {}
+        auto_binding_base_(),
+        hlsl_iomap_(false) {}
 
   // Requests that the compiler place debug information into the object code,
   // such as identifier names and line numbers.
@@ -232,6 +243,9 @@ class Compiler {
                                   uint32_t base) {
     auto_binding_base_[static_cast<int>(stage)][static_cast<int>(kind)] = base;
   }
+
+  // Use HLSL IO mapping rules for bindings.  Default is false.
+  void SetHlslIoMapping(bool hlsl_iomap) { hlsl_iomap_ = hlsl_iomap; }
 
   // Compiles the shader source in the input_source_string parameter.
   //
@@ -391,6 +405,9 @@ class Compiler {
   // binding uniforms that don't hzve explicit bindings in the shader source.
   // The default is zero.
   uint32_t auto_binding_base_[kNumStages][kNumUniformKinds];
+
+  // True if the compiler should use HLSL IO mapping rules when compiling HLSL.
+  bool hlsl_iomap_;
 };
 
 // Converts a string to a vector of uint32_t by copying the content of a given

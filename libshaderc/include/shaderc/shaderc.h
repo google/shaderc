@@ -184,11 +184,19 @@ typedef enum {
 // In Vulkan, uniform resources are bound to the pipeline via descriptors
 // with numbered bindings and sets.
 typedef enum {
-  shaderc_uniform_kind_image, // This also applies to uniform image buffers.
+  // Image and image buffer.
+  shaderc_uniform_kind_image,
+  // Pure sampler.
   shaderc_uniform_kind_sampler,
+  // Sampled texture in GLSL, and Shader Resource View in HLSL.
   shaderc_uniform_kind_texture,
-  shaderc_uniform_kind_buffer, // Uniform Buffer Object, or UBO
-  shaderc_uniform_kind_storage_buffer, // Shader Storage Buffer Object, or SSBO
+  // Uniform Buffer Object (UBO) in GLSL.  Cbuffer in HLSL.
+  shaderc_uniform_kind_buffer,
+  // Shader Storage Buffer Object (SSBO) in GLSL.
+  shaderc_uniform_kind_storage_buffer,
+  // Unordered Access View, in HLSL.  (Writable storage image or storage
+  // buffer.)
+  shaderc_uniform_kind_unordered_access_view,
 } shaderc_uniform_kind;
 
 // Usage examples:
@@ -375,16 +383,22 @@ void shaderc_compile_options_set_limit(
 void shaderc_compile_options_set_auto_bind_uniforms(
     shaderc_compile_options_t options, bool auto_bind);
 
-// When automatically assigning bindings for uniforms, sets the lowest automatically
-// assigned binding number for uniform resources of the given type.
+// Sets whether the compiler should use HLSL IO mapping rules for bindings.
+// Defaults to false.
+void shaderc_compile_options_set_hlsl_io_mapping(
+    shaderc_compile_options_t options, bool hlsl_iomap);
+
+// Sets the base binding number used for for a uniform resource type when
+// automatically assigning bindings.  For GLSL compilation, sets the lowest
+// automatically assigned number.  For HLSL compilation, the regsiter number
+// assigned to the resource is added to this specified base.
 void shaderc_compile_options_set_binding_base(shaderc_compile_options_t options,
                                               shaderc_uniform_kind kind,
                                               uint32_t base);
 
-// When automatically assigning bindings for uniforms, sets the lowest automatically
-// assigned binding number for uniform resources of the given type, when compiling
-// for the given shader stage.  The stage is assumed to be one of vertex, fragment,
-// tessellation evaluation, tesselation control, geometry, or compute.
+// Like shaderc_compile_options_set_binding_base, but only takes effect when
+// compiling a given shader stage.  The stage is assumed to be one of vertex,
+// fragment, tessellation evaluation, tesselation control, geometry, or compute.
 void shaderc_compile_options_set_binding_base_for_stage(
     shaderc_compile_options_t options, shaderc_shader_kind shader_kind,
     shaderc_uniform_kind kind, uint32_t base);

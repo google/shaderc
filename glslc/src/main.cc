@@ -56,25 +56,39 @@ Options:
                     Automatically assign bindings to uniform variables that
                     don't have an explicit 'binding' layout in the shader
                     source.
+  -fhlsl-iomap      Use HLSL IO mappings for bindings.
   -fimage-binding-base [stage] <value>
                     Sets the lowest automatically assigned binding number for
                     images.  Optionally only set it for a single shader stage.
+                    For HLSL, the resource register number is added to this
+                    base.
   -ftexture-binding-base [stage] <value>
                     Sets the lowest automatically assigned binding number for
                     textures.  Optionally only set it for a single shader stage.
+                    For HLSL, the resource register number is added to this
+                    base.
   -fsampler-binding-base [stage] <value>
                     Sets the lowest automatically assigned binding number for
                     samplers  Optionally only set it for a single shader stage.
+                    For HLSL, the resource register number is added to this
+                    base.
   -fubo-binding-base [stage] <value>
                     Sets the lowest automatically assigned binding number for
                     uniform buffer objects (UBO).  Optionally only set it for
                     a single shader stage.
+                    For HLSL, the resource register number is added to this
+                    base.
   -fcbuffer-binding-base [stage] <value>
                     Same as -fubo-binding-base.
   -fssbo-binding-base [stage] <value>
                     Sets the lowest automatically assigned binding number for
                     shader storage buffer objects (SSBO).  Optionally only set
                     it for a single shader stage.  Only affects GLSL.
+  -fuav-binding-base [stage] <value>
+                    For automatically assigned bindings for unordered access
+                    views (UAV), the register number is added to this base to
+                    determine the binding number.  Optionally only set it for
+                    a single shader stage.  Only affects HLSL.
   -fentry-point=<name>
                     Specify the entry point name for HLSL compilation, for
                     all subsequent source files.  Default is "main".
@@ -170,7 +184,7 @@ const char kBuildVersion[] =
 // Parses the given string as a number of the specified type.  Returns a pair
 // where the first member is true if parsing succeeded, and the second
 // member is the parsed value.  (I've worked out the general case for this
-// in SPIRV-Tools source/util/parse_number.h
+// in SPIRV-Tools source/util/parse_number.h. -- dneto)
 std::pair<bool, uint32_t> ParseUint32(std::string str) {
   std::istringstream iss(str);
 
@@ -299,6 +313,8 @@ int main(int argc, char** argv) {
       }
     } else if (arg == "-fauto-bind-uniforms") {
       compiler.options().SetAutoBindUniforms(true);
+    } else if (arg == "-fhlsl-iomap") {
+      compiler.options().SetHlslIoMapping(true);
     } else if (arg == "-fimage-binding-base") {
       const auto kind = shaderc_uniform_kind_image;
       if (!GetOptionalStageThenOffsetArgument(arg, &std::cerr, argc, argv, &i,
@@ -325,6 +341,12 @@ int main(int argc, char** argv) {
       set_binding_base(arg_stage, kind, arg_base);
     } else if (arg == "-fssbo-binding-base") {
       const auto kind = shaderc_uniform_kind_storage_buffer;
+      if (!GetOptionalStageThenOffsetArgument(arg, &std::cerr, argc, argv, &i,
+                                              &arg_stage, &arg_base))
+        return 1;
+      set_binding_base(arg_stage, kind, arg_base);
+    } else if (arg == "-fuav-binding-base") {
+      const auto kind = shaderc_uniform_kind_unordered_access_view;
       if (!GetOptionalStageThenOffsetArgument(arg, &std::cerr, argc, argv, &i,
                                               &arg_stage, &arg_base))
         return 1;

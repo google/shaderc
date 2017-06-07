@@ -254,18 +254,23 @@ class CompileOptions {
     shaderc_compile_options_set_auto_bind_uniforms(options_, auto_bind);
   }
 
-  // When automatically assigning bindings for uniforms, sets the lowest
-  // automatically assigned binding number for uniform resources of the given
-  // type.
+  // Sets whether the compiler should use HLSL IO mapping rules for bindings.
+  // Defaults to false.
+  void SetHlslIoMapping(bool hlsl_iomap) {
+    shaderc_compile_options_set_hlsl_io_mapping(options_, hlsl_iomap);
+  }
+
+  // Sets the base binding number used for for a uniform resource type when
+  // automatically assigning bindings.  For GLSL compilation, sets the lowest
+  // automatically assigned number.  For HLSL compilation, the regsiter number
+  // assigned to the resource is added to this specified base.
   void SetBindingBase(shaderc_uniform_kind kind, uint32_t base) {
     shaderc_compile_options_set_binding_base(options_, kind, base);
   }
 
-  // When automatically assigning bindings for uniforms, sets the lowest
-  // automatically assigned binding number for uniform resources of the given
-  // type, when compiling for the given shader stage.  The stage is assumed to
-  // be one of vertex, fragment, tessellation evaluation, tesselation control,
-  // geometry, or compute.
+  // Like SetBindingBase, but only takes effect when compiling a given shader
+  // stage.  The stage is assumed to be one of vertex, fragment, tessellation
+  // evaluation, tesselation control, geometry, or compute.
   void SetBindingBaseForStage(shaderc_shader_kind shader_kind,
                               shaderc_uniform_kind kind, uint32_t base) {
     shaderc_compile_options_set_binding_base_for_stage(options_, shader_kind,

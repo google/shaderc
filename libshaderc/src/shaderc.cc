@@ -264,6 +264,8 @@ shaderc_util::Compiler::UniformKind GetUniformKind(shaderc_uniform_kind kind) {
       return shaderc_util::Compiler::UniformKind::Buffer;
     case shaderc_uniform_kind_storage_buffer:
       return shaderc_util::Compiler::UniformKind::StorageBuffer;
+    case shaderc_uniform_kind_unordered_access_view:
+      return shaderc_util::Compiler::UniformKind::UnorderedAccessView;
   }
   assert(0 && "Should not have reached here");
   return static_cast<shaderc_util::Compiler::UniformKind>(0);
@@ -408,6 +410,11 @@ void shaderc_compile_options_set_limit(
 void shaderc_compile_options_set_auto_bind_uniforms(
     shaderc_compile_options_t options, bool auto_bind) {
   options->compiler.SetAutoBindUniforms(auto_bind);
+}
+
+void shaderc_compile_options_set_hlsl_io_mapping(
+    shaderc_compile_options_t options, bool hlsl_iomap) {
+  options->compiler.SetHlslIoMapping(hlsl_iomap);
 }
 
 void shaderc_compile_options_set_binding_base(shaderc_compile_options_t options,

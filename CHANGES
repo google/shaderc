@@ -1,6 +1,9 @@
 Revision history for Shaderc
 
 v2017.2-dev 2017-03-10
+ - Add options for automatically set bindings for (uniform) resources that
+   don't have bindings set in shader source.
+ - Add option for using HLSL IO mappings as expressed in source.
  - Add options for setting resource binding base numbers.
  - Add option to use HLSL resource register numbers for bindings.
  - HLSL compilation now defaults to HLSL packing rules.
