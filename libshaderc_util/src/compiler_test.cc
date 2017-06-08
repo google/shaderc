@@ -104,6 +104,12 @@ const char kGlslFragShaderNoExplicitBinding[] =
          float x = my_ubo.x;
        })";
 
+// A GLSL vertex shader with a weirdly packed block.
+const char kGlslShaderWeirdPacking[] =
+    R"(#version 450
+       buffer B { float x; vec3 foo; } my_ssbo;
+       void main() { my_ssbo.x = 1.0; })";
+
 // Returns the disassembly of the given SPIR-V binary, as a string.
 // Assumes the disassembly will be successful when targeting Vulkan.
 std::string Disassemble(const std::vector<uint32_t> binary) {
@@ -628,6 +634,32 @@ TEST_F(CompilerTest, EmitMessageTextOnlyOnce) {
   EXPECT_THAT(errs, Eq("shader: error: Linking vertex stage: Missing entry "
                        "point: Each stage requires one entry point\n"))
       << errs;
+}
+
+TEST_F(CompilerTest, GlslDefaultPackingUsed) {
+  const auto words =
+      SimpleCompilationBinary(kGlslShaderWeirdPacking, EShLangVertex);
+  const auto disassembly = Disassemble(words);
+  EXPECT_THAT(disassembly, HasSubstr("OpMemberDecorate %B 1 Offset 16"))
+      << disassembly;
+}
+
+TEST_F(CompilerTest, HlslOffsetsOptionDisableRespected) {
+  compiler_.SetHlslOffsets(false);
+  const auto words =
+      SimpleCompilationBinary(kGlslShaderWeirdPacking, EShLangVertex);
+  const auto disassembly = Disassemble(words);
+  EXPECT_THAT(disassembly, HasSubstr("OpMemberDecorate %B 1 Offset 16"))
+      << disassembly;
+}
+
+TEST_F(CompilerTest, HlslOffsetsOptionEnableRespected) {
+  compiler_.SetHlslOffsets(true);
+  const auto words =
+      SimpleCompilationBinary(kGlslShaderWeirdPacking, EShLangVertex);
+  const auto disassembly = Disassemble(words);
+  EXPECT_THAT(disassembly, HasSubstr("OpMemberDecorate %B 1 Offset 4"))
+      << disassembly;
 }
 
 }  // anonymous namespace

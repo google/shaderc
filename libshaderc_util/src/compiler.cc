@@ -65,10 +65,12 @@ std::pair<int, string_piece> DecodeLineDirective(string_piece directive) {
   return std::make_pair(line, directive);
 }
 
-// Returns the Glslang message rules for the given target environment
-// and source language.  We assume only valid combinations are used.
+// Returns the Glslang message rules for the given target environment,
+// source language, and whether we want HLSL offset rules.  We assume
+// only valid combinations are used.
 EShMessages GetMessageRules(shaderc_util::Compiler::TargetEnv env,
-                            shaderc_util::Compiler::SourceLanguage lang) {
+                            shaderc_util::Compiler::SourceLanguage lang,
+                            bool hlsl_offsets) {
   using shaderc_util::Compiler;
   EShMessages result = EShMsgCascadingErrors;
   if (lang == Compiler::SourceLanguage::HLSL) {
@@ -84,6 +86,9 @@ EShMessages GetMessageRules(shaderc_util::Compiler::TargetEnv env,
       result =
           static_cast<EShMessages>(result | EShMsgSpvRules | EShMsgVulkanRules);
       break;
+  }
+  if (hlsl_offsets) {
+    result = static_cast<EShMessages>(result | EShMsgHlslOffsets);
   }
   return result;
 }
@@ -215,10 +220,10 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   shader.setHlslIoMapping(hlsl_iomap_);
 
   // TODO(dneto): Generate source-level debug info if requested.
-  bool success =
-      shader.parse(&limits_, default_version_, default_profile_,
-                   force_version_profile_, kNotForwardCompatible,
-                   GetMessageRules(target_env_, source_language_), includer);
+  bool success = shader.parse(
+      &limits_, default_version_, default_profile_, force_version_profile_,
+      kNotForwardCompatible,
+      GetMessageRules(target_env_, source_language_, hlsl_offsets_), includer);
 
   success &= PrintFilteredErrors(error_tag, error_stream, warnings_as_errors_,
                                  suppress_warnings_, shader.getInfoLog(),
@@ -342,7 +347,8 @@ std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
   // So combine the existing rules with the just-give-me-preprocessor-output
   // flag.
   const auto rules = static_cast<EShMessages>(
-      EShMsgOnlyPreprocessor | GetMessageRules(target_env_, source_language_));
+      EShMsgOnlyPreprocessor |
+      GetMessageRules(target_env_, source_language_, hlsl_offsets_));
 
   std::string preprocessed_shader;
   const bool success = shader.preprocess(

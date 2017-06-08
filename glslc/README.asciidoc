@@ -27,6 +27,7 @@ glslc [-c|-S|-E]
       [-fcbuffer-binding-base [stage] value]
       [-fssbo-binding-base [stage] value]
       [-fuav-binding-base [stage] value]
+      [-fhlsl-offsets]
       [-fentry-point=...]
       [-flimit=...]
       [-flimit-file <resource-limits-file>]
@@ -218,6 +219,12 @@ automatically assigned binding for Unordered Access Views (UAV).
 If a stage is specified, only affects the specified stage.
 
 This only affects HLSL compilation.
+
+[[option-f-hlsl-offsets]]
+==== `-fhlsl-offsets`
+
+Use HLSL packing rules instead of GLSL rules when determining offsets of
+members of blocks.  This option is always on when compiling for HLSL.
 
 [[option-f-entry-point]]
 ==== `-fentry-point=`

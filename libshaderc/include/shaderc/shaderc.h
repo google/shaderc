@@ -388,6 +388,12 @@ void shaderc_compile_options_set_auto_bind_uniforms(
 void shaderc_compile_options_set_hlsl_io_mapping(
     shaderc_compile_options_t options, bool hlsl_iomap);
 
+// Sets whether the compiler should determine block member offsets using HLSL
+// packing rules instead of standard GLSL rules.  Defaults to false.  Only
+// affects GLSL compilation.  HLSL rules are always used when compiling HLSL.
+void shaderc_compile_options_set_hlsl_offsets(
+    shaderc_compile_options_t options, bool hlsl_offsets);
+
 // Sets the base binding number used for for a uniform resource type when
 // automatically assigning bindings.  For GLSL compilation, sets the lowest
 // automatically assigned number.  For HLSL compilation, the regsiter number

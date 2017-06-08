@@ -184,7 +184,8 @@ class Compiler {
         limits_(kDefaultTBuiltInResource),
         auto_bind_uniforms_(false),
         auto_binding_base_(),
-        hlsl_iomap_(false) {}
+        hlsl_iomap_(false),
+        hlsl_offsets_(false) {}
 
   // Requests that the compiler place debug information into the object code,
   // such as identifier names and line numbers.
@@ -246,6 +247,10 @@ class Compiler {
 
   // Use HLSL IO mapping rules for bindings.  Default is false.
   void SetHlslIoMapping(bool hlsl_iomap) { hlsl_iomap_ = hlsl_iomap; }
+
+  // Use HLSL rules for offsets in "transparent" memory.  These allow for
+  // tighter packing of some combinations of types than standard GLSL packings.
+  void SetHlslOffsets(bool hlsl_offsets) { hlsl_offsets_ = hlsl_offsets; }
 
   // Compiles the shader source in the input_source_string parameter.
   //
@@ -408,6 +413,10 @@ class Compiler {
 
   // True if the compiler should use HLSL IO mapping rules when compiling HLSL.
   bool hlsl_iomap_;
+
+  // True if the compiler should determine block member offsets using HLSL
+  // packing rules instead of standard GLSL rules.
+  bool hlsl_offsets_;
 };
 
 // Converts a string to a vector of uint32_t by copying the content of a given

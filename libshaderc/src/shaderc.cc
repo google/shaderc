@@ -417,6 +417,11 @@ void shaderc_compile_options_set_hlsl_io_mapping(
   options->compiler.SetHlslIoMapping(hlsl_iomap);
 }
 
+void shaderc_compile_options_set_hlsl_offsets(
+    shaderc_compile_options_t options, bool hlsl_offsets) {
+  options->compiler.SetHlslOffsets(hlsl_offsets);
+}
+
 void shaderc_compile_options_set_binding_base(shaderc_compile_options_t options,
                                               shaderc_uniform_kind kind,
                                               uint32_t base) {

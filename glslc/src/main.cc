@@ -135,6 +135,8 @@ Options:
                     Valid languages are: glsl, hlsl.
                     For files ending in .hlsl the default is hlsl.
                     Otherwise the default is glsl.
+  -fhlsl-offsets    Use HLSL offset rules for packing members of blocks.
+                    Affects only GLSL.  HLSL rules are always used for HLSL.
 )";
 }
 
@@ -318,6 +320,8 @@ int main(int argc, char** argv) {
       compiler.options().SetAutoBindUniforms(true);
     } else if (arg == "-fhlsl-iomap") {
       compiler.options().SetHlslIoMapping(true);
+    } else if (arg == "-fhlsl-offsets") {
+      compiler.options().SetHlslOffsets(true);
     } else if (((u_kind = shaderc_uniform_kind_image),
                 (arg == "-fimage-binding-base")) ||
                ((u_kind = shaderc_uniform_kind_texture),

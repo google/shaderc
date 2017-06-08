@@ -1638,4 +1638,30 @@ TEST_F(
   EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_ubo Binding 4"));
 }
 
+TEST_F(CompileStringWithOptionsTest, GlslDefaultPackingUsed) {
+  const std::string disassembly_text =
+      CompilationOutput(kGlslShaderWeirdPacking, shaderc_vertex_shader,
+                        options_.get(), OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text,
+              HasSubstr("OpMemberDecorate %B 1 Offset 16"));
+}
+
+TEST_F(CompileStringWithOptionsTest, HlslOffsetsOptionDisableRespected) {
+  shaderc_compile_options_set_hlsl_offsets(options_.get(), false);
+  const std::string disassembly_text =
+      CompilationOutput(kGlslShaderWeirdPacking, shaderc_vertex_shader,
+                        options_.get(), OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text,
+              HasSubstr("OpMemberDecorate %B 1 Offset 16"));
+}
+
+TEST_F(CompileStringWithOptionsTest, HlslOffsetsOptionEnableRespected) {
+  shaderc_compile_options_set_hlsl_offsets(options_.get(), true);
+  const std::string disassembly_text =
+      CompilationOutput(kGlslShaderWeirdPacking, shaderc_vertex_shader,
+                        options_.get(), OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text,
+              HasSubstr("OpMemberDecorate %B 1 Offset 4"));
+}
+
 }  // anonymous namespace
