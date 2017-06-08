@@ -1,6 +1,10 @@
 Revision history for Shaderc
 
 v2017.2-dev 2017-03-10
+ - Add options for setting resource binding base numbers.
+ - Add option to use HLSL resource register numbers for bindings.
+ - HLSL compilation now defaults to HLSL packing rules.
+   (This change is inherited from Glslang commit 7cca140.)
 
 v2017.1 2017-03-10
  - Add option to automatically assign bindings to uniform variables

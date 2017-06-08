@@ -250,6 +250,10 @@ under Vulkan semantics.
 are `glsl` and `hlsl`.  If the file extension is `hlsl` then the default language
 is HLSL.  Otherwise the default is 'glsl'.
 
+Note: HLSL compilation will use HLSL packing (offset) rules for variables
+that are vertex shader outputs, and inputs and outputs of both geometry
+and pixel shaders.
+
 [[compilation-stage-selection-options]]
 === Compilation Stage Selection Options
 
