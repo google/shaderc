@@ -93,7 +93,7 @@ script:
     else
       export NPROC=`sysctl -n hw.ncpu`;
     fi
-  - if [[ "$BUILD_NDK" != "ON" ]]; then ctest -j${NPROC} --output_on_failure; fi
+  - if [[ "$BUILD_NDK" != "ON" ]]; then ctest -j${NPROC} --output-on-failure; fi
 
 after_success:
   # Collect coverage and push to coveralls.info.
