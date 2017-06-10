@@ -89,6 +89,11 @@ Options:
                     views (UAV), the register number is added to this base to
                     determine the binding number.  Optionally only set it for
                     a single shader stage.  Only affects HLSL.
+  -fresource-set-binding [stage] <reg0> <set0> <binding0>
+                        [<reg1> <set1> <binding1>...]
+                    Explicitly sets the descriptor set and binding for
+                    HLSL resources, by register name.  Optionally restrict
+                    it to a single stage.
   -fentry-point=<name>
                     Specify the entry point name for HLSL compilation, for
                     all subsequent source files.  Default is "main".
@@ -183,16 +188,16 @@ const char kBuildVersion[] =
 #include "build-version.inc"
     ;
 
-// Parses the given string as a number of the specified type.  Returns a pair
-// where the first member is true if parsing succeeded, and the second
-// member is the parsed value.  (I've worked out the general case for this
-// in SPIRV-Tools source/util/parse_number.h. -- dneto)
-std::pair<bool, uint32_t> ParseUint32(std::string str) {
+
+// Parses the given string as a number of the specified type.  Returns true
+// if parsing succeeded, and stores the parsed value via |value|.
+// (I've worked out the general case for this in
+// SPIRV-Tools source/util/parse_number.h. -- dneto)
+bool ParseUint32(const std::string& str, uint32_t* value) {
   std::istringstream iss(str);
 
   iss >> std::setbase(0);
-  uint32_t parsed_number{};
-  iss >> parsed_number;
+  iss >> *value;
 
   // We should have read something.
   bool ok = !str.empty() && !iss.bad();
@@ -205,7 +210,7 @@ std::pair<bool, uint32_t> ParseUint32(std::string str) {
   // Count any negative number as an error, including "-0".
   ok = ok && (str[0] != '-');
 
-  return std::make_pair(ok, parsed_number);
+  return ok;
 }
 
 // Gets an optional stage name followed by required offset argument.  Returns
@@ -233,15 +238,13 @@ bool GetOptionalStageThenOffsetArgument(const shaderc_util::string_piece option,
       return false;
     }
   }
-  auto num_parse = ParseUint32(argv[argi + 1]);
-  if (!num_parse.first) {
+  if (!ParseUint32(argv[argi + 1], offset)) {
     *errs << "glslc: error: invalid offset value " << argv[argi + 1] << " for "
           << option << std::endl;
     return false;
   }
   ++argi;
   *shader_kind = stage;
-  *offset = num_parse.second;
   return true;
 }
 
@@ -340,6 +343,43 @@ int main(int argc, char** argv) {
                                               &arg_stage, &arg_base))
         return 1;
       set_binding_base(arg_stage, u_kind, arg_base);
+    } else if (arg == "-fresource-set-binding") {
+      auto need_three_args_err = [arg]() {
+        std::cerr << "glsc: error: Option " << arg
+                  << " requires at least 3 arguments" << std::endl;
+        return 1;
+      };
+      if (i + 1 >= argc) return need_three_args_err();
+      auto stage = glslc::MapStageNameToForcedKind(argv[i + 1]);
+      if (stage != shaderc_glsl_infer_from_source) {
+        ++i;
+      }
+      bool seen_triple = false;
+      while (i + 3 < argc && argv[i + 1][0] != '-' && argv[i + 2][0] != '-' &&
+             argv[i + 3][0] != '-') {
+        seen_triple = true;
+        uint32_t set = 0;
+        if (!ParseUint32(argv[i + 2], &set)) {
+          std::cerr << "glslc: error: Invalid set number: " << argv[i + 2]
+                    << std::endl;
+          return 1;
+        }
+        uint32_t binding = 0;
+        if (!ParseUint32(argv[i + 3], &binding)) {
+          std::cerr << "glslc: error: Invalid binding number: " << argv[i + 3]
+                    << std::endl;
+          return 1;
+        }
+        if (stage == shaderc_glsl_infer_from_source) {
+          compiler.options().SetHlslRegisterSetAndBinding(
+              argv[i + 1], argv[i + 2], argv[i + 3]);
+        } else {
+          compiler.options().SetHlslRegisterSetAndBindingForStage(
+              stage, argv[i + 1], argv[i + 2], argv[i + 3]);
+        }
+        i += 3;
+      }
+      if (!seen_triple) return need_three_args_err();
     } else if (arg.starts_with("-fentry-point=")) {
       current_entry_point_name =
           arg.substr(std::strlen("-fentry-point=")).str();

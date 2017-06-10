@@ -94,6 +94,11 @@ Options:
                     views (UAV), the register number is added to this base to
                     determine the binding number.  Optionally only set it for
                     a single shader stage.  Only affects HLSL.
+  -fresource-set-binding [stage] <reg0> <set0> <binding0>
+                        [<reg1> <set1> <binding1>...]
+                    Explicitly sets the descriptor set and binding for
+                    HLSL resources, by register name.  Optionally restrict
+                    it to a single stage.
   -fentry-point=<name>
                     Specify the entry point name for HLSL compilation, for
                     all subsequent source files.  Default is "main".
