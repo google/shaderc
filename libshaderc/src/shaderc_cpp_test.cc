@@ -1302,4 +1302,36 @@ TEST_F(CppInterface, HlslOffsetsOptionEnableRespected) {
               HasSubstr("OpMemberDecorate %B 1 Offset 4"));
 }
 
+TEST_F(CppInterface, HlslRegSetBindingForFragmentRespected) {
+  CompileOptions options;
+  options.SetSourceLanguage(shaderc_source_language_hlsl);
+  options.SetHlslRegisterSetAndBindingForStage(shaderc_fragment_shader, "t4",
+                                               "9", "16");
+  const std::string disassembly_text = AssemblyOutput(
+      kHlslFragShaderWithRegisters, shaderc_glsl_fragment_shader, options);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %t4 DescriptorSet 9"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %t4 Binding 16"));
+}
+
+TEST_F(CppInterface, HlslRegSetBindingForDifferentStageIgnored) {
+  CompileOptions options;
+  options.SetSourceLanguage(shaderc_source_language_hlsl);
+  options.SetHlslRegisterSetAndBindingForStage(shaderc_vertex_shader, "t4", "9",
+                                               "16");
+  const std::string disassembly_text = AssemblyOutput(
+      kHlslFragShaderWithRegisters, shaderc_glsl_fragment_shader, options);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %t4 DescriptorSet 0"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %t4 Binding 4"));
+}
+
+TEST_F(CppInterface, HlslRegSetBindingForAllStagesRespected) {
+  CompileOptions options;
+  options.SetSourceLanguage(shaderc_source_language_hlsl);
+  options.SetHlslRegisterSetAndBinding("t4", "9", "16");
+  const std::string disassembly_text = AssemblyOutput(
+      kHlslFragShaderWithRegisters, shaderc_glsl_fragment_shader, options);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %t4 DescriptorSet 9"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %t4 Binding 16"));
+}
+
 }  // anonymous namespace

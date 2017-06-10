@@ -409,6 +409,18 @@ void shaderc_compile_options_set_binding_base_for_stage(
     shaderc_compile_options_t options, shaderc_shader_kind shader_kind,
     shaderc_uniform_kind kind, uint32_t base);
 
+// Sets a descriptor set and binding for an HLSL register in the given stage.
+// This method keeps a copy of the string data.
+void shaderc_compile_options_set_hlsl_register_set_and_binding_for_stage(
+    shaderc_compile_options_t options, shaderc_shader_kind shader_kind,
+    const char* reg, const char* set, const char* binding);
+
+// Like shaderc_compile_options_set_hlsl_register_set_and_binding_for_stage,
+// but affects all shader stages.
+void shaderc_compile_options_set_hlsl_register_set_and_binding(
+    shaderc_compile_options_t options, const char* reg, const char* set,
+    const char* binding);
+
 // An opaque handle to the results of a call to any shaderc_compile_into_*()
 // function.
 typedef struct shaderc_compilation_result* shaderc_compilation_result_t;

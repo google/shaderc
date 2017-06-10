@@ -284,6 +284,25 @@ class CompileOptions {
                                                        kind, base);
   }
 
+  // Sets a descriptor set and binding for an HLSL register in the given stage.
+  // Copies the parameter strings.
+  void SetHlslRegisterSetAndBindingForStage(shaderc_shader_kind shader_kind,
+                                            const std::string& reg,
+                                            const std::string& set,
+                                            const std::string& binding) {
+    shaderc_compile_options_set_hlsl_register_set_and_binding_for_stage(
+        options_, shader_kind, reg.c_str(), set.c_str(), binding.c_str());
+  }
+
+  // Sets a descriptor set and binding for an HLSL register in any stage.
+  // Copies the parameter strings.
+  void SetHlslRegisterSetAndBinding(const std::string& reg,
+                                    const std::string& set,
+                                    const std::string& binding) {
+    shaderc_compile_options_set_hlsl_register_set_and_binding(
+        options_, reg.c_str(), set.c_str(), binding.c_str());
+  }
+
  private:
   CompileOptions& operator=(const CompileOptions& other) = delete;
   shaderc_compile_options_t options_;

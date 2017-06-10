@@ -240,6 +240,16 @@ const char kGlslShaderWeirdPacking[] =
        buffer B { float x; vec3 foo; } my_ssbo;
        void main() { my_ssbo.x = 1.0; })";
 
+// A HLSL fragment shader with a weirdly packed block.
+const char kHlslFragShaderWithRegisters[] =
+    R"(Buffer<float> t4 : register(t4);
+       Buffer<float> t5 : register(t5);
+       float4 main() : SV_Target0 {
+         t4;
+         t5;
+         return float4(1.0);
+       })";
+
 #ifdef __cplusplus
 }
 #endif  // __cplusplus

@@ -218,6 +218,8 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   shader.setShiftSsboBinding(bases[static_cast<int>(UniformKind::StorageBuffer)]);
   shader.setShiftUavBinding(bases[static_cast<int>(UniformKind::UnorderedAccessView)]);
   shader.setHlslIoMapping(hlsl_iomap_);
+  shader.setResourceSetBinding(
+      hlsl_explicit_bindings_[static_cast<int>(used_shader_stage)]);
 
   // TODO(dneto): Generate source-level debug info if requested.
   bool success = shader.parse(

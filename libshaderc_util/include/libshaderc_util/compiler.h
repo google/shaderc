@@ -185,7 +185,8 @@ class Compiler {
         auto_bind_uniforms_(false),
         auto_binding_base_(),
         hlsl_iomap_(false),
-        hlsl_offsets_(false) {}
+        hlsl_offsets_(false),
+        hlsl_explicit_bindings_() {}
 
   // Requests that the compiler place debug information into the object code,
   // such as identifier names and line numbers.
@@ -251,6 +252,29 @@ class Compiler {
   // Use HLSL rules for offsets in "transparent" memory.  These allow for
   // tighter packing of some combinations of types than standard GLSL packings.
   void SetHlslOffsets(bool hlsl_offsets) { hlsl_offsets_ = hlsl_offsets; }
+
+  // Sets an explicit set and binding for the given HLSL register.
+  void SetHlslRegisterSetAndBinding(const std::string& reg,
+                                    const std::string& set,
+                                    const std::string& binding) {
+    for (auto stage : stages()) {
+      SetHlslRegisterSetAndBindingForStage(stage, reg, set, binding);
+    }
+  }
+
+  // Sets an explicit set and binding for the given HLSL register in the given
+  // shader stage.  For example,
+  //    SetHlslRegisterSetAndBinding(Stage::Fragment, "t1", "4", "5")
+  // means register "t1" in a fragment shader should map to binding 5 in set 4.
+  // (Glslang wants this data as strings, not ints or enums.)  The string data is
+  // copied.
+  void SetHlslRegisterSetAndBindingForStage(Stage stage, const std::string& reg,
+                                            const std::string& set,
+                                            const std::string& binding) {
+    hlsl_explicit_bindings_[static_cast<int>(stage)].push_back(reg);
+    hlsl_explicit_bindings_[static_cast<int>(stage)].push_back(set);
+    hlsl_explicit_bindings_[static_cast<int>(stage)].push_back(binding);
+  }
 
   // Compiles the shader source in the input_source_string parameter.
   //
@@ -417,6 +441,11 @@ class Compiler {
   // True if the compiler should determine block member offsets using HLSL
   // packing rules instead of standard GLSL rules.
   bool hlsl_offsets_;
+
+  // A sequence of triples, each triple representing a specific HLSL register
+  // name, and the set and binding numbers it should be mapped to, but in
+  // the form of strings.  This is how Glslang wants to consume the data.
+  std::vector<std::string> hlsl_explicit_bindings_[kNumStages];
 };
 
 // Converts a string to a vector of uint32_t by copying the content of a given
