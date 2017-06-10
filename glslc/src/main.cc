@@ -199,10 +199,9 @@ std::pair<bool, uint32_t> ParseUint32(std::string str) {
   // It should have been in range.
   ok = ok && !iss.fail();
 
-  // Work around a bug in GNU C++11 library.  It happily parses -1 as
-  // the maximum unsigned value.  The string "-0" should map to 0, but
-  // all other numbers with a leading minus should fail to parse.
-  if (str[0] == '-') ok = (parsed_number == 0);
+  // Work around a bugs in various C++ standard libraries.
+  // Count any negative number as an error, including "-0".
+  ok = ok && (str[0] != '-');
 
   return std::make_pair(ok, parsed_number);
 }
