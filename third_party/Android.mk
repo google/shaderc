@@ -95,9 +95,7 @@ LOCAL_SRC_FILES:= \
 		glslang/MachineIndependent/preprocessor/PpAtom.cpp \
 		glslang/MachineIndependent/preprocessor/PpContext.cpp \
 		glslang/MachineIndependent/preprocessor/Pp.cpp \
-		glslang/MachineIndependent/preprocessor/PpMemory.cpp \
 		glslang/MachineIndependent/preprocessor/PpScanner.cpp \
-		glslang/MachineIndependent/preprocessor/PpSymbols.cpp \
 		glslang/MachineIndependent/preprocessor/PpTokens.cpp
 
 LOCAL_C_INCLUDES:=$(GLSLANG_LOCAL_PATH) \
