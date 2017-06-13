@@ -381,7 +381,9 @@ class TestDashCapMImpliesDashW(DependencyInfoStdoutMatch,
          <no warning message should be generated>
     """
     environment = Directory('.', [File(
-        'shader.vert', '#version 140\nattribute float x;\nvoid main() {}')])
+            'shader.vert', """#version 400
+               layout(location=0) attribute float x;
+               void main() {}""")])
     glslc_args = ['-M', 'shader.vert']
     dependency_rules_expected = [{'target': 'shader.vert.spv',
                                   'dependency': {'shader.vert'}}]
@@ -412,7 +414,10 @@ class TestDashCapMMImpliesDashW(DependencyInfoStdoutMatch,
          <no warning message should be generated>
     """
     environment = Directory('.', [File(
-        'shader.vert', '#version 140\nattribute float x;\nvoid main() {}')])
+        'shader.vert', """
+           #version 400
+           layout(location = 0) attribute float x;
+           void main() {}""")])
     glslc_args = ['-MM', 'shader.vert']
     dependency_rules_expected = [{'target': 'shader.vert.spv',
                                   'dependency': {'shader.vert'}}]

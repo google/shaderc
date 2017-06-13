@@ -47,8 +47,8 @@ const char kValuelessPredefinitionShader[] =
 // because some versions of glslang will error out for a too-low version
 // when generating SPIR-V.
 const char kDeprecatedAttributeShader[] =
-    "#version 140\n"
-    "attribute float x;\n"
+    "#version 400\n"
+    "layout(location = 0) attribute float x;\n"
     "void main() {}\n";
 
 // By default the compiler will emit a warning as version 550 is an unknown
@@ -80,9 +80,9 @@ const char kTwoErrorsShader[] =
 
 // Compiler should generate two warnings.
 const char kTwoWarningsShader[] =
-    "#version 140\n"
-    "attribute float x;\n"
-    "attribute float y;\n"
+    "#version 400\n"
+    "layout(location = 0) attribute float x;\n"
+    "layout(location = 1) attribute float y;\n"
     "void main(){}\n";
 
 // A shader that compiles under OpenGL compatibility profile rules,

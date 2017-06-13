@@ -122,8 +122,8 @@ class WarningOnLine(expect.WarningMessage):
     """Tests that a warning message with a file/line number is emitted."""
 
     shader = FileShader(
-        """#version 140
-    attribute float x;
+        """#version 400
+    layout(location = 0) attribute float x;
     void main() {
     }
     """, '.vert')
@@ -139,8 +139,8 @@ class SuppressedWarningOnLine(expect.SuccessfulReturn):
     presence of -w."""
 
     shader = FileShader(
-        """#version 140
-    attribute float x;
+        """#version 400
+    layout(location = 0) attribute float x;
     void main() {
     }
     """, '.vert')
@@ -152,8 +152,8 @@ class WarningOnLineAsError(expect.ErrorMessage):
     number is emitted instead of a warning."""
 
     shader = FileShader(
-        """#version 140
-    attribute float x;
+        """#version 400
+    layout(location = 0) attribute float x;
     void main() {
     }
     """, '.vert')
@@ -168,8 +168,8 @@ class WarningAndError(expect.ErrorMessage):
     """Tests that both warnings and errors are emitted together."""
 
     shader = FileShader(
-        """#version 140
-    attribute float x;
+        """#version 400
+    layout(location = 0) attribute float x;
     int main() {
     }
     """, '.vert')
@@ -187,8 +187,8 @@ class SuppressedWarningAndError(expect.ErrorMessage):
     """Tests that only warnings are suppressed in the presence of -w."""
 
     shader = FileShader(
-        """#version 140
-    attribute float x;
+        """#version 400
+    layout(location = 0) attribute float x;
     int main() {
     }
     """, '.vert')
@@ -204,8 +204,8 @@ class WarningAsErrorAndError(expect.ErrorMessage):
     """Tests that with -Werror an warnings and errors are emitted as errors."""
 
     shader = FileShader(
-        """#version 140
-    attribute float x;
+        """#version 400
+    layout(location = 0) attribute float x;
     int main() {
     }
     """, '.vert')
@@ -243,8 +243,8 @@ class WarningAsErrorMultipleFiles(expect.ErrorMessage):
     """
 
     shader = FileShader(
-        """#version 140
-    attribute float x;
+        """#version 400
+    layout(location = 0) attribute float x;
     void main() {
     }
     """, '.vert')
@@ -268,8 +268,8 @@ class SuppressedWarningAsError(expect.SuccessfulReturn):
     """Tests that nothing is returned in the presence of -w -Werror."""
 
     shader = FileShader(
-        """#version 140
-    attribute float x;
+        """#version 400
+    layout(location = 0) attribute float x;
     void main() {
     }
     """, '.vert')
@@ -280,8 +280,8 @@ class MultipleSuppressed(expect.SuccessfulReturn):
     """Tests that multiple -w arguments are supported."""
 
     shader = FileShader(
-        """#version 140
-    attribute float x;
+        """#version 400
+    layout(location = 0) attribute float x;
     void main() {
     }
     """, '.vert')
@@ -292,15 +292,15 @@ class MultipleSuppressedFiles(expect.SuccessfulReturn):
     """Tests that -w suppresses warnings from all files."""
 
     shader = FileShader(
-        """#version 140
-    attribute float x;
+        """#version 400
+    layout(location = 0) attribute float x;
     void main() {
     }
     """, '.vert')
 
     shader2 = FileShader(
-        """#version 140
-    attribute float x;
+        """#version 400
+    layout(location = 0) attribute float x;
     void main() {
     }
     """, '.vert')
