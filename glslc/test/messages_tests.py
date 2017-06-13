@@ -84,10 +84,11 @@ class GlobalWarning(expect.WarningMessage):
     void main() {
     }
     """, '.vert')
-    glslc_args = ['-c', shader]
+    glslc_args = ['-c', '-std=400', shader]
 
     expected_warning = [
-        shader, ': warning: version 550 is unknown.\n1 warning generated.\n']
+            shader, ': warning: (version, profile) forced to be (400, none),'
+            ' while in source code it is (550, none)\n1 warning generated.\n']
 
 @inside_glslc_testsuite('ErrorMessages')
 class SuppressedGlobalWarning(expect.SuccessfulReturn):
@@ -99,7 +100,7 @@ class SuppressedGlobalWarning(expect.SuccessfulReturn):
     void main() {
     }
     """, '.vert')
-    glslc_args = ['-c', shader, '-w']
+    glslc_args = ['-c', '-std=400', shader, '-w']
 
 
 @inside_glslc_testsuite('ErrorMessages')
@@ -112,10 +113,11 @@ class GlobalWarningAsError(expect.ErrorMessage):
     void main() {
     }
     """, '.vert')
-    glslc_args = ['-c', shader, '-Werror']
+    glslc_args = ['-c', '-std=400', shader, '-Werror']
 
     expected_error= [
-        shader, ': error: version 550 is unknown.\n1 error generated.\n']
+            shader, ': error: (version, profile) forced to be (400, none),'
+            ' while in source code it is (550, none)\n1 error generated.\n']
 
 @inside_glslc_testsuite('ErrorMessages')
 class WarningOnLine(expect.WarningMessage):
@@ -255,13 +257,15 @@ class WarningAsErrorMultipleFiles(expect.ErrorMessage):
     }
     """, '.vert')
 
-    glslc_args = ['-c', shader, '-Werror', shader2]
+    glslc_args = ['-c', '-std=400', shader, '-Werror', shader2]
 
     expected_error = [
         shader, ':2: error: attribute deprecated in version 130; ',
         'may be removed in future release\n',
-        shader2, ': error: version 550 is unknown.\n',
+        shader2, ': error: (version, profile) forced to be (400, none),'
+            ' while in source code it is (550, none)\n',
         '2 errors generated.\n']
+
 
 @inside_glslc_testsuite('ErrorMessages')
 class SuppressedWarningAsError(expect.SuccessfulReturn):

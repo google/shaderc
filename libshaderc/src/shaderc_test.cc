@@ -571,7 +571,8 @@ TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileUnknownVersionStd) {
   // Warning message should complain about the unknown version.
   EXPECT_THAT(CompilationWarnings(kMinimalShader, shaderc_glsl_vertex_shader,
                                   options_.get()),
-              HasSubstr("warning: version 4242 is unknown.\n"));
+              HasSubstr("warning: (version, profile) forced to be (4242, core),"
+                        " while in source code it is (140, none)\n"));
 }
 
 TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileVersionsBefore150) {
@@ -984,22 +985,30 @@ TEST_F(CompileStringWithOptionsTest, SuppressWarningsOnLine) {
 
 TEST_F(CompileStringWithOptionsTest, GlobalWarnings) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  shaderc_compile_options_set_forced_version_profile(options_.get(), 400,
+                                                     shaderc_profile_core);
   EXPECT_THAT(CompilationWarnings(kMinimalUnknownVersionShader,
                                   shaderc_glsl_vertex_shader, options_.get()),
-              HasSubstr("version 550 is unknown.\n"));
+              HasSubstr("(version, profile) forced to be (400, core),"
+                        " while in source code it is (550, none)\n"));
 }
 
 TEST_F(CompileStringWithOptionsTest, GlobalWarningsAsErrors) {
   shaderc_compile_options_set_warnings_as_errors(options_.get());
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  shaderc_compile_options_set_forced_version_profile(options_.get(), 400,
+                                                     shaderc_profile_core);
   EXPECT_THAT(CompilationErrors(kMinimalUnknownVersionShader,
                                 shaderc_glsl_vertex_shader, options_.get()),
-              HasSubstr("error: version 550 is unknown.\n"));
+              HasSubstr("(version, profile) forced to be (400, core),"
+                        " while in source code it is (550, none)\n"));
 }
 
 TEST_F(CompileStringWithOptionsTest, SuppressGlobalWarnings) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   shaderc_compile_options_set_suppress_warnings(options_.get());
+  shaderc_compile_options_set_forced_version_profile(options_.get(), 400,
+                                                     shaderc_profile_core);
   EXPECT_EQ("",
             CompilationWarnings(kMinimalUnknownVersionShader,
                                 shaderc_glsl_vertex_shader, options_.get()));

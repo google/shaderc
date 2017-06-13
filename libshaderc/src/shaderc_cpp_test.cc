@@ -432,7 +432,8 @@ TEST_F(CppInterface, ForcedVersionProfileUnknownVersionStd) {
                                    shaderc_profile_core);
   EXPECT_THAT(
       CompilationWarnings(kMinimalShader, shaderc_glsl_vertex_shader, options_),
-      HasSubstr("warning: version 4242 is unknown.\n"));
+      HasSubstr("warning: (version, profile) forced to be (4242, core),"
+                " while in source code it is (140, none)\n"));
 }
 
 TEST_F(CppInterface, ForcedVersionProfileVersionsBefore150) {
@@ -891,15 +892,18 @@ TEST_F(CppInterface, WarningsOnLineAsErrorsClonedOptions) {
 TEST_F(CppInterface, GlobalWarnings) {
   // By default the compiler will emit a warning as version 550 is an unknown
   // version.
+  options_.SetForcedVersionProfile(400, shaderc_profile_core);
   EXPECT_THAT(CompilationWarnings(kMinimalUnknownVersionShader,
                                   shaderc_glsl_vertex_shader, options_),
-              HasSubstr("warning: version 550 is unknown.\n"));
+              HasSubstr("(version, profile) forced to be (400, core),"
+                        " while in source code it is (550, none)\n"));
 }
 
 TEST_F(CppInterface, SuppressGlobalWarnings) {
   // Sets the compiler to suppress warnings, so that the unknown version warning
   // won't be emitted.
   options_.SetSuppressWarnings();
+  options_.SetForcedVersionProfile(400, shaderc_profile_core);
   EXPECT_EQ("", CompilationWarnings(kMinimalUnknownVersionShader,
                                     shaderc_glsl_vertex_shader, options_));
 }
@@ -919,19 +923,23 @@ TEST_F(CppInterface, GlobalWarningsAsErrors) {
   // Sets the compiler to make warnings into errors. So that the unknown
   // version warning will be emitted as an error and compilation should fail.
   options_.SetWarningsAsErrors();
+  options_.SetForcedVersionProfile(400, shaderc_profile_core);
   EXPECT_THAT(CompilationErrors(kMinimalUnknownVersionShader,
                                 shaderc_glsl_vertex_shader, options_),
-              HasSubstr("error: version 550 is unknown.\n"));
+              HasSubstr("(version, profile) forced to be (400, core),"
+                        " while in source code it is (550, none)\n"));
 }
 
 TEST_F(CppInterface, GlobalWarningsAsErrorsClonedOptions) {
   // Sets the compiler to make warnings into errors. This mode should be carried
   // into any clone of the original option object.
   options_.SetWarningsAsErrors();
+  options_.SetForcedVersionProfile(400, shaderc_profile_core);
   CompileOptions cloned_options(options_);
   EXPECT_THAT(CompilationErrors(kMinimalUnknownVersionShader,
                                 shaderc_glsl_vertex_shader, cloned_options),
-              HasSubstr("error: version 550 is unknown.\n"));
+              HasSubstr("(version, profile) forced to be (400, core),"
+                        " while in source code it is (550, none)\n"));
 }
 
 TEST_F(CppInterface, SuppressWarningsModeFirstOverridesWarningsAsErrorsMode) {
