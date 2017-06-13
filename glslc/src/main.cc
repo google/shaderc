@@ -259,6 +259,10 @@ int main(int argc, char** argv) {
   shaderc_shader_kind arg_stage = shaderc_glsl_infer_from_source;
   // Binding base for a single option.
   uint32_t arg_base = 0;
+
+  // What kind of uniform variable are we setting the binding base for?
+  shaderc_uniform_kind u_kind = shaderc_uniform_kind_buffer;
+
   // Sets binding base for the given uniform kind.  If stage is
   // shader_glsl_infer_from_source then set it for all shader stages.
   auto set_binding_base = [&compiler](
@@ -314,42 +318,24 @@ int main(int argc, char** argv) {
       compiler.options().SetAutoBindUniforms(true);
     } else if (arg == "-fhlsl-iomap") {
       compiler.options().SetHlslIoMapping(true);
-    } else if (arg == "-fimage-binding-base") {
-      const auto kind = shaderc_uniform_kind_image;
+    } else if (((u_kind = shaderc_uniform_kind_image),
+                (arg == "-fimage-binding-base")) ||
+               ((u_kind = shaderc_uniform_kind_texture),
+                (arg == "-ftexture-binding-base")) ||
+               ((u_kind = shaderc_uniform_kind_sampler),
+                (arg == "-fsampler-binding-base")) ||
+               ((u_kind = shaderc_uniform_kind_buffer),
+                (arg == "-fubo-binding-base")) ||
+               ((u_kind = shaderc_uniform_kind_buffer),
+                (arg == "-fcbuffer-binding-base")) ||
+               ((u_kind = shaderc_uniform_kind_storage_buffer),
+                (arg == "-fssbo-binding-base")) ||
+               ((u_kind = shaderc_uniform_kind_unordered_access_view),
+                (arg == "-fuav-binding-base"))) {
       if (!GetOptionalStageThenOffsetArgument(arg, &std::cerr, argc, argv, &i,
                                               &arg_stage, &arg_base))
         return 1;
-      set_binding_base(arg_stage, kind, arg_base);
-    } else if (arg == "-ftexture-binding-base") {
-      const auto kind = shaderc_uniform_kind_texture;
-      if (!GetOptionalStageThenOffsetArgument(arg, &std::cerr, argc, argv, &i,
-                                              &arg_stage, &arg_base))
-        return 1;
-      set_binding_base(arg_stage, kind, arg_base);
-    } else if (arg == "-fsampler-binding-base") {
-      const auto kind = shaderc_uniform_kind_sampler;
-      if (!GetOptionalStageThenOffsetArgument(arg, &std::cerr, argc, argv, &i,
-                                              &arg_stage, &arg_base))
-        return 1;
-      set_binding_base(arg_stage, kind, arg_base);
-    } else if (arg == "-fubo-binding-base" || arg == "-fcbuffer-binding-base") {
-      const auto kind = shaderc_uniform_kind_buffer;
-      if (!GetOptionalStageThenOffsetArgument(arg, &std::cerr, argc, argv, &i,
-                                              &arg_stage, &arg_base))
-        return 1;
-      set_binding_base(arg_stage, kind, arg_base);
-    } else if (arg == "-fssbo-binding-base") {
-      const auto kind = shaderc_uniform_kind_storage_buffer;
-      if (!GetOptionalStageThenOffsetArgument(arg, &std::cerr, argc, argv, &i,
-                                              &arg_stage, &arg_base))
-        return 1;
-      set_binding_base(arg_stage, kind, arg_base);
-    } else if (arg == "-fuav-binding-base") {
-      const auto kind = shaderc_uniform_kind_unordered_access_view;
-      if (!GetOptionalStageThenOffsetArgument(arg, &std::cerr, argc, argv, &i,
-                                              &arg_stage, &arg_base))
-        return 1;
-      set_binding_base(arg_stage, kind, arg_base);
+      set_binding_base(arg_stage, u_kind, arg_base);
     } else if (arg.starts_with("-fentry-point=")) {
       current_entry_point_name =
           arg.substr(std::strlen("-fentry-point=")).str();
