@@ -57,7 +57,7 @@ if(${SHADERC_ENABLE_TESTS})
   # that we get the right relative path names in the "include" test output.
   set(GLSLANG_TEST_SRC_DIR ${SHADERC_GLSLANG_DIR}/Test)
   set(GLSLANG_TEST_BIN_DIR
-        ${CMAKE_CURRENT_BINARY_DIR}/Test/${CMAKE_CFG_INTDIR})
+        ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/Test)
 
   # If we are building in a multi-configuration setting we have
   # to put the glslang tests into their respective subdirectories.
@@ -73,10 +73,10 @@ if(${SHADERC_ENABLE_TESTS})
 
   if (CMAKE_CONFIGURATION_TYPES)
     # If we are running a multi-configuration project,
-    # the tests will be in Test/${Configuration}
+    # the tests will be in ${Configuration}/Test
     add_test(NAME glslang-testsuite
       COMMAND bash runtests
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Test/$<CONFIGURATION>
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIGURATION>/Test
     )
   else()
     add_test(NAME glslang-testsuite

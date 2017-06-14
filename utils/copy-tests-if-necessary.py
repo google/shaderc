@@ -110,18 +110,11 @@ def main():
         target_location = "../" + target_location + intermediate_directory + "/"
     target_location = "EXE=" + target_location
 
-    include_test_file = "../Test/"
-    if intermediate_directory:
-        include_test_file = "../" + target_location + intermediate_directory + "/"
-    include_test_file = include_test_file + "hlsl.include.vert"
-
     if src_glsl_stamp != old_glsl_stamp:
         setup_directory(glsl_src_dir, glsl_bin_dir)
         runtests_script = os.path.join(glsl_bin_dir, "runtests")
         substitute_file(runtests_script,
                         ("EXE=../build/install/bin/", target_location))
-        substitute_file(runtests_script,
-                        ("../Test/hlsl.include.vert", include_test_file))
         write_file(glsl_list_file, src_glsl_stamp)
 
 
