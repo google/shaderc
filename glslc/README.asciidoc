@@ -1,5 +1,6 @@
 = glslc Manual
-
+:toc:
+:toclevels: 3
 :numbered:
 :source-highlighter: pygments
 
