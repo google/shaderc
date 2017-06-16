@@ -18,17 +18,7 @@ glslc [--show-limits]
 
 glslc [-c|-S|-E]
       [-x ...] [-std=standard]
-      [-fauto-bind-uniforms]
-      [-fhlsl-iomap]
-      [-fimage-binding-base [stage] value]
-      [-fsampler-binding-base [stage] value]
-      [-ftexture-binding-base [stage] value]
-      [-fubo-binding-base [stage] value]
-      [-fcbuffer-binding-base [stage] value]
-      [-fssbo-binding-base [stage] value]
-      [-fuav-binding-base [stage] value]
-      [-fresource-set-binding [stage] <reg0> <set0> <binding0>
-        [<reg1> <set1> <binding1>...]]
+      [ ... options for resource bindings ... ]
       [-fhlsl-offsets]
       [-fentry-point=...]
       [-flimit=...]
@@ -62,7 +52,7 @@ as shown in the following table. `-fshader-stage=` and `#pragma shader_stage()`,
 on the other hand, enable you to specify shader stages from the command line
 and within the source file. Possible ``stage``s for them are also listed in
 the following table. Details about `-fshader-stage=` can be found in
-<<option-f-shader-stage,its own section>>.
+<<option-fshader-stage,its own section>>.
 
 [[shader-stage-selection]]
 .Shader Stage Selection
@@ -142,123 +132,7 @@ multiple files generated. A filename of `-` represents standard output.
 
 === Language and Mode Selection Options
 
-[[option-f-auto-bind-uniforms]]
-==== `-fauto-bind-uniforms`
-
-Option `-fauto-bind-uniforms` directs the compiler to automatically assign
-binding numbers to uniform variables, when an explicit binding is not
-specified in the shader source.
-
-An explicit binding number can be specified in the shader source by using
-a `binding` layout qualifier.  For example:
-
-----
-layout(binding = 12) uniform texture2D;
-----
-
-[[option-f-hlsl-iomap]]
-==== `-fhlsl-iomap`
-
-Option `-fhlsl-iomap` directs the compiler to use HLSL register
-assignments as binding values.
-
-[[option-f-image-binding-base]]
-==== `-fimage-binding-base`
-
-Option `-fimage-binding-base [stage] base` sets the lowest automatically
-assigned binding for images.  If a stage is specified, only affects the specified
-stage.
-
-For HLSL, sets one less than the base.
-
-[[option-f-sampler-binding-base]]
-==== `-fsampler-binding-base`
-
-Option `-fsampler-binding-base [stage] base` sets the lowest automatically
-assigned binding for samplers.  If a stage is specified, only affects the specified
-stage.
-
-For HLSL, sets one less than the base.
-
-[[option-f-texture-binding-base]]
-==== `-ftexture-binding-base`
-
-Option `-ftexture-binding-base [stage] base` sets the lowest automatically
-assigned binding for textures.  If a stage is specified, only affects the specified
-stage.
-
-For HLSL, sets one less than the base.
-
-[[option-f-ubo-binding-base]]
-==== `-fubo-binding-base`
-
-Option `-fubo-binding-base [stage] base` sets the lowest automatically
-assigned binding for Uniform Buffer Objects (GLSL) or Cbuffers (HLSL).
-If a stage is specified, only affects the specified stage.
-
-For HLSL, sets one less than the base.
-
-[[option-f-cbuffer-binding-base]]
-==== `-fcbuffer-binding-base`
-
-Option `-fcbuffer-binding-base [stage] base` is the same as
-`-fubo-binding-base [stage] base`.
-
-[[option-f-ssbo-binding-base]]
-==== `-fssbo-binding-base`
-
-Option `-fssbo-binding-base [stage] base` sets the lowest automatically
-assigned binding for Shader Storage Buffer Objects (GLSL).
-If a stage is specified, only affects the specified stage.
-
-This only affects GLSL compilation.
-
-[[option-f-uav-binding-base]]
-==== `-fuav-binding-base`
-
-Option `-fuav-binding-base [stage] base` sets one less than the lowest
-automatically assigned binding for Unordered Access Views (UAV).
-If a stage is specified, only affects the specified stage.
-
-This only affects HLSL compilation.
-
-[[option-f-register-set-binding]]
-==== `-fresource-set-binding`
-
-Option `-fresource-set-binding [stage] <reg0> <set0> <binding1>` sets
-the descriptor set and binding for an HLSL resource, by register name.
-To specify settings for more registers, append their triples, consisting
-of register name, descriptor set, and binding.
-
-Example:
-
-----
-# For a texture in register t1, use set 1 binding 0.
-# For a texture in register t2, use set 1 binding 3
-glslc -x hlsl foo.frag -fresource-set-binding t1 1 0 t2 1 3
-----
-
-If a stage is specified, only affects the specified stage.
-
-----
-# Same as the previous example, but the settings only apply
-# to fragment (pixel) shaders.
-glslc -x hlsl foo.frag -fresource-set-binding frag t1 1 0 t2 1 3
-----
-
-[[option-f-hlsl-offsets]]
-==== `-fhlsl-offsets`
-
-Use HLSL packing rules instead of GLSL rules when determining offsets of
-members of blocks.  This option is always on when compiling for HLSL.
-
-[[option-f-entry-point]]
-==== `-fentry-point=`
-
-`-fentry-point=<name>` lets you specify the entry point name.  This is only
-significant for HLSL compilation.  The default is "main".
-
-[[option-f-limit]]
+[[option-flimit]]
 ==== `-flimit=`
 
 `-flimit=<resource-limits>` lets you specify resource limits.
@@ -270,7 +144,7 @@ Use `--show-limits` to show the default values, and example syntax.
 
 This option affects all compiled shaders.
 
-[[option-f-limit-file]]
+[[option-flimit-file]]
 ==== `-flimit-file`
 
 `-flimit-file <resource-limits-file>` lets you specify resource limits in a file.
@@ -280,7 +154,7 @@ files, e.g. as emitted by `glslangValidator -c`.
 
 This option affects all compiled shaders.
 
-[[option-f-shader-stage]]
+[[option-fshader-stage]]
 ==== `-fshader-stage=`
 
 `-fshader-stage=<stage>` lets you specify the shader stage for one or more
@@ -468,6 +342,19 @@ specified) will trigger an error.
                  {0x07230203, 0x00010000, 0x00080001, 0x00000006...}
 |===
 
+[[option-fhlsl-offsets]]
+==== `-fhlsl-offsets`
+
+Use HLSL packing rules instead of GLSL rules when determining offsets of
+members of blocks.  This option is always on when compiling for HLSL.
+
+[[option-fentry-point]]
+==== `-fentry-point=`
+
+`-fentry-point=<name>` lets you specify the entry point name.  This is only
+significant for HLSL compilation.  The default is "main".
+
+
 === Warning and Error Options
 
 ==== `-w`
@@ -565,6 +452,113 @@ stdout: `target: main.vert <other dependent files>`.
 |glslc -c -MD main.vert -o obj  |obj  |obj.d  |obj: main.vert
 |glslc -c -MD main.vert -o obj -MF dep_info -MT target|obj|dep_info|target: main.vert
 |===
+
+=== Resource Binding Options
+
+[[option-fauto-bind-uniforms]]
+==== `-fauto-bind-uniforms`
+
+Option `-fauto-bind-uniforms` directs the compiler to automatically assign
+binding numbers to uniform variables, when an explicit binding is not
+specified in the shader source.
+
+An explicit binding number can be specified in the shader source by using
+a `binding` layout qualifier.  For example:
+
+----
+layout(binding = 12) uniform texture2D;
+----
+
+[[option-fhlsl-iomap]]
+==== `-fhlsl-iomap`
+
+Option `-fhlsl-iomap` directs the compiler to use HLSL register
+assignments as binding values.
+
+[[option-fimage-binding-base]]
+==== `-fimage-binding-base`
+
+Option `-fimage-binding-base [stage] base` sets the lowest automatically
+assigned binding for images.  If a stage is specified, only affects the specified
+stage.
+
+For HLSL, sets one less than the base.
+
+[[option-fsampler-binding-base]]
+==== `-fsampler-binding-base`
+
+Option `-fsampler-binding-base [stage] base` sets the lowest automatically
+assigned binding for samplers.  If a stage is specified, only affects the specified
+stage.
+
+For HLSL, sets one less than the base.
+
+[[option-ftexture-binding-base]]
+==== `-ftexture-binding-base`
+
+Option `-ftexture-binding-base [stage] base` sets the lowest automatically
+assigned binding for textures.  If a stage is specified, only affects the specified
+stage.
+
+For HLSL, sets one less than the base.
+
+[[option-fubo-binding-base]]
+==== `-fubo-binding-base`
+
+Option `-fubo-binding-base [stage] base` sets the lowest automatically
+assigned binding for Uniform Buffer Objects (GLSL) or Cbuffers (HLSL).
+If a stage is specified, only affects the specified stage.
+
+For HLSL, sets one less than the base.
+
+[[option-fcbuffer-binding-base]]
+==== `-fcbuffer-binding-base`
+
+Option `-fcbuffer-binding-base [stage] base` is the same as
+`-fubo-binding-base [stage] base`.
+
+[[option-fssbo-binding-base]]
+==== `-fssbo-binding-base`
+
+Option `-fssbo-binding-base [stage] base` sets the lowest automatically
+assigned binding for Shader Storage Buffer Objects (GLSL).
+If a stage is specified, only affects the specified stage.
+
+This only affects GLSL compilation.
+
+[[option-fuav-binding-base]]
+==== `-fuav-binding-base`
+
+Option `-fuav-binding-base [stage] base` sets one less than the lowest
+automatically assigned binding for Unordered Access Views (UAV).
+If a stage is specified, only affects the specified stage.
+
+This only affects HLSL compilation.
+
+[[option-fregister-set-binding]]
+==== `-fresource-set-binding`
+
+Option `-fresource-set-binding [stage] <reg0> <set0> <binding0>` sets
+the descriptor set and binding for an HLSL resource, by register name.
+To specify settings for more registers, append their triples consisting
+of register name, descriptor set, and binding.
+
+Example:
+
+----
+# For a texture in register t1, use set 1 binding 0.
+# For a texture in register t2, use set 1 binding 3
+glslc -x hlsl foo.frag -fresource-set-binding t1 1 0 t2 1 3
+----
+
+If a stage is specified, only affects the specified stage.
+
+----
+# Same as the previous example, but the settings only apply
+# to fragment (pixel) shaders.
+glslc -x hlsl foo.frag -fresource-set-binding frag t1 1 0 t2 1 3
+----
+
 
 == Divergence from and extensions to GLSL specifications
 
