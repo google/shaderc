@@ -344,8 +344,8 @@ int main(int argc, char** argv) {
         return 1;
       set_binding_base(arg_stage, u_kind, arg_base);
     } else if (arg == "-fresource-set-binding") {
-      auto need_three_args_err = [arg]() {
-        std::cerr << "glsc: error: Option " << arg
+      auto need_three_args_err = []() {
+        std::cerr << "glsc: error: Option -fresource-set-binding"
                   << " requires at least 3 arguments" << std::endl;
         return 1;
       };
