@@ -160,6 +160,7 @@ SPVTOOLS_OPT_SRC_FILES := \
 		source/opt/freeze_spec_constant_value_pass.cpp \
 		source/opt/function.cpp \
 		source/opt/inline_pass.cpp \
+		source/opt/insert_extract_elim.cpp \
 		source/opt/instruction.cpp \
 		source/opt/ir_loader.cpp \
 		source/opt/local_access_chain_convert_pass.cpp \
