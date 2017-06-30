@@ -32,7 +32,12 @@ const TBuiltInResource kDefaultTBuiltInResource = {
     /*.maxCombinedTextureImageUnits = */ 80,
     /*.maxTextureImageUnits = */ 16,
     /*.maxFragmentUniformComponents = */ 1024,
-    /*.maxDrawBuffers = */ 4,
+
+    // glslang has 32 maxDrawBuffers.
+    // Pixel phone Vulkan driver in Android N has 8
+    // maxFragmentOutputAttachments.
+    /*.maxDrawBuffers = */ 8, 
+
     /*.maxVertexUniformVectors = */ 256,
     /*.maxVaryingVectors = */ 15,  // From OpenGLES 3.1 table 6.44.
     /*.maxFragmentUniformVectors = */ 256,

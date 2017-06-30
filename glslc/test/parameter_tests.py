@@ -254,7 +254,7 @@ MaxVertexTextureImageUnits 16
 MaxCombinedTextureImageUnits 80
 MaxTextureImageUnits 16
 MaxFragmentUniformComponents 1024
-MaxDrawBuffers 4
+MaxDrawBuffers 8
 MaxVertexUniformVectors 256
 MaxVaryingVectors 15
 MaxFragmentUniformVectors 256
