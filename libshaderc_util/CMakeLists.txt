@@ -26,9 +26,11 @@ shaderc_default_compile_options(shaderc_util)
 target_include_directories(shaderc_util
   PUBLIC include PRIVATE ${glslang_SOURCE_DIR})
 
-install(TARGETS shaderc_util
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib)
+if(SHADERC_ENABLE_INSTALL)
+  install(TARGETS shaderc_util
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib)
+endif(SHADERC_ENABLE_INSTALL)
 
 find_package(Threads)
 target_link_libraries(shaderc_util PRIVATE
