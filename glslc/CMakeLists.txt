@@ -38,7 +38,9 @@ shaderc_add_tests(
 
 shaderc_add_asciidoc(glslc_doc_README README)
 
-install(TARGETS glslc_exe
-  RUNTIME DESTINATION bin)
+if(SHADERC_ENABLE_INSTALL)
+  install(TARGETS glslc_exe
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif(SHADERC_ENABLE_INSTALL)
 
 add_subdirectory(test)
