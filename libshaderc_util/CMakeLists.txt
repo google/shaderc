@@ -28,8 +28,8 @@ target_include_directories(shaderc_util
 
 if(SHADERC_ENABLE_INSTALL)
   install(TARGETS shaderc_util
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib)
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif(SHADERC_ENABLE_INSTALL)
 
 find_package(Threads)
