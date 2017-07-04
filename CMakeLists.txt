@@ -19,6 +19,7 @@ else()
   message(STATUS "Configuring Shaderc to avoid building tests.")
 endif()
 
+include(GNUInstallDirs)
 include(cmake/setup_build.cmake)
 include(cmake/utils.cmake)
 
