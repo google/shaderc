@@ -5,34 +5,34 @@
       "site" : "github",
       "subrepo" : "KhronosGroup/glslang",
       "subdir" : "third_party/glslang",
-      "commit" : "91c46c656720a6e1e71a3411cd1f4f792b427b2d"
+      "commit" : "eb5f12d1ca7b2bf16c804fc930a960ba4d0f5628"
     },
     {
       "name" : "googletest",
       "site" : "github",
       "subrepo" : "google/googletest",
       "subdir" : "third_party/googletest",
-      "commit" : "c2d90bddc6a2a562ee7750c14351e9ca16a6a37a"
+      "commit" : "4bab34d2084259cba67f3bfb51217c10d606e175"
     },
     {
       "name" : "shaderc",
       "site" : "github",
       "subrepo" : "google/shaderc",
-      "commit" : "aede4fe9571a1be4e8962c3149772bb9fcc604f1"
+      "commit" : "cd5199fa837b4912c671afaf85be9d4d68503f80"
     },
     {
       "name" : "spirv-headers",
       "site" : "github",
       "subrepo" : "KhronosGroup/SPIRV-Headers",
       "subdir" : "third_party/spirv-tools/external/spirv-headers",
-      "commit" : "63e1062a194750b354d48be8c16750d7a4d0dc4e"
+      "commit" : "661ad91124e6af2272afd00f804d8aa276e17107"
     },
     {
       "name" : "spirv-tools",
       "site" : "github",
       "subrepo" : "KhronosGroup/SPIRV-Tools",
       "subdir" : "third_party/spirv-tools",
-      "commit" : "7c8da66bc27cc5c4ccb6a0fa612f56c9417518ff"
+      "commit" : "73e8dac5b925f979d5c9e94770fb104fcc539ac2"
     }
   ]
 }
