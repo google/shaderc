@@ -151,6 +151,7 @@ SPVTOOLS_SRC_FILES := \
 
 SPVTOOLS_OPT_SRC_FILES := \
 		source/opt/basic_block.cpp \
+		source/opt/block_merge_pass.cpp \
 		source/opt/build_module.cpp \
 		source/opt/compact_ids_pass.cpp \
 		source/opt/def_use_manager.cpp \
