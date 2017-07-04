@@ -4,6 +4,11 @@ enable_testing()
 
 message(STATUS "Shaderc: build type is \"${CMAKE_BUILD_TYPE}\".")
 
+option(SHADERC_SKIP_INSTALL "Skip installation" ${SHADERC_SKIP_INSTALL})
+if(NOT ${SHADERC_SKIP_INSTALL})
+  set(SHADERC_ENABLE_INSTALL ON)
+endif()
+
 option(SHADERC_SKIP_TESTS "Skip building tests" ${SHADERC_SKIP_TESTS})
 if(NOT ${SHADERC_SKIP_TESTS})
   set(SHADERC_ENABLE_TESTS ON)
