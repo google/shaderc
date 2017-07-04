@@ -46,7 +46,7 @@ include $(BUILD_STATIC_LIBRARY)
 # Build Glslang's HLSL parser library.
 include $(CLEAR_VARS)
 LOCAL_MODULE:=HLSL
-LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti
+LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti $(GLSLANG_DEFINES)
 LOCAL_SRC_FILES:= \
 		hlsl/hlslAttributes.cpp \
 		hlsl/hlslGrammar.cpp \
