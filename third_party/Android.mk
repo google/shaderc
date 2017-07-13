@@ -150,10 +150,12 @@ SPVTOOLS_SRC_FILES := \
 		source/validate_type_unique.cpp
 
 SPVTOOLS_OPT_SRC_FILES := \
+		source/opt/aggressive_dead_code_elim_pass.cpp \
 		source/opt/basic_block.cpp \
 		source/opt/block_merge_pass.cpp \
 		source/opt/build_module.cpp \
 		source/opt/compact_ids_pass.cpp \
+		source/opt/dead_branch_elim_pass.cpp \
 		source/opt/def_use_manager.cpp \
 		source/opt/eliminate_dead_constant_pass.cpp \
 		source/opt/flatten_decoration_pass.cpp \
@@ -167,6 +169,7 @@ SPVTOOLS_OPT_SRC_FILES := \
 		source/opt/local_access_chain_convert_pass.cpp \
 		source/opt/local_single_block_elim_pass.cpp \
 		source/opt/local_single_store_elim_pass.cpp \
+		source/opt/local_ssa_elim_pass.cpp \
 		source/opt/module.cpp \
 		source/opt/optimizer.cpp \
 		source/opt/pass_manager.cpp \
