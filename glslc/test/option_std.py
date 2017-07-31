@@ -272,7 +272,7 @@ class TestVersionMissingProfile(expect.ErrorMessage):
     glslc_args = ['-c', '-std=310', shader]
 
     expected_error = [
-        shader, ': error: #version: versions 300 and 310 require ',
+        shader, ': error: #version: versions 300, 310, and 320 require ',
         "specifying the 'es' profile\n1 error generated.\n"]
 
 

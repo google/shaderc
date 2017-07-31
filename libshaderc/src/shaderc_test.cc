@@ -569,10 +569,15 @@ TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileUnknownVersionStd) {
       options_.get(), 4242 /*unknown version*/, shaderc_profile_core);
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   // Warning message should complain about the unknown version.
-  EXPECT_THAT(CompilationWarnings(kMinimalShader, shaderc_glsl_vertex_shader,
-                                  options_.get()),
-              HasSubstr("warning: (version, profile) forced to be (4242, core),"
-                        " while in source code it is (140, none)\n"));
+  //
+  // Also, Glslang errors out on unkown versions, due to commit:
+  // https://github.com/KhronosGroup/glslang/commit/9353f1afab8d1c2b1811c6acd807675128eaabc5
+  const auto errs = CompilationErrors(
+      kMinimalShader, shaderc_glsl_vertex_shader, options_.get());
+  EXPECT_THAT(
+      errs, HasSubstr("warning: (version, profile) forced to be (4242, core), "
+                      "while in source code it is (140, none)\n"));
+  EXPECT_THAT(errs, HasSubstr("error: version not supported\n"));
 }
 
 TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileVersionsBefore150) {
