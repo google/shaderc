@@ -23,15 +23,36 @@ namespace shaderc_util {
 
 // Returns true if the given version is an accepted GLSL (ES) version.
 inline bool IsKnownVersion(int version) {
-  return version == 100 || version == 110 || version == 120 || version == 130 ||
-         version == 140 || version == 150 || version == 300 || version == 330 ||
-         version == 310 || version == 400 || version == 410 || version == 420 ||
-         version == 430 || version == 440 || version == 450;
+  switch (version) {
+    case 100:
+    case 110:
+    case 120:
+    case 130:
+    case 140:
+    case 150:
+    case 300:
+    case 310:
+    case 320:
+    case 330:
+    case 400:
+    case 410:
+    case 420:
+    case 430:
+    case 440:
+    case 450:
+    case 460:
+      return true;
+    default:
+      break;
+  }
+  return false;
 }
 
 // Given a string version_profile containing both version and profile, decodes
 // it and puts the decoded version in version, decoded profile in profile.
 // Returns true if decoding is successful and version and profile are accepted.
+// This does not validate the version number against the profile.  For example,
+// "460es" doesn't make sense (yet), but is still accepted.
 bool ParseVersionProfile(const std::string& version_profile, int* version,
                          EProfile* profile);
 

@@ -47,10 +47,13 @@ shaderc_add_tests(
     file_finder
     io
     message
-    mutex)
+    mutex
+    version_profile)
 
 if(${SHADERC_ENABLE_TESTS})
   target_include_directories(shaderc_util_counting_includer_test
+    PRIVATE ${glslang_SOURCE_DIR})
+  target_include_directories(shaderc_util_version_profile_test
     PRIVATE ${glslang_SOURCE_DIR})
 endif()
 
