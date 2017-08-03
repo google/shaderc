@@ -155,6 +155,7 @@ SPVTOOLS_OPT_SRC_FILES := \
 		source/opt/block_merge_pass.cpp \
 		source/opt/build_module.cpp \
 		source/opt/compact_ids_pass.cpp \
+		source/opt/common_uniform_elim_pass.cpp \
 		source/opt/dead_branch_elim_pass.cpp \
 		source/opt/def_use_manager.cpp \
 		source/opt/eliminate_dead_constant_pass.cpp \
