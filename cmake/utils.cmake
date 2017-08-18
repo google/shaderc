@@ -59,7 +59,10 @@ function(shaderc_add_asciidoc TARGET FILE)
         ${CMAKE_CURRENT_SOURCE_DIR}/${FILE}.asciidoc
       DEPENDS ${FILE}.asciidoc ${ARGN}
       OUTPUT ${DEST})
-    add_custom_target(${TARGET} ALL DEPENDS ${DEST})
+    # Create the target, but the default build target does not depend on it.
+    # Some Asciidoctor installations are mysteriously broken, and it's hard
+    # to detect those cases.  Generating HTML is not critical by default.
+    add_custom_target(${TARGET} DEPENDS ${DEST})
   endif(ASCIIDOCTOR_EXE)
 endfunction()
 
