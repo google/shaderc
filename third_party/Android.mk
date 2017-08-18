@@ -166,6 +166,7 @@ SPVTOOLS_OPT_SRC_FILES := \
 		source/opt/function.cpp \
 		source/opt/inline_pass.cpp \
 		source/opt/inline_exhaustive_pass.cpp \
+		source/opt/inline_opaque_pass.cpp \
 		source/opt/insert_extract_elim.cpp \
 		source/opt/instruction.cpp \
 		source/opt/ir_loader.cpp \
