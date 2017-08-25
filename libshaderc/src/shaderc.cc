@@ -449,14 +449,17 @@ void shaderc_compile_options_set_hlsl_register_set_and_binding(
 }
 
 shaderc_compiler_t shaderc_compiler_initialize() {
-  static shaderc_util::GlslangInitializer* initializer =
+  shaderc_util::GlslangInitializer* initializer =
       new shaderc_util::GlslangInitializer;
   shaderc_compiler_t compiler = new (std::nothrow) shaderc_compiler;
   compiler->initializer = initializer;
   return compiler;
 }
 
-void shaderc_compiler_release(shaderc_compiler_t compiler) { delete compiler; }
+void shaderc_compiler_release(shaderc_compiler_t compiler) {
+  delete compiler->initializer;
+  delete compiler;
+}
 
 namespace {
 shaderc_compilation_result_t CompileToSpecifiedOutputType(
