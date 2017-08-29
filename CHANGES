@@ -1,6 +1,7 @@
 Revision history for Shaderc
 
 v2017.2-dev 2017-03-10
+ - Add a shared library version of libshaderc
  - Support GLSL 4.6 and ESSL 3.2
  - Add options for automatically set bindings for (uniform) resources that
    don't have bindings set in shader source.

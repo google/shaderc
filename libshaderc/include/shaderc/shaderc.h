@@ -23,6 +23,25 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
+// SHADERC_EXPORT tags symbol that will be exposed by the shared library.
+#if defined(SHADERC_SHAREDLIB)
+    #if defined(WIN32)
+        #if defined(SHADERC_IMPLEMENTATION)
+            #define SHADERC_EXPORT __declspec(dllexport)
+        #else
+            #define SHADERC_EXPORT __declspec(dllimport)
+        #endif
+    #else
+        #if defined(SHADERC_IMPLEMENTATION)
+            #define SHADERC_EXPORT __attribute__((visibility("default")))
+        #else
+            #define SHADERC_EXPORT
+        #endif
+    #endif
+#else
+    #define SHADERC_EXPORT
+#endif
+
 // Source language kind.
 typedef enum {
   shaderc_source_language_glsl,
@@ -235,12 +254,12 @@ typedef struct shaderc_compiler* shaderc_compiler_t;
 // no synchronization; concurrent invocation of these functions on the SAME
 // object requires synchronization IF AND ONLY IF some of them take a non-const
 // argument.
-shaderc_compiler_t shaderc_compiler_initialize(void);
+SHADERC_EXPORT shaderc_compiler_t shaderc_compiler_initialize(void);
 
 // Releases the resources held by the shaderc_compiler_t.
 // After this call it is invalid to make any future calls to functions
 // involving this shaderc_compiler_t.
-void shaderc_compiler_release(shaderc_compiler_t);
+SHADERC_EXPORT void shaderc_compiler_release(shaderc_compiler_t);
 
 // An opaque handle to an object that manages options to a single compilation
 // result.
@@ -251,18 +270,20 @@ typedef struct shaderc_compile_options* shaderc_compile_options_t;
 // A return of NULL indicates that there was an error initializing the options.
 // Any function operating on shaderc_compile_options_t must offer the
 // basic thread-safety guarantee.
-shaderc_compile_options_t shaderc_compile_options_initialize(void);
+SHADERC_EXPORT shaderc_compile_options_t
+    shaderc_compile_options_initialize(void);
 
 // Returns a copy of the given shaderc_compile_options_t.
 // If NULL is passed as the parameter the call is the same as
 // shaderc_compile_options_init.
-shaderc_compile_options_t shaderc_compile_options_clone(
+SHADERC_EXPORT shaderc_compile_options_t shaderc_compile_options_clone(
     const shaderc_compile_options_t options);
 
 // Releases the compilation options. It is invalid to use the given
 // shaderc_compile_options_t object in any future calls. It is safe to pass
 // NULL to this function, and doing such will have no effect.
-void shaderc_compile_options_release(shaderc_compile_options_t options);
+SHADERC_EXPORT void shaderc_compile_options_release(
+    shaderc_compile_options_t options);
 
 // Adds a predefined macro to the compilation options. This has the same
 // effect as passing -Dname=value to the command-line compiler.  If value
@@ -275,21 +296,21 @@ void shaderc_compile_options_release(shaderc_compile_options_t options);
 // modified or deleted after this function has returned. In case of adding
 // a valueless macro, the value argument should be a null pointer or the
 // value_length should be 0u.
-void shaderc_compile_options_add_macro_definition(
+SHADERC_EXPORT void shaderc_compile_options_add_macro_definition(
     shaderc_compile_options_t options, const char* name, size_t name_length,
     const char* value, size_t value_length);
 
 // Sets the source language.  The default is GLSL.
-void shaderc_compile_options_set_source_language(
+SHADERC_EXPORT void shaderc_compile_options_set_source_language(
     shaderc_compile_options_t options, shaderc_source_language lang);
 
 // Sets the compiler mode to generate debug information in the output.
-void shaderc_compile_options_set_generate_debug_info(
+SHADERC_EXPORT void shaderc_compile_options_set_generate_debug_info(
     shaderc_compile_options_t options);
 
 // Sets the compiler optimization level to the given level. Only the last one
 // takes effect if multiple calls of this function exist.
-void shaderc_compile_options_set_optimization_level(
+SHADERC_EXPORT void shaderc_compile_options_set_optimization_level(
     shaderc_compile_options_t options, shaderc_optimization_level level);
 
 // Forces the GLSL language version and profile to a given pair. The version
@@ -297,7 +318,7 @@ void shaderc_compile_options_set_optimization_level(
 // Version and profile specified here overrides the #version annotation in the
 // source. Use profile: 'shaderc_profile_none' for GLSL versions that do not
 // define profiles, e.g. versions below 150.
-void shaderc_compile_options_set_forced_version_profile(
+SHADERC_EXPORT void shaderc_compile_options_set_forced_version_profile(
     shaderc_compile_options_t options, int version, shaderc_profile profile);
 
 // Source text inclusion via #include is supported with a pair of callbacks
@@ -349,7 +370,7 @@ typedef void (*shaderc_include_result_release_fn)(
     void* user_data, shaderc_include_result* include_result);
 
 // Sets includer callback functions.
-void shaderc_compile_options_set_include_callbacks(
+SHADERC_EXPORT void shaderc_compile_options_set_include_callbacks(
     shaderc_compile_options_t options, shaderc_include_resolve_fn resolver,
     shaderc_include_result_release_fn result_releaser, void* user_data);
 
@@ -357,67 +378,69 @@ void shaderc_compile_options_set_include_callbacks(
 // mode. When both suppress-warnings and warnings-as-errors modes are
 // turned on, warning messages will be inhibited, and will not be emitted
 // as error messages.
-void shaderc_compile_options_set_suppress_warnings(
+SHADERC_EXPORT void shaderc_compile_options_set_suppress_warnings(
     shaderc_compile_options_t options);
 
 // Sets the target shader environment, affecting which warnings or errors will
 // be issued.  The version will be for distinguishing between different versions
 // of the target environment.  "0" is the only supported version at this point
-void shaderc_compile_options_set_target_env(shaderc_compile_options_t options,
-                                            shaderc_target_env target,
-                                            uint32_t version);
+SHADERC_EXPORT void shaderc_compile_options_set_target_env(
+    shaderc_compile_options_t options,
+    shaderc_target_env target,
+    uint32_t version);
 
 // Sets the compiler mode to treat all warnings as errors. Note the
 // suppress-warnings mode overrides this option, i.e. if both
 // warning-as-errors and suppress-warnings modes are set, warnings will not
 // be emitted as error messages.
-void shaderc_compile_options_set_warnings_as_errors(
+SHADERC_EXPORT void shaderc_compile_options_set_warnings_as_errors(
     shaderc_compile_options_t options);
 
 // Sets a resource limit.
-void shaderc_compile_options_set_limit(
+SHADERC_EXPORT void shaderc_compile_options_set_limit(
     shaderc_compile_options_t options, shaderc_limit limit, int value);
 
 // Sets whether the compiler should automatically assign bindings to uniforms
 // that aren't already explicitly bound in the shader source.
-void shaderc_compile_options_set_auto_bind_uniforms(
+SHADERC_EXPORT void shaderc_compile_options_set_auto_bind_uniforms(
     shaderc_compile_options_t options, bool auto_bind);
 
 // Sets whether the compiler should use HLSL IO mapping rules for bindings.
 // Defaults to false.
-void shaderc_compile_options_set_hlsl_io_mapping(
+SHADERC_EXPORT void shaderc_compile_options_set_hlsl_io_mapping(
     shaderc_compile_options_t options, bool hlsl_iomap);
 
 // Sets whether the compiler should determine block member offsets using HLSL
 // packing rules instead of standard GLSL rules.  Defaults to false.  Only
 // affects GLSL compilation.  HLSL rules are always used when compiling HLSL.
-void shaderc_compile_options_set_hlsl_offsets(
+SHADERC_EXPORT void shaderc_compile_options_set_hlsl_offsets(
     shaderc_compile_options_t options, bool hlsl_offsets);
 
 // Sets the base binding number used for for a uniform resource type when
 // automatically assigning bindings.  For GLSL compilation, sets the lowest
 // automatically assigned number.  For HLSL compilation, the regsiter number
 // assigned to the resource is added to this specified base.
-void shaderc_compile_options_set_binding_base(shaderc_compile_options_t options,
-                                              shaderc_uniform_kind kind,
-                                              uint32_t base);
+SHADERC_EXPORT void shaderc_compile_options_set_binding_base(
+    shaderc_compile_options_t options,
+    shaderc_uniform_kind kind,
+    uint32_t base);
 
 // Like shaderc_compile_options_set_binding_base, but only takes effect when
 // compiling a given shader stage.  The stage is assumed to be one of vertex,
 // fragment, tessellation evaluation, tesselation control, geometry, or compute.
-void shaderc_compile_options_set_binding_base_for_stage(
+SHADERC_EXPORT void shaderc_compile_options_set_binding_base_for_stage(
     shaderc_compile_options_t options, shaderc_shader_kind shader_kind,
     shaderc_uniform_kind kind, uint32_t base);
 
 // Sets a descriptor set and binding for an HLSL register in the given stage.
 // This method keeps a copy of the string data.
-void shaderc_compile_options_set_hlsl_register_set_and_binding_for_stage(
+SHADERC_EXPORT void shaderc_compile_options_set_hlsl_register_set_and_binding_for_stage(
     shaderc_compile_options_t options, shaderc_shader_kind shader_kind,
     const char* reg, const char* set, const char* binding);
 
 // Like shaderc_compile_options_set_hlsl_register_set_and_binding_for_stage,
 // but affects all shader stages.
-void shaderc_compile_options_set_hlsl_register_set_and_binding(
+SHADERC_EXPORT void shaderc_compile_options_set_hlsl_register_set_and_binding(
     shaderc_compile_options_t options, const char* reg, const char* set,
     const char* binding);
 
@@ -444,7 +467,7 @@ typedef struct shaderc_compilation_result* shaderc_compilation_result_t;
 // present.  May be safely called from multiple threads without explicit
 // synchronization. If there was failure in allocating the compiler object,
 // null will be returned.
-shaderc_compilation_result_t shaderc_compile_into_spv(
+SHADERC_EXPORT shaderc_compilation_result_t shaderc_compile_into_spv(
     const shaderc_compiler_t compiler, const char* source_text,
     size_t source_text_size, shaderc_shader_kind shader_kind,
     const char* input_file_name, const char* entry_point_name,
@@ -453,7 +476,7 @@ shaderc_compilation_result_t shaderc_compile_into_spv(
 // Like shaderc_compile_into_spv, but the result contains SPIR-V assembly text
 // instead of a SPIR-V binary module.  The SPIR-V assembly syntax is as defined
 // by the SPIRV-Tools open source project.
-shaderc_compilation_result_t shaderc_compile_into_spv_assembly(
+SHADERC_EXPORT shaderc_compilation_result_t shaderc_compile_into_spv_assembly(
     const shaderc_compiler_t compiler, const char* source_text,
     size_t source_text_size, shaderc_shader_kind shader_kind,
     const char* input_file_name, const char* entry_point_name,
@@ -461,7 +484,7 @@ shaderc_compilation_result_t shaderc_compile_into_spv_assembly(
 
 // Like shaderc_compile_into_spv, but the result contains preprocessed source
 // code instead of a SPIR-V binary module
-shaderc_compilation_result_t shaderc_compile_into_preprocessed_text(
+SHADERC_EXPORT shaderc_compilation_result_t shaderc_compile_into_preprocessed_text(
     const shaderc_compiler_t compiler, const char* source_text,
     size_t source_text_size, shaderc_shader_kind shader_kind,
     const char* input_file_name, const char* entry_point_name,
@@ -476,7 +499,7 @@ shaderc_compilation_result_t shaderc_compile_into_preprocessed_text(
 // May be safely called from multiple threads without explicit synchronization.
 // If there was failure in allocating the compiler object, null will be
 // returned.
-shaderc_compilation_result_t shaderc_assemble_into_spv(
+SHADERC_EXPORT shaderc_compilation_result_t shaderc_assemble_into_spv(
     const shaderc_compiler_t compiler, const char* source_assembly,
     size_t source_assembly_size,
     const shaderc_compile_options_t additional_options);
@@ -486,23 +509,23 @@ shaderc_compilation_result_t shaderc_assemble_into_spv(
 
 // Releases the resources held by the result object. It is invalid to use the
 // result object for any further operations.
-void shaderc_result_release(shaderc_compilation_result_t result);
+SHADERC_EXPORT void shaderc_result_release(shaderc_compilation_result_t result);
 
 // Returns the number of bytes of the compilation output data in a result
 // object.
-size_t shaderc_result_get_length(const shaderc_compilation_result_t result);
+SHADERC_EXPORT size_t shaderc_result_get_length(const shaderc_compilation_result_t result);
 
 // Returns the number of warnings generated during the compilation.
-size_t shaderc_result_get_num_warnings(
+SHADERC_EXPORT size_t shaderc_result_get_num_warnings(
     const shaderc_compilation_result_t result);
 
 // Returns the number of errors generated during the compilation.
-size_t shaderc_result_get_num_errors(const shaderc_compilation_result_t result);
+SHADERC_EXPORT size_t shaderc_result_get_num_errors(const shaderc_compilation_result_t result);
 
 // Returns the compilation status, indicating whether the compilation succeeded,
 // or failed due to some reasons, like invalid shader stage or compilation
 // errors.
-shaderc_compilation_status shaderc_result_get_compilation_status(
+SHADERC_EXPORT shaderc_compilation_status shaderc_result_get_compilation_status(
     const shaderc_compilation_result_t);
 
 // Returns a pointer to the start of the compilation output data bytes, either
@@ -510,21 +533,21 @@ shaderc_compilation_status shaderc_result_get_compilation_status(
 // binary, this is guaranteed to be castable to a uint32_t*. If the result
 // contains assembly text or preprocessed source text, the pointer will point to
 // the resulting array of characters.
-const char* shaderc_result_get_bytes(const shaderc_compilation_result_t result);
+SHADERC_EXPORT const char* shaderc_result_get_bytes(const shaderc_compilation_result_t result);
 
 // Returns a null-terminated string that contains any error messages generated
 // during the compilation.
-const char* shaderc_result_get_error_message(
+SHADERC_EXPORT const char* shaderc_result_get_error_message(
     const shaderc_compilation_result_t result);
 
 // Provides the version & revision of the SPIR-V which will be produced
-void shaderc_get_spv_version(unsigned int* version, unsigned int* revision);
+SHADERC_EXPORT void shaderc_get_spv_version(unsigned int* version, unsigned int* revision);
 
 // Parses the version and profile from a given null-terminated string
 // containing both version and profile, like: '450core'. Returns false if
 // the string can not be parsed. Returns true when the parsing succeeds. The
 // parsed version and profile are returned through arguments.
-bool shaderc_parse_version_profile(const char* str, int* version,
+SHADERC_EXPORT bool shaderc_parse_version_profile(const char* str, int* version,
                                    shaderc_profile* profile);
 
 #ifdef __cplusplus
