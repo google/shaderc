@@ -181,6 +181,7 @@ SPVTOOLS_OPT_SRC_FILES := \
 		source/opt/pass.cpp \
 		source/opt/pass_manager.cpp \
 		source/opt/set_spec_constant_default_value_pass.cpp \
+		source/opt/strength_reduction_pass.cpp \
 		source/opt/strip_debug_info_pass.cpp \
 		source/opt/type_manager.cpp \
 		source/opt/types.cpp \
