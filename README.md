@@ -71,6 +71,10 @@ Shaderc into.
 
 ## Getting and building Shaderc
 
+On Windows, instead of building from source, you can get the artifacts for
+the top of the tree of the master branch deployed by the Appveyor continuous
+integration service at the [Release][ci-release] page.
+
 1) Check out the source code:
 
 ```sh
@@ -237,4 +241,5 @@ older versions of Shaderc and its dependencies.
 [google-glslang]: https://github.com/google/glslang
 [spirv-tools]: https://github.com/KhronosGroup/SPIRV-Tools
 [pyshaderc]: https://github.com/realitix/pyshaderc
+[ci-release]: https://github.com/google/shaderc/releases
 [shaderc-rs]: https://github.com/google/shaderc-rs
