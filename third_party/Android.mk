@@ -190,6 +190,7 @@ SPVTOOLS_OPT_SRC_FILES := \
 # Locations of grammar files.
 SPV_CORE10_GRAMMAR=$(SPVHEADERS_LOCAL_PATH)/include/spirv/1.0/spirv.core.grammar.json
 SPV_CORE11_GRAMMAR=$(SPVHEADERS_LOCAL_PATH)/include/spirv/1.1/spirv.core.grammar.json
+SPV_CORE12_GRAMMAR=$(SPVHEADERS_LOCAL_PATH)/include/spirv/1.2/spirv.core.grammar.json
 SPV_GLSL_GRAMMAR=$(SPVHEADERS_LOCAL_PATH)/include/spirv/1.0/extinst.glsl.std.450.grammar.json
 SPV_OPENCL_GRAMMAR=$(SPVHEADERS_LOCAL_PATH)/include/spirv/1.0/extinst.opencl.std.100.grammar.json
 
@@ -219,9 +220,9 @@ $(1)/core.insts-1.1.inc $(1)/operand.kinds-1.1.inc: \
 		@echo "[$(TARGET_ARCH_ABI)] Grammar v1.1   : instructions & operands <= grammar JSON files"
 $(1)/core.insts-1.2.inc $(1)/operand.kinds-1.2.inc: \
         $(SPVTOOLS_LOCAL_PATH)/utils/generate_grammar_tables.py \
-        $(SPV_CORE11_GRAMMAR)
+        $(SPV_CORE12_GRAMMAR)
 		@$(HOST_PYTHON) $(SPVTOOLS_LOCAL_PATH)/utils/generate_grammar_tables.py \
-		                --spirv-core-grammar=$(SPV_CORE11_GRAMMAR) \
+		                --spirv-core-grammar=$(SPV_CORE12_GRAMMAR) \
 		                --core-insts-output=$(1)/core.insts-1.2.inc \
 		                --operand-kinds-output=$(1)/operand.kinds-1.2.inc
 		@echo "[$(TARGET_ARCH_ABI)] Grammar v1.2   : instructions & operands <= grammar JSON files"
