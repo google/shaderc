@@ -162,6 +162,7 @@ SPVTOOLS_OPT_SRC_FILES := \
 		source/opt/dead_branch_elim_pass.cpp \
 		source/opt/def_use_manager.cpp \
 		source/opt/eliminate_dead_constant_pass.cpp \
+		source/opt/eliminate_dead_functions_pass.cpp \
 		source/opt/flatten_decoration_pass.cpp \
 		source/opt/fold_spec_constant_op_and_composite_pass.cpp \
 		source/opt/freeze_spec_constant_value_pass.cpp \
