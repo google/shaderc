@@ -19,9 +19,13 @@
 
 #include "glslang/Public/ShaderLang.h"
 
+#include "libshaderc_util/mutex.h"
+
 namespace shaderc_util {
 
 // An Includer that counts how many #include directives it saw.
+// Inclusions are internally serialized, but releasing a previous result
+// can occur concurrently.
 class CountingIncluder : public glslang::TShader::Includer {
  public:
   // Done as .store(0) instead of in the initializer list for the following
@@ -42,13 +46,16 @@ class CountingIncluder : public glslang::TShader::Includer {
   // requesting source.  For the semantics of the result, see the base class.
   // Also increments num_include_directives and returns the results of
   // include_delegate(filename).  Subclasses should override include_delegate()
-  // instead of this method.
+  // instead of this method.  Inclusions are serialized.
   glslang::TShader::Includer::IncludeResult* includeSystem(
       const char* requested_source, const char* requesting_source,
       size_t include_depth) final {
     ++num_include_directives_;
-    return include_delegate(requested_source, requesting_source,
-                            IncludeType::System, include_depth);
+    include_mutex_.lock();
+    auto result = include_delegate(requested_source, requesting_source,
+                                   IncludeType::System, include_depth);
+    include_mutex_.unlock();
+    return result;
   }
 
   // Like includeSystem, but for "local" include search.
@@ -56,8 +63,11 @@ class CountingIncluder : public glslang::TShader::Includer {
       const char* requested_source, const char* requesting_source,
       size_t include_depth) final {
     ++num_include_directives_;
-    return include_delegate(requested_source, requesting_source,
-                            IncludeType::Local, include_depth);
+    include_mutex_.lock();
+    auto result = include_delegate(requested_source, requesting_source,
+                                   IncludeType::Local, include_depth);
+    include_mutex_.unlock();
+    return result;
   }
 
   // Releases the given IncludeResult.
@@ -81,6 +91,10 @@ class CountingIncluder : public glslang::TShader::Includer {
 
   // The number of #include directive encountered.
   std::atomic_int num_include_directives_;
+
+  // A mutex to protect against concurrent inclusions.  We can't trust
+  // our delegates to be safe for concurrent inclusions.
+  shaderc_util::mutex include_mutex_;
 };
 }
 
