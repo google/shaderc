@@ -241,5 +241,5 @@ older versions of Shaderc and its dependencies.
 [google-glslang]: https://github.com/google/glslang
 [spirv-tools]: https://github.com/KhronosGroup/SPIRV-Tools
 [pyshaderc]: https://github.com/realitix/pyshaderc
-[ci-release]: https://github.com/google/shaderc/releases
+[ci-release]: https://github.com/antiagainst/shaderc/releases
 [shaderc-rs]: https://github.com/google/shaderc-rs

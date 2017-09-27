@@ -73,6 +73,7 @@ deploy:
     release: master-tot-release
     description: "Continuous release build of the top of the tree (ToT) of the master branch by Appveyor.\n\nartifacts.zip contains the build artifacts for Windows x64 platform:\n- glslc.exe\n- shaderc C/C++ headers\n- shaderc_combined.lib\n- shaderc_shared.dll"
     artifact: shaderc-artifacts
+    repository: antiagainst/shaderc
     draft: false
     prerelease: false
     force_update: true
@@ -86,6 +87,7 @@ deploy:
     release: master-tot-debug
     description: "Continuous debug build of the top of the tree (ToT) of the master branch by Appveyor.\n\nartifacts.zip contains the build artifacts for Windows x64 platform:\n- glslc.exe\n- shaderc C/C++ headers\n- shaderc_combined.lib\n- shaderc_sharedd.dll"
     artifact: shaderc-artifacts
+    repository: antiagainst/shaderc
     draft: false
     prerelease: false
     force_update: true
