@@ -71,9 +71,10 @@ Shaderc into.
 
 ## Getting and building Shaderc
 
-On Windows, instead of building from source, you can get the artifacts for
-the top of the tree of the master branch deployed by the Appveyor continuous
-integration service from [BinTray][bintray].
+**Experimental:** On Windows, instead of building from source, you can get the
+artifacts from a third-party service [BinTray][bintray] (not hosted by Google
+or GitHub). Appveyor continuously deploys the build artifacts for the top of
+the tree of the master branch there.
 
 1) Check out the source code:
 
