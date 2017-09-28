@@ -68,22 +68,6 @@ artifacts:
     name: shaderc-artifacts
   - path: build\install\bin\glslc.exe
 
-deploy:
-  - provider: BinTray
-    username: antiagainst
-    api_key:
-      secure: SwJ06SwKnaNsS5MbChuka51mR9I2YDCXR1itJYZ9khZkNfWZqIwyOZoRvvgAbG8n
-    subject: antiagainst
-    repo: spirv-toolchain
-    package: shaderc
-    version: master-tot
-    artifact: shaderc-artifacts
-    publish: true
-    override: true
-    on:
-      branch: master
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-
 notifications:
   - provider: Email
     to:
