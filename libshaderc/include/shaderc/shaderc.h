@@ -25,7 +25,7 @@ extern "C" {
 
 // SHADERC_EXPORT tags symbol that will be exposed by the shared library.
 #if defined(SHADERC_SHAREDLIB)
-    #if defined(WIN32)
+    #if defined(_WIN32)
         #if defined(SHADERC_IMPLEMENTATION)
             #define SHADERC_EXPORT __declspec(dllexport)
         #else
