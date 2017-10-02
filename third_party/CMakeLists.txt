@@ -7,6 +7,8 @@ set(SHADERC_GOOGLE_TEST_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/googletest" CACHE S
   "Location of googletest source")
 set(SHADERC_SPIRV_TOOLS_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/spirv-tools" CACHE STRING
   "Location of spirv-tools source")
+set(SHADERC_SPIRV_HEADERS_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/spirv-headers" CACHE STRING
+  "Location of spirv-headers source")
 set(SHADERC_GLSLANG_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/glslang" CACHE STRING
   "Location of glslang source")
 
@@ -25,6 +27,10 @@ if(${SHADERC_ENABLE_TESTS})
 endif()
 
 set(OLD_PLATFORM_TOOLSET ${CMAKE_GENERATOR_TOOLSET})
+
+if (IS_DIRECTORY ${SHADERC_SPIRV_HEADERS_DIR})
+  add_subdirectory(${SHADERC_SPIRV_HEADERS_DIR} spirv-headers)
+endif()
 
 # Check SPIRV-Tools before glslang since it is a dependency of glslang.
 if (IS_DIRECTORY ${SHADERC_SPIRV_TOOLS_DIR})
