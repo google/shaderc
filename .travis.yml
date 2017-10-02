@@ -71,7 +71,7 @@ before_script:
   - git clone --depth=1 https://github.com/google/googletest          third_party/googletest
   - git clone --depth=1 https://github.com/google/glslang             third_party/glslang
   - git clone --depth=1 https://github.com/KhronosGroup/SPIRV-Tools   third_party/spirv-tools
-  - git clone --depth=1 https://github.com/KhronosGroup/SPIRV-Headers third_party/spirv-tools/external/spirv-headers
+  - git clone --depth=1 https://github.com/KhronosGroup/SPIRV-Headers third_party/spirv-headers
 
 script:
   - mkdir build && cd build

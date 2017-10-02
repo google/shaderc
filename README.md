@@ -83,7 +83,7 @@ cd $SOURCE_DIR/third_party
 git clone https://github.com/google/googletest.git
 git clone https://github.com/google/glslang.git
 git clone https://github.com/KhronosGroup/SPIRV-Tools.git spirv-tools
-git clone https://github.com/KhronosGroup/SPIRV-Headers.git spirv-tools/external/spirv-headers
+git clone https://github.com/KhronosGroup/SPIRV-Headers.git spirv-headers
 cd $SOURCE_DIR/
 ```
 

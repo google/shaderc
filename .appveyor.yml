@@ -32,7 +32,7 @@ install:
   - git clone https://github.com/google/googletest.git          third_party/googletest
   - git clone https://github.com/google/glslang.git             third_party/glslang
   - git clone https://github.com/KhronosGroup/SPIRV-Tools.git   third_party/spirv-tools
-  - git clone https://github.com/KhronosGroup/SPIRV-Headers.git third_party/spirv-tools/external/spirv-headers
+  - git clone https://github.com/KhronosGroup/SPIRV-Headers.git third_party/spirv-headers
 
 build:
   parallel: true  # enable MSBuild parallel builds
