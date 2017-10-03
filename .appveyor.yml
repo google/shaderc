@@ -14,7 +14,6 @@ platform:
 
 environment:
   PYTHON_PATH: "C:/Python27"
-  PYTHON_PACKAGE_PATH: "C:/Python27/Scripts"
 
 configuration:
   - Debug
@@ -26,9 +25,7 @@ branches:
 
 # scripts that are called at very beginning, before repo cloning
 init:
-  - ps: (new-object net.webclient).DownloadFile('https://bootstrap.pypa.io/get-pip.py', 'C:/get-pip.py')
-  - "%PYTHON_PATH%/python.exe C:/get-pip.py"
-  - "%PYTHON_PACKAGE_PATH%/pip.exe install nose"
+  - "%PYTHON_PATH%/Scripts/pip.exe install nose"
 
 # scripts that run after cloning repository
 install:
