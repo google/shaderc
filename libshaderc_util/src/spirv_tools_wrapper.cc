@@ -105,8 +105,62 @@ bool SpirvToolsOptimize(Compiler::TargetEnv env,
       case PassId::kStripDebugInfo:
         optimizer.RegisterPass(spvtools::CreateStripDebugInfoPass());
         break;
+      case PassId::kEliminateDeadFunctions:
+        optimizer.RegisterPass(spvtools::CreateEliminateDeadFunctionsPass());
+        break;
+      case PassId::kFlattenDecoration:
+        optimizer.RegisterPass(spvtools::CreateFlattenDecorationPass());
+        break;
+      case PassId::kFreezeSpecConstantValue:
+        optimizer.RegisterPass(spvtools::CreateFreezeSpecConstantValuePass());
+        break;
+      case PassId::kFoldSpecConstantOpAndComposite:
+        optimizer.RegisterPass(spvtools::CreateFoldSpecConstantOpAndCompositePass());
+        break;
       case PassId::kUnifyConstant:
         optimizer.RegisterPass(spvtools::CreateUnifyConstantPass());
+        break;
+      case PassId::kEliminateDeadConstant:
+        optimizer.RegisterPass(spvtools::CreateEliminateDeadConstantPass());
+        break;
+      case PassId::kStrengthReduction:
+        optimizer.RegisterPass(spvtools::CreateStrengthReductionPass());
+        break;
+      case PassId::kBlockMerge:
+        optimizer.RegisterPass(spvtools::CreateBlockMergePass());
+        break;
+      case PassId::kInlineExhaustive:
+        optimizer.RegisterPass(spvtools::CreateInlineExhaustivePass());
+        break;
+      case PassId::kInlineOpaque:
+        optimizer.RegisterPass(spvtools::CreateInlineOpaquePass());
+        break;
+      case PassId::kLocalSingleBlockLoadStoreElim:
+        optimizer.RegisterPass(spvtools::CreateLocalSingleBlockLoadStoreElimPass());
+        break;
+      case PassId::kDeadBranchElim:
+        optimizer.RegisterPass(spvtools::CreateDeadBranchElimPass());
+        break;
+      case PassId::kLocalMultiStoreElim:
+        optimizer.RegisterPass(spvtools::CreateLocalMultiStoreElimPass());
+        break;
+      case PassId::kLocalAccessChainConvert:
+        optimizer.RegisterPass(spvtools::CreateLocalAccessChainConvertPass());
+        break;
+      case PassId::kLocalSingleStoreElim:
+        optimizer.RegisterPass(spvtools::CreateLocalSingleStoreElimPass());
+        break;
+      case PassId::kInsertExtractElim:
+        optimizer.RegisterPass(spvtools::CreateInsertExtractElimPass());
+        break;
+      case PassId::kCommonUniformElim:
+        optimizer.RegisterPass(spvtools::CreateCommonUniformElimPass());
+        break;
+      case PassId::kAggressiveDCE:
+        optimizer.RegisterPass(spvtools::CreateAggressiveDCEPass());
+        break;
+      case PassId::kCompactIds:
+        optimizer.RegisterPass(spvtools::CreateCompactIdsPass());
         break;
     }
   }
