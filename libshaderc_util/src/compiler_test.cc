@@ -110,6 +110,27 @@ const char kGlslShaderWeirdPacking[] =
        buffer B { float x; vec3 foo; } my_ssbo;
        void main() { my_ssbo.x = 1.0; })";
 
+const char kHlslShaderForLegalizationTest[] = R"(
+struct CombinedTextureSampler {
+ Texture2D tex;
+ SamplerState sampl;
+};
+
+float4 sampleTexture(CombinedTextureSampler c, float2 loc) {
+ return c.tex.Sample(c.sampl, loc);
+};
+
+Texture2D gTex;
+SamplerState gSampler;
+
+float4 main(float2 loc: A) : SV_Target {
+ CombinedTextureSampler cts;
+ cts.tex = gTex;
+ cts.sampl = gSampler;
+
+ return sampleTexture(cts, loc);
+})";
+
 // Returns the disassembly of the given SPIR-V binary, as a string.
 // Assumes the disassembly will be successful when targeting Vulkan.
 std::string Disassemble(const std::vector<uint32_t> binary) {
@@ -660,6 +681,34 @@ TEST_F(CompilerTest, HlslOffsetsOptionEnableRespected) {
   const auto disassembly = Disassemble(words);
   EXPECT_THAT(disassembly, HasSubstr("OpMemberDecorate %B 1 Offset 4"))
       << disassembly;
+}
+
+TEST_F(CompilerTest, HlslLegalizationEnabledNoSizeOpt) {
+  compiler_.SetSourceLanguage(Compiler::SourceLanguage::HLSL);
+  const auto words =
+      SimpleCompilationBinary(kHlslShaderForLegalizationTest, EShLangFragment);
+  const auto disassembly = Disassemble(words);
+  EXPECT_THAT(disassembly, Not(HasSubstr("OpFunctionCall"))) << disassembly;
+  EXPECT_THAT(disassembly, HasSubstr("OpName")) << disassembly;
+}
+
+TEST_F(CompilerTest, HlslLegalizationEnabledWithSizeOpt) {
+  compiler_.SetSourceLanguage(Compiler::SourceLanguage::HLSL);
+  compiler_.SetOptimizationLevel(Compiler::OptimizationLevel::Size);
+  const auto words =
+      SimpleCompilationBinary(kHlslShaderForLegalizationTest, EShLangFragment);
+  const auto disassembly = Disassemble(words);
+  EXPECT_THAT(disassembly, Not(HasSubstr("OpFunctionCall"))) << disassembly;
+  EXPECT_THAT(disassembly, Not(HasSubstr("OpName"))) << disassembly;
+}
+
+TEST_F(CompilerTest, HlslLegalizationDisabled) {
+  compiler_.SetSourceLanguage(Compiler::SourceLanguage::HLSL);
+  compiler_.EnableHlslLegalization(false);
+  const auto words =
+      SimpleCompilationBinary(kHlslShaderForLegalizationTest, EShLangFragment);
+  const auto disassembly = Disassemble(words);
+  EXPECT_THAT(disassembly, HasSubstr("OpFunctionCall")) << disassembly;
 }
 
 }  // anonymous namespace
