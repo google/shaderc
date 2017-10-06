@@ -161,6 +161,7 @@ SPVTOOLS_OPT_SRC_FILES := \
 		source/opt/compact_ids_pass.cpp \
 		source/opt/common_uniform_elim_pass.cpp \
 		source/opt/dead_branch_elim_pass.cpp \
+		source/opt/decoration_manager.cpp \
 		source/opt/def_use_manager.cpp \
 		source/opt/eliminate_dead_constant_pass.cpp \
 		source/opt/eliminate_dead_functions_pass.cpp \
@@ -183,12 +184,14 @@ SPVTOOLS_OPT_SRC_FILES := \
 		source/opt/optimizer.cpp \
 		source/opt/pass.cpp \
 		source/opt/pass_manager.cpp \
+		source/opt/remove_duplicates_pass.cpp \
 		source/opt/set_spec_constant_default_value_pass.cpp \
 		source/opt/strength_reduction_pass.cpp \
 		source/opt/strip_debug_info_pass.cpp \
 		source/opt/type_manager.cpp \
 		source/opt/types.cpp \
 		source/opt/unify_const_pass.cpp
+
 # Locations of grammar files.
 SPV_CORE10_GRAMMAR=$(SPVHEADERS_LOCAL_PATH)/include/spirv/1.0/spirv.core.grammar.json
 SPV_CORE11_GRAMMAR=$(SPVHEADERS_LOCAL_PATH)/include/spirv/1.1/spirv.core.grammar.json
