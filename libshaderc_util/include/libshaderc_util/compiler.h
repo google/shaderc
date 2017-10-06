@@ -186,6 +186,7 @@ class Compiler {
         auto_binding_base_(),
         hlsl_iomap_(false),
         hlsl_offsets_(false),
+        hlsl_legalization_enabled_(true),
         hlsl_explicit_bindings_() {}
 
   // Requests that the compiler place debug information into the object code,
@@ -195,6 +196,9 @@ class Compiler {
   // Sets the optimization level to the given level. Only the last one takes
   // effect if multiple calls of this method exist.
   void SetOptimizationLevel(OptimizationLevel level);
+
+  // Enables or disables HLSL legalization passes.
+  void EnableHlslLegalization(bool hlsl_legalization_enabled);
 
   // When a warning is encountered it treat it as an error.
   void SetWarningsAsErrors();
@@ -441,6 +445,10 @@ class Compiler {
   // True if the compiler should determine block member offsets using HLSL
   // packing rules instead of standard GLSL rules.
   bool hlsl_offsets_;
+
+  // True if the compiler should perform legalization optimization passes if
+  // source language is HLSL.
+  bool hlsl_legalization_enabled_;
 
   // A sequence of triples, each triple representing a specific HLSL register
   // name, and the set and binding numbers it should be mapped to, but in

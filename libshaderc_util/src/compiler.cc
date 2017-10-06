@@ -243,8 +243,13 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   // 'spirv' is an alias for the compilation_output_data. This alias is added
   // to serve as an input for the call to DissassemblyBinary.
   std::vector<uint32_t>& spirv = compilation_output_data;
+  glslang::SpvOptions options;
+  options.generateDebugInfo = false;
+  options.disableOptimizer = true;
+  options.optimizeSize = false;
   // Note the call to GlslangToSpv also populates compilation_output_data.
-  glslang::GlslangToSpv(*program.getIntermediate(used_shader_stage), spirv);
+  glslang::GlslangToSpv(*program.getIntermediate(used_shader_stage), spirv,
+			&options);
 
   // Set the tool field (the top 16-bits) in the generator word to
   // 'Shaderc over Glslang'.
@@ -254,10 +259,36 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   spirv[generator_word_index] =
       (spirv[generator_word_index] & 0xffff) | (shaderc_generator_word << 16);
 
-  if (!enabled_opt_passes_.empty()) {
+  std::vector<PassId> opt_passes;
+
+  if (hlsl_legalization_enabled_ && source_language_ == SourceLanguage::HLSL) {
+    // If from HLSL, run this passes to "legalize" the SPIR-V for Vulkan
+    // eg. forward and remove memory writes of opaque types.
+    opt_passes.push_back(PassId::kInlineExhaustive);
+    opt_passes.push_back(PassId::kLocalAccessChainConvert);
+    opt_passes.push_back(PassId::kLocalSingleBlockLoadStoreElim);
+    opt_passes.push_back(PassId::kLocalSingleStoreElim);
+    opt_passes.push_back(PassId::kInsertExtractElim);
+    opt_passes.push_back(PassId::kAggressiveDCE);
+    opt_passes.push_back(PassId::kDeadBranchElim);
+    opt_passes.push_back(PassId::kBlockMerge);
+    opt_passes.push_back(PassId::kLocalMultiStoreElim);
+    opt_passes.push_back(PassId::kInsertExtractElim);
+    opt_passes.push_back(PassId::kAggressiveDCE);
+    opt_passes.push_back(PassId::kEliminateDeadConstant);
+    opt_passes.push_back(PassId::kEliminateDeadFunctions);
+
+    // TODO(atgoo, dneto0, greg-lunarg):
+    // Add PassId::kCommonUniformElim when AMD driver issues are resolved.
+    // Add dead var/type elimination passes when available.
+  }
+
+  opt_passes.insert(
+      opt_passes.end(), enabled_opt_passes_.begin(), enabled_opt_passes_.end());
+
+  if (!opt_passes.empty()) {
     std::string opt_errors;
-    if (!SpirvToolsOptimize(target_env_, enabled_opt_passes_, &spirv,
-                            &opt_errors)) {
+    if (!SpirvToolsOptimize(target_env_, opt_passes, &spirv, &opt_errors)) {
       *error_stream << "shaderc: internal error: compilation succeeded but "
                        "failed to optimize: "
                     << opt_errors << "\n";
@@ -329,6 +360,10 @@ void Compiler::SetOptimizationLevel(Compiler::OptimizationLevel level) {
     default:
       break;
   }
+}
+
+void Compiler::EnableHlslLegalization(bool hlsl_legalization_enabled) {
+  hlsl_legalization_enabled_ = hlsl_legalization_enabled;
 }
 
 void Compiler::SetSuppressWarnings() { suppress_warnings_ = true; }
