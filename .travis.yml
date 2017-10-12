@@ -49,7 +49,11 @@ addons:
 
 before_install:
   # Install ninja on macOS.
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install ninja; fi
+  # The brew update neds Ruby 2.3 or later
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      rvm install 2.3.5;
+      brew install ninja;
+    fi
   - if [[ "$BUILD_NDK" == "ON" ]]; then
       git clone --depth=1 https://github.com/urho3d/android-ndk.git $HOME/android-ndk;
       export ANDROID_NDK=$HOME/android-ndk;
