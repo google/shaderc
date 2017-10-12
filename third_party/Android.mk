@@ -104,4 +104,4 @@ LOCAL_C_INCLUDES:=$(GLSLANG_LOCAL_PATH) \
 LOCAL_STATIC_LIBRARIES:=OSDependent OGLCompiler SPIRV HLSL
 include $(BUILD_STATIC_LIBRARY)
 
-include $(THIRD_PARTY_PATH)/spirv-tools/Android.mk
+include $(SPVTOOLS_LOCAL_PATH)/Android.mk
