@@ -44,12 +44,9 @@ addons:
   apt:
     packages:
       - clang-3.6
-      - ninja-build
       - lcov
 
 before_install:
-  # Install ninja on macOS.
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install ninja; fi
   - if [[ "$BUILD_NDK" == "ON" ]]; then
       git clone --depth=1 https://github.com/urho3d/android-ndk.git $HOME/android-ndk;
       export ANDROID_NDK=$HOME/android-ndk;
@@ -80,19 +77,17 @@ script:
             -DANDROID_NATIVE_API_LEVEL=android-9
             -DCMAKE_BUILD_TYPE=Release
             -DANDROID_ABI="armeabi-v7a with NEON"
-            -DSHADERC_SKIP_TESTS=ON
-            -GNinja ..;
+            -DSHADERC_SKIP_TESTS=ON ..;
     else
       cmake -DCMAKE_BUILD_TYPE=${SHADERC_BUILD_TYPE:-Debug}
-            -DENABLE_CODE_COVERAGE=${SHADERC_CODE_COVERAGE:-OFF}
-            -GNinja ..;
+            -DENABLE_CODE_COVERAGE=${SHADERC_CODE_COVERAGE:-OFF} ..;
     fi
-  - ninja
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       export NPROC=`nproc`;
     else
       export NPROC=`sysctl -n hw.ncpu`;
     fi
+  - make -j${NPROC}
   - if [[ "$BUILD_NDK" != "ON" ]]; then ctest -j${NPROC} --output-on-failure; fi
 
 after_success:
