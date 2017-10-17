@@ -10,6 +10,10 @@ v2017.2-dev 2017-03-10
  - Add option to use HLSL resource register numbers for bindings.
  - HLSL compilation now defaults to HLSL packing rules.
    (This change is inherited from Glslang commit 7cca140.)
+ - HLSL compilation runs SPIR-V "legalization" transforms to reduce
+   manipulation of opaque handles (e.g. images), to satisfy Vulkan rules.
+ - Adapt to Glslang generator version number update to 2, to indicate
+   a fix for code generation for atomicCounterDecrement.
  - CMake install rules uses GNUInstallDirs.  For example, install to lib64
    when that is the norm for the target system.
 
