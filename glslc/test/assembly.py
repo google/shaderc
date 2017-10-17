@@ -21,7 +21,7 @@ def assembly_comments():
     return """
     ; SPIR-V
     ; Version: 1.0
-    ; Generator: Google Shaderc over Glslang; 1
+    ; Generator: Google Shaderc over Glslang; 2
     ; Bound: 6
     ; Schema: 0"""
 
