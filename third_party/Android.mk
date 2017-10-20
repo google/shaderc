@@ -104,4 +104,11 @@ LOCAL_C_INCLUDES:=$(GLSLANG_LOCAL_PATH) \
 LOCAL_STATIC_LIBRARIES:=OSDependent OGLCompiler SPIRV HLSL
 include $(BUILD_STATIC_LIBRARY)
 
+# Set the location of SPIRV-Tools.
+# Allow the user to override it, but default it to under our third_party directory.
+ifeq ($(SPVTOOLS_LOCAL_PATH),)
+  SPVTOOLS_LOCAL_PATH:=$(THIRD_PARTY_PATH)/spirv-tools
+endif
+
+# Now include the SPIRV-Tools dependency
 include $(SPVTOOLS_LOCAL_PATH)/Android.mk
