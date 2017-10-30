@@ -29,7 +29,8 @@ import sys
 KNOWN_GOOD_FILE = 'known_good.json'
 
 # Maps a site name to its hostname.
-SITE_TO_HOST = { 'github' : 'github.com' }
+SITE_TO_HOST = { 'github' : 'github.com',
+                 'gitlab' : 'gitlab.com'}
 
 VERBOSE = True
 
@@ -107,9 +108,9 @@ class GoodCommit(object):
         command_output(['git', 'checkout', self.commit], self.subdir)
 
 
-def GetGoodCommits():
+def GetGoodCommits(known_good_file):
     """Returns the latest list of GoodCommit objects."""
-    with open(KNOWN_GOOD_FILE) as known_good:
+    with open(known_good_file) as known_good:
         return [GoodCommit(c) for c in json.loads(known_good.read())['commits']]
 
 
@@ -117,10 +118,12 @@ def main():
     parser = argparse.ArgumentParser(description='Get Shaderc source dependencies at a known-good commit')
     parser.add_argument('--dir', dest='dir', default='src',
                         help="Set target directory for Shaderc source root. Default is \'src\'.")
+    parser.add_argument('--file', dest='known_good_file', default=KNOWN_GOOD_FILE,
+                        help="The file containing known-good commits. Default is \'' + KNOWN_GOOD_FILE + '\'.")
 
     args = parser.parse_args()
 
-    commits = GetGoodCommits()
+    commits = GetGoodCommits(args.known_good_file)
 
     distutils.dir_util.mkpath(args.dir)
     print('Change directory to {d}'.format(d=args.dir))
