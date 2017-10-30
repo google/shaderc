@@ -22,7 +22,7 @@
     },
     {
       "name" : "spirv-headers",
-      "site" : "github",
+      "site" : "gitlab",
       "subrepo" : "spirv/SPIRV-Headers",
       "subdir" : "third_party/spirv-tools/external/spirv-headers",
       "commit" : "854b5dda6149c481d6faf0b9c760c311ab45b05d"
