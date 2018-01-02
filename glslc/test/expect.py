@@ -170,7 +170,7 @@ class CorrectObjectFilePreamble(GlslCTest):
                 return False, 'Incorrect SPV binary: wrong version number'
             # Shaderc-over-Glslang (0x000d....) or
             # SPIRV-Tools (0x0007....) generator number
-            if read_word(preamble, 2, little_endian) != 0x000d0002 and \
+            if read_word(preamble, 2, little_endian) != 0x000d0003 and \
                     read_word(preamble, 2, little_endian) != 0x00070000:
                 return False, ('Incorrect SPV binary: wrong generator magic '
                                'number')
@@ -196,7 +196,7 @@ class CorrectAssemblyFilePreamble(GlslCTest):
 
         if (line1 != '; SPIR-V\n' or
             line2 != '; Version: 1.0\n' or
-            line3 != '; Generator: Google Shaderc over Glslang; 2\n'):
+            (not line3.startswith('; Generator: Google Shaderc over Glslang;'))):
             return False, 'Incorrect SPV assembly'
 
         return True, ''
