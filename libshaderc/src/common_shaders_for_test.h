@@ -245,9 +245,7 @@ const char kHlslFragShaderWithRegisters[] =
     R"(Buffer<float> t4 : register(t4);
        Buffer<float> t5 : register(t5);
        float4 main() : SV_Target0 {
-         t4;
-         t5;
-         return float4(1.0);
+         return float4(t4.Load(0) + t5.Load(1));
        })";
 
 #ifdef __cplusplus
