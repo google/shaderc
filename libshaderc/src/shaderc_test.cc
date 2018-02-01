@@ -1076,8 +1076,10 @@ TEST_F(CompileStringWithOptionsTest, IfDefCompileOption) {
                                  shaderc_glsl_vertex_shader, options_.get()));
 }
 
-TEST_F(CompileStringWithOptionsTest,
-       TargetEnvRespectedWhenCompilingOpenGLCompatibilityShaderToBinary) {
+// OpenGL compatibility profile is no longer supported.
+TEST_F(
+    CompileStringWithOptionsTest,
+    DISABLED_TargetEnvRespectedWhenCompilingOpenGLCompatibilityShaderToBinary) {
   // Confirm that kOpenGLCompatibilityFragmentShader compiles with
   // shaderc_target_env_opengl_compat.  When targeting OpenGL core profile
   // or Vulkan, it should fail to compile.

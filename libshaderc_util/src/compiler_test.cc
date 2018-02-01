@@ -235,7 +235,9 @@ TEST_F(CompilerTest, SimpleVulkanShaderCompilesWithDefaultCompilerSettings) {
   EXPECT_TRUE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
 }
 
-TEST_F(CompilerTest, RespectTargetEnvOnOpenGLCompatibilityShader) {
+// OpenGL compatibility profile is no longer supported for SPIR-V code
+// generation by Glslan.
+TEST_F(CompilerTest, DISABLED_RespectTargetEnvOnOpenGLCompatibilityShader) {
   const EShLanguage stage = EShLangFragment;
 
   compiler_.SetTargetEnv(Compiler::TargetEnv::OpenGLCompat);
