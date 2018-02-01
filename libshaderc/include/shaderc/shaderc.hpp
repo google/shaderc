@@ -180,6 +180,8 @@ class CompileOptions {
 
     // Handles shaderc_include_result_release_fn callbacks.
     virtual void ReleaseInclude(shaderc_include_result* data) = 0;
+
+    virtual ~IncluderInterface() = default;
   };
 
   // Sets the includer instance for libshaderc to call during compilation, as
