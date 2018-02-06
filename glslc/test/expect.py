@@ -170,7 +170,7 @@ class CorrectObjectFilePreamble(GlslCTest):
                 return False, 'Incorrect SPV binary: wrong version number'
             # Shaderc-over-Glslang (0x000d....) or
             # SPIRV-Tools (0x0007....) generator number
-            if read_word(preamble, 2, little_endian) != 0x000d0003 and \
+            if read_word(preamble, 2, little_endian) != 0x000d0004 and \
                     read_word(preamble, 2, little_endian) != 0x00070000:
                 return False, ('Incorrect SPV binary: wrong generator magic '
                                'number')
