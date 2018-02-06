@@ -71,6 +71,7 @@ LOCAL_EXPORT_C_INCLUDES:=$(GLSLANG_LOCAL_PATH)
 LOCAL_SRC_FILES:= \
 		glslang/GenericCodeGen/CodeGen.cpp \
 		glslang/GenericCodeGen/Link.cpp \
+		glslang/MachineIndependent/attribute.cpp \
 		glslang/MachineIndependent/Constant.cpp \
 		glslang/MachineIndependent/glslang_tab.cpp \
 		glslang/MachineIndependent/InfoSink.cpp \
