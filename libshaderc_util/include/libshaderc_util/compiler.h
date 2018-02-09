@@ -184,6 +184,7 @@ class Compiler {
         limits_(kDefaultTBuiltInResource),
         auto_bind_uniforms_(false),
         auto_binding_base_(),
+        auto_map_locations_(false),
         hlsl_iomap_(false),
         hlsl_offsets_(false),
         hlsl_legalization_enabled_(true),
@@ -249,6 +250,10 @@ class Compiler {
                                   uint32_t base) {
     auto_binding_base_[static_cast<int>(stage)][static_cast<int>(kind)] = base;
   }
+
+  // Sets whether the compiler automatically assigns locations to
+  // uniform variables that don't have explicit locations.
+  void SetAutoMapLocations(bool auto_map) { auto_map_locations_ = auto_map; }
 
   // Use HLSL IO mapping rules for bindings.  Default is false.
   void SetHlslIoMapping(bool hlsl_iomap) { hlsl_iomap_ = hlsl_iomap; }
@@ -438,6 +443,10 @@ class Compiler {
   // binding uniforms that don't hzve explicit bindings in the shader source.
   // The default is zero.
   uint32_t auto_binding_base_[kNumStages][kNumUniformKinds];
+
+  // True if the compiler should automatically map uniforms that don't
+  // have explicit locations.
+  bool auto_map_locations_;
 
   // True if the compiler should use HLSL IO mapping rules when compiling HLSL.
   bool hlsl_iomap_;

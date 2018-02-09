@@ -56,6 +56,10 @@ Options:
                     Automatically assign bindings to uniform variables that
                     don't have an explicit 'binding' layout in the shader
                     source.
+  -fauto-map-locations
+                    Automatically assign locations to uniform variables that
+                    don't have an explicit 'location' layout in the shader
+                    source.
   -fhlsl-iomap      Use HLSL IO mappings for bindings.
   -fimage-binding-base [stage] <value>
                     Sets the lowest automatically assigned binding number for
@@ -321,6 +325,8 @@ int main(int argc, char** argv) {
       }
     } else if (arg == "-fauto-bind-uniforms") {
       compiler.options().SetAutoBindUniforms(true);
+    } else if (arg == "-fauto-map-locations") {
+      compiler.options().SetAutoMapLocations(true);
     } else if (arg == "-fhlsl-iomap") {
       compiler.options().SetHlslIoMapping(true);
     } else if (arg == "-fhlsl-offsets") {

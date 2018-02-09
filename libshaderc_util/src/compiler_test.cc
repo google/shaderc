@@ -104,6 +104,26 @@ const char kGlslFragShaderNoExplicitBinding[] =
          float x = my_ubo.x;
        })";
 
+// A GLSL vertex shader with the location defined for its non-opaque uniform
+// variable.
+const char kGlslVertShaderExplicitLocation[] =
+    R"(#version 450
+       layout(location = 10) uniform mat4 my_mat;
+       layout(location = 0) in vec4 my_vec;
+       void main(void) {
+         gl_Position = my_mat * my_vec;
+       })";
+
+// A GLSL vertex shader without the location defined for its non-opaque uniform
+// variable.
+const char kGlslVertShaderNoExplicitLocation[] =
+    R"(#version 450
+       uniform mat4 my_mat;
+       layout(location = 0) in vec4 my_vec;
+       void main(void) {
+         gl_Position = my_mat * my_vec;
+       })";
+
 // A GLSL vertex shader with a weirdly packed block.
 const char kGlslShaderWeirdPacking[] =
     R"(#version 450
@@ -634,6 +654,37 @@ TEST_F(CompilerTest, AutoMapBindingsSetsBindingsSetFragImageBindingBaseCompiledA
   EXPECT_THAT(disassembly, HasSubstr("OpDecorate %my_img Binding 2"));
   EXPECT_THAT(disassembly, HasSubstr("OpDecorate %my_imbuf Binding 3"));
   EXPECT_THAT(disassembly, HasSubstr("OpDecorate %my_ubo Binding 4"));
+}
+
+TEST_F(CompilerTest, NoAutoMapLocationsFailsCompilationOnOpenGLShader) {
+  compiler_.SetTargetEnv(Compiler::TargetEnv::OpenGL);
+  compiler_.SetAutoMapLocations(false);
+
+  const auto words = SimpleCompilationBinary(kGlslVertShaderExplicitLocation,
+                                             EShLangVertex);
+  const auto disassembly = Disassemble(words);
+  EXPECT_THAT(disassembly, HasSubstr("OpDecorate %my_mat Location 10"))
+      << disassembly;
+
+  EXPECT_FALSE(
+      SimpleCompilationSucceeds(kGlslVertShaderNoExplicitLocation, EShLangVertex));
+}
+
+TEST_F(CompilerTest, AutoMapLocationsSetsLocationsOnOpenGLShader) {
+  compiler_.SetTargetEnv(Compiler::TargetEnv::OpenGL);
+  compiler_.SetAutoMapLocations(true);
+
+  const auto words_no_auto =
+      SimpleCompilationBinary(kGlslVertShaderExplicitLocation, EShLangVertex);
+  const auto disassembly_no_auto = Disassemble(words_no_auto);
+  EXPECT_THAT(disassembly_no_auto, HasSubstr("OpDecorate %my_mat Location 10"))
+      << disassembly_no_auto;
+
+  const auto words_auto =
+      SimpleCompilationBinary(kGlslVertShaderNoExplicitLocation, EShLangVertex);
+  const auto disassembly_auto = Disassemble(words_auto);
+  EXPECT_THAT(disassembly_auto, HasSubstr("OpDecorate %my_mat Location 0"))
+      << disassembly_auto;
 }
 
 TEST_F(CompilerTest, EmitMessageTextOnlyOnce) {

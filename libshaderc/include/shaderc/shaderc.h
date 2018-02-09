@@ -432,6 +432,11 @@ SHADERC_EXPORT void shaderc_compile_options_set_binding_base_for_stage(
     shaderc_compile_options_t options, shaderc_shader_kind shader_kind,
     shaderc_uniform_kind kind, uint32_t base);
 
+// Sets whether the compiler should automatically assign locations to
+// uniform variables that don't have explicit locations in the shader source.
+SHADERC_EXPORT void shaderc_compile_options_set_auto_map_locations(
+    shaderc_compile_options_t options, bool auto_map);
+
 // Sets a descriptor set and binding for an HLSL register in the given stage.
 // This method keeps a copy of the string data.
 SHADERC_EXPORT void shaderc_compile_options_set_hlsl_register_set_and_binding_for_stage(
