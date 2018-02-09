@@ -5,34 +5,35 @@
       "site" : "gitlab",
       "subrepo" : "GLSL/glslang",
       "subdir" : "third_party/glslang",
-      "commit" : "f5da6fa44db0b9670427bfed05669f192a54b89f"
+      "commit" : "4eb34c8402f1938c3b69da012ccce0ea1a6d472e",
+      "caveat" : "Requires further updating"
     },
     {
       "name" : "googletest",
       "site" : "github",
       "subrepo" : "google/googletest",
       "subdir" : "third_party/googletest",
-      "commit" : "6d0bb75c81bc59770520e303f6a04737b8aedb39"
+      "commit" : "a3c73ed28d7995b18d48027aee740ad827fcc157"
     },
     {
       "name" : "shaderc",
       "site" : "github",
       "subrepo" : "google/shaderc",
-      "commit" : "98ab88bcac1724ced19b8add0b582e402261ec17"
+      "commit" : "563bc6e87a43c38b5495469307922c768edbd191"
     },
     {
       "name" : "spirv-headers",
       "site" : "gitlab",
       "subrepo" : "spirv/SPIRV-Headers",
       "subdir" : "third_party/spirv-tools/external/spirv-headers",
-      "commit" : "854b5dda6149c481d6faf0b9c760c311ab45b05d"
+      "commit" : "efb8e1ed195654ab5144bc7443192236eb5a9f94"
     },
     {
       "name" : "spirv-tools",
       "site" : "gitlab",
       "subrepo" : "spirv/spirv-tools",
       "subdir" : "third_party/spirv-tools",
-      "commit" : "65457244d0135e91815fef57dc662f9b39232284"
+      "commit" : "310036ac3178121e8acbe4a3ae37ddc8a49ee207"
     }
   ]
 }
