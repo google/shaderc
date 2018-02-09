@@ -286,6 +286,12 @@ class CompileOptions {
                                                        kind, base);
   }
 
+  // Sets whether the compiler automatically assigns locations to
+  // uniform variables that don't have explicit locations.
+  void SetAutoMapLocations(bool auto_map) {
+    shaderc_compile_options_set_auto_map_locations(options_, auto_map);
+  }
+
   // Sets a descriptor set and binding for an HLSL register in the given stage.
   // Copies the parameter strings.
   void SetHlslRegisterSetAndBindingForStage(shaderc_shader_kind shader_kind,

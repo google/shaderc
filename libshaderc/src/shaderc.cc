@@ -435,6 +435,11 @@ void shaderc_compile_options_set_binding_base_for_stage(
                                                GetUniformKind(kind), base);
 }
 
+void shaderc_compile_options_set_auto_map_locations(
+    shaderc_compile_options_t options, bool auto_map) {
+  options->compiler.SetAutoMapLocations(auto_map);
+}
+
 void shaderc_compile_options_set_hlsl_register_set_and_binding_for_stage(
     shaderc_compile_options_t options, shaderc_shader_kind shader_kind,
     const char* reg, const char* set, const char* binding) {
