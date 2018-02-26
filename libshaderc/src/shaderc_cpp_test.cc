@@ -1122,8 +1122,8 @@ TEST(
 std::string ShaderWithTexOffset(int offset) {
   std::ostringstream oss;
   oss <<
-    "#version 150\n"
-    "uniform sampler1D tex;\n"
+    "#version 450\n"
+    "layout (binding=0) uniform sampler1D tex;\n"
     "void main() { vec4 x = textureOffset(tex, 1.0, " << offset << "); }\n";
   return oss.str();
 }
@@ -1165,24 +1165,12 @@ TEST_F(CppInterface, LimitsTexelOffsetHigherMaximum) {
                                   options_));
 }
 
-TEST_F(CppInterface, UniformsWithoutBindingsHaveNoBindingsByDefault) {
+TEST_F(CppInterface, UniformsWithoutBindingsFailCompilation) {
   CompileOptions options;
-  const std::string disassembly_text = AssemblyOutput(
+  const std::string errors = CompilationErrors(
       kShaderWithUniformsWithoutBindings, shaderc_glsl_vertex_shader, options);
-  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_tex Binding")));
-  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_sam Binding")));
-}
-
-TEST_F(CppInterface, UniformsWithoutBindingsOptionSetNoBindingsHaveNoBindings) {
-  CompileOptions options;
-  options.SetAutoBindUniforms(false);
-  const std::string disassembly_text = AssemblyOutput(
-      kShaderWithUniformsWithoutBindings, shaderc_glsl_vertex_shader, options);
-  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_tex Binding")));
-  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_sam Binding")));
-  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_img Binding")));
-  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_imbuf Binding")));
-  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_ubo Binding")));
+  EXPECT_THAT(errors,
+              HasSubstr("sampler/texture/image requires layout(binding=X)"));
 }
 
 TEST_F(CppInterface,
@@ -1266,22 +1254,6 @@ TEST_F(CppInterface, SetBindingBaseSurvivesCloning) {
   EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_img Binding 60"));
   EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_imbuf Binding 61"));
   EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_ubo Binding 70"));
-}
-
-TEST_F(CppInterface, SetBindingBaseIgnoredWhenNotAutoBinding) {
-  CompileOptions options;
-  options.SetAutoBindUniforms(false);
-  options.SetBindingBase(shaderc_uniform_kind_texture, 40);
-  options.SetBindingBase(shaderc_uniform_kind_sampler, 50);
-  options.SetBindingBase(shaderc_uniform_kind_image, 60);
-  options.SetBindingBase(shaderc_uniform_kind_buffer, 70);
-  const std::string disassembly_text = AssemblyOutput(
-      kShaderWithUniformsWithoutBindings, shaderc_glsl_vertex_shader, options);
-  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_tex Binding")));
-  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_sam Binding")));
-  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_img Binding")));
-  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_imbuf Binding")));
-  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorate %my_ubo Binding")));
 }
 
 TEST_F(CppInterface, GlslDefaultPackingUsed) {

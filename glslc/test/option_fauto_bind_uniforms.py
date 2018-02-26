@@ -81,13 +81,12 @@ float4 main() : SV_Target0 {
 """
 
 @inside_glslc_testsuite('OptionFAutoBindUniforms')
-class UniformBindingsNotCreatedByDefault(expect.ValidAssemblyFileWithoutSubstr):
-    """Tests that the compiler does not generate bindings for uniforms by default."""
+class UniformBindingsNotCreatedByDefault(expect.ErrorMessageSubstr):
+    """Tests that compilation fails when uniforms have no binding."""
 
     shader = FileShader(GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS, '.vert')
     glslc_args = ['-S', shader]
-    # Sufficient to just check one of the uniforms.
-    unexpected_assembly_substr = "OpDecorate %my_sam Binding"
+    expected_error_substr = "sampler/texture/image requires layout(binding=X)"
 
 
 @inside_glslc_testsuite('OptionFAutoBindUniforms')

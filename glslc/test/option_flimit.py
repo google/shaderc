@@ -21,8 +21,8 @@ from placeholder import FileShader
 def shader_source_with_tex_offset(offset):
     """Returns a vertex shader using a texture access with the given offset."""
 
-    return """#version 150
-              uniform sampler1D tex;
+    return """#version 450
+              layout (binding=0) uniform sampler1D tex;
               void main() { vec4 x = textureOffset(tex, 1.0, """ + str(offset) + "); }"
 
 

@@ -492,8 +492,8 @@ INSTANTIATE_TEST_CASE_P(
 // offset.
 std::string ShaderWithTexOffset(int offset) {
   std::ostringstream oss;
-  oss << "#version 150\n"
-         "uniform sampler1D tex;\n"
+  oss << "#version 450\n"
+         "layout (binding=0) uniform sampler1D tex;\n"
          "void main() { vec4 x = textureOffset(tex, 1.0, "
       << offset << "); }\n";
   return oss.str();
@@ -531,28 +531,12 @@ TEST_F(CompilerTest, GeneratorWordIsShadercOverGlslang) {
   EXPECT_EQ(shaderc_over_glslang, words[generator_word_index] >> 16u);
 }
 
-TEST_F(CompilerTest, DefaultsDoNotSetBindings) {
-  const auto words = SimpleCompilationBinary(kGlslFragShaderNoExplicitBinding,
-                                             EShLangFragment);
-  const auto disassembly = Disassemble(words);
-  EXPECT_THAT(disassembly, Not(HasSubstr("OpDecorate %my_tex Binding")));
-  EXPECT_THAT(disassembly, Not(HasSubstr("OpDecorate %my_sam Binding")));
-  EXPECT_THAT(disassembly, Not(HasSubstr("OpDecorate %my_img Binding")));
-  EXPECT_THAT(disassembly, Not(HasSubstr("OpDecorate %my_imbuf Binding")));
-  EXPECT_THAT(disassembly, Not(HasSubstr("OpDecorate %my_ubo Binding")));
-}
-
-TEST_F(CompilerTest, NoAutoMapBindingsDoesNotSetBindings) {
+TEST_F(CompilerTest, NoBindingsAndNoAutoMapBindingsFailsCompile) {
   compiler_.SetAutoBindUniforms(false);
-  const auto words = SimpleCompilationBinary(kGlslFragShaderNoExplicitBinding,
-                                             EShLangFragment);
-  const auto disassembly = Disassemble(words);
-  EXPECT_THAT(disassembly, Not(HasSubstr("OpDecorate %my_tex Binding")))
-      << disassembly;
-  EXPECT_THAT(disassembly, Not(HasSubstr("OpDecorate %my_sam Binding")));
-  EXPECT_THAT(disassembly, Not(HasSubstr("OpDecorate %my_img Binding")));
-  EXPECT_THAT(disassembly, Not(HasSubstr("OpDecorate %my_imbuf Binding")));
-  EXPECT_THAT(disassembly, Not(HasSubstr("OpDecorate %my_ubo Binding")));
+  EXPECT_FALSE(SimpleCompilationSucceeds(kGlslFragShaderNoExplicitBinding,
+                                         EShLangFragment));
+  EXPECT_THAT(errors_,
+              HasSubstr("sampler/texture/image requires layout(binding=X)"));
 }
 
 TEST_F(CompilerTest, AutoMapBindingsSetsBindings) {
