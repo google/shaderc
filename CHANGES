@@ -4,8 +4,9 @@ v2017.2-dev 2017-03-10
  - Add a shared library version of libshaderc
  - Support GLSL 4.6 and ESSL 3.2
  - Fail compilation if a resource does not have a binding.
- - Add options for automatically set bindings for (uniform) resources that
+ - Add options for automatically setting bindings for (uniform) resources that
    don't have bindings set in shader source.
+ - Add options for automatically setting locations for pipline inputs and outputs.
  - Add option for using HLSL IO mappings as expressed in source.
  - Add options for setting resource binding base numbers.
  - Add option to use HLSL resource register numbers for bindings.
