@@ -20,7 +20,8 @@ glslc [-c|-S|-E]
       [-x ...] [-std=standard]
       [ ... options for resource bindings ... ]
       [-fhlsl-offsets]
-      [-fentry-point=...]
+      [-fentry-point=<name>]
+      [-fauto-map-locations]
       [-flimit=...]
       [-flimit-file <resource-limits-file>]
       [-fshader-stage=...]
@@ -349,11 +350,41 @@ Use HLSL packing rules instead of GLSL rules when determining offsets of
 members of blocks.  This option is always on when compiling for HLSL.
 
 [[option-fentry-point]]
-==== `-fentry-point=`
+==== `-fentry-point=<name>`
 
 `-fentry-point=<name>` lets you specify the entry point name.  This is only
 significant for HLSL compilation.  The default is "main".
 
+[[option-fauto-map-locations]]
+==== `-fauto-map-locations`
+
+For GLSL compilation, option `-fauto-map-locations` directs the compiler to automatically
+assign location numbers to user-defined stage input and output variables if not explicitly
+specified by the shader source.
+
+For HLSL compilation, this option is on by default.
+
+Client APIs normally require adjacent stages to agree on their I/O interface.
+The compiler only sees one stage at a time, so it is strongly recommended that
+you avoid relying on this option to assign locations.
+
+Instead, an explicit binding number should be specified in the shader source, as follows:
+
+* In a GLSL shader, use a `location` layout qualifier:
+
+----
+layout(location = 1) in vec4 x;
+----
+
+* In an HLSL shader, use a `vk::location` attribute:
+
+----
+[[vk::location(1)]] float4 FooShader(
+  [[vk::location(0)]] float4 a,
+  [[vk::location(2)]] float4 b) : COLOR0 {
+  return a + b;
+}
+----
 
 === Warning and Error Options
 
