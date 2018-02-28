@@ -5,8 +5,7 @@
       "site" : "gitlab",
       "subrepo" : "GLSL/glslang",
       "subdir" : "third_party/glslang",
-      "commit" : "4eb34c8402f1938c3b69da012ccce0ea1a6d472e",
-      "caveat" : "Requires further updating"
+      "commit" : "d481e0716ade062a184e3effe3c2cd3f6e45fd37"
     },
     {
       "name" : "googletest",
@@ -19,7 +18,7 @@
       "name" : "shaderc",
       "site" : "github",
       "subrepo" : "google/shaderc",
-      "commit" : "563bc6e87a43c38b5495469307922c768edbd191"
+      "commit" : "10530a08bdc5a3fb627746f64bc7e0a8b18819f8"
     },
     {
       "name" : "spirv-headers",
