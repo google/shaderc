@@ -12,7 +12,7 @@
       "site" : "github",
       "subrepo" : "google/googletest",
       "subdir" : "third_party/googletest",
-      "commit" : "a3c73ed28d7995b18d48027aee740ad827fcc157"
+      "commit" : "9557d29b7a5f3476ce024ae54410c997b9088f4a"
     },
     {
       "name" : "shaderc",
