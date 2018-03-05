@@ -677,3 +677,4 @@ bool shaderc_parse_version_profile(const char* str, int* version,
   // Be strict to return false.
   return false;
 }
+
