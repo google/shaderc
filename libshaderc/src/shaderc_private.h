@@ -121,3 +121,4 @@ inline shaderc_util::Compiler::Stage shaderc_convert_specific_stage(
 }
 
 #endif  // LIBSHADERC_SRC_SHADERC_PRIVATE_H_
+
