@@ -32,3 +32,4 @@ TEST(ConvertSpecificStage, Exhaustive) {
             shaderc_convert_specific_stage(shaderc_compute_shader));
 }
 }  // anonymous namespace
+
