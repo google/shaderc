@@ -102,7 +102,7 @@ fi
 echo $(date): Starting ctest...
 if [ $SKIP_TESTS = "False" ]
 then
-  ctest
+  ctest --output-on-failure -j4
 fi
 echo $(date): ctest completed.
 

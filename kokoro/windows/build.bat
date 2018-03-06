@@ -65,12 +65,13 @@ echo "Build Completed %DATE% %TIME%"
 :: Run the tests.
 :: #########################################
 echo "Running Tests... %DATE% %TIME%"
-ctest -C RelWithDebInfo
+ctest -C %BUILD_TYPE% --output-on-failure -j4
 echo "Tests Completed %DATE% %TIME%"
 
-:: Clean up everything. This will reduce the time it takes for the bot to report the status.
-cd %BUILD_ROOT%
-rm -rf *
+:: Clean up some directories.
+rm -rf %SRC%\build
+rm -rf %SRC%\third_party
+
 
 exit /b %ERRORLEVEL%
 

@@ -58,6 +58,6 @@ ninja check-copyright
 echo $(date): Build completed.
 
 echo $(date): Starting ctest...
-ctest
+ctest --output-on-failure -j4
 echo $(date): ctest completed.
 
