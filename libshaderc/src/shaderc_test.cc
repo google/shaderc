@@ -1633,3 +1633,4 @@ TEST_F(CompileStringWithOptionsTest, HlslOffsetsOptionEnableRespected) {
 }
 
 }  // anonymous namespace
+
