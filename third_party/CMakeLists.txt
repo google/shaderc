@@ -82,16 +82,23 @@ if(${SHADERC_ENABLE_TESTS})
       ${GLSLANG_TEST_SRC_DIR} ${GLSLANG_TEST_BIN_DIR} ${GLSLANG_CONFIGURATION_DIR}
     COMMENT "Copying and patching glslang tests if needed")
 
+  # glslang-testsuite runs a bash script on Windows.
+  # Make sure to use '-o igncr' flag to ignore carriage returns (\r).
+  set(IGNORE_CR_FLAG "")
+  if(WIN32)
+    set(IGNORE_CR_FLAG -o igncr)
+  endif()
+
   if (CMAKE_CONFIGURATION_TYPES)
     # If we are running a multi-configuration project,
     # the tests will be in ${Configuration}/Test
     add_test(NAME glslang-testsuite
-      COMMAND bash runtests
+      COMMAND bash ${IGNORE_CR_FLAG} runtests
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIGURATION>/Test
     )
   else()
     add_test(NAME glslang-testsuite
-      COMMAND bash runtests
+      COMMAND bash ${IGNORE_CR_FLAG} runtests
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Test/
     )
   endif()
