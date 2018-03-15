@@ -980,7 +980,8 @@ TEST_F(CppInterface, SuppressWarningsModeSecondOverridesWarningsAsErrorsMode) {
               Eq("shader: error: version not supported\n"));
 }
 
-TEST_F(CppInterface, TargetEnvCompileOptions) {
+// OpenGL compatibility profile is not supported.
+TEST_F(CppInterface, DISABLED_TargetEnvCompileOptions) {
   // Test shader compilation which requires opengl compatibility environment
   options_.SetTargetEnvironment(shaderc_target_env_opengl_compat, 0);
   const std::string kGlslShader =
