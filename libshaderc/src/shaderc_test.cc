@@ -1076,11 +1076,11 @@ TEST_F(CompileStringWithOptionsTest, IfDefCompileOption) {
                                  shaderc_glsl_vertex_shader, options_.get()));
 }
 
-TEST_F(CompileStringWithOptionsTest,
-       TargetEnvRespectedWhenCompilingOpenGLCompatibilityShaderToBinary) {
-  // Confirm that kOpenGLCompatibilityFragmentShader compiles with
-  // shaderc_target_env_opengl_compat.  When targeting OpenGL core profile
-  // or Vulkan, it should fail to compile.
+TEST_F(
+    CompileStringWithOptionsTest,
+    TargetEnvRespectedWhenCompilingOpenGLCompatibilityShaderToBinaryAndAlwaysFails) {
+  // Glslang does not support generating SPIR-V for compatibility profile
+  // shaders.
 
   EXPECT_FALSE(CompilesToValidSpv(compiler_, kOpenGLCompatibilityFragmentShader,
                                   shaderc_glsl_fragment_shader,
@@ -1088,8 +1088,9 @@ TEST_F(CompileStringWithOptionsTest,
 
   shaderc_compile_options_set_target_env(options_.get(),
                                          shaderc_target_env_opengl_compat, 0);
-  EXPECT_TRUE(CompilesToValidSpv(compiler_, kOpenGLCompatibilityFragmentShader,
-                                 shaderc_glsl_fragment_shader, options_.get()));
+  EXPECT_FALSE(CompilesToValidSpv(compiler_, kOpenGLCompatibilityFragmentShader,
+                                  shaderc_glsl_fragment_shader,
+                                  options_.get()));
 
   shaderc_compile_options_set_target_env(options_.get(),
                                          shaderc_target_env_opengl, 0);
@@ -1118,8 +1119,42 @@ TEST_F(CompileStringWithOptionsTest,
                                          shaderc_target_env_opengl, 0);
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kOpenGLVertexShader,
                                  shaderc_glsl_vertex_shader, options_.get()));
+}
 
-  // TODO(dneto): Check what happens when targeting Vulkan.
+TEST_F(CompileStringWithOptionsTest,
+       TargetEnvRespectedWhenCompilingVulkan1_0ShaderToVulkan1_0Succeeds) {
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_vulkan,
+                                         shaderc_env_version_vulkan_1_0);
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kGlslShaderComputeBarrier,
+                                 shaderc_glsl_compute_shader, options_.get()));
+}
+
+TEST_F(CompileStringWithOptionsTest,
+       TargetEnvRespectedWhenCompilingVulkan1_0ShaderToVulkan1_1Succeeds) {
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_vulkan,
+                                         shaderc_env_version_vulkan_1_1);
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kGlslShaderComputeBarrier,
+                                 shaderc_glsl_compute_shader, options_.get()));
+}
+
+TEST_F(CompileStringWithOptionsTest,
+       TargetEnvRespectedWhenCompilingVulkan1_1ShaderToVulkan1_0Fails) {
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_vulkan,
+                                         shaderc_env_version_vulkan_1_0);
+  EXPECT_FALSE(CompilesToValidSpv(compiler_, kGlslShaderComputeSubgroupBarrier,
+                                  shaderc_glsl_compute_shader, options_.get()));
+}
+
+TEST_F(CompileStringWithOptionsTest,
+       TargetEnvRespectedWhenCompilingVulkan1_1ShaderToVulkan1_1Succeeds) {
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_vulkan,
+                                         shaderc_env_version_vulkan_1_1);
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kGlslShaderComputeSubgroupBarrier,
+                                 shaderc_glsl_compute_shader, options_.get()));
 }
 
 TEST_F(CompileStringWithOptionsTest,

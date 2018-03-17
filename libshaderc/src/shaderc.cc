@@ -298,6 +298,7 @@ shaderc_util::Compiler::Stage GetStage(shaderc_shader_kind kind) {
 
 struct shaderc_compile_options {
   shaderc_target_env target_env = shaderc_target_env_default;
+  uint32_t target_env_version = 0;
   shaderc_util::Compiler compiler;
   shaderc_include_resolve_fn include_resolver = nullptr;
   shaderc_include_result_release_fn include_result_releaser = nullptr;
@@ -391,10 +392,8 @@ void shaderc_compile_options_set_suppress_warnings(
 void shaderc_compile_options_set_target_env(shaderc_compile_options_t options,
                                             shaderc_target_env target,
                                             uint32_t version) {
-  // "version" reserved for future use, intended to distinguish between
-  // different versions of a target environment
   options->target_env = target;
-  options->compiler.SetTargetEnv(GetCompilerTargetEnv(target));
+  options->compiler.SetTargetEnv(GetCompilerTargetEnv(target), version);
 }
 
 void shaderc_compile_options_set_warnings_as_errors(
