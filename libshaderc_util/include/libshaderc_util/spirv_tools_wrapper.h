@@ -39,6 +39,7 @@ bool SpirvToolsDisassemble(Compiler::TargetEnv env,
 
 // The ids of a list of supported optimization passes.
 enum class PassId {
+  kLegalizationPasses,
   kNullPass,
   kStripDebugInfo,
   kEliminateDeadFunctions,

@@ -43,12 +43,15 @@ bool SpirvToolsDisassemble(Compiler::TargetEnv env,
                            std::string* text_or_error) {
   spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_0);
   std::ostringstream oss;
-  tools.SetMessageConsumer([&oss](
-      spv_message_level_t, const char*, const spv_position_t& position,
-      const char* message) { oss << position.index << ": " << message; });
-  const bool success = tools.Disassemble(
-      binary, text_or_error, SPV_BINARY_TO_TEXT_OPTION_INDENT |
-                                 SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES);
+  tools.SetMessageConsumer([&oss](spv_message_level_t, const char*,
+                                  const spv_position_t& position,
+                                  const char* message) {
+    oss << position.index << ": " << message;
+  });
+  const bool success =
+      tools.Disassemble(binary, text_or_error,
+                        SPV_BINARY_TO_TEXT_OPTION_INDENT |
+                            SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES);
   if (!success) {
     *text_or_error = oss.str();
   }
@@ -99,6 +102,9 @@ bool SpirvToolsOptimize(Compiler::TargetEnv env,
 
   for (const auto& pass : enabled_passes) {
     switch (pass) {
+      case PassId::kLegalizationPasses:
+        optimizer.RegisterLegalizationPasses();
+        break;
       case PassId::kNullPass:
         // We actually don't need to do anything for null pass.
         break;
@@ -115,7 +121,8 @@ bool SpirvToolsOptimize(Compiler::TargetEnv env,
         optimizer.RegisterPass(spvtools::CreateFreezeSpecConstantValuePass());
         break;
       case PassId::kFoldSpecConstantOpAndComposite:
-        optimizer.RegisterPass(spvtools::CreateFoldSpecConstantOpAndCompositePass());
+        optimizer.RegisterPass(
+            spvtools::CreateFoldSpecConstantOpAndCompositePass());
         break;
       case PassId::kUnifyConstant:
         optimizer.RegisterPass(spvtools::CreateUnifyConstantPass());
@@ -136,7 +143,8 @@ bool SpirvToolsOptimize(Compiler::TargetEnv env,
         optimizer.RegisterPass(spvtools::CreateInlineOpaquePass());
         break;
       case PassId::kLocalSingleBlockLoadStoreElim:
-        optimizer.RegisterPass(spvtools::CreateLocalSingleBlockLoadStoreElimPass());
+        optimizer.RegisterPass(
+            spvtools::CreateLocalSingleBlockLoadStoreElimPass());
         break;
       case PassId::kDeadBranchElim:
         optimizer.RegisterPass(spvtools::CreateDeadBranchElimPass());
