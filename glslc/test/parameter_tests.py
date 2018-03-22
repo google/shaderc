@@ -140,9 +140,14 @@ Options:
                     generation.
   -S                Only run preprocess and compilation steps.
   --target-env=<environment>
-                    Set the target shader environment, and the semantics
-                    of warnings and errors. Valid values are 'opengl',
-                    'opengl_compat' and 'vulkan'. The default value is 'vulkan'.
+                    Set the target client environment, and the semantics
+                    of warnings and errors.  An optional suffix can specify
+                    the client version.  Values are:
+                        vulkan1.0       # The default
+                        vulkan1.1
+                        vulkan          # Same as vulkan1.0
+                        opengl4.5
+                        opengl          # Same as opengl4.5
   -w                Suppresses all warning messages.
   -Werror           Treat all warnings as errors.
   -x <language>     Treat subsequent input files as having type <language>.

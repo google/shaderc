@@ -93,6 +93,53 @@ EShMessages GetMessageRules(shaderc_util::Compiler::TargetEnv env,
   return result;
 }
 
+// A GlslangClientInfo captures target client version and desired SPIR-V
+// version.
+struct GlslangClientInfo {
+  bool valid_client = false;
+  glslang::EShClient client = glslang::EShClientNone;
+  bool valid_client_version = false;
+  glslang::EShTargetClientVersion client_version;
+  glslang::EShTargetLanguage target_language = glslang::EShTargetSpv;
+  glslang::EShTargetLanguageVersion target_language_version =
+      glslang::EShTargetSpv_1_0;
+};
+
+// Returns the mappings to Glslang client, client version, and SPIR-V version.
+// Also indicates whether the input values were valid.
+GlslangClientInfo GetGlslangClientInfo(shaderc_util::Compiler::TargetEnv env,
+                                       uint32_t version) {
+  GlslangClientInfo result;
+
+  using shaderc_util::Compiler;
+  switch (env) {
+    case Compiler::TargetEnv::Vulkan:
+      result.valid_client = true;
+      result.client = glslang::EShClientVulkan;
+      if (version == 0 ||
+          version == uint32_t(Compiler::TargetEnvVersion::Vulkan_1_0)) {
+        result.client_version = glslang::EShTargetVulkan_1_0;
+        result.valid_client_version = true;
+      } else if (version == uint32_t(Compiler::TargetEnvVersion::Vulkan_1_1)) {
+        result.client_version = glslang::EShTargetVulkan_1_1;
+        result.valid_client_version = true;
+        result.target_language_version = glslang::EShTargetSpv_1_3;
+      }
+      break;
+    case Compiler::TargetEnv::OpenGLCompat:  // TODO(dneto): remove this
+    case Compiler::TargetEnv::OpenGL:
+      result.valid_client = true;
+      result.client = glslang::EShClientOpenGL;
+      if (version == 0 ||
+          version == uint32_t(Compiler::TargetEnvVersion::OpenGL_4_5)) {
+        result.client_version = glslang::EShTargetOpenGL_450;
+        result.valid_client_version = true;
+      }
+      break;
+  }
+  return result;
+}
+
 }  // anonymous namespace
 
 namespace shaderc_util {
@@ -138,6 +185,25 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   bool& succeeded = std::get<0>(result_tuple);
   std::vector<uint32_t>& compilation_output_data = std::get<1>(result_tuple);
   size_t& compilation_output_data_size_in_bytes = std::get<2>(result_tuple);
+
+  // Check target environment.
+  const auto target_client_info =
+      GetGlslangClientInfo(target_env_, target_env_version_);
+  if (!target_client_info.valid_client) {
+    *error_stream << "error:" << error_tag
+                  << ": Invalid target client environment " << int(target_env_);
+    *total_warnings = 0;
+    *total_errors = 1;
+    return result_tuple;
+  }
+  if (!target_client_info.valid_client_version) {
+    *error_stream << "error:" << error_tag << ": Invalid target client version "
+                  << target_env_version_ << " for environment "
+                  << int(target_env_);
+    *total_warnings = 0;
+    *total_errors = 1;
+    return result_tuple;
+  }
 
   auto token = initializer->Acquire();
   EShLanguage used_shader_stage = forced_shader_stage;
@@ -221,6 +287,10 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   shader.setHlslIoMapping(hlsl_iomap_);
   shader.setResourceSetBinding(
       hlsl_explicit_bindings_[static_cast<int>(used_shader_stage)]);
+  shader.setEnvClient(target_client_info.client,
+                      target_client_info.client_version);
+  shader.setEnvTarget(target_client_info.target_language,
+                      target_client_info.target_language_version);
 
   // TODO(dneto): Generate source-level debug info if requested.
   bool success = shader.parse(
@@ -324,7 +394,10 @@ void Compiler::AddMacroDefinition(const char* macro, size_t macro_length,
       definition ? std::string(definition, definition_length) : "";
 }
 
-void Compiler::SetTargetEnv(Compiler::TargetEnv env) { target_env_ = env; }
+void Compiler::SetTargetEnv(Compiler::TargetEnv env, uint32_t version) {
+  target_env_ = env;
+  target_env_version_ = version;
+}
 
 void Compiler::SetSourceLanguage(Compiler::SourceLanguage lang) {
   source_language_ = lang;
@@ -380,6 +453,22 @@ std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
   shader.setStringsWithLengthsAndNames(&shader_strings, &shader_lengths,
                                        &string_names, 1);
   shader.setPreamble(shader_preamble.data());
+  auto target_client_info =
+      GetGlslangClientInfo(target_env_, target_env_version_);
+  if (!target_client_info.valid_client) {
+    std::ostringstream os;
+    os << "error:" << error_tag << ": Invalid target client "
+       << int(target_env_);
+    return std::make_tuple(false, "", os.str());
+  }
+  if (!target_client_info.valid_client_version) {
+    std::ostringstream os;
+    os << "error:" << error_tag << ": Invalid target client "
+       << int(target_env_version_) << " for environmnent " << int(target_env_);
+    return std::make_tuple(false, "", os.str());
+  }
+  shader.setEnvClient(target_client_info.client,
+                      target_client_info.client_version);
 
   // The preprocessor might be sensitive to the target environment.
   // So combine the existing rules with the just-give-me-preprocessor-output

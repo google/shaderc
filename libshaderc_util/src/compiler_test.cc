@@ -34,20 +34,11 @@ const char kVertexShader[] =
     "#version 140\n"
     "void main() {}";
 
-// A shader that compiles under OpenGL compatibility profile rules,
-// but not OpenGL core profile rules.
+// A shader that parses under OpenGL compatibility profile rules.
+// It does not compile because Glslang does not support SPIR-V
+// code generation for OpenGL compatibility profile.
 const char kOpenGLCompatibilityFragShader[] =
     R"(#version 140
-       uniform highp sampler2D tex;
-       void main() {
-         gl_FragColor = texture2D(tex, vec2(0.0,0.0));
-       })";
-
-// A shader that compiles under OpenGL compatibility profile rules,
-// but not OpenGL core profile rules, even when deducing the stage.
-const char kOpenGLCompatibilityFragShaderDeducibleStage[] =
-    R"(#version 140
-       #pragma shader_stage(fragment)
        uniform highp sampler2D tex;
        void main() {
          gl_FragColor = texture2D(tex, vec2(0.0,0.0));
@@ -255,46 +246,6 @@ TEST_F(CompilerTest, SimpleVulkanShaderCompilesWithDefaultCompilerSettings) {
   EXPECT_TRUE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
 }
 
-TEST_F(CompilerTest, RespectTargetEnvOnOpenGLCompatibilityShader) {
-  const EShLanguage stage = EShLangFragment;
-
-  compiler_.SetTargetEnv(Compiler::TargetEnv::OpenGLCompat);
-  EXPECT_TRUE(SimpleCompilationSucceeds(kOpenGLCompatibilityFragShader, stage));
-  compiler_.SetTargetEnv(Compiler::TargetEnv::OpenGL);
-  EXPECT_FALSE(
-      SimpleCompilationSucceeds(kOpenGLCompatibilityFragShader, stage));
-  compiler_.SetTargetEnv(Compiler::TargetEnv::Vulkan);
-  EXPECT_FALSE(
-      SimpleCompilationSucceeds(kOpenGLCompatibilityFragShader, stage));
-  // Default compiler.
-  compiler_ = Compiler();
-  EXPECT_FALSE(
-      SimpleCompilationSucceeds(kOpenGLCompatibilityFragShader, stage));
-}
-
-TEST_F(CompilerTest,
-       RespectTargetEnvOnOpenGLCompatibilityShaderWhenDeducingStage) {
-  const EShLanguage stage = EShLangCount;
-
-  compiler_.SetTargetEnv(Compiler::TargetEnv::OpenGLCompat);
-  EXPECT_TRUE(SimpleCompilationSucceeds(
-      kOpenGLCompatibilityFragShaderDeducibleStage, stage))
-      << errors_;
-  compiler_.SetTargetEnv(Compiler::TargetEnv::OpenGL);
-  EXPECT_FALSE(SimpleCompilationSucceeds(
-      kOpenGLCompatibilityFragShaderDeducibleStage, stage))
-      << errors_;
-  compiler_.SetTargetEnv(Compiler::TargetEnv::Vulkan);
-  EXPECT_FALSE(SimpleCompilationSucceeds(
-      kOpenGLCompatibilityFragShaderDeducibleStage, stage))
-      << errors_;
-  // Default compiler.
-  compiler_ = Compiler();
-  EXPECT_FALSE(SimpleCompilationSucceeds(
-      kOpenGLCompatibilityFragShaderDeducibleStage, stage))
-      << errors_;
-}
-
 TEST_F(CompilerTest, RespectTargetEnvOnOpenGLShader) {
   const EShLanguage stage = EShLangVertex;
 
@@ -332,13 +283,14 @@ TEST_F(CompilerTest, VulkanSpecificShaderFailsUnderOpenGLRules) {
   EXPECT_FALSE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
 }
 
-TEST_F(CompilerTest, OpenGLCompatibilitySpecificShaderFailsUnderDefaultRules) {
-  EXPECT_FALSE(SimpleCompilationSucceeds(kOpenGLCompatibilityFragShader,
-                                         EShLangFragment));
-}
-
 TEST_F(CompilerTest, OpenGLSpecificShaderFailsUnderDefaultRules) {
   EXPECT_FALSE(SimpleCompilationSucceeds(kOpenGLVertexShader, EShLangVertex));
+}
+
+TEST_F(CompilerTest, OpenGLCompatibilitySpecificShaderFailsUnderOpenGLRules) {
+  compiler_.SetTargetEnv(Compiler::TargetEnv::OpenGL);
+  EXPECT_FALSE(SimpleCompilationSucceeds(kOpenGLCompatibilityFragShader,
+                                         EShLangFragment));
 }
 
 TEST_F(CompilerTest, OpenGLCompatibilitySpecificShaderFailsUnderVulkanRules) {
@@ -350,6 +302,19 @@ TEST_F(CompilerTest, OpenGLCompatibilitySpecificShaderFailsUnderVulkanRules) {
 TEST_F(CompilerTest, OpenGLSpecificShaderFailsUnderVulkanRules) {
   compiler_.SetTargetEnv(Compiler::TargetEnv::Vulkan);
   EXPECT_FALSE(SimpleCompilationSucceeds(kOpenGLVertexShader, EShLangVertex));
+}
+
+TEST_F(CompilerTest, BadTargetEnvFails) {
+  compiler_.SetTargetEnv(static_cast<Compiler::TargetEnv>(32767));
+  EXPECT_FALSE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
+  EXPECT_THAT(errors_, HasSubstr("Invalid target client environment 32767"));
+}
+
+TEST_F(CompilerTest, BadTargetEnvVersionFails) {
+  compiler_.SetTargetEnv(Compiler::TargetEnv::Vulkan, 123);
+  EXPECT_FALSE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
+  EXPECT_THAT(errors_,
+              HasSubstr("Invalid target client version 123 for environment 0"));
 }
 
 TEST_F(CompilerTest, AddMacroDefinition) {

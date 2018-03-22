@@ -980,19 +980,76 @@ TEST_F(CppInterface, SuppressWarningsModeSecondOverridesWarningsAsErrorsMode) {
               Eq("shader: error: version not supported\n"));
 }
 
-TEST_F(CppInterface, TargetEnvCompileOptions) {
-  // Test shader compilation which requires opengl compatibility environment
+TEST_F(CppInterface, TargetEnvCompileOptionsOpenGLCompatibilityShadersFail) {
+  // Glslang does not support SPIR-V code generation for OpenGL compatibility
+  // profile.
   options_.SetTargetEnvironment(shaderc_target_env_opengl_compat, 0);
   const std::string kGlslShader =
-      R"(#version 100
+      R"(#version 150 compatibility
        uniform highp sampler2D tex;
        void main() {
          gl_FragColor = texture2D(tex, vec2(0.0,0.0));
        }
   )";
 
-  EXPECT_TRUE(
-      CompilationSuccess(kGlslShader, shaderc_glsl_fragment_shader, options_));
+  EXPECT_THAT(
+      CompilationErrors(kGlslShader, shaderc_glsl_fragment_shader, options_),
+      HasSubstr(
+          "compilation for SPIR-V does not support the compatibility profile"));
+}
+
+std::string BarrierComputeShader() {
+  return R"(#version 450
+    void main() { barrier(); })";
+};
+
+std::string SubgroupBarrierComputeShader() {
+  return R"(#version 450
+    #extension GL_KHR_shader_subgroup_basic : enable
+    void main() { subgroupBarrier(); })";
+};
+
+TEST_F(CppInterface, TargetEnvCompileOptionsVulkanEnvVulkan1_0ShaderSucceeds) {
+  options_.SetTargetEnvironment(shaderc_target_env_vulkan, 0);
+  EXPECT_TRUE(CompilationSuccess(BarrierComputeShader(),
+                                 shaderc_glsl_compute_shader, options_));
+}
+
+TEST_F(CppInterface, TargetEnvCompileOptionsVulkanEnvVulkan1_0ShaderFails) {
+  options_.SetTargetEnvironment(shaderc_target_env_vulkan, 0);
+  EXPECT_FALSE(CompilationSuccess(SubgroupBarrierComputeShader(),
+                                  shaderc_glsl_compute_shader, options_));
+}
+
+TEST_F(CppInterface,
+       TargetEnvCompileOptionsVulkan1_0EnvVulkan1_0ShaderSucceeds) {
+  options_.SetTargetEnvironment(shaderc_target_env_vulkan,
+                                shaderc_env_version_vulkan_1_0);
+  EXPECT_TRUE(CompilationSuccess(BarrierComputeShader(),
+                                 shaderc_glsl_compute_shader, options_));
+}
+
+TEST_F(CppInterface, TargetEnvCompileOptionsVulkan1_0EnvVulkan1_1ShaderFails) {
+  options_.SetTargetEnvironment(shaderc_target_env_vulkan,
+                                shaderc_env_version_vulkan_1_0);
+  EXPECT_FALSE(CompilationSuccess(SubgroupBarrierComputeShader(),
+                                  shaderc_glsl_compute_shader, options_));
+}
+
+TEST_F(CppInterface,
+       TargetEnvCompileOptionsVulkan1_1EnvVulkan1_0ShaderSucceeds) {
+  options_.SetTargetEnvironment(shaderc_target_env_vulkan,
+                                shaderc_env_version_vulkan_1_1);
+  EXPECT_TRUE(CompilationSuccess(BarrierComputeShader(),
+                                 shaderc_glsl_compute_shader, options_));
+}
+
+TEST_F(CppInterface,
+       TargetEnvCompileOptionsVulkan1_1EnvVulkan1_1ShaderSucceeds) {
+  options_.SetTargetEnvironment(shaderc_target_env_vulkan,
+                                shaderc_env_version_vulkan_1_1);
+  EXPECT_TRUE(CompilationSuccess(SubgroupBarrierComputeShader(),
+                                 shaderc_glsl_compute_shader, options_));
 }
 
 TEST_F(CppInterface, BeginAndEndOnSpvCompilationResult) {
