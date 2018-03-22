@@ -415,7 +415,7 @@ void Compiler::SetOptimizationLevel(Compiler::OptimizationLevel level) {
       if (!generate_debug_info_) {
         enabled_opt_passes_.push_back(PassId::kStripDebugInfo);
       }
-      enabled_opt_passes_.push_back(PassId::kUnifyConstant);
+      enabled_opt_passes_.push_back(PassId::kSizePasses);
       break;
     default:
       break;
