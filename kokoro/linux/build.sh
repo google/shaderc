@@ -33,6 +33,8 @@ BUILD_TYPE="Debug"
 CMAKE_C_CXX_COMPILER=""
 if [ $COMPILER = "clang" ]
 then
+  sudo ln -s /usr/bin/clang-3.8 /usr/bin/clang
+  sudo ln -s /usr/bin/clang++-3.8 /usr/bin/clang++
   CMAKE_C_CXX_COMPILER="-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"
 fi
 

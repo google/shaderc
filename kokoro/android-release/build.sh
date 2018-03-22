@@ -31,10 +31,6 @@ wget -q https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linu
 unzip -q ninja-linux.zip
 export PATH="$PWD:$PATH"
 export BUILD_NDK=ON
-export CC=clang-3.6
-export CXX=clang++-3.6
-clang --version
-
 export ANDROID_NDK=/opt/android-ndk-r15c
 git clone --depth=1 https://github.com/taka-no-me/android-cmake.git android-cmake
 export TOOLCHAIN_PATH=$PWD/android-cmake/android.toolchain.cmake
