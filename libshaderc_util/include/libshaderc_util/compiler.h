@@ -106,17 +106,17 @@ class Compiler {
 
   // Target environment.
   enum class TargetEnv {
-    Vulkan,  // Default to Vuilkan 1.0
-    OpenGL,  // Default to OpenGL
-    OpenGLCompat,
+    Vulkan,  // Default to Vulkan 1.0
+    OpenGL,  // Default to OpenGL 4.5
+    OpenGLCompat, // Deprecated.
   };
 
-  // Target environment versions.  These bnumbgers match those used by Glslang.
+  // Target environment versions.  These numbers match those used by Glslang.
   enum class TargetEnvVersion : uint32_t {
-    // For Vulkan, use numbering schmee from vulkan.h
-    Vulkan_1_0 = ((1 << 22)),              // Default to Vuilkan 1.0
-    Vulkan_1_1 = ((1 << 22) | (1 << 12)),  // Default to Vuilkan 1.0
-    // For Op[enGL, use the numbering from #version in shaders.
+    // For Vulkan, use numbering scheme from vulkan.h
+    Vulkan_1_0 = ((1 << 22)),              // Default to Vulkan 1.0
+    Vulkan_1_1 = ((1 << 22) | (1 << 12)),  // Default to Vulkan 1.0
+    // For OpenGL, use the numbering from #version in shaders.
     OpenGL_4_5 = 450,
   };
 
@@ -227,8 +227,10 @@ class Compiler {
   void AddMacroDefinition(const char* macro, size_t macro_length,
                           const char* definition, size_t definition_length);
 
-  // Sets the target environment, including version.
-  // 0 means the default version for the
+  // Sets the target environment, including version.  The version value should
+  // be 0 or one of the values from TargetEnvVersion.  The 0 version value maps
+  // to Vulkan 1.0 if the target environment is Vulkan, and it maps to OpenGL
+  // 4.5 if the target environment is OpenGL.
   void SetTargetEnv(TargetEnv env, uint32_t version = 0);
 
   // Sets the souce language.

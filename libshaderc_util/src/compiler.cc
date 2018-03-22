@@ -186,7 +186,7 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   std::vector<uint32_t>& compilation_output_data = std::get<1>(result_tuple);
   size_t& compilation_output_data_size_in_bytes = std::get<2>(result_tuple);
 
-  // Check target envirohnment.
+  // Check target environment.
   const auto target_client_info =
       GetGlslangClientInfo(target_env_, target_env_version_);
   if (!target_client_info.valid_client) {

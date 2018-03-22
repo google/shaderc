@@ -95,13 +95,6 @@ class TestTargetEnvEqVulkanWithVulkan1_0ShaderSucceeds(expect.ValidObjectFile):
 
 
 @inside_glslc_testsuite('OptionTargetEnv')
-class TestTargetEnvEqVulkan1_0WithVulkan1_1ShaderFails(expect.ErrorMessageSubstr):
-    shader = FileShader(vulkan_compute_subgroup_shader(), '.comp')
-    glslc_args = ['--target-env=vulkan1.0', '-c', shader]
-    expected_error_substr = "error: 'subgroup op' : requires SPIR-V 1.3"
-
-
-@inside_glslc_testsuite('OptionTargetEnv')
 class TestTargetEnvEqVulkan1_0WithVulkan1_0ShaderSucceeds(expect.ValidObjectFile):
     """Tests that compiling a Vulkan-specific Vulkan 1.0 shader succeeds with
     --target-env=vulkan1.0"""
@@ -117,9 +110,9 @@ class TestTargetEnvEqVulkan1_0WithVulkan1_1ShaderFails(expect.ErrorMessageSubstr
 
 
 @inside_glslc_testsuite('OptionTargetEnv')
-class TestTargetEnvEqVulkan1_1WithVulkan1_0ShaderSucceeds(expect.ValidObjectFile):
+class TestTargetEnvEqVulkan1_1WithVulkan1_0ShaderSucceeds(expect.ValidObjectFile1_3):
     shader = FileShader(vulkan_vertex_shader(), '.vert')
-    glslc_args = ['--target-env=vulkan1.0', '-c', shader]
+    glslc_args = ['--target-env=vulkan1.1', '-c', shader]
 
 
 @inside_glslc_testsuite('OptionTargetEnv')

@@ -217,16 +217,20 @@ follow the version specified by `-std=`.
 ==== `--target-env=`
 
 `--target-env=<value>` lets you specify a target environment on the command line.
-This affects the generation of warnings and errors. ``<value>`` can be one of
+This affects the generation of warnings and errors. The ``<value>`` can be one of
 the following:
 
-* `vulkan`: create SPIR-V under Vulkan semantics.
-* `opengl`: create SPIR-V under OpenGL semantics.
+* `vulkan`: create SPIR-V under Vulkan 1.0 semantics.
+* `vulkan1.0`: create SPIR-V under Vulkan 1.0 semantics.
+* `vulkan1.1`: create SPIR-V under Vulkan 1.1 semantics.
+* `opengl`: create SPIR-V under OpenGL 4.5 semantics.
+* `opengl4.5`: create SPIR-V under OpenGL 4.5 semantics.
 * `opengl_compat`: create SPIR-V under OpenGL semantics, including compatibility
   profile functions.
 
-By default, the ``<value>`` is set to `vulkan` and the compiler creates SPIR-V
-under Vulkan semantics.
+Generated code uses SPIR-V 1.0, except that code compiled for Vulkan 1.1 uses SPIR-V 1.3.
+
+If this option is not specified, a default of `vulkan1.0` is used.
 
 ==== `-x`
 

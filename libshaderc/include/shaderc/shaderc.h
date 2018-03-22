@@ -82,7 +82,7 @@ typedef enum {
 typedef enum {
   shaderc_target_env_vulkan,  // create SPIR-V under Vulkan semantics
   shaderc_target_env_opengl,  // create SPIR-V under OpenGL semantics
-  // NOTE: SPIR-V coide generation is not supported for shaders under OpenGL
+  // NOTE: SPIR-V code generation is not supported for shaders under OpenGL
   // compatibility profile.
   shaderc_target_env_opengl_compat,  // create SPIR-V under OpenGL semantics,
                                      // including compatibility profile
@@ -96,7 +96,7 @@ typedef enum {
   shaderc_env_version_vulkan_1_0 = (((uint32_t)1 << 22)),
   shaderc_env_version_vulkan_1_1 = (((uint32_t)1 << 22) | (1 << 12)),
   // For OpenGL, use the number from #version in shaders.
-  // TODO(dneto): Currently no difference between OpenGL 4.5 andf 4.6.
+  // TODO(dneto): Currently no difference between OpenGL 4.5 and 4.6.
   // See glslang/Standalone/Standalone.cpp
   // TODO(dneto): Glslang doesn't accept a OpenGL client version of 460.
   shaderc_env_version_opengl_4_5 = 450,
@@ -397,7 +397,9 @@ SHADERC_EXPORT void shaderc_compile_options_set_suppress_warnings(
 
 // Sets the target shader environment, affecting which warnings or errors will
 // be issued.  The version will be for distinguishing between different versions
-// of the target environment.  "0" is the only supported version at this point
+// of the target environment.  The version value should be either 0 or
+// a value listed in shaderc_env_version.  The 0 value maps to Vulkan 1.0 if
+// |target| is Vulkan, and it maps to OpenGL 4.5 if |target| is OpenGL.
 SHADERC_EXPORT void shaderc_compile_options_set_target_env(
     shaderc_compile_options_t options,
     shaderc_target_env target,
