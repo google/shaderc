@@ -312,6 +312,7 @@ glslang support for generating debug info.
 `-O` specifies which optimization level to use:
 
 * `-O0` means "no optimization". This level generates the most debuggable code.
+* `-O` means the default optimization level for better performance.
 * `-Os` enables optimizations to reduce code size.
 
 ==== `-mfmt=<format>`
