@@ -128,8 +128,9 @@ class Compiler {
 
   // Supported optimization levels.
   enum class OptimizationLevel {
-    Zero,  // No optimization.
-    Size,  // Optimization towards reducing code size.
+    Zero,         // No optimization.
+    Performance,  // Optimization towards better performance.
+    Size,         // Optimization towards reducing code size.
   };
 
   // Resource limits.  These map to the "max*" fields in glslang::TBuiltInResource.

@@ -27,9 +27,9 @@
 namespace {
 
 using shaderc::AssemblyCompilationResult;
+using shaderc::CompileOptions;
 using shaderc::PreprocessedSourceCompilationResult;
 using shaderc::SpvCompilationResult;
-using shaderc::CompileOptions;
 using testing::Each;
 using testing::Eq;
 using testing::HasSubstr;
@@ -504,6 +504,15 @@ TEST_F(CppInterface, CompileAndOptimizeWithLevelZero) {
   // Check that we still have debug instructions.
   EXPECT_THAT(disassembly_text, HasSubstr("OpName"));
   EXPECT_THAT(disassembly_text, HasSubstr("OpSource"));
+}
+
+TEST_F(CppInterface, CompileAndOptimizeWithLevelPerformance) {
+  options_.SetOptimizationLevel(shaderc_optimization_level_performance);
+  options_.SetSourceLanguage(shaderc_source_language_hlsl);
+  const std::string disassembly_text =
+      AssemblyOutput(kHlslMultipleFnShader, shaderc_vertex_shader, options_);
+  // Check that we do not have function definition for foo() anymore.
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("%foo = OpFunction")));
 }
 
 TEST_F(CppInterface, CompileAndOptimizeWithLevelSize) {
@@ -1178,10 +1187,10 @@ TEST(
 // offset.
 std::string ShaderWithTexOffset(int offset) {
   std::ostringstream oss;
-  oss <<
-    "#version 450\n"
-    "layout (binding=0) uniform sampler1D tex;\n"
-    "void main() { vec4 x = textureOffset(tex, 1.0, " << offset << "); }\n";
+  oss << "#version 450\n"
+         "layout (binding=0) uniform sampler1D tex;\n"
+         "void main() { vec4 x = textureOffset(tex, 1.0, "
+      << offset << "); }\n";
   return oss.str();
 }
 
@@ -1317,8 +1326,7 @@ TEST_F(CppInterface, GlslDefaultPackingUsed) {
   CompileOptions options;
   const std::string disassembly_text = AssemblyOutput(
       kGlslShaderWeirdPacking, shaderc_glsl_vertex_shader, options);
-  EXPECT_THAT(disassembly_text,
-              HasSubstr("OpMemberDecorate %B 1 Offset 16"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpMemberDecorate %B 1 Offset 16"));
 }
 
 TEST_F(CppInterface, HlslOffsetsOptionDisableRespected) {
@@ -1326,8 +1334,7 @@ TEST_F(CppInterface, HlslOffsetsOptionDisableRespected) {
   options.SetHlslOffsets(false);
   const std::string disassembly_text = AssemblyOutput(
       kGlslShaderWeirdPacking, shaderc_glsl_vertex_shader, options);
-  EXPECT_THAT(disassembly_text,
-              HasSubstr("OpMemberDecorate %B 1 Offset 16"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpMemberDecorate %B 1 Offset 16"));
 }
 
 TEST_F(CppInterface, HlslOffsetsOptionEnableRespected) {
@@ -1335,8 +1342,7 @@ TEST_F(CppInterface, HlslOffsetsOptionEnableRespected) {
   options.SetHlslOffsets(true);
   const std::string disassembly_text = AssemblyOutput(
       kGlslShaderWeirdPacking, shaderc_glsl_vertex_shader, options);
-  EXPECT_THAT(disassembly_text,
-              HasSubstr("OpMemberDecorate %B 1 Offset 4"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpMemberDecorate %B 1 Offset 4"));
 }
 
 TEST_F(CppInterface, HlslRegSetBindingForFragmentRespected) {
