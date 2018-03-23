@@ -652,13 +652,11 @@ TEST_F(CompileStringWithOptionsTest, CompileAndOptimizeWithLevelZero) {
 TEST_F(CompileStringWithOptionsTest, CompileAndOptimizeWithLevelPerformance) {
   shaderc_compile_options_set_optimization_level(
       options_.get(), shaderc_optimization_level_performance);
-  shaderc_compile_options_set_source_language(options_.get(),
-                                              shaderc_source_language_hlsl);
   const std::string disassembly_text =
-      CompilationOutput(kHlslMultipleFnShader, shaderc_vertex_shader,
+      CompilationOutput(kGlslMultipleFnShader, shaderc_glsl_fragment_shader,
                         options_.get(), OutputType::SpirvAssemblyText);
-  // Check that we do not have function definition for foo() anymore.
-  EXPECT_THAT(disassembly_text, Not(HasSubstr("%foo = OpFunction")));
+  // Check that we do not have function calls anymore.
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpFunctionCall")));
 }
 
 TEST_F(CompileStringWithOptionsTest, CompileAndOptimizeWithLevelSize) {

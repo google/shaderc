@@ -417,6 +417,12 @@ void Compiler::SetOptimizationLevel(Compiler::OptimizationLevel level) {
       }
       enabled_opt_passes_.push_back(PassId::kSizePasses);
       break;
+    case OptimizationLevel::Performance:
+      if (!generate_debug_info_) {
+        enabled_opt_passes_.push_back(PassId::kStripDebugInfo);
+      }
+      enabled_opt_passes_.push_back(PassId::kPerformancePasses);
+      break;
     default:
       break;
   }
