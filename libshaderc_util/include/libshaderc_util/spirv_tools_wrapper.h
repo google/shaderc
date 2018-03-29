@@ -39,26 +39,14 @@ bool SpirvToolsDisassemble(Compiler::TargetEnv env,
 
 // The ids of a list of supported optimization passes.
 enum class PassId {
+  // SPIRV-Tools standard recipes
+  kLegalizationPasses,
+  kPerformancePasses,
+  kSizePasses,
+
+  // SPIRV-Tools specific passes
   kNullPass,
   kStripDebugInfo,
-  kEliminateDeadFunctions,
-  kFlattenDecoration,
-  kFreezeSpecConstantValue,
-  kFoldSpecConstantOpAndComposite,
-  kUnifyConstant,
-  kEliminateDeadConstant,
-  kStrengthReduction,
-  kBlockMerge,
-  kInlineExhaustive,
-  kInlineOpaque,
-  kLocalSingleBlockLoadStoreElim,
-  kDeadBranchElim,
-  kLocalMultiStoreElim,
-  kLocalAccessChainConvert,
-  kLocalSingleStoreElim,
-  kInsertExtractElim,
-  kCommonUniformElim,
-  kAggressiveDCE,
   kCompactIds,
 };
 

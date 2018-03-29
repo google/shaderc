@@ -592,7 +592,10 @@ int main(int argc, char** argv) {
     } else if (arg == "-g") {
       compiler.options().SetGenerateDebugInfo();
     } else if (arg.starts_with("-O")) {
-      if (arg == "-Os") {
+      if (arg == "-O") {
+        compiler.options().SetOptimizationLevel(
+            shaderc_optimization_level_performance);
+      } else if (arg == "-Os") {
         compiler.options().SetOptimizationLevel(
             shaderc_optimization_level_size);
       } else if (arg == "-O0") {

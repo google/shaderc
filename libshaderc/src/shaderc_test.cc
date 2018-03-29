@@ -649,6 +649,16 @@ TEST_F(CompileStringWithOptionsTest, CompileAndOptimizeWithLevelZero) {
   EXPECT_THAT(disassembly_text, HasSubstr("OpSource"));
 }
 
+TEST_F(CompileStringWithOptionsTest, CompileAndOptimizeWithLevelPerformance) {
+  shaderc_compile_options_set_optimization_level(
+      options_.get(), shaderc_optimization_level_performance);
+  const std::string disassembly_text =
+      CompilationOutput(kGlslMultipleFnShader, shaderc_glsl_fragment_shader,
+                        options_.get(), OutputType::SpirvAssemblyText);
+  // Check that we do not have function calls anymore.
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpFunctionCall")));
+}
+
 TEST_F(CompileStringWithOptionsTest, CompileAndOptimizeWithLevelSize) {
   shaderc_compile_options_set_optimization_level(
       options_.get(), shaderc_optimization_level_size);
@@ -1427,10 +1437,10 @@ TEST(EntryPointTest, LangHlslOnHlslVertexSucceedsWithGivenEntryPointName) {
 // offset.
 std::string ShaderWithTexOffset(int offset) {
   std::ostringstream oss;
-  oss <<
-    "#version 450\n"
-    "layout (binding=0) uniform sampler1D tex;\n"
-    "void main() { vec4 x = textureOffset(tex, 1.0, " << offset << "); }\n";
+  oss << "#version 450\n"
+         "layout (binding=0) uniform sampler1D tex;\n"
+         "void main() { vec4 x = textureOffset(tex, 1.0, "
+      << offset << "); }\n";
   return oss.str();
 }
 
@@ -1617,18 +1627,18 @@ TEST_F(
   const std::string disassembly_text = CompilationOutput(
       kShaderWithUniformsWithoutBindings, shaderc_vertex_shader, options_.get(),
       OutputType::SpirvAssemblyText);
-  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_tex Binding 100")) << disassembly_text;
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_tex Binding 100"))
+      << disassembly_text;
   EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_sam Binding 0"));
   EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_img Binding 1"));
   EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_imbuf Binding 2"));
   EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %my_ubo Binding 3"));
 }
 
-TEST_F(
-    CompileStringWithOptionsTest,
-    SetBindingBaseForTextureForVertexIgnoredWhenCompilingAsFragment) {
+TEST_F(CompileStringWithOptionsTest,
+       SetBindingBaseForTextureForVertexIgnoredWhenCompilingAsFragment) {
   shaderc_compile_options_set_auto_bind_uniforms(options_.get(), true);
-// This is ignored since we're compiling as a different stage.
+  // This is ignored since we're compiling as a different stage.
   shaderc_compile_options_set_binding_base_for_stage(
       options_.get(), shaderc_vertex_shader, shaderc_uniform_kind_texture, 100);
   const std::string disassembly_text = CompilationOutput(
@@ -1645,8 +1655,7 @@ TEST_F(CompileStringWithOptionsTest, GlslDefaultPackingUsed) {
   const std::string disassembly_text =
       CompilationOutput(kGlslShaderWeirdPacking, shaderc_vertex_shader,
                         options_.get(), OutputType::SpirvAssemblyText);
-  EXPECT_THAT(disassembly_text,
-              HasSubstr("OpMemberDecorate %B 1 Offset 16"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpMemberDecorate %B 1 Offset 16"));
 }
 
 TEST_F(CompileStringWithOptionsTest, HlslOffsetsOptionDisableRespected) {
@@ -1654,8 +1663,7 @@ TEST_F(CompileStringWithOptionsTest, HlslOffsetsOptionDisableRespected) {
   const std::string disassembly_text =
       CompilationOutput(kGlslShaderWeirdPacking, shaderc_vertex_shader,
                         options_.get(), OutputType::SpirvAssemblyText);
-  EXPECT_THAT(disassembly_text,
-              HasSubstr("OpMemberDecorate %B 1 Offset 16"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpMemberDecorate %B 1 Offset 16"));
 }
 
 TEST_F(CompileStringWithOptionsTest, HlslOffsetsOptionEnableRespected) {
@@ -1663,8 +1671,7 @@ TEST_F(CompileStringWithOptionsTest, HlslOffsetsOptionEnableRespected) {
   const std::string disassembly_text =
       CompilationOutput(kGlslShaderWeirdPacking, shaderc_vertex_shader,
                         options_.get(), OutputType::SpirvAssemblyText);
-  EXPECT_THAT(disassembly_text,
-              HasSubstr("OpMemberDecorate %B 1 Offset 4"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpMemberDecorate %B 1 Offset 4"));
 }
 
 }  // anonymous namespace

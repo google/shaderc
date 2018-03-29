@@ -124,6 +124,7 @@ typedef enum {
 typedef enum {
   shaderc_optimization_level_zero,  // no optimization
   shaderc_optimization_level_size,  // optimize towards reducing code size
+  shaderc_optimization_level_performance,  // optimize towards performance
 } shaderc_optimization_level;
 
 // Resource limits.

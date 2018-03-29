@@ -282,8 +282,10 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   shader.setShiftSamplerBinding(bases[static_cast<int>(UniformKind::Sampler)]);
   shader.setShiftTextureBinding(bases[static_cast<int>(UniformKind::Texture)]);
   shader.setShiftUboBinding(bases[static_cast<int>(UniformKind::Buffer)]);
-  shader.setShiftSsboBinding(bases[static_cast<int>(UniformKind::StorageBuffer)]);
-  shader.setShiftUavBinding(bases[static_cast<int>(UniformKind::UnorderedAccessView)]);
+  shader.setShiftSsboBinding(
+      bases[static_cast<int>(UniformKind::StorageBuffer)]);
+  shader.setShiftUavBinding(
+      bases[static_cast<int>(UniformKind::UnorderedAccessView)]);
   shader.setHlslIoMapping(hlsl_iomap_);
   shader.setResourceSetBinding(
       hlsl_explicit_bindings_[static_cast<int>(used_shader_stage)]);
@@ -320,12 +322,12 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   options.optimizeSize = false;
   // Note the call to GlslangToSpv also populates compilation_output_data.
   glslang::GlslangToSpv(*program.getIntermediate(used_shader_stage), spirv,
-			&options);
+                        &options);
 
   // Set the tool field (the top 16-bits) in the generator word to
   // 'Shaderc over Glslang'.
-  const uint32_t shaderc_generator_word = 13; // From SPIR-V XML Registry
-  const uint32_t generator_word_index = 2; // SPIR-V 2.3: Physical layout
+  const uint32_t shaderc_generator_word = 13;  // From SPIR-V XML Registry
+  const uint32_t generator_word_index = 2;     // SPIR-V 2.3: Physical layout
   assert(spirv.size() > generator_word_index);
   spirv[generator_word_index] =
       (spirv[generator_word_index] & 0xffff) | (shaderc_generator_word << 16);
@@ -335,27 +337,11 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   if (hlsl_legalization_enabled_ && source_language_ == SourceLanguage::HLSL) {
     // If from HLSL, run this passes to "legalize" the SPIR-V for Vulkan
     // eg. forward and remove memory writes of opaque types.
-    opt_passes.push_back(PassId::kInlineExhaustive);
-    opt_passes.push_back(PassId::kLocalAccessChainConvert);
-    opt_passes.push_back(PassId::kLocalSingleBlockLoadStoreElim);
-    opt_passes.push_back(PassId::kLocalSingleStoreElim);
-    opt_passes.push_back(PassId::kInsertExtractElim);
-    opt_passes.push_back(PassId::kAggressiveDCE);
-    opt_passes.push_back(PassId::kDeadBranchElim);
-    opt_passes.push_back(PassId::kBlockMerge);
-    opt_passes.push_back(PassId::kLocalMultiStoreElim);
-    opt_passes.push_back(PassId::kInsertExtractElim);
-    opt_passes.push_back(PassId::kAggressiveDCE);
-    opt_passes.push_back(PassId::kEliminateDeadConstant);
-    opt_passes.push_back(PassId::kEliminateDeadFunctions);
-
-    // TODO(atgoo, dneto0, greg-lunarg):
-    // Add PassId::kCommonUniformElim when AMD driver issues are resolved.
-    // Add dead var/type elimination passes when available.
+    opt_passes.push_back(PassId::kLegalizationPasses);
   }
 
-  opt_passes.insert(
-      opt_passes.end(), enabled_opt_passes_.begin(), enabled_opt_passes_.end());
+  opt_passes.insert(opt_passes.end(), enabled_opt_passes_.begin(),
+                    enabled_opt_passes_.end());
 
   if (!opt_passes.empty()) {
     std::string opt_errors;
@@ -429,7 +415,13 @@ void Compiler::SetOptimizationLevel(Compiler::OptimizationLevel level) {
       if (!generate_debug_info_) {
         enabled_opt_passes_.push_back(PassId::kStripDebugInfo);
       }
-      enabled_opt_passes_.push_back(PassId::kUnifyConstant);
+      enabled_opt_passes_.push_back(PassId::kSizePasses);
+      break;
+    case OptimizationLevel::Performance:
+      if (!generate_debug_info_) {
+        enabled_opt_passes_.push_back(PassId::kStripDebugInfo);
+      }
+      enabled_opt_passes_.push_back(PassId::kPerformancePasses);
       break;
     default:
       break;
@@ -693,4 +685,4 @@ std::vector<uint32_t> ConvertStringToVector(const std::string& str) {
   return result_vec;
 }
 
-}  // namesapce shaderc_util
+}  // namespace shaderc_util

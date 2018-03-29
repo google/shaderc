@@ -259,6 +259,13 @@ const char kGlslShaderComputeSubgroupBarrier[] =
        #extension GL_KHR_shader_subgroup_basic : enable
        void main() { subgroupBarrier(); })";
 
+const char kGlslMultipleFnShader[] =
+    R"(#version 450
+       layout(location=0) flat in  int inVal;
+       layout(location=0)      out int outVal;
+       int foo(int a) { return a; }
+       void main() { outVal = foo(inVal); })";
+
 #ifdef __cplusplus
 }
 #endif  // __cplusplus

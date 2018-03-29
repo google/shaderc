@@ -240,8 +240,9 @@ shaderc_util::Compiler::TargetEnv GetCompilerTargetEnv(shaderc_target_env env) {
 // Returns the Compiler::Limit enum for the given shaderc_limit enum.
 shaderc_util::Compiler::Limit CompilerLimit(shaderc_limit limit) {
   switch (limit) {
-#define RESOURCE(NAME,FIELD,CNAME) \
-     case shaderc_limit_##CNAME: return shaderc_util::Compiler::Limit::NAME;
+#define RESOURCE(NAME, FIELD, CNAME) \
+  case shaderc_limit_##CNAME:        \
+    return shaderc_util::Compiler::Limit::NAME;
 #include "libshaderc_util/resources.inc"
 #undef RESOURCE
     default:
@@ -293,7 +294,6 @@ shaderc_util::Compiler::Stage GetStage(shaderc_shader_kind kind) {
   return static_cast<shaderc_util::Compiler::Stage>(0);
 }
 
-
 }  // anonymous namespace
 
 struct shaderc_compile_options {
@@ -328,8 +328,7 @@ void shaderc_compile_options_add_macro_definition(
 }
 
 void shaderc_compile_options_set_source_language(
-    shaderc_compile_options_t options,
-    shaderc_source_language set_lang) {
+    shaderc_compile_options_t options, shaderc_source_language set_lang) {
   auto lang = shaderc_util::Compiler::SourceLanguage::GLSL;
   if (set_lang == shaderc_source_language_hlsl)
     lang = shaderc_util::Compiler::SourceLanguage::HLSL;
@@ -347,6 +346,9 @@ void shaderc_compile_options_set_optimization_level(
   switch (level) {
     case shaderc_optimization_level_size:
       opt_level = shaderc_util::Compiler::OptimizationLevel::Size;
+      break;
+    case shaderc_optimization_level_performance:
+      opt_level = shaderc_util::Compiler::OptimizationLevel::Performance;
       break;
     default:
       break;
@@ -401,8 +403,8 @@ void shaderc_compile_options_set_warnings_as_errors(
   options->compiler.SetWarningsAsErrors();
 }
 
-void shaderc_compile_options_set_limit(
-    shaderc_compile_options_t options, shaderc_limit limit, int value) {
+void shaderc_compile_options_set_limit(shaderc_compile_options_t options,
+                                       shaderc_limit limit, int value) {
   options->compiler.SetLimit(CompilerLimit(limit), value);
 }
 
@@ -416,8 +418,8 @@ void shaderc_compile_options_set_hlsl_io_mapping(
   options->compiler.SetHlslIoMapping(hlsl_iomap);
 }
 
-void shaderc_compile_options_set_hlsl_offsets(
-    shaderc_compile_options_t options, bool hlsl_offsets) {
+void shaderc_compile_options_set_hlsl_offsets(shaderc_compile_options_t options,
+                                              bool hlsl_offsets) {
   options->compiler.SetHlslOffsets(hlsl_offsets);
 }
 
