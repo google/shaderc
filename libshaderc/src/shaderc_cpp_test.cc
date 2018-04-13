@@ -1376,4 +1376,31 @@ TEST_F(CppInterface, HlslRegSetBindingForAllStagesRespected) {
   EXPECT_THAT(disassembly_text, HasSubstr("OpDecorate %t4 Binding 16"));
 }
 
+TEST_F(CppInterface, HlslFunctionality1OffByDefault) {
+  CompileOptions options;
+  options.SetSourceLanguage(shaderc_source_language_hlsl);
+  const std::string disassembly_text = AssemblyOutput(
+      kHlslShaderWithCounterBuffer, shaderc_glsl_fragment_shader, options);
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorateStringGOOGLE")));
+}
+
+TEST_F(CppInterface, HlslFunctionality1Respected) {
+  CompileOptions options;
+  options.SetSourceLanguage(shaderc_source_language_hlsl);
+  options.SetHlslFunctionality1(true);
+  const std::string disassembly_text = AssemblyOutput(
+      kHlslShaderWithCounterBuffer, shaderc_glsl_fragment_shader, options);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorateStringGOOGLE"));
+}
+
+TEST_F(CppInterface, HlslFunctionality1SurvivesCloning) {
+  CompileOptions options;
+  options.SetSourceLanguage(shaderc_source_language_hlsl);
+  options.SetHlslFunctionality1(true);
+  CompileOptions cloned_options(options);
+  const std::string disassembly_text = AssemblyOutput(
+      kHlslShaderWithCounterBuffer, shaderc_glsl_fragment_shader, cloned_options);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorateStringGOOGLE"));
+}
+
 }  // anonymous namespace

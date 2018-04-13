@@ -66,6 +66,9 @@ Options:
                     don't have an explicit 'location' layout in the shader
                     source.
   -fhlsl-iomap      Use HLSL IO mappings for bindings.
+  -fhlsl_functionality1, -fhlsl-functionality1
+                    Enable extension SPV_GOOGLE_hlsl_functionality1 for HLSL
+                    compilation.
   -fimage-binding-base [stage] <value>
                     Sets the lowest automatically assigned binding number for
                     images.  Optionally only set it for a single shader stage.

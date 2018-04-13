@@ -293,6 +293,9 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
                       target_client_info.client_version);
   shader.setEnvTarget(target_client_info.target_language,
                       target_client_info.target_language_version);
+  if (hlsl_functionality1_enabled_) {
+    shader.setEnvTargetHlslFunctionality1();
+  }
 
   // TODO(dneto): Generate source-level debug info if requested.
   bool success = shader.parse(
@@ -432,6 +435,10 @@ void Compiler::EnableHlslLegalization(bool hlsl_legalization_enabled) {
   hlsl_legalization_enabled_ = hlsl_legalization_enabled;
 }
 
+void Compiler::EnableHlslFunctionality1(bool enable) {
+  hlsl_functionality1_enabled_ = enable;
+}
+
 void Compiler::SetSuppressWarnings() { suppress_warnings_ = true; }
 
 std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
@@ -461,6 +468,9 @@ std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
   }
   shader.setEnvClient(target_client_info.client,
                       target_client_info.client_version);
+  if (hlsl_functionality1_enabled_) {
+    shader.setEnvTargetHlslFunctionality1();
+  }
 
   // The preprocessor might be sensitive to the target environment.
   // So combine the existing rules with the just-give-me-preprocessor-output

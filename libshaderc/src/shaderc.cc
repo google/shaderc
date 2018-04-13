@@ -454,6 +454,11 @@ void shaderc_compile_options_set_hlsl_register_set_and_binding(
   options->compiler.SetHlslRegisterSetAndBinding(reg, set, binding);
 }
 
+void shaderc_compile_options_set_hlsl_functionality1(
+    shaderc_compile_options_t options, bool enable) {
+  options->compiler.EnableHlslFunctionality1(enable);
+}
+
 shaderc_compiler_t shaderc_compiler_initialize() {
   static shaderc_util::GlslangInitializer* initializer =
       new shaderc_util::GlslangInitializer;

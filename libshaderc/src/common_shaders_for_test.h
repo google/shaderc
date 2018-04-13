@@ -266,6 +266,12 @@ const char kGlslMultipleFnShader[] =
        int foo(int a) { return a; }
        void main() { outVal = foo(inVal); })";
 
+const char kHlslShaderWithCounterBuffer[] =
+    R"(RWStructuredBuffer<uint> Ainc;
+       float4 main() : SV_Target0 {
+         return float4(Ainc.IncrementCounter(), 0, 0, 0);
+       })";
+
 #ifdef __cplusplus
 }
 #endif  // __cplusplus

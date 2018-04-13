@@ -142,6 +142,14 @@ float4 main(float2 loc: A) : SV_Target {
  return sampleTexture(cts, loc);
 })";
 
+const char kHlslShaderWithCounterBuffer[] = R"(
+RWStructuredBuffer<float4> Ainc;
+float4 main() : SV_Target0 {
+  return float4(Ainc.IncrementCounter(), 0, 0, 0);
+}
+)";
+
+
 // Returns the disassembly of the given SPIR-V binary, as a string.
 // Assumes the disassembly will be successful when targeting Vulkan.
 std::string Disassemble(const std::vector<uint32_t> binary) {
@@ -709,6 +717,21 @@ TEST_F(CompilerTest, HlslLegalizationDisabled) {
       SimpleCompilationBinary(kHlslShaderForLegalizationTest, EShLangFragment);
   const auto disassembly = Disassemble(words);
   EXPECT_THAT(disassembly, HasSubstr("OpFunctionCall")) << disassembly;
+}
+
+TEST_F(CompilerTest, HlslFunctionality1Enabled) {
+  compiler_.SetSourceLanguage(Compiler::SourceLanguage::HLSL);
+  compiler_.EnableHlslFunctionality1(true);
+  const auto words =
+      SimpleCompilationBinary(kHlslShaderWithCounterBuffer, EShLangFragment);
+  const auto disassembly = Disassemble(words);
+  EXPECT_THAT(disassembly,
+              HasSubstr("OpExtension \"SPV_GOOGLE_hlsl_functionality1\""))
+      << disassembly;
+  EXPECT_THAT(disassembly,
+              HasSubstr("OpDecorateStringGOOGLE %_entryPointOutput "
+                        "HlslSemanticGOOGLE \"SV_TARGET0\""))
+      << disassembly;
 }
 
 }  // anonymous namespace

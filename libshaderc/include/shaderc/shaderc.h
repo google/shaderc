@@ -466,6 +466,11 @@ SHADERC_EXPORT void shaderc_compile_options_set_hlsl_register_set_and_binding(
     shaderc_compile_options_t options, const char* reg, const char* set,
     const char* binding);
 
+// Sets whether the compiler should enable extension
+// SPV_GOOGLE_hlsl_functionality1.
+SHADERC_EXPORT void shaderc_compile_options_set_hlsl_functionality1(
+    shaderc_compile_options_t options, bool enable);
+
 // An opaque handle to the results of a call to any shaderc_compile_into_*()
 // function.
 typedef struct shaderc_compilation_result* shaderc_compilation_result_t;

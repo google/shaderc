@@ -20,6 +20,7 @@ glslc [-c|-S|-E]
       [-x ...] [-std=standard]
       [ ... options for resource bindings ... ]
       [-fhlsl-offsets]
+      [-fhlsl-functionality1]
       [-fentry-point=<name>]
       [-fauto-map-locations]
       [-flimit=...]
@@ -353,6 +354,17 @@ specified) will trigger an error.
 
 Use HLSL packing rules instead of GLSL rules when determining offsets of
 members of blocks.  This option is always on when compiling for HLSL.
+
+[[option-fhlsl-functionality1]]
+==== `-fhlsl-functionality1`
+
+Enable extension `SPV_GOOGLE_hlsl_functionality1`, and instructs the compiler
+to:
+
+- Annotate HLSL semantic string decorations on interface objects
+- Explicitly record the association of a UAV resource with its companion counter buffer.
+
+This option can also be spelled with an underscore: `-fhlsl_functionality1`.
 
 [[option-fentry-point]]
 ==== `-fentry-point=<name>`

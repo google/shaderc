@@ -2,6 +2,7 @@ Revision history for Shaderc
 
 v2018.0-dev 2018-02-27
  - Start v2018.0-dev
+ - Support -fhlsl_functionality1 (also -fhlsl-functionality1)
 
 v2017.2 2018-02-27
  - Add a shared library version of libshaderc

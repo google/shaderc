@@ -311,6 +311,12 @@ class CompileOptions {
         options_, reg.c_str(), set.c_str(), binding.c_str());
   }
 
+  // Sets whether the compiler should enable extension
+  // SPV_GOOGLE_hlsl_functionality1.
+  void SetHlslFunctionality1(bool enable) {
+    shaderc_compile_options_set_hlsl_functionality1(options_, enable);
+  }
+
  private:
   CompileOptions& operator=(const CompileOptions& other) = delete;
   shaderc_compile_options_t options_;

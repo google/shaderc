@@ -1674,4 +1674,35 @@ TEST_F(CompileStringWithOptionsTest, HlslOffsetsOptionEnableRespected) {
   EXPECT_THAT(disassembly_text, HasSubstr("OpMemberDecorate %B 1 Offset 4"));
 }
 
+TEST_F(CompileStringWithOptionsTest, HlslFunctionality1OffByDefault) {
+  shaderc_compile_options_set_source_language(options_.get(),
+                                              shaderc_source_language_hlsl);
+  const std::string disassembly_text =
+      CompilationOutput(kHlslShaderWithCounterBuffer, shaderc_fragment_shader,
+                        options_.get(), OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorateStringGOOGLE"))) << disassembly_text;
+}
+
+TEST_F(CompileStringWithOptionsTest, HlslFunctionality1Respected) {
+  shaderc_compile_options_set_source_language(options_.get(),
+                                              shaderc_source_language_hlsl);
+  shaderc_compile_options_set_hlsl_functionality1(options_.get(), true);
+  const std::string disassembly_text =
+      CompilationOutput(kHlslShaderWithCounterBuffer, shaderc_fragment_shader,
+                        options_.get(), OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorateStringGOOGLE"));
+}
+
+TEST_F(CompileStringWithOptionsTest, HlslFunctionality1SurvivesCloning) {
+  shaderc_compile_options_set_source_language(options_.get(),
+                                              shaderc_source_language_hlsl);
+  shaderc_compile_options_set_hlsl_functionality1(options_.get(), true);
+  compile_options_ptr cloned_options(
+      shaderc_compile_options_clone(options_.get()));
+  const std::string disassembly_text =
+      CompilationOutput(kHlslShaderWithCounterBuffer, shaderc_fragment_shader,
+                        cloned_options.get(), OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorateStringGOOGLE"));
+}
+
 }  // anonymous namespace

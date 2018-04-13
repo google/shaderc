@@ -202,6 +202,7 @@ class Compiler {
         hlsl_iomap_(false),
         hlsl_offsets_(false),
         hlsl_legalization_enabled_(true),
+        hlsl_functionality1_enabled_(false),
         hlsl_explicit_bindings_() {}
 
   // Requests that the compiler place debug information into the object code,
@@ -214,6 +215,9 @@ class Compiler {
 
   // Enables or disables HLSL legalization passes.
   void EnableHlslLegalization(bool hlsl_legalization_enabled);
+
+  // Enables or disables extension SPV_GOOGLE_hlsl_functionality1
+  void EnableHlslFunctionality1(bool enable);
 
   // When a warning is encountered it treat it as an error.
   void SetWarningsAsErrors();
@@ -481,6 +485,9 @@ class Compiler {
   // True if the compiler should perform legalization optimization passes if
   // source language is HLSL.
   bool hlsl_legalization_enabled_;
+
+  // True if the compiler should support extension SPV_GOOGLE_hlsl_functionality1.
+  bool hlsl_functionality1_enabled_;
 
   // A sequence of triples, each triple representing a specific HLSL register
   // name, and the set and binding numbers it should be mapped to, but in
