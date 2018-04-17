@@ -82,11 +82,13 @@ typedef enum {
 typedef enum {
   shaderc_target_env_vulkan,  // create SPIR-V under Vulkan semantics
   shaderc_target_env_opengl,  // create SPIR-V under OpenGL semantics
-  // NOTE: SPIR-V code generation is not supported for shaders under OpenGL
-  // compatibility profile.
-  shaderc_target_env_opengl_compat,  // create SPIR-V under OpenGL semantics,
-                                     // including compatibility profile
-                                     // functions
+  // OpenGL Compatibility mode is no longer supported, and will fail
+  // compilation since the underlying Glslang compiler no longer supports
+  // OpenGL compatibility profile when generating SPIR-V.
+  // The OpenGL GL_ARB_gl_spirv extension removes all OpenGL compatibility
+  // mode features.  This enum remains only so that existing applications
+  // can still compile.
+  shaderc_target_env_opengl_compat,
   shaderc_target_env_default = shaderc_target_env_vulkan
 } shaderc_target_env;
 
@@ -106,7 +108,15 @@ typedef enum {
   shaderc_profile_none,  // Used if and only if GLSL version did not specify
                          // profiles.
   shaderc_profile_core,
+
+  // OpenGL Compatibility mode is no longer supported, and will fail
+  // compilation since the underlying Glslang compiler no longer supports
+  // OpenGL compatibility profile when generating SPIR-V.
+  // The OpenGL GL_ARB_gl_spirv extension removes all OpenGL compatibility
+  // mode features.  This enum remains only so that existing applications
+  // can still compile.
   shaderc_profile_compatibility,
+
   shaderc_profile_es,
 } shaderc_profile;
 
