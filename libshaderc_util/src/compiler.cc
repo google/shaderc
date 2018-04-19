@@ -297,6 +297,11 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
     shader.setEnvTargetHlslFunctionality1();
   }
 
+  // Vulkan and OpenGL only support SPIR-V 1.0.
+  // TODO(dneto): Extensions or future versions of those APIs might permit
+  // other versions of SPIR-V.
+  shader.setEnvTarget(glslang::EshTargetSpv, 100);
+
   // TODO(dneto): Generate source-level debug info if requested.
   bool success = shader.parse(
       &limits_, default_version_, default_profile_, force_version_profile_,
