@@ -195,7 +195,8 @@ subsequent files.
 `-std=<value>` lets you specify a shader version and profile on the command
 line. ``<value>`` can be any valid concatenation of a GLSL version number and
 profile, e.g., `310es`, `450core`, etc. The profile can be omitted as allowed by
-GLSL, e.g., `450`.
+GLSL, e.g., `450`.  The OpenGL 'compatibility' profile is not supported and will result
+in an error.
 
 `-std=` behaves as follows:
 
@@ -226,12 +227,13 @@ the following:
 * `vulkan1.1`: create SPIR-V under Vulkan 1.1 semantics.
 * `opengl`: create SPIR-V under OpenGL 4.5 semantics.
 * `opengl4.5`: create SPIR-V under OpenGL 4.5 semantics.
-* `opengl_compat`: create SPIR-V under OpenGL semantics, including compatibility
-  profile functions.
 
 Generated code uses SPIR-V 1.0, except that code compiled for Vulkan 1.1 uses SPIR-V 1.3.
 
 If this option is not specified, a default of `vulkan1.0` is used.
+
+The OpenGL compatibility profile, specified by a value of `opengl_compat` is *not* supported,
+and will result in an error.
 
 ==== `-x`
 

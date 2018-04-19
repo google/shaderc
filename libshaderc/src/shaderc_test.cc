@@ -602,6 +602,20 @@ TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileRedundantProfileStd) {
                         "profile token\n"));
 }
 
+TEST_F(CompileStringWithOptionsTest,
+       ForcedVersionProfileCompatibilityProfileFails) {
+  // Forces the version and profile to 150compatibility.  This fails because
+  // compatibility profile is not supported by Glslang.
+  shaderc_compile_options_set_forced_version_profile(
+      options_.get(), 150, shaderc_profile_compatibility);
+  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  EXPECT_THAT(
+      CompilationErrors(kOpenGLCompatibilityFragmentShader,
+                        shaderc_glsl_fragment_shader, options_.get()),
+      HasSubstr("error: #version: compilation for SPIR-V does not support "
+                "the compatibility profile\n"));
+}
+
 TEST_F(CompileStringWithOptionsTest, GenerateDebugInfoBinary) {
   shaderc_compile_options_set_generate_debug_info(options_.get());
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
