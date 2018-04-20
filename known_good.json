@@ -12,7 +12,7 @@
       "site" : "github",
       "subrepo" : "google/googletest",
       "subdir" : "third_party/googletest",
-      "commit" : "1114a0202a3147c1ce548c9a2883ce29e80df9e3"
+      "commit" : "a6f06bf2fd3b832822cd4e9e554b7d47f32ec084"
     },
     {
       "name" : "shaderc",
@@ -32,7 +32,7 @@
       "site" : "github",
       "subrepo" : "KhronosGroup/SPIRV-Tools",
       "subdir" : "third_party/spirv-tools",
-      "commit" : "e7c2e91ded337c69091be6baf093f02a7de47cc8"
+      "commit" : "7a5928358753dc0433bdf83d8f3021991c88840f"
     }
   ]
 }
