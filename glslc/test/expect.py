@@ -113,11 +113,20 @@ class NoGeneratedFiles(GlslCTest):
             return False, 'Extra files generated: {}'.format(generated_files)
 
 
-class CorrectObjectFilePreamble(GlslCTest):
-    """Provides methods for verifying preamble for a SPV object file."""
+class CorrectBinaryLengthAndPreamble(GlslCTest):
+    """Provides methods for verifying preamble for a SPIR-V binary."""
 
-    def verify_object_file_preamble(self, filename, spv_version = 0x10000):
-        """Checks that the given SPIR-V binary file has correct preamble."""
+    def verify_binary_length_and_header(self, binary, spv_version = 0x10000):
+        """Checks that the given SPIR-V binary has valid length and header.
+
+        Returns:
+            False, error string if anything is invalid
+            True, '' otherwise
+        Args:
+            binary: a bytes object containing the SPIR-V binary
+            spv_version: target SPIR-V version number, with same encoding
+                 as the version word in a SPIR-V header.
+        """
 
         def read_word(binary, index, little_endian):
             """Reads the index-th word from the given binary file."""
@@ -127,7 +136,7 @@ class CorrectObjectFilePreamble(GlslCTest):
             return reduce(lambda w, b: (w << 8) | ord(b), word, 0)
 
         def check_endianness(binary):
-            """Checks the endianness of the given SPIR-V binary file.
+            """Checks the endianness of the given SPIR-V binary.
 
             Returns:
               True if it's little endian, False if it's big endian.
@@ -141,6 +150,45 @@ class CorrectObjectFilePreamble(GlslCTest):
                 return False
             return None
 
+        num_bytes = len(binary)
+        if num_bytes % 4 != 0:
+            return False, ('Incorrect SPV binary: size should be a multiple'
+                           ' of words')
+        if num_bytes < 20:
+            return False, 'Incorrect SPV binary: size less than 5 words'
+
+        preamble = binary[0:19]
+        little_endian = check_endianness(preamble)
+        # SPIR-V module magic number
+        if little_endian is None:
+            return False, 'Incorrect SPV binary: wrong magic number'
+
+        # SPIR-V version number
+        version = read_word(preamble, 1, little_endian)
+        # TODO(dneto): Recent Glslang uses version word 0 for opengl_compat
+        # profile
+
+        if version != spv_version and version != 0:
+            return False, 'Incorrect SPV binary: wrong version number'
+        # Shaderc-over-Glslang (0x000d....) or
+        # SPIRV-Tools (0x0007....) generator number
+        if read_word(preamble, 2, little_endian) != 0x000d0006 and \
+                read_word(preamble, 2, little_endian) != 0x00070000:
+            return False, ('Incorrect SPV binary: wrong generator magic '
+                           'number')
+        # reserved for instruction schema
+        if read_word(preamble, 4, little_endian) != 0:
+            return False, 'Incorrect SPV binary: the 5th byte should be 0'
+
+        return True, ''
+
+
+class CorrectObjectFilePreamble(CorrectBinaryLengthAndPreamble):
+    """Provides methods for verifying preamble for a SPV object file."""
+
+    def verify_object_file_preamble(self, filename, spv_version = 0x10000):
+        """Checks that the given SPIR-V binary file has correct preamble."""
+
         success, message = verify_file_non_empty(filename)
         if not success:
             return False, message
@@ -148,36 +196,11 @@ class CorrectObjectFilePreamble(GlslCTest):
         with open(filename, 'rb') as object_file:
             object_file.seek(0, os.SEEK_END)
             num_bytes = object_file.tell()
-            if num_bytes % 4 != 0:
-                return False, ('Incorrect SPV binary: size should be a multiple'
-                               ' of words')
-            if num_bytes < 20:
-                return False, 'Incorrect SPV binary: size less than 5 words'
 
             object_file.seek(0)
-            preamble = bytes(object_file.read(20))
 
-            little_endian = check_endianness(preamble)
-            # SPIR-V module magic number
-            if little_endian is None:
-                return False, 'Incorrect SPV binary: wrong magic number'
-
-            # SPIR-V version number
-            version = read_word(preamble, 1, little_endian)
-            # TODO(dneto): Recent Glslang uses version word 0 for opengl_compat
-            # profile
-
-            if version != spv_version and version != 0:
-                return False, 'Incorrect SPV binary: wrong version number'
-            # Shaderc-over-Glslang (0x000d....) or
-            # SPIRV-Tools (0x0007....) generator number
-            if read_word(preamble, 2, little_endian) != 0x000d0006 and \
-                    read_word(preamble, 2, little_endian) != 0x00070000:
-                return False, ('Incorrect SPV binary: wrong generator magic '
-                               'number')
-            # reserved for instruction schema
-            if read_word(preamble, 4, little_endian) != 0:
-                return False, 'Incorrect SPV binary: the 5th byte should be 0'
+            binary = bytes(object_file.read())
+            return self.verify_binary_length_and_header(binary, spv_version)
 
         return True, ''
 

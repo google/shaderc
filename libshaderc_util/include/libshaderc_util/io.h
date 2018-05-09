@@ -57,6 +57,13 @@ std::ostream* GetOutputStream(const string_piece& output_filename,
 // is "-", writes to std::cout.
 bool WriteFile(std::ostream* output_stream, const string_piece& output_data);
 
+// Flush the standard output stream and set it to binary mode.  Subsequent
+// output will not translate newlines to carriage-return newline pairs.
+void FlushAndSetBinaryModeOnStdout();
+// Flush the standard output stream and set it to text mode.  Subsequent
+// output will translate newlines to carriage-return newline pairs.
+void FlushAndSetTextModeOnStdout();
+
 }  // namespace shaderc_util
 
 #endif  // LIBSHADERC_UTIL_IO_H_
