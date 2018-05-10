@@ -56,11 +56,12 @@ before_install:
       git clone --depth=1 https://github.com/taka-no-me/android-cmake.git $HOME/android-cmake;
       export TOOLCHAIN_PATH=$HOME/android-cmake/android.toolchain.cmake;
     fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      curl https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py;
+      sudo python /tmp/get-pip.py;
+    fi
 
 install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      sudo easy_install pip;
-    fi
   - pip install --user nose
   - pip install --user cpp-coveralls
 
