@@ -214,7 +214,13 @@ bool FileCompiler::EmitCompiledResult(
       case SpirvBinaryEmissionFormat::Unspecified:
       case SpirvBinaryEmissionFormat::Binary:
         // The output format is unspecified or specified as binary output.
+        // On Windows, the output stream must be set to binary mode.  By
+        // default the standard output stream is set to text mode, which
+        // translates newlines (\n) to carriage-return newline pairs
+        // (\r\n).
+        if (out == &std::cout) shaderc_util::FlushAndSetBinaryModeOnStdout();
         out->write(compilation_output.data(), compilation_output.size());
+        if (out == &std::cout) shaderc_util::FlushAndSetTextModeOnStdout();
         break;
       case SpirvBinaryEmissionFormat::Numbers:
         // The output format is specified to be a list of hex numbers, the

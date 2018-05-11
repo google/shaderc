@@ -63,3 +63,35 @@ class DashOMissingArgumentIsAnError(expect.ErrorMessage):
     glslc_args = ['-o']
     expected_error = ['glslc: error: argument to \'-o\' is missing ' +
                       '(expected 1 value)\n']
+
+
+@inside_glslc_testsuite('OptionDashO')
+class OutputFileBinaryAvoidsCRLFTranslation(expect.ReturnCodeIsZero,
+                                            expect.NoOutputOnStderr,
+                                            expect.NoGeneratedFiles,
+                                            expect.CorrectBinaryLengthAndPreamble):
+    """Tests that the -o flag emits a binary file without CR/LF translation.
+    """
+
+    # A shader whose compiled output has three bytes that are newlines.
+    # If the output stream converts the newlines to CR/LF, then we end up
+    # with a file that is 4k + 3 bytes long.  That will be caught by the
+    # object file checks.
+    SHADER_WITH_THREE_NEWLINES_IN_BINARY = """#version 450
+       layout(location = 0) out uint ovar;
+       void main() { ovar = 10; }
+    """
+
+    shader = FileShader(SHADER_WITH_THREE_NEWLINES_IN_BINARY, '.vert')
+    glslc_args = [shader, '-o', '-']
+
+    def check_stdout_binary(self, status):
+        binary = status.stdout
+        newlines = [x for x in binary if x == '\n']
+        num_newlines = len(newlines)
+        if num_newlines % 4 == 0:
+            return False, "Bad test. Need nontrivial number of newlines"
+        if num_newlines != 3:
+            return False, ("Update this test. Expected 3 newlines in the "
+                           "binary, but found {}").format(num_newlines)
+        return self.verify_binary_length_and_header(status.stdout)
