@@ -34,8 +34,8 @@ endif(SHADERC_ENABLE_INSTALL)
 
 find_package(Threads)
 target_link_libraries(shaderc_util PRIVATE
-  glslang OSDependent OGLCompiler HLSL glslang SPIRV
-  SPIRV-Tools-opt ${CMAKE_THREAD_LIBS_INIT})
+  glslang OSDependent OGLCompiler glslang HLSL SPIRV
+  SPIRV-Tools-opt SPIRV-Tools ${CMAKE_THREAD_LIBS_INIT})
 
 shaderc_add_tests(
   TEST_PREFIX shaderc_util

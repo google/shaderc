@@ -18,7 +18,7 @@ add_library(glslc STATIC
 shaderc_default_compile_options(glslc)
 target_include_directories(glslc PUBLIC ${glslang_SOURCE_DIR})
 target_link_libraries(glslc PRIVATE glslang OSDependent OGLCompiler
-  HLSL glslang SPIRV ${CMAKE_THREAD_LIBS_INIT})
+  glslang SPIRV HLSL ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(glslc PRIVATE shaderc_util shaderc)
 
 add_executable(glslc_exe src/main.cc)
