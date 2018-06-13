@@ -20,4 +20,5 @@
 set SCRIPT_DIR=%~dp0
 
 :: Call with correct parameter
-call %SCRIPT_DIR%\build.bat Debug
+call %SCRIPT_DIR%\build.bat RelWithDebInfo 2017
+
