@@ -38,6 +38,9 @@ class FileIncluder : public shaderc::CompileOptions::IncluderInterface {
  public:
   explicit FileIncluder(const shaderc_util::FileFinder* file_finder)
       : file_finder_(*file_finder) {}
+
+  ~FileIncluder() override;
+
   // Resolves a requested source file of a given type from a requesting
   // source into a shaderc_include_result whose contents will remain valid
   // until it's released.

@@ -25,6 +25,8 @@ shaderc_include_result* MakeErrorIncludeResult(const char* message) {
   return new shaderc_include_result{"", 0, message, strlen(message)};
 }
 
+FileIncluder::~FileIncluder() = default;
+
 shaderc_include_result* FileIncluder::GetInclude(
     const char* requested_source, shaderc_include_type include_type,
     const char* requesting_source, size_t) {
