@@ -19,6 +19,7 @@
 set BUILD_ROOT=%cd%
 set SRC=%cd%\github\shaderc
 set BUILD_TYPE=%1
+set VS_VERSION=%2
 
 :: Force usage of python 2.7 rather than 3.6
 set PATH=C:\python27;%PATH%
@@ -33,8 +34,19 @@ cd %SRC%
 mkdir build
 cd %SRC%\build
 
+:: #########################################
 :: set up msvc build env
-call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86
+:: #########################################
+if %VS_VERSION% == 2017 (
+  call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x86
+  echo "Using VS 2017..."
+) else if %VS_VERSION% == 2015 (
+  call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86
+  echo "Using VS 2015..."
+) else if %VS_VERSION% == 2013 (
+  call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" x86
+  echo "Using VS 2013..."
+)
 
 :: #########################################
 :: Start building.
@@ -45,7 +57,7 @@ if "%KOKORO_GITHUB_COMMIT%." == "." (
 ) else (
   set BUILD_SHA=%KOKORO_GITHUB_COMMIT%
 )
-cmake -DRE2_BUILD_TESTING=OFF -DCMAKE_C_COMPILER="C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/cl.exe" -DCMAKE_CXX_COMPILER="C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/cl.exe" -GNinja -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ..
+cmake -DRE2_BUILD_TESTING=OFF -GNinja -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe ..
 if %ERRORLEVEL% GEQ 1 exit /b %ERRORLEVEL%
 
 echo "Build glslang... %DATE% %TIME%"
