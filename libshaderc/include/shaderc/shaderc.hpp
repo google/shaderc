@@ -172,6 +172,8 @@ class CompileOptions {
   // A C++ version of the libshaderc includer interface.
   class IncluderInterface {
    public:
+    virtual ~IncluderInterface() {}
+
     // Handles shaderc_include_resolver_fn callbacks.
     virtual shaderc_include_result* GetInclude(const char* requested_source,
                                                shaderc_include_type type,
