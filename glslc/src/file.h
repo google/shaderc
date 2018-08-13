@@ -41,6 +41,8 @@ inline std::string GetGlslOrHlslExtension(
   return "";
 }
 
+bool CreateIntermediateDirectories(const std::string &filename);
+
 }  // namespace glslc
 
 #endif  // GLSLC_FILE_H_

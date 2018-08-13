@@ -201,6 +201,9 @@ bool FileCompiler::EmitCompiledResult(
   std::ostream* out = nullptr;
   std::ofstream potential_file_stream;
   if (compilation_success) {
+    if (!CreateIntermediateDirectories(output_file_name)) {
+      return false;
+    }
     out = shaderc_util::GetOutputStream(output_file_name,
                                         &potential_file_stream, &std::cerr);
     if (!out || out->fail()) {
