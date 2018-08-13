@@ -64,9 +64,16 @@ bool CreateIntermediateDirectories(const std::string &filename)
         }
     }
 
+#if defined(_MSC_VER) || defined(__MINGW32__) || defined(_WIN32)
+    bool success = CreateDirectoryA(path, nullptr);
+    if (!success)
+        success = GetLastError() == ERROR_ALREADY_EXISTS;
+#else
     int ret = mkdir(path, 0755);
+    bool success = ret == 0 || errno == EEXIST;
+#endif
     free(path);
-    return ret == 0;
+    return success;
 }
 
 }  // namespace glslc
