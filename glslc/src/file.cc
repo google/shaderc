@@ -23,4 +23,57 @@ shaderc_util::string_piece GetFileExtension(
   return filename.substr(dot_pos + 1);
 }
 
+#if defined(_MSC_VER) || defined(__MINGW32__) || defined(_WIN32)
+#define strdup _strdup
+#define isseparator(c) ((c) == '/' || (c) == '\\')
+#define WIN32_LEAN_AND_MEAN
+#define VC_EXTRALEAN
+#define NOMINMAX
+#include <windows.h>
+#else
+#include <sys/stat.h>
+#include <string.h>
+#define isseparator(c) ((c) == '/')
+#endif
+
+
+bool CreateIntermediateDirectories(const std::string &filename)
+{
+    char *path = strdup(filename.c_str());
+    int len = filename.length();
+
+    /* Find the file. Remove it from the path. */
+    for (int i = len - 1; i >= 0; --i) {
+        if (isseparator(path[i])) {
+            path[i] = 0;
+            break;
+        }
+    }
+
+    /* Create all intermediate directories. */
+    for (int i = 0; i < len; ++i) {
+        if (isseparator(path[i])) {
+            char c = path[i];
+            path[i] = 0;
+#if defined(_MSC_VER) || defined(__MINGW32__) || defined(_WIN32)
+            CreateDirectoryA(path, nullptr);
+#else
+            mkdir(path, 0755);
+#endif
+            path[i] = c;
+        }
+    }
+
+#if defined(_MSC_VER) || defined(__MINGW32__) || defined(_WIN32)
+    bool success = CreateDirectoryA(path, nullptr);
+    if (!success)
+        success = GetLastError() == ERROR_ALREADY_EXISTS;
+#else
+    int ret = mkdir(path, 0755);
+    bool success = ret == 0 || errno == EEXIST;
+#endif
+    free(path);
+    return success;
+}
+
 }  // namespace glslc
