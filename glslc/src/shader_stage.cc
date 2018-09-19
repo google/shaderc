@@ -45,6 +45,11 @@ shaderc_shader_kind MapStageNameToForcedKind(const string_piece& stage_name) {
       {"compute", shaderc_glsl_compute_shader},
       {"comp", shaderc_glsl_compute_shader},
 #ifdef NV_EXTENSIONS
+      {"rgen", shaderc_glsl_raygen_shader },
+      {"rahit", shaderc_glsl_anyhit_shader },
+      {"rchit", shaderc_glsl_closesthit_shader },
+      {"rmiss", shaderc_glsl_miss_shader },
+      {"rint", shaderc_glsl_intersection_shader },
       {"task", shaderc_glsl_task_shader },
       {"mesh", shaderc_glsl_mesh_shader },
 #endif
@@ -74,6 +79,11 @@ shaderc_shader_kind DeduceDefaultShaderKindFromFileName(
       {"comp", shaderc_glsl_default_compute_shader},
       {"spvasm", shaderc_spirv_assembly},
 #ifdef NV_EXTENSIONS
+      {"rgen", shaderc_glsl_default_raygen_shader },
+      {"rahit", shaderc_glsl_default_anyhit_shader },
+      {"rchit", shaderc_glsl_default_closesthit_shader },
+      {"rmiss", shaderc_glsl_default_miss_shader },
+      {"rint", shaderc_glsl_default_intersection_shader },
       {"task", shaderc_glsl_default_task_shader },
       {"mesh", shaderc_glsl_default_mesh_shader },
 #endif

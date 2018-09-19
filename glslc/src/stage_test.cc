@@ -50,6 +50,21 @@ TEST(DeduceDefaultShaderKindFromFileName, ValidStage) {
             glslc::DeduceDefaultShaderKindFromFileName("a.comp"));
 
 #ifdef NV_EXTENSIONS
+  EXPECT_EQ(shaderc_glsl_default_raygen_shader,
+            glslc::DeduceDefaultShaderKindFromFileName("a.rgen"));
+
+  EXPECT_EQ(shaderc_glsl_default_anyhit_shader,
+            glslc::DeduceDefaultShaderKindFromFileName("a.rahit"));
+
+  EXPECT_EQ(shaderc_glsl_default_closesthit_shader,
+            glslc::DeduceDefaultShaderKindFromFileName("a.rchit"));
+
+  EXPECT_EQ(shaderc_glsl_default_miss_shader,
+            glslc::DeduceDefaultShaderKindFromFileName("a.rmiss"));
+
+  EXPECT_EQ(shaderc_glsl_default_intersection_shader,
+            glslc::DeduceDefaultShaderKindFromFileName("a.rint"));
+
   EXPECT_EQ(shaderc_glsl_default_task_shader,
             glslc::DeduceDefaultShaderKindFromFileName("a.task"));
 

@@ -112,6 +112,16 @@ inline shaderc_util::Compiler::Stage shaderc_convert_specific_stage(
     case shaderc_compute_shader:
       return shaderc_util::Compiler::Stage::Compute;
 #if NV_EXTENSIONS
+    case shaderc_raygen_shader:
+      return shaderc_util::Compiler::Stage::RayGenNV;
+    case shaderc_intersection_shader:
+      return shaderc_util::Compiler::Stage::IntersectNV;
+    case shaderc_anyhit_shader:
+      return shaderc_util::Compiler::Stage::AnyHitNV;
+    case shaderc_closesthit_shader:
+      return shaderc_util::Compiler::Stage::ClosestHitNV;
+    case shaderc_miss_shader:
+      return shaderc_util::Compiler::Stage::MissNV;
     case shaderc_task_shader:
       return shaderc_util::Compiler::Stage::TaskNV;
     case shaderc_mesh_shader:

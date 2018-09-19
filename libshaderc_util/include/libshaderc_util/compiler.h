@@ -170,6 +170,11 @@ class Compiler {
     Fragment,
     Compute,
 #ifdef NV_EXTENSIONS
+    RayGenNV,
+    IntersectNV,
+    AnyHitNV,
+    ClosestHitNV,
+    MissNV,
     TaskNV,
     MeshNV,
 #endif
@@ -183,8 +188,13 @@ class Compiler {
         {Stage::Vertex, Stage::TessEval, Stage::TessControl, Stage::Geometry,
          Stage::Fragment, Stage::Compute,
 #ifdef NV_EXTENSIONS
-         Stage::TaskNV,
-         Stage::MeshNV,
+          Stage::RayGenNV,
+          Stage::IntersectNV,
+          Stage::AnyHitNV,
+          Stage::ClosestHitNV,
+          Stage::MissNV,
+          Stage::TaskNV,
+          Stage::MeshNV,
 #endif
         }};
     return values;

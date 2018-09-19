@@ -58,14 +58,12 @@ typedef enum {
   shaderc_tess_control_shader,
   shaderc_tess_evaluation_shader,
 
-
   shaderc_glsl_vertex_shader = shaderc_vertex_shader,
   shaderc_glsl_fragment_shader = shaderc_fragment_shader,
   shaderc_glsl_compute_shader = shaderc_compute_shader,
   shaderc_glsl_geometry_shader = shaderc_geometry_shader,
   shaderc_glsl_tess_control_shader = shaderc_tess_control_shader,
   shaderc_glsl_tess_evaluation_shader = shaderc_tess_evaluation_shader,
-
 
   // Deduce the shader kind from #pragma annotation in the source code. Compiler
   // will emit error if #pragma annotation is not found.
@@ -80,8 +78,22 @@ typedef enum {
   shaderc_glsl_default_tess_control_shader,
   shaderc_glsl_default_tess_evaluation_shader,
   shaderc_spirv_assembly,
-
 #ifdef NV_EXTENSIONS
+  shaderc_raygen_shader,
+  shaderc_anyhit_shader,
+  shaderc_closesthit_shader,
+  shaderc_miss_shader,
+  shaderc_intersection_shader,
+  shaderc_glsl_raygen_shader = shaderc_raygen_shader,
+  shaderc_glsl_anyhit_shader = shaderc_anyhit_shader,
+  shaderc_glsl_closesthit_shader = shaderc_closesthit_shader,
+  shaderc_glsl_miss_shader = shaderc_miss_shader,
+  shaderc_glsl_intersection_shader = shaderc_intersection_shader,
+  shaderc_glsl_default_raygen_shader,
+  shaderc_glsl_default_anyhit_shader,
+  shaderc_glsl_default_closesthit_shader,
+  shaderc_glsl_default_miss_shader,
+  shaderc_glsl_default_intersection_shader,
   shaderc_task_shader,
   shaderc_mesh_shader,
   shaderc_glsl_task_shader = shaderc_task_shader,
