@@ -58,12 +58,15 @@ typedef enum {
   shaderc_tess_control_shader,
   shaderc_tess_evaluation_shader,
 
+
   shaderc_glsl_vertex_shader = shaderc_vertex_shader,
   shaderc_glsl_fragment_shader = shaderc_fragment_shader,
   shaderc_glsl_compute_shader = shaderc_compute_shader,
   shaderc_glsl_geometry_shader = shaderc_geometry_shader,
   shaderc_glsl_tess_control_shader = shaderc_tess_control_shader,
   shaderc_glsl_tess_evaluation_shader = shaderc_tess_evaluation_shader,
+
+
   // Deduce the shader kind from #pragma annotation in the source code. Compiler
   // will emit error if #pragma annotation is not found.
   shaderc_glsl_infer_from_source,
@@ -77,6 +80,15 @@ typedef enum {
   shaderc_glsl_default_tess_control_shader,
   shaderc_glsl_default_tess_evaluation_shader,
   shaderc_spirv_assembly,
+
+#ifdef NV_EXTENSIONS
+  shaderc_task_shader,
+  shaderc_mesh_shader,
+  shaderc_glsl_task_shader = shaderc_task_shader,
+  shaderc_glsl_mesh_shader = shaderc_mesh_shader,
+  shaderc_glsl_default_task_shader,
+  shaderc_glsl_default_mesh_shader,
+#endif
 } shaderc_shader_kind;
 
 typedef enum {

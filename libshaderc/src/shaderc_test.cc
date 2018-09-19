@@ -1167,6 +1167,82 @@ TEST_F(CompileStringWithOptionsTest,
                                  shaderc_glsl_compute_shader, options_.get()));
 }
 
+#ifdef NV_EXTENSIONS
+// task shader
+TEST_F(CompileStringWithOptionsTest,
+       TargetEnvRespectedWhenCompilingVulkan1_0TaskShaderToVulkan1_0Succeeds) {
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_vulkan,
+                                         shaderc_env_version_vulkan_1_0);
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kGlslShaderTaskBarrier,
+                                 shaderc_glsl_task_shader, options_.get()));
+}
+
+TEST_F(CompileStringWithOptionsTest,
+       TargetEnvRespectedWhenCompilingVulkan1_0TaskShaderToVulkan1_1Succeeds) {
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_vulkan,
+                                         shaderc_env_version_vulkan_1_1);
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kGlslShaderTaskBarrier,
+                                 shaderc_glsl_task_shader, options_.get()));
+}
+
+TEST_F(CompileStringWithOptionsTest,
+       TargetEnvRespectedWhenCompilingVulkan1_1TaskShaderToVulkan1_0Fails) {
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_vulkan,
+                                         shaderc_env_version_vulkan_1_0);
+  EXPECT_FALSE(CompilesToValidSpv(compiler_, kGlslShaderTaskSubgroupBarrier,
+                                  shaderc_glsl_task_shader, options_.get()));
+}
+
+TEST_F(CompileStringWithOptionsTest,
+       TargetEnvRespectedWhenCompilingVulkan1_1TaskShaderToVulkan1_1Succeeds) {
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_vulkan,
+                                         shaderc_env_version_vulkan_1_1);
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kGlslShaderTaskSubgroupBarrier,
+                                 shaderc_glsl_task_shader, options_.get()));
+}
+
+// mesh shader
+TEST_F(CompileStringWithOptionsTest,
+       TargetEnvRespectedWhenCompilingVulkan1_0MeshShaderToVulkan1_0Succeeds) {
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_vulkan,
+                                         shaderc_env_version_vulkan_1_0);
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kGlslShaderMeshBarrier,
+                                 shaderc_glsl_mesh_shader, options_.get()));
+}
+
+TEST_F(CompileStringWithOptionsTest,
+       TargetEnvRespectedWhenCompilingVulkan1_0MeshShaderToVulkan1_1Succeeds) {
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_vulkan,
+                                         shaderc_env_version_vulkan_1_1);
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kGlslShaderMeshBarrier,
+                                 shaderc_glsl_mesh_shader, options_.get()));
+}
+
+TEST_F(CompileStringWithOptionsTest,
+       TargetEnvRespectedWhenCompilingVulkan1_1MeshShaderToVulkan1_0Fails) {
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_vulkan,
+                                         shaderc_env_version_vulkan_1_0);
+  EXPECT_FALSE(CompilesToValidSpv(compiler_, kGlslShaderMeshSubgroupBarrier,
+                                  shaderc_glsl_mesh_shader, options_.get()));
+}
+
+TEST_F(CompileStringWithOptionsTest,
+       TargetEnvRespectedWhenCompilingVulkan1_1MeshShaderToVulkan1_1Succeeds) {
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_vulkan,
+                                         shaderc_env_version_vulkan_1_1);
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kGlslShaderMeshSubgroupBarrier,
+                                 shaderc_glsl_mesh_shader, options_.get()));
+}
+#endif
+
 TEST_F(CompileStringWithOptionsTest,
        DISABLED_TargetEnvIgnoredWhenPreprocessing) {
   // This test is disabled since some versions of glslang may refuse to compile

@@ -19,9 +19,16 @@ else()
   message(STATUS "Configuring Shaderc to avoid building tests.")
 endif()
 
+option(SHADERC_ENABLE_NV_EXTENSIONS "Enables support of Nvidia-specific extensions" ON)
+
 include(GNUInstallDirs)
 include(cmake/setup_build.cmake)
 include(cmake/utils.cmake)
+
+
+if(SHADERC_ENABLE_NV_EXTENSIONS)
+    add_definitions(-DNV_EXTENSIONS)
+endif(SHADERC_ENABLE_NV_EXTENSIONS)
 
 add_custom_target(check-copyright ALL
   ${PYTHON_EXE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/add_copyright.py

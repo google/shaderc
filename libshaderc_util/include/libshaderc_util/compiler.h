@@ -169,14 +169,24 @@ class Compiler {
     Geometry,
     Fragment,
     Compute,
+#ifdef NV_EXTENSIONS
+    TaskNV,
+    MeshNV,
+#endif
+    StageEnd,
   };
-  enum { kNumStages = int(Stage::Compute) + 1 };
+  enum { kNumStages = int(Stage::StageEnd) };
 
   // Returns a std::array of all the Stage values.
   const std::array<Stage, kNumStages>& stages() const {
     static std::array<Stage, kNumStages> values{
         {Stage::Vertex, Stage::TessEval, Stage::TessControl, Stage::Geometry,
-         Stage::Fragment, Stage::Compute}};
+         Stage::Fragment, Stage::Compute,
+#ifdef NV_EXTENSIONS
+         Stage::TaskNV,
+         Stage::MeshNV,
+#endif
+        }};
     return values;
   }
 

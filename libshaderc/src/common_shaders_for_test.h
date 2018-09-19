@@ -259,6 +259,44 @@ const char kGlslShaderComputeSubgroupBarrier[] =
        #extension GL_KHR_shader_subgroup_basic : enable
        void main() { subgroupBarrier(); })";
 
+#ifdef NV_EXTENSIONS
+// A GLSL task shader using a regular barrier.
+const char kGlslShaderTaskBarrier[] =
+    R"(#version 450
+       #extension GL_NV_mesh_shader : enable
+       layout(local_size_x = 32) in;
+       void main() { barrier(); })";
+
+// A GLSL task shader using the Subgroups feature.
+const char kGlslShaderTaskSubgroupBarrier[] =
+    R"(#version 450
+       #extension GL_NV_mesh_shader : enable
+       #extension GL_KHR_shader_subgroup_basic : enable
+       layout(local_size_x = 32) in;
+       void main() { subgroupBarrier(); })";
+
+// A GLSL mesh shader using a regular barrier.
+const char kGlslShaderMeshBarrier[] =
+    R"(#version 450
+       #extension GL_NV_mesh_shader : enable
+       layout(local_size_x = 32) in;
+       layout(max_vertices=81) out;
+       layout(max_primitives=32) out;
+       layout(triangles) out;
+       void main() { barrier(); })";
+
+// A GLSL mesh shader using the Subgroups feature.
+const char kGlslShaderMeshSubgroupBarrier[] =
+    R"(#version 450
+       #extension GL_NV_mesh_shader : enable
+       #extension GL_KHR_shader_subgroup_basic : enable
+       layout(local_size_x = 32) in;
+       layout(max_vertices=81) out;
+       layout(max_primitives=32) out;
+       layout(triangles) out;
+       void main() { subgroupBarrier(); })";
+#endif
+
 const char kGlslMultipleFnShader[] =
     R"(#version 450
        layout(location=0) flat in  int inVal;
