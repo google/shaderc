@@ -1,8 +1,11 @@
 Revision history for Shaderc
 
-v2018.0-dev 2018-02-27
- - Start v2018.0-dev
+v2018.0-dev 2018-09-20
  - Support -fhlsl_functionality1 (also -fhlsl-functionality1)
+ - Support NVIDIA Turing extensions. Requires updated Glslang and SPIRV-Tools.
+ Fixes:
+  #469: Add virtual dtor to classes with virtual functions.
+  #457: Fix writing SPIR-V binaries to standard output on Windows.
 
 v2017.2 2018-02-27
  - Add a shared library version of libshaderc
