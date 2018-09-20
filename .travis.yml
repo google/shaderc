@@ -51,10 +51,14 @@ addons:
 
 before_install:
   - if [[ "$BUILD_NDK" == "ON" ]]; then
-      git clone --depth=1 https://github.com/urho3d/android-ndk.git $HOME/android-ndk;
       export ANDROID_NDK=$HOME/android-ndk;
-      git clone --depth=1 https://github.com/taka-no-me/android-cmake.git $HOME/android-cmake;
-      export TOOLCHAIN_PATH=$HOME/android-cmake/android.toolchain.cmake;
+      git init $ANDROID_NDK;
+      pushd $ANDROID_NDK;
+        git remote add dneto0 https://github.com/dneto0/android-ndk.git;
+        git fetch --depth=1 dneto0 r17b-strip;
+        git checkout FETCH_HEAD;
+      popd;
+      export TOOLCHAIN_PATH=$ANDROID_NDK/build/cmake/android.toolchain.cmake;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       curl https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py;
@@ -81,7 +85,7 @@ script:
   - mkdir build && cd build
   - if [[ "$BUILD_NDK" == "ON" ]]; then
       cmake -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_PATH}
-            -DANDROID_NATIVE_API_LEVEL=android-9
+            -DANDROID_NATIVE_API_LEVEL=android-14
             -DCMAKE_BUILD_TYPE=Release
             -DANDROID_ABI="armeabi-v7a with NEON"
             -DSHADERC_SKIP_TESTS=ON ..;
