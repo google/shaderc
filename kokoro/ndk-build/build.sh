@@ -46,6 +46,8 @@ git clone $GLSLANG_REPO_URL
 git clone https://github.com/google/googletest.git
 git clone https://github.com/KhronosGroup/SPIRV-Tools.git   spirv-tools
 git clone https://github.com/KhronosGroup/SPIRV-Headers.git spirv-tools/external/spirv-headers
+git clone https://github.com/google/re2                     spirv-tools/external/re2
+git clone https://github.com/google/effcee                  spirv-tools/external/effcee
 
 cd $SRC/
 mkdir build
