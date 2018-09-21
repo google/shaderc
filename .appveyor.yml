@@ -48,7 +48,11 @@ build:
 
 build_script:
   - mkdir build && cd build
-  - cmake .. -DCMAKE_INSTALL_PREFIX=install
+  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2013" (
+      cmake .. -DCMAKE_INSTALL_PREFIX=install -DSPIRV_SKIP_TESTS=ON
+    ) else (
+      cmake .. -DCMAKE_INSTALL_PREFIX=install
+    )
   - cmake --build . --target install --config %CONFIGURATION%
 
 test_script:
