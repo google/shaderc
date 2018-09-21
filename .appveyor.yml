@@ -62,12 +62,14 @@ after_test:
   - ps: >-
       If ($env:configuration -Match "Debug") {
         $env:ZIP_FILENAME="shaderc-tot-windows-x64-debug.zip"
+        $env:SHARED_LIB_NAME="shaderc_sharedd.dll"
       } Else {
         $env:ZIP_FILENAME="shaderc-tot-windows-x64-release.zip"
+        $env:SHARED_LIB_NAME="shaderc_shared.dll"
       }
-  - cp libshaderc\%CONFIGURATION%\shaderc_shared.dll install\lib\
+  - cp libshaderc\%CONFIGURATION%\%SHARED_LIB_NAME% install\lib\
   - cd install
-  - 7z a %ZIP_FILENAME% bin\glslc.exe include\shaderc\* lib\shaderc_combined.lib lib\shaderc_shared.dll
+  - 7z a %ZIP_FILENAME% bin\glslc.exe include\shaderc\* lib\shaderc_combined.lib lib\%SHARED_LIB_NAME%
 
 artifacts:
   - path: build\install\$(ZIP_FILENAME)
