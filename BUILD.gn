@@ -21,13 +21,7 @@ config("shaderc_util_public") {
   include_dirs = [ "libshaderc_util/include" ]
 }
 
-static_library("shaderc_util") {
-  public_configs = [ ":shaderc_util_public" ]
-  deps = [
-    "${glslang_dir}:glslang_static",
-    "${spirv_tools_dir}:spvtools",
-  ]
-
+source_set("shaderc_util_sources") {
   sources = [
     "libshaderc_util/include/libshaderc_util/counting_includer.h",
     "libshaderc_util/include/libshaderc_util/file_finder.h",
@@ -49,6 +43,21 @@ static_library("shaderc_util") {
     "libshaderc_util/src/spirv_tools_wrapper.cc",
     "libshaderc_util/src/version_profile.cc",
   ]
+
+  public_configs = [ ":shaderc_util_public" ]
+
+  deps = [
+    "${glslang_dir}:glslang_static",
+    "${spirv_tools_dir}:spvtools",
+  ]
+}
+
+static_library("shaderc_util") {
+  public_configs = [ ":shaderc_util_public" ]
+
+  deps = [
+    ":shaderc_util_sources",
+  ]
 }
 
 config("shaderc_public") {
@@ -64,14 +73,7 @@ config("shaderc_public") {
   }
 }
 
-shared_library("libshaderc") {
-  public_configs = [ ":shaderc_public" ]
-  deps = [
-    "${glslang_dir}:glslang_static",
-    ":shaderc_util",
-    "${spirv_tools_dir}:spvtools",
-    "${spirv_tools_dir}:spvtools_val",
-  ]
+source_set("libshaderc_sources") {
   defines = [ "SHADERC_IMPLEMENTATION" ]
 
   sources = [
@@ -79,6 +81,23 @@ shared_library("libshaderc") {
     "libshaderc/include/shaderc/shaderc.hpp",
     "libshaderc/src/shaderc.cc",
     "libshaderc/src/shaderc_private.h",
+  ]
+
+  public_configs = [ ":shaderc_public" ]
+
+  deps = [
+    ":shaderc_util",
+    "${spirv_tools_dir}:spvtools",
+    "${spirv_tools_dir}:spvtools_val",
+    "${glslang_dir}:glslang_static",
+  ]
+}
+
+shared_library("libshaderc") {
+  public_configs = [ ":shaderc_public" ]
+
+  deps = [
+    ":libshaderc_sources",
   ]
 
   # Tell dependents where to find this shared library
