@@ -58,6 +58,7 @@ static_library("shaderc_util") {
   deps = [
     ":shaderc_util_sources",
   ]
+  complete_static_lib = true
 }
 
 config("shaderc_public") {
