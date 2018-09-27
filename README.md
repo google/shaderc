@@ -1,11 +1,5 @@
 # Shaderc
 
-[![Linux and Mac Build Status](https://travis-ci.org/google/shaderc.svg)](https://travis-ci.org/google/shaderc "Linux and Mac Build Status")
-[![Windows Build status](https://ci.appveyor.com/api/projects/status/g6c372blna7vnk1l?svg=true)](https://ci.appveyor.com/project/dneto0/shaderc "Windows Build Status")
-[![Coverage Status](https://coveralls.io/repos/google/shaderc/badge.svg?branch=master&service=github)](https://coveralls.io/github/google/shaderc?branch=master)
-
-Latest Build Status by Google:
-
 <img alt="Linux" src="kokoro/img/linux.png" width="20px" height="20px" hspace="2px"/>![Linux Build Status](https://storage.googleapis.com/shaderc/badges/build_status_linux_release.svg)
 <img alt="MacOS" src="kokoro/img/macos.png" width="20px" height="20px" hspace="2px"/>![MacOS Build Status](https://storage.googleapis.com/shaderc/badges/build_status_macos_release.svg)
 <img alt="Windows" src="kokoro/img/windows.png" width="20px" height="20px" hspace="2px"/>![Windows Build Status](https://storage.googleapis.com/shaderc/badges/build_status_windows_release.svg)
