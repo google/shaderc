@@ -41,6 +41,8 @@ TEST(ConvertSpecificStage, Exhaustive) {
             shaderc_convert_specific_stage(shaderc_intersection_shader));
   EXPECT_EQ(shaderc_util::Compiler::Stage::MissNV,
             shaderc_convert_specific_stage(shaderc_miss_shader));
+  EXPECT_EQ(shaderc_util::Compiler::Stage::CallableNV,
+            shaderc_convert_specific_stage(shaderc_callable_shader));
   EXPECT_EQ(shaderc_util::Compiler::Stage::TaskNV,
             shaderc_convert_specific_stage(shaderc_task_shader));
   EXPECT_EQ(shaderc_util::Compiler::Stage::MeshNV,

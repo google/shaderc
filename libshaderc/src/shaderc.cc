@@ -68,6 +68,8 @@ EShLanguage GetForcedStage(shaderc_shader_kind kind) {
       return EShLangMissNV;
     case shaderc_glsl_intersection_shader:
       return EShLangIntersectNV;
+    case shaderc_glsl_callable_shader:
+      return EShLangCallableNV;
     case shaderc_glsl_task_shader:
       return EShLangTaskNV;
     case shaderc_glsl_mesh_shader:
@@ -87,6 +89,7 @@ EShLanguage GetForcedStage(shaderc_shader_kind kind) {
     case shaderc_glsl_default_closesthit_shader:
     case shaderc_glsl_default_miss_shader:
     case shaderc_glsl_default_intersection_shader:
+    case shaderc_glsl_default_callable_shader:
     case shaderc_glsl_default_task_shader:
     case shaderc_glsl_default_mesh_shader:
 #endif
@@ -153,6 +156,7 @@ class StageDeducer {
       case shaderc_glsl_closesthit_shader:
       case shaderc_glsl_miss_shader:
       case shaderc_glsl_intersection_shader:
+      case shaderc_glsl_callable_shader:
       case shaderc_glsl_task_shader:
       case shaderc_glsl_mesh_shader:
 #endif
@@ -180,6 +184,8 @@ class StageDeducer {
         return EShLangMissNV;
       case shaderc_glsl_default_intersection_shader:
         return EShLangIntersectNV;
+      case shaderc_glsl_default_callable_shader:
+        return EShLangCallableNV;
       case shaderc_glsl_default_task_shader:
         return EShLangTaskNV;
       case shaderc_glsl_default_mesh_shader:
