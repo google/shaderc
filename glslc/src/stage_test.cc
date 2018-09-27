@@ -65,6 +65,9 @@ TEST(DeduceDefaultShaderKindFromFileName, ValidStage) {
   EXPECT_EQ(shaderc_glsl_default_intersection_shader,
             glslc::DeduceDefaultShaderKindFromFileName("a.rint"));
 
+  EXPECT_EQ(shaderc_glsl_default_callable_shader,
+            glslc::DeduceDefaultShaderKindFromFileName("a.rcall"));
+
   EXPECT_EQ(shaderc_glsl_default_task_shader,
             glslc::DeduceDefaultShaderKindFromFileName("a.task"));
 

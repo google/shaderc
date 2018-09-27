@@ -175,6 +175,7 @@ class Compiler {
     AnyHitNV,
     ClosestHitNV,
     MissNV,
+    CallableNV,
     TaskNV,
     MeshNV,
 #endif
@@ -193,6 +194,7 @@ class Compiler {
           Stage::AnyHitNV,
           Stage::ClosestHitNV,
           Stage::MissNV,
+          Stage::CallableNV,
           Stage::TaskNV,
           Stage::MeshNV,
 #endif
