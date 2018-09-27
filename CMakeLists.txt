@@ -19,6 +19,8 @@ else()
   message(STATUS "Configuring Shaderc to avoid building tests.")
 endif()
 
+set (CMAKE_CXX_STANDARD 11)
+
 option(SHADERC_ENABLE_NV_EXTENSIONS "Enables support of Nvidia-specific extensions" ON)
 
 include(GNUInstallDirs)
