@@ -294,6 +294,26 @@ shaderc_util::Compiler::TargetEnv GetCompilerTargetEnv(shaderc_target_env env) {
   return shaderc_util::Compiler::TargetEnv::Vulkan;
 }
 
+shaderc_util::Compiler::TargetEnvVersion GetCompilerTargetEnvVersion(
+    uint32_t version_number) {
+  using namespace shaderc_util;
+
+  if (static_cast<uint32_t>(Compiler::TargetEnvVersion::Vulkan_1_0) ==
+      version_number) {
+    return Compiler::TargetEnvVersion::Vulkan_1_0;
+  }
+  if (static_cast<uint32_t>(Compiler::TargetEnvVersion::Vulkan_1_1) ==
+      version_number) {
+    return Compiler::TargetEnvVersion::Vulkan_1_1;
+  }
+  if (static_cast<uint32_t>(Compiler::TargetEnvVersion::OpenGL_4_5) ==
+      version_number) {
+    return Compiler::TargetEnvVersion::OpenGL_4_5;
+  }
+
+  return Compiler::TargetEnvVersion::Default;
+}
+
 // Returns the Compiler::Limit enum for the given shaderc_limit enum.
 shaderc_util::Compiler::Limit CompilerLimit(shaderc_limit limit) {
   switch (limit) {
@@ -452,7 +472,8 @@ void shaderc_compile_options_set_target_env(shaderc_compile_options_t options,
                                             shaderc_target_env target,
                                             uint32_t version) {
   options->target_env = target;
-  options->compiler.SetTargetEnv(GetCompilerTargetEnv(target), version);
+  options->compiler.SetTargetEnv(GetCompilerTargetEnv(target),
+                                 GetCompilerTargetEnvVersion(version));
 }
 
 void shaderc_compile_options_set_warnings_as_errors(
@@ -652,8 +673,11 @@ shaderc_compilation_result_t shaderc_assemble_into_spv(
     std::string errors;
     const auto target_env = additional_options ? additional_options->target_env
                                                : shaderc_target_env_default;
+    const uint32_t target_env_version =
+        additional_options ? additional_options->target_env_version : 0;
     const bool assembling_succeeded = shaderc_util::SpirvToolsAssemble(
         GetCompilerTargetEnv(target_env),
+        GetCompilerTargetEnvVersion(target_env_version),
         {source_assembly, source_assembly + source_assembly_size},
         &assembling_output_data, &errors);
     result->num_errors = !assembling_succeeded;

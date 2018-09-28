@@ -25,8 +25,8 @@
 namespace {
 
 using shaderc_util::Compiler;
-using ::testing::HasSubstr;
 using ::testing::Eq;
+using ::testing::HasSubstr;
 using ::testing::Not;
 
 // A trivial vertex shader
@@ -149,13 +149,13 @@ float4 main() : SV_Target0 {
 }
 )";
 
-
 // Returns the disassembly of the given SPIR-V binary, as a string.
 // Assumes the disassembly will be successful when targeting Vulkan.
 std::string Disassemble(const std::vector<uint32_t> binary) {
   std::string result;
-  shaderc_util::SpirvToolsDisassemble(Compiler::TargetEnv::Vulkan, binary,
-                                      &result);
+  shaderc_util::SpirvToolsDisassemble(Compiler::TargetEnv::Vulkan,
+                                      Compiler::TargetEnvVersion::Vulkan_1_1,
+                                      binary, &result);
   return result;
 }
 
@@ -319,7 +319,8 @@ TEST_F(CompilerTest, BadTargetEnvFails) {
 }
 
 TEST_F(CompilerTest, BadTargetEnvVersionFails) {
-  compiler_.SetTargetEnv(Compiler::TargetEnv::Vulkan, 123);
+  compiler_.SetTargetEnv(Compiler::TargetEnv::Vulkan,
+                         static_cast<Compiler::TargetEnvVersion>(123));
   EXPECT_FALSE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
   EXPECT_THAT(errors_,
               HasSubstr("Invalid target client version 123 for environment 0"));
@@ -499,8 +500,8 @@ TEST_F(CompilerTest, TexelOffsetRaiseTheMaximum) {
 
 TEST_F(CompilerTest, GeneratorWordIsShadercOverGlslang) {
   const auto words = SimpleCompilationBinary(kVertexShader, EShLangVertex);
-  const uint32_t shaderc_over_glslang = 13; // From SPIR-V XML Registry
-  const uint32_t generator_word_index = 2; // From SPIR-V binary layout
+  const uint32_t shaderc_over_glslang = 13;  // From SPIR-V XML Registry
+  const uint32_t generator_word_index = 2;   // From SPIR-V binary layout
   EXPECT_EQ(shaderc_over_glslang, words[generator_word_index] >> 16u);
 }
 
