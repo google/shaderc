@@ -310,6 +310,16 @@ const char kHlslShaderWithCounterBuffer[] =
          return float4(Ainc.IncrementCounter(), 0, 0, 0);
        })";
 
+const char kHlslWaveActiveSumeComputeShader[] =
+  R"(struct S { uint val; uint result; };
+
+     RWStructuredBuffer<S> MyBuffer;
+
+     [numthreads(32, 1, 1)]
+     void main(uint3 id : SV_DispatchThreadID) {
+       MyBuffer[id.x].result = WaveActiveSum(MyBuffer[id.x].val);
+     })";
+
 #ifdef __cplusplus
 }
 #endif  // __cplusplus

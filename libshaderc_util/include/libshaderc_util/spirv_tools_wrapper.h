@@ -27,13 +27,16 @@ namespace shaderc_util {
 // Assembles the given assembly. On success, returns true, writes the assembled
 // binary to *binary, and clears *errors. Otherwise, writes the error message
 // into *errors.
-bool SpirvToolsAssemble(Compiler::TargetEnv env, const string_piece assembly,
-                        spv_binary* binary, std::string* errors);
+bool SpirvToolsAssemble(Compiler::TargetEnv env,
+                        Compiler::TargetEnvVersion version,
+                        const string_piece assembly, spv_binary* binary,
+                        std::string* errors);
 
 // Disassembles the given binary. Returns true and writes the disassembled text
 // to *text_or_error if successful. Otherwise, writes the error message to
 // *text_or_error.
 bool SpirvToolsDisassemble(Compiler::TargetEnv env,
+                           Compiler::TargetEnvVersion version,
                            const std::vector<uint32_t>& binary,
                            std::string* text_or_error);
 
@@ -55,6 +58,7 @@ enum class PassId {
 // optimized binary back to *binary if successful. Otherwise, writes errors to
 // *errors and the content of binary may be in an invalid state.
 bool SpirvToolsOptimize(Compiler::TargetEnv env,
+                        Compiler::TargetEnvVersion version,
                         const std::vector<PassId>& enabled_passes,
                         std::vector<uint32_t>* binary, std::string* errors);
 

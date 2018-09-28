@@ -262,8 +262,11 @@ class CompileStringTest : public testing::Test {
       OutputType output_type = OutputType::SpirvBinary) {
     const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
                            "shader", "main", options, output_type);
-    EXPECT_TRUE(CompilationResultIsSuccess(comp.result())) << kind << '\n'
-                                                           << shader;
+    EXPECT_TRUE(CompilationResultIsSuccess(comp.result()))
+        << "shader kind: " << kind << "\nerror message: "
+        << shaderc_result_get_error_message(comp.result())
+        << "\nshader source code: \n"
+        << shader;
     // Use string(const char* s, size_t n) constructor instead of
     // string(const char* s) to make sure the string has complete binary data.
     // string(const char* s) assumes a null-terminated C-string, which will cut
@@ -671,6 +674,34 @@ TEST_F(CompileStringWithOptionsTest, CompileAndOptimizeWithLevelSize) {
   // Check that we do not have debug instructions.
   EXPECT_THAT(disassembly_text, Not(HasSubstr("OpName")));
   EXPECT_THAT(disassembly_text, Not(HasSubstr("OpSource")));
+}
+
+TEST_F(CompileStringWithOptionsTest, CompileAndOptimizeForVulkan10Failure) {
+  shaderc_compile_options_set_source_language(options_.get(),
+                                              shaderc_source_language_hlsl);
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_vulkan,
+                                         shaderc_env_version_vulkan_1_0);
+  shaderc_compile_options_set_optimization_level(
+      options_.get(), shaderc_optimization_level_performance);
+
+  EXPECT_FALSE(CompilesToValidSpv(compiler_, kHlslWaveActiveSumeComputeShader,
+                                  shaderc_compute_shader, options_.get()));
+}
+
+TEST_F(CompileStringWithOptionsTest, CompileAndOptimizeForVulkan11Success) {
+  shaderc_compile_options_set_source_language(options_.get(),
+                                              shaderc_source_language_hlsl);
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_vulkan,
+                                         shaderc_env_version_vulkan_1_1);
+  shaderc_compile_options_set_optimization_level(
+      options_.get(), shaderc_optimization_level_performance);
+
+  const std::string disassembly_text = CompilationOutput(
+      kHlslWaveActiveSumeComputeShader, shaderc_compute_shader, options_.get(),
+      OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpGroupNonUniformIAdd"));
 }
 
 TEST_F(CompileStringWithOptionsTest, FollowingOptLevelOverridesPreviousOne) {

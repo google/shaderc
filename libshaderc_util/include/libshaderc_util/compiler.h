@@ -106,16 +106,17 @@ class Compiler {
 
   // Target environment.
   enum class TargetEnv {
-    Vulkan,  // Default to Vulkan 1.0
-    OpenGL,  // Default to OpenGL 4.5
-    OpenGLCompat, // Deprecated.
+    Vulkan,        // Default to Vulkan 1.0
+    OpenGL,        // Default to OpenGL 4.5
+    OpenGLCompat,  // Deprecated.
   };
 
   // Target environment versions.  These numbers match those used by Glslang.
   enum class TargetEnvVersion : uint32_t {
+    Default = 0,  // Default for the corresponding target environment
     // For Vulkan, use numbering scheme from vulkan.h
-    Vulkan_1_0 = ((1 << 22)),              // Default to Vulkan 1.0
-    Vulkan_1_1 = ((1 << 22) | (1 << 12)),  // Default to Vulkan 1.0
+    Vulkan_1_0 = ((1 << 22)),              // Vulkan 1.0
+    Vulkan_1_1 = ((1 << 22) | (1 << 12)),  // Vulkan 1.1
     // For OpenGL, use the numbering from #version in shaders.
     OpenGL_4_5 = 450,
   };
@@ -133,9 +134,10 @@ class Compiler {
     Performance,  // Optimization towards better performance.
   };
 
-  // Resource limits.  These map to the "max*" fields in glslang::TBuiltInResource.
+  // Resource limits.  These map to the "max*" fields in
+  // glslang::TBuiltInResource.
   enum class Limit {
-#define RESOURCE(NAME,FIELD,CNAME) NAME,
+#define RESOURCE(NAME, FIELD, CNAME) NAME,
 #include "resources.inc"
 #undef RESOURCE
   };
@@ -185,20 +187,24 @@ class Compiler {
 
   // Returns a std::array of all the Stage values.
   const std::array<Stage, kNumStages>& stages() const {
-    static std::array<Stage, kNumStages> values{
-        {Stage::Vertex, Stage::TessEval, Stage::TessControl, Stage::Geometry,
-         Stage::Fragment, Stage::Compute,
+    static std::array<Stage, kNumStages> values{{
+        Stage::Vertex,
+        Stage::TessEval,
+        Stage::TessControl,
+        Stage::Geometry,
+        Stage::Fragment,
+        Stage::Compute,
 #ifdef NV_EXTENSIONS
-          Stage::RayGenNV,
-          Stage::IntersectNV,
-          Stage::AnyHitNV,
-          Stage::ClosestHitNV,
-          Stage::MissNV,
-          Stage::CallableNV,
-          Stage::TaskNV,
-          Stage::MeshNV,
+        Stage::RayGenNV,
+        Stage::IntersectNV,
+        Stage::AnyHitNV,
+        Stage::ClosestHitNV,
+        Stage::MissNV,
+        Stage::CallableNV,
+        Stage::TaskNV,
+        Stage::MeshNV,
 #endif
-        }};
+    }};
     return values;
   }
 
@@ -215,7 +221,7 @@ class Compiler {
         generate_debug_info_(false),
         enabled_opt_passes_(),
         target_env_(TargetEnv::Vulkan),
-        target_env_version_(0),  // Resolve default later.
+        target_env_version_(TargetEnvVersion::Default),
         source_language_(SourceLanguage::GLSL),
         limits_(kDefaultTBuiltInResource),
         auto_bind_uniforms_(false),
@@ -255,10 +261,11 @@ class Compiler {
                           const char* definition, size_t definition_length);
 
   // Sets the target environment, including version.  The version value should
-  // be 0 or one of the values from TargetEnvVersion.  The 0 version value maps
+  // be 0 or one of the values from TargetEnvVersion.  The default value maps
   // to Vulkan 1.0 if the target environment is Vulkan, and it maps to OpenGL
   // 4.5 if the target environment is OpenGL.
-  void SetTargetEnv(TargetEnv env, uint32_t version = 0);
+  void SetTargetEnv(TargetEnv env,
+                    TargetEnvVersion version = TargetEnvVersion::Default);
 
   // Sets the souce language.
   void SetSourceLanguage(SourceLanguage lang);
@@ -476,7 +483,7 @@ class Compiler {
   // particular to each target environment.  If this is 0, then use a default
   // for that particular target environment. See libshaders/shaderc/shaderc.h
   // for those defaults.
-  uint32_t target_env_version_;
+  TargetEnvVersion target_env_version_;
 
   // The source language.  Defaults to GLSL.
   SourceLanguage source_language_;

@@ -526,6 +526,31 @@ TEST_F(CppInterface, CompileAndOptimizeWithLevelSize) {
   EXPECT_THAT(disassembly_text, Not(HasSubstr("OpSource")));
 }
 
+TEST_F(CppInterface, CompileAndOptimizeForVulkan10Failure) {
+  options_.SetSourceLanguage(shaderc_source_language_hlsl);
+  options_.SetTargetEnvironment(shaderc_target_env_vulkan,
+                                shaderc_env_version_vulkan_1_0);
+  options_.SetOptimizationLevel(shaderc_optimization_level_performance);
+
+  EXPECT_THAT(CompilationErrors(kHlslWaveActiveSumeComputeShader,
+                                shaderc_compute_shader, options_),
+              // TODO(antiagainst): the error message can be improved to be more
+              // explicit regarding Vulkan 1.1
+              HasSubstr("compilation succeeded but failed to optimize: "
+                        "Invalid capability operand"));
+}
+
+TEST_F(CppInterface, CompileAndOptimizeForVulkan11Success) {
+  options_.SetSourceLanguage(shaderc_source_language_hlsl);
+  options_.SetTargetEnvironment(shaderc_target_env_vulkan,
+                                shaderc_env_version_vulkan_1_1);
+  options_.SetOptimizationLevel(shaderc_optimization_level_performance);
+
+  const std::string disassembly_text = AssemblyOutput(
+      kHlslWaveActiveSumeComputeShader, shaderc_compute_shader, options_);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpGroupNonUniformIAdd"));
+}
+
 TEST_F(CppInterface, FollowingOptLevelOverridesPreviousOne) {
   options_.SetOptimizationLevel(shaderc_optimization_level_size);
   // Optimization level settings overridden by
@@ -1197,37 +1222,29 @@ std::string ShaderWithTexOffset(int offset) {
 // two particular limits.
 TEST_F(CppInterface, LimitsTexelOffsetDefault) {
   EXPECT_FALSE(CompilationSuccess(ShaderWithTexOffset(-9).c_str(),
-                                  shaderc_glsl_fragment_shader,
-                                  options_));
+                                  shaderc_glsl_fragment_shader, options_));
   EXPECT_TRUE(CompilationSuccess(ShaderWithTexOffset(-8).c_str(),
-                                 shaderc_glsl_fragment_shader,
-                                 options_));
+                                 shaderc_glsl_fragment_shader, options_));
   EXPECT_TRUE(CompilationSuccess(ShaderWithTexOffset(7).c_str(),
-                                 shaderc_glsl_fragment_shader,
-                                 options_));
+                                 shaderc_glsl_fragment_shader, options_));
   EXPECT_FALSE(CompilationSuccess(ShaderWithTexOffset(8).c_str(),
-                                  shaderc_glsl_fragment_shader,
-                                  options_));
+                                  shaderc_glsl_fragment_shader, options_));
 }
 
 TEST_F(CppInterface, LimitsTexelOffsetLowerMinimum) {
   options_.SetLimit(shaderc_limit_min_program_texel_offset, -99);
   EXPECT_FALSE(CompilationSuccess(ShaderWithTexOffset(-100).c_str(),
-                                  shaderc_glsl_fragment_shader,
-                                  options_));
+                                  shaderc_glsl_fragment_shader, options_));
   EXPECT_TRUE(CompilationSuccess(ShaderWithTexOffset(-99).c_str(),
-                                 shaderc_glsl_fragment_shader,
-                                 options_));
+                                 shaderc_glsl_fragment_shader, options_));
 }
 
 TEST_F(CppInterface, LimitsTexelOffsetHigherMaximum) {
   options_.SetLimit(shaderc_limit_max_program_texel_offset, 10);
   EXPECT_TRUE(CompilationSuccess(ShaderWithTexOffset(10).c_str(),
-                                 shaderc_glsl_fragment_shader,
-                                 options_));
+                                 shaderc_glsl_fragment_shader, options_));
   EXPECT_FALSE(CompilationSuccess(ShaderWithTexOffset(11).c_str(),
-                                  shaderc_glsl_fragment_shader,
-                                  options_));
+                                  shaderc_glsl_fragment_shader, options_));
 }
 
 TEST_F(CppInterface, UniformsWithoutBindingsFailCompilation) {

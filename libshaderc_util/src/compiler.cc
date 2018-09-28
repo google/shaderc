@@ -107,8 +107,9 @@ struct GlslangClientInfo {
 
 // Returns the mappings to Glslang client, client version, and SPIR-V version.
 // Also indicates whether the input values were valid.
-GlslangClientInfo GetGlslangClientInfo(shaderc_util::Compiler::TargetEnv env,
-                                       uint32_t version) {
+GlslangClientInfo GetGlslangClientInfo(
+    shaderc_util::Compiler::TargetEnv env,
+    shaderc_util::Compiler::TargetEnvVersion version) {
   GlslangClientInfo result;
 
   using shaderc_util::Compiler;
@@ -116,11 +117,11 @@ GlslangClientInfo GetGlslangClientInfo(shaderc_util::Compiler::TargetEnv env,
     case Compiler::TargetEnv::Vulkan:
       result.valid_client = true;
       result.client = glslang::EShClientVulkan;
-      if (version == 0 ||
-          version == uint32_t(Compiler::TargetEnvVersion::Vulkan_1_0)) {
+      if (version == Compiler::TargetEnvVersion::Default ||
+          version == Compiler::TargetEnvVersion::Vulkan_1_0) {
         result.client_version = glslang::EShTargetVulkan_1_0;
         result.valid_client_version = true;
-      } else if (version == uint32_t(Compiler::TargetEnvVersion::Vulkan_1_1)) {
+      } else if (version == Compiler::TargetEnvVersion::Vulkan_1_1) {
         result.client_version = glslang::EShTargetVulkan_1_1;
         result.valid_client_version = true;
         result.target_language_version = glslang::EShTargetSpv_1_3;
@@ -130,8 +131,8 @@ GlslangClientInfo GetGlslangClientInfo(shaderc_util::Compiler::TargetEnv env,
     case Compiler::TargetEnv::OpenGL:
       result.valid_client = true;
       result.client = glslang::EShClientOpenGL;
-      if (version == 0 ||
-          version == uint32_t(Compiler::TargetEnvVersion::OpenGL_4_5)) {
+      if (version == Compiler::TargetEnvVersion::Default ||
+          version == Compiler::TargetEnvVersion::OpenGL_4_5) {
         result.client_version = glslang::EShTargetOpenGL_450;
         result.valid_client_version = true;
       }
@@ -198,8 +199,8 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   }
   if (!target_client_info.valid_client_version) {
     *error_stream << "error:" << error_tag << ": Invalid target client version "
-                  << target_env_version_ << " for environment "
-                  << int(target_env_);
+                  << static_cast<uint32_t>(target_env_version_)
+                  << " for environment " << int(target_env_);
     *total_warnings = 0;
     *total_errors = 1;
     return result_tuple;
@@ -348,7 +349,8 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
 
   if (!opt_passes.empty()) {
     std::string opt_errors;
-    if (!SpirvToolsOptimize(target_env_, opt_passes, &spirv, &opt_errors)) {
+    if (!SpirvToolsOptimize(target_env_, target_env_version_, opt_passes,
+                            &spirv, &opt_errors)) {
       *error_stream << "shaderc: internal error: compilation succeeded but "
                        "failed to optimize: "
                     << opt_errors << "\n";
@@ -358,7 +360,8 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
 
   if (output_type == OutputType::SpirvAssemblyText) {
     std::string text_or_error;
-    if (!SpirvToolsDisassemble(target_env_, spirv, &text_or_error)) {
+    if (!SpirvToolsDisassemble(target_env_, target_env_version_, spirv,
+                               &text_or_error)) {
       *error_stream << "shaderc: internal error: compilation succeeded but "
                        "failed to disassemble: "
                     << text_or_error << "\n";
@@ -383,7 +386,8 @@ void Compiler::AddMacroDefinition(const char* macro, size_t macro_length,
       definition ? std::string(definition, definition_length) : "";
 }
 
-void Compiler::SetTargetEnv(Compiler::TargetEnv env, uint32_t version) {
+void Compiler::SetTargetEnv(Compiler::TargetEnv env,
+                            Compiler::TargetEnvVersion version) {
   target_env_ = env;
   target_env_version_ = version;
 }
