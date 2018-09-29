@@ -60,6 +60,7 @@ class CompilationResult {
     }
     compilation_result_ = other.compilation_result_;
     other.compilation_result_ = nullptr;
+    return *this;
   }
 
   // Returns any error message found during compilation.
