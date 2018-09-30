@@ -21,6 +21,7 @@ target_compile_definitions(shaderc_shared
     PRIVATE SHADERC_IMPLEMENTATION
     PUBLIC SHADERC_SHAREDLIB
 )
+set_target_properties(shaderc_shared PROPERTIES SOVERSION 1)
 
 if(SHADERC_ENABLE_INSTALL)
   install(
