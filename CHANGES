@@ -3,6 +3,10 @@ Revision history for Shaderc
 v2018.0-dev 2018-09-20
  - Support -fhlsl_functionality1 (also -fhlsl-functionality1)
  - Support NVIDIA Turing extensions. Requires updated Glslang and SPIRV-Tools.
+ - Use SPIR-V optimization and HLSL legalization recipes from SPIRV-Tools.
+   - Pass target environment into SPIRV-Tools code, e.g. from --target-env vulkan1.1
+ - Add SONAME=1 property to shared library
+ - Support GN build for Chromium
  Fixes:
   #469: Add virtual dtor to classes with virtual functions.
   #457: Fix writing SPIR-V binaries to standard output on Windows.
