@@ -30,6 +30,7 @@ spv_target_env GetSpirvToolsTargetEnv(Compiler::TargetEnv env,
     case Compiler::TargetEnv::Vulkan:
       switch (version) {
         case Compiler::TargetEnvVersion::Default:
+          return SPV_ENV_VULKAN_1_0;
         case Compiler::TargetEnvVersion::Vulkan_1_0:
           return SPV_ENV_VULKAN_1_0;
         case Compiler::TargetEnvVersion::Vulkan_1_1:
@@ -37,7 +38,9 @@ spv_target_env GetSpirvToolsTargetEnv(Compiler::TargetEnv env,
         default:
           break;
       }
+      break;
     case Compiler::TargetEnv::OpenGL:
+      return SPV_ENV_OPENGL_4_5;
     case Compiler::TargetEnv::OpenGLCompat:  // Deprecated
       return SPV_ENV_OPENGL_4_5;
   }
