@@ -1,5 +1,8 @@
 Revision history for Shaderc
 
+v2018.1-dev 2018-10-01
+ - Start v2018.1 development
+
 v2018.0 2018-10-01
  - Support -fhlsl_functionality1 (also -fhlsl-functionality1)
  - Support NVIDIA Turing extensions. Requires updated Glslang and SPIRV-Tools.
