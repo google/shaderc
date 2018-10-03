@@ -2,7 +2,15 @@ cmake_minimum_required(VERSION 2.8.12)
 project(shaderc)
 enable_testing()
 
+set (CMAKE_CXX_STANDARD 11)
+
 message(STATUS "Shaderc: build type is \"${CMAKE_BUILD_TYPE}\".")
+
+# Note that we are not using or setting CMake BUILD_SHARED_LIBS here since that
+# also affects external projects and makes libshaderc.so to depend on shared
+# libraries compiled from external projects. We want libshaderc.so to depend
+# on only standard system libraries.
+option(SHADERC_BUILD_SHARED "Build Shaderc as shared library" OFF)
 
 option(SHADERC_SKIP_INSTALL "Skip installation" ${SHADERC_SKIP_INSTALL})
 if(NOT ${SHADERC_SKIP_INSTALL})
@@ -18,8 +26,6 @@ if(${SHADERC_ENABLE_TESTS})
 else()
   message(STATUS "Configuring Shaderc to avoid building tests.")
 endif()
-
-set (CMAKE_CXX_STANDARD 11)
 
 option(SHADERC_ENABLE_NV_EXTENSIONS "Enables support of Nvidia-specific extensions" ON)
 
