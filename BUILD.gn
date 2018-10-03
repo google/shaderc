@@ -47,7 +47,7 @@ source_set("shaderc_util_sources") {
   public_configs = [ ":shaderc_util_public" ]
 
   deps = [
-    "${glslang_dir}:glslang_static",
+    "${glslang_dir}:glslang_sources",
     "${spirv_tools_dir}:spvtools",
   ]
 }
@@ -91,10 +91,10 @@ source_set("libshaderc_sources") {
   public_configs = [ ":shaderc_public" ]
 
   deps = [
-    ":shaderc_util",
+    ":shaderc_util_sources",
     "${spirv_tools_dir}:spvtools",
     "${spirv_tools_dir}:spvtools_val",
-    "${glslang_dir}:glslang_static",
+    "${glslang_dir}:glslang_sources",
   ]
 }
 
