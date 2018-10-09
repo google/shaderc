@@ -32,6 +32,11 @@ git clone https://github.com/KhronosGroup/SPIRV-Headers.git spirv-headers
 git clone https://github.com/google/re2 spirv-tools/external/re2
 git clone https://github.com/google/effcee spirv-tools/external/effcee
 
+:: CMake 3.7 does not support $<IF:...> syntax, which is now used in later
+:: googletest code
+cd googletest
+git checkout e93da23920e5b6887d6a6a291c3a59f83f5b579e
+
 cd %SRC%
 mkdir build
 cd %SRC%\build
