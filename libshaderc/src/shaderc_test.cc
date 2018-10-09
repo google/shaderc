@@ -1558,35 +1558,29 @@ TEST_F(CompileStringTest, LimitsTexelOffsetDefault) {
                                   shaderc_glsl_fragment_shader,
                                   options_.get()));
   EXPECT_TRUE(CompilationSuccess(ShaderWithTexOffset(-8).c_str(),
-                                 shaderc_glsl_fragment_shader,
-                                 options_.get()));
+                                 shaderc_glsl_fragment_shader, options_.get()));
   EXPECT_TRUE(CompilationSuccess(ShaderWithTexOffset(7).c_str(),
-                                 shaderc_glsl_fragment_shader,
-                                 options_.get()));
+                                 shaderc_glsl_fragment_shader, options_.get()));
   EXPECT_FALSE(CompilationSuccess(ShaderWithTexOffset(8).c_str(),
                                   shaderc_glsl_fragment_shader,
                                   options_.get()));
 }
 
 TEST_F(CompileStringTest, LimitsTexelOffsetLowerMinimum) {
-  shaderc_compile_options_set_limit(options_.get(),
-                                    shaderc_limit_min_program_texel_offset,
-                                    -99);
+  shaderc_compile_options_set_limit(
+      options_.get(), shaderc_limit_min_program_texel_offset, -99);
   EXPECT_FALSE(CompilationSuccess(ShaderWithTexOffset(-100).c_str(),
                                   shaderc_glsl_fragment_shader,
                                   options_.get()));
   EXPECT_TRUE(CompilationSuccess(ShaderWithTexOffset(-99).c_str(),
-                                 shaderc_glsl_fragment_shader,
-                                 options_.get()));
+                                 shaderc_glsl_fragment_shader, options_.get()));
 }
 
 TEST_F(CompileStringTest, LimitsTexelOffsetHigherMaximum) {
   shaderc_compile_options_set_limit(options_.get(),
-                                    shaderc_limit_max_program_texel_offset,
-                                    10);
+                                    shaderc_limit_max_program_texel_offset, 10);
   EXPECT_TRUE(CompilationSuccess(ShaderWithTexOffset(10).c_str(),
-                                 shaderc_glsl_fragment_shader,
-                                 options_.get()));
+                                 shaderc_glsl_fragment_shader, options_.get()));
   EXPECT_FALSE(CompilationSuccess(ShaderWithTexOffset(11).c_str(),
                                   shaderc_glsl_fragment_shader,
                                   options_.get()));
@@ -1787,7 +1781,8 @@ TEST_F(CompileStringWithOptionsTest, HlslFunctionality1OffByDefault) {
   const std::string disassembly_text =
       CompilationOutput(kHlslShaderWithCounterBuffer, shaderc_fragment_shader,
                         options_.get(), OutputType::SpirvAssemblyText);
-  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorateStringGOOGLE"))) << disassembly_text;
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorateStringGOOGLE")))
+      << disassembly_text;
 }
 
 TEST_F(CompileStringWithOptionsTest, HlslFunctionality1Respected) {
@@ -1810,6 +1805,16 @@ TEST_F(CompileStringWithOptionsTest, HlslFunctionality1SurvivesCloning) {
       CompilationOutput(kHlslShaderWithCounterBuffer, shaderc_fragment_shader,
                         cloned_options.get(), OutputType::SpirvAssemblyText);
   EXPECT_THAT(disassembly_text, HasSubstr("OpDecorateStringGOOGLE"));
+}
+
+TEST_F(CompileStringWithOptionsTest, HlslFlexibleMemoryLayoutAllowed) {
+  shaderc_compile_options_set_source_language(options_.get(),
+                                              shaderc_source_language_hlsl);
+  shaderc_compile_options_set_optimization_level(
+      options_.get(), shaderc_optimization_level_performance);
+
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kHlslMemLayoutResourceSelect,
+                                 shaderc_fragment_shader, options_.get()));
 }
 
 }  // anonymous namespace

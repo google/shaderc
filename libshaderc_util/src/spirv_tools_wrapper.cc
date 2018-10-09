@@ -111,7 +111,18 @@ bool SpirvToolsOptimize(Compiler::TargetEnv env,
     return true;
   }
 
+  spvtools::ValidatorOptions val_opts;
+  // This allows flexible memory layout for HLSL.
+  val_opts.SetSkipBlockLayout(true);
+  // This allows HLSL legalization regarding resources.
+  val_opts.SetRelaxLogicalPointer(true);
+
+  spvtools::OptimizerOptions opt_opts;
+  opt_opts.set_validator_options(val_opts);
+  opt_opts.set_run_validator(true);
+
   spvtools::Optimizer optimizer(GetSpirvToolsTargetEnv(env, version));
+
   std::ostringstream oss;
   optimizer.SetMessageConsumer(
       [&oss](spv_message_level_t, const char*, const spv_position_t&,
@@ -140,7 +151,7 @@ bool SpirvToolsOptimize(Compiler::TargetEnv env,
     }
   }
 
-  if (!optimizer.Run(binary->data(), binary->size(), binary)) {
+  if (!optimizer.Run(binary->data(), binary->size(), binary, opt_opts)) {
     *errors = oss.str();
     return false;
   }

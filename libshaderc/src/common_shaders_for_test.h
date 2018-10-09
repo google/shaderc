@@ -320,6 +320,26 @@ const char kHlslWaveActiveSumeComputeShader[] =
        MyBuffer[id.x].result = WaveActiveSum(MyBuffer[id.x].val);
      })";
 
+const char kHlslMemLayoutResourceSelect[] =
+    R"(cbuffer Foo { float a; float3 b; }
+
+       Texture2D Tex;
+       SamplerState Sampler1;
+       SamplerState Sampler2;
+
+       static const int val = 42;
+
+       float4 main() : SV_Target {
+         SamplerState samp;
+
+         if (val > 5)
+           samp = Sampler1;
+         else
+           samp = Sampler2;
+
+         return Tex.Sample(samp, float2(0.5, 0.5)) + float4(a, b);
+       })";
+
 #ifdef __cplusplus
 }
 #endif  // __cplusplus
