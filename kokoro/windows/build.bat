@@ -32,6 +32,8 @@ git clone https://github.com/KhronosGroup/SPIRV-Headers.git spirv-headers
 git clone https://github.com/google/re2 spirv-tools/external/re2
 git clone https://github.com/google/effcee spirv-tools/external/effcee
 
+cmake --version
+
 :: CMake 3.7 does not support $<IF:...> syntax, which is now used in later
 :: googletest code
 cd googletest
@@ -45,13 +47,13 @@ cd %SRC%\build
 :: set up msvc build env
 :: #########################################
 if %VS_VERSION% == 2017 (
-  call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x86
+  call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
   echo "Using VS 2017..."
 ) else if %VS_VERSION% == 2015 (
-  call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86
+  call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
   echo "Using VS 2015..."
 ) else if %VS_VERSION% == 2013 (
-  call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" x86
+  call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
   echo "Using VS 2013..."
 )
 
