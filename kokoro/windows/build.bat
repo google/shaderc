@@ -34,10 +34,10 @@ git clone https://github.com/google/effcee
 
 cmake --version
 
-:: CMake 3.7 does not support $<IF:...> syntax, which is now used in later
-:: googletest code
-cd googletest
-git checkout e93da23920e5b6887d6a6a291c3a59f83f5b579e
+:: If you need to pin googletest to a specific revision, uncomment
+:: the following two lines (and set the commit hash).
+:: cd googletest
+:: git checkout e93da23920e5b6887d6a6a291c3a59f83f5b579e
 
 cd %SRC%
 mkdir build
