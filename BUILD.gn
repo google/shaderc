@@ -52,19 +52,6 @@ source_set("shaderc_util_sources") {
   ]
 }
 
-static_library("shaderc_util") {
-  public_configs = [ ":shaderc_util_public" ]
-
-  deps = [
-    ":shaderc_util_sources",
-  ]
-
-  # Without this the macOS linker complains that the static library is empty
-  if (is_mac) {
-    complete_static_lib = true
-  }
-}
-
 config("shaderc_public") {
   include_dirs = [ "libshaderc/include" ]
   defines = [ "SHADERC_SHAREDLIB" ]
