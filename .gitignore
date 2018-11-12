@@ -5,8 +5,10 @@ build-*/
 compile_commands.json
 .ycm_extra_conf.py
 cscope.*
+third_party/effcee/
 third_party/glslang/
 third_party/googletest/
+third_party/re2/
 third_party/spirv-tools/
 third_party/spirv-headers/
 android_test/libs

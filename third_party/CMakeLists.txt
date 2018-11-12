@@ -11,6 +11,10 @@ set(SHADERC_SPIRV_HEADERS_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/spirv-headers" CA
   "Location of spirv-headers source")
 set(SHADERC_GLSLANG_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/glslang" CACHE STRING
   "Location of glslang source")
+set(SHADERC_EFFCEE_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/effcee" CACHE STRING
+  "Location of effcee source")
+set(SHADERC_RE2_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/re2" CACHE STRING
+  "Location of re2 source")
 
 set( SKIP_GLSLANG_INSTALL ${SHADERC_SKIP_INSTALL} )
 set( SKIP_SPIRV_TOOLS_INSTALL ${SHADERC_SKIP_INSTALL} )
@@ -39,6 +43,10 @@ if (NOT TARGET SPIRV-Tools)
     if ("${SHADERC_SKIP_TESTS}")
       # Also skip building tests in SPIRV-Tools.
       set(SPIRV_SKIP_TESTS ON CACHE BOOL "Skip building SPIRV-Tools tests")
+    else()
+      # SPIRV-Tools requires re2 and effcee to build tests
+      add_subdirectory(${SHADERC_RE2_DIR} re2)
+      add_subdirectory(${SHADERC_EFFCEE_DIR} effcee)
     endif()
     add_subdirectory(${SHADERC_SPIRV_TOOLS_DIR} spirv-tools)
   endif()
