@@ -43,7 +43,7 @@ if (NOT TARGET SPIRV-Tools)
     if ("${SHADERC_SKIP_TESTS}")
       # Also skip building tests in SPIRV-Tools.
       set(SPIRV_SKIP_TESTS ON CACHE BOOL "Skip building SPIRV-Tools tests")
-    else if(NOT "${SPIRV_SKIP_TESTS}")
+    elseif(NOT "${SPIRV_SKIP_TESTS}")
       # SPIRV-Tools requires re2 and effcee to build tests.
       add_subdirectory(${SHADERC_RE2_DIR} re2)
       add_subdirectory(${SHADERC_EFFCEE_DIR} effcee)
