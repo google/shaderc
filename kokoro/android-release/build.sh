@@ -35,16 +35,9 @@ export ANDROID_NDK=/opt/android-ndk-r15c
 git clone --depth=1 https://github.com/taka-no-me/android-cmake.git android-cmake
 export TOOLCHAIN_PATH=$PWD/android-cmake/android.toolchain.cmake
 
+cd $SRC
+./utils/git-sync-deps
 
-cd $SRC/third_party
-git clone https://github.com/google/googletest.git
-git clone https://github.com/google/glslang.git
-git clone https://github.com/KhronosGroup/SPIRV-Tools.git spirv-tools
-git clone https://github.com/KhronosGroup/SPIRV-Headers.git spirv-headers
-git clone https://github.com/google/re2
-git clone https://github.com/google/effcee
-
-cd $SRC/
 mkdir build
 cd $SRC/build
 
