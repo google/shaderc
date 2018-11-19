@@ -52,13 +52,6 @@ for more information. See also the [`AUTHORS`](AUTHORS) and
 - `utils/`: utility scripts for Shaderc
 
 Shaderc depends on glslang, the Khronos reference compiler for GLSL.
-Sometimes a change updates both Shaderc and glslang.  In that case the
-glslang change will appear in [google/glslang][google-glslang]
-before it appears upstream in [KhronosGroup/glslang][khr-glslang]
-We intend to upstream all changes to glslang. We maintain the separate
-copy only to stage those changes for review, and to provide something for
-Shaderc to build against in the meantime.  Please see
-[DEVELOPMENT.howto.md](DEVELOPMENT.howto.md) for more details.
 
 Shaderc depends on [SPIRV-Tools][spirv-tools] for assembling, disassembling,
 and transforming SPIR-V binaries.
@@ -81,7 +74,7 @@ branch under the "Artifacts" tab of a certain job.
 git clone https://github.com/google/shaderc $SOURCE_DIR
 cd $SOURCE_DIR/third_party
 git clone https://github.com/google/googletest.git
-git clone https://github.com/google/glslang.git
+git clone https://github.com/KhronosGroup/glslang.git
 git clone https://github.com/KhronosGroup/SPIRV-Tools.git spirv-tools
 git clone https://github.com/KhronosGroup/SPIRV-Headers.git spirv-headers
 git clone https://github.com/google/re2.git
@@ -240,7 +233,6 @@ older versions of Shaderc and its dependencies.
 * **Rust:** [shaderc-rs][shaderc-rs]
 
 [khr-glslang]: https://github.com/KhronosGroup/glslang
-[google-glslang]: https://github.com/google/glslang
 [spirv-tools]: https://github.com/KhronosGroup/SPIRV-Tools
 [pyshaderc]: https://github.com/realitix/pyshaderc
 [shaderc-rs]: https://github.com/google/shaderc-rs

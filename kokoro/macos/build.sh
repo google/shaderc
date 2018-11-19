@@ -33,7 +33,7 @@ export PATH="$PWD:$PATH"
 
 cd $SRC/third_party
 git clone https://github.com/google/googletest.git
-git clone https://github.com/google/glslang.git
+git clone https://github.com/KhronosGroup/glslang.git
 git clone https://github.com/KhronosGroup/SPIRV-Tools.git spirv-tools
 git clone https://github.com/KhronosGroup/SPIRV-Headers.git spirv-headers
 git clone https://github.com/google/re2

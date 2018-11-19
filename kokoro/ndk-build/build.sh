@@ -26,7 +26,7 @@ SRC=$PWD/github/shaderc
 
 # Set the glslang repo URL.
 GLSLANG_REMOTE=$1
-GLSLANG_REPO_URL="https://github.com/google/glslang.git"
+GLSLANG_REPO_URL="https://github.com/KhronosGroup/glslang.git"
 if [ $GLSLANG_REMOTE = "KHRONOS" ]
 then
   GLSLANG_REPO_URL="https://github.com/KhronosGroup/glslang.git"
