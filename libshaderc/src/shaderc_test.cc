@@ -814,6 +814,8 @@ INSTANTIATE_TEST_CASE_P(
         {kTessControlOnlyShader, shaderc_glsl_default_tess_control_shader},
         {kTessEvaluationOnlyShader,
          shaderc_glsl_default_tess_evaluation_shader},
+        {kNVMeshShader, shaderc_glsl_default_mesh_shader},
+        {kNVTaskShader, shaderc_glsl_default_task_shader},
 
         // #pragma annotation overrides default shader kinds.
         {kVertexOnlyShaderWithPragma, shaderc_glsl_default_compute_shader},
@@ -825,6 +827,13 @@ INSTANTIATE_TEST_CASE_P(
         {kGeometryOnlyShaderWithPragma,
          shaderc_glsl_default_tess_evaluation_shader},
         {kComputeOnlyShaderWithPragma, shaderc_glsl_default_geometry_shader},
+        {kNVMeshShaderWithPragma, shaderc_glsl_default_geometry_shader},
+        {kNVTaskShaderWithPragma, shaderc_glsl_default_geometry_shader},
+
+        // Infer from source
+        {kVertexOnlyShaderWithPragma, shaderc_glsl_infer_from_source},
+        {kNVMeshShaderWithPragma, shaderc_glsl_infer_from_source},
+        {kNVTaskShaderWithPragma, shaderc_glsl_infer_from_source},
 
         // Specified non-default shader kind overrides #pragma annotation.
         {kVertexOnlyShaderWithInvalidPragma, shaderc_glsl_vertex_shader},

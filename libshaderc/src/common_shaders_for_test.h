@@ -176,6 +176,50 @@ const char kComputeOnlyShaderWithPragma[] =
     "    uvec3 temp = gl_WorkGroupID;\n"
     "}";
 
+// NV mesh shader without #pragma.
+const char kNVMeshShader[] =
+    "#version 450\n"
+    "#extension GL_NV_mesh_shader : enable\n"
+    "layout(local_size_x=8) in;\n"
+    "layout(max_vertices=5) out;\n"
+    "layout(max_primitives=10) out;\n"
+    "layout(triangles) out;\n"
+    "void main() {\n"
+    "  gl_MeshVerticesNV[gl_LocalInvocationID.x].gl_Position = vec4(0.0);\n"
+    "}\n";
+
+// NV mesh shader with #pragma annotation.
+const char kNVMeshShaderWithPragma[] =
+    "#version 450\n"
+    "#extension GL_NV_mesh_shader : enable\n"
+    "#pragma shader_stage(mesh)\n"
+    "layout(local_size_x=8) in;\n"
+    "layout(max_vertices=5) out;\n"
+    "layout(max_primitives=10) out;\n"
+    "layout(triangles) out;\n"
+    "void main() {\n"
+    "  gl_MeshVerticesNV[gl_LocalInvocationID.x].gl_Position = vec4(0.0);\n"
+    "}\n";
+
+// NV task shader without #pragma annotation.
+const char kNVTaskShader[] =
+    "#version 450\n"
+    "#extension GL_NV_mesh_shader : enable\n"
+    "layout(local_size_x=8) in;\n"
+    "void main() {\n"
+    "  gl_TaskCountNV = 2;\n"
+    "}\n";
+
+// NV task shader with #pragma annotation.
+const char kNVTaskShaderWithPragma[] =
+    "#version 450\n"
+    "#extension GL_NV_mesh_shader : enable\n"
+    "#pragma shader_stage(task)\n"
+    "layout(local_size_x=8) in;\n"
+    "void main() {\n"
+    "  gl_TaskCountNV = 2;\n"
+    "}\n";
+
 // Vertex only shader with invalid #pragma annotation.
 const char kVertexOnlyShaderWithInvalidPragma[] =
     "#version 310 es\n"

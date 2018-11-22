@@ -189,6 +189,7 @@ class StageDeducer {
       case shaderc_glsl_default_task_shader:
         return EShLangTaskNV;
       case shaderc_glsl_default_mesh_shader:
+        return EShLangMeshNV;
 #endif
       case shaderc_spirv_assembly:
         return EShLangCount;
