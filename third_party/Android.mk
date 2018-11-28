@@ -1,6 +1,6 @@
 THIRD_PARTY_PATH := $(call my-dir)
 
-# Set the location of glslang.
+# Set the location of glslang
 ifeq ($(GLSLANG_LOCAL_PATH),)
 	GLSLANG_LOCAL_PATH:=$(THIRD_PARTY_PATH)/glslang
 endif
