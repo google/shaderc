@@ -19,7 +19,8 @@ from placeholder import FileShader
 # An HLSL shader with a counter buffer with a counter increment.
 # Glslang doesn't automatically assign a binding to the counter, and
 # it doesn't understand [[vk::counter_binding(n)]], so compile this
-# with --auto-bind-uniforms
+# with --auto-bind-uniforms.
+# See https://github.com/KhronosGroup/glslang/issues/1616
 HLSL_VERTEX_SHADER_WITH_COUNTER_BUFFER = """
 RWStructuredBuffer<int> Ainc;
 float4 main() : SV_Target0 {

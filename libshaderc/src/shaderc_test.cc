@@ -1827,6 +1827,8 @@ TEST_F(CompileStringWithOptionsTest, HlslFlexibleMemoryLayoutAllowed) {
                                               shaderc_source_language_hlsl);
   shaderc_compile_options_set_optimization_level(
       options_.get(), shaderc_optimization_level_performance);
+  // There is no way to set the counter's binding, so set it automatically.
+  // See https://github.com/KhronosGroup/glslang/issues/1616
   shaderc_compile_options_set_auto_bind_uniforms(options_.get(), true);
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kHlslMemLayoutResourceSelect,
                                  shaderc_fragment_shader, options_.get()));

@@ -1408,7 +1408,7 @@ TEST_F(CppInterface, HlslFunctionality1Respected) {
   CompileOptions options;
   options.SetSourceLanguage(shaderc_source_language_hlsl);
   // The counter needs a binding, and there is no way to set it in the shader
-  // source.
+  // source.  https://github.com/KhronosGroup/glslang/issues/1616
   options.SetAutoBindUniforms(true);
   options.SetHlslFunctionality1(true);
   const std::string disassembly_text = AssemblyOutput(
@@ -1421,7 +1421,7 @@ TEST_F(CppInterface, HlslFunctionality1SurvivesCloning) {
   options.SetSourceLanguage(shaderc_source_language_hlsl);
   options.SetHlslFunctionality1(true);
   // The counter needs a binding, and there is no way to set it in the shader
-  // source.
+  // source. https://github.com/KhronosGroup/glslang/issues/1616
   options.SetAutoBindUniforms(true);
   CompileOptions cloned_options(options);
   const std::string disassembly_text = AssemblyOutput(

@@ -40,6 +40,7 @@ GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS = """#version 450
 # binding.  Compile this shader with --auto-bind-uniforms to
 # give it a binding, since Glslang does not support attribute
 # [[vk::counter_binding(N))]].
+# See https://github.com/KhronosGroup/glslang/issues/1616
 HLSL_SHADER_WITHOUT_BINDINGS = """
 SamplerState s1 : register(s1);
 SamplerComparisonState s2 : register(s2);
