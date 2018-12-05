@@ -357,6 +357,7 @@ const char kHlslShaderWithCounterBuffer[] =
 const char kHlslWaveActiveSumeComputeShader[] =
   R"(struct S { uint val; uint result; };
 
+     [[vk::binding(0,0)]]
      RWStructuredBuffer<S> MyBuffer;
 
      [numthreads(32, 1, 1)]
@@ -367,8 +368,11 @@ const char kHlslWaveActiveSumeComputeShader[] =
 const char kHlslMemLayoutResourceSelect[] =
     R"(cbuffer Foo { float a; float3 b; }
 
+       [[vk::binding(0,0)]]
        Texture2D Tex;
+       [[vk::binding(1,0)]]
        SamplerState Sampler1;
+       [[vk::binding(2,0)]]
        SamplerState Sampler2;
 
        static const int val = 42;

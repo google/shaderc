@@ -1787,6 +1787,8 @@ TEST_F(CompileStringWithOptionsTest, HlslOffsetsOptionEnableRespected) {
 TEST_F(CompileStringWithOptionsTest, HlslFunctionality1OffByDefault) {
   shaderc_compile_options_set_source_language(options_.get(),
                                               shaderc_source_language_hlsl);
+  // The counter should automatically get a binding.
+  shaderc_compile_options_set_auto_bind_uniforms(options_.get(), true);
   const std::string disassembly_text =
       CompilationOutput(kHlslShaderWithCounterBuffer, shaderc_fragment_shader,
                         options_.get(), OutputType::SpirvAssemblyText);
@@ -1798,6 +1800,8 @@ TEST_F(CompileStringWithOptionsTest, HlslFunctionality1Respected) {
   shaderc_compile_options_set_source_language(options_.get(),
                                               shaderc_source_language_hlsl);
   shaderc_compile_options_set_hlsl_functionality1(options_.get(), true);
+  // The counter should automatically get a binding.
+  shaderc_compile_options_set_auto_bind_uniforms(options_.get(), true);
   const std::string disassembly_text =
       CompilationOutput(kHlslShaderWithCounterBuffer, shaderc_fragment_shader,
                         options_.get(), OutputType::SpirvAssemblyText);
@@ -1808,6 +1812,8 @@ TEST_F(CompileStringWithOptionsTest, HlslFunctionality1SurvivesCloning) {
   shaderc_compile_options_set_source_language(options_.get(),
                                               shaderc_source_language_hlsl);
   shaderc_compile_options_set_hlsl_functionality1(options_.get(), true);
+  // The counter should automatically get a binding.
+  shaderc_compile_options_set_auto_bind_uniforms(options_.get(), true);
   compile_options_ptr cloned_options(
       shaderc_compile_options_clone(options_.get()));
   const std::string disassembly_text =
@@ -1821,7 +1827,7 @@ TEST_F(CompileStringWithOptionsTest, HlslFlexibleMemoryLayoutAllowed) {
                                               shaderc_source_language_hlsl);
   shaderc_compile_options_set_optimization_level(
       options_.get(), shaderc_optimization_level_performance);
-
+  shaderc_compile_options_set_auto_bind_uniforms(options_.get(), true);
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kHlslMemLayoutResourceSelect,
                                  shaderc_fragment_shader, options_.get()));
 }
