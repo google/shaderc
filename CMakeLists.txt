@@ -68,6 +68,7 @@ endif(MSVC)
 # We depend on these for later projects, so they should come first.
 add_subdirectory(third_party)
 
+add_subdirectory(libshaderc_spvc)
 add_subdirectory(libshaderc_util)
 add_subdirectory(libshaderc)
 add_subdirectory(glslc)

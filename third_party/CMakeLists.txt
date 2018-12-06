@@ -9,6 +9,8 @@ set(SHADERC_SPIRV_TOOLS_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/spirv-tools" CACHE 
   "Location of spirv-tools source")
 set(SHADERC_SPIRV_HEADERS_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/spirv-headers" CACHE STRING
   "Location of spirv-headers source")
+set(SHADERC_SPIRV_CROSS_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/spirv-cross" CACHE STRING
+  "Location of spirv-cross source")
 set(SHADERC_GLSLANG_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/glslang" CACHE STRING
   "Location of glslang source")
 set(SHADERC_EFFCEE_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/effcee" CACHE STRING
@@ -31,6 +33,8 @@ if(${SHADERC_ENABLE_TESTS})
 endif()
 
 set(OLD_PLATFORM_TOOLSET ${CMAKE_GENERATOR_TOOLSET})
+
+add_subdirectory(${SHADERC_SPIRV_CROSS_DIR} spirv-cross)
 
 if (IS_DIRECTORY ${SHADERC_SPIRV_HEADERS_DIR})
   set(SPIRV_HEADERS_SKIP_EXAMPLES ON)
