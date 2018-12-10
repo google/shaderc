@@ -24,7 +24,7 @@ guidelines -- in particular, every file, class, method, data member, and global
 will require a comment.  Reviewers will also expect to see test coverage for
 every code change.  _How much_ coverage will be a judgment call on a
 case-by-case basis, balancing the required effort against the incremental
-benefit.  But coverage will be expected.  As a matter of development philosophy,
+benefit.  Coverage will be expected.  As a matter of development philosophy,
 we will strive to engineer the code to make writing tests easy.
 
 ## Coding style
