@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SHADERC_SPVC_SPVC_H_
-#define SHADERC_SPVC_SPVC_H_
+#ifndef SHADERC_SPVC_H_
+#define SHADERC_SPVC_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,127 +23,95 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
-//XXX share with libshaderc?
-// SHADERC_EXPORT tags symbol that will be exposed by the shared library.
-#if defined(SHADERC_SHAREDLIB)
-    #if defined(_WIN32)
-        #if defined(SHADERC_IMPLEMENTATION)
-            #define SHADERC_EXPORT __declspec(dllexport)
-        #else
-            #define SHADERC_EXPORT __declspec(dllimport)
-        #endif
-    #else
-        #if defined(SHADERC_IMPLEMENTATION)
-            #define SHADERC_EXPORT __attribute__((visibility("default")))
-        #else
-            #define SHADERC_EXPORT
-        #endif
-    #endif
-#else
-    #define SHADERC_EXPORT
-#endif
-
-//XXX share with libshaderc?
-// Indicate the status of a compilation.
-typedef enum {
-  spvc_compilation_status_success = 0,
-  spvc_compilation_status_invalid_stage,  // error stage deduction
-  spvc_compilation_status_compilation_error,
-  spvc_compilation_status_internal_error,  // unexpected failure
-  spvc_compilation_status_null_result_object,
-  spvc_compilation_status_invalid_assembly,
-} spvc_compilation_status;
+#include "libshaderc_util/common.h"
+#include "libshaderc_util/visibility.h"
 
 // An opaque handle to an object that manages all compiler state.
-typedef struct spvc_compiler* spvc_compiler_t;
+typedef struct shaderc_spvc_compiler* shaderc_spvc_compiler_t;
 
-// Returns a spvc_compiler_t that can be used to compile modules.
-// A return of NULL indicates that there was an error initializing the compiler.
-// Any function operating on spvc_compiler_t must offer the basic
+// Create a compiler.  A return of NULL indicates that there was an error.
+// Any function operating on a *_compiler_t must offer the basic
 // thread-safety guarantee.
 // [http://herbsutter.com/2014/01/13/gotw-95-solution-thread-safety-and-synchronization/]
 // That is: concurrent invocation of these functions on DIFFERENT objects needs
 // no synchronization; concurrent invocation of these functions on the SAME
 // object requires synchronization IF AND ONLY IF some of them take a non-const
 // argument.
-SHADERC_EXPORT spvc_compiler_t spvc_compiler_initialize(void);
+SHADERC_EXPORT shaderc_spvc_compiler_t shaderc_spvc_compiler_initialize(void);
 
-// Releases the resources held by the spvc_compiler_t.
-// After this call it is invalid to make any future calls to functions
-// involving this spvc_compiler_t.
-SHADERC_EXPORT void spvc_compiler_release(spvc_compiler_t);
+// Release resources.  After this the handle cannot be used.
+SHADERC_EXPORT void shaderc_spvc_compiler_release(shaderc_spvc_compiler_t);
 
 // An opaque handle to an object that manages options to a single compilation
 // result.
-typedef struct spvc_compile_options* spvc_compile_options_t;
+typedef struct shaderc_spvc_compile_options* shaderc_spvc_compile_options_t;
 
-// Returns a default-initialized spvc_compile_options_t that can be used
-// to modify the functionality of a compiled module.
+// Returns default compiler options.
 // A return of NULL indicates that there was an error initializing the options.
-// Any function operating on spvc_compile_options_t must offer the
+// Any function operating on shaderc_spvc_compile_options_t must offer the
 // basic thread-safety guarantee.
-SHADERC_EXPORT spvc_compile_options_t
-    spvc_compile_options_initialize(void);
+SHADERC_EXPORT shaderc_spvc_compile_options_t
+shaderc_spvc_compile_options_initialize(void);
 
-// Returns a copy of the given spvc_compile_options_t.
+// Returns a copy of the given options.
 // If NULL is passed as the parameter the call is the same as
-// spvc_compile_options_init.
-SHADERC_EXPORT spvc_compile_options_t spvc_compile_options_clone(
-    const spvc_compile_options_t options);
+// shaderc_spvc_compile_options_init.
+SHADERC_EXPORT shaderc_spvc_compile_options_t
+shaderc_spvc_compile_options_clone(
+    const shaderc_spvc_compile_options_t options);
 
 // Releases the compilation options. It is invalid to use the given
-// spvc_compile_options_t object in any future calls. It is safe to pass
+// option object in any future calls. It is safe to pass
 // NULL to this function, and doing such will have no effect.
-SHADERC_EXPORT void spvc_compile_options_release(
-    spvc_compile_options_t options);
+SHADERC_EXPORT void shaderc_spvc_compile_options_release(
+    shaderc_spvc_compile_options_t options);
 
-// An opaque handle to the results of a call to any spvc_compile_into_*()
-// function.
-typedef struct spvc_compilation_result* spvc_compilation_result_t;
+// Sets the target shader environment, affecting which warnings or errors will
+// be issued.  The version will be for distinguishing between different versions
+// of the target environment.  The version value should be either 0 or
+// a value listed in shaderc_env_version.  The 0 value maps to Vulkan 1.0 if
+// |target| is Vulkan, and it maps to OpenGL 4.5 if |target| is OpenGL.
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_target_env(
+    shaderc_spvc_compile_options_t options, shaderc_target_env target,
+    uint32_t version);
 
-// Takes SPIR-V as a sequence of 32-bit words and compiles to GLSL.
-SHADERC_EXPORT spvc_compilation_result_t spvc_compile_into_glsl(
-    const spvc_compiler_t compiler, const uint32_t* source,
-    size_t source_len, const spvc_compile_options_t additional_options);
+// Set language version.  Default is 450.
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_language_version(
+    shaderc_spvc_compile_options_t options, uint32_t version);
 
-// The following functions, operating on spvc_compilation_result_t objects,
-// offer only the basic thread-safety guarantee.
+// An opaque handle to the results of a call to any
+// shaderc_spvc_compile_into_*() function.
+typedef struct shaderc_spvc_compilation_result*
+    shaderc_spvc_compilation_result_t;
+
+// Takes SPIR-V as a sequence of 32-bit words and compiles to high level
+// language.
+SHADERC_EXPORT shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_glsl(
+    const shaderc_spvc_compiler_t compiler, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options);
+
+// The following functions, operating on shaderc_spvc_compilation_result_t
+// objects, offer only the basic thread-safety guarantee.
 
 // Releases the resources held by the result object. It is invalid to use the
 // result object for any further operations.
-SHADERC_EXPORT void spvc_result_release(spvc_compilation_result_t result);
-
-// Returns the number of bytes of the compilation output data in a result
-// object.
-SHADERC_EXPORT size_t spvc_result_get_length(const spvc_compilation_result_t result);
-
-// Returns the number of warnings generated during the compilation.
-SHADERC_EXPORT size_t spvc_result_get_num_warnings(
-    const spvc_compilation_result_t result);
-
-// Returns the number of errors generated during the compilation.
-SHADERC_EXPORT size_t spvc_result_get_num_errors(const spvc_compilation_result_t result);
+SHADERC_EXPORT void shaderc_spvc_result_release(
+    shaderc_spvc_compilation_result_t result);
 
 // Returns the compilation status, indicating whether the compilation succeeded,
 // or failed due to some reasons, like invalid shader stage or compilation
 // errors.
-SHADERC_EXPORT spvc_compilation_status spvc_result_get_compilation_status(
-    const spvc_compilation_result_t);
+SHADERC_EXPORT shaderc_compilation_status
+shaderc_spvc_result_get_status(const shaderc_spvc_compilation_result_t);
 
-// Returns a pointer to the start of the compilation output data bytes, either
-// SPIR-V binary or char string. When the source string is compiled into SPIR-V
-// binary, this is guaranteed to be castable to a uint32_t*. If the result
-// contains assembly text or preprocessed source text, the pointer will point to
-// the resulting array of characters.
-SHADERC_EXPORT const char* spvc_result_get_bytes(const spvc_compilation_result_t result);
-
-// Returns a null-terminated string that contains any error messages generated
-// during the compilation.
-SHADERC_EXPORT const char* spvc_result_get_error_message(
-    const spvc_compilation_result_t result);
+// Get validation/compilation result as a string.
+SHADERC_EXPORT const char* shaderc_spvc_result_get_validation_messages(
+    const shaderc_spvc_compilation_result_t result);
+SHADERC_EXPORT const char* shaderc_spvc_result_get_compiler_output(
+    const shaderc_spvc_compilation_result_t result);
 
 #ifdef __cplusplus
 }
 #endif  // __cplusplus
 
-#endif  // SHADERC_SPVC_SPVC_H_
+#endif  // SHADERC_SPVC_H_

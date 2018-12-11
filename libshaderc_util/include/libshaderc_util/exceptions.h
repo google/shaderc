@@ -12,5 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gmock/gmock.h>
-#include "spvc_private.h"
+#ifndef LIBSHADERC_UTIL_EXCEPTIONS_H_
+#define LIBSHADERC_UTIL_EXCEPTIONS_H_
+
+#if (defined(_MSC_VER) && !defined(_CPPUNWIND)) || !defined(__EXCEPTIONS)
+#define TRY_IF_EXCEPTIONS_ENABLED
+#define CATCH_IF_EXCEPTIONS_ENABLED(X) if (0)
+#else
+#define TRY_IF_EXCEPTIONS_ENABLED try
+#define CATCH_IF_EXCEPTIONS_ENABLED(X) catch (X)
+#endif
+
+#endif  // LIBSHADERC_UTIL_EXCEPTIONS_H_

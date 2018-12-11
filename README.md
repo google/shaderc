@@ -73,6 +73,7 @@ branch under the "Artifacts" tab of a certain job.
 
 ```sh
 git clone https://github.com/google/shaderc $SOURCE_DIR
+<<<<<<< HEAD
 cd $SOURCE_DIR
 ./utils/git-sync-deps
 cd $SOURCE_DIR/   REMOVE???

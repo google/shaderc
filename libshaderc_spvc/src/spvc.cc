@@ -12,95 +12,137 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "spvc_private.h"
+#include "shaderc/spvc.h"
+#include "libshaderc_util/exceptions.h"
 
-#if (defined(_MSC_VER) && !defined(_CPPUNWIND)) || !defined(__EXCEPTIONS)
-#define TRY_IF_EXCEPTIONS_ENABLED
-#define CATCH_IF_EXCEPTIONS_ENABLED(X) if (0)
-#else
-#define TRY_IF_EXCEPTIONS_ENABLED try
-#define CATCH_IF_EXCEPTIONS_ENABLED(X) catch (X)
-#endif
+#include "spirv-tools/libspirv.hpp"
+#include "spirv_glsl.hpp"
+#include "spirv_hlsl.hpp"
+#include "spirv_msl.hpp"
 
-struct spvc_compile_options {
-  //spvc_target_env target_env = spvc_target_env_default;
-  uint32_t target_env_version = 0;
+struct shaderc_spvc_compiler {};
+
+// Described in spvc.h.
+struct shaderc_spvc_compilation_result {
+  std::string validation_messages;
+  std::string compiler_output;
+  shaderc_compilation_status status =
+      shaderc_compilation_status_null_result_object;
 };
 
-spvc_compile_options_t spvc_compile_options_initialize() {
-  return new (std::nothrow) spvc_compile_options;
+struct shaderc_spvc_compile_options {
+  bool validate = true;
+  spv_target_env target_env = SPV_ENV_VULKAN_1_0;
+  spirv_cross::CompilerGLSL::Options glsl;
+  spirv_cross::CompilerHLSL::Options hlsl;
+  spirv_cross::CompilerMSL::Options msl;
+};
+
+shaderc_spvc_compile_options_t shaderc_spvc_compile_options_initialize() {
+  return new (std::nothrow) shaderc_spvc_compile_options;
 }
 
-spvc_compile_options_t spvc_compile_options_clone(
-    const spvc_compile_options_t options) {
-  if (!options) {
-    return spvc_compile_options_initialize();
-  }
-  return new (std::nothrow) spvc_compile_options(*options);
+shaderc_spvc_compile_options_t shaderc_spvc_compile_options_clone(
+    shaderc_spvc_compile_options_t options) {
+  if (options) return new (std::nothrow) shaderc_spvc_compile_options(*options);
+  return shaderc_spvc_compile_options_initialize();
 }
 
-void spvc_compile_options_release(spvc_compile_options_t options) {
+void shaderc_spvc_compile_options_release(
+    shaderc_spvc_compile_options_t options) {
   delete options;
 }
 
-spvc_compiler_t spvc_compiler_initialize() {
-  spvc_compiler_t compiler = new (std::nothrow) spvc_compiler;
-  return compiler;
+void shaderc_spvc_compile_options_set_target_env(
+    shaderc_spvc_compile_options_t options, shaderc_target_env target,
+    uint32_t version) {
+  switch (target) {
+    case shaderc_target_env_opengl:
+    case shaderc_target_env_opengl_compat:
+      switch (version) {
+        case shaderc_env_version_opengl_4_5:
+          options->target_env = SPV_ENV_OPENGL_4_5;
+          break;
+      }
+      break;
+    case shaderc_target_env_vulkan:
+      switch (version) {
+        case shaderc_env_version_vulkan_1_0:
+          options->target_env = SPV_ENV_VULKAN_1_0;
+          break;
+        case shaderc_env_version_vulkan_1_1:
+          options->target_env = SPV_ENV_VULKAN_1_1;
+          break;
+      }
+      break;
+  }
 }
 
-void spvc_compiler_release(spvc_compiler_t compiler) { delete compiler; }
+void shaderc_spvc_compile_options_set_language_version(
+    shaderc_spvc_compile_options_t options, uint32_t version) {
+  options->glsl.version = version;
+}
 
-spvc_compilation_result_t spvc_compile_into_glsl(
-    const spvc_compiler_t compiler,
-    const uint32_t *source, size_t source_len,
-    const spvc_compile_options_t additional_options) {
-  auto* result = new (std::nothrow) spvc_compilation_result;
+shaderc_spvc_compiler_t shaderc_spvc_compiler_initialize() {
+  return new (std::nothrow) shaderc_spvc_compiler;
+}
+
+void shaderc_spvc_compiler_release(shaderc_spvc_compiler_t compiler) {
+  delete compiler;
+}
+
+void consume_validation_message(shaderc_spvc_compilation_result* result,
+                                spv_message_level_t level, const char* src,
+                                const spv_position_t& pos,
+                                const char* message) {
+  result->validation_messages.append(message);
+  result->validation_messages.append("\n");
+}
+
+shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_glsl(
+    const shaderc_spvc_compiler_t compiler, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options) {
+  auto* result = new (std::nothrow) shaderc_spvc_compilation_result;
   if (!result) return nullptr;
+  if (options->validate) {
+    spvtools::SpirvTools tools(options->target_env);
+    tools.SetMessageConsumer(std::bind(
+        consume_validation_message, result, std::placeholders::_1,
+        std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+    if (!tools.Validate(source, source_len, spvtools::ValidatorOptions())) {
+      result->status = shaderc_compilation_status_validation_error;
+    }
+  }
   TRY_IF_EXCEPTIONS_ENABLED {
     spirv_cross::CompilerGLSL cross(source, source_len);
-    result->output = cross.compile();
-    result->compilation_status = spvc_compilation_status_success;
+    cross.set_common_options(options->glsl);
+    result->compiler_output = cross.compile();
+    // An exception during compiling would crash (if exceptions off) or jump to
+    // the catch block (if exceptions on) so if we're here we know the compile
+    // worked.
+    result->status = shaderc_compilation_status_success;
   }
   CATCH_IF_EXCEPTIONS_ENABLED(...) {
-    result->compilation_status = spvc_compilation_status_internal_error;
+    result->status = shaderc_compilation_status_compilation_error;
   }
   return result;
 }
 
-size_t spvc_result_get_length(const spvc_compilation_result_t result) {
-  return result->output_data_size;
+const char* shaderc_spvc_result_get_compiler_output(
+    const shaderc_spvc_compilation_result_t result) {
+  return result->compiler_output.c_str();
 }
 
-size_t spvc_result_get_num_warnings(
-    const spvc_compilation_result_t result) {
-  return result->num_warnings;
+const char* shaderc_spvc_result_get_validation_messages(
+    const shaderc_spvc_compilation_result_t result) {
+  return result->validation_messages.c_str();
 }
 
-size_t spvc_result_get_num_errors(
-    const spvc_compilation_result_t result) {
-  return result->num_errors;
+shaderc_compilation_status shaderc_spvc_result_get_status(
+    const shaderc_spvc_compilation_result_t result) {
+  return result->status;
 }
 
-const char* spvc_result_get_output(
-    const spvc_compilation_result_t result) {
-  return result->output.c_str();
-}
-
-void spvc_result_release(spvc_compilation_result_t result) {
+void shaderc_spvc_result_release(shaderc_spvc_compilation_result_t result) {
   delete result;
-}
-
-const char* spvc_result_get_error_message(
-    const spvc_compilation_result_t result) {
-  return result->messages.c_str();
-}
-
-spvc_compilation_status spvc_result_get_compilation_status(
-    const spvc_compilation_result_t result) {
-  return result->compilation_status;
-}
-
-void spvc_get_spv_version(unsigned int* version, unsigned int* revision) {
-  *version = spv::Version;
-  *revision = spv::Revision;
 }

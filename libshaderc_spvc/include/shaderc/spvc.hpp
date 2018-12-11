@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SHADERC_SPVC_SPVC_HPP_
-#define SHADERC_SPVC_SPVC_HPP_
+#ifndef SHADERC_SPVC_HPP_
+#define SHADERC_SPVC_HPP_
 
 #include <memory>
 #include <string>
@@ -21,7 +21,7 @@
 
 #include "spvc.h"
 
-namespace spvc {
+namespace shaderc_spvc {
 // A CompilationResult contains the compiler output, compilation status,
 // and messages.
 //
@@ -34,134 +34,90 @@ namespace spvc {
 //
 // Methods begin() and end() are also provided to enable range-based for.
 // They are synonyms to cbegin() and cend(), respectively.
-template <typename OutputElementType>
 class CompilationResult {
  public:
-  typedef OutputElementType element_type;
-  // The type used to describe the begin and end iterators on the
-  // compiler output.
-  typedef const OutputElementType* const_iterator;
-
   // Upon creation, the CompilationResult takes ownership of the
-  // spvc_compilation_result instance. During destruction of the
-  // CompilationResult, the spvc_compilation_result will be released.
-  explicit CompilationResult(spvc_compilation_result_t compilation_result)
-      : compilation_result_(compilation_result) {}
-  CompilationResult() : compilation_result_(nullptr) {}
-  ~CompilationResult() { spvc_result_release(compilation_result_); }
+  // shaderc_spvc_compilation_result instance. During destruction of the
+  // CompilationResult, the shaderc_spvc_compilation_result will be released.
+  explicit CompilationResult(shaderc_spvc_compilation_result_t result)
+      : result_(result) {}
+  CompilationResult() : result_(nullptr) {}
+  ~CompilationResult() { shaderc_spvc_result_release(result_); }
 
-  CompilationResult(CompilationResult&& other) : compilation_result_(nullptr) {
+  CompilationResult(CompilationResult&& other) : result_(nullptr) {
     *this = std::move(other);
   }
 
   CompilationResult& operator=(CompilationResult&& other) {
-    if (compilation_result_) {
-      spvc_result_release(compilation_result_);
+    if (result_) {
+      shaderc_spvc_result_release(result_);
     }
-    compilation_result_ = other.compilation_result_;
-    other.compilation_result_ = nullptr;
+    result_ = other.result_;
+    other.result_ = nullptr;
     return *this;
-  }
-
-  // Returns any error message found during compilation.
-  std::string GetErrorMessage() const {
-    if (!compilation_result_) {
-      return "";
-    }
-    return spvc_result_get_error_message(compilation_result_);
   }
 
   // Returns the compilation status, indicating whether the compilation
   // succeeded, or failed due to some reasons, like invalid shader stage or
   // compilation errors.
-  spvc_compilation_status GetCompilationStatus() const {
-    if (!compilation_result_) {
-      return spvc_compilation_status_null_result_object;
+  shaderc_compilation_status GetCompilationStatus() const {
+    if (!result_) {
+      return shaderc_compilation_status_null_result_object;
     }
-    return spvc_result_get_compilation_status(compilation_result_);
+    return shaderc_spvc_result_get_status(result_);
   }
 
-  // Returns a random access (contiguous) iterator pointing to the start
-  // of the compilation output.  It is valid for the lifetime of this object.
-  // If there is no compilation result, then returns nullptr.
-  const_iterator cbegin() const {
-    if (!compilation_result_) return nullptr;
-    return reinterpret_cast<const_iterator>(
-        spvc_result_get_bytes(compilation_result_));
+  const std::string GetCompilerOutput() const {
+    return shaderc_spvc_result_get_compiler_output(result_);
   }
 
-  // Returns a random access (contiguous) iterator pointing to the end of
-  // the compilation output.  It is valid for the lifetime of this object.
-  // If there is no compilation result, then returns nullptr.
-  const_iterator cend() const {
-    if (!compilation_result_) return nullptr;
-    return cbegin() +
-           spvc_result_get_length(compilation_result_) /
-               sizeof(OutputElementType);
-  }
-
-  // Returns the same iterator as cbegin().
-  const_iterator begin() const { return cbegin(); }
-  // Returns the same iterator as cend().
-  const_iterator end() const { return cend(); }
-
-  // Returns the number of warnings generated during the compilation.
-  size_t GetNumWarnings() const {
-    if (!compilation_result_) {
-      return 0;
-    }
-    return spvc_result_get_num_warnings(compilation_result_);
-  }
-
-  // Returns the number of errors generated during the compilation.
-  size_t GetNumErrors() const {
-    if (!compilation_result_) {
-      return 0;
-    }
-    return spvc_result_get_num_errors(compilation_result_);
+  const std::string GetValidationMessages() const {
+    return shaderc_spvc_result_get_validation_messages(result_);
   }
 
  private:
   CompilationResult(const CompilationResult& other) = delete;
   CompilationResult& operator=(const CompilationResult& other) = delete;
 
-  spvc_compilation_result_t compilation_result_;
+  shaderc_spvc_compilation_result_t result_;
 };
-
-// A compilation result for a SPIR-V binary module, which is an array
-// of uint32_t words.
-using SpvCompilationResult = CompilationResult<uint32_t>;
-// A compilation result in SPIR-V assembly syntax.
-using AssemblyCompilationResult = CompilationResult<char>;
-// Preprocessed source text.
-using PreprocessedSourceCompilationResult = CompilationResult<char>;
 
 // Contains any options that can have default values for a compilation.
 class CompileOptions {
  public:
-  CompileOptions() { options_ = spvc_compile_options_initialize(); }
-  ~CompileOptions() { spvc_compile_options_release(options_); }
+  CompileOptions() { options_ = shaderc_spvc_compile_options_initialize(); }
+  ~CompileOptions() { shaderc_spvc_compile_options_release(options_); }
   CompileOptions(const CompileOptions& other) {
-    options_ = spvc_compile_options_clone(other.options_);
+    options_ = shaderc_spvc_compile_options_clone(other.options_);
   }
   CompileOptions(CompileOptions&& other) {
     options_ = other.options_;
     other.options_ = nullptr;
   }
 
+  // Which environment should be used to validate the input SPIR-V.  Default is
+  // Vulkan 1.0.
+  void SetTargetEnvironment(shaderc_target_env target, uint32_t version) {
+    shaderc_spvc_compile_options_set_target_env(options_, target, version);
+  }
+
+  // Which GLSL version should be produced.  Default is 450.
+  void SetLanguageVersion(uint32_t version) {
+    shaderc_spvc_compile_options_set_language_version(options_, version);
+  }
+
  private:
   CompileOptions& operator=(const CompileOptions& other) = delete;
-  spvc_compile_options_t options_;
-  //std::unique_ptr<IncluderInterface> includer_;
+  shaderc_spvc_compile_options_t options_;
 
   friend class Compiler;
 };
 
-// The compilation context for compiling source to SPIR-V.
+// The compilation context for compiling SPIR-V.
 class Compiler {
  public:
-  Compiler() : compiler_(spvc_compiler_initialize()) {}
-  ~Compiler() { spvc_compiler_release(compiler_); }
+  Compiler() : compiler_(shaderc_spvc_compiler_initialize()) {}
+  ~Compiler() { shaderc_spvc_compiler_release(compiler_); }
 
   Compiler(Compiler&& other) {
     compiler_ = other.compiler_;
@@ -171,20 +127,20 @@ class Compiler {
   bool IsValid() const { return compiler_ != nullptr; }
 
   // Compiles the given source SPIR-V to GLSL.
-  SpvCompilationResult CompileSpvToGlsl(const uint32_t* source,
-                                        size_t source_len,
-                                        const CompileOptions& options) const {
-    spvc_compilation_result_t compilation_result = spvc_compile_into_glsl(
-        compiler_, source, source_len, options.options_);
-    return SpvCompilationResult(compilation_result);
+  CompilationResult CompileSpvToGlsl(const uint32_t* source, size_t source_len,
+                                     const CompileOptions& options) const {
+    shaderc_spvc_compilation_result_t compilation_result =
+        shaderc_spvc_compile_into_glsl(compiler_, source, source_len,
+                                       options.options_);
+    return CompilationResult(compilation_result);
   }
 
  private:
   Compiler(const Compiler&) = delete;
   Compiler& operator=(const Compiler& other) = delete;
 
-  spvc_compiler_t compiler_;
+  shaderc_spvc_compiler_t compiler_;
 };
-}  // namespace spvc
+}  // namespace shaderc_spvc
 
-#endif  // SHADERC_SPVC_SPVC_HPP_
+#endif  // SHADERC_SPVC_HPP_

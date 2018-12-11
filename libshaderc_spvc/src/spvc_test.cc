@@ -21,47 +21,52 @@
 namespace {
 
 TEST(Init, MultipleCalls) {
-  spvc_compiler_t compiler1, compiler2, compiler3;
-  EXPECT_NE(nullptr, compiler1 = spvc_compiler_initialize());
-  EXPECT_NE(nullptr, compiler2 = spvc_compiler_initialize());
-  EXPECT_NE(nullptr, compiler3 = spvc_compiler_initialize());
-  spvc_compiler_release(compiler1);
-  spvc_compiler_release(compiler2);
-  spvc_compiler_release(compiler3);
+  shaderc_spvc_compiler_t compiler1, compiler2, compiler3;
+  EXPECT_NE(nullptr, compiler1 = shaderc_spvc_compiler_initialize());
+  EXPECT_NE(nullptr, compiler2 = shaderc_spvc_compiler_initialize());
+  EXPECT_NE(nullptr, compiler3 = shaderc_spvc_compiler_initialize());
+  shaderc_spvc_compiler_release(compiler1);
+  shaderc_spvc_compiler_release(compiler2);
+  shaderc_spvc_compiler_release(compiler3);
 }
 
 #ifndef SHADERC_DISABLE_THREADED_TESTS
 TEST(Init, MultipleThreadsCalling) {
-  spvc_compiler_t compiler1, compiler2, compiler3;
-  std::thread t1([&compiler1]() { compiler1 = spvc_compiler_initialize(); });
-  std::thread t2([&compiler2]() { compiler2 = spvc_compiler_initialize(); });
-  std::thread t3([&compiler3]() { compiler3 = spvc_compiler_initialize(); });
+  shaderc_spvc_compiler_t compiler1, compiler2, compiler3;
+  std::thread t1(
+      [&compiler1]() { compiler1 = shaderc_spvc_compiler_initialize(); });
+  std::thread t2(
+      [&compiler2]() { compiler2 = shaderc_spvc_compiler_initialize(); });
+  std::thread t3(
+      [&compiler3]() { compiler3 = shaderc_spvc_compiler_initialize(); });
   t1.join();
   t2.join();
   t3.join();
   EXPECT_NE(nullptr, compiler1);
   EXPECT_NE(nullptr, compiler2);
   EXPECT_NE(nullptr, compiler3);
-  spvc_compiler_release(compiler1);
-  spvc_compiler_release(compiler2);
-  spvc_compiler_release(compiler3);
+  shaderc_spvc_compiler_release(compiler1);
+  shaderc_spvc_compiler_release(compiler2);
+  shaderc_spvc_compiler_release(compiler3);
 }
 #endif
 
 TEST(Compile, Test1) {
-  spvc_compiler_t compiler;
-  spvc_compile_options_t options;
+  shaderc_spvc_compiler_t compiler;
+  shaderc_spvc_compile_options_t options;
 
-  compiler = spvc_compiler_initialize();
-  options = spvc_compile_options_initialize();
+  compiler = shaderc_spvc_compiler_initialize();
+  options = shaderc_spvc_compile_options_initialize();
 
-  spvc_compilation_result_t result = spvc_compile_into_glsl(compiler, kShader1, sizeof(kShader1)/sizeof(uint32_t), options);
+  shaderc_spvc_compilation_result_t result = shaderc_spvc_compile_into_glsl(
+      compiler, kShader1, sizeof(kShader1) / sizeof(uint32_t), options);
   ASSERT_NE(nullptr, result);
-  EXPECT_EQ(spvc_compilation_status_success, spvc_result_get_compilation_status(result));
+  EXPECT_EQ(shaderc_compilation_status_success,
+            shaderc_spvc_result_get_status(result));
 
-  spvc_result_release(result);
-  spvc_compile_options_release(options);
-  spvc_compiler_release(compiler);
+  shaderc_spvc_result_release(result);
+  shaderc_spvc_compile_options_release(options);
+  shaderc_spvc_compiler_release(compiler);
 }
 
 }  // anonymous namespace

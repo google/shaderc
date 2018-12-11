@@ -12,24 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
+#ifndef LIBSHADERC_UTIL_VISIBILITY_H_
+#define LIBSHADERC_UTIL_VISIBILITY_H_
 
-#include "common_shaders_for_test.h"
-#include "shaderc/spvc.hpp"
+// SHADERC_EXPORT tags symbol that will be exposed by the shared libraries.
+#if defined(SHADERC_SHAREDLIB)
+#if defined(_WIN32)
+#if defined(SHADERC_IMPLEMENTATION)
+#define SHADERC_EXPORT __declspec(dllexport)
+#else
+#define SHADERC_EXPORT __declspec(dllimport)
+#endif
+#else
+#if defined(SHADERC_IMPLEMENTATION)
+#define SHADERC_EXPORT __attribute__((visibility("default")))
+#else
+#define SHADERC_EXPORT
+#endif
+#endif
+#else
+#define SHADERC_EXPORT
+#endif
 
-using shaderc_spvc::CompilationResult;
-using shaderc_spvc::CompileOptions;
-using shaderc_spvc::Compiler;
-
-namespace {
-
-TEST(Compile, Test1) {
-  Compiler compiler;
-  CompileOptions options;
-
-  CompilationResult result = compiler.CompileSpvToGlsl(
-      kShader1, sizeof(kShader1) / sizeof(uint32_t), options);
-  ASSERT_EQ(shaderc_compilation_status_success, result.GetCompilationStatus());
-}
-
-}  // anonymous namespace
+#endif  // LIBSHADERC_UTIL_VISIBILITY_H_

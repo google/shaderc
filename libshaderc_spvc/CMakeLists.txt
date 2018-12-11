@@ -7,7 +7,6 @@ set(SPVC_SOURCES
   include/shaderc/spvc.h
   include/shaderc/spvc.hpp
   src/spvc.cc
-  src/spvc_private.h
 )
 
 add_library(shaderc_spvc STATIC ${SPVC_SOURCES})
@@ -18,7 +17,6 @@ add_library(shaderc_spvc_shared SHARED ${SPVC_SOURCES})
 shaderc_default_compile_options(shaderc_spvc_shared)
 target_include_directories(shaderc_spvc_shared PUBLIC include PRIVATE ${shaderc_SOURCE_DIR}/libshaderc_util/include ${spirv-tools_SOURCE_DIR}/include ${SPIRV-Cross_SOURCE_DIR})
 
-#XXX what is this?
 target_compile_definitions(shaderc_spvc_shared
     PRIVATE SHADERC_IMPLEMENTATION
     PUBLIC SHADERC_SHAREDLIB
@@ -41,9 +39,7 @@ endif(SHADERC_ENABLE_INSTALL)
 
 find_package(Threads)
 set(SPVC_LIBS
-  OSDependent OGLCompiler ${CMAKE_THREAD_LIBS_INIT}
-  shaderc_util
-  SPIRV # from glslang
+  ${CMAKE_THREAD_LIBS_INIT}
   SPIRV-Tools
   spirv-cross-glsl
 )
@@ -53,21 +49,19 @@ target_link_libraries(shaderc_spvc_shared PRIVATE ${SPVC_LIBS})
 
 shaderc_add_tests(
   TEST_PREFIX shaderc
-  LINK_LIBS shaderc_spvc shaderc_util
+  LINK_LIBS shaderc_spvc
   INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc_util/include ${SPIRV-Cross_SOURCE_DIR}
   TEST_NAMES
     spvc
-    spvc_cpp
-    spvc_private)
+    spvc_cpp)
 
 shaderc_add_tests(
   TEST_PREFIX shaderc_shared
-  LINK_LIBS shaderc_spvc_shared SPIRV-Tools shaderc_util
+  LINK_LIBS shaderc_spvc_shared SPIRV-Tools
   INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc_util/include ${SPIRV-Cross_SOURCE_DIR}
   TEST_NAMES
     spvc
-    spvc_cpp
-    spvc_private)
+    spvc_cpp)
 
 shaderc_combine_static_lib(shaderc_spvc_combined shaderc_spvc)
 
@@ -98,7 +92,7 @@ shaderc_add_tests(
 
 if(${SHADERC_ENABLE_TESTS})
   add_executable(spvc_c_smoke_test ./src/spvc_c_smoke_test.c)
-  target_include_directories(spvc_c_smoke_test PUBLIC include PRIVATE ${shaderc_SOURCE_DIR}/libshaderc/include)
+  target_include_directories(spvc_c_smoke_test PUBLIC include PRIVATE ${shaderc_SOURCE_DIR}/libshaderc/include ${shaderc_SOURCE_DIR}/libshaderc_util/include)
   shaderc_default_c_compile_options(spvc_c_smoke_test)
   target_link_libraries(spvc_c_smoke_test PRIVATE shaderc_spvc shaderc)
   add_test(NAME spvc_c_smoke_test COMMAND spvc_c_smoke_test)
