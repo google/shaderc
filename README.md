@@ -72,13 +72,8 @@ branch under the "Artifacts" tab of a certain job.
 
 ```sh
 git clone https://github.com/google/shaderc $SOURCE_DIR
-cd $SOURCE_DIR/third_party
-git clone https://github.com/google/googletest.git
-git clone https://github.com/KhronosGroup/glslang.git
-git clone https://github.com/KhronosGroup/SPIRV-Tools.git spirv-tools
-git clone https://github.com/KhronosGroup/SPIRV-Headers.git spirv-headers
-git clone https://github.com/google/re2.git
-git clone https://github.com/google/effcee.git
+cd $SOURCE_DIR
+./utils/git-sync-deps
 cd $SOURCE_DIR/
 ```
 
