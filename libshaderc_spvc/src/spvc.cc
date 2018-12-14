@@ -16,9 +16,9 @@
 #include "libshaderc_util/exceptions.h"
 
 #include "spirv-tools/libspirv.hpp"
-#include "spirv_glsl.hpp"
-#include "spirv_hlsl.hpp"
-#include "spirv_msl.hpp"
+#include "spirv-cross/spirv_glsl.hpp"
+#include "spirv-cross/spirv_hlsl.hpp"
+#include "spirv-cross/spirv_msl.hpp"
 
 struct shaderc_spvc_compiler {};
 
@@ -55,13 +55,15 @@ void shaderc_spvc_compile_options_release(
 
 void shaderc_spvc_compile_options_set_target_env(
     shaderc_spvc_compile_options_t options, shaderc_target_env target,
-    uint32_t version) {
+    shaderc_env_version version) {
   switch (target) {
     case shaderc_target_env_opengl:
     case shaderc_target_env_opengl_compat:
       switch (version) {
         case shaderc_env_version_opengl_4_5:
           options->target_env = SPV_ENV_OPENGL_4_5;
+          break;
+        default:
           break;
       }
       break;
@@ -73,7 +75,11 @@ void shaderc_spvc_compile_options_set_target_env(
         case shaderc_env_version_vulkan_1_1:
           options->target_env = SPV_ENV_VULKAN_1_1;
           break;
+        default:
+          break;
       }
+      break;
+    default:
       break;
   }
 }
@@ -111,6 +117,7 @@ shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_glsl(
         std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
     if (!tools.Validate(source, source_len, spvtools::ValidatorOptions())) {
       result->status = shaderc_compilation_status_validation_error;
+      return result;
     }
   }
   TRY_IF_EXCEPTIONS_ENABLED {

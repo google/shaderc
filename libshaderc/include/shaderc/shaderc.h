@@ -26,19 +26,11 @@ extern "C" {
 #include "libshaderc_util/common.h"
 #include "libshaderc_util/visibility.h"
 
-// Languages.
+// Source language kind.
 typedef enum {
   shaderc_source_language_glsl,
   shaderc_source_language_hlsl,
 } shaderc_source_language;
-
-typedef enum {
-  shaderc_profile_none,  // Used if and only if GLSL version did not specify
-                         // profiles.
-  shaderc_profile_core,
-  shaderc_profile_compatibility,
-  shaderc_profile_es,
-} shaderc_profile;
 
 typedef enum {
   // Forced shader kinds. These shader kinds force the compiler to compile the
@@ -97,6 +89,14 @@ typedef enum {
   shaderc_glsl_default_mesh_shader,
 #endif
 } shaderc_shader_kind;
+
+typedef enum {
+  shaderc_profile_none,  // Used if and only if GLSL version did not specify
+                         // profiles.
+  shaderc_profile_core,
+  shaderc_profile_compatibility,
+  shaderc_profile_es,
+} shaderc_profile;
 
 // Optimization level.
 typedef enum {

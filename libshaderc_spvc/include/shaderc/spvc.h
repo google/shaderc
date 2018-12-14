@@ -67,13 +67,10 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_release(
     shaderc_spvc_compile_options_t options);
 
 // Sets the target shader environment, affecting which warnings or errors will
-// be issued.  The version will be for distinguishing between different versions
-// of the target environment.  The version value should be either 0 or
-// a value listed in shaderc_env_version.  The 0 value maps to Vulkan 1.0 if
-// |target| is Vulkan, and it maps to OpenGL 4.5 if |target| is OpenGL.
+// be issued during validation.
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_target_env(
     shaderc_spvc_compile_options_t options, shaderc_target_env target,
-    uint32_t version);
+    shaderc_env_version version);
 
 // Set language version.  Default is 450.
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_language_version(

@@ -9,7 +9,7 @@ set(SHADERC_SPIRV_TOOLS_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/spirv-tools" CACHE 
   "Location of spirv-tools source")
 set(SHADERC_SPIRV_HEADERS_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/spirv-headers" CACHE STRING
   "Location of spirv-headers source")
-set(SHADERC_SPIRV_CROSS_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/SPIRV-Cross" CACHE STRING
+set(SHADERC_SPIRV_CROSS_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/spirv-cross" CACHE STRING
   "Location of SPIRV-Cross source")
 set(SHADERC_GLSLANG_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/glslang" CACHE STRING
   "Location of glslang source")
@@ -80,7 +80,7 @@ if (NOT TARGET spirv-cross-core)
     # Add -fPIC to SPIRV-Cross build.
     set(CXX_BACK ${CMAKE_CXX_FLAGS})
     SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-fPIC")
-    add_subdirectory(${SHADERC_SPIRV_CROSS_DIR} SPIRV-Cross)
+    add_subdirectory(${SHADERC_SPIRV_CROSS_DIR} spirv-cross)
     set(CMAKE_CXX_FLAGS ${CXX_BACK})
   endif()
   if (NOT TARGET spirv-cross-core)

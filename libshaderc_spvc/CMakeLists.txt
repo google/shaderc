@@ -11,11 +11,11 @@ set(SPVC_SOURCES
 
 add_library(shaderc_spvc STATIC ${SPVC_SOURCES})
 shaderc_default_compile_options(shaderc_spvc)
-target_include_directories(shaderc_spvc PUBLIC include PRIVATE ${shaderc_SOURCE_DIR}/libshaderc_util/include ${spirv-tools_SOURCE_DIR}/include ${SPIRV-Cross_SOURCE_DIR})
+target_include_directories(shaderc_spvc PUBLIC include PRIVATE ${shaderc_SOURCE_DIR}/libshaderc_util/include ${spirv-tools_SOURCE_DIR}/include ${SPIRV-Cross_SOURCE_DIR}/..)
 
 add_library(shaderc_spvc_shared SHARED ${SPVC_SOURCES})
 shaderc_default_compile_options(shaderc_spvc_shared)
-target_include_directories(shaderc_spvc_shared PUBLIC include PRIVATE ${shaderc_SOURCE_DIR}/libshaderc_util/include ${spirv-tools_SOURCE_DIR}/include ${SPIRV-Cross_SOURCE_DIR})
+target_include_directories(shaderc_spvc_shared PUBLIC include PRIVATE ${shaderc_SOURCE_DIR}/libshaderc_util/include ${spirv-tools_SOURCE_DIR}/include ${SPIRV-Cross_SOURCE_DIR}/..)
 
 target_compile_definitions(shaderc_spvc_shared
     PRIVATE SHADERC_IMPLEMENTATION
@@ -50,7 +50,7 @@ target_link_libraries(shaderc_spvc_shared PRIVATE ${SPVC_LIBS})
 shaderc_add_tests(
   TEST_PREFIX shaderc
   LINK_LIBS shaderc_spvc
-  INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc_util/include ${SPIRV-Cross_SOURCE_DIR}
+  INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc_util/include ${SPIRV-Cross_SOURCE_DIR}/..
   TEST_NAMES
     spvc
     spvc_cpp)
@@ -58,7 +58,7 @@ shaderc_add_tests(
 shaderc_add_tests(
   TEST_PREFIX shaderc_shared
   LINK_LIBS shaderc_spvc_shared SPIRV-Tools
-  INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc_util/include ${SPIRV-Cross_SOURCE_DIR}
+  INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc_util/include ${SPIRV-Cross_SOURCE_DIR}/..
   TEST_NAMES
     spvc
     spvc_cpp)
