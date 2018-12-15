@@ -32,6 +32,8 @@ RUN git clone https://github.com/google/googletest.git          third_party/goog
 RUN git clone https://github.com/google/glslang.git             third_party/glslang
 RUN git clone https://github.com/KhronosGroup/SPIRV-Tools.git   third_party/spirv-tools
 RUN git clone https://github.com/KhronosGroup/SPIRV-Headers.git third_party/spirv-tools/external/spirv-headers
+RUN git clone https://github.com/google/re2.git                 third_party/re2
+RUN git clone https://github.com/google/effcee.git              third_party/effcee
 
 WORKDIR build
 RUN cmake -GNinja \
