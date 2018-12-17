@@ -24,7 +24,7 @@ set VS_VERSION=%2
 :: Force usage of python 2.7 rather than 3.6
 set PATH=C:\python27;%PATH%
 
-cd %SRC%\third_party
+cd %SRC%
 python utils\git-sync-deps
 
 cmake --version
