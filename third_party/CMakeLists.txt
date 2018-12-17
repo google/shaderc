@@ -80,6 +80,8 @@ if (NOT TARGET spirv-cross-core)
     # Add -fPIC to SPIRV-Cross build.
     set(CXX_BACK ${CMAKE_CXX_FLAGS})
     SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-fPIC")
+    # cmake inserts a semicolon, change it to a space.
+    STRING(REGEX REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     add_subdirectory(${SHADERC_SPIRV_CROSS_DIR} spirv-cross)
     set(CMAKE_CXX_FLAGS ${CXX_BACK})
   endif()
