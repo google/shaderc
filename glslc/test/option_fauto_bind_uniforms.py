@@ -36,6 +36,11 @@ GLSL_SHADER_WITH_UNIFORMS_WITHOUT_BINDINGS = """#version 450
 
 
 # An HLSL shader with uniforms without explicit bindings.
+# The counter buffer has an associated counter that needs a
+# binding.  Compile this shader with --auto-bind-uniforms to
+# give it a binding, since Glslang does not support attribute
+# [[vk::counter_binding(N))]].
+# See https://github.com/KhronosGroup/glslang/issues/1616
 HLSL_SHADER_WITHOUT_BINDINGS = """
 SamplerState s1 : register(s1);
 SamplerComparisonState s2 : register(s2);
@@ -318,11 +323,12 @@ class FSsboBindingBaseForFragOptionIgnoredOnSsboCompileAsVert(expect.ValidAssemb
 
 
 @inside_glslc_testsuite('OptionFAutoBindUniforms')
-class AutomaticaHlslIoMapping(expect.ValidAssemblyFileWithSubstr):
+class AutomaticHlslIoMapping(expect.ValidAssemblyFileWithSubstr):
     """Tests that HLSL IO Mapping uses the register values in the source code."""
 
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
-    glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap', shader]
+    glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap',
+                  '-fauto-bind-uniforms', shader]
     expected_assembly_substr = "OpDecorate %u8 Binding 28"
 
 
@@ -333,7 +339,7 @@ class HlslFSamplerBindingBaseOptionRespected(expect.ValidAssemblyFileWithSubstr)
 
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap', shader,
-                  '-fsampler-binding-base', '100']
+                  '-fauto-bind-uniforms', '-fsampler-binding-base', '100']
     expected_assembly_substr = "OpDecorate %s2 Binding 102"
 
 
@@ -344,7 +350,7 @@ class HlslFSamplerBindingBaseForFragOptionRespected(expect.ValidAssemblyFileWith
 
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap', shader,
-                  '-fsampler-binding-base', 'frag', '100']
+                  '-fauto-bind-uniforms', '-fsampler-binding-base', 'frag', '100']
     expected_assembly_substr = "OpDecorate %s2 Binding 102"
 
 
@@ -355,7 +361,7 @@ class HlslFSamplerBindingBaseForComputeOptionIgnoredWhenCompilingAsFrag(expect.V
 
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap', shader,
-                  '-fsampler-binding-base', 'compute', '100']
+                  '-fauto-bind-uniforms', '-fsampler-binding-base', 'compute', '100']
     expected_assembly_substr = "OpDecorate %s2 Binding 2"
 
 
@@ -366,7 +372,7 @@ class HlslFTextureBindingBaseOptionRespected(expect.ValidAssemblyFileWithSubstr)
 
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap', shader,
-                  '-ftexture-binding-base', '100']
+                  '-fauto-bind-uniforms', '-ftexture-binding-base', '100']
     expected_assembly_substr = "OpDecorate %t6 Binding 116"
 
 
@@ -377,7 +383,7 @@ class HlslFTextureBindingBaseForFragOptionRespected(expect.ValidAssemblyFileWith
 
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap', shader,
-                  '-ftexture-binding-base', 'frag', '100']
+                  '-fauto-bind-uniforms', '-ftexture-binding-base', 'frag', '100']
     expected_assembly_substr = "OpDecorate %t6 Binding 116"
 
 
@@ -388,7 +394,7 @@ class HlslFTextureBindingBaseForComputeOptionIgnoredWhenCompilingAsFrag(expect.V
 
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap', shader,
-                  '-ftexture-binding-base', 'compute', '100']
+                  '-fauto-bind-uniforms', '-ftexture-binding-base', 'compute', '100']
     expected_assembly_substr = "OpDecorate %t6 Binding 16"
 
 
@@ -399,7 +405,7 @@ class HlslFUavBindingBaseOptionRespected(expect.ValidAssemblyFileWithSubstr):
 
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap', shader,
-                  '-fuav-binding-base', '100']
+                  '-fauto-bind-uniforms', '-fuav-binding-base', '100']
     expected_assembly_substr = "OpDecorate %u8 Binding 128"
 
 
@@ -410,7 +416,7 @@ class HlslFUavBindingBaseForFragOptionRespected(expect.ValidAssemblyFileWithSubs
 
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap', shader,
-                  '-fuav-binding-base', 'frag', '100']
+                  '-fauto-bind-uniforms', '-fuav-binding-base', 'frag', '100']
     expected_assembly_substr = "OpDecorate %u8 Binding 128"
 
 
@@ -421,5 +427,5 @@ class HlslFUavBindingBaseForComputeOptionIgnoredWhenCompilingAsFrag(expect.Valid
 
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap', shader,
-                  '-fuav-binding-base', 'compute', '100']
+                  '-fauto-bind-uniforms', '-fuav-binding-base', 'compute', '100']
     expected_assembly_substr = "OpDecorate %u8 Binding 28"

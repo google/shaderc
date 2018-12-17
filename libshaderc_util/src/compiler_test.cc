@@ -131,7 +131,9 @@ float4 sampleTexture(CombinedTextureSampler c, float2 loc) {
  return c.tex.Sample(c.sampl, loc);
 };
 
+[[vk::binding(0,0)]]
 Texture2D gTex;
+[[vk::binding(0,1)]]
 SamplerState gSampler;
 
 float4 main(float2 loc: A) : SV_Target {
@@ -143,6 +145,7 @@ float4 main(float2 loc: A) : SV_Target {
 })";
 
 const char kHlslShaderWithCounterBuffer[] = R"(
+[[vk::binding(0,0)]]
 RWStructuredBuffer<float4> Ainc;
 float4 main() : SV_Target0 {
   return float4(Ainc.IncrementCounter(), 0, 0, 0);
@@ -217,7 +220,7 @@ class CompilerTest : public testing::Test {
         Compiler::OutputType::SpirvBinary, &errors, &total_warnings,
         &total_errors, &initializer);
     errors_ = errors.str();
-    EXPECT_TRUE(result);
+    EXPECT_TRUE(result) << errors_;
     return words;
   }
 
@@ -582,7 +585,8 @@ TEST_F(CompilerTest, SetBindingBaseForBufferAdjustsBufferBindingsOnly) {
   EXPECT_THAT(disassembly, HasSubstr("OpDecorate %my_ubo Binding 42"));
 }
 
-TEST_F(CompilerTest, AutoMapBindingsSetsBindingsSetFragTextureBindingBaseCompiledAsFrag) {
+TEST_F(CompilerTest,
+       AutoMapBindingsSetsBindingsSetFragTextureBindingBaseCompiledAsFrag) {
   compiler_.SetAutoBindUniforms(true);
   compiler_.SetAutoBindingBaseForStage(Compiler::Stage::Fragment,
                                        Compiler::UniformKind::Texture, 100);
@@ -597,14 +601,15 @@ TEST_F(CompilerTest, AutoMapBindingsSetsBindingsSetFragTextureBindingBaseCompile
   EXPECT_THAT(disassembly, HasSubstr("OpDecorate %my_ubo Binding 3"));
 }
 
-TEST_F(CompilerTest, AutoMapBindingsSetsBindingsSetFragImageBindingBaseCompiledAsVert) {
+TEST_F(CompilerTest,
+       AutoMapBindingsSetsBindingsSetFragImageBindingBaseCompiledAsVert) {
   compiler_.SetAutoBindUniforms(true);
   // This is ignored because we're compiling the shader as a vertex shader, not
   // as a fragment shader.
   compiler_.SetAutoBindingBaseForStage(Compiler::Stage::Fragment,
                                        Compiler::UniformKind::Image, 100);
-  const auto words = SimpleCompilationBinary(kGlslFragShaderNoExplicitBinding,
-                                             EShLangVertex);
+  const auto words =
+      SimpleCompilationBinary(kGlslFragShaderNoExplicitBinding, EShLangVertex);
   const auto disassembly = Disassemble(words);
   EXPECT_THAT(disassembly, HasSubstr("OpDecorate %my_tex Binding 0"))
       << disassembly;
@@ -618,14 +623,14 @@ TEST_F(CompilerTest, NoAutoMapLocationsFailsCompilationOnOpenGLShader) {
   compiler_.SetTargetEnv(Compiler::TargetEnv::OpenGL);
   compiler_.SetAutoMapLocations(false);
 
-  const auto words = SimpleCompilationBinary(kGlslVertShaderExplicitLocation,
-                                             EShLangVertex);
+  const auto words =
+      SimpleCompilationBinary(kGlslVertShaderExplicitLocation, EShLangVertex);
   const auto disassembly = Disassemble(words);
   EXPECT_THAT(disassembly, HasSubstr("OpDecorate %my_mat Location 10"))
       << disassembly;
 
-  EXPECT_FALSE(
-      SimpleCompilationSucceeds(kGlslVertShaderNoExplicitLocation, EShLangVertex));
+  EXPECT_FALSE(SimpleCompilationSucceeds(kGlslVertShaderNoExplicitLocation,
+                                         EShLangVertex));
 }
 
 TEST_F(CompilerTest, AutoMapLocationsSetsLocationsOnOpenGLShader) {
@@ -723,6 +728,7 @@ TEST_F(CompilerTest, HlslLegalizationDisabled) {
 TEST_F(CompilerTest, HlslFunctionality1Enabled) {
   compiler_.SetSourceLanguage(Compiler::SourceLanguage::HLSL);
   compiler_.EnableHlslFunctionality1(true);
+  compiler_.SetAutoBindUniforms(true);  // Counter variable needs a binding.
   const auto words =
       SimpleCompilationBinary(kHlslShaderWithCounterBuffer, EShLangFragment);
   const auto disassembly = Disassemble(words);
