@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <assert.h>
+#include <stdio.h>
 #include <string.h>
 #include "shaderc/shaderc.h"
 #include "shaderc/spvc.h"
@@ -74,6 +75,7 @@ int main() {
     // Early exit on failure.
     return -1;
   }
+  printf("success! %lu characters of compiler output\n", strlen(shaderc_spvc_result_get_output(result)));
   shaderc_spvc_result_release(result);
   shaderc_spvc_compile_options_release(options);
   shaderc_spvc_compiler_release(compiler);

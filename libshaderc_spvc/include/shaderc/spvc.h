@@ -76,16 +76,19 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_set_target_env(
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_language_version(
     shaderc_spvc_compile_options_t options, uint32_t version);
 
+// TODO(fjhenigman): Add more options to control validator and compiler.
+
 // An opaque handle to the results of a call to any
 // shaderc_spvc_compile_into_*() function.
 typedef struct shaderc_spvc_compilation_result*
     shaderc_spvc_compilation_result_t;
 
-// Takes SPIR-V as a sequence of 32-bit words and compiles to high level
-// language.
+// Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to GLSL.
 SHADERC_EXPORT shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_glsl(
     const shaderc_spvc_compiler_t compiler, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options);
+
+// TODO(fjhenigman): Add functions to compile to HLSL and MSL.
 
 // The following functions, operating on shaderc_spvc_compilation_result_t
 // objects, offer only the basic thread-safety guarantee.
@@ -101,10 +104,12 @@ SHADERC_EXPORT void shaderc_spvc_result_release(
 SHADERC_EXPORT shaderc_compilation_status
 shaderc_spvc_result_get_status(const shaderc_spvc_compilation_result_t);
 
-// Get validation/compilation result as a string.
-SHADERC_EXPORT const char* shaderc_spvc_result_get_validation_messages(
+// Get validation/compilation error or informational messages.
+SHADERC_EXPORT const char* shaderc_spvc_result_get_messages(
     const shaderc_spvc_compilation_result_t result);
-SHADERC_EXPORT const char* shaderc_spvc_result_get_compiler_output(
+
+// Get validation/compilation result as a string.
+SHADERC_EXPORT const char* shaderc_spvc_result_get_output(
     const shaderc_spvc_compilation_result_t result);
 
 #ifdef __cplusplus

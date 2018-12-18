@@ -24,8 +24,8 @@ struct shaderc_spvc_compiler {};
 
 // Described in spvc.h.
 struct shaderc_spvc_compilation_result {
-  std::string validation_messages;
-  std::string compiler_output;
+  std::string output;
+  std::string messages;
   shaderc_compilation_status status =
       shaderc_compilation_status_null_result_object;
 };
@@ -97,19 +97,23 @@ void shaderc_spvc_compiler_release(shaderc_spvc_compiler_t compiler) {
   delete compiler;
 }
 
+namespace {
 void consume_validation_message(shaderc_spvc_compilation_result* result,
                                 spv_message_level_t level, const char* src,
                                 const spv_position_t& pos,
                                 const char* message) {
-  result->validation_messages.append(message);
-  result->validation_messages.append("\n");
+  result->messages.append(message);
+  result->messages.append("\n");
+}
 }
 
 shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_glsl(
     const shaderc_spvc_compiler_t compiler, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options) {
+
   auto* result = new (std::nothrow) shaderc_spvc_compilation_result;
   if (!result) return nullptr;
+
   if (options->validate) {
     spvtools::SpirvTools tools(options->target_env);
     tools.SetMessageConsumer(std::bind(
@@ -120,10 +124,11 @@ shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_glsl(
       return result;
     }
   }
+
+  spirv_cross::CompilerGLSL cross(source, source_len);
   TRY_IF_EXCEPTIONS_ENABLED {
-    spirv_cross::CompilerGLSL cross(source, source_len);
     cross.set_common_options(options->glsl);
-    result->compiler_output = cross.compile();
+    result->output = cross.compile();
     // An exception during compiling would crash (if exceptions off) or jump to
     // the catch block (if exceptions on) so if we're here we know the compile
     // worked.
@@ -131,18 +136,20 @@ shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_glsl(
   }
   CATCH_IF_EXCEPTIONS_ENABLED(...) {
     result->status = shaderc_compilation_status_compilation_error;
+    result->messages = "Compilation failed.  Partial source:";
+    result->messages.append(cross.get_partial_source());
   }
   return result;
 }
 
-const char* shaderc_spvc_result_get_compiler_output(
+const char* shaderc_spvc_result_get_output(
     const shaderc_spvc_compilation_result_t result) {
-  return result->compiler_output.c_str();
+  return result->output.c_str();
 }
 
-const char* shaderc_spvc_result_get_validation_messages(
+const char* shaderc_spvc_result_get_messages(
     const shaderc_spvc_compilation_result_t result) {
-  return result->validation_messages.c_str();
+  return result->messages.c_str();
 }
 
 shaderc_compilation_status shaderc_spvc_result_get_status(

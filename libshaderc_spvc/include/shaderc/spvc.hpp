@@ -67,12 +67,12 @@ class CompilationResult {
     return shaderc_spvc_result_get_status(result_);
   }
 
-  const std::string GetCompilerOutput() const {
-    return shaderc_spvc_result_get_compiler_output(result_);
+  const std::string GetOutput() const {
+    return shaderc_spvc_result_get_output(result_);
   }
 
-  const std::string GetValidationMessages() const {
-    return shaderc_spvc_result_get_validation_messages(result_);
+  const std::string GetMessages() const {
+    return shaderc_spvc_result_get_messages(result_);
   }
 
  private:

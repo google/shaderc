@@ -29,7 +29,8 @@ TEST(Compile, Test1) {
 
   CompilationResult result = compiler.CompileSpvToGlsl(
       kShader1, sizeof(kShader1) / sizeof(uint32_t), options);
-  ASSERT_EQ(shaderc_compilation_status_success, result.GetCompilationStatus());
+  EXPECT_EQ(shaderc_compilation_status_success, result.GetCompilationStatus());
+  EXPECT_NE(0, result.GetOutput().size());
 }
 
 }  // anonymous namespace

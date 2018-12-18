@@ -43,5 +43,5 @@ counterparts should be linked in the order specified.
   * `build/third_party/SPIRV-Cross/libspirv-cross-glsl.a` etc.
 
 5. If building for Android using the Android NDK, `shaderc/Android.mk` can be
-included in the application's `Android.mk` and `LOCAL_STATIC_LIBRARIES:=shaderc`
+included in the application's `Android.mk` and `LOCAL_STATIC_LIBRARIES:=shaderc_spvc`
 can be specified. See `shaderc/android_test` for an example.
