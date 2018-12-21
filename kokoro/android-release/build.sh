@@ -29,38 +29,34 @@ TARGET_ARCH=$1
 # Get NINJA.
 wget -q https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linux.zip
 unzip -q ninja-linux.zip
-export PATH="$PWD:$PATH"
-export BUILD_NDK=ON
-export ANDROID_NDK=/opt/android-ndk-r15c
-git clone --depth=1 https://github.com/taka-no-me/android-cmake.git android-cmake
-export TOOLCHAIN_PATH=$PWD/android-cmake/android.toolchain.cmake
+NINJA=$PWD/ninja
 
+# Get Android NDK.
+wget https://dl.google.com/android/repository/android-ndk-r18b-linux-x86_64.zip
+unzip -q android-ndk-r18b-linux-x86_64.zip
+NDK=$PWD/android-ndk-r18b
 
 cd $SRC/third_party
 git clone https://github.com/google/googletest.git
 git clone https://github.com/google/glslang.git
 git clone https://github.com/KhronosGroup/SPIRV-Tools.git spirv-tools
 git clone https://github.com/KhronosGroup/SPIRV-Headers.git spirv-headers
-git clone https://github.com/google/re2
-git clone https://github.com/google/effcee
 
-cd $SRC/
-mkdir build
+mkdir $SRC/build
 cd $SRC/build
 
 # Invoke the build.
 BUILD_SHA=${KOKORO_GITHUB_COMMIT:-$KOKORO_GITHUB_PULL_REQUEST_COMMIT}
 echo $(date): Starting build...
-cmake -DRE2_BUILD_TESTING=OFF -GNinja -DCMAKE_BUILD_TYPE=Release -DANDROID_NATIVE_API_LEVEL=android-14 -DANDROID_ABI=$TARGET_ARCH -DSHADERC_SKIP_TESTS=ON -DSPIRV_SKIP_TESTS=ON -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_PATH -DANDROID_NDK=$ANDROID_NDK ..
-
+cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_MAKE_PROGRAM=$NINJA -DANDROID_ABI=$TARGET_ARCH -DSHADERC_SKIP_TESTS=ON -DSPIRV_SKIP_TESTS=ON -DCMAKE_TOOLCHAIN_FILE=$NDK/build/cmake/android.toolchain.cmake -DANDROID_NDK=$NDK ..
 
 echo $(date): Build glslang...
-ninja glslangValidator
+$NINJA glslangValidator
 
 echo $(date): Build everything...
-ninja
+$NINJA
 
 echo $(date): Check Shaderc for copyright notices...
-ninja check-copyright
+$NINJA check-copyright
 
 echo $(date): Build completed.
