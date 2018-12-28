@@ -608,10 +608,15 @@ TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileRedundantProfileStd) {
 TEST_F(CompileStringWithOptionsTest, GenerateDebugInfoBinary) {
   shaderc_compile_options_set_generate_debug_info(options_.get());
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  // The binary output should contain the name of the vector: debug_info_sample.
-  EXPECT_THAT(CompilationOutput(kMinimalDebugInfoShader,
-                                shaderc_glsl_vertex_shader, options_.get()),
-              HasSubstr("debug_info_sample"));
+  const std::string binary_output =
+      CompilationOutput(kMinimalDebugInfoShader,
+                        shaderc_glsl_vertex_shader, options_.get());
+  // The binary output should contain the name of the vector (debug_info_sample)
+  // null-terminated, as well as the whole original source.
+  std::string vector_name("debug_info_sample");
+  vector_name.resize(vector_name.size() + 1);
+  EXPECT_THAT(binary_output, HasSubstr(vector_name));
+  EXPECT_THAT(binary_output, HasSubstr(kMinimalDebugInfoShader));
 }
 
 TEST_F(CompileStringWithOptionsTest, GenerateDebugInfoBinaryClonedOptions) {
@@ -619,11 +624,15 @@ TEST_F(CompileStringWithOptionsTest, GenerateDebugInfoBinaryClonedOptions) {
   compile_options_ptr cloned_options(
       shaderc_compile_options_clone(options_.get()));
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  // The binary output should contain the name of the vector: debug_info_sample.
-  EXPECT_THAT(
-      CompilationOutput(kMinimalDebugInfoShader, shaderc_glsl_vertex_shader,
-                        cloned_options.get()),
-      HasSubstr("debug_info_sample"));
+  const std::string binary_output =
+      CompilationOutput(kMinimalDebugInfoShader,
+                        shaderc_glsl_vertex_shader, cloned_options.get());
+  // The binary output should contain the name of the vector (debug_info_sample)
+  // null-terminated, as well as the whole original source.
+  std::string vector_name("debug_info_sample");
+  vector_name.resize(vector_name.size() + 1);
+  EXPECT_THAT(binary_output, HasSubstr(vector_name));
+  EXPECT_THAT(binary_output, HasSubstr(kMinimalDebugInfoShader));
 }
 
 TEST_F(CompileStringWithOptionsTest, GenerateDebugInfoDisassembly) {
@@ -730,7 +739,7 @@ TEST_F(CompileStringWithOptionsTest,
   const std::string disassembly_text =
       CompilationOutput(kMinimalShader, shaderc_glsl_vertex_shader,
                         options_.get(), OutputType::SpirvAssemblyText);
-  for (const auto& substring : kMinimalShaderDisassemblySubstrings) {
+  for (const auto& substring : kMinimalShaderDebugInfoDisassemblySubstrings) {
     EXPECT_THAT(disassembly_text, HasSubstr(substring));
   }
   // Check that we still have debug instructions.
@@ -747,7 +756,7 @@ TEST_F(CompileStringWithOptionsTest,
   const std::string disassembly_text =
       CompilationOutput(kMinimalShader, shaderc_glsl_vertex_shader,
                         options_.get(), OutputType::SpirvAssemblyText);
-  for (const auto& substring : kMinimalShaderDisassemblySubstrings) {
+  for (const auto& substring : kMinimalShaderDebugInfoDisassemblySubstrings) {
     EXPECT_THAT(disassembly_text, HasSubstr(substring));
   }
   // Check that we still have debug instructions.

@@ -242,6 +242,18 @@ const char* kMinimalShaderDisassemblySubstrings[] = {
     "               OpReturn\n",
     "               OpFunctionEnd\n"};
 
+const char* kMinimalShaderDebugInfoDisassemblySubstrings[] = {
+    "; SPIR-V\n"
+    "; Version: 1.0\n"
+    "; Generator: Google Shaderc over Glslang; 7\n"
+    "; Bound:",
+
+    "               OpCapability Shader\n",
+    "          %2 = OpExtInstImport \"GLSL.std.450\"\n",
+    "               OpMemoryModel Logical GLSL450\n",
+    "               OpReturn\n",
+    "               OpFunctionEnd\n"};
+
 const char kMinimalShaderAssembly[] = R"(
     ; SPIR-V
     ; Version: 1.0
