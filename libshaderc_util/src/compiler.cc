@@ -70,7 +70,8 @@ std::pair<int, string_piece> DecodeLineDirective(string_piece directive) {
 // only valid combinations are used.
 EShMessages GetMessageRules(shaderc_util::Compiler::TargetEnv env,
                             shaderc_util::Compiler::SourceLanguage lang,
-                            bool hlsl_offsets) {
+                            bool hlsl_offsets,
+                            bool debug_info) {
   using shaderc_util::Compiler;
   EShMessages result = EShMsgCascadingErrors;
   if (lang == Compiler::SourceLanguage::HLSL) {
@@ -89,6 +90,9 @@ EShMessages GetMessageRules(shaderc_util::Compiler::TargetEnv env,
   }
   if (hlsl_offsets) {
     result = static_cast<EShMessages>(result | EShMsgHlslOffsets);
+  }
+  if (debug_info) {
+    result = static_cast<EShMessages>(result | EShMsgDebugInfo);
   }
   return result;
 }
@@ -298,11 +302,13 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
     shader.setEnvTargetHlslFunctionality1();
   }
 
-  // TODO(dneto): Generate source-level debug info if requested.
+  const EShMessages rules = GetMessageRules(target_env_, source_language_,
+                                            hlsl_offsets_,
+                                            generate_debug_info_);
+
   bool success = shader.parse(
       &limits_, default_version_, default_profile_, force_version_profile_,
-      kNotForwardCompatible,
-      GetMessageRules(target_env_, source_language_, hlsl_offsets_), includer);
+      kNotForwardCompatible, rules, includer);
 
   success &= PrintFilteredErrors(error_tag, error_stream, warnings_as_errors_,
                                  suppress_warnings_, shader.getInfoLog(),
@@ -321,7 +327,7 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   // to serve as an input for the call to DissassemblyBinary.
   std::vector<uint32_t>& spirv = compilation_output_data;
   glslang::SpvOptions options;
-  options.generateDebugInfo = false;
+  options.generateDebugInfo = generate_debug_info_;
   options.disableOptimizer = true;
   options.optimizeSize = false;
   // Note the call to GlslangToSpv also populates compilation_output_data.
@@ -481,7 +487,7 @@ std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
   // flag.
   const auto rules = static_cast<EShMessages>(
       EShMsgOnlyPreprocessor |
-      GetMessageRules(target_env_, source_language_, hlsl_offsets_));
+      GetMessageRules(target_env_, source_language_, hlsl_offsets_, false));
 
   std::string preprocessed_shader;
   const bool success = shader.preprocess(
