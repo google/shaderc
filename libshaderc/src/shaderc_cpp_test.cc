@@ -1409,7 +1409,7 @@ TEST_F(CppInterface, HlslFunctionality1OffByDefault) {
   options.SetAutoBindUniforms(true);
   const std::string disassembly_text = AssemblyOutput(
       kHlslShaderWithCounterBuffer, shaderc_glsl_fragment_shader, options);
-  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorateStringGOOGLE")));
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorateString")));
 }
 
 TEST_F(CppInterface, HlslFunctionality1Respected) {
@@ -1421,7 +1421,7 @@ TEST_F(CppInterface, HlslFunctionality1Respected) {
   options.SetHlslFunctionality1(true);
   const std::string disassembly_text = AssemblyOutput(
       kHlslShaderWithCounterBuffer, shaderc_glsl_fragment_shader, options);
-  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorateStringGOOGLE"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorateString"));
 }
 
 TEST_F(CppInterface, HlslFunctionality1SurvivesCloning) {
@@ -1434,7 +1434,7 @@ TEST_F(CppInterface, HlslFunctionality1SurvivesCloning) {
   CompileOptions cloned_options(options);
   const std::string disassembly_text = AssemblyOutput(
       kHlslShaderWithCounterBuffer, shaderc_glsl_fragment_shader, cloned_options);
-  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorateStringGOOGLE"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorateString"));
 }
 
 }  // anonymous namespace

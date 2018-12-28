@@ -1801,7 +1801,7 @@ TEST_F(CompileStringWithOptionsTest, HlslFunctionality1OffByDefault) {
   const std::string disassembly_text =
       CompilationOutput(kHlslShaderWithCounterBuffer, shaderc_fragment_shader,
                         options_.get(), OutputType::SpirvAssemblyText);
-  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorateStringGOOGLE")))
+  EXPECT_THAT(disassembly_text, Not(HasSubstr("OpDecorateString")))
       << disassembly_text;
 }
 
@@ -1814,7 +1814,7 @@ TEST_F(CompileStringWithOptionsTest, HlslFunctionality1Respected) {
   const std::string disassembly_text =
       CompilationOutput(kHlslShaderWithCounterBuffer, shaderc_fragment_shader,
                         options_.get(), OutputType::SpirvAssemblyText);
-  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorateStringGOOGLE"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorateString"));
 }
 
 TEST_F(CompileStringWithOptionsTest, HlslFunctionality1SurvivesCloning) {
@@ -1828,7 +1828,7 @@ TEST_F(CompileStringWithOptionsTest, HlslFunctionality1SurvivesCloning) {
   const std::string disassembly_text =
       CompilationOutput(kHlslShaderWithCounterBuffer, shaderc_fragment_shader,
                         cloned_options.get(), OutputType::SpirvAssemblyText);
-  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorateStringGOOGLE"));
+  EXPECT_THAT(disassembly_text, HasSubstr("OpDecorateString"));
 }
 
 TEST_F(CompileStringWithOptionsTest, HlslFlexibleMemoryLayoutAllowed) {

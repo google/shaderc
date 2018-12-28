@@ -46,7 +46,7 @@ class TestHlslFunctionality1DecoratesCounter(expect.ValidAssemblyFileWithSubstr)
     shader = FileShader(HLSL_VERTEX_SHADER_WITH_COUNTER_BUFFER, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl_functionality1',
                   '-fauto-bind-uniforms', shader]
-    expected_assembly_substr = 'OpDecorateStringGOOGLE'
+    expected_assembly_substr = 'OpDecorateString'
 
 
 ## Next tests use the option with the hypen instead of underscore.
@@ -68,4 +68,4 @@ class TestHlslHyphenFunctionality1DecoratesCounter(expect.ValidAssemblyFileWithS
     shader = FileShader(HLSL_VERTEX_SHADER_WITH_COUNTER_BUFFER, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl_functionality1',
                   '-fauto-bind-uniforms', shader]
-    expected_assembly_substr = 'OpDecorateStringGOOGLE'
+    expected_assembly_substr = 'OpDecorateString'

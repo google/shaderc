@@ -736,8 +736,8 @@ TEST_F(CompilerTest, HlslFunctionality1Enabled) {
               HasSubstr("OpExtension \"SPV_GOOGLE_hlsl_functionality1\""))
       << disassembly;
   EXPECT_THAT(disassembly,
-              HasSubstr("OpDecorateStringGOOGLE %_entryPointOutput "
-                        "HlslSemanticGOOGLE \"SV_TARGET0\""))
+              HasSubstr("OpDecorateString %_entryPointOutput "
+                        "UserSemantic \"SV_TARGET0\""))
       << disassembly;
 }
 
