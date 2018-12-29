@@ -64,7 +64,7 @@ if "%KOKORO_GITHUB_COMMIT%." == "." (
 
 :: Skip building SPIRV-Tools tests for VS2013
 if %VS_VERSION% == 2013 (
-  cmake -DRE2_BUILD_TESTING=OFF -DSPIRV_SKIP_TESTS=ON -GNinja -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe ..
+  cmake -DRE2_BUILD_TESTING=OFF -DSHADERC_SKIP_TESTS=ON -DSPIRV_SKIP_TESTS=ON -GNinja -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe ..
 ) else (
   cmake -DRE2_BUILD_TESTING=OFF -GNinja -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe ..
 )
@@ -84,13 +84,15 @@ ninja check-copyright
 if %ERRORLEVEL% GEQ 1 exit /b %ERRORLEVEL%
 echo "Build Completed %DATE% %TIME%"
 
-:: #########################################
-:: Run the tests.
-:: #########################################
+:: ################################################
+:: Run the tests (We no longer run tests on VS2013)
+:: ################################################
+if NOT %VS_VERSION% == 2013 (
 echo "Running Tests... %DATE% %TIME%"
 ctest -C %BUILD_TYPE% --output-on-failure -j4
 if %ERRORLEVEL% GEQ 1 exit /b %ERRORLEVEL%
 echo "Tests Completed %DATE% %TIME%"
+)
 
 :: Clean up some directories.
 rm -rf %SRC%\build
