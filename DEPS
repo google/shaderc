@@ -8,7 +8,7 @@ vars = {
   'glslang_revision': '83b2647293db3d777e77adbaf04283cf97a18661',
   'googletest_revision': 'd5932506d6eed73ac80b9bcc47ed723c8c74eb1e',
   're2_revision': 'f620af75bd693f917c684106d26de1b99ffe0e0d',
-  'spirv_headers_revision': 'ff684ffc6a35d2a58f0f63108877d0064ea33feb',
+  'spirv_headers_revision': '4618b86e9e4b027a22040732dfee35e399cd2c47',
   'spirv_tools_revision': '64f2750e5dc553baa2922b780f15049023689ef9',
 }
 
