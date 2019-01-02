@@ -17,7 +17,7 @@ from environment import File, Directory
 from glslc_test_framework import inside_glslc_testsuite
 from placeholder import FileShader
 
-MINIMAL_SHADER = '#version 310 es\nvoid main() {}'
+MINIMAL_SHADER = '#version 310 es\nvoid main() {}\n'
 EMPTY_SHADER_IN_CWD = Directory('.', [File('shader.vert', MINIMAL_SHADER)])
 
 ASSEMBLY_WITH_DEBUG_SOURCE = [
@@ -37,7 +37,8 @@ ASSEMBLY_WITH_DEBUG_SOURCE = [
     '// OpModuleProcessed entry-point main\n',
     '#line 1\n',
     '#version 310 es\n',
-    'void main() {}"\n',
+    'void main() {}\n',
+    '"\n',
     '               OpSourceExtension "GL_GOOGLE_cpp_style_line_directive"\n',
     '               OpSourceExtension "GL_GOOGLE_include_directive"\n',
     '               OpName %main "main"\n',
