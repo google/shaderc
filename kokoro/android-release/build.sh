@@ -36,13 +36,10 @@ wget https://dl.google.com/android/repository/android-ndk-r18b-linux-x86_64.zip
 unzip -q android-ndk-r18b-linux-x86_64.zip
 NDK=$PWD/android-ndk-r18b
 
-cd $SRC/third_party
-git clone https://github.com/google/googletest.git
-git clone https://github.com/google/glslang.git
-git clone https://github.com/KhronosGroup/SPIRV-Tools.git spirv-tools
-git clone https://github.com/KhronosGroup/SPIRV-Headers.git spirv-headers
+cd $SRC
+./utils/git-sync-deps
 
-mkdir $SRC/build
+mkdir build
 cd $SRC/build
 
 # Invoke the build.

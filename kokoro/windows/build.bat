@@ -24,22 +24,11 @@ set VS_VERSION=%2
 :: Force usage of python 2.7 rather than 3.6
 set PATH=C:\python27;%PATH%
 
-cd %SRC%\third_party
-git clone https://github.com/google/googletest.git
-git clone https://github.com/google/glslang.git
-git clone https://github.com/KhronosGroup/SPIRV-Tools.git spirv-tools
-git clone https://github.com/KhronosGroup/SPIRV-Headers.git spirv-headers
-git clone https://github.com/google/re2
-git clone https://github.com/google/effcee
+cd %SRC%
+python utils\git-sync-deps
 
 cmake --version
 
-:: If you need to pin googletest to a specific revision, uncomment
-:: the following two lines (and set the commit hash).
-:: cd googletest
-:: git checkout e93da23920e5b6887d6a6a291c3a59f83f5b579e
-
-cd %SRC%
 mkdir build
 cd %SRC%\build
 

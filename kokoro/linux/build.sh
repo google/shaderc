@@ -69,15 +69,9 @@ wget -q https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linu
 unzip -q ninja-linux.zip
 export PATH="$PWD:$PATH"
 
-cd $SRC/third_party
-git clone https://github.com/google/googletest.git
-git clone https://github.com/google/glslang.git
-git clone https://github.com/KhronosGroup/SPIRV-Tools.git spirv-tools
-git clone https://github.com/KhronosGroup/SPIRV-Headers.git spirv-headers
-git clone https://github.com/google/re2
-git clone https://github.com/google/effcee
+cd $SRC
+./utils/git-sync-deps
 
-cd $SRC/
 mkdir build
 cd $SRC/build
 
