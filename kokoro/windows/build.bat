@@ -56,42 +56,44 @@ if "%KOKORO_GITHUB_COMMIT%." == "." (
   set BUILD_SHA=%KOKORO_GITHUB_COMMIT%
 )
 
+set CMAKE_FLAGS=-DRE2_BUILD_TESTING=OFF -GNinja -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe
+
 :: Skip building SPIRV-Tools tests for VS2013
 if %VS_VERSION% == 2013 (
-  cmake -DRE2_BUILD_TESTING=OFF -DSHADERC_SKIP_TESTS=ON -DSPIRV_SKIP_TESTS=ON -GNinja -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe ..
-) else (
-  cmake -DRE2_BUILD_TESTING=OFF -GNinja -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe ..
+  set CMAKE_FLAGS=%CMAKE_FLAGS% -DSHADERC_SKIP_TESTS=ON -DSPIRV_SKIP_TESTS=ON
 )
 
-if %ERRORLEVEL% GEQ 1 exit /b %ERRORLEVEL%
+cmake %CMAKE_FLAGS% ..
+if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 
 echo "Build glslang... %DATE% %TIME%"
 ninja glslangValidator
-if %ERRORLEVEL% GEQ 1 exit /b %ERRORLEVEL%
+if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 
 echo "Build everything... %DATE% %TIME%"
 ninja
-if %ERRORLEVEL% GEQ 1 exit /b %ERRORLEVEL%
+if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 
 echo "Check Shaderc for copyright notices... %DATE% %TIME%"
 ninja check-copyright
-if %ERRORLEVEL% GEQ 1 exit /b %ERRORLEVEL%
+if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 echo "Build Completed %DATE% %TIME%"
+
+:: This lets us use !ERRORLEVEL! inside an IF ... () and get the actual error at that point.
+setlocal ENABLEDELAYEDEXPANSION
 
 :: ################################################
 :: Run the tests (We no longer run tests on VS2013)
 :: ################################################
-if NOT %VS_VERSION% == 2013 (
-echo "Running Tests... %DATE% %TIME%"
-ctest -C %BUILD_TYPE% --output-on-failure -j4
-if %ERRORLEVEL% GEQ 1 exit /b %ERRORLEVEL%
-echo "Tests Completed %DATE% %TIME%"
+echo "Running tests... %DATE% %TIME%"
+if %VS_VERSION% NEQ 2013 (
+  ctest -C %BUILD_TYPE% --output-on-failure -j4
+  if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
 )
+echo "Tests passed %DATE% %TIME%"
 
 :: Clean up some directories.
 rm -rf %SRC%\build
 rm -rf %SRC%\third_party
 
-
-exit /b %ERRORLEVEL%
-
+exit /b 0
