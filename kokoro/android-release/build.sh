@@ -32,7 +32,7 @@ unzip -q ninja-linux.zip
 NINJA=$PWD/ninja
 
 # Get Android NDK.
-wget https://dl.google.com/android/repository/android-ndk-r18b-linux-x86_64.zip
+wget -q https://dl.google.com/android/repository/android-ndk-r18b-linux-x86_64.zip
 unzip -q android-ndk-r18b-linux-x86_64.zip
 NDK=$PWD/android-ndk-r18b
 
