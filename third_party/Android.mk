@@ -12,7 +12,12 @@ ifeq ($(SPVTOOLS_LOCAL_PATH),)
   SPVTOOLS_LOCAL_PATH:=$(THIRD_PARTY_PATH)/spirv-tools
 endif
 ifeq ($(SPVHEADERS_LOCAL_PATH),)
-	SPVHEADERS_LOCAL_PATH:=$(THIRD_PARTY_PATH)/spirv-headers
+   # Use the third party dir if it exists.
+   ifneq ($(wildcard $(THIRD_PARTY_PATH)/spirv-headers/include/spirv/spirv.xml),)
+     SPVHEADERS_LOCAL_PATH:=$(THIRD_PARTY_PATH)/spirv-headers
+   else
+     # Let SPIRV-Tools find its own headers and hope for the best.
+   endif
 endif
 
 # Now include the SPIRV-Tools dependency
