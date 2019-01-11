@@ -102,8 +102,8 @@ class CompileOptions {
   }
 
   // Which GLSL version should be produced.  Default is 450.
-  void SetLanguageVersion(uint32_t version) {
-    shaderc_spvc_compile_options_set_language_version(options_, version);
+  void SetOutputLanguageVersion(uint32_t version) {
+    shaderc_spvc_compile_options_set_output_language_version(options_, version);
   }
 
  private:

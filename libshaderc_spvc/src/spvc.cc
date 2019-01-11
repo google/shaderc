@@ -84,7 +84,7 @@ void shaderc_spvc_compile_options_set_target_env(
   }
 }
 
-void shaderc_spvc_compile_options_set_language_version(
+void shaderc_spvc_compile_options_set_output_language_version(
     shaderc_spvc_compile_options_t options, uint32_t version) {
   options->glsl.version = version;
 }

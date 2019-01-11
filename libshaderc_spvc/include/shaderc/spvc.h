@@ -73,7 +73,7 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_set_target_env(
     shaderc_env_version version);
 
 // Set language version.  Default is 450.
-SHADERC_EXPORT void shaderc_spvc_compile_options_set_language_version(
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_output_language_version(
     shaderc_spvc_compile_options_t options, uint32_t version);
 
 // TODO(fjhenigman): Add more options to control validator and compiler.
