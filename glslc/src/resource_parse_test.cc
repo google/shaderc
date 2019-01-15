@@ -40,7 +40,7 @@ TEST_P(ParseResourceSettingsTest, Sample) {
   EXPECT_THAT(err, Eq(GetParam().message));
 }
 
-INSTANTIATE_TEST_CASE_P(ParseResources, ParseResourceSettingsTest,
+INSTANTIATE_TEST_SUITE_P(ParseResources, ParseResourceSettingsTest,
   ::testing::ValuesIn(std::vector<ResourceSettingsCase>{
     {"", true, {}, ""},
     {"   \t \t \n ", true, {}, ""},
