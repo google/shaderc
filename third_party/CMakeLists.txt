@@ -9,6 +9,8 @@ set(SHADERC_SPIRV_TOOLS_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/spirv-tools" CACHE 
   "Location of spirv-tools source")
 set(SHADERC_SPIRV_HEADERS_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/spirv-headers" CACHE STRING
   "Location of spirv-headers source")
+set(SHADERC_SPIRV_CROSS_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/spirv-cross" CACHE STRING
+  "Location of SPIRV-Cross source")
 set(SHADERC_GLSLANG_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/glslang" CACHE STRING
   "Location of glslang source")
 set(SHADERC_EFFCEE_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/effcee" CACHE STRING
@@ -31,6 +33,7 @@ if(${SHADERC_ENABLE_TESTS})
 endif()
 
 set(OLD_PLATFORM_TOOLSET ${CMAKE_GENERATOR_TOOLSET})
+
 
 if (IS_DIRECTORY ${SHADERC_SPIRV_HEADERS_DIR})
   set(SPIRV_HEADERS_SKIP_EXAMPLES ON)
@@ -69,6 +72,21 @@ if (NOT TARGET glslang)
       # installed, undo anything glslang has done to it.
       set(CMAKE_GENERATOR_TOOLSET "${OLD_PLATFORM_TOOLSET}" CACHE STRING
         "Platform Toolset" FORCE)
+  endif()
+endif()
+
+if (NOT TARGET spirv-cross-core)
+  if (IS_DIRECTORY ${SHADERC_SPIRV_CROSS_DIR})
+    # Add -fPIC to SPIRV-Cross build.
+    set(CXX_BACK ${CMAKE_CXX_FLAGS})
+    SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-fPIC")
+    # cmake inserts a semicolon, change it to a space.
+    STRING(REGEX REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    add_subdirectory(${SHADERC_SPIRV_CROSS_DIR} spirv-cross)
+    set(CMAKE_CXX_FLAGS ${CXX_BACK})
+  endif()
+  if (NOT TARGET spirv-cross-core)
+    message(FATAL_ERROR "SPIRV-Cross was not found - required for compilation")
   endif()
 endif()
 

@@ -14,6 +14,11 @@ if(NOT ${SHADERC_SKIP_INSTALL})
   set(SHADERC_ENABLE_INSTALL ON)
 endif()
 
+option(SHADERC_SKIP_SPVC "Skip libshaderc_spvc" ${SHADERC_SKIP_SPVC})
+if(NOT ${SHADERC_SKIP_SPVC})
+  set(SHADERC_ENABLE_SPVC ON)
+endif()
+
 option(SHADERC_SKIP_TESTS "Skip building tests" ${SHADERC_SKIP_TESTS})
 if(NOT ${SHADERC_SKIP_TESTS})
   set(SHADERC_ENABLE_TESTS ON)
@@ -68,6 +73,9 @@ endif(MSVC)
 # We depend on these for later projects, so they should come first.
 add_subdirectory(third_party)
 
+if(SHADERC_ENABLE_SPVC)
+add_subdirectory(libshaderc_spvc)
+endif()
 add_subdirectory(libshaderc_util)
 add_subdirectory(libshaderc)
 add_subdirectory(glslc)
