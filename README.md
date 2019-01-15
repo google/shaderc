@@ -30,6 +30,7 @@ Shaderc has been shipping in the
 [Android NDK](https://developer.android.com/ndk/index.html) since version r12b.
 (The NDK build uses sources from https://android.googlesource.com/platform/external/shaderc/.
 Those repos are downstream from GitHub.)
+We currently require r18b.
 
 For licensing terms, please see the [`LICENSE`](LICENSE) file.  If interested in
 contributing to this project, please see [`CONTRIBUTING.md`](CONTRIBUTING.md).

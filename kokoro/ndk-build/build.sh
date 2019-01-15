@@ -29,14 +29,16 @@ wget -q https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linu
 unzip -q ninja-linux.zip
 export PATH="$PWD:$PATH"
 
-# NDK Path
-export ANDROID_NDK=/opt/android-ndk-r15c
+# Get Android NDK.
+wget -q https://dl.google.com/android/repository/android-ndk-r18b-linux-x86_64.zip
+unzip -q android-ndk-r18b-linux-x86_64.zip
+export ANDROID_NDK=$PWD/android-ndk-r18b
 
 # Get shaderc dependencies.
 cd $SRC
 ./utils/git-sync-deps
 
-cd $SRC/
+cd $SRC
 mkdir build
 cd $SRC/build
 
@@ -48,8 +50,7 @@ $ANDROID_NDK/ndk-build \
   NDK_APP_OUT=`pwd` \
   V=1 \
   SPVTOOLS_LOCAL_PATH=$SRC/third_party/spirv-tools \
-  SPVHEADERS_LOCAL_PATH=$SRC/third_party/spirv-tools/external/spirv-headers \
+  SPVHEADERS_LOCAL_PATH=$SRC/third_party/spirv-headers \
   -j 8
 
 echo $(date): ndk-build completed.
-
