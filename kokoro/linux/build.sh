@@ -33,8 +33,7 @@ BUILD_TYPE="Debug"
 CMAKE_C_CXX_COMPILER=""
 if [ $COMPILER = "clang" ]
 then
-  sudo ln -s /usr/bin/clang-3.8 /usr/bin/clang
-  sudo ln -s /usr/bin/clang++-3.8 /usr/bin/clang++
+  PATH=/usr/lib/llvm-3.8/bin:$PATH
   CMAKE_C_CXX_COMPILER="-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"
 fi
 
@@ -50,7 +49,7 @@ ADDITIONAL_CMAKE_FLAGS=""
 if [ $CONFIG = "ASAN" ]
 then
   ADDITIONAL_CMAKE_FLAGS="-DCMAKE_CXX_FLAGS=-fsanitize=address -DCMAKE_C_FLAGS=-fsanitize=address"
-  export ASAN_SYMBOLIZER_PATH=/usr/bin/llvm-symbolizer-3.4
+  [ $COMPILER = "clang" ] || { echo "$CONFIG requires clang"; exit 1; }
 elif [ $CONFIG = "COVERAGE" ]
 then
   ADDITIONAL_CMAKE_FLAGS="-DENABLE_CODE_COVERAGE=ON"
