@@ -75,7 +75,8 @@ int main() {
     // Early exit on failure.
     return -1;
   }
-  printf("success! %lu characters of compiler output\n", strlen(shaderc_spvc_result_get_output(result)));
+  printf("success! %lu characters of compiler output\n",
+         (unsigned long)(strlen(shaderc_spvc_result_get_output(result))));
   shaderc_compile_options_release(opt);
   shaderc_result_release(res);
   shaderc_spvc_result_release(result);
