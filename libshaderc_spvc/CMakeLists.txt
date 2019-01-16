@@ -21,6 +21,12 @@ target_compile_definitions(shaderc_spvc_shared
     PRIVATE SHADERC_IMPLEMENTATION
     PUBLIC SHADERC_SHAREDLIB
 )
+
+if (DISABLE_EXCEPTIONS)
+  target_compile_definitions(shaderc_spvc PRIVATE SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS)
+  target_compile_definitions(shaderc_spvc_shared PRIVATE SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS)
+endif (DISABLE_EXCEPTIONS)
+
 set_target_properties(shaderc_spvc_shared PROPERTIES SOVERSION 1)
 
 if(SHADERC_ENABLE_INSTALL)
