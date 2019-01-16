@@ -77,11 +77,13 @@ endif()
 
 if (NOT TARGET spirv-cross-core)
   if (IS_DIRECTORY ${SHADERC_SPIRV_CROSS_DIR})
+    set(SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS ${DISABLE_EXCEPTIONS} CACHE BOOL "tell SPIRV-Cross not to throw" FORCE)
+
     # Add -fPIC to SPIRV-Cross build.
     set(CXX_BACK ${CMAKE_CXX_FLAGS})
-    SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-fPIC")
+    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-fPIC")
     # cmake inserts a semicolon, change it to a space.
-    STRING(REGEX REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    string(REGEX REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     add_subdirectory(${SHADERC_SPIRV_CROSS_DIR} spirv-cross)
     set(CMAKE_CXX_FLAGS ${CXX_BACK})
   endif()
