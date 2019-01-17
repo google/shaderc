@@ -75,22 +75,24 @@ if (NOT TARGET glslang)
   endif()
 endif()
 
-if (NOT TARGET spirv-cross-core)
-  if (IS_DIRECTORY ${SHADERC_SPIRV_CROSS_DIR})
-    set(SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS ${DISABLE_EXCEPTIONS} CACHE BOOL "tell SPIRV-Cross not to throw" FORCE)
-
-    # Add -fPIC to SPIRV-Cross build.
-    set(CXX_BACK ${CMAKE_CXX_FLAGS})
-    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-fPIC")
-    # cmake inserts a semicolon, change it to a space.
-    string(REGEX REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    add_subdirectory(${SHADERC_SPIRV_CROSS_DIR} spirv-cross)
-    set(CMAKE_CXX_FLAGS ${CXX_BACK})
-  endif()
+if (SHADERC_ENABLE_SPVC)
   if (NOT TARGET spirv-cross-core)
-    message(FATAL_ERROR "SPIRV-Cross was not found - required for compilation")
+    if (IS_DIRECTORY ${SHADERC_SPIRV_CROSS_DIR})
+      set(SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS ${DISABLE_EXCEPTIONS} CACHE BOOL "tell SPIRV-Cross not to throw" FORCE)
+
+      # Add -fPIC to SPIRV-Cross build.
+      set(CXX_BACK ${CMAKE_CXX_FLAGS})
+      set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-fPIC")
+      # cmake inserts a semicolon, change it to a space.
+      string(REGEX REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+      add_subdirectory(${SHADERC_SPIRV_CROSS_DIR} spirv-cross)
+      set(CMAKE_CXX_FLAGS ${CXX_BACK})
+    endif()
+    if (NOT TARGET spirv-cross-core)
+      message(FATAL_ERROR "SPIRV-Cross was not found - required for compilation")
+    endif()
   endif()
-endif()
+endif (SHADERC_ENABLE_SPVC)
 
 if(${SHADERC_ENABLE_TESTS})
   # Configure out-of-source-directory tests for glslang.
