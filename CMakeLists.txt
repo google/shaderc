@@ -16,7 +16,7 @@ endif()
 
 option(SHADERC_SKIP_SPVC "Skip libshaderc_spvc" ${SHADERC_SKIP_SPVC})
 if(NOT ${SHADERC_SKIP_SPVC})
-  set(SHADERC_ENABLE_SPVC ON)
+  set(SHADERC_ENABLE_SPVC OFF)
 endif()
 
 option(SHADERC_SKIP_TESTS "Skip building tests" ${SHADERC_SKIP_TESTS})
