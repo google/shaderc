@@ -58,18 +58,17 @@ source_set("shaderc_util_sources") {
 
 config("shaderc_public") {
   include_dirs = [ "libshaderc/include" ]
-  defines = [ "SHADERC_SHAREDLIB" ]
-
-  # Executable needs an rpath to find our shared libraries on OSX
-  if (is_mac) {
-    ldflags = [
-      "-rpath",
-      "@executable_path/",
-    ]
+  if (is_component_build) {
+    defines += [ "SHADERC_SHAREDLIB" ]
   }
 }
 
-source_set("libshaderc_sources") {
+component("libshaderc") {
+  public_configs = [
+    ":shaderc_public",
+    ":shaderc_util_public",
+  ]
+
   defines = [ "SHADERC_IMPLEMENTATION" ]
 
   sources = [
@@ -79,30 +78,12 @@ source_set("libshaderc_sources") {
     "libshaderc/src/shaderc_private.h",
   ]
 
-  public_configs = [ ":shaderc_public" ]
-
   deps = [
     ":shaderc_util_sources",
     "${spirv_tools_dir}:spvtools",
     "${spirv_tools_dir}:spvtools_val",
     "${glslang_dir}:glslang_sources",
   ]
-}
-
-shared_library("libshaderc") {
-  public_configs = [ ":shaderc_public" ]
-
-  deps = [
-    ":libshaderc_sources",
-  ]
-
-  # Tell dependents where to find this shared library
-  if (is_mac) {
-    ldflags = [
-      "-install_name",
-      "@rpath/${target_name}.dylib",
-    ]
-  }
 
   configs -= [ "//build/config/compiler:chromium_code" ]
   configs += [ "//build/config/compiler:no_chromium_code" ]
@@ -110,18 +91,17 @@ shared_library("libshaderc") {
 
 config("shaderc_spvc_public") {
   include_dirs = [ "libshaderc_spvc/include" ]
-  defines = [ "SHADERC_SHAREDLIB" ]
-
-  # Executable needs an rpath to find our shared libraries on OSX
-  if (is_mac) {
-    ldflags = [
-      "-rpath",
-      "@executable_path/",
-    ]
+  if (is_component_build) {
+    defines += [ "SHADERC_SHAREDLIB" ]
   }
 }
 
-source_set("libshaderc_spvc_sources") {
+component("libshaderc_spvc") {
+  public_configs = [
+    ":shaderc_spvc_public",
+    ":shaderc_util_public",
+  ]
+
   defines = [ "SHADERC_IMPLEMENTATION" ]
 
   sources = [
@@ -130,30 +110,12 @@ source_set("libshaderc_spvc_sources") {
     "libshaderc_spvc/src/spvc.cc",
   ]
 
-  public_configs = [ ":shaderc_spvc_public" ]
-
-  deps = [
+ deps = [
     ":shaderc_util_sources",
     "${spirv_tools_dir}:spvtools",
     "${spirv_tools_dir}:spvtools_val",
     "${spirv_cross_dir}:spirv_cross",
   ]
-}
-
-shared_library("libshaderc_spvc") {
-  public_configs = [ ":shaderc_spvc_public" ]
-
-  deps = [
-    ":libshaderc_spvc_sources",
-  ]
-
-  # Tell dependents where to find this shared library
-  if (is_mac) {
-    ldflags = [
-      "-install_name",
-      "@rpath/${target_name}.dylib",
-    ]
-  }
 
   configs -= [ "//build/config/compiler:chromium_code" ]
   configs += [ "//build/config/compiler:no_chromium_code" ]
