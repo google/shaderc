@@ -59,7 +59,7 @@ source_set("shaderc_util_sources") {
 config("shaderc_public") {
   include_dirs = [ "libshaderc/include" ]
   if (is_component_build) {
-    defines += [ "SHADERC_SHAREDLIB" ]
+    defines = [ "SHADERC_SHAREDLIB" ]
   }
 }
 
@@ -92,7 +92,7 @@ component("libshaderc") {
 config("shaderc_spvc_public") {
   include_dirs = [ "libshaderc_spvc/include" ]
   if (is_component_build) {
-    defines += [ "SHADERC_SHAREDLIB" ]
+    defines = [ "SHADERC_SHAREDLIB" ]
   }
 }
 
