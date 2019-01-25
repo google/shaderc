@@ -76,6 +76,26 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_set_target_env(
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_output_language_version(
     shaderc_spvc_compile_options_t options, uint32_t version);
 
+// Set HLSL shader model.  Default is 30.
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_shader_model(
+    shaderc_spvc_compile_options_t options, uint32_t model);
+
+// If true (default is false):
+//   GLSL: map depth from Vulkan/D3D style to GL style, i.e. [ 0,w] -> [-w,w]
+//   MSL : map depth from GL style to Vulkan/D3D style, i.e. [-w,w] -> [ 0,w]
+//   HLSL: map depth from GL style to Vulkan/D3D style, i.e. [-w,w] -> [ 0,w]
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_fixup_clipspace(
+    shaderc_spvc_compile_options_t options, bool b);
+
+// If true invert gl_Position.y or equivalent.  Default is false.
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_flip_vert_y(
+    shaderc_spvc_compile_options_t options, bool b);
+
+// Fill options with given data.  Return amount of data used, or zero
+// if not enough data was given.
+SHADERC_EXPORT size_t shaderc_spvc_compile_options_set_for_fuzzing(
+    shaderc_spvc_compile_options_t options, const uint8_t* data, size_t size);
+
 // TODO(fjhenigman): Add more options to control validator and compiler.
 
 // An opaque handle to the results of a call to any
@@ -83,12 +103,23 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_set_output_language_version(
 typedef struct shaderc_spvc_compilation_result*
     shaderc_spvc_compilation_result_t;
 
-// Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to GLSL.
+// Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
+// GLSL.
 SHADERC_EXPORT shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_glsl(
     const shaderc_spvc_compiler_t compiler, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options);
 
-// TODO(fjhenigman): Add functions to compile to HLSL and MSL.
+// Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
+// HLSL.
+SHADERC_EXPORT shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_hlsl(
+    const shaderc_spvc_compiler_t compiler, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options);
+
+// Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
+// MSL.
+SHADERC_EXPORT shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_msl(
+    const shaderc_spvc_compiler_t compiler, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options);
 
 // The following functions, operating on shaderc_spvc_compilation_result_t
 // objects, offer only the basic thread-safety guarantee.
