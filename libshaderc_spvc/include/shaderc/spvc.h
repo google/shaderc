@@ -94,7 +94,7 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_set_flip_vert_y(
 // Fill options with given data.  Return amount of data used, or zero
 // if not enough data was given.
 SHADERC_EXPORT size_t shaderc_spvc_compile_options_set_for_fuzzing(
-    shaderc_spvc_compile_options_t options, const uint8_t *data, size_t size);
+    shaderc_spvc_compile_options_t options, const uint8_t* data, size_t size);
 
 // TODO(fjhenigman): Add more options to control validator and compiler.
 
@@ -103,17 +103,20 @@ SHADERC_EXPORT size_t shaderc_spvc_compile_options_set_for_fuzzing(
 typedef struct shaderc_spvc_compilation_result*
     shaderc_spvc_compilation_result_t;
 
-// Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to GLSL.
+// Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
+// GLSL.
 SHADERC_EXPORT shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_glsl(
     const shaderc_spvc_compiler_t compiler, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options);
 
-// Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to HLSL.
+// Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
+// HLSL.
 SHADERC_EXPORT shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_hlsl(
     const shaderc_spvc_compiler_t compiler, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options);
 
-// Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to MSL.
+// Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
+// MSL.
 SHADERC_EXPORT shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_msl(
     const shaderc_spvc_compiler_t compiler, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options);

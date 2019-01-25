@@ -15,10 +15,10 @@
 #include "shaderc/spvc.h"
 #include "libshaderc_util/exceptions.h"
 
-#include "spirv-tools/libspirv.hpp"
 #include "spirv-cross/spirv_glsl.hpp"
 #include "spirv-cross/spirv_hlsl.hpp"
 #include "spirv-cross/spirv_msl.hpp"
+#include "spirv-tools/libspirv.hpp"
 
 struct shaderc_spvc_compiler {};
 
@@ -105,12 +105,11 @@ void shaderc_spvc_compile_options_set_flip_vert_y(
 }
 
 size_t shaderc_spvc_compile_options_set_for_fuzzing(
-    shaderc_spvc_compile_options_t options, const uint8_t *data, size_t size) {
-    if (!data || size < sizeof(*options))
-      return 0;
+    shaderc_spvc_compile_options_t options, const uint8_t* data, size_t size) {
+  if (!data || size < sizeof(*options)) return 0;
 
-    memcpy(options, data, sizeof(*options));
-    return sizeof(*options);
+  memcpy(options, data, sizeof(*options));
+  return sizeof(*options);
 }
 
 shaderc_spvc_compiler_t shaderc_spvc_compiler_initialize() {
@@ -130,12 +129,14 @@ void consume_validation_message(shaderc_spvc_compilation_result* result,
   result->messages.append("\n");
 }
 
-// Validate the source spir-v if requested, and if valid use the given compiler to translate it to a higher level language.
-// CompilerGLSL is the base class for all spirv-cross compilers so this function works with a compiler for any output language.
-// The given compiler should already have its options set by the caller.
-shaderc_spvc_compilation_result_t validate_and_compile(spirv_cross::CompilerGLSL *compiler, const uint32_t* source,
+// Validate the source spir-v if requested, and if valid use the given compiler
+// to translate it to a higher level language. CompilerGLSL is the base class
+// for all spirv-cross compilers so this function works with a compiler for any
+// output language. The given compiler should already have its options set by
+// the caller.
+shaderc_spvc_compilation_result_t validate_and_compile(
+    spirv_cross::CompilerGLSL* compiler, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options) {
-
   auto* result = new (std::nothrow) shaderc_spvc_compilation_result;
   if (!result) return nullptr;
 
@@ -168,16 +169,16 @@ shaderc_spvc_compilation_result_t validate_and_compile(spirv_cross::CompilerGLSL
 }  // namespace
 
 shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_glsl(
-    const shaderc_spvc_compiler_t, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options) {
+    const shaderc_spvc_compiler_t, const uint32_t* source, size_t source_len,
+    shaderc_spvc_compile_options_t options) {
   spirv_cross::CompilerGLSL compiler(source, source_len);
   compiler.set_common_options(options->glsl);
   return validate_and_compile(&compiler, source, source_len, options);
 }
 
 shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_hlsl(
-    const shaderc_spvc_compiler_t, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options) {
+    const shaderc_spvc_compiler_t, const uint32_t* source, size_t source_len,
+    shaderc_spvc_compile_options_t options) {
   spirv_cross::CompilerHLSL compiler(source, source_len);
   compiler.set_common_options(options->glsl);
   compiler.set_hlsl_options(options->hlsl);
@@ -185,8 +186,8 @@ shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_hlsl(
 }
 
 shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_msl(
-    const shaderc_spvc_compiler_t, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options) {
+    const shaderc_spvc_compiler_t, const uint32_t* source, size_t source_len,
+    shaderc_spvc_compile_options_t options) {
   spirv_cross::CompilerMSL compiler(source, source_len);
   compiler.set_common_options(options->glsl);
   return validate_and_compile(&compiler, source, source_len, options);

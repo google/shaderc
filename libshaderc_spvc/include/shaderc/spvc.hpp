@@ -97,7 +97,8 @@ class CompileOptions {
 
   // Which environment should be used to validate the input SPIR-V.  Default is
   // Vulkan 1.0.
-  void SetTargetEnvironment(shaderc_target_env target, shaderc_env_version version) {
+  void SetTargetEnvironment(shaderc_target_env target,
+                            shaderc_env_version version) {
     shaderc_spvc_compile_options_set_target_env(options_, target, version);
   }
 
@@ -170,10 +171,10 @@ class Compiler {
 
   // Compiles the given source SPIR-V to MSL.
   CompilationResult CompileSpvToMsl(const uint32_t* source, size_t source_len,
-                                     const CompileOptions& options) const {
+                                    const CompileOptions& options) const {
     shaderc_spvc_compilation_result_t compilation_result =
         shaderc_spvc_compile_into_msl(compiler_, source, source_len,
-                                       options.options_);
+                                      options.options_);
     return CompilationResult(compilation_result);
   }
 
