@@ -114,6 +114,7 @@ component("libshaderc_spvc") {
     ":shaderc_util_sources",
     "${spirv_tools_dir}:spvtools",
     "${spirv_tools_dir}:spvtools_val",
+    "${spirv_tools_dir}:spvtools_opt",
     "${spirv_cross_dir}:spirv_cross_full_for_fuzzers",
   ]
 
