@@ -97,13 +97,38 @@ class CompileOptions {
 
   // Which environment should be used to validate the input SPIR-V.  Default is
   // Vulkan 1.0.
-  void SetTargetEnvironment(shaderc_target_env target, shaderc_env_version version) {
+  void SetTargetEnvironment(shaderc_target_env target,
+                            shaderc_env_version version) {
     shaderc_spvc_compile_options_set_target_env(options_, target, version);
   }
 
   // Which GLSL version should be produced.  Default is 450.
   void SetOutputLanguageVersion(uint32_t version) {
     shaderc_spvc_compile_options_set_output_language_version(options_, version);
+  }
+
+  // Which HLSL shader model should be used.  Default is 30.
+  void SetShaderModel(uint32_t model) {
+    shaderc_spvc_compile_options_set_shader_model(options_, model);
+  }
+
+  // If true (default is false):
+  //   GLSL: map depth from Vulkan/D3D style to GL style, i.e. [ 0,w] -> [-w,w]
+  //   MSL : map depth from GL style to Vulkan/D3D style, i.e. [-w,w] -> [ 0,w]
+  //   HLSL: map depth from GL style to Vulkan/D3D style, i.e. [-w,w] -> [ 0,w]
+  void SetFixupClipspace(bool b) {
+    shaderc_spvc_compile_options_set_fixup_clipspace(options_, b);
+  }
+
+  // If true invert gl_Position.y or equivalent.  Default is false.
+  void SetFlipVertY(bool b) {
+    shaderc_spvc_compile_options_set_flip_vert_y(options_, b);
+  }
+
+  // Fill options with given data.  Return amount of data used, or zero
+  // if not enough data was given.
+  size_t SetForFuzzing(const uint8_t* data, size_t size) {
+    return shaderc_spvc_compile_options_set_for_fuzzing(options_, data, size);
   }
 
  private:
@@ -132,6 +157,24 @@ class Compiler {
     shaderc_spvc_compilation_result_t compilation_result =
         shaderc_spvc_compile_into_glsl(compiler_, source, source_len,
                                        options.options_);
+    return CompilationResult(compilation_result);
+  }
+
+  // Compiles the given source SPIR-V to HLSL.
+  CompilationResult CompileSpvToHlsl(const uint32_t* source, size_t source_len,
+                                     const CompileOptions& options) const {
+    shaderc_spvc_compilation_result_t compilation_result =
+        shaderc_spvc_compile_into_hlsl(compiler_, source, source_len,
+                                       options.options_);
+    return CompilationResult(compilation_result);
+  }
+
+  // Compiles the given source SPIR-V to MSL.
+  CompilationResult CompileSpvToMsl(const uint32_t* source, size_t source_len,
+                                    const CompileOptions& options) const {
+    shaderc_spvc_compilation_result_t compilation_result =
+        shaderc_spvc_compile_into_msl(compiler_, source, source_len,
+                                      options.options_);
     return CompilationResult(compilation_result);
   }
 
