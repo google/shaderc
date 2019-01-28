@@ -9,14 +9,11 @@ endif()
 
 message(STATUS "Shaderc: build type is \"${CMAKE_BUILD_TYPE}\".")
 
+option(SHADERC_ENABLE_SPVC "Enable libshaderc_spvc" OFF)
+
 option(SHADERC_SKIP_INSTALL "Skip installation" ${SHADERC_SKIP_INSTALL})
 if(NOT ${SHADERC_SKIP_INSTALL})
   set(SHADERC_ENABLE_INSTALL ON)
-endif()
-
-option(SHADERC_SKIP_SPVC "Skip libshaderc_spvc" ${SHADERC_SKIP_SPVC})
-if(NOT ${SHADERC_SKIP_SPVC})
-  set(SHADERC_ENABLE_SPVC OFF)
 endif()
 
 option(SHADERC_SKIP_TESTS "Skip building tests" ${SHADERC_SKIP_TESTS})
