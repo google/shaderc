@@ -375,7 +375,7 @@ TEST_P(ConvertStringToVectorTestFixture, VariousStringSize) {
       << "test_case.input_str: " << test_case.input_str << std::endl;
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     ConvertStringToVectorTest, ConvertStringToVectorTestFixture,
     testing::ValuesIn(std::vector<ConvertStringToVectorTestCase>{
         {"", {0x00000000}},
@@ -451,7 +451,7 @@ TEST_P(LimitTest, Sample) {
 
 #define CASE(LIMIT, DEFAULT, NEW) \
   { Compiler::Limit::LIMIT, DEFAULT, NEW }
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     CompilerTest, LimitTest,
     // See resources.cc for the defaults.
     testing::ValuesIn(std::vector<SetLimitCase>{
@@ -462,7 +462,7 @@ INSTANTIATE_TEST_CASE_P(
         CASE(MaxTessControlAtomicCounters, 0, 72),
         CASE(MaxSamples, 4, 8),
         // clang-format on
-    }), );
+    }));
 #undef CASE
 
 // Returns a fragment shader accessing a texture with the given

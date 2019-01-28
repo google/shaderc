@@ -812,7 +812,7 @@ TEST_P(ValidShaderKind, ValidSpvCode) {
       CompilesToValidSpv(compiler, test_case.shader_, test_case.shader_kind_));
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     CompileStringTest, ValidShaderKind,
     testing::ValuesIn(std::vector<ShaderKindTestCase>{
         // Valid default shader kinds.
@@ -858,7 +858,7 @@ TEST_P(InvalidShaderKind, CompilationShouldFail) {
       CompilesToValidSpv(compiler, test_case.shader_, test_case.shader_kind_));
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     CompileStringTest, InvalidShaderKind,
     testing::ValuesIn(std::vector<ShaderKindTestCase>{
         // Invalid default shader kind.
@@ -982,7 +982,7 @@ TEST_P(IncluderTests, SetIncluderCallbacksClonedOptions) {
               HasSubstr(test_case.expected_substring()));
 }
 
-INSTANTIATE_TEST_CASE_P(CompileStringTest, IncluderTests,
+INSTANTIATE_TEST_SUITE_P(CompileStringTest, IncluderTests,
                         testing::ValuesIn(std::vector<IncluderTestCase>{
                             IncluderTestCase(
                                 // Fake file system.
@@ -1457,7 +1457,7 @@ TEST_P(ParseVersionProfileTest, FromNullTerminatedString) {
   }
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     HelperMethods, ParseVersionProfileTest,
     testing::ValuesIn(std::vector<ParseVersionProfileTestCase>{
         // Valid version profiles
