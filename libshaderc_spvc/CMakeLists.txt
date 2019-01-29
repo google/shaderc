@@ -48,6 +48,8 @@ set(SPVC_LIBS
   ${CMAKE_THREAD_LIBS_INIT}
   SPIRV-Tools
   spirv-cross-glsl
+  spirv-cross-hlsl
+  spirv-cross-msl
 )
 
 target_link_libraries(shaderc_spvc PRIVATE ${SPVC_LIBS})
