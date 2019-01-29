@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef LIBSHADERC_UTIL_COMMON_H_
-#define LIBSHADERC_UTIL_COMMON_H_
+#ifndef SHADERC_ENV_H_
+#define SHADERC_ENV_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,19 +42,8 @@ typedef enum {
   shaderc_env_version_opengl_4_5 = 450,
 } shaderc_env_version;
 
-// Indicate the status of a compilation.
-typedef enum {
-  shaderc_compilation_status_success = 0,
-  shaderc_compilation_status_invalid_stage,  // error stage deduction
-  shaderc_compilation_status_compilation_error,
-  shaderc_compilation_status_internal_error,  // unexpected failure
-  shaderc_compilation_status_null_result_object,
-  shaderc_compilation_status_invalid_assembly,
-  shaderc_compilation_status_validation_error,
-} shaderc_compilation_status;
-
 #ifdef __cplusplus
 }
 #endif  // __cplusplus
 
-#endif  // LIBSHADERC_UTIL_COMMON_H_
+#endif  // SHADERC_ENV_H_
