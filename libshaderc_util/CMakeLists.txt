@@ -27,6 +27,13 @@ target_include_directories(shaderc_util
   PUBLIC include PRIVATE ${glslang_SOURCE_DIR})
 
 if(SHADERC_ENABLE_INSTALL)
+  install(
+    FILES
+      include/shaderc/common.h
+      include/shaderc/visibility.h
+    DESTINATION
+      ${CMAKE_INSTALL_INCLUDEDIR}/shaderc)
+
   install(TARGETS shaderc_util
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})

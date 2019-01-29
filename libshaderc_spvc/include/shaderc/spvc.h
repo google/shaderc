@@ -23,8 +23,8 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
-#include "libshaderc_util/common.h"
-#include "libshaderc_util/visibility.h"
+#include "shaderc/common.h"
+#include "shaderc/visibility.h"
 
 // An opaque handle to an object that manages all compiler state.
 typedef struct shaderc_spvc_compiler* shaderc_spvc_compiler_t;
