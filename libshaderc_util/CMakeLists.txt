@@ -29,7 +29,8 @@ target_include_directories(shaderc_util
 if(SHADERC_ENABLE_INSTALL)
   install(
     FILES
-      include/shaderc/common.h
+      include/shaderc/env.h
+      include/shaderc/status.h
       include/shaderc/visibility.h
     DESTINATION
       ${CMAKE_INSTALL_INCLUDEDIR}/shaderc)

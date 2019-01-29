@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef LIBSHADERC_UTIL_VISIBILITY_H_
-#define LIBSHADERC_UTIL_VISIBILITY_H_
+#ifndef SHADERC_VISIBILITY_H_
+#define SHADERC_VISIBILITY_H_
 
 // SHADERC_EXPORT tags symbol that will be exposed by the shared libraries.
 #if defined(SHADERC_SHAREDLIB)
@@ -34,4 +34,4 @@
 #define SHADERC_EXPORT
 #endif
 
-#endif  // LIBSHADERC_UTIL_VISIBILITY_H_
+#endif  // SHADERC_VISIBILITY_H_

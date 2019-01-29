@@ -23,7 +23,8 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
-#include "shaderc/common.h"
+#include "shaderc/env.h"
+#include "shaderc/status.h"
 #include "shaderc/visibility.h"
 
 // Source language kind.
