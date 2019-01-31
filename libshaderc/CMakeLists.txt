@@ -26,6 +26,9 @@ set_target_properties(shaderc_shared PROPERTIES SOVERSION 1)
 if(SHADERC_ENABLE_INSTALL)
   install(
     FILES
+      include/shaderc/env.h
+      include/shaderc/status.h
+      include/shaderc/visibility.h
       include/shaderc/shaderc.h
       include/shaderc/shaderc.hpp
     DESTINATION

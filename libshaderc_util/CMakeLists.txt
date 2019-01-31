@@ -26,20 +26,6 @@ shaderc_default_compile_options(shaderc_util)
 target_include_directories(shaderc_util
   PUBLIC include PRIVATE ${glslang_SOURCE_DIR})
 
-if(SHADERC_ENABLE_INSTALL)
-  install(
-    FILES
-      include/shaderc/env.h
-      include/shaderc/status.h
-      include/shaderc/visibility.h
-    DESTINATION
-      ${CMAKE_INSTALL_INCLUDEDIR}/shaderc)
-
-  install(TARGETS shaderc_util
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-endif(SHADERC_ENABLE_INSTALL)
-
 find_package(Threads)
 target_link_libraries(shaderc_util PRIVATE
   glslang OSDependent OGLCompiler HLSL glslang SPIRV
