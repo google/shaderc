@@ -544,6 +544,24 @@ inline Compiler::Stage ConvertToStage(EShLanguage stage) {
       return Compiler::Stage::Fragment;
     case EShLangCompute:
       return Compiler::Stage::Compute;
+#ifdef NV_EXTENSIONS
+    case EShLangRayGenNV:
+      return Compiler::Stage::RayGenNV;
+    case EShLangIntersectNV:
+      return Compiler::Stage::IntersectNV;
+    case EShLangAnyHitNV:
+      return Compiler::Stage::AnyHitNV;
+    case EShLangClosestHitNV:
+      return Compiler::Stage::ClosestHitNV;
+    case EShLangMissNV:
+      return Compiler::Stage::MissNV;
+    case EShLangCallableNV:
+      return Compiler::Stage::CallableNV;
+    case EShLangTaskNV:
+      return Compiler::Stage::TaskNV;
+    case EShLangMeshNV:
+      return Compiler::Stage::MeshNV;
+#endif
     default:
       break;
   }
