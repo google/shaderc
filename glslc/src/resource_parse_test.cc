@@ -70,6 +70,6 @@ INSTANTIATE_TEST_SUITE_P(ParseResources, ParseResourceSettingsTest,
     {"generalConstantMatrixVectorIndexing 1", true, {}, ""},
     // Check an ignore case with a regular case
     {"whileLoops 1 MaxLights 99", true, {{shaderc_limit_max_lights, 99}}, ""},
-  }), );
+  }));
 
 }  // anonymous namespace
