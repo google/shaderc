@@ -101,7 +101,7 @@ INSTANTIATE_TEST_SUITE_P(OpenGLBlankCases, ParseVersionProfileTest,
                             {"460", true, 460, ENoProfile},
                             {"99", false, 0, EBadProfile},
                             {"500", false, 0, EBadProfile},
-                        }), );
+                        }));
 
 INSTANTIATE_TEST_SUITE_P(OpenGLCoreCases, ParseVersionProfileTest,
                         ValuesIn(std::vector<ParseVersionProfileCase>{
@@ -114,7 +114,7 @@ INSTANTIATE_TEST_SUITE_P(OpenGLCoreCases, ParseVersionProfileTest,
                             {"440core", true, 440, ECoreProfile},
                             {"450core", true, 450, ECoreProfile},
                             {"460core", true, 460, ECoreProfile},
-                        }), );
+                        }));
 
 INSTANTIATE_TEST_SUITE_P(
     OpenGLCompatibilityCases, ParseVersionProfileTest,
@@ -128,6 +128,6 @@ INSTANTIATE_TEST_SUITE_P(
         {"440compatibility", true, 440, ECompatibilityProfile},
         {"450compatibility", true, 450, ECompatibilityProfile},
         {"460compatibility", true, 460, ECompatibilityProfile},
-    }), );
+    }));
 
 }  // anonymous namespace
