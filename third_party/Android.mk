@@ -23,11 +23,13 @@ endif
 # Now include the SPIRV-Tools dependency
 include $(SPVTOOLS_LOCAL_PATH)/Android.mk
 
-# Set the location of SPIRV-Cross.
-# Allow the user to override it, but default it to under our third_party directory.
-ifeq ($(SPVCROSS_LOCAL_PATH),)
-  SPVCROSS_LOCAL_PATH:=$(THIRD_PARTY_PATH)/spirv-cross
-endif
+ifeq ($(SHADERC_ENABLE_SPVC),1)
+  # Set the location of SPIRV-Cross.
+  # Allow the user to override it, but default it to under our third_party directory.
+  ifeq ($(SPVCROSS_LOCAL_PATH),)
+    SPVCROSS_LOCAL_PATH:=$(THIRD_PARTY_PATH)/spirv-cross
+  endif
 
-# Now include the SPIRV-Cross dependency
-include $(SPVCROSS_LOCAL_PATH)/jni/Android.mk
+  # Now include the SPIRV-Cross dependency
+  include $(SPVCROSS_LOCAL_PATH)/jni/Android.mk
+endif
