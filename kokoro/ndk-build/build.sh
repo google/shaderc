@@ -51,6 +51,7 @@ $ANDROID_NDK/ndk-build \
   V=1 \
   SPVTOOLS_LOCAL_PATH=$SRC/third_party/spirv-tools \
   SPVHEADERS_LOCAL_PATH=$SRC/third_party/spirv-headers \
+  SHADERC_ENABLE_SPVC=1 \
   -j 8
 
 echo $(date): ndk-build completed.
