@@ -72,6 +72,7 @@ add_subdirectory(third_party)
 
 if(SHADERC_ENABLE_SPVC)
 add_subdirectory(libshaderc_spvc)
+add_subdirectory(spvc)
 endif()
 add_subdirectory(libshaderc_util)
 add_subdirectory(libshaderc)

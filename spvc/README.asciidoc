@@ -1,0 +1,61 @@
+= spvc Manual
+:toc:
+:toclevels: 3
+:numbered:
+:source-highlighter: pygments
+
+== Name
+
+`spvc` - A command-line SPIR-V to GLSL/HLSL/MSL compiler with
+Clang-compatible arguments.
+
+== Synopsis
+
+----
+spvc [--help]
+
+spvc [--version]
+     [--validate=<target env>]
+     [-o outfile]
+     shader...
+----
+
+== Description
+
+=== Input file languages
+
+Spvc accepts SPIR-V binary files as input.
+
+[[output-file-naming]]
+=== Output file naming
+
+If a name is specified via `-o`, the output file will be given that name.
+Otherwise the output file name is the same as the input file name except
+with a `.glsl,` `.hlsl` or `.msl` extension, as appropriate.
+
+== Command Line Options
+
+=== Overall Options
+
+==== `--help`
+
+`--help` tells the spvc compiler to display all available options and exit.
+
+==== `--version`
+
+`--version` displays version information.
+
+==== `--validate=<target env>`
+
+`--validate` validates the input with the given target environment, which is one of:
+
+* vulkan1.0
+* vulkan1.1
+* opengl
+* opengl4.5
+* opengl_compate
+
+==== `-o`
+
+`-o` lets you specify the output file's name. It cannot be used when there are
+multiple files generated. A filename of `-` represents standard output.
