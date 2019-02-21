@@ -1,3 +1,10 @@
+/usr/local/google/home/dneto/ndk/external/googletest
+/usr/local/google/home/dneto/ndk/external/shaderc/glslang
+/usr/local/google/home/dneto/ndk/external/shaderc/shaderc
+/usr/local/google/home/dneto/ndk/external/shaderc/spirv-headers
+/usr/local/google/home/dneto/ndk/external/shaderc/spirv-tools
+/usr/local/google/home/dneto/ndk/external/regex-re2
+/usr/local/google/home/dneto/ndk/external/effcee
 {
   "commits" : [
     {
@@ -5,14 +12,14 @@
       "site" : "github",
       "subrepo" : "KhronosGroup/glslang",
       "subdir" : "third_party/glslang",
-      "commit" : "9983f99e87ab0b6608b236ea59bcf873f90e1435"
+      "commit" : "58d6905ea01f7c44652eb082d26b662ca811df25"
     },
     {
       "name" : "re2",
       "site" : "github",
       "subrepo" : "google/re2",
       "subdir" : "third_party/re2",
-      "commit" : "68752454406a2ca8de090e41927702288dfe101e"
+      "commit" : "79ef3b2d31f06493f687ef9e947d9632bad54b9b"
     },
     {
       "name" : "effcee",
@@ -46,7 +53,7 @@
       "site" : "github",
       "subrepo" : "KhronosGroup/SPIRV-Tools",
       "subdir" : "third_party/spirv-tools",
-      "commit" : "0f4bf0720a9cd49d7375ae1296c874133df5ea34"
+      "commit" : "76730a46a1d81bdf46f25f33684e04b429ff1718"
     }
   ]
 }
