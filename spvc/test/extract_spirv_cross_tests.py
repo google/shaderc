@@ -31,16 +31,16 @@ shaderc_spirv_cross_test_inputs = 'spirv_cross_test_inputs'
 
 test_case_dirs = (
 # directory           language  optimize
- ('shaders'            , 'glsl', ''   ),
-#TODO: add the following
-#('shaders'            , 'glsl', 'opt'),
-#('shaders-no-opt'     , 'glsl', ''   ),
-#('shaders-msl'        , 'msl' , ''   ),
-#('shaders-msl'        , 'msl' , 'opt'),
-#('shaders-msl-no-opt' , 'msl' , ''   ),
-#('shaders-hlsl'       , 'hlsl', ''   ),
-#('shaders-hlsl'       , 'hlsl', 'opt'),
-#('shaders-hlsl-no-opt', 'hlsl', ''   ),
+('shaders'            , 'glsl', ''   ),
+('shaders'            , 'glsl', 'opt'),
+('shaders-no-opt'     , 'glsl', ''   ),
+('shaders-msl'        , 'msl' , ''   ),
+('shaders-msl'        , 'msl' , 'opt'),
+('shaders-msl-no-opt' , 'msl' , ''   ),
+('shaders-hlsl'       , 'hlsl', ''   ),
+('shaders-hlsl'       , 'hlsl', 'opt'),
+('shaders-hlsl-no-opt', 'hlsl', ''   ),
+('shaders-reflection' , 'refl', ''   ),
 )
 
 spirv_as_path = os.path.join(spirv_cross_dir, 'external', 'spirv-tools-build',
@@ -61,11 +61,9 @@ def mkdir_p(filepath):
 devnull = open(os.devnull, 'w')
 
 def spirv_as(inp, out):
-    return
     subprocess.check_call([spirv_as_path, '-o', out, inp], stdout=devnull)
 
 def glslangValidator(inp, out):
-    return
     subprocess.check_call([glslangValidator_path , '--target-env', 'vulkan1.1', '-V', '-o',
                           out, inp], stdout=devnull)
 
@@ -75,39 +73,45 @@ def make_test_case(dirpath, filename, language, optimize):
     input_binary_path = os.path.join(shaderc_spirv_cross_test_inputs, test_case_path)
     expected_output_path = os.path.join('reference', test_case_path)
 
-    # convert text source to binary
-    mkdir_p(input_binary_path)
-    if '.asm.' in filename:
-        # spirv text
-        spirv_as(input_source_path, input_binary_path)
+    if language == 'glsl':
+        # convert text source to binary
+        mkdir_p(input_binary_path)
+        if '.asm.' in filename:
+            # spirv text
+            spirv_as(input_source_path, input_binary_path)
+        else:
+            # glsl
+            glslangValidator(input_source_path, input_binary_path)
+
+        # build up compiler flags
+        flags = ''
+        if optimize:
+            flags += ' --opt'
+        if not '.noeliminate' in filename:
+            flags += ' --remove-unused-variables'
+        if '.legacy.' in filename:
+            flags += ' --version 100 --es'
+        if '.flatten.' in filename:
+            flags += ' --flatten-ubo'
+        if '.flatten_dim.' in filename:
+            flags += ' --flatten-multidimensional-arrays'
+        if '.sso.' in filename:
+            flags += ' --separate-shader-objects'
+
+        # print test case
+        if not '.nocompat.' in filename:
+            print test_case_path, expected_output_path, flags
+        if '.vk.' in filename:
+            print test_case_path, expected_output_path + '.vk', flags + ' --vulkan-semantics'
+
     else:
-        # glsl
-        glslangValidator(input_source_path, input_binary_path)
-
-    # build up compiler flags
-    flags = ''
-    if optimize:
-        flags += ' --opt'
-    if not '.noeliminate' in filename:
-        flags += ' --remove-unused-variables'
-    if '.legacy.' in filename:
-        flags += ' --version 100 --es'
-    if '.flatten.' in filename:
-        flags += ' --flatten-ubo'
-    if '.flatten_dim.' in filename:
-        flags += ' --flatten-multidimensional-arrays'
-    if '.sso.' in filename:
-        flags += ' --separate-shader-objects'
-
-    # print test case
-    if not '.nocompat.' in filename:
-        print test_case_path, expected_output_path, flags
-    if '.vk.' in filename:
-        print test_case_path, expected_output_path + '.vk', flags + ' --vulkan-semantics'
+        # TODO: other languages
+        print 'skip', test_case_path, expected_output_path
 
 for test_case_dir, language, optimize in test_case_dirs:
     top = os.path.join(spirv_cross_dir, test_case_dir)
     for dirpath, dirnames, filenames in os.walk(top):
-        for filename in filenames:
+        dirnames.sort()
+        for filename in sorted(filenames):
             relative_dirpath = os.path.relpath(dirpath, spirv_cross_dir)
             make_test_case(relative_dirpath, filename, language, optimize)

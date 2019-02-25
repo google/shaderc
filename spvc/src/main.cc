@@ -42,8 +42,7 @@ Options:
   -o <output file>      '-' means standard output.
   --validate=[<env>]    Validate SPIR-V source with given environment
                         <env> is empty to skip validation, or one of the following:
-                        vulkan1.0 (default) vulkan1.1 opencl2.2
-                        spv1.0 spv1.1 spv1.2 spv1.3 webgpu0
+                        vulkan1.0 (default) vulkan1.1 opengl opengl4.5
 )";
 }
 
@@ -141,9 +140,6 @@ int main(int argc, char** argv) {
         options.SetTargetEnvironment(shaderc_target_env_opengl,
                                      shaderc_env_version_vulkan_1_1);
       } else if (target_env == "opengl4.5") {
-        options.SetTargetEnvironment(shaderc_target_env_opengl,
-                                     shaderc_env_version_vulkan_1_1);
-      } else if (target_env == "opengl_compat") {
         options.SetTargetEnvironment(shaderc_target_env_opengl,
                                      shaderc_env_version_vulkan_1_1);
       } else {

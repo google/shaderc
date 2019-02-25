@@ -37,6 +37,7 @@ for line in cases_file:
 
     test_count += 1
     if line.startswith('skip '):
+        print line
         continue
     run_count += 1
 
@@ -45,12 +46,19 @@ for line in cases_file:
     expect_path = os.path.join(expect_dir, split[1])
     flags = split[2:]
     command = [spvc_path, '-o', tmpfile, '--validate=vulkan1.1' ] + flags + [input_spv]
-    subprocess.check_call(command)
+    try:
+        subprocess.check_call(command)
+    except:
+        print 'skip', line
+        continue
 
     if filecmp.cmp(tmpfile, expect_path):
         pass_count += 1
     else:
-        print 'FAIL', line
+        print 'skip', line
+        continue
+
+    print line
 
 cases_file.close()
 os.remove(tmpfile)

@@ -1,260 +1,1159 @@
-skip shaders/comp/inout-struct.invalid.comp reference/shaders/comp/inout-struct.invalid.comp  --remove-unused-variables
-skip shaders/comp/type-alias.comp reference/shaders/comp/type-alias.comp  --remove-unused-variables
-skip shaders/comp/dowhile.comp reference/shaders/comp/dowhile.comp  --remove-unused-variables
-skip shaders/comp/modf.comp reference/shaders/comp/modf.comp  --remove-unused-variables
-skip shaders/comp/casts.comp reference/shaders/comp/casts.comp  --remove-unused-variables
-skip shaders/comp/struct-packing.comp reference/shaders/comp/struct-packing.comp  --remove-unused-variables
-skip shaders/comp/atomic.comp reference/shaders/comp/atomic.comp  --remove-unused-variables
-skip shaders/comp/insert.comp reference/shaders/comp/insert.comp  --remove-unused-variables
-skip shaders/comp/generate_height.comp reference/shaders/comp/generate_height.comp  --remove-unused-variables
-skip shaders/comp/cfg-preserve-parameter.comp reference/shaders/comp/cfg-preserve-parameter.comp  --remove-unused-variables
-skip shaders/comp/torture-loop.comp reference/shaders/comp/torture-loop.comp  --remove-unused-variables
-skip shaders/comp/read-write-only.comp reference/shaders/comp/read-write-only.comp  --remove-unused-variables
-skip shaders/comp/udiv.comp reference/shaders/comp/udiv.comp  --remove-unused-variables
-skip shaders/comp/rmw-opt.comp reference/shaders/comp/rmw-opt.comp  --remove-unused-variables
-skip shaders/comp/mat3.comp reference/shaders/comp/mat3.comp  --remove-unused-variables
-skip shaders/comp/ssbo-array.comp reference/shaders/comp/ssbo-array.comp  --remove-unused-variables
-skip shaders/comp/basic.comp reference/shaders/comp/basic.comp  --remove-unused-variables
-skip shaders/comp/shared.comp reference/shaders/comp/shared.comp  --remove-unused-variables
-skip shaders/comp/coherent-block.comp reference/shaders/comp/coherent-block.comp  --remove-unused-variables
-skip shaders/comp/mod.comp reference/shaders/comp/mod.comp  --remove-unused-variables
-skip shaders/comp/bake_gradient.comp reference/shaders/comp/bake_gradient.comp  --remove-unused-variables
-shaders/comp/bitcast-16bit-2.invalid.comp reference/shaders/comp/bitcast-16bit-2.invalid.comp  --remove-unused-variables
-skip shaders/comp/barriers.comp reference/shaders/comp/barriers.comp  --remove-unused-variables
-shaders/comp/bitcast-16bit-1.invalid.comp reference/shaders/comp/bitcast-16bit-1.invalid.comp  --remove-unused-variables
-skip shaders/comp/defer-parens.comp reference/shaders/comp/defer-parens.comp  --remove-unused-variables
-skip shaders/comp/image.comp reference/shaders/comp/image.comp  --remove-unused-variables
-skip shaders/comp/coherent-image.comp reference/shaders/comp/coherent-image.comp  --remove-unused-variables
-skip shaders/comp/struct-layout.comp reference/shaders/comp/struct-layout.comp  --remove-unused-variables
-skip shaders/comp/composite-construct.comp reference/shaders/comp/composite-construct.comp  --remove-unused-variables
-skip shaders/comp/rmw-matrix.comp reference/shaders/comp/rmw-matrix.comp  --remove-unused-variables
-skip shaders/comp/cfg.comp reference/shaders/comp/cfg.comp  --remove-unused-variables
-skip shaders/comp/culling.comp reference/shaders/comp/culling.comp  --remove-unused-variables
-skip shaders/comp/composite-array-initialization.comp reference/shaders/comp/composite-array-initialization.comp  --remove-unused-variables
-shaders/desktop-only/comp/int64.desktop.comp reference/shaders/desktop-only/comp/int64.desktop.comp  --remove-unused-variables
-shaders/desktop-only/comp/image-formats.desktop.noeliminate.comp reference/shaders/desktop-only/comp/image-formats.desktop.noeliminate.comp 
-shaders/desktop-only/comp/fp64.desktop.comp reference/shaders/desktop-only/comp/fp64.desktop.comp  --remove-unused-variables
-shaders/desktop-only/comp/extended-arithmetic.desktop.comp reference/shaders/desktop-only/comp/extended-arithmetic.desktop.comp  --remove-unused-variables
-shaders/desktop-only/comp/enhanced-layouts.comp reference/shaders/desktop-only/comp/enhanced-layouts.comp  --remove-unused-variables
-shaders/desktop-only/frag/clip-cull-distance.desktop.frag reference/shaders/desktop-only/frag/clip-cull-distance.desktop.frag  --remove-unused-variables
-shaders/desktop-only/frag/depth-greater-than.desktop.frag reference/shaders/desktop-only/frag/depth-greater-than.desktop.frag  --remove-unused-variables
-shaders/desktop-only/frag/layout-component.desktop.frag reference/shaders/desktop-only/frag/layout-component.desktop.frag  --remove-unused-variables
-shaders/desktop-only/frag/hlsl-uav-block-alias.asm.frag reference/shaders/desktop-only/frag/hlsl-uav-block-alias.asm.frag  --remove-unused-variables
-shaders/desktop-only/frag/image-query.desktop.frag reference/shaders/desktop-only/frag/image-query.desktop.frag  --remove-unused-variables
-shaders/desktop-only/frag/sampler-ms-query.desktop.frag reference/shaders/desktop-only/frag/sampler-ms-query.desktop.frag  --remove-unused-variables
-shaders/desktop-only/frag/query-levels.desktop.frag reference/shaders/desktop-only/frag/query-levels.desktop.frag  --remove-unused-variables
-shaders/desktop-only/frag/dual-source-blending.desktop.frag reference/shaders/desktop-only/frag/dual-source-blending.desktop.frag  --remove-unused-variables
-shaders/desktop-only/frag/query-lod.desktop.frag reference/shaders/desktop-only/frag/query-lod.desktop.frag  --remove-unused-variables
-shaders/desktop-only/frag/depth-less-than.desktop.frag reference/shaders/desktop-only/frag/depth-less-than.desktop.frag  --remove-unused-variables
-skip shaders/desktop-only/frag/fp16.invalid.desktop.frag reference/shaders/desktop-only/frag/fp16.invalid.desktop.frag  --remove-unused-variables
-shaders/desktop-only/frag/in-block-qualifiers.frag reference/shaders/desktop-only/frag/in-block-qualifiers.frag  --remove-unused-variables
-shaders/desktop-only/frag/control-dependent-in-branch.desktop.frag reference/shaders/desktop-only/frag/control-dependent-in-branch.desktop.frag  --remove-unused-variables
-shaders/desktop-only/frag/image-ms.desktop.frag reference/shaders/desktop-only/frag/image-ms.desktop.frag  --remove-unused-variables
-shaders/desktop-only/frag/texture-proj-shadow.desktop.frag reference/shaders/desktop-only/frag/texture-proj-shadow.desktop.frag  --remove-unused-variables
-skip shaders/desktop-only/tese/triangle.desktop.sso.tese reference/shaders/desktop-only/tese/triangle.desktop.sso.tese  --remove-unused-variables --separate-shader-objects
-skip shaders/desktop-only/tesc/basic.desktop.sso.tesc reference/shaders/desktop-only/tesc/basic.desktop.sso.tesc  --remove-unused-variables --separate-shader-objects
-shaders/desktop-only/vert/clip-cull-distance.desktop.vert reference/shaders/desktop-only/vert/clip-cull-distance.desktop.vert  --remove-unused-variables
-skip shaders/desktop-only/vert/clip-cull-distance.desktop.sso.vert reference/shaders/desktop-only/vert/clip-cull-distance.desktop.sso.vert  --remove-unused-variables --separate-shader-objects
-skip shaders/desktop-only/vert/basic.desktop.sso.vert reference/shaders/desktop-only/vert/basic.desktop.sso.vert  --remove-unused-variables --separate-shader-objects
-skip shaders/desktop-only/vert/shader-draw-parameters.desktop.vert reference/shaders/desktop-only/vert/shader-draw-parameters.desktop.vert  --remove-unused-variables
-shaders/desktop-only/vert/out-block-qualifiers.vert reference/shaders/desktop-only/vert/out-block-qualifiers.vert  --remove-unused-variables
-shaders/desktop-only/vert/shader-draw-parameters-450.desktop.vert reference/shaders/desktop-only/vert/shader-draw-parameters-450.desktop.vert  --remove-unused-variables
-shaders/desktop-only/geom/viewport-index.desktop.geom reference/shaders/desktop-only/geom/viewport-index.desktop.geom  --remove-unused-variables
-skip shaders/desktop-only/geom/basic.desktop.sso.geom reference/shaders/desktop-only/geom/basic.desktop.sso.geom  --remove-unused-variables --separate-shader-objects
-skip shaders/legacy/vert/struct-varying.legacy.vert reference/shaders/legacy/vert/struct-varying.legacy.vert  --remove-unused-variables --version 100 --es
-skip shaders/legacy/vert/transpose.legacy.vert reference/shaders/legacy/vert/transpose.legacy.vert  --remove-unused-variables --version 
-skip shaders/legacy/vert/io-block.legacy.vert reference/shaders/legacy/vert/io-block.legacy.vert  --remove-unused-variables --version 100 --es
-skip shaders/legacy/vert/implicit-lod.legacy.vert reference/shaders/legacy/vert/implicit-lod.legacy.vert  --remove-unused-variables --version 100 --es
-skip shaders/legacy/fragment/io-blocks.legacy.frag reference/shaders/legacy/fragment/io-blocks.legacy.frag  --remove-unused-variables --version 100 --es
-skip shaders/legacy/fragment/struct-varying.legacy.frag reference/shaders/legacy/fragment/struct-varying.legacy.frag  --remove-unused-variables --version 100 --es
-skip shaders/legacy/fragment/explicit-lod.legacy.frag reference/shaders/legacy/fragment/explicit-lod.legacy.frag  --remove-unused-variables --version 100 --es
-skip shaders/frag/ubo_layout.frag reference/shaders/frag/ubo_layout.frag  --remove-unused-variables
-skip shaders/frag/for-loop-init.frag reference/shaders/frag/for-loop-init.frag  --remove-unused-variables
-skip shaders/frag/loop-dominator-and-switch-default.frag reference/shaders/frag/loop-dominator-and-switch-default.frag  --remove-unused-variables
-skip shaders/frag/sample-parameter.frag reference/shaders/frag/sample-parameter.frag  --remove-unused-variables
-skip shaders/frag/composite-extract-forced-temporary.frag reference/shaders/frag/composite-extract-forced-temporary.frag  --remove-unused-variables
-skip shaders/frag/sampler-proj.frag reference/shaders/frag/sampler-proj.frag  --remove-unused-variables
-skip shaders/frag/front-facing.frag reference/shaders/frag/front-facing.frag  --remove-unused-variables
-skip shaders/frag/constant-composites.frag reference/shaders/frag/constant-composites.frag  --remove-unused-variables
-skip shaders/frag/basic.frag reference/shaders/frag/basic.frag  --remove-unused-variables
-skip shaders/frag/mix.frag reference/shaders/frag/mix.frag  --remove-unused-variables
-skip shaders/frag/ground.frag reference/shaders/frag/ground.frag  --remove-unused-variables
-skip shaders/frag/lut-promotion.frag reference/shaders/frag/lut-promotion.frag  --remove-unused-variables
-skip shaders/frag/constant-array.frag reference/shaders/frag/constant-array.frag  --remove-unused-variables
-skip shaders/frag/unary-enclose.frag reference/shaders/frag/unary-enclose.frag  --remove-unused-variables
-skip shaders/frag/frexp-modf.frag reference/shaders/frag/frexp-modf.frag  --remove-unused-variables
-skip shaders/frag/hoisted-temporary-use-continue-block-as-value.frag reference/shaders/frag/hoisted-temporary-use-continue-block-as-value.frag  --remove-unused-variables
-skip shaders/frag/gather-dref.frag reference/shaders/frag/gather-dref.frag  --remove-unused-variables
-skip shaders/frag/switch-unsigned-case.frag reference/shaders/frag/switch-unsigned-case.frag  --remove-unused-variables
-shaders/frag/image-load-store-uint-coord.asm.frag reference/shaders/frag/image-load-store-uint-coord.asm.frag  --remove-unused-variables
-skip shaders/frag/pls.frag reference/shaders/frag/pls.frag  --remove-unused-variables
-skip shaders/frag/complex-expression-in-access-chain.frag reference/shaders/frag/complex-expression-in-access-chain.frag  --remove-unused-variables
-skip shaders/frag/helper-invocation.frag reference/shaders/frag/helper-invocation.frag  --remove-unused-variables
-skip shaders/frag/swizzle.frag reference/shaders/frag/swizzle.frag  --remove-unused-variables
-skip shaders/frag/array-lut-no-loop-variable.frag reference/shaders/frag/array-lut-no-loop-variable.frag  --remove-unused-variables
-skip shaders/frag/flush_params.frag reference/shaders/frag/flush_params.frag  --remove-unused-variables
-skip shaders/frag/partial-write-preserve.frag reference/shaders/frag/partial-write-preserve.frag  --remove-unused-variables
-shaders/frag/16bit-constants.frag reference/shaders/frag/16bit-constants.frag  --remove-unused-variables
-skip shaders/frag/false-loop-init.frag reference/shaders/frag/false-loop-init.frag  --remove-unused-variables
-skip shaders/frag/sampler-ms.frag reference/shaders/frag/sampler-ms.frag  --remove-unused-variables
-skip shaders/frag/texel-fetch-offset.frag reference/shaders/frag/texel-fetch-offset.frag  --remove-unused-variables
-skip shaders/frag/sampler.frag reference/shaders/frag/sampler.frag  --remove-unused-variables
-skip shaders/flatten/basic.flatten.vert reference/shaders/flatten/basic.flatten.vert  --remove-unused-variables --flatten-ubo
-skip shaders/flatten/multi-dimensional.desktop.invalid.flatten_dim.frag reference/shaders/flatten/multi-dimensional.desktop.invalid.flatten_dim.frag  --remove-unused-variables --flatten-multidimensional-arrays
-skip shaders/flatten/dynamic.flatten.vert reference/shaders/flatten/dynamic.flatten.vert  --remove-unused-variables --flatten-ubo
-skip shaders/flatten/matrixindex.flatten.vert reference/shaders/flatten/matrixindex.flatten.vert  --remove-unused-variables --flatten-ubo
-skip shaders/flatten/copy.flatten.vert reference/shaders/flatten/copy.flatten.vert  --remove-unused-variables --flatten-ubo
-skip shaders/flatten/struct.flatten.vert reference/shaders/flatten/struct.flatten.vert  --remove-unused-variables --flatten-ubo
-skip shaders/flatten/swizzle.flatten.vert reference/shaders/flatten/swizzle.flatten.vert  --remove-unused-variables --flatten-ubo
-skip shaders/flatten/types.flatten.frag reference/shaders/flatten/types.flatten.frag  --remove-unused-variables --flatten-ubo
-skip shaders/flatten/multiindex.flatten.vert reference/shaders/flatten/multiindex.flatten.vert  --remove-unused-variables --flatten-ubo
-skip shaders/flatten/struct.rowmajor.flatten.vert reference/shaders/flatten/struct.rowmajor.flatten.vert  --remove-unused-variables --flatten-ubo
-skip shaders/flatten/push-constant.flatten.vert reference/shaders/flatten/push-constant.flatten.vert  --remove-unused-variables --flatten-ubo
-skip shaders/flatten/matrix-conversion.flatten.frag reference/shaders/flatten/matrix-conversion.flatten.frag  --remove-unused-variables --flatten-ubo
-skip shaders/flatten/rowmajor.flatten.vert reference/shaders/flatten/rowmajor.flatten.vert  --remove-unused-variables --flatten-ubo
-skip shaders/flatten/array.flatten.vert reference/shaders/flatten/array.flatten.vert  --remove-unused-variables --flatten-ubo
-skip shaders/asm/comp/decoration-group.asm.comp reference/shaders/asm/comp/decoration-group.asm.comp  --remove-unused-variables
-skip shaders/asm/comp/logical.asm.comp reference/shaders/asm/comp/logical.asm.comp  --remove-unused-variables
-shaders/asm/comp/atomic-increment.asm.comp reference/shaders/asm/comp/atomic-increment.asm.comp  --remove-unused-variables
-skip shaders/asm/comp/bitcast_sdiv.asm.comp reference/shaders/asm/comp/bitcast_sdiv.asm.comp  --remove-unused-variables
-skip shaders/asm/comp/bitcast_iequal.asm.comp reference/shaders/asm/comp/bitcast_iequal.asm.comp  --remove-unused-variables
-shaders/asm/comp/global-parameter-name-alias.asm.comp reference/shaders/asm/comp/global-parameter-name-alias.asm.comp  --remove-unused-variables
-shaders/asm/comp/op-phi-swap.asm.comp reference/shaders/asm/comp/op-phi-swap.asm.comp  --remove-unused-variables
-skip shaders/asm/comp/multiple-entry.asm.comp reference/shaders/asm/comp/multiple-entry.asm.comp  --remove-unused-variables
-skip shaders/asm/comp/specialization-constant-workgroup.asm.comp reference/shaders/asm/comp/specialization-constant-workgroup.asm.comp  --remove-unused-variables
-skip shaders/asm/comp/bitcast_slr.asm.comp reference/shaders/asm/comp/bitcast_slr.asm.comp  --remove-unused-variables
-shaders/asm/comp/switch-break-ladder.asm.comp reference/shaders/asm/comp/switch-break-ladder.asm.comp  --remove-unused-variables
-shaders/asm/comp/block-name-alias-global.asm.comp reference/shaders/asm/comp/block-name-alias-global.asm.comp  --remove-unused-variables
-skip shaders/asm/comp/bitcast_iadd.asm.comp reference/shaders/asm/comp/bitcast_iadd.asm.comp  --remove-unused-variables
-shaders/asm/comp/hlsl-functionality.asm.comp reference/shaders/asm/comp/hlsl-functionality.asm.comp  --remove-unused-variables
-skip shaders/asm/comp/bitcast_sar.asm.comp reference/shaders/asm/comp/bitcast_sar.asm.comp  --remove-unused-variables
-skip shaders/asm/comp/quantize.asm.comp reference/shaders/asm/comp/quantize.asm.comp  --remove-unused-variables
+skip shaders/amd/fragmentMaskFetch_subpassInput.vk.nocompat.invalid.frag reference/shaders/amd/fragmentMaskFetch_subpassInput.vk.nocompat.invalid.frag.vk  --remove-unused-variables --vulkan-semantics
+shaders/amd/fs.invalid.frag reference/shaders/amd/fs.invalid.frag  --remove-unused-variables
+shaders/amd/gcn_shader.comp reference/shaders/amd/gcn_shader.comp  --remove-unused-variables
+shaders/amd/shader_ballot.comp reference/shaders/amd/shader_ballot.comp  --remove-unused-variables
+skip shaders/amd/shader_ballot_nonuniform_invocations.invalid.comp reference/shaders/amd/shader_ballot_nonuniform_invocations.invalid.comp  --remove-unused-variables
+shaders/amd/shader_group_vote.comp reference/shaders/amd/shader_group_vote.comp  --remove-unused-variables
+shaders/amd/shader_trinary_minmax.comp reference/shaders/amd/shader_trinary_minmax.comp  --remove-unused-variables
 shaders/asm/comp/atomic-decrement.asm.comp reference/shaders/asm/comp/atomic-decrement.asm.comp  --remove-unused-variables
-shaders/asm/comp/storage-buffer-basic.invalid.asm.comp reference/shaders/asm/comp/storage-buffer-basic.invalid.asm.comp  --remove-unused-variables
+shaders/asm/comp/atomic-increment.asm.comp reference/shaders/asm/comp/atomic-increment.asm.comp  --remove-unused-variables
+skip shaders/asm/comp/bitcast_iadd.asm.comp reference/shaders/asm/comp/bitcast_iadd.asm.comp  --remove-unused-variables
+skip shaders/asm/comp/bitcast_iequal.asm.comp reference/shaders/asm/comp/bitcast_iequal.asm.comp  --remove-unused-variables
+skip shaders/asm/comp/bitcast_sar.asm.comp reference/shaders/asm/comp/bitcast_sar.asm.comp  --remove-unused-variables
+skip shaders/asm/comp/bitcast_sdiv.asm.comp reference/shaders/asm/comp/bitcast_sdiv.asm.comp  --remove-unused-variables
+skip shaders/asm/comp/bitcast_slr.asm.comp reference/shaders/asm/comp/bitcast_slr.asm.comp  --remove-unused-variables
+shaders/asm/comp/block-name-alias-global.asm.comp reference/shaders/asm/comp/block-name-alias-global.asm.comp  --remove-unused-variables
 shaders/asm/comp/builtin-compute-bitcast.asm.comp reference/shaders/asm/comp/builtin-compute-bitcast.asm.comp  --remove-unused-variables
-shaders/asm/frag/loop-body-dominator-continue-access.asm.frag reference/shaders/asm/frag/loop-body-dominator-continue-access.asm.frag  --remove-unused-variables
-skip shaders/asm/frag/frem.asm.frag reference/shaders/asm/frag/frem.asm.frag  --remove-unused-variables
-shaders/asm/frag/locations-components.asm.frag reference/shaders/asm/frag/locations-components.asm.frag  --remove-unused-variables
-shaders/asm/frag/invalidation.asm.frag reference/shaders/asm/frag/invalidation.asm.frag  --remove-unused-variables
-shaders/asm/frag/inf-nan-constant-double.asm.frag reference/shaders/asm/frag/inf-nan-constant-double.asm.frag  --remove-unused-variables
-shaders/asm/frag/phi-loop-variable.asm.frag reference/shaders/asm/frag/phi-loop-variable.asm.frag  --remove-unused-variables
-shaders/asm/frag/for-loop-phi-only-continue.asm.frag reference/shaders/asm/frag/for-loop-phi-only-continue.asm.frag  --remove-unused-variables
-shaders/asm/frag/default-member-names.asm.frag reference/shaders/asm/frag/default-member-names.asm.frag  --remove-unused-variables
-skip shaders/asm/frag/switch-label-shared-block.asm.frag reference/shaders/asm/frag/switch-label-shared-block.asm.frag  --remove-unused-variables
-skip shaders/asm/frag/srem.asm.frag reference/shaders/asm/frag/srem.asm.frag  --remove-unused-variables
-skip shaders/asm/frag/sampler-buffer-array-without-sampler.asm.frag reference/shaders/asm/frag/sampler-buffer-array-without-sampler.asm.frag  --remove-unused-variables
-shaders/asm/frag/texel-fetch-no-lod.asm.frag reference/shaders/asm/frag/texel-fetch-no-lod.asm.frag  --remove-unused-variables
-skip shaders/asm/frag/loop-header-to-continue.asm.frag reference/shaders/asm/frag/loop-header-to-continue.asm.frag  --remove-unused-variables
-skip shaders/asm/frag/image-query-no-sampler.vk.asm.frag reference/shaders/asm/frag/image-query-no-sampler.vk.asm.frag  --remove-unused-variables
-skip shaders/asm/frag/image-query-no-sampler.vk.asm.frag reference/shaders/asm/frag/image-query-no-sampler.vk.asm.frag.vk  --remove-unused-variables --vulkan-semantics
-shaders/asm/frag/temporary-phi-hoisting.asm.frag reference/shaders/asm/frag/temporary-phi-hoisting.asm.frag  --remove-unused-variables
-skip shaders/asm/frag/lut-promotion-initializer.asm.frag reference/shaders/asm/frag/lut-promotion-initializer.asm.frag  --remove-unused-variables
-skip shaders/asm/frag/struct-composite-extract-swizzle.asm.frag reference/shaders/asm/frag/struct-composite-extract-swizzle.asm.frag  --remove-unused-variables
-skip shaders/asm/frag/function-overload-alias.asm.frag reference/shaders/asm/frag/function-overload-alias.asm.frag  --remove-unused-variables
-shaders/asm/frag/temporary-name-alias.asm.frag reference/shaders/asm/frag/temporary-name-alias.asm.frag  --remove-unused-variables
-shaders/asm/frag/op-phi-swap-continue-block.asm.frag reference/shaders/asm/frag/op-phi-swap-continue-block.asm.frag  --remove-unused-variables
-skip shaders/asm/frag/hlsl-sample-cmp-level-zero.asm.frag reference/shaders/asm/frag/hlsl-sample-cmp-level-zero.asm.frag  --remove-unused-variables
-skip shaders/asm/frag/hlsl-sample-cmp-level-zero-cube.asm.frag reference/shaders/asm/frag/hlsl-sample-cmp-level-zero-cube.asm.frag  --remove-unused-variables
-shaders/asm/frag/selection-merge-to-continue.asm.frag reference/shaders/asm/frag/selection-merge-to-continue.asm.frag  --remove-unused-variables
-skip shaders/asm/frag/switch-merge-to-continue.asm.frag reference/shaders/asm/frag/switch-merge-to-continue.asm.frag  --remove-unused-variables
-skip shaders/asm/frag/unknown-depth-state.asm.vk.frag reference/shaders/asm/frag/unknown-depth-state.asm.vk.frag  --remove-unused-variables
-skip shaders/asm/frag/unknown-depth-state.asm.vk.frag reference/shaders/asm/frag/unknown-depth-state.asm.vk.frag.vk  --remove-unused-variables --vulkan-semantics
-skip shaders/asm/frag/inf-nan-constant.asm.frag reference/shaders/asm/frag/inf-nan-constant.asm.frag  --remove-unused-variables
-shaders/asm/frag/image-extract-reuse.asm.frag reference/shaders/asm/frag/image-extract-reuse.asm.frag  --remove-unused-variables
-shaders/asm/frag/complex-name-workarounds.asm.frag reference/shaders/asm/frag/complex-name-workarounds.asm.frag  --remove-unused-variables
-skip shaders/asm/frag/image-fetch-no-sampler.asm.vk.frag reference/shaders/asm/frag/image-fetch-no-sampler.asm.vk.frag  --remove-unused-variables
-skip shaders/asm/frag/image-fetch-no-sampler.asm.vk.frag reference/shaders/asm/frag/image-fetch-no-sampler.asm.vk.frag.vk  --remove-unused-variables --vulkan-semantics
-skip shaders/asm/frag/composite-construct-struct-no-swizzle.asm.frag reference/shaders/asm/frag/composite-construct-struct-no-swizzle.asm.frag  --remove-unused-variables
-shaders/asm/frag/pass-by-value.asm.frag reference/shaders/asm/frag/pass-by-value.asm.frag  --remove-unused-variables
-skip shaders/asm/frag/multi-for-loop-init.asm.frag reference/shaders/asm/frag/multi-for-loop-init.asm.frag  --remove-unused-variables
-shaders/asm/frag/undef-variable-store.asm.frag reference/shaders/asm/frag/undef-variable-store.asm.frag  --remove-unused-variables
-shaders/asm/frag/unreachable.asm.frag reference/shaders/asm/frag/unreachable.asm.frag  --remove-unused-variables
-skip shaders/asm/frag/op-constant-null.asm.frag reference/shaders/asm/frag/op-constant-null.asm.frag  --remove-unused-variables
-shaders/asm/frag/empty-struct.asm.frag reference/shaders/asm/frag/empty-struct.asm.frag  --remove-unused-variables
-shaders/asm/frag/sampler-buffer-without-sampler.asm.frag reference/shaders/asm/frag/sampler-buffer-without-sampler.asm.frag  --remove-unused-variables
-shaders/asm/frag/loop-merge-to-continue.asm.frag reference/shaders/asm/frag/loop-merge-to-continue.asm.frag  --remove-unused-variables
-skip shaders/asm/frag/vector-shuffle-oom.asm.frag reference/shaders/asm/frag/vector-shuffle-oom.asm.frag  --remove-unused-variables
-shaders/asm/frag/storage-class-output-initializer.asm.frag reference/shaders/asm/frag/storage-class-output-initializer.asm.frag  --remove-unused-variables
-shaders/asm/frag/implicit-read-dep-phi.asm.frag reference/shaders/asm/frag/implicit-read-dep-phi.asm.frag  --remove-unused-variables
+skip shaders/asm/comp/decoration-group.asm.comp reference/shaders/asm/comp/decoration-group.asm.comp  --remove-unused-variables
+shaders/asm/comp/global-parameter-name-alias.asm.comp reference/shaders/asm/comp/global-parameter-name-alias.asm.comp  --remove-unused-variables
+skip shaders/asm/comp/hlsl-functionality.asm.comp reference/shaders/asm/comp/hlsl-functionality.asm.comp  --remove-unused-variables
+skip shaders/asm/comp/logical.asm.comp reference/shaders/asm/comp/logical.asm.comp  --remove-unused-variables
+skip shaders/asm/comp/multiple-entry.asm.comp reference/shaders/asm/comp/multiple-entry.asm.comp  --remove-unused-variables
+shaders/asm/comp/op-phi-swap.asm.comp reference/shaders/asm/comp/op-phi-swap.asm.comp  --remove-unused-variables
+skip shaders/asm/comp/quantize.asm.comp reference/shaders/asm/comp/quantize.asm.comp  --remove-unused-variables
+skip shaders/asm/comp/specialization-constant-workgroup.asm.comp reference/shaders/asm/comp/specialization-constant-workgroup.asm.comp  --remove-unused-variables
+shaders/asm/comp/storage-buffer-basic.invalid.asm.comp reference/shaders/asm/comp/storage-buffer-basic.invalid.asm.comp  --remove-unused-variables
+shaders/asm/comp/switch-break-ladder.asm.comp reference/shaders/asm/comp/switch-break-ladder.asm.comp  --remove-unused-variables
 skip shaders/asm/frag/combined-sampler-reuse.vk.asm.frag reference/shaders/asm/frag/combined-sampler-reuse.vk.asm.frag  --remove-unused-variables
 skip shaders/asm/frag/combined-sampler-reuse.vk.asm.frag reference/shaders/asm/frag/combined-sampler-reuse.vk.asm.frag.vk  --remove-unused-variables --vulkan-semantics
-skip shaders/asm/tesc/tess-fixed-input-array-builtin-array.invalid.asm.tesc reference/shaders/asm/tesc/tess-fixed-input-array-builtin-array.invalid.asm.tesc  --remove-unused-variables
-skip shaders/asm/vert/empty-io.asm.vert reference/shaders/asm/vert/empty-io.asm.vert  --remove-unused-variables
-shaders/asm/vert/spec-constant-op-composite.asm.vk.vert reference/shaders/asm/vert/spec-constant-op-composite.asm.vk.vert  --remove-unused-variables
-skip shaders/asm/vert/spec-constant-op-composite.asm.vk.vert reference/shaders/asm/vert/spec-constant-op-composite.asm.vk.vert.vk  --remove-unused-variables --vulkan-semantics
-skip shaders/asm/vert/invariant.asm.vert reference/shaders/asm/vert/invariant.asm.vert  --remove-unused-variables
-skip shaders/asm/vert/invariant.sso.asm.vert reference/shaders/asm/vert/invariant.sso.asm.vert  --remove-unused-variables --separate-shader-objects
-skip shaders/asm/vert/global-builtin.sso.asm.vert reference/shaders/asm/vert/global-builtin.sso.asm.vert  --remove-unused-variables --separate-shader-objects
-skip shaders/asm/vert/invariant-block.asm.vert reference/shaders/asm/vert/invariant-block.asm.vert  --remove-unused-variables
-skip shaders/asm/vert/invariant-block.sso.asm.vert reference/shaders/asm/vert/invariant-block.sso.asm.vert  --remove-unused-variables --separate-shader-objects
-shaders/asm/vert/uint-vertex-id-instance-id.asm.vert reference/shaders/asm/vert/uint-vertex-id-instance-id.asm.vert  --remove-unused-variables
+shaders/asm/frag/complex-name-workarounds.asm.frag reference/shaders/asm/frag/complex-name-workarounds.asm.frag  --remove-unused-variables
+skip shaders/asm/frag/composite-construct-struct-no-swizzle.asm.frag reference/shaders/asm/frag/composite-construct-struct-no-swizzle.asm.frag  --remove-unused-variables
+skip shaders/asm/frag/default-member-names.asm.frag reference/shaders/asm/frag/default-member-names.asm.frag  --remove-unused-variables
+shaders/asm/frag/empty-struct.asm.frag reference/shaders/asm/frag/empty-struct.asm.frag  --remove-unused-variables
+shaders/asm/frag/for-loop-phi-only-continue.asm.frag reference/shaders/asm/frag/for-loop-phi-only-continue.asm.frag  --remove-unused-variables
+skip shaders/asm/frag/frem.asm.frag reference/shaders/asm/frag/frem.asm.frag  --remove-unused-variables
+skip shaders/asm/frag/function-overload-alias.asm.frag reference/shaders/asm/frag/function-overload-alias.asm.frag  --remove-unused-variables
+skip shaders/asm/frag/hlsl-sample-cmp-level-zero-cube.asm.frag reference/shaders/asm/frag/hlsl-sample-cmp-level-zero-cube.asm.frag  --remove-unused-variables
+skip shaders/asm/frag/hlsl-sample-cmp-level-zero.asm.frag reference/shaders/asm/frag/hlsl-sample-cmp-level-zero.asm.frag  --remove-unused-variables
+shaders/asm/frag/image-extract-reuse.asm.frag reference/shaders/asm/frag/image-extract-reuse.asm.frag  --remove-unused-variables
+skip shaders/asm/frag/image-fetch-no-sampler.asm.vk.frag reference/shaders/asm/frag/image-fetch-no-sampler.asm.vk.frag  --remove-unused-variables
+skip shaders/asm/frag/image-fetch-no-sampler.asm.vk.frag reference/shaders/asm/frag/image-fetch-no-sampler.asm.vk.frag.vk  --remove-unused-variables --vulkan-semantics
+skip shaders/asm/frag/image-query-no-sampler.vk.asm.frag reference/shaders/asm/frag/image-query-no-sampler.vk.asm.frag  --remove-unused-variables
+skip shaders/asm/frag/image-query-no-sampler.vk.asm.frag reference/shaders/asm/frag/image-query-no-sampler.vk.asm.frag.vk  --remove-unused-variables --vulkan-semantics
+shaders/asm/frag/implicit-read-dep-phi.asm.frag reference/shaders/asm/frag/implicit-read-dep-phi.asm.frag  --remove-unused-variables
+shaders/asm/frag/inf-nan-constant-double.asm.frag reference/shaders/asm/frag/inf-nan-constant-double.asm.frag  --remove-unused-variables
+skip shaders/asm/frag/inf-nan-constant.asm.frag reference/shaders/asm/frag/inf-nan-constant.asm.frag  --remove-unused-variables
+shaders/asm/frag/invalidation.asm.frag reference/shaders/asm/frag/invalidation.asm.frag  --remove-unused-variables
+skip shaders/asm/frag/locations-components.asm.frag reference/shaders/asm/frag/locations-components.asm.frag  --remove-unused-variables
+shaders/asm/frag/loop-body-dominator-continue-access.asm.frag reference/shaders/asm/frag/loop-body-dominator-continue-access.asm.frag  --remove-unused-variables
+skip shaders/asm/frag/loop-header-to-continue.asm.frag reference/shaders/asm/frag/loop-header-to-continue.asm.frag  --remove-unused-variables
+shaders/asm/frag/loop-merge-to-continue.asm.frag reference/shaders/asm/frag/loop-merge-to-continue.asm.frag  --remove-unused-variables
+skip shaders/asm/frag/lut-promotion-initializer.asm.frag reference/shaders/asm/frag/lut-promotion-initializer.asm.frag  --remove-unused-variables
+skip shaders/asm/frag/multi-for-loop-init.asm.frag reference/shaders/asm/frag/multi-for-loop-init.asm.frag  --remove-unused-variables
+skip shaders/asm/frag/op-constant-null.asm.frag reference/shaders/asm/frag/op-constant-null.asm.frag  --remove-unused-variables
+shaders/asm/frag/op-phi-swap-continue-block.asm.frag reference/shaders/asm/frag/op-phi-swap-continue-block.asm.frag  --remove-unused-variables
+shaders/asm/frag/pass-by-value.asm.frag reference/shaders/asm/frag/pass-by-value.asm.frag  --remove-unused-variables
+shaders/asm/frag/phi-loop-variable.asm.frag reference/shaders/asm/frag/phi-loop-variable.asm.frag  --remove-unused-variables
+skip shaders/asm/frag/sampler-buffer-array-without-sampler.asm.frag reference/shaders/asm/frag/sampler-buffer-array-without-sampler.asm.frag  --remove-unused-variables
+shaders/asm/frag/sampler-buffer-without-sampler.asm.frag reference/shaders/asm/frag/sampler-buffer-without-sampler.asm.frag  --remove-unused-variables
+shaders/asm/frag/selection-merge-to-continue.asm.frag reference/shaders/asm/frag/selection-merge-to-continue.asm.frag  --remove-unused-variables
+skip shaders/asm/frag/srem.asm.frag reference/shaders/asm/frag/srem.asm.frag  --remove-unused-variables
+skip shaders/asm/frag/struct-composite-extract-swizzle.asm.frag reference/shaders/asm/frag/struct-composite-extract-swizzle.asm.frag  --remove-unused-variables
+skip shaders/asm/frag/switch-label-shared-block.asm.frag reference/shaders/asm/frag/switch-label-shared-block.asm.frag  --remove-unused-variables
+skip shaders/asm/frag/switch-merge-to-continue.asm.frag reference/shaders/asm/frag/switch-merge-to-continue.asm.frag  --remove-unused-variables
+shaders/asm/frag/temporary-name-alias.asm.frag reference/shaders/asm/frag/temporary-name-alias.asm.frag  --remove-unused-variables
+skip shaders/asm/frag/temporary-phi-hoisting.asm.frag reference/shaders/asm/frag/temporary-phi-hoisting.asm.frag  --remove-unused-variables
+shaders/asm/frag/texel-fetch-no-lod.asm.frag reference/shaders/asm/frag/texel-fetch-no-lod.asm.frag  --remove-unused-variables
+shaders/asm/frag/undef-variable-store.asm.frag reference/shaders/asm/frag/undef-variable-store.asm.frag  --remove-unused-variables
+skip shaders/asm/frag/unknown-depth-state.asm.vk.frag reference/shaders/asm/frag/unknown-depth-state.asm.vk.frag  --remove-unused-variables
+skip shaders/asm/frag/unknown-depth-state.asm.vk.frag reference/shaders/asm/frag/unknown-depth-state.asm.vk.frag.vk  --remove-unused-variables --vulkan-semantics
+shaders/asm/frag/unreachable.asm.frag reference/shaders/asm/frag/unreachable.asm.frag  --remove-unused-variables
+skip shaders/asm/frag/vector-shuffle-oom.asm.frag reference/shaders/asm/frag/vector-shuffle-oom.asm.frag  --remove-unused-variables
 shaders/asm/geom/block-name-namespace.asm.geom reference/shaders/asm/geom/block-name-namespace.asm.geom  --remove-unused-variables
+skip shaders/asm/geom/inout-split-access-chain-handle.asm.geom reference/shaders/asm/geom/inout-split-access-chain-handle.asm.geom  --remove-unused-variables
 skip shaders/asm/geom/split-access-chain-input.asm.geom reference/shaders/asm/geom/split-access-chain-input.asm.geom  --remove-unused-variables
 shaders/asm/geom/store-uint-layer.invalid.asm.geom reference/shaders/asm/geom/store-uint-layer.invalid.asm.geom  --remove-unused-variables
-skip shaders/asm/geom/inout-split-access-chain-handle.asm.geom reference/shaders/asm/geom/inout-split-access-chain-handle.asm.geom  --remove-unused-variables
+shaders/asm/tesc/tess-fixed-input-array-builtin-array.invalid.asm.tesc reference/shaders/asm/tesc/tess-fixed-input-array-builtin-array.invalid.asm.tesc  --remove-unused-variables
+skip shaders/asm/vert/empty-io.asm.vert reference/shaders/asm/vert/empty-io.asm.vert  --remove-unused-variables
+skip shaders/asm/vert/global-builtin.sso.asm.vert reference/shaders/asm/vert/global-builtin.sso.asm.vert  --remove-unused-variables --separate-shader-objects
+shaders/asm/vert/invariant-block.asm.vert reference/shaders/asm/vert/invariant-block.asm.vert  --remove-unused-variables
+skip shaders/asm/vert/invariant-block.sso.asm.vert reference/shaders/asm/vert/invariant-block.sso.asm.vert  --remove-unused-variables --separate-shader-objects
+shaders/asm/vert/invariant.asm.vert reference/shaders/asm/vert/invariant.asm.vert  --remove-unused-variables
+skip shaders/asm/vert/invariant.sso.asm.vert reference/shaders/asm/vert/invariant.sso.asm.vert  --remove-unused-variables --separate-shader-objects
+shaders/asm/vert/spec-constant-op-composite.asm.vk.vert reference/shaders/asm/vert/spec-constant-op-composite.asm.vk.vert  --remove-unused-variables
+skip shaders/asm/vert/spec-constant-op-composite.asm.vk.vert reference/shaders/asm/vert/spec-constant-op-composite.asm.vk.vert.vk  --remove-unused-variables --vulkan-semantics
+shaders/asm/vert/uint-vertex-id-instance-id.asm.vert reference/shaders/asm/vert/uint-vertex-id-instance-id.asm.vert  --remove-unused-variables
+skip shaders/comp/atomic.comp reference/shaders/comp/atomic.comp  --remove-unused-variables
+skip shaders/comp/bake_gradient.comp reference/shaders/comp/bake_gradient.comp  --remove-unused-variables
+skip shaders/comp/barriers.comp reference/shaders/comp/barriers.comp  --remove-unused-variables
+skip shaders/comp/basic.comp reference/shaders/comp/basic.comp  --remove-unused-variables
+shaders/comp/bitcast-16bit-1.invalid.comp reference/shaders/comp/bitcast-16bit-1.invalid.comp  --remove-unused-variables
+shaders/comp/bitcast-16bit-2.invalid.comp reference/shaders/comp/bitcast-16bit-2.invalid.comp  --remove-unused-variables
+skip shaders/comp/casts.comp reference/shaders/comp/casts.comp  --remove-unused-variables
+skip shaders/comp/cfg-preserve-parameter.comp reference/shaders/comp/cfg-preserve-parameter.comp  --remove-unused-variables
+skip shaders/comp/cfg.comp reference/shaders/comp/cfg.comp  --remove-unused-variables
+skip shaders/comp/coherent-block.comp reference/shaders/comp/coherent-block.comp  --remove-unused-variables
+skip shaders/comp/coherent-image.comp reference/shaders/comp/coherent-image.comp  --remove-unused-variables
+skip shaders/comp/composite-array-initialization.comp reference/shaders/comp/composite-array-initialization.comp  --remove-unused-variables
+skip shaders/comp/composite-construct.comp reference/shaders/comp/composite-construct.comp  --remove-unused-variables
+skip shaders/comp/culling.comp reference/shaders/comp/culling.comp  --remove-unused-variables
+skip shaders/comp/defer-parens.comp reference/shaders/comp/defer-parens.comp  --remove-unused-variables
+skip shaders/comp/dowhile.comp reference/shaders/comp/dowhile.comp  --remove-unused-variables
+skip shaders/comp/generate_height.comp reference/shaders/comp/generate_height.comp  --remove-unused-variables
+skip shaders/comp/image.comp reference/shaders/comp/image.comp  --remove-unused-variables
+skip shaders/comp/inout-struct.invalid.comp reference/shaders/comp/inout-struct.invalid.comp  --remove-unused-variables
+skip shaders/comp/insert.comp reference/shaders/comp/insert.comp  --remove-unused-variables
+skip shaders/comp/mat3.comp reference/shaders/comp/mat3.comp  --remove-unused-variables
+skip shaders/comp/mod.comp reference/shaders/comp/mod.comp  --remove-unused-variables
+skip shaders/comp/modf.comp reference/shaders/comp/modf.comp  --remove-unused-variables
+skip shaders/comp/read-write-only.comp reference/shaders/comp/read-write-only.comp  --remove-unused-variables
+skip shaders/comp/rmw-matrix.comp reference/shaders/comp/rmw-matrix.comp  --remove-unused-variables
+skip shaders/comp/rmw-opt.comp reference/shaders/comp/rmw-opt.comp  --remove-unused-variables
+skip shaders/comp/shared.comp reference/shaders/comp/shared.comp  --remove-unused-variables
+skip shaders/comp/ssbo-array.comp reference/shaders/comp/ssbo-array.comp  --remove-unused-variables
+skip shaders/comp/struct-layout.comp reference/shaders/comp/struct-layout.comp  --remove-unused-variables
+skip shaders/comp/struct-packing.comp reference/shaders/comp/struct-packing.comp  --remove-unused-variables
+skip shaders/comp/torture-loop.comp reference/shaders/comp/torture-loop.comp  --remove-unused-variables
+skip shaders/comp/type-alias.comp reference/shaders/comp/type-alias.comp  --remove-unused-variables
+skip shaders/comp/udiv.comp reference/shaders/comp/udiv.comp  --remove-unused-variables
+shaders/desktop-only/comp/enhanced-layouts.comp reference/shaders/desktop-only/comp/enhanced-layouts.comp  --remove-unused-variables
+shaders/desktop-only/comp/extended-arithmetic.desktop.comp reference/shaders/desktop-only/comp/extended-arithmetic.desktop.comp  --remove-unused-variables
+shaders/desktop-only/comp/fp64.desktop.comp reference/shaders/desktop-only/comp/fp64.desktop.comp  --remove-unused-variables
+shaders/desktop-only/comp/image-formats.desktop.noeliminate.comp reference/shaders/desktop-only/comp/image-formats.desktop.noeliminate.comp 
+shaders/desktop-only/comp/int64.desktop.comp reference/shaders/desktop-only/comp/int64.desktop.comp  --remove-unused-variables
+shaders/desktop-only/frag/clip-cull-distance.desktop.frag reference/shaders/desktop-only/frag/clip-cull-distance.desktop.frag  --remove-unused-variables
+shaders/desktop-only/frag/control-dependent-in-branch.desktop.frag reference/shaders/desktop-only/frag/control-dependent-in-branch.desktop.frag  --remove-unused-variables
+shaders/desktop-only/frag/depth-greater-than.desktop.frag reference/shaders/desktop-only/frag/depth-greater-than.desktop.frag  --remove-unused-variables
+shaders/desktop-only/frag/depth-less-than.desktop.frag reference/shaders/desktop-only/frag/depth-less-than.desktop.frag  --remove-unused-variables
+shaders/desktop-only/frag/dual-source-blending.desktop.frag reference/shaders/desktop-only/frag/dual-source-blending.desktop.frag  --remove-unused-variables
+skip shaders/desktop-only/frag/fp16.invalid.desktop.frag reference/shaders/desktop-only/frag/fp16.invalid.desktop.frag  --remove-unused-variables
+shaders/desktop-only/frag/hlsl-uav-block-alias.asm.frag reference/shaders/desktop-only/frag/hlsl-uav-block-alias.asm.frag  --remove-unused-variables
+shaders/desktop-only/frag/image-ms.desktop.frag reference/shaders/desktop-only/frag/image-ms.desktop.frag  --remove-unused-variables
+shaders/desktop-only/frag/image-query.desktop.frag reference/shaders/desktop-only/frag/image-query.desktop.frag  --remove-unused-variables
+shaders/desktop-only/frag/in-block-qualifiers.frag reference/shaders/desktop-only/frag/in-block-qualifiers.frag  --remove-unused-variables
+shaders/desktop-only/frag/layout-component.desktop.frag reference/shaders/desktop-only/frag/layout-component.desktop.frag  --remove-unused-variables
+shaders/desktop-only/frag/query-levels.desktop.frag reference/shaders/desktop-only/frag/query-levels.desktop.frag  --remove-unused-variables
+shaders/desktop-only/frag/query-lod.desktop.frag reference/shaders/desktop-only/frag/query-lod.desktop.frag  --remove-unused-variables
+shaders/desktop-only/frag/sampler-ms-query.desktop.frag reference/shaders/desktop-only/frag/sampler-ms-query.desktop.frag  --remove-unused-variables
+shaders/desktop-only/frag/texture-proj-shadow.desktop.frag reference/shaders/desktop-only/frag/texture-proj-shadow.desktop.frag  --remove-unused-variables
+skip shaders/desktop-only/geom/basic.desktop.sso.geom reference/shaders/desktop-only/geom/basic.desktop.sso.geom  --remove-unused-variables --separate-shader-objects
+shaders/desktop-only/geom/viewport-index.desktop.geom reference/shaders/desktop-only/geom/viewport-index.desktop.geom  --remove-unused-variables
+skip shaders/desktop-only/tesc/basic.desktop.sso.tesc reference/shaders/desktop-only/tesc/basic.desktop.sso.tesc  --remove-unused-variables --separate-shader-objects
+skip shaders/desktop-only/tese/triangle.desktop.sso.tese reference/shaders/desktop-only/tese/triangle.desktop.sso.tese  --remove-unused-variables --separate-shader-objects
+skip shaders/desktop-only/vert/basic.desktop.sso.vert reference/shaders/desktop-only/vert/basic.desktop.sso.vert  --remove-unused-variables --separate-shader-objects
+skip shaders/desktop-only/vert/clip-cull-distance.desktop.sso.vert reference/shaders/desktop-only/vert/clip-cull-distance.desktop.sso.vert  --remove-unused-variables --separate-shader-objects
+shaders/desktop-only/vert/clip-cull-distance.desktop.vert reference/shaders/desktop-only/vert/clip-cull-distance.desktop.vert  --remove-unused-variables
+shaders/desktop-only/vert/out-block-qualifiers.vert reference/shaders/desktop-only/vert/out-block-qualifiers.vert  --remove-unused-variables
+shaders/desktop-only/vert/shader-draw-parameters-450.desktop.vert reference/shaders/desktop-only/vert/shader-draw-parameters-450.desktop.vert  --remove-unused-variables
+skip shaders/desktop-only/vert/shader-draw-parameters.desktop.vert reference/shaders/desktop-only/vert/shader-draw-parameters.desktop.vert  --remove-unused-variables
+skip shaders/flatten/array.flatten.vert reference/shaders/flatten/array.flatten.vert  --remove-unused-variables --flatten-ubo
+skip shaders/flatten/basic.flatten.vert reference/shaders/flatten/basic.flatten.vert  --remove-unused-variables --flatten-ubo
+skip shaders/flatten/copy.flatten.vert reference/shaders/flatten/copy.flatten.vert  --remove-unused-variables --flatten-ubo
+skip shaders/flatten/dynamic.flatten.vert reference/shaders/flatten/dynamic.flatten.vert  --remove-unused-variables --flatten-ubo
+skip shaders/flatten/matrix-conversion.flatten.frag reference/shaders/flatten/matrix-conversion.flatten.frag  --remove-unused-variables --flatten-ubo
+skip shaders/flatten/matrixindex.flatten.vert reference/shaders/flatten/matrixindex.flatten.vert  --remove-unused-variables --flatten-ubo
+skip shaders/flatten/multi-dimensional.desktop.invalid.flatten_dim.frag reference/shaders/flatten/multi-dimensional.desktop.invalid.flatten_dim.frag  --remove-unused-variables --flatten-multidimensional-arrays
+skip shaders/flatten/multiindex.flatten.vert reference/shaders/flatten/multiindex.flatten.vert  --remove-unused-variables --flatten-ubo
+skip shaders/flatten/push-constant.flatten.vert reference/shaders/flatten/push-constant.flatten.vert  --remove-unused-variables --flatten-ubo
+skip shaders/flatten/rowmajor.flatten.vert reference/shaders/flatten/rowmajor.flatten.vert  --remove-unused-variables --flatten-ubo
+skip shaders/flatten/struct.flatten.vert reference/shaders/flatten/struct.flatten.vert  --remove-unused-variables --flatten-ubo
+skip shaders/flatten/struct.rowmajor.flatten.vert reference/shaders/flatten/struct.rowmajor.flatten.vert  --remove-unused-variables --flatten-ubo
+skip shaders/flatten/swizzle.flatten.vert reference/shaders/flatten/swizzle.flatten.vert  --remove-unused-variables --flatten-ubo
+skip shaders/flatten/types.flatten.frag reference/shaders/flatten/types.flatten.frag  --remove-unused-variables --flatten-ubo
+shaders/frag/16bit-constants.frag reference/shaders/frag/16bit-constants.frag  --remove-unused-variables
+skip shaders/frag/array-lut-no-loop-variable.frag reference/shaders/frag/array-lut-no-loop-variable.frag  --remove-unused-variables
+skip shaders/frag/basic.frag reference/shaders/frag/basic.frag  --remove-unused-variables
+skip shaders/frag/complex-expression-in-access-chain.frag reference/shaders/frag/complex-expression-in-access-chain.frag  --remove-unused-variables
+skip shaders/frag/composite-extract-forced-temporary.frag reference/shaders/frag/composite-extract-forced-temporary.frag  --remove-unused-variables
+skip shaders/frag/constant-array.frag reference/shaders/frag/constant-array.frag  --remove-unused-variables
+skip shaders/frag/constant-composites.frag reference/shaders/frag/constant-composites.frag  --remove-unused-variables
+skip shaders/frag/false-loop-init.frag reference/shaders/frag/false-loop-init.frag  --remove-unused-variables
+skip shaders/frag/flush_params.frag reference/shaders/frag/flush_params.frag  --remove-unused-variables
+skip shaders/frag/for-loop-init.frag reference/shaders/frag/for-loop-init.frag  --remove-unused-variables
+skip shaders/frag/frexp-modf.frag reference/shaders/frag/frexp-modf.frag  --remove-unused-variables
+skip shaders/frag/front-facing.frag reference/shaders/frag/front-facing.frag  --remove-unused-variables
+skip shaders/frag/gather-dref.frag reference/shaders/frag/gather-dref.frag  --remove-unused-variables
+skip shaders/frag/ground.frag reference/shaders/frag/ground.frag  --remove-unused-variables
+skip shaders/frag/helper-invocation.frag reference/shaders/frag/helper-invocation.frag  --remove-unused-variables
+skip shaders/frag/hoisted-temporary-use-continue-block-as-value.frag reference/shaders/frag/hoisted-temporary-use-continue-block-as-value.frag  --remove-unused-variables
+shaders/frag/image-load-store-uint-coord.asm.frag reference/shaders/frag/image-load-store-uint-coord.asm.frag  --remove-unused-variables
+skip shaders/frag/loop-dominator-and-switch-default.frag reference/shaders/frag/loop-dominator-and-switch-default.frag  --remove-unused-variables
+skip shaders/frag/lut-promotion.frag reference/shaders/frag/lut-promotion.frag  --remove-unused-variables
+skip shaders/frag/mix.frag reference/shaders/frag/mix.frag  --remove-unused-variables
+skip shaders/frag/partial-write-preserve.frag reference/shaders/frag/partial-write-preserve.frag  --remove-unused-variables
+skip shaders/frag/pls.frag reference/shaders/frag/pls.frag  --remove-unused-variables
+skip shaders/frag/sample-parameter.frag reference/shaders/frag/sample-parameter.frag  --remove-unused-variables
+skip shaders/frag/sampler-ms.frag reference/shaders/frag/sampler-ms.frag  --remove-unused-variables
+skip shaders/frag/sampler-proj.frag reference/shaders/frag/sampler-proj.frag  --remove-unused-variables
+skip shaders/frag/sampler.frag reference/shaders/frag/sampler.frag  --remove-unused-variables
+skip shaders/frag/switch-unsigned-case.frag reference/shaders/frag/switch-unsigned-case.frag  --remove-unused-variables
+skip shaders/frag/swizzle.frag reference/shaders/frag/swizzle.frag  --remove-unused-variables
+skip shaders/frag/texel-fetch-offset.frag reference/shaders/frag/texel-fetch-offset.frag  --remove-unused-variables
+skip shaders/frag/ubo_layout.frag reference/shaders/frag/ubo_layout.frag  --remove-unused-variables
+skip shaders/frag/unary-enclose.frag reference/shaders/frag/unary-enclose.frag  --remove-unused-variables
+skip shaders/geom/basic.geom reference/shaders/geom/basic.geom  --remove-unused-variables
+skip shaders/geom/lines-adjacency.geom reference/shaders/geom/lines-adjacency.geom  --remove-unused-variables
+skip shaders/geom/lines.geom reference/shaders/geom/lines.geom  --remove-unused-variables
+skip shaders/geom/points.geom reference/shaders/geom/points.geom  --remove-unused-variables
+skip shaders/geom/single-invocation.geom reference/shaders/geom/single-invocation.geom  --remove-unused-variables
+skip shaders/geom/triangles-adjacency.geom reference/shaders/geom/triangles-adjacency.geom  --remove-unused-variables
+skip shaders/geom/triangles.geom reference/shaders/geom/triangles.geom  --remove-unused-variables
+skip shaders/legacy/fragment/explicit-lod.legacy.frag reference/shaders/legacy/fragment/explicit-lod.legacy.frag  --remove-unused-variables --version 100 --es
+skip shaders/legacy/fragment/io-blocks.legacy.frag reference/shaders/legacy/fragment/io-blocks.legacy.frag  --remove-unused-variables --version 100 --es
+skip shaders/legacy/fragment/struct-varying.legacy.frag reference/shaders/legacy/fragment/struct-varying.legacy.frag  --remove-unused-variables --version 100 --es
+skip shaders/legacy/vert/implicit-lod.legacy.vert reference/shaders/legacy/vert/implicit-lod.legacy.vert  --remove-unused-variables --version 100 --es
+skip shaders/legacy/vert/io-block.legacy.vert reference/shaders/legacy/vert/io-block.legacy.vert  --remove-unused-variables --version 100 --es
+skip shaders/legacy/vert/struct-varying.legacy.vert reference/shaders/legacy/vert/struct-varying.legacy.vert  --remove-unused-variables --version 100 --es
+skip shaders/legacy/vert/transpose.legacy.vert reference/shaders/legacy/vert/transpose.legacy.vert  --remove-unused-variables --version 100 --es
+skip shaders/tesc/basic.tesc reference/shaders/tesc/basic.tesc  --remove-unused-variables
+skip shaders/tesc/water_tess.tesc reference/shaders/tesc/water_tess.tesc  --remove-unused-variables
+skip shaders/tese/ccw.tese reference/shaders/tese/ccw.tese  --remove-unused-variables
+skip shaders/tese/cw.tese reference/shaders/tese/cw.tese  --remove-unused-variables
+skip shaders/tese/equal.tese reference/shaders/tese/equal.tese  --remove-unused-variables
 skip shaders/tese/fractional_even.tese reference/shaders/tese/fractional_even.tese  --remove-unused-variables
 skip shaders/tese/fractional_odd.tese reference/shaders/tese/fractional_odd.tese  --remove-unused-variables
 skip shaders/tese/line.tese reference/shaders/tese/line.tese  --remove-unused-variables
 skip shaders/tese/triangle.tese reference/shaders/tese/triangle.tese  --remove-unused-variables
 skip shaders/tese/water_tess.tese reference/shaders/tese/water_tess.tese  --remove-unused-variables
-skip shaders/tese/cw.tese reference/shaders/tese/cw.tese  --remove-unused-variables
-shaders/tese/input-array.tese reference/shaders/tese/input-array.tese  --remove-unused-variables
-skip shaders/tese/equal.tese reference/shaders/tese/equal.tese  --remove-unused-variables
-skip shaders/tese/ccw.tese reference/shaders/tese/ccw.tese  --remove-unused-variables
-skip shaders/tesc/water_tess.tesc reference/shaders/tesc/water_tess.tesc  --remove-unused-variables
-skip shaders/tesc/basic.tesc reference/shaders/tesc/basic.tesc  --remove-unused-variables
-shaders/amd/shader_ballot.comp reference/shaders/amd/shader_ballot.comp  --remove-unused-variables
-shaders/amd/fs.invalid.frag reference/shaders/amd/fs.invalid.frag  --remove-unused-variables
-shaders/amd/shader_group_vote.comp reference/shaders/amd/shader_group_vote.comp  --remove-unused-variables
-shaders/amd/gcn_shader.comp reference/shaders/amd/gcn_shader.comp  --remove-unused-variables
-skip shaders/amd/fragmentMaskFetch_subpassInput.vk.nocompat.invalid.frag reference/shaders/amd/fragmentMaskFetch_subpassInput.vk.nocompat.invalid.frag.vk  --remove-unused-variables --vulkan-semantics
-shaders/amd/shader_trinary_minmax.comp reference/shaders/amd/shader_trinary_minmax.comp  --remove-unused-variables
-skip shaders/amd/shader_ballot_nonuniform_invocations.invalid.comp reference/shaders/amd/shader_ballot_nonuniform_invocations.invalid.comp  --remove-unused-variables
-skip shaders/vert/ubo.vert reference/shaders/vert/ubo.vert  --remove-unused-variables
-skip shaders/vert/invariant.vert reference/shaders/vert/invariant.vert  --remove-unused-variables
-skip shaders/vert/ground.vert reference/shaders/vert/ground.vert  --remove-unused-variables
 skip shaders/vert/basic.vert reference/shaders/vert/basic.vert  --remove-unused-variables
-skip shaders/vert/return-array.vert reference/shaders/vert/return-array.vert  --remove-unused-variables
+skip shaders/vert/ground.vert reference/shaders/vert/ground.vert  --remove-unused-variables
+skip shaders/vert/invariant.vert reference/shaders/vert/invariant.vert  --remove-unused-variables
 skip shaders/vert/ocean.vert reference/shaders/vert/ocean.vert  --remove-unused-variables
 skip shaders/vert/read-from-row-major-array.vert reference/shaders/vert/read-from-row-major-array.vert  --remove-unused-variables
+skip shaders/vert/return-array.vert reference/shaders/vert/return-array.vert  --remove-unused-variables
 skip shaders/vert/texture_buffer.vert reference/shaders/vert/texture_buffer.vert  --remove-unused-variables
-shaders/vulkan/comp/spec-constant-work-group-size.vk.comp reference/shaders/vulkan/comp/spec-constant-work-group-size.vk.comp  --remove-unused-variables
-skip shaders/vulkan/comp/spec-constant-work-group-size.vk.comp reference/shaders/vulkan/comp/spec-constant-work-group-size.vk.comp.vk  --remove-unused-variables --vulkan-semantics
+skip shaders/vert/ubo.vert reference/shaders/vert/ubo.vert  --remove-unused-variables
 shaders/vulkan/comp/spec-constant-op-member-array.vk.comp reference/shaders/vulkan/comp/spec-constant-op-member-array.vk.comp  --remove-unused-variables
 skip shaders/vulkan/comp/spec-constant-op-member-array.vk.comp reference/shaders/vulkan/comp/spec-constant-op-member-array.vk.comp.vk  --remove-unused-variables --vulkan-semantics
+shaders/vulkan/comp/spec-constant-work-group-size.vk.comp reference/shaders/vulkan/comp/spec-constant-work-group-size.vk.comp  --remove-unused-variables
+skip shaders/vulkan/comp/spec-constant-work-group-size.vk.comp reference/shaders/vulkan/comp/spec-constant-work-group-size.vk.comp.vk  --remove-unused-variables --vulkan-semantics
 skip shaders/vulkan/comp/subgroups.nocompat.invalid.vk.comp reference/shaders/vulkan/comp/subgroups.nocompat.invalid.vk.comp.vk  --remove-unused-variables --vulkan-semantics
-shaders/vulkan/frag/spec-constant-ternary.vk.frag reference/shaders/vulkan/frag/spec-constant-ternary.vk.frag  --remove-unused-variables
-skip shaders/vulkan/frag/spec-constant-ternary.vk.frag reference/shaders/vulkan/frag/spec-constant-ternary.vk.frag.vk  --remove-unused-variables --vulkan-semantics
-skip shaders/vulkan/frag/input-attachment.vk.frag reference/shaders/vulkan/frag/input-attachment.vk.frag  --remove-unused-variables
-skip shaders/vulkan/frag/input-attachment.vk.frag reference/shaders/vulkan/frag/input-attachment.vk.frag.vk  --remove-unused-variables --vulkan-semantics
-skip shaders/vulkan/frag/separate-sampler-texture.vk.frag reference/shaders/vulkan/frag/separate-sampler-texture.vk.frag  --remove-unused-variables
-skip shaders/vulkan/frag/separate-sampler-texture.vk.frag reference/shaders/vulkan/frag/separate-sampler-texture.vk.frag.vk  --remove-unused-variables --vulkan-semantics
-skip shaders/vulkan/frag/separate-sampler-texture-array.vk.frag reference/shaders/vulkan/frag/separate-sampler-texture-array.vk.frag  --remove-unused-variables
-skip shaders/vulkan/frag/separate-sampler-texture-array.vk.frag reference/shaders/vulkan/frag/separate-sampler-texture-array.vk.frag.vk  --remove-unused-variables --vulkan-semantics
+skip shaders/vulkan/frag/combined-texture-sampler-shadow.vk.frag reference/shaders/vulkan/frag/combined-texture-sampler-shadow.vk.frag  --remove-unused-variables
+skip shaders/vulkan/frag/combined-texture-sampler-shadow.vk.frag reference/shaders/vulkan/frag/combined-texture-sampler-shadow.vk.frag.vk  --remove-unused-variables --vulkan-semantics
 skip shaders/vulkan/frag/combined-texture-sampler.vk.frag reference/shaders/vulkan/frag/combined-texture-sampler.vk.frag  --remove-unused-variables
 skip shaders/vulkan/frag/combined-texture-sampler.vk.frag reference/shaders/vulkan/frag/combined-texture-sampler.vk.frag.vk  --remove-unused-variables --vulkan-semantics
 shaders/vulkan/frag/desktop-mediump.vk.frag reference/shaders/vulkan/frag/desktop-mediump.vk.frag  --remove-unused-variables
 skip shaders/vulkan/frag/desktop-mediump.vk.frag reference/shaders/vulkan/frag/desktop-mediump.vk.frag.vk  --remove-unused-variables --vulkan-semantics
-skip shaders/vulkan/frag/combined-texture-sampler-shadow.vk.frag reference/shaders/vulkan/frag/combined-texture-sampler-shadow.vk.frag  --remove-unused-variables
-skip shaders/vulkan/frag/combined-texture-sampler-shadow.vk.frag reference/shaders/vulkan/frag/combined-texture-sampler-shadow.vk.frag.vk  --remove-unused-variables --vulkan-semantics
-skip shaders/vulkan/frag/spec-constant-block-size.vk.frag reference/shaders/vulkan/frag/spec-constant-block-size.vk.frag  --remove-unused-variables
-skip shaders/vulkan/frag/spec-constant-block-size.vk.frag reference/shaders/vulkan/frag/spec-constant-block-size.vk.frag.vk  --remove-unused-variables --vulkan-semantics
+shaders/vulkan/frag/input-attachment-ms.vk.frag reference/shaders/vulkan/frag/input-attachment-ms.vk.frag  --remove-unused-variables
+skip shaders/vulkan/frag/input-attachment-ms.vk.frag reference/shaders/vulkan/frag/input-attachment-ms.vk.frag.vk  --remove-unused-variables --vulkan-semantics
+skip shaders/vulkan/frag/input-attachment.vk.frag reference/shaders/vulkan/frag/input-attachment.vk.frag  --remove-unused-variables
+skip shaders/vulkan/frag/input-attachment.vk.frag reference/shaders/vulkan/frag/input-attachment.vk.frag.vk  --remove-unused-variables --vulkan-semantics
 skip shaders/vulkan/frag/push-constant.vk.frag reference/shaders/vulkan/frag/push-constant.vk.frag  --remove-unused-variables
 skip shaders/vulkan/frag/push-constant.vk.frag reference/shaders/vulkan/frag/push-constant.vk.frag.vk  --remove-unused-variables --vulkan-semantics
 skip shaders/vulkan/frag/separate-combined-fake-overload.vk.frag reference/shaders/vulkan/frag/separate-combined-fake-overload.vk.frag  --remove-unused-variables
 skip shaders/vulkan/frag/separate-combined-fake-overload.vk.frag reference/shaders/vulkan/frag/separate-combined-fake-overload.vk.frag.vk  --remove-unused-variables --vulkan-semantics
-shaders/vulkan/frag/input-attachment-ms.vk.frag reference/shaders/vulkan/frag/input-attachment-ms.vk.frag  --remove-unused-variables
-skip shaders/vulkan/frag/input-attachment-ms.vk.frag reference/shaders/vulkan/frag/input-attachment-ms.vk.frag.vk  --remove-unused-variables --vulkan-semantics
-skip shaders/vulkan/frag/shader-arithmetic-8bit.nocompat.vk.frag reference/shaders/vulkan/frag/shader-arithmetic-8bit.nocompat.vk.frag.vk  --remove-unused-variables --vulkan-semantics
+skip shaders/vulkan/frag/separate-sampler-texture-array.vk.frag reference/shaders/vulkan/frag/separate-sampler-texture-array.vk.frag  --remove-unused-variables
+skip shaders/vulkan/frag/separate-sampler-texture-array.vk.frag reference/shaders/vulkan/frag/separate-sampler-texture-array.vk.frag.vk  --remove-unused-variables --vulkan-semantics
+skip shaders/vulkan/frag/separate-sampler-texture.vk.frag reference/shaders/vulkan/frag/separate-sampler-texture.vk.frag  --remove-unused-variables
+skip shaders/vulkan/frag/separate-sampler-texture.vk.frag reference/shaders/vulkan/frag/separate-sampler-texture.vk.frag.vk  --remove-unused-variables --vulkan-semantics
+skip shaders/vulkan/frag/spec-constant-block-size.vk.frag reference/shaders/vulkan/frag/spec-constant-block-size.vk.frag  --remove-unused-variables
+skip shaders/vulkan/frag/spec-constant-block-size.vk.frag reference/shaders/vulkan/frag/spec-constant-block-size.vk.frag.vk  --remove-unused-variables --vulkan-semantics
+shaders/vulkan/frag/spec-constant-ternary.vk.frag reference/shaders/vulkan/frag/spec-constant-ternary.vk.frag  --remove-unused-variables
+skip shaders/vulkan/frag/spec-constant-ternary.vk.frag reference/shaders/vulkan/frag/spec-constant-ternary.vk.frag.vk  --remove-unused-variables --vulkan-semantics
 skip shaders/vulkan/vert/multiview.nocompat.vk.vert reference/shaders/vulkan/vert/multiview.nocompat.vk.vert.vk  --remove-unused-variables --vulkan-semantics
 shaders/vulkan/vert/small-storage.vk.vert reference/shaders/vulkan/vert/small-storage.vk.vert  --remove-unused-variables
 skip shaders/vulkan/vert/small-storage.vk.vert reference/shaders/vulkan/vert/small-storage.vk.vert.vk  --remove-unused-variables --vulkan-semantics
 skip shaders/vulkan/vert/vulkan-vertex.vk.vert reference/shaders/vulkan/vert/vulkan-vertex.vk.vert  --remove-unused-variables
 skip shaders/vulkan/vert/vulkan-vertex.vk.vert reference/shaders/vulkan/vert/vulkan-vertex.vk.vert.vk  --remove-unused-variables --vulkan-semantics
-skip shaders/geom/triangles.geom reference/shaders/geom/triangles.geom  --remove-unused-variables
-skip shaders/geom/points.geom reference/shaders/geom/points.geom  --remove-unused-variables
-skip shaders/geom/lines-adjacency.geom reference/shaders/geom/lines-adjacency.geom  --remove-unused-variables
-skip shaders/geom/lines.geom reference/shaders/geom/lines.geom  --remove-unused-variables
-skip shaders/geom/basic.geom reference/shaders/geom/basic.geom  --remove-unused-variables
-skip shaders/geom/triangles-adjacency.geom reference/shaders/geom/triangles-adjacency.geom  --remove-unused-variables
-skip shaders/geom/single-invocation.geom reference/shaders/geom/single-invocation.geom  --remove-unused-variables
+skip shaders/amd/fragmentMaskFetch_subpassInput.vk.nocompat.invalid.frag reference/shaders/amd/fragmentMaskFetch_subpassInput.vk.nocompat.invalid.frag.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders/amd/fs.invalid.frag reference/shaders/amd/fs.invalid.frag  --opt --remove-unused-variables
+skip shaders/amd/gcn_shader.comp reference/shaders/amd/gcn_shader.comp  --opt --remove-unused-variables
+skip shaders/amd/shader_ballot.comp reference/shaders/amd/shader_ballot.comp  --opt --remove-unused-variables
+skip shaders/amd/shader_ballot_nonuniform_invocations.invalid.comp reference/shaders/amd/shader_ballot_nonuniform_invocations.invalid.comp  --opt --remove-unused-variables
+skip shaders/amd/shader_group_vote.comp reference/shaders/amd/shader_group_vote.comp  --opt --remove-unused-variables
+skip shaders/amd/shader_trinary_minmax.comp reference/shaders/amd/shader_trinary_minmax.comp  --opt --remove-unused-variables
+skip shaders/asm/comp/atomic-decrement.asm.comp reference/shaders/asm/comp/atomic-decrement.asm.comp  --opt --remove-unused-variables
+skip shaders/asm/comp/atomic-increment.asm.comp reference/shaders/asm/comp/atomic-increment.asm.comp  --opt --remove-unused-variables
+skip shaders/asm/comp/bitcast_iadd.asm.comp reference/shaders/asm/comp/bitcast_iadd.asm.comp  --opt --remove-unused-variables
+skip shaders/asm/comp/bitcast_iequal.asm.comp reference/shaders/asm/comp/bitcast_iequal.asm.comp  --opt --remove-unused-variables
+skip shaders/asm/comp/bitcast_sar.asm.comp reference/shaders/asm/comp/bitcast_sar.asm.comp  --opt --remove-unused-variables
+skip shaders/asm/comp/bitcast_sdiv.asm.comp reference/shaders/asm/comp/bitcast_sdiv.asm.comp  --opt --remove-unused-variables
+skip shaders/asm/comp/bitcast_slr.asm.comp reference/shaders/asm/comp/bitcast_slr.asm.comp  --opt --remove-unused-variables
+skip shaders/asm/comp/block-name-alias-global.asm.comp reference/shaders/asm/comp/block-name-alias-global.asm.comp  --opt --remove-unused-variables
+skip shaders/asm/comp/builtin-compute-bitcast.asm.comp reference/shaders/asm/comp/builtin-compute-bitcast.asm.comp  --opt --remove-unused-variables
+skip shaders/asm/comp/decoration-group.asm.comp reference/shaders/asm/comp/decoration-group.asm.comp  --opt --remove-unused-variables
+skip shaders/asm/comp/global-parameter-name-alias.asm.comp reference/shaders/asm/comp/global-parameter-name-alias.asm.comp  --opt --remove-unused-variables
+skip shaders/asm/comp/hlsl-functionality.asm.comp reference/shaders/asm/comp/hlsl-functionality.asm.comp  --opt --remove-unused-variables
+skip shaders/asm/comp/logical.asm.comp reference/shaders/asm/comp/logical.asm.comp  --opt --remove-unused-variables
+skip shaders/asm/comp/multiple-entry.asm.comp reference/shaders/asm/comp/multiple-entry.asm.comp  --opt --remove-unused-variables
+skip shaders/asm/comp/op-phi-swap.asm.comp reference/shaders/asm/comp/op-phi-swap.asm.comp  --opt --remove-unused-variables
+skip shaders/asm/comp/quantize.asm.comp reference/shaders/asm/comp/quantize.asm.comp  --opt --remove-unused-variables
+skip shaders/asm/comp/specialization-constant-workgroup.asm.comp reference/shaders/asm/comp/specialization-constant-workgroup.asm.comp  --opt --remove-unused-variables
+skip shaders/asm/comp/storage-buffer-basic.invalid.asm.comp reference/shaders/asm/comp/storage-buffer-basic.invalid.asm.comp  --opt --remove-unused-variables
+skip shaders/asm/comp/switch-break-ladder.asm.comp reference/shaders/asm/comp/switch-break-ladder.asm.comp  --opt --remove-unused-variables
+skip shaders/asm/frag/combined-sampler-reuse.vk.asm.frag reference/shaders/asm/frag/combined-sampler-reuse.vk.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/combined-sampler-reuse.vk.asm.frag reference/shaders/asm/frag/combined-sampler-reuse.vk.asm.frag.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders/asm/frag/complex-name-workarounds.asm.frag reference/shaders/asm/frag/complex-name-workarounds.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/composite-construct-struct-no-swizzle.asm.frag reference/shaders/asm/frag/composite-construct-struct-no-swizzle.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/default-member-names.asm.frag reference/shaders/asm/frag/default-member-names.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/empty-struct.asm.frag reference/shaders/asm/frag/empty-struct.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/for-loop-phi-only-continue.asm.frag reference/shaders/asm/frag/for-loop-phi-only-continue.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/frem.asm.frag reference/shaders/asm/frag/frem.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/function-overload-alias.asm.frag reference/shaders/asm/frag/function-overload-alias.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/hlsl-sample-cmp-level-zero-cube.asm.frag reference/shaders/asm/frag/hlsl-sample-cmp-level-zero-cube.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/hlsl-sample-cmp-level-zero.asm.frag reference/shaders/asm/frag/hlsl-sample-cmp-level-zero.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/image-extract-reuse.asm.frag reference/shaders/asm/frag/image-extract-reuse.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/image-fetch-no-sampler.asm.vk.frag reference/shaders/asm/frag/image-fetch-no-sampler.asm.vk.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/image-fetch-no-sampler.asm.vk.frag reference/shaders/asm/frag/image-fetch-no-sampler.asm.vk.frag.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders/asm/frag/image-query-no-sampler.vk.asm.frag reference/shaders/asm/frag/image-query-no-sampler.vk.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/image-query-no-sampler.vk.asm.frag reference/shaders/asm/frag/image-query-no-sampler.vk.asm.frag.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders/asm/frag/implicit-read-dep-phi.asm.frag reference/shaders/asm/frag/implicit-read-dep-phi.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/inf-nan-constant-double.asm.frag reference/shaders/asm/frag/inf-nan-constant-double.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/inf-nan-constant.asm.frag reference/shaders/asm/frag/inf-nan-constant.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/invalidation.asm.frag reference/shaders/asm/frag/invalidation.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/locations-components.asm.frag reference/shaders/asm/frag/locations-components.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/loop-body-dominator-continue-access.asm.frag reference/shaders/asm/frag/loop-body-dominator-continue-access.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/loop-header-to-continue.asm.frag reference/shaders/asm/frag/loop-header-to-continue.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/loop-merge-to-continue.asm.frag reference/shaders/asm/frag/loop-merge-to-continue.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/lut-promotion-initializer.asm.frag reference/shaders/asm/frag/lut-promotion-initializer.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/multi-for-loop-init.asm.frag reference/shaders/asm/frag/multi-for-loop-init.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/op-constant-null.asm.frag reference/shaders/asm/frag/op-constant-null.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/op-phi-swap-continue-block.asm.frag reference/shaders/asm/frag/op-phi-swap-continue-block.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/pass-by-value.asm.frag reference/shaders/asm/frag/pass-by-value.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/phi-loop-variable.asm.frag reference/shaders/asm/frag/phi-loop-variable.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/sampler-buffer-array-without-sampler.asm.frag reference/shaders/asm/frag/sampler-buffer-array-without-sampler.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/sampler-buffer-without-sampler.asm.frag reference/shaders/asm/frag/sampler-buffer-without-sampler.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/selection-merge-to-continue.asm.frag reference/shaders/asm/frag/selection-merge-to-continue.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/srem.asm.frag reference/shaders/asm/frag/srem.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/struct-composite-extract-swizzle.asm.frag reference/shaders/asm/frag/struct-composite-extract-swizzle.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/switch-label-shared-block.asm.frag reference/shaders/asm/frag/switch-label-shared-block.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/switch-merge-to-continue.asm.frag reference/shaders/asm/frag/switch-merge-to-continue.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/temporary-name-alias.asm.frag reference/shaders/asm/frag/temporary-name-alias.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/temporary-phi-hoisting.asm.frag reference/shaders/asm/frag/temporary-phi-hoisting.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/texel-fetch-no-lod.asm.frag reference/shaders/asm/frag/texel-fetch-no-lod.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/undef-variable-store.asm.frag reference/shaders/asm/frag/undef-variable-store.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/unknown-depth-state.asm.vk.frag reference/shaders/asm/frag/unknown-depth-state.asm.vk.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/unknown-depth-state.asm.vk.frag reference/shaders/asm/frag/unknown-depth-state.asm.vk.frag.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders/asm/frag/unreachable.asm.frag reference/shaders/asm/frag/unreachable.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/frag/vector-shuffle-oom.asm.frag reference/shaders/asm/frag/vector-shuffle-oom.asm.frag  --opt --remove-unused-variables
+skip shaders/asm/geom/block-name-namespace.asm.geom reference/shaders/asm/geom/block-name-namespace.asm.geom  --opt --remove-unused-variables
+skip shaders/asm/geom/inout-split-access-chain-handle.asm.geom reference/shaders/asm/geom/inout-split-access-chain-handle.asm.geom  --opt --remove-unused-variables
+skip shaders/asm/geom/split-access-chain-input.asm.geom reference/shaders/asm/geom/split-access-chain-input.asm.geom  --opt --remove-unused-variables
+skip shaders/asm/geom/store-uint-layer.invalid.asm.geom reference/shaders/asm/geom/store-uint-layer.invalid.asm.geom  --opt --remove-unused-variables
+skip shaders/asm/tesc/tess-fixed-input-array-builtin-array.invalid.asm.tesc reference/shaders/asm/tesc/tess-fixed-input-array-builtin-array.invalid.asm.tesc  --opt --remove-unused-variables
+skip shaders/asm/vert/empty-io.asm.vert reference/shaders/asm/vert/empty-io.asm.vert  --opt --remove-unused-variables
+skip shaders/asm/vert/global-builtin.sso.asm.vert reference/shaders/asm/vert/global-builtin.sso.asm.vert  --opt --remove-unused-variables --separate-shader-objects
+skip shaders/asm/vert/invariant-block.asm.vert reference/shaders/asm/vert/invariant-block.asm.vert  --opt --remove-unused-variables
+skip shaders/asm/vert/invariant-block.sso.asm.vert reference/shaders/asm/vert/invariant-block.sso.asm.vert  --opt --remove-unused-variables --separate-shader-objects
+skip shaders/asm/vert/invariant.asm.vert reference/shaders/asm/vert/invariant.asm.vert  --opt --remove-unused-variables
+skip shaders/asm/vert/invariant.sso.asm.vert reference/shaders/asm/vert/invariant.sso.asm.vert  --opt --remove-unused-variables --separate-shader-objects
+skip shaders/asm/vert/spec-constant-op-composite.asm.vk.vert reference/shaders/asm/vert/spec-constant-op-composite.asm.vk.vert  --opt --remove-unused-variables
+skip shaders/asm/vert/spec-constant-op-composite.asm.vk.vert reference/shaders/asm/vert/spec-constant-op-composite.asm.vk.vert.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders/asm/vert/uint-vertex-id-instance-id.asm.vert reference/shaders/asm/vert/uint-vertex-id-instance-id.asm.vert  --opt --remove-unused-variables
+skip shaders/comp/atomic.comp reference/shaders/comp/atomic.comp  --opt --remove-unused-variables
+skip shaders/comp/bake_gradient.comp reference/shaders/comp/bake_gradient.comp  --opt --remove-unused-variables
+skip shaders/comp/barriers.comp reference/shaders/comp/barriers.comp  --opt --remove-unused-variables
+skip shaders/comp/basic.comp reference/shaders/comp/basic.comp  --opt --remove-unused-variables
+skip shaders/comp/bitcast-16bit-1.invalid.comp reference/shaders/comp/bitcast-16bit-1.invalid.comp  --opt --remove-unused-variables
+skip shaders/comp/bitcast-16bit-2.invalid.comp reference/shaders/comp/bitcast-16bit-2.invalid.comp  --opt --remove-unused-variables
+skip shaders/comp/casts.comp reference/shaders/comp/casts.comp  --opt --remove-unused-variables
+skip shaders/comp/cfg-preserve-parameter.comp reference/shaders/comp/cfg-preserve-parameter.comp  --opt --remove-unused-variables
+skip shaders/comp/cfg.comp reference/shaders/comp/cfg.comp  --opt --remove-unused-variables
+skip shaders/comp/coherent-block.comp reference/shaders/comp/coherent-block.comp  --opt --remove-unused-variables
+skip shaders/comp/coherent-image.comp reference/shaders/comp/coherent-image.comp  --opt --remove-unused-variables
+skip shaders/comp/composite-array-initialization.comp reference/shaders/comp/composite-array-initialization.comp  --opt --remove-unused-variables
+skip shaders/comp/composite-construct.comp reference/shaders/comp/composite-construct.comp  --opt --remove-unused-variables
+skip shaders/comp/culling.comp reference/shaders/comp/culling.comp  --opt --remove-unused-variables
+skip shaders/comp/defer-parens.comp reference/shaders/comp/defer-parens.comp  --opt --remove-unused-variables
+skip shaders/comp/dowhile.comp reference/shaders/comp/dowhile.comp  --opt --remove-unused-variables
+skip shaders/comp/generate_height.comp reference/shaders/comp/generate_height.comp  --opt --remove-unused-variables
+skip shaders/comp/image.comp reference/shaders/comp/image.comp  --opt --remove-unused-variables
+skip shaders/comp/inout-struct.invalid.comp reference/shaders/comp/inout-struct.invalid.comp  --opt --remove-unused-variables
+skip shaders/comp/insert.comp reference/shaders/comp/insert.comp  --opt --remove-unused-variables
+skip shaders/comp/mat3.comp reference/shaders/comp/mat3.comp  --opt --remove-unused-variables
+skip shaders/comp/mod.comp reference/shaders/comp/mod.comp  --opt --remove-unused-variables
+skip shaders/comp/modf.comp reference/shaders/comp/modf.comp  --opt --remove-unused-variables
+skip shaders/comp/read-write-only.comp reference/shaders/comp/read-write-only.comp  --opt --remove-unused-variables
+skip shaders/comp/rmw-matrix.comp reference/shaders/comp/rmw-matrix.comp  --opt --remove-unused-variables
+skip shaders/comp/rmw-opt.comp reference/shaders/comp/rmw-opt.comp  --opt --remove-unused-variables
+skip shaders/comp/shared.comp reference/shaders/comp/shared.comp  --opt --remove-unused-variables
+skip shaders/comp/ssbo-array.comp reference/shaders/comp/ssbo-array.comp  --opt --remove-unused-variables
+skip shaders/comp/struct-layout.comp reference/shaders/comp/struct-layout.comp  --opt --remove-unused-variables
+skip shaders/comp/struct-packing.comp reference/shaders/comp/struct-packing.comp  --opt --remove-unused-variables
+skip shaders/comp/torture-loop.comp reference/shaders/comp/torture-loop.comp  --opt --remove-unused-variables
+skip shaders/comp/type-alias.comp reference/shaders/comp/type-alias.comp  --opt --remove-unused-variables
+skip shaders/comp/udiv.comp reference/shaders/comp/udiv.comp  --opt --remove-unused-variables
+skip shaders/desktop-only/comp/enhanced-layouts.comp reference/shaders/desktop-only/comp/enhanced-layouts.comp  --opt --remove-unused-variables
+skip shaders/desktop-only/comp/extended-arithmetic.desktop.comp reference/shaders/desktop-only/comp/extended-arithmetic.desktop.comp  --opt --remove-unused-variables
+skip shaders/desktop-only/comp/fp64.desktop.comp reference/shaders/desktop-only/comp/fp64.desktop.comp  --opt --remove-unused-variables
+skip shaders/desktop-only/comp/image-formats.desktop.noeliminate.comp reference/shaders/desktop-only/comp/image-formats.desktop.noeliminate.comp  --opt
+skip shaders/desktop-only/comp/int64.desktop.comp reference/shaders/desktop-only/comp/int64.desktop.comp  --opt --remove-unused-variables
+skip shaders/desktop-only/frag/clip-cull-distance.desktop.frag reference/shaders/desktop-only/frag/clip-cull-distance.desktop.frag  --opt --remove-unused-variables
+skip shaders/desktop-only/frag/control-dependent-in-branch.desktop.frag reference/shaders/desktop-only/frag/control-dependent-in-branch.desktop.frag  --opt --remove-unused-variables
+skip shaders/desktop-only/frag/depth-greater-than.desktop.frag reference/shaders/desktop-only/frag/depth-greater-than.desktop.frag  --opt --remove-unused-variables
+skip shaders/desktop-only/frag/depth-less-than.desktop.frag reference/shaders/desktop-only/frag/depth-less-than.desktop.frag  --opt --remove-unused-variables
+skip shaders/desktop-only/frag/dual-source-blending.desktop.frag reference/shaders/desktop-only/frag/dual-source-blending.desktop.frag  --opt --remove-unused-variables
+skip shaders/desktop-only/frag/fp16.invalid.desktop.frag reference/shaders/desktop-only/frag/fp16.invalid.desktop.frag  --opt --remove-unused-variables
+skip shaders/desktop-only/frag/hlsl-uav-block-alias.asm.frag reference/shaders/desktop-only/frag/hlsl-uav-block-alias.asm.frag  --opt --remove-unused-variables
+skip shaders/desktop-only/frag/image-ms.desktop.frag reference/shaders/desktop-only/frag/image-ms.desktop.frag  --opt --remove-unused-variables
+skip shaders/desktop-only/frag/image-query.desktop.frag reference/shaders/desktop-only/frag/image-query.desktop.frag  --opt --remove-unused-variables
+skip shaders/desktop-only/frag/in-block-qualifiers.frag reference/shaders/desktop-only/frag/in-block-qualifiers.frag  --opt --remove-unused-variables
+skip shaders/desktop-only/frag/layout-component.desktop.frag reference/shaders/desktop-only/frag/layout-component.desktop.frag  --opt --remove-unused-variables
+skip shaders/desktop-only/frag/query-levels.desktop.frag reference/shaders/desktop-only/frag/query-levels.desktop.frag  --opt --remove-unused-variables
+skip shaders/desktop-only/frag/query-lod.desktop.frag reference/shaders/desktop-only/frag/query-lod.desktop.frag  --opt --remove-unused-variables
+skip shaders/desktop-only/frag/sampler-ms-query.desktop.frag reference/shaders/desktop-only/frag/sampler-ms-query.desktop.frag  --opt --remove-unused-variables
+skip shaders/desktop-only/frag/texture-proj-shadow.desktop.frag reference/shaders/desktop-only/frag/texture-proj-shadow.desktop.frag  --opt --remove-unused-variables
+skip shaders/desktop-only/geom/basic.desktop.sso.geom reference/shaders/desktop-only/geom/basic.desktop.sso.geom  --opt --remove-unused-variables --separate-shader-objects
+skip shaders/desktop-only/geom/viewport-index.desktop.geom reference/shaders/desktop-only/geom/viewport-index.desktop.geom  --opt --remove-unused-variables
+skip shaders/desktop-only/tesc/basic.desktop.sso.tesc reference/shaders/desktop-only/tesc/basic.desktop.sso.tesc  --opt --remove-unused-variables --separate-shader-objects
+skip shaders/desktop-only/tese/triangle.desktop.sso.tese reference/shaders/desktop-only/tese/triangle.desktop.sso.tese  --opt --remove-unused-variables --separate-shader-objects
+skip shaders/desktop-only/vert/basic.desktop.sso.vert reference/shaders/desktop-only/vert/basic.desktop.sso.vert  --opt --remove-unused-variables --separate-shader-objects
+skip shaders/desktop-only/vert/clip-cull-distance.desktop.sso.vert reference/shaders/desktop-only/vert/clip-cull-distance.desktop.sso.vert  --opt --remove-unused-variables --separate-shader-objects
+skip shaders/desktop-only/vert/clip-cull-distance.desktop.vert reference/shaders/desktop-only/vert/clip-cull-distance.desktop.vert  --opt --remove-unused-variables
+skip shaders/desktop-only/vert/out-block-qualifiers.vert reference/shaders/desktop-only/vert/out-block-qualifiers.vert  --opt --remove-unused-variables
+skip shaders/desktop-only/vert/shader-draw-parameters-450.desktop.vert reference/shaders/desktop-only/vert/shader-draw-parameters-450.desktop.vert  --opt --remove-unused-variables
+skip shaders/desktop-only/vert/shader-draw-parameters.desktop.vert reference/shaders/desktop-only/vert/shader-draw-parameters.desktop.vert  --opt --remove-unused-variables
+skip shaders/flatten/array.flatten.vert reference/shaders/flatten/array.flatten.vert  --opt --remove-unused-variables --flatten-ubo
+skip shaders/flatten/basic.flatten.vert reference/shaders/flatten/basic.flatten.vert  --opt --remove-unused-variables --flatten-ubo
+skip shaders/flatten/copy.flatten.vert reference/shaders/flatten/copy.flatten.vert  --opt --remove-unused-variables --flatten-ubo
+skip shaders/flatten/dynamic.flatten.vert reference/shaders/flatten/dynamic.flatten.vert  --opt --remove-unused-variables --flatten-ubo
+skip shaders/flatten/matrix-conversion.flatten.frag reference/shaders/flatten/matrix-conversion.flatten.frag  --opt --remove-unused-variables --flatten-ubo
+skip shaders/flatten/matrixindex.flatten.vert reference/shaders/flatten/matrixindex.flatten.vert  --opt --remove-unused-variables --flatten-ubo
+skip shaders/flatten/multi-dimensional.desktop.invalid.flatten_dim.frag reference/shaders/flatten/multi-dimensional.desktop.invalid.flatten_dim.frag  --opt --remove-unused-variables --flatten-multidimensional-arrays
+skip shaders/flatten/multiindex.flatten.vert reference/shaders/flatten/multiindex.flatten.vert  --opt --remove-unused-variables --flatten-ubo
+skip shaders/flatten/push-constant.flatten.vert reference/shaders/flatten/push-constant.flatten.vert  --opt --remove-unused-variables --flatten-ubo
+skip shaders/flatten/rowmajor.flatten.vert reference/shaders/flatten/rowmajor.flatten.vert  --opt --remove-unused-variables --flatten-ubo
+skip shaders/flatten/struct.flatten.vert reference/shaders/flatten/struct.flatten.vert  --opt --remove-unused-variables --flatten-ubo
+skip shaders/flatten/struct.rowmajor.flatten.vert reference/shaders/flatten/struct.rowmajor.flatten.vert  --opt --remove-unused-variables --flatten-ubo
+skip shaders/flatten/swizzle.flatten.vert reference/shaders/flatten/swizzle.flatten.vert  --opt --remove-unused-variables --flatten-ubo
+skip shaders/flatten/types.flatten.frag reference/shaders/flatten/types.flatten.frag  --opt --remove-unused-variables --flatten-ubo
+skip shaders/frag/16bit-constants.frag reference/shaders/frag/16bit-constants.frag  --opt --remove-unused-variables
+skip shaders/frag/array-lut-no-loop-variable.frag reference/shaders/frag/array-lut-no-loop-variable.frag  --opt --remove-unused-variables
+skip shaders/frag/basic.frag reference/shaders/frag/basic.frag  --opt --remove-unused-variables
+skip shaders/frag/complex-expression-in-access-chain.frag reference/shaders/frag/complex-expression-in-access-chain.frag  --opt --remove-unused-variables
+skip shaders/frag/composite-extract-forced-temporary.frag reference/shaders/frag/composite-extract-forced-temporary.frag  --opt --remove-unused-variables
+skip shaders/frag/constant-array.frag reference/shaders/frag/constant-array.frag  --opt --remove-unused-variables
+skip shaders/frag/constant-composites.frag reference/shaders/frag/constant-composites.frag  --opt --remove-unused-variables
+skip shaders/frag/false-loop-init.frag reference/shaders/frag/false-loop-init.frag  --opt --remove-unused-variables
+skip shaders/frag/flush_params.frag reference/shaders/frag/flush_params.frag  --opt --remove-unused-variables
+skip shaders/frag/for-loop-init.frag reference/shaders/frag/for-loop-init.frag  --opt --remove-unused-variables
+skip shaders/frag/frexp-modf.frag reference/shaders/frag/frexp-modf.frag  --opt --remove-unused-variables
+skip shaders/frag/front-facing.frag reference/shaders/frag/front-facing.frag  --opt --remove-unused-variables
+skip shaders/frag/gather-dref.frag reference/shaders/frag/gather-dref.frag  --opt --remove-unused-variables
+skip shaders/frag/ground.frag reference/shaders/frag/ground.frag  --opt --remove-unused-variables
+skip shaders/frag/helper-invocation.frag reference/shaders/frag/helper-invocation.frag  --opt --remove-unused-variables
+skip shaders/frag/hoisted-temporary-use-continue-block-as-value.frag reference/shaders/frag/hoisted-temporary-use-continue-block-as-value.frag  --opt --remove-unused-variables
+skip shaders/frag/image-load-store-uint-coord.asm.frag reference/shaders/frag/image-load-store-uint-coord.asm.frag  --opt --remove-unused-variables
+skip shaders/frag/loop-dominator-and-switch-default.frag reference/shaders/frag/loop-dominator-and-switch-default.frag  --opt --remove-unused-variables
+skip shaders/frag/lut-promotion.frag reference/shaders/frag/lut-promotion.frag  --opt --remove-unused-variables
+skip shaders/frag/mix.frag reference/shaders/frag/mix.frag  --opt --remove-unused-variables
+skip shaders/frag/partial-write-preserve.frag reference/shaders/frag/partial-write-preserve.frag  --opt --remove-unused-variables
+skip shaders/frag/pls.frag reference/shaders/frag/pls.frag  --opt --remove-unused-variables
+skip shaders/frag/sample-parameter.frag reference/shaders/frag/sample-parameter.frag  --opt --remove-unused-variables
+skip shaders/frag/sampler-ms.frag reference/shaders/frag/sampler-ms.frag  --opt --remove-unused-variables
+skip shaders/frag/sampler-proj.frag reference/shaders/frag/sampler-proj.frag  --opt --remove-unused-variables
+skip shaders/frag/sampler.frag reference/shaders/frag/sampler.frag  --opt --remove-unused-variables
+skip shaders/frag/switch-unsigned-case.frag reference/shaders/frag/switch-unsigned-case.frag  --opt --remove-unused-variables
+skip shaders/frag/swizzle.frag reference/shaders/frag/swizzle.frag  --opt --remove-unused-variables
+skip shaders/frag/texel-fetch-offset.frag reference/shaders/frag/texel-fetch-offset.frag  --opt --remove-unused-variables
+skip shaders/frag/ubo_layout.frag reference/shaders/frag/ubo_layout.frag  --opt --remove-unused-variables
+skip shaders/frag/unary-enclose.frag reference/shaders/frag/unary-enclose.frag  --opt --remove-unused-variables
+skip shaders/geom/basic.geom reference/shaders/geom/basic.geom  --opt --remove-unused-variables
+skip shaders/geom/lines-adjacency.geom reference/shaders/geom/lines-adjacency.geom  --opt --remove-unused-variables
+skip shaders/geom/lines.geom reference/shaders/geom/lines.geom  --opt --remove-unused-variables
+skip shaders/geom/points.geom reference/shaders/geom/points.geom  --opt --remove-unused-variables
+skip shaders/geom/single-invocation.geom reference/shaders/geom/single-invocation.geom  --opt --remove-unused-variables
+skip shaders/geom/triangles-adjacency.geom reference/shaders/geom/triangles-adjacency.geom  --opt --remove-unused-variables
+skip shaders/geom/triangles.geom reference/shaders/geom/triangles.geom  --opt --remove-unused-variables
+skip shaders/legacy/fragment/explicit-lod.legacy.frag reference/shaders/legacy/fragment/explicit-lod.legacy.frag  --opt --remove-unused-variables --version 100 --es
+skip shaders/legacy/fragment/io-blocks.legacy.frag reference/shaders/legacy/fragment/io-blocks.legacy.frag  --opt --remove-unused-variables --version 100 --es
+skip shaders/legacy/fragment/struct-varying.legacy.frag reference/shaders/legacy/fragment/struct-varying.legacy.frag  --opt --remove-unused-variables --version 100 --es
+skip shaders/legacy/vert/implicit-lod.legacy.vert reference/shaders/legacy/vert/implicit-lod.legacy.vert  --opt --remove-unused-variables --version 100 --es
+skip shaders/legacy/vert/io-block.legacy.vert reference/shaders/legacy/vert/io-block.legacy.vert  --opt --remove-unused-variables --version 100 --es
+skip shaders/legacy/vert/struct-varying.legacy.vert reference/shaders/legacy/vert/struct-varying.legacy.vert  --opt --remove-unused-variables --version 100 --es
+skip shaders/legacy/vert/transpose.legacy.vert reference/shaders/legacy/vert/transpose.legacy.vert  --opt --remove-unused-variables --version 100 --es
+skip shaders/tesc/basic.tesc reference/shaders/tesc/basic.tesc  --opt --remove-unused-variables
+skip shaders/tesc/water_tess.tesc reference/shaders/tesc/water_tess.tesc  --opt --remove-unused-variables
+skip shaders/tese/ccw.tese reference/shaders/tese/ccw.tese  --opt --remove-unused-variables
+skip shaders/tese/cw.tese reference/shaders/tese/cw.tese  --opt --remove-unused-variables
+skip shaders/tese/equal.tese reference/shaders/tese/equal.tese  --opt --remove-unused-variables
+skip shaders/tese/fractional_even.tese reference/shaders/tese/fractional_even.tese  --opt --remove-unused-variables
+skip shaders/tese/fractional_odd.tese reference/shaders/tese/fractional_odd.tese  --opt --remove-unused-variables
+skip shaders/tese/line.tese reference/shaders/tese/line.tese  --opt --remove-unused-variables
+skip shaders/tese/triangle.tese reference/shaders/tese/triangle.tese  --opt --remove-unused-variables
+skip shaders/tese/water_tess.tese reference/shaders/tese/water_tess.tese  --opt --remove-unused-variables
+skip shaders/vert/basic.vert reference/shaders/vert/basic.vert  --opt --remove-unused-variables
+skip shaders/vert/ground.vert reference/shaders/vert/ground.vert  --opt --remove-unused-variables
+skip shaders/vert/invariant.vert reference/shaders/vert/invariant.vert  --opt --remove-unused-variables
+skip shaders/vert/ocean.vert reference/shaders/vert/ocean.vert  --opt --remove-unused-variables
+skip shaders/vert/read-from-row-major-array.vert reference/shaders/vert/read-from-row-major-array.vert  --opt --remove-unused-variables
+skip shaders/vert/return-array.vert reference/shaders/vert/return-array.vert  --opt --remove-unused-variables
+skip shaders/vert/texture_buffer.vert reference/shaders/vert/texture_buffer.vert  --opt --remove-unused-variables
+skip shaders/vert/ubo.vert reference/shaders/vert/ubo.vert  --opt --remove-unused-variables
+skip shaders/vulkan/comp/spec-constant-op-member-array.vk.comp reference/shaders/vulkan/comp/spec-constant-op-member-array.vk.comp  --opt --remove-unused-variables
+skip shaders/vulkan/comp/spec-constant-op-member-array.vk.comp reference/shaders/vulkan/comp/spec-constant-op-member-array.vk.comp.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders/vulkan/comp/spec-constant-work-group-size.vk.comp reference/shaders/vulkan/comp/spec-constant-work-group-size.vk.comp  --opt --remove-unused-variables
+skip shaders/vulkan/comp/spec-constant-work-group-size.vk.comp reference/shaders/vulkan/comp/spec-constant-work-group-size.vk.comp.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders/vulkan/comp/subgroups.nocompat.invalid.vk.comp reference/shaders/vulkan/comp/subgroups.nocompat.invalid.vk.comp.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders/vulkan/frag/combined-texture-sampler-shadow.vk.frag reference/shaders/vulkan/frag/combined-texture-sampler-shadow.vk.frag  --opt --remove-unused-variables
+skip shaders/vulkan/frag/combined-texture-sampler-shadow.vk.frag reference/shaders/vulkan/frag/combined-texture-sampler-shadow.vk.frag.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders/vulkan/frag/combined-texture-sampler.vk.frag reference/shaders/vulkan/frag/combined-texture-sampler.vk.frag  --opt --remove-unused-variables
+skip shaders/vulkan/frag/combined-texture-sampler.vk.frag reference/shaders/vulkan/frag/combined-texture-sampler.vk.frag.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders/vulkan/frag/desktop-mediump.vk.frag reference/shaders/vulkan/frag/desktop-mediump.vk.frag  --opt --remove-unused-variables
+skip shaders/vulkan/frag/desktop-mediump.vk.frag reference/shaders/vulkan/frag/desktop-mediump.vk.frag.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders/vulkan/frag/input-attachment-ms.vk.frag reference/shaders/vulkan/frag/input-attachment-ms.vk.frag  --opt --remove-unused-variables
+skip shaders/vulkan/frag/input-attachment-ms.vk.frag reference/shaders/vulkan/frag/input-attachment-ms.vk.frag.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders/vulkan/frag/input-attachment.vk.frag reference/shaders/vulkan/frag/input-attachment.vk.frag  --opt --remove-unused-variables
+skip shaders/vulkan/frag/input-attachment.vk.frag reference/shaders/vulkan/frag/input-attachment.vk.frag.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders/vulkan/frag/push-constant.vk.frag reference/shaders/vulkan/frag/push-constant.vk.frag  --opt --remove-unused-variables
+skip shaders/vulkan/frag/push-constant.vk.frag reference/shaders/vulkan/frag/push-constant.vk.frag.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders/vulkan/frag/separate-combined-fake-overload.vk.frag reference/shaders/vulkan/frag/separate-combined-fake-overload.vk.frag  --opt --remove-unused-variables
+skip shaders/vulkan/frag/separate-combined-fake-overload.vk.frag reference/shaders/vulkan/frag/separate-combined-fake-overload.vk.frag.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders/vulkan/frag/separate-sampler-texture-array.vk.frag reference/shaders/vulkan/frag/separate-sampler-texture-array.vk.frag  --opt --remove-unused-variables
+skip shaders/vulkan/frag/separate-sampler-texture-array.vk.frag reference/shaders/vulkan/frag/separate-sampler-texture-array.vk.frag.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders/vulkan/frag/separate-sampler-texture.vk.frag reference/shaders/vulkan/frag/separate-sampler-texture.vk.frag  --opt --remove-unused-variables
+skip shaders/vulkan/frag/separate-sampler-texture.vk.frag reference/shaders/vulkan/frag/separate-sampler-texture.vk.frag.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders/vulkan/frag/spec-constant-block-size.vk.frag reference/shaders/vulkan/frag/spec-constant-block-size.vk.frag  --opt --remove-unused-variables
+skip shaders/vulkan/frag/spec-constant-block-size.vk.frag reference/shaders/vulkan/frag/spec-constant-block-size.vk.frag.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders/vulkan/frag/spec-constant-ternary.vk.frag reference/shaders/vulkan/frag/spec-constant-ternary.vk.frag  --opt --remove-unused-variables
+skip shaders/vulkan/frag/spec-constant-ternary.vk.frag reference/shaders/vulkan/frag/spec-constant-ternary.vk.frag.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders/vulkan/vert/multiview.nocompat.vk.vert reference/shaders/vulkan/vert/multiview.nocompat.vk.vert.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders/vulkan/vert/small-storage.vk.vert reference/shaders/vulkan/vert/small-storage.vk.vert  --opt --remove-unused-variables
+skip shaders/vulkan/vert/small-storage.vk.vert reference/shaders/vulkan/vert/small-storage.vk.vert.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders/vulkan/vert/vulkan-vertex.vk.vert reference/shaders/vulkan/vert/vulkan-vertex.vk.vert  --opt --remove-unused-variables
+skip shaders/vulkan/vert/vulkan-vertex.vk.vert reference/shaders/vulkan/vert/vulkan-vertex.vk.vert.vk  --opt --remove-unused-variables --vulkan-semantics
+skip shaders-no-opt/asm/frag/inliner-dominator-inside-loop.asm.frag reference/shaders-no-opt/asm/frag/inliner-dominator-inside-loop.asm.frag  --remove-unused-variables
+skip shaders-no-opt/asm/vert/empty-struct-composite.asm.vert reference/shaders-no-opt/asm/vert/empty-struct-composite.asm.vert  --remove-unused-variables
+shaders-no-opt/asm/vert/semantic-decoration.asm.vert reference/shaders-no-opt/asm/vert/semantic-decoration.asm.vert  --remove-unused-variables
+skip shaders-no-opt/comp/bitfield.comp reference/shaders-no-opt/comp/bitfield.comp  --remove-unused-variables
+skip shaders-no-opt/comp/loop.comp reference/shaders-no-opt/comp/loop.comp  --remove-unused-variables
+skip shaders-no-opt/comp/return.comp reference/shaders-no-opt/comp/return.comp  --remove-unused-variables
+skip shaders-no-opt/vulkan/frag/spec-constant.vk.frag reference/shaders-no-opt/vulkan/frag/spec-constant.vk.frag  --remove-unused-variables
+skip shaders-no-opt/vulkan/frag/spec-constant.vk.frag reference/shaders-no-opt/vulkan/frag/spec-constant.vk.frag.vk  --remove-unused-variables --vulkan-semantics
+skip shaders-msl/asm/comp/atomic-decrement.asm.comp reference/shaders-msl/asm/comp/atomic-decrement.asm.comp
+skip shaders-msl/asm/comp/atomic-increment.asm.comp reference/shaders-msl/asm/comp/atomic-increment.asm.comp
+skip shaders-msl/asm/comp/bitcast_iadd.asm.comp reference/shaders-msl/asm/comp/bitcast_iadd.asm.comp
+skip shaders-msl/asm/comp/bitcast_sar.asm.comp reference/shaders-msl/asm/comp/bitcast_sar.asm.comp
+skip shaders-msl/asm/comp/bitcast_sdiv.asm.comp reference/shaders-msl/asm/comp/bitcast_sdiv.asm.comp
+skip shaders-msl/asm/comp/bitcast_slr.asm.comp reference/shaders-msl/asm/comp/bitcast_slr.asm.comp
+skip shaders-msl/asm/comp/block-name-alias-global.asm.comp reference/shaders-msl/asm/comp/block-name-alias-global.asm.comp
+skip shaders-msl/asm/comp/buffer-write-relative-addr.asm.comp reference/shaders-msl/asm/comp/buffer-write-relative-addr.asm.comp
+skip shaders-msl/asm/comp/buffer-write.asm.comp reference/shaders-msl/asm/comp/buffer-write.asm.comp
+skip shaders-msl/asm/comp/global-parameter-name-alias.asm.comp reference/shaders-msl/asm/comp/global-parameter-name-alias.asm.comp
+skip shaders-msl/asm/comp/multiple-entry.asm.comp reference/shaders-msl/asm/comp/multiple-entry.asm.comp
+skip shaders-msl/asm/comp/quantize.asm.comp reference/shaders-msl/asm/comp/quantize.asm.comp
+skip shaders-msl/asm/comp/relaxed-block-layout.asm.comp reference/shaders-msl/asm/comp/relaxed-block-layout.asm.comp
+skip shaders-msl/asm/comp/specialization-constant-workgroup.asm.comp reference/shaders-msl/asm/comp/specialization-constant-workgroup.asm.comp
+skip shaders-msl/asm/comp/storage-buffer-basic.invalid.asm.comp reference/shaders-msl/asm/comp/storage-buffer-basic.invalid.asm.comp
+skip shaders-msl/asm/comp/vector-builtin-type-cast-func.asm.comp reference/shaders-msl/asm/comp/vector-builtin-type-cast-func.asm.comp
+skip shaders-msl/asm/comp/vector-builtin-type-cast.asm.comp reference/shaders-msl/asm/comp/vector-builtin-type-cast.asm.comp
+skip shaders-msl/asm/frag/combined-sampler-reuse.asm.frag reference/shaders-msl/asm/frag/combined-sampler-reuse.asm.frag
+skip shaders-msl/asm/frag/default-member-names.asm.frag reference/shaders-msl/asm/frag/default-member-names.asm.frag
+skip shaders-msl/asm/frag/empty-struct.asm.frag reference/shaders-msl/asm/frag/empty-struct.asm.frag
+skip shaders-msl/asm/frag/extract-packed-from-composite.asm.frag reference/shaders-msl/asm/frag/extract-packed-from-composite.asm.frag
+skip shaders-msl/asm/frag/frem.asm.frag reference/shaders-msl/asm/frag/frem.asm.frag
+skip shaders-msl/asm/frag/function-overload-alias.asm.frag reference/shaders-msl/asm/frag/function-overload-alias.asm.frag
+skip shaders-msl/asm/frag/image-extract-reuse.asm.frag reference/shaders-msl/asm/frag/image-extract-reuse.asm.frag
+skip shaders-msl/asm/frag/implicit-read-dep-phi.asm.frag reference/shaders-msl/asm/frag/implicit-read-dep-phi.asm.frag
+skip shaders-msl/asm/frag/inf-nan-constant.asm.frag reference/shaders-msl/asm/frag/inf-nan-constant.asm.frag
+skip shaders-msl/asm/frag/interpolation-qualifiers-struct.asm.frag reference/shaders-msl/asm/frag/interpolation-qualifiers-struct.asm.frag
+skip shaders-msl/asm/frag/locations-components.asm.frag reference/shaders-msl/asm/frag/locations-components.asm.frag
+skip shaders-msl/asm/frag/lut-promotion-initializer.asm.frag reference/shaders-msl/asm/frag/lut-promotion-initializer.asm.frag
+skip shaders-msl/asm/frag/min-max-clamp.invalid.asm.frag reference/shaders-msl/asm/frag/min-max-clamp.invalid.asm.frag
+skip shaders-msl/asm/frag/op-constant-null.asm.frag reference/shaders-msl/asm/frag/op-constant-null.asm.frag
+skip shaders-msl/asm/frag/op-image-sampled-image.asm.frag reference/shaders-msl/asm/frag/op-image-sampled-image.asm.frag
+skip shaders-msl/asm/frag/pass-by-value.asm.frag reference/shaders-msl/asm/frag/pass-by-value.asm.frag
+skip shaders-msl/asm/frag/phi-loop-variable.asm.frag reference/shaders-msl/asm/frag/phi-loop-variable.asm.frag
+skip shaders-msl/asm/frag/srem.asm.frag reference/shaders-msl/asm/frag/srem.asm.frag
+skip shaders-msl/asm/frag/texel-fetch-no-lod.asm.frag reference/shaders-msl/asm/frag/texel-fetch-no-lod.asm.frag
+skip shaders-msl/asm/frag/undef-variable-store.asm.frag reference/shaders-msl/asm/frag/undef-variable-store.asm.frag
+skip shaders-msl/asm/frag/unknown-depth-state.asm.frag reference/shaders-msl/asm/frag/unknown-depth-state.asm.frag
+skip shaders-msl/asm/frag/unord-relational-op.asm.frag reference/shaders-msl/asm/frag/unord-relational-op.asm.frag
+skip shaders-msl/asm/frag/unreachable.asm.frag reference/shaders-msl/asm/frag/unreachable.asm.frag
+skip shaders-msl/asm/frag/vector-shuffle-oom.asm.frag reference/shaders-msl/asm/frag/vector-shuffle-oom.asm.frag
+skip shaders-msl/asm/vert/packing-test.asm.vert reference/shaders-msl/asm/vert/packing-test.asm.vert
+skip shaders-msl/asm/vert/spec-constant-op-composite.asm.vert reference/shaders-msl/asm/vert/spec-constant-op-composite.asm.vert
+skip shaders-msl/asm/vert/uint-vertex-id-instance-id.asm.vert reference/shaders-msl/asm/vert/uint-vertex-id-instance-id.asm.vert
+skip shaders-msl/comp/access-private-workgroup-in-function.comp reference/shaders-msl/comp/access-private-workgroup-in-function.comp
+skip shaders-msl/comp/atomic.comp reference/shaders-msl/comp/atomic.comp
+skip shaders-msl/comp/barriers.comp reference/shaders-msl/comp/barriers.comp
+skip shaders-msl/comp/basic.comp reference/shaders-msl/comp/basic.comp
+skip shaders-msl/comp/bitcast-16bit-1.invalid.comp reference/shaders-msl/comp/bitcast-16bit-1.invalid.comp
+skip shaders-msl/comp/bitcast-16bit-2.invalid.comp reference/shaders-msl/comp/bitcast-16bit-2.invalid.comp
+skip shaders-msl/comp/builtins.comp reference/shaders-msl/comp/builtins.comp
+skip shaders-msl/comp/cfg-preserve-parameter.comp reference/shaders-msl/comp/cfg-preserve-parameter.comp
+skip shaders-msl/comp/coherent-block.comp reference/shaders-msl/comp/coherent-block.comp
+skip shaders-msl/comp/coherent-image.comp reference/shaders-msl/comp/coherent-image.comp
+skip shaders-msl/comp/composite-array-initialization.comp reference/shaders-msl/comp/composite-array-initialization.comp
+skip shaders-msl/comp/composite-construct.comp reference/shaders-msl/comp/composite-construct.comp
+skip shaders-msl/comp/copy-array-of-arrays.comp reference/shaders-msl/comp/copy-array-of-arrays.comp
+skip shaders-msl/comp/culling.comp reference/shaders-msl/comp/culling.comp
+skip shaders-msl/comp/defer-parens.comp reference/shaders-msl/comp/defer-parens.comp
+skip shaders-msl/comp/dowhile.comp reference/shaders-msl/comp/dowhile.comp
+skip shaders-msl/comp/functions.comp reference/shaders-msl/comp/functions.comp
+skip shaders-msl/comp/global-invocation-id-writable-ssbo-in-function.comp reference/shaders-msl/comp/global-invocation-id-writable-ssbo-in-function.comp
+skip shaders-msl/comp/global-invocation-id.comp reference/shaders-msl/comp/global-invocation-id.comp
+skip shaders-msl/comp/image-cube-array-load-store.comp reference/shaders-msl/comp/image-cube-array-load-store.comp
+skip shaders-msl/comp/image.comp reference/shaders-msl/comp/image.comp
+skip shaders-msl/comp/insert.comp reference/shaders-msl/comp/insert.comp
+skip shaders-msl/comp/inverse.comp reference/shaders-msl/comp/inverse.comp
+skip shaders-msl/comp/local-invocation-id.comp reference/shaders-msl/comp/local-invocation-id.comp
+skip shaders-msl/comp/local-invocation-index.comp reference/shaders-msl/comp/local-invocation-index.comp
+skip shaders-msl/comp/mat3.comp reference/shaders-msl/comp/mat3.comp
+skip shaders-msl/comp/mod.comp reference/shaders-msl/comp/mod.comp
+skip shaders-msl/comp/modf.comp reference/shaders-msl/comp/modf.comp
+skip shaders-msl/comp/packing-test-1.comp reference/shaders-msl/comp/packing-test-1.comp
+skip shaders-msl/comp/packing-test-2.comp reference/shaders-msl/comp/packing-test-2.comp
+skip shaders-msl/comp/read-write-only.comp reference/shaders-msl/comp/read-write-only.comp
+skip shaders-msl/comp/rmw-matrix.comp reference/shaders-msl/comp/rmw-matrix.comp
+skip shaders-msl/comp/rmw-opt.comp reference/shaders-msl/comp/rmw-opt.comp
+skip shaders-msl/comp/shared-array-of-arrays.comp reference/shaders-msl/comp/shared-array-of-arrays.comp
+skip shaders-msl/comp/shared.comp reference/shaders-msl/comp/shared.comp
+skip shaders-msl/comp/spec-constant-op-member-array.comp reference/shaders-msl/comp/spec-constant-op-member-array.comp
+skip shaders-msl/comp/spec-constant-work-group-size.comp reference/shaders-msl/comp/spec-constant-work-group-size.comp
+skip shaders-msl/comp/struct-layout.comp reference/shaders-msl/comp/struct-layout.comp
+skip shaders-msl/comp/struct-nested.comp reference/shaders-msl/comp/struct-nested.comp
+skip shaders-msl/comp/struct-packing.comp reference/shaders-msl/comp/struct-packing.comp
+skip shaders-msl/comp/torture-loop.comp reference/shaders-msl/comp/torture-loop.comp
+skip shaders-msl/comp/type-alias.comp reference/shaders-msl/comp/type-alias.comp
+skip shaders-msl/comp/udiv.comp reference/shaders-msl/comp/udiv.comp
+skip shaders-msl/comp/writable-ssbo.comp reference/shaders-msl/comp/writable-ssbo.comp
+skip shaders-msl/desktop-only/comp/extended-arithmetic.desktop.comp reference/shaders-msl/desktop-only/comp/extended-arithmetic.desktop.comp
+skip shaders-msl/desktop-only/frag/image-ms.desktop.frag reference/shaders-msl/desktop-only/frag/image-ms.desktop.frag
+skip shaders-msl/desktop-only/frag/query-levels.desktop.frag reference/shaders-msl/desktop-only/frag/query-levels.desktop.frag
+skip shaders-msl/desktop-only/frag/sampler-ms-query.desktop.frag reference/shaders-msl/desktop-only/frag/sampler-ms-query.desktop.frag
+skip shaders-msl/desktop-only/vert/basic.desktop.sso.vert reference/shaders-msl/desktop-only/vert/basic.desktop.sso.vert
+skip shaders-msl/desktop-only/vert/clip-cull-distance.desktop.vert reference/shaders-msl/desktop-only/vert/clip-cull-distance.desktop.vert
+skip shaders-msl/desktop-only/vert/shader-draw-parameters.desktop.vert reference/shaders-msl/desktop-only/vert/shader-draw-parameters.desktop.vert
+skip shaders-msl/flatten/basic.flatten.vert reference/shaders-msl/flatten/basic.flatten.vert
+skip shaders-msl/flatten/multiindex.flatten.vert reference/shaders-msl/flatten/multiindex.flatten.vert
+skip shaders-msl/flatten/push-constant.flatten.vert reference/shaders-msl/flatten/push-constant.flatten.vert
+skip shaders-msl/flatten/rowmajor.flatten.vert reference/shaders-msl/flatten/rowmajor.flatten.vert
+skip shaders-msl/flatten/struct.flatten.vert reference/shaders-msl/flatten/struct.flatten.vert
+skip shaders-msl/flatten/swizzle.flatten.vert reference/shaders-msl/flatten/swizzle.flatten.vert
+skip shaders-msl/flatten/types.flatten.frag reference/shaders-msl/flatten/types.flatten.frag
+skip shaders-msl/frag/16bit-constants.frag reference/shaders-msl/frag/16bit-constants.frag
+skip shaders-msl/frag/array-lut-no-loop-variable.frag reference/shaders-msl/frag/array-lut-no-loop-variable.frag
+skip shaders-msl/frag/basic.frag reference/shaders-msl/frag/basic.frag
+skip shaders-msl/frag/binary-func-unpack-pack-arguments.frag reference/shaders-msl/frag/binary-func-unpack-pack-arguments.frag
+skip shaders-msl/frag/binary-unpack-pack-arguments.frag reference/shaders-msl/frag/binary-unpack-pack-arguments.frag
+skip shaders-msl/frag/bitcasting.frag reference/shaders-msl/frag/bitcasting.frag
+skip shaders-msl/frag/buffer-read.frag reference/shaders-msl/frag/buffer-read.frag
+skip shaders-msl/frag/builtins.frag reference/shaders-msl/frag/builtins.frag
+skip shaders-msl/frag/complex-expression-in-access-chain.frag reference/shaders-msl/frag/complex-expression-in-access-chain.frag
+skip shaders-msl/frag/composite-extract-forced-temporary.frag reference/shaders-msl/frag/composite-extract-forced-temporary.frag
+skip shaders-msl/frag/constant-array.frag reference/shaders-msl/frag/constant-array.frag
+skip shaders-msl/frag/constant-composites.frag reference/shaders-msl/frag/constant-composites.frag
+skip shaders-msl/frag/control-dependent-in-branch.desktop.frag reference/shaders-msl/frag/control-dependent-in-branch.desktop.frag
+skip shaders-msl/frag/depth-greater-than.frag reference/shaders-msl/frag/depth-greater-than.frag
+skip shaders-msl/frag/depth-less-than.frag reference/shaders-msl/frag/depth-less-than.frag
+skip shaders-msl/frag/dual-source-blending.frag reference/shaders-msl/frag/dual-source-blending.frag
+skip shaders-msl/frag/early-fragment-tests.frag reference/shaders-msl/frag/early-fragment-tests.frag
+skip shaders-msl/frag/false-loop-init.frag reference/shaders-msl/frag/false-loop-init.frag
+skip shaders-msl/frag/flush_params.frag reference/shaders-msl/frag/flush_params.frag
+skip shaders-msl/frag/for-loop-init.frag reference/shaders-msl/frag/for-loop-init.frag
+skip shaders-msl/frag/fp16-packing.frag reference/shaders-msl/frag/fp16-packing.frag
+skip shaders-msl/frag/fp16.desktop.invalid.frag reference/shaders-msl/frag/fp16.desktop.invalid.frag
+skip shaders-msl/frag/front-facing.frag reference/shaders-msl/frag/front-facing.frag
+skip shaders-msl/frag/gather-dref.frag reference/shaders-msl/frag/gather-dref.frag
+skip shaders-msl/frag/gather-offset.frag reference/shaders-msl/frag/gather-offset.frag
+skip shaders-msl/frag/helper-invocation.msl21.frag reference/shaders-msl/frag/helper-invocation.msl21.frag
+skip shaders-msl/frag/illegal-name-test-0.frag reference/shaders-msl/frag/illegal-name-test-0.frag
+skip shaders-msl/frag/in_block.frag reference/shaders-msl/frag/in_block.frag
+skip shaders-msl/frag/in_mat.frag reference/shaders-msl/frag/in_mat.frag
+skip shaders-msl/frag/input-attachment-ms.frag reference/shaders-msl/frag/input-attachment-ms.frag
+skip shaders-msl/frag/input-attachment.frag reference/shaders-msl/frag/input-attachment.frag
+skip shaders-msl/frag/interpolation-qualifiers-block.frag reference/shaders-msl/frag/interpolation-qualifiers-block.frag
+skip shaders-msl/frag/interpolation-qualifiers.frag reference/shaders-msl/frag/interpolation-qualifiers.frag
+skip shaders-msl/frag/lut-promotion.frag reference/shaders-msl/frag/lut-promotion.frag
+skip shaders-msl/frag/mix.frag reference/shaders-msl/frag/mix.frag
+skip shaders-msl/frag/mrt-array.frag reference/shaders-msl/frag/mrt-array.frag
+skip shaders-msl/frag/packed-expression-vector-shuffle.frag reference/shaders-msl/frag/packed-expression-vector-shuffle.frag
+skip shaders-msl/frag/packing-test-3.frag reference/shaders-msl/frag/packing-test-3.frag
+skip shaders-msl/frag/pls.frag reference/shaders-msl/frag/pls.frag
+skip shaders-msl/frag/readonly-ssbo.frag reference/shaders-msl/frag/readonly-ssbo.frag
+skip shaders-msl/frag/sample-depth-separate-image-sampler.frag reference/shaders-msl/frag/sample-depth-separate-image-sampler.frag
+skip shaders-msl/frag/sample-mask.frag reference/shaders-msl/frag/sample-mask.frag
+skip shaders-msl/frag/sample-position-func.frag reference/shaders-msl/frag/sample-position-func.frag
+skip shaders-msl/frag/sample-position.frag reference/shaders-msl/frag/sample-position.frag
+skip shaders-msl/frag/sampler-1d-lod.frag reference/shaders-msl/frag/sampler-1d-lod.frag
+skip shaders-msl/frag/sampler-compare-cascade-gradient.frag reference/shaders-msl/frag/sampler-compare-cascade-gradient.frag
+skip shaders-msl/frag/sampler-compare-cascade-gradient.ios.frag reference/shaders-msl/frag/sampler-compare-cascade-gradient.ios.frag
+skip shaders-msl/frag/sampler-image-arrays.msl2.frag reference/shaders-msl/frag/sampler-image-arrays.msl2.frag
+skip shaders-msl/frag/sampler-ms.frag reference/shaders-msl/frag/sampler-ms.frag
+skip shaders-msl/frag/sampler.frag reference/shaders-msl/frag/sampler.frag
+skip shaders-msl/frag/separate-image-sampler-argument.frag reference/shaders-msl/frag/separate-image-sampler-argument.frag
+skip shaders-msl/frag/shadow-compare-global-alias.invalid.frag reference/shaders-msl/frag/shadow-compare-global-alias.invalid.frag
+skip shaders-msl/frag/spec-constant-block-size.frag reference/shaders-msl/frag/spec-constant-block-size.frag
+skip shaders-msl/frag/spec-constant-ternary.frag reference/shaders-msl/frag/spec-constant-ternary.frag
+skip shaders-msl/frag/switch-unsigned-case.frag reference/shaders-msl/frag/switch-unsigned-case.frag
+skip shaders-msl/frag/swizzle.frag reference/shaders-msl/frag/swizzle.frag
+skip shaders-msl/frag/texel-fetch-offset.frag reference/shaders-msl/frag/texel-fetch-offset.frag
+skip shaders-msl/frag/texture-multisample-array.msl21.frag reference/shaders-msl/frag/texture-multisample-array.msl21.frag
+skip shaders-msl/frag/texture-proj-shadow.frag reference/shaders-msl/frag/texture-proj-shadow.frag
+skip shaders-msl/frag/ubo_layout.frag reference/shaders-msl/frag/ubo_layout.frag
+skip shaders-msl/frag/unary-enclose.frag reference/shaders-msl/frag/unary-enclose.frag
+skip shaders-msl/frag/write-depth-in-function.frag reference/shaders-msl/frag/write-depth-in-function.frag
+skip shaders-msl/legacy/vert/transpose.legacy.vert reference/shaders-msl/legacy/vert/transpose.legacy.vert
+skip shaders-msl/vert/basic.vert reference/shaders-msl/vert/basic.vert
+skip shaders-msl/vert/copy.flatten.vert reference/shaders-msl/vert/copy.flatten.vert
+skip shaders-msl/vert/dynamic.flatten.vert reference/shaders-msl/vert/dynamic.flatten.vert
+skip shaders-msl/vert/functions.vert reference/shaders-msl/vert/functions.vert
+skip shaders-msl/vert/in_out_array_mat.vert reference/shaders-msl/vert/in_out_array_mat.vert
+skip shaders-msl/vert/interpolation-qualifiers-block.vert reference/shaders-msl/vert/interpolation-qualifiers-block.vert
+skip shaders-msl/vert/interpolation-qualifiers.vert reference/shaders-msl/vert/interpolation-qualifiers.vert
+skip shaders-msl/vert/layer.msl11.invalid.vert reference/shaders-msl/vert/layer.msl11.invalid.vert
+skip shaders-msl/vert/no_stage_out.vert reference/shaders-msl/vert/no_stage_out.vert
+skip shaders-msl/vert/no_stage_out.write_buff.vert reference/shaders-msl/vert/no_stage_out.write_buff.vert
+skip shaders-msl/vert/no_stage_out.write_buff_atomic.vert reference/shaders-msl/vert/no_stage_out.write_buff_atomic.vert
+skip shaders-msl/vert/no_stage_out.write_tex.vert reference/shaders-msl/vert/no_stage_out.write_tex.vert
+skip shaders-msl/vert/out_block.vert reference/shaders-msl/vert/out_block.vert
+skip shaders-msl/vert/packed_matrix.vert reference/shaders-msl/vert/packed_matrix.vert
+skip shaders-msl/vert/pointsize.vert reference/shaders-msl/vert/pointsize.vert
+skip shaders-msl/vert/read-from-row-major-array.vert reference/shaders-msl/vert/read-from-row-major-array.vert
+skip shaders-msl/vert/resource-arrays-leaf.ios.vert reference/shaders-msl/vert/resource-arrays-leaf.ios.vert
+skip shaders-msl/vert/resource-arrays.ios.vert reference/shaders-msl/vert/resource-arrays.ios.vert
+skip shaders-msl/vert/return-array.vert reference/shaders-msl/vert/return-array.vert
+skip shaders-msl/vert/set_builtin_in_func.vert reference/shaders-msl/vert/set_builtin_in_func.vert
+skip shaders-msl/vert/sign-int-types.vert reference/shaders-msl/vert/sign-int-types.vert
+skip shaders-msl/vert/texture_buffer.vert reference/shaders-msl/vert/texture_buffer.vert
+skip shaders-msl/vert/ubo.alignment.vert reference/shaders-msl/vert/ubo.alignment.vert
+skip shaders-msl/vert/ubo.vert reference/shaders-msl/vert/ubo.vert
+skip shaders-msl/vert/viewport-index.msl2.invalid.vert reference/shaders-msl/vert/viewport-index.msl2.invalid.vert
+skip shaders-msl/vulkan/frag/push-constant.vk.frag reference/shaders-msl/vulkan/frag/push-constant.vk.frag
+skip shaders-msl/vulkan/frag/spec-constant.msl11.vk.frag reference/shaders-msl/vulkan/frag/spec-constant.msl11.vk.frag
+skip shaders-msl/vulkan/frag/spec-constant.vk.frag reference/shaders-msl/vulkan/frag/spec-constant.vk.frag
+skip shaders-msl/vulkan/vert/small-storage.vk.vert reference/shaders-msl/vulkan/vert/small-storage.vk.vert
+skip shaders-msl/vulkan/vert/vulkan-vertex.vk.vert reference/shaders-msl/vulkan/vert/vulkan-vertex.vk.vert
+skip shaders-msl/asm/comp/atomic-decrement.asm.comp reference/shaders-msl/asm/comp/atomic-decrement.asm.comp
+skip shaders-msl/asm/comp/atomic-increment.asm.comp reference/shaders-msl/asm/comp/atomic-increment.asm.comp
+skip shaders-msl/asm/comp/bitcast_iadd.asm.comp reference/shaders-msl/asm/comp/bitcast_iadd.asm.comp
+skip shaders-msl/asm/comp/bitcast_sar.asm.comp reference/shaders-msl/asm/comp/bitcast_sar.asm.comp
+skip shaders-msl/asm/comp/bitcast_sdiv.asm.comp reference/shaders-msl/asm/comp/bitcast_sdiv.asm.comp
+skip shaders-msl/asm/comp/bitcast_slr.asm.comp reference/shaders-msl/asm/comp/bitcast_slr.asm.comp
+skip shaders-msl/asm/comp/block-name-alias-global.asm.comp reference/shaders-msl/asm/comp/block-name-alias-global.asm.comp
+skip shaders-msl/asm/comp/buffer-write-relative-addr.asm.comp reference/shaders-msl/asm/comp/buffer-write-relative-addr.asm.comp
+skip shaders-msl/asm/comp/buffer-write.asm.comp reference/shaders-msl/asm/comp/buffer-write.asm.comp
+skip shaders-msl/asm/comp/global-parameter-name-alias.asm.comp reference/shaders-msl/asm/comp/global-parameter-name-alias.asm.comp
+skip shaders-msl/asm/comp/multiple-entry.asm.comp reference/shaders-msl/asm/comp/multiple-entry.asm.comp
+skip shaders-msl/asm/comp/quantize.asm.comp reference/shaders-msl/asm/comp/quantize.asm.comp
+skip shaders-msl/asm/comp/relaxed-block-layout.asm.comp reference/shaders-msl/asm/comp/relaxed-block-layout.asm.comp
+skip shaders-msl/asm/comp/specialization-constant-workgroup.asm.comp reference/shaders-msl/asm/comp/specialization-constant-workgroup.asm.comp
+skip shaders-msl/asm/comp/storage-buffer-basic.invalid.asm.comp reference/shaders-msl/asm/comp/storage-buffer-basic.invalid.asm.comp
+skip shaders-msl/asm/comp/vector-builtin-type-cast-func.asm.comp reference/shaders-msl/asm/comp/vector-builtin-type-cast-func.asm.comp
+skip shaders-msl/asm/comp/vector-builtin-type-cast.asm.comp reference/shaders-msl/asm/comp/vector-builtin-type-cast.asm.comp
+skip shaders-msl/asm/frag/combined-sampler-reuse.asm.frag reference/shaders-msl/asm/frag/combined-sampler-reuse.asm.frag
+skip shaders-msl/asm/frag/default-member-names.asm.frag reference/shaders-msl/asm/frag/default-member-names.asm.frag
+skip shaders-msl/asm/frag/empty-struct.asm.frag reference/shaders-msl/asm/frag/empty-struct.asm.frag
+skip shaders-msl/asm/frag/extract-packed-from-composite.asm.frag reference/shaders-msl/asm/frag/extract-packed-from-composite.asm.frag
+skip shaders-msl/asm/frag/frem.asm.frag reference/shaders-msl/asm/frag/frem.asm.frag
+skip shaders-msl/asm/frag/function-overload-alias.asm.frag reference/shaders-msl/asm/frag/function-overload-alias.asm.frag
+skip shaders-msl/asm/frag/image-extract-reuse.asm.frag reference/shaders-msl/asm/frag/image-extract-reuse.asm.frag
+skip shaders-msl/asm/frag/implicit-read-dep-phi.asm.frag reference/shaders-msl/asm/frag/implicit-read-dep-phi.asm.frag
+skip shaders-msl/asm/frag/inf-nan-constant.asm.frag reference/shaders-msl/asm/frag/inf-nan-constant.asm.frag
+skip shaders-msl/asm/frag/interpolation-qualifiers-struct.asm.frag reference/shaders-msl/asm/frag/interpolation-qualifiers-struct.asm.frag
+skip shaders-msl/asm/frag/locations-components.asm.frag reference/shaders-msl/asm/frag/locations-components.asm.frag
+skip shaders-msl/asm/frag/lut-promotion-initializer.asm.frag reference/shaders-msl/asm/frag/lut-promotion-initializer.asm.frag
+skip shaders-msl/asm/frag/min-max-clamp.invalid.asm.frag reference/shaders-msl/asm/frag/min-max-clamp.invalid.asm.frag
+skip shaders-msl/asm/frag/op-constant-null.asm.frag reference/shaders-msl/asm/frag/op-constant-null.asm.frag
+skip shaders-msl/asm/frag/op-image-sampled-image.asm.frag reference/shaders-msl/asm/frag/op-image-sampled-image.asm.frag
+skip shaders-msl/asm/frag/pass-by-value.asm.frag reference/shaders-msl/asm/frag/pass-by-value.asm.frag
+skip shaders-msl/asm/frag/phi-loop-variable.asm.frag reference/shaders-msl/asm/frag/phi-loop-variable.asm.frag
+skip shaders-msl/asm/frag/srem.asm.frag reference/shaders-msl/asm/frag/srem.asm.frag
+skip shaders-msl/asm/frag/texel-fetch-no-lod.asm.frag reference/shaders-msl/asm/frag/texel-fetch-no-lod.asm.frag
+skip shaders-msl/asm/frag/undef-variable-store.asm.frag reference/shaders-msl/asm/frag/undef-variable-store.asm.frag
+skip shaders-msl/asm/frag/unknown-depth-state.asm.frag reference/shaders-msl/asm/frag/unknown-depth-state.asm.frag
+skip shaders-msl/asm/frag/unord-relational-op.asm.frag reference/shaders-msl/asm/frag/unord-relational-op.asm.frag
+skip shaders-msl/asm/frag/unreachable.asm.frag reference/shaders-msl/asm/frag/unreachable.asm.frag
+skip shaders-msl/asm/frag/vector-shuffle-oom.asm.frag reference/shaders-msl/asm/frag/vector-shuffle-oom.asm.frag
+skip shaders-msl/asm/vert/packing-test.asm.vert reference/shaders-msl/asm/vert/packing-test.asm.vert
+skip shaders-msl/asm/vert/spec-constant-op-composite.asm.vert reference/shaders-msl/asm/vert/spec-constant-op-composite.asm.vert
+skip shaders-msl/asm/vert/uint-vertex-id-instance-id.asm.vert reference/shaders-msl/asm/vert/uint-vertex-id-instance-id.asm.vert
+skip shaders-msl/comp/access-private-workgroup-in-function.comp reference/shaders-msl/comp/access-private-workgroup-in-function.comp
+skip shaders-msl/comp/atomic.comp reference/shaders-msl/comp/atomic.comp
+skip shaders-msl/comp/barriers.comp reference/shaders-msl/comp/barriers.comp
+skip shaders-msl/comp/basic.comp reference/shaders-msl/comp/basic.comp
+skip shaders-msl/comp/bitcast-16bit-1.invalid.comp reference/shaders-msl/comp/bitcast-16bit-1.invalid.comp
+skip shaders-msl/comp/bitcast-16bit-2.invalid.comp reference/shaders-msl/comp/bitcast-16bit-2.invalid.comp
+skip shaders-msl/comp/builtins.comp reference/shaders-msl/comp/builtins.comp
+skip shaders-msl/comp/cfg-preserve-parameter.comp reference/shaders-msl/comp/cfg-preserve-parameter.comp
+skip shaders-msl/comp/coherent-block.comp reference/shaders-msl/comp/coherent-block.comp
+skip shaders-msl/comp/coherent-image.comp reference/shaders-msl/comp/coherent-image.comp
+skip shaders-msl/comp/composite-array-initialization.comp reference/shaders-msl/comp/composite-array-initialization.comp
+skip shaders-msl/comp/composite-construct.comp reference/shaders-msl/comp/composite-construct.comp
+skip shaders-msl/comp/copy-array-of-arrays.comp reference/shaders-msl/comp/copy-array-of-arrays.comp
+skip shaders-msl/comp/culling.comp reference/shaders-msl/comp/culling.comp
+skip shaders-msl/comp/defer-parens.comp reference/shaders-msl/comp/defer-parens.comp
+skip shaders-msl/comp/dowhile.comp reference/shaders-msl/comp/dowhile.comp
+skip shaders-msl/comp/functions.comp reference/shaders-msl/comp/functions.comp
+skip shaders-msl/comp/global-invocation-id-writable-ssbo-in-function.comp reference/shaders-msl/comp/global-invocation-id-writable-ssbo-in-function.comp
+skip shaders-msl/comp/global-invocation-id.comp reference/shaders-msl/comp/global-invocation-id.comp
+skip shaders-msl/comp/image-cube-array-load-store.comp reference/shaders-msl/comp/image-cube-array-load-store.comp
+skip shaders-msl/comp/image.comp reference/shaders-msl/comp/image.comp
+skip shaders-msl/comp/insert.comp reference/shaders-msl/comp/insert.comp
+skip shaders-msl/comp/inverse.comp reference/shaders-msl/comp/inverse.comp
+skip shaders-msl/comp/local-invocation-id.comp reference/shaders-msl/comp/local-invocation-id.comp
+skip shaders-msl/comp/local-invocation-index.comp reference/shaders-msl/comp/local-invocation-index.comp
+skip shaders-msl/comp/mat3.comp reference/shaders-msl/comp/mat3.comp
+skip shaders-msl/comp/mod.comp reference/shaders-msl/comp/mod.comp
+skip shaders-msl/comp/modf.comp reference/shaders-msl/comp/modf.comp
+skip shaders-msl/comp/packing-test-1.comp reference/shaders-msl/comp/packing-test-1.comp
+skip shaders-msl/comp/packing-test-2.comp reference/shaders-msl/comp/packing-test-2.comp
+skip shaders-msl/comp/read-write-only.comp reference/shaders-msl/comp/read-write-only.comp
+skip shaders-msl/comp/rmw-matrix.comp reference/shaders-msl/comp/rmw-matrix.comp
+skip shaders-msl/comp/rmw-opt.comp reference/shaders-msl/comp/rmw-opt.comp
+skip shaders-msl/comp/shared-array-of-arrays.comp reference/shaders-msl/comp/shared-array-of-arrays.comp
+skip shaders-msl/comp/shared.comp reference/shaders-msl/comp/shared.comp
+skip shaders-msl/comp/spec-constant-op-member-array.comp reference/shaders-msl/comp/spec-constant-op-member-array.comp
+skip shaders-msl/comp/spec-constant-work-group-size.comp reference/shaders-msl/comp/spec-constant-work-group-size.comp
+skip shaders-msl/comp/struct-layout.comp reference/shaders-msl/comp/struct-layout.comp
+skip shaders-msl/comp/struct-nested.comp reference/shaders-msl/comp/struct-nested.comp
+skip shaders-msl/comp/struct-packing.comp reference/shaders-msl/comp/struct-packing.comp
+skip shaders-msl/comp/torture-loop.comp reference/shaders-msl/comp/torture-loop.comp
+skip shaders-msl/comp/type-alias.comp reference/shaders-msl/comp/type-alias.comp
+skip shaders-msl/comp/udiv.comp reference/shaders-msl/comp/udiv.comp
+skip shaders-msl/comp/writable-ssbo.comp reference/shaders-msl/comp/writable-ssbo.comp
+skip shaders-msl/desktop-only/comp/extended-arithmetic.desktop.comp reference/shaders-msl/desktop-only/comp/extended-arithmetic.desktop.comp
+skip shaders-msl/desktop-only/frag/image-ms.desktop.frag reference/shaders-msl/desktop-only/frag/image-ms.desktop.frag
+skip shaders-msl/desktop-only/frag/query-levels.desktop.frag reference/shaders-msl/desktop-only/frag/query-levels.desktop.frag
+skip shaders-msl/desktop-only/frag/sampler-ms-query.desktop.frag reference/shaders-msl/desktop-only/frag/sampler-ms-query.desktop.frag
+skip shaders-msl/desktop-only/vert/basic.desktop.sso.vert reference/shaders-msl/desktop-only/vert/basic.desktop.sso.vert
+skip shaders-msl/desktop-only/vert/clip-cull-distance.desktop.vert reference/shaders-msl/desktop-only/vert/clip-cull-distance.desktop.vert
+skip shaders-msl/desktop-only/vert/shader-draw-parameters.desktop.vert reference/shaders-msl/desktop-only/vert/shader-draw-parameters.desktop.vert
+skip shaders-msl/flatten/basic.flatten.vert reference/shaders-msl/flatten/basic.flatten.vert
+skip shaders-msl/flatten/multiindex.flatten.vert reference/shaders-msl/flatten/multiindex.flatten.vert
+skip shaders-msl/flatten/push-constant.flatten.vert reference/shaders-msl/flatten/push-constant.flatten.vert
+skip shaders-msl/flatten/rowmajor.flatten.vert reference/shaders-msl/flatten/rowmajor.flatten.vert
+skip shaders-msl/flatten/struct.flatten.vert reference/shaders-msl/flatten/struct.flatten.vert
+skip shaders-msl/flatten/swizzle.flatten.vert reference/shaders-msl/flatten/swizzle.flatten.vert
+skip shaders-msl/flatten/types.flatten.frag reference/shaders-msl/flatten/types.flatten.frag
+skip shaders-msl/frag/16bit-constants.frag reference/shaders-msl/frag/16bit-constants.frag
+skip shaders-msl/frag/array-lut-no-loop-variable.frag reference/shaders-msl/frag/array-lut-no-loop-variable.frag
+skip shaders-msl/frag/basic.frag reference/shaders-msl/frag/basic.frag
+skip shaders-msl/frag/binary-func-unpack-pack-arguments.frag reference/shaders-msl/frag/binary-func-unpack-pack-arguments.frag
+skip shaders-msl/frag/binary-unpack-pack-arguments.frag reference/shaders-msl/frag/binary-unpack-pack-arguments.frag
+skip shaders-msl/frag/bitcasting.frag reference/shaders-msl/frag/bitcasting.frag
+skip shaders-msl/frag/buffer-read.frag reference/shaders-msl/frag/buffer-read.frag
+skip shaders-msl/frag/builtins.frag reference/shaders-msl/frag/builtins.frag
+skip shaders-msl/frag/complex-expression-in-access-chain.frag reference/shaders-msl/frag/complex-expression-in-access-chain.frag
+skip shaders-msl/frag/composite-extract-forced-temporary.frag reference/shaders-msl/frag/composite-extract-forced-temporary.frag
+skip shaders-msl/frag/constant-array.frag reference/shaders-msl/frag/constant-array.frag
+skip shaders-msl/frag/constant-composites.frag reference/shaders-msl/frag/constant-composites.frag
+skip shaders-msl/frag/control-dependent-in-branch.desktop.frag reference/shaders-msl/frag/control-dependent-in-branch.desktop.frag
+skip shaders-msl/frag/depth-greater-than.frag reference/shaders-msl/frag/depth-greater-than.frag
+skip shaders-msl/frag/depth-less-than.frag reference/shaders-msl/frag/depth-less-than.frag
+skip shaders-msl/frag/dual-source-blending.frag reference/shaders-msl/frag/dual-source-blending.frag
+skip shaders-msl/frag/early-fragment-tests.frag reference/shaders-msl/frag/early-fragment-tests.frag
+skip shaders-msl/frag/false-loop-init.frag reference/shaders-msl/frag/false-loop-init.frag
+skip shaders-msl/frag/flush_params.frag reference/shaders-msl/frag/flush_params.frag
+skip shaders-msl/frag/for-loop-init.frag reference/shaders-msl/frag/for-loop-init.frag
+skip shaders-msl/frag/fp16-packing.frag reference/shaders-msl/frag/fp16-packing.frag
+skip shaders-msl/frag/fp16.desktop.invalid.frag reference/shaders-msl/frag/fp16.desktop.invalid.frag
+skip shaders-msl/frag/front-facing.frag reference/shaders-msl/frag/front-facing.frag
+skip shaders-msl/frag/gather-dref.frag reference/shaders-msl/frag/gather-dref.frag
+skip shaders-msl/frag/gather-offset.frag reference/shaders-msl/frag/gather-offset.frag
+skip shaders-msl/frag/helper-invocation.msl21.frag reference/shaders-msl/frag/helper-invocation.msl21.frag
+skip shaders-msl/frag/illegal-name-test-0.frag reference/shaders-msl/frag/illegal-name-test-0.frag
+skip shaders-msl/frag/in_block.frag reference/shaders-msl/frag/in_block.frag
+skip shaders-msl/frag/in_mat.frag reference/shaders-msl/frag/in_mat.frag
+skip shaders-msl/frag/input-attachment-ms.frag reference/shaders-msl/frag/input-attachment-ms.frag
+skip shaders-msl/frag/input-attachment.frag reference/shaders-msl/frag/input-attachment.frag
+skip shaders-msl/frag/interpolation-qualifiers-block.frag reference/shaders-msl/frag/interpolation-qualifiers-block.frag
+skip shaders-msl/frag/interpolation-qualifiers.frag reference/shaders-msl/frag/interpolation-qualifiers.frag
+skip shaders-msl/frag/lut-promotion.frag reference/shaders-msl/frag/lut-promotion.frag
+skip shaders-msl/frag/mix.frag reference/shaders-msl/frag/mix.frag
+skip shaders-msl/frag/mrt-array.frag reference/shaders-msl/frag/mrt-array.frag
+skip shaders-msl/frag/packed-expression-vector-shuffle.frag reference/shaders-msl/frag/packed-expression-vector-shuffle.frag
+skip shaders-msl/frag/packing-test-3.frag reference/shaders-msl/frag/packing-test-3.frag
+skip shaders-msl/frag/pls.frag reference/shaders-msl/frag/pls.frag
+skip shaders-msl/frag/readonly-ssbo.frag reference/shaders-msl/frag/readonly-ssbo.frag
+skip shaders-msl/frag/sample-depth-separate-image-sampler.frag reference/shaders-msl/frag/sample-depth-separate-image-sampler.frag
+skip shaders-msl/frag/sample-mask.frag reference/shaders-msl/frag/sample-mask.frag
+skip shaders-msl/frag/sample-position-func.frag reference/shaders-msl/frag/sample-position-func.frag
+skip shaders-msl/frag/sample-position.frag reference/shaders-msl/frag/sample-position.frag
+skip shaders-msl/frag/sampler-1d-lod.frag reference/shaders-msl/frag/sampler-1d-lod.frag
+skip shaders-msl/frag/sampler-compare-cascade-gradient.frag reference/shaders-msl/frag/sampler-compare-cascade-gradient.frag
+skip shaders-msl/frag/sampler-compare-cascade-gradient.ios.frag reference/shaders-msl/frag/sampler-compare-cascade-gradient.ios.frag
+skip shaders-msl/frag/sampler-image-arrays.msl2.frag reference/shaders-msl/frag/sampler-image-arrays.msl2.frag
+skip shaders-msl/frag/sampler-ms.frag reference/shaders-msl/frag/sampler-ms.frag
+skip shaders-msl/frag/sampler.frag reference/shaders-msl/frag/sampler.frag
+skip shaders-msl/frag/separate-image-sampler-argument.frag reference/shaders-msl/frag/separate-image-sampler-argument.frag
+skip shaders-msl/frag/shadow-compare-global-alias.invalid.frag reference/shaders-msl/frag/shadow-compare-global-alias.invalid.frag
+skip shaders-msl/frag/spec-constant-block-size.frag reference/shaders-msl/frag/spec-constant-block-size.frag
+skip shaders-msl/frag/spec-constant-ternary.frag reference/shaders-msl/frag/spec-constant-ternary.frag
+skip shaders-msl/frag/switch-unsigned-case.frag reference/shaders-msl/frag/switch-unsigned-case.frag
+skip shaders-msl/frag/swizzle.frag reference/shaders-msl/frag/swizzle.frag
+skip shaders-msl/frag/texel-fetch-offset.frag reference/shaders-msl/frag/texel-fetch-offset.frag
+skip shaders-msl/frag/texture-multisample-array.msl21.frag reference/shaders-msl/frag/texture-multisample-array.msl21.frag
+skip shaders-msl/frag/texture-proj-shadow.frag reference/shaders-msl/frag/texture-proj-shadow.frag
+skip shaders-msl/frag/ubo_layout.frag reference/shaders-msl/frag/ubo_layout.frag
+skip shaders-msl/frag/unary-enclose.frag reference/shaders-msl/frag/unary-enclose.frag
+skip shaders-msl/frag/write-depth-in-function.frag reference/shaders-msl/frag/write-depth-in-function.frag
+skip shaders-msl/legacy/vert/transpose.legacy.vert reference/shaders-msl/legacy/vert/transpose.legacy.vert
+skip shaders-msl/vert/basic.vert reference/shaders-msl/vert/basic.vert
+skip shaders-msl/vert/copy.flatten.vert reference/shaders-msl/vert/copy.flatten.vert
+skip shaders-msl/vert/dynamic.flatten.vert reference/shaders-msl/vert/dynamic.flatten.vert
+skip shaders-msl/vert/functions.vert reference/shaders-msl/vert/functions.vert
+skip shaders-msl/vert/in_out_array_mat.vert reference/shaders-msl/vert/in_out_array_mat.vert
+skip shaders-msl/vert/interpolation-qualifiers-block.vert reference/shaders-msl/vert/interpolation-qualifiers-block.vert
+skip shaders-msl/vert/interpolation-qualifiers.vert reference/shaders-msl/vert/interpolation-qualifiers.vert
+skip shaders-msl/vert/layer.msl11.invalid.vert reference/shaders-msl/vert/layer.msl11.invalid.vert
+skip shaders-msl/vert/no_stage_out.vert reference/shaders-msl/vert/no_stage_out.vert
+skip shaders-msl/vert/no_stage_out.write_buff.vert reference/shaders-msl/vert/no_stage_out.write_buff.vert
+skip shaders-msl/vert/no_stage_out.write_buff_atomic.vert reference/shaders-msl/vert/no_stage_out.write_buff_atomic.vert
+skip shaders-msl/vert/no_stage_out.write_tex.vert reference/shaders-msl/vert/no_stage_out.write_tex.vert
+skip shaders-msl/vert/out_block.vert reference/shaders-msl/vert/out_block.vert
+skip shaders-msl/vert/packed_matrix.vert reference/shaders-msl/vert/packed_matrix.vert
+skip shaders-msl/vert/pointsize.vert reference/shaders-msl/vert/pointsize.vert
+skip shaders-msl/vert/read-from-row-major-array.vert reference/shaders-msl/vert/read-from-row-major-array.vert
+skip shaders-msl/vert/resource-arrays-leaf.ios.vert reference/shaders-msl/vert/resource-arrays-leaf.ios.vert
+skip shaders-msl/vert/resource-arrays.ios.vert reference/shaders-msl/vert/resource-arrays.ios.vert
+skip shaders-msl/vert/return-array.vert reference/shaders-msl/vert/return-array.vert
+skip shaders-msl/vert/set_builtin_in_func.vert reference/shaders-msl/vert/set_builtin_in_func.vert
+skip shaders-msl/vert/sign-int-types.vert reference/shaders-msl/vert/sign-int-types.vert
+skip shaders-msl/vert/texture_buffer.vert reference/shaders-msl/vert/texture_buffer.vert
+skip shaders-msl/vert/ubo.alignment.vert reference/shaders-msl/vert/ubo.alignment.vert
+skip shaders-msl/vert/ubo.vert reference/shaders-msl/vert/ubo.vert
+skip shaders-msl/vert/viewport-index.msl2.invalid.vert reference/shaders-msl/vert/viewport-index.msl2.invalid.vert
+skip shaders-msl/vulkan/frag/push-constant.vk.frag reference/shaders-msl/vulkan/frag/push-constant.vk.frag
+skip shaders-msl/vulkan/frag/spec-constant.msl11.vk.frag reference/shaders-msl/vulkan/frag/spec-constant.msl11.vk.frag
+skip shaders-msl/vulkan/frag/spec-constant.vk.frag reference/shaders-msl/vulkan/frag/spec-constant.vk.frag
+skip shaders-msl/vulkan/vert/small-storage.vk.vert reference/shaders-msl/vulkan/vert/small-storage.vk.vert
+skip shaders-msl/vulkan/vert/vulkan-vertex.vk.vert reference/shaders-msl/vulkan/vert/vulkan-vertex.vk.vert
+skip shaders-msl-no-opt/asm/frag/inliner-dominator-inside-loop.asm.frag reference/shaders-msl-no-opt/asm/frag/inliner-dominator-inside-loop.asm.frag
+skip shaders-msl-no-opt/asm/frag/texture-access.swizzle.asm.frag reference/shaders-msl-no-opt/asm/frag/texture-access.swizzle.asm.frag
+skip shaders-msl-no-opt/asm/vert/empty-struct-composite.asm.vert reference/shaders-msl-no-opt/asm/vert/empty-struct-composite.asm.vert
+skip shaders-msl-no-opt/comp/bitfield.comp reference/shaders-msl-no-opt/comp/bitfield.comp
+skip shaders-msl-no-opt/comp/loop.comp reference/shaders-msl-no-opt/comp/loop.comp
+skip shaders-msl-no-opt/comp/return.comp reference/shaders-msl-no-opt/comp/return.comp
+skip shaders-msl-no-opt/frag/in_block_assign.frag reference/shaders-msl-no-opt/frag/in_block_assign.frag
+skip shaders-msl-no-opt/frag/texture-access-int.swizzle.frag reference/shaders-msl-no-opt/frag/texture-access-int.swizzle.frag
+skip shaders-msl-no-opt/frag/texture-access-leaf.swizzle.frag reference/shaders-msl-no-opt/frag/texture-access-leaf.swizzle.frag
+skip shaders-msl-no-opt/frag/texture-access-uint.swizzle.frag reference/shaders-msl-no-opt/frag/texture-access-uint.swizzle.frag
+skip shaders-msl-no-opt/frag/texture-access.swizzle.frag reference/shaders-msl-no-opt/frag/texture-access.swizzle.frag
+skip shaders-msl-no-opt/vert/functions_nested.vert reference/shaders-msl-no-opt/vert/functions_nested.vert
+skip shaders-hlsl/asm/comp/access-chain-invalidate.asm.comp reference/shaders-hlsl/asm/comp/access-chain-invalidate.asm.comp
+skip shaders-hlsl/asm/comp/atomic-decrement.asm.comp reference/shaders-hlsl/asm/comp/atomic-decrement.asm.comp
+skip shaders-hlsl/asm/comp/atomic-increment.asm.comp reference/shaders-hlsl/asm/comp/atomic-increment.asm.comp
+skip shaders-hlsl/asm/comp/block-name-alias-global.asm.comp reference/shaders-hlsl/asm/comp/block-name-alias-global.asm.comp
+skip shaders-hlsl/asm/comp/control-flow-hints.asm.comp reference/shaders-hlsl/asm/comp/control-flow-hints.asm.comp
+skip shaders-hlsl/asm/comp/global-parameter-name-alias.asm.comp reference/shaders-hlsl/asm/comp/global-parameter-name-alias.asm.comp
+skip shaders-hlsl/asm/comp/storage-buffer-basic.invalid.nofxc.asm.comp reference/shaders-hlsl/asm/comp/storage-buffer-basic.invalid.nofxc.asm.comp
+skip shaders-hlsl/asm/frag/cbuffer-stripped.asm.frag reference/shaders-hlsl/asm/frag/cbuffer-stripped.asm.frag
+skip shaders-hlsl/asm/frag/combined-sampler-reuse.asm.frag reference/shaders-hlsl/asm/frag/combined-sampler-reuse.asm.frag
+skip shaders-hlsl/asm/frag/empty-struct.asm.frag reference/shaders-hlsl/asm/frag/empty-struct.asm.frag
+skip shaders-hlsl/asm/frag/frem.asm.frag reference/shaders-hlsl/asm/frag/frem.asm.frag
+skip shaders-hlsl/asm/frag/function-overload-alias.asm.frag reference/shaders-hlsl/asm/frag/function-overload-alias.asm.frag
+skip shaders-hlsl/asm/frag/image-extract-reuse.asm.frag reference/shaders-hlsl/asm/frag/image-extract-reuse.asm.frag
+skip shaders-hlsl/asm/frag/implicit-read-dep-phi.asm.frag reference/shaders-hlsl/asm/frag/implicit-read-dep-phi.asm.frag
+skip shaders-hlsl/asm/frag/inf-nan-constant.asm.frag reference/shaders-hlsl/asm/frag/inf-nan-constant.asm.frag
+skip shaders-hlsl/asm/frag/lut-promotion-initializer.asm.frag reference/shaders-hlsl/asm/frag/lut-promotion-initializer.asm.frag
+skip shaders-hlsl/asm/frag/pass-by-value.asm.frag reference/shaders-hlsl/asm/frag/pass-by-value.asm.frag
+skip shaders-hlsl/asm/frag/srem.asm.frag reference/shaders-hlsl/asm/frag/srem.asm.frag
+skip shaders-hlsl/asm/frag/texel-fetch-no-lod.asm.frag reference/shaders-hlsl/asm/frag/texel-fetch-no-lod.asm.frag
+skip shaders-hlsl/asm/frag/unknown-depth-state.asm.frag reference/shaders-hlsl/asm/frag/unknown-depth-state.asm.frag
+skip shaders-hlsl/asm/frag/unreachable.asm.frag reference/shaders-hlsl/asm/frag/unreachable.asm.frag
+skip shaders-hlsl/asm/vert/spec-constant-op-composite.asm.vert reference/shaders-hlsl/asm/vert/spec-constant-op-composite.asm.vert
+skip shaders-hlsl/asm/vert/uint-vertex-id-instance-id.asm.vert reference/shaders-hlsl/asm/vert/uint-vertex-id-instance-id.asm.vert
+skip shaders-hlsl/asm/vert/vertex-id-instance-id.asm.vert reference/shaders-hlsl/asm/vert/vertex-id-instance-id.asm.vert
+skip shaders-hlsl/comp/access-chains.comp reference/shaders-hlsl/comp/access-chains.comp
+skip shaders-hlsl/comp/address-buffers.comp reference/shaders-hlsl/comp/address-buffers.comp
+skip shaders-hlsl/comp/atomic.comp reference/shaders-hlsl/comp/atomic.comp
+skip shaders-hlsl/comp/barriers.comp reference/shaders-hlsl/comp/barriers.comp
+skip shaders-hlsl/comp/builtins.comp reference/shaders-hlsl/comp/builtins.comp
+skip shaders-hlsl/comp/composite-array-initialization.comp reference/shaders-hlsl/comp/composite-array-initialization.comp
+skip shaders-hlsl/comp/globallycoherent.comp reference/shaders-hlsl/comp/globallycoherent.comp
+skip shaders-hlsl/comp/image.comp reference/shaders-hlsl/comp/image.comp
+skip shaders-hlsl/comp/inverse.comp reference/shaders-hlsl/comp/inverse.comp
+skip shaders-hlsl/comp/num-workgroups-alone.comp reference/shaders-hlsl/comp/num-workgroups-alone.comp
+skip shaders-hlsl/comp/num-workgroups-with-builtins.comp reference/shaders-hlsl/comp/num-workgroups-with-builtins.comp
+skip shaders-hlsl/comp/rmw-matrix.comp reference/shaders-hlsl/comp/rmw-matrix.comp
+skip shaders-hlsl/comp/rwbuffer-matrix.comp reference/shaders-hlsl/comp/rwbuffer-matrix.comp
+skip shaders-hlsl/comp/shared.comp reference/shaders-hlsl/comp/shared.comp
+skip shaders-hlsl/comp/spec-constant-op-member-array.comp reference/shaders-hlsl/comp/spec-constant-op-member-array.comp
+skip shaders-hlsl/comp/spec-constant-work-group-size.comp reference/shaders-hlsl/comp/spec-constant-work-group-size.comp
+skip shaders-hlsl/comp/ssbo-array.comp reference/shaders-hlsl/comp/ssbo-array.comp
+skip shaders-hlsl/comp/subgroups.invalid.nofxc.sm60.comp reference/shaders-hlsl/comp/subgroups.invalid.nofxc.sm60.comp
+skip shaders-hlsl/frag/array-lut-no-loop-variable.frag reference/shaders-hlsl/frag/array-lut-no-loop-variable.frag
+skip shaders-hlsl/frag/basic-color-3comp.sm30.frag reference/shaders-hlsl/frag/basic-color-3comp.sm30.frag
+skip shaders-hlsl/frag/basic-color-3comp.sm50.frag reference/shaders-hlsl/frag/basic-color-3comp.sm50.frag
+skip shaders-hlsl/frag/basic.frag reference/shaders-hlsl/frag/basic.frag
+skip shaders-hlsl/frag/bit-conversions.frag reference/shaders-hlsl/frag/bit-conversions.frag
+skip shaders-hlsl/frag/boolean-mix.frag reference/shaders-hlsl/frag/boolean-mix.frag
+skip shaders-hlsl/frag/builtins.frag reference/shaders-hlsl/frag/builtins.frag
+skip shaders-hlsl/frag/bvec-operations.frag reference/shaders-hlsl/frag/bvec-operations.frag
+skip shaders-hlsl/frag/clip-cull-distance.frag reference/shaders-hlsl/frag/clip-cull-distance.frag
+skip shaders-hlsl/frag/combined-texture-sampler-parameter.frag reference/shaders-hlsl/frag/combined-texture-sampler-parameter.frag
+skip shaders-hlsl/frag/combined-texture-sampler-shadow.frag reference/shaders-hlsl/frag/combined-texture-sampler-shadow.frag
+skip shaders-hlsl/frag/complex-expression-in-access-chain.frag reference/shaders-hlsl/frag/complex-expression-in-access-chain.frag
+skip shaders-hlsl/frag/constant-buffer-array.invalid.sm51.frag reference/shaders-hlsl/frag/constant-buffer-array.invalid.sm51.frag
+skip shaders-hlsl/frag/constant-composites.frag reference/shaders-hlsl/frag/constant-composites.frag
+skip shaders-hlsl/frag/control-dependent-in-branch.desktop.frag reference/shaders-hlsl/frag/control-dependent-in-branch.desktop.frag
+skip shaders-hlsl/frag/depth-greater-than.frag reference/shaders-hlsl/frag/depth-greater-than.frag
+skip shaders-hlsl/frag/depth-less-than.frag reference/shaders-hlsl/frag/depth-less-than.frag
+skip shaders-hlsl/frag/early-fragment-test.frag reference/shaders-hlsl/frag/early-fragment-test.frag
+skip shaders-hlsl/frag/fp16-packing.frag reference/shaders-hlsl/frag/fp16-packing.frag
+skip shaders-hlsl/frag/fp16.invalid.desktop.frag reference/shaders-hlsl/frag/fp16.invalid.desktop.frag
+skip shaders-hlsl/frag/front-facing.frag reference/shaders-hlsl/frag/front-facing.frag
+skip shaders-hlsl/frag/image-query-selective.frag reference/shaders-hlsl/frag/image-query-selective.frag
+skip shaders-hlsl/frag/image-query.frag reference/shaders-hlsl/frag/image-query.frag
+skip shaders-hlsl/frag/input-attachment-ms.frag reference/shaders-hlsl/frag/input-attachment-ms.frag
+skip shaders-hlsl/frag/input-attachment.frag reference/shaders-hlsl/frag/input-attachment.frag
+skip shaders-hlsl/frag/io-block.frag reference/shaders-hlsl/frag/io-block.frag
+skip shaders-hlsl/frag/lut-promotion.frag reference/shaders-hlsl/frag/lut-promotion.frag
+skip shaders-hlsl/frag/matrix-input.frag reference/shaders-hlsl/frag/matrix-input.frag
+skip shaders-hlsl/frag/mod.frag reference/shaders-hlsl/frag/mod.frag
+skip shaders-hlsl/frag/mrt.frag reference/shaders-hlsl/frag/mrt.frag
+skip shaders-hlsl/frag/no-return.frag reference/shaders-hlsl/frag/no-return.frag
+skip shaders-hlsl/frag/no-return2.frag reference/shaders-hlsl/frag/no-return2.frag
+skip shaders-hlsl/frag/partial-write-preserve.frag reference/shaders-hlsl/frag/partial-write-preserve.frag
+skip shaders-hlsl/frag/point-coord-compat.frag reference/shaders-hlsl/frag/point-coord-compat.frag
+skip shaders-hlsl/frag/query-lod.desktop.frag reference/shaders-hlsl/frag/query-lod.desktop.frag
+skip shaders-hlsl/frag/resources.frag reference/shaders-hlsl/frag/resources.frag
+skip shaders-hlsl/frag/row-major-layout-in-struct.frag reference/shaders-hlsl/frag/row-major-layout-in-struct.frag
+skip shaders-hlsl/frag/sample-cmp-level-zero.frag reference/shaders-hlsl/frag/sample-cmp-level-zero.frag
+skip shaders-hlsl/frag/sampler-array.frag reference/shaders-hlsl/frag/sampler-array.frag
+skip shaders-hlsl/frag/sampler-image-arrays.frag reference/shaders-hlsl/frag/sampler-image-arrays.frag
+skip shaders-hlsl/frag/separate-combined-fake-overload.sm30.frag reference/shaders-hlsl/frag/separate-combined-fake-overload.sm30.frag
+skip shaders-hlsl/frag/spec-constant-block-size.frag reference/shaders-hlsl/frag/spec-constant-block-size.frag
+skip shaders-hlsl/frag/spec-constant-ternary.frag reference/shaders-hlsl/frag/spec-constant-ternary.frag
+skip shaders-hlsl/frag/switch-unsigned-case.frag reference/shaders-hlsl/frag/switch-unsigned-case.frag
+skip shaders-hlsl/frag/swizzle-scalar.frag reference/shaders-hlsl/frag/swizzle-scalar.frag
+skip shaders-hlsl/frag/tex-sampling-ms.frag reference/shaders-hlsl/frag/tex-sampling-ms.frag
+skip shaders-hlsl/frag/tex-sampling.frag reference/shaders-hlsl/frag/tex-sampling.frag
+skip shaders-hlsl/frag/texel-fetch-offset.frag reference/shaders-hlsl/frag/texel-fetch-offset.frag
+skip shaders-hlsl/frag/texture-proj-shadow.frag reference/shaders-hlsl/frag/texture-proj-shadow.frag
+skip shaders-hlsl/frag/texture-size-combined-image-sampler.frag reference/shaders-hlsl/frag/texture-size-combined-image-sampler.frag
+skip shaders-hlsl/frag/unary-enclose.frag reference/shaders-hlsl/frag/unary-enclose.frag
+skip shaders-hlsl/frag/unorm-snorm-packing.frag reference/shaders-hlsl/frag/unorm-snorm-packing.frag
+skip shaders-hlsl/frag/various-glsl-ops.frag reference/shaders-hlsl/frag/various-glsl-ops.frag
+skip shaders-hlsl/vert/basic.vert reference/shaders-hlsl/vert/basic.vert
+skip shaders-hlsl/vert/clip-cull-distance.vert reference/shaders-hlsl/vert/clip-cull-distance.vert
+skip shaders-hlsl/vert/instancing.vert reference/shaders-hlsl/vert/instancing.vert
+skip shaders-hlsl/vert/locations.vert reference/shaders-hlsl/vert/locations.vert
+skip shaders-hlsl/vert/matrix-attribute.vert reference/shaders-hlsl/vert/matrix-attribute.vert
+skip shaders-hlsl/vert/matrix-output.vert reference/shaders-hlsl/vert/matrix-output.vert
+skip shaders-hlsl/vert/no-input.vert reference/shaders-hlsl/vert/no-input.vert
+skip shaders-hlsl/vert/point-size-compat.vert reference/shaders-hlsl/vert/point-size-compat.vert
+skip shaders-hlsl/vert/qualifiers.vert reference/shaders-hlsl/vert/qualifiers.vert
+skip shaders-hlsl/vert/read-from-row-major-array.vert reference/shaders-hlsl/vert/read-from-row-major-array.vert
+skip shaders-hlsl/vert/return-array.vert reference/shaders-hlsl/vert/return-array.vert
+skip shaders-hlsl/vert/sampler-buffers.vert reference/shaders-hlsl/vert/sampler-buffers.vert
+skip shaders-hlsl/vert/struct-composite-decl.vert reference/shaders-hlsl/vert/struct-composite-decl.vert
+skip shaders-hlsl/vert/texture_buffer.vert reference/shaders-hlsl/vert/texture_buffer.vert
+skip shaders-hlsl/asm/comp/access-chain-invalidate.asm.comp reference/shaders-hlsl/asm/comp/access-chain-invalidate.asm.comp
+skip shaders-hlsl/asm/comp/atomic-decrement.asm.comp reference/shaders-hlsl/asm/comp/atomic-decrement.asm.comp
+skip shaders-hlsl/asm/comp/atomic-increment.asm.comp reference/shaders-hlsl/asm/comp/atomic-increment.asm.comp
+skip shaders-hlsl/asm/comp/block-name-alias-global.asm.comp reference/shaders-hlsl/asm/comp/block-name-alias-global.asm.comp
+skip shaders-hlsl/asm/comp/control-flow-hints.asm.comp reference/shaders-hlsl/asm/comp/control-flow-hints.asm.comp
+skip shaders-hlsl/asm/comp/global-parameter-name-alias.asm.comp reference/shaders-hlsl/asm/comp/global-parameter-name-alias.asm.comp
+skip shaders-hlsl/asm/comp/storage-buffer-basic.invalid.nofxc.asm.comp reference/shaders-hlsl/asm/comp/storage-buffer-basic.invalid.nofxc.asm.comp
+skip shaders-hlsl/asm/frag/cbuffer-stripped.asm.frag reference/shaders-hlsl/asm/frag/cbuffer-stripped.asm.frag
+skip shaders-hlsl/asm/frag/combined-sampler-reuse.asm.frag reference/shaders-hlsl/asm/frag/combined-sampler-reuse.asm.frag
+skip shaders-hlsl/asm/frag/empty-struct.asm.frag reference/shaders-hlsl/asm/frag/empty-struct.asm.frag
+skip shaders-hlsl/asm/frag/frem.asm.frag reference/shaders-hlsl/asm/frag/frem.asm.frag
+skip shaders-hlsl/asm/frag/function-overload-alias.asm.frag reference/shaders-hlsl/asm/frag/function-overload-alias.asm.frag
+skip shaders-hlsl/asm/frag/image-extract-reuse.asm.frag reference/shaders-hlsl/asm/frag/image-extract-reuse.asm.frag
+skip shaders-hlsl/asm/frag/implicit-read-dep-phi.asm.frag reference/shaders-hlsl/asm/frag/implicit-read-dep-phi.asm.frag
+skip shaders-hlsl/asm/frag/inf-nan-constant.asm.frag reference/shaders-hlsl/asm/frag/inf-nan-constant.asm.frag
+skip shaders-hlsl/asm/frag/lut-promotion-initializer.asm.frag reference/shaders-hlsl/asm/frag/lut-promotion-initializer.asm.frag
+skip shaders-hlsl/asm/frag/pass-by-value.asm.frag reference/shaders-hlsl/asm/frag/pass-by-value.asm.frag
+skip shaders-hlsl/asm/frag/srem.asm.frag reference/shaders-hlsl/asm/frag/srem.asm.frag
+skip shaders-hlsl/asm/frag/texel-fetch-no-lod.asm.frag reference/shaders-hlsl/asm/frag/texel-fetch-no-lod.asm.frag
+skip shaders-hlsl/asm/frag/unknown-depth-state.asm.frag reference/shaders-hlsl/asm/frag/unknown-depth-state.asm.frag
+skip shaders-hlsl/asm/frag/unreachable.asm.frag reference/shaders-hlsl/asm/frag/unreachable.asm.frag
+skip shaders-hlsl/asm/vert/spec-constant-op-composite.asm.vert reference/shaders-hlsl/asm/vert/spec-constant-op-composite.asm.vert
+skip shaders-hlsl/asm/vert/uint-vertex-id-instance-id.asm.vert reference/shaders-hlsl/asm/vert/uint-vertex-id-instance-id.asm.vert
+skip shaders-hlsl/asm/vert/vertex-id-instance-id.asm.vert reference/shaders-hlsl/asm/vert/vertex-id-instance-id.asm.vert
+skip shaders-hlsl/comp/access-chains.comp reference/shaders-hlsl/comp/access-chains.comp
+skip shaders-hlsl/comp/address-buffers.comp reference/shaders-hlsl/comp/address-buffers.comp
+skip shaders-hlsl/comp/atomic.comp reference/shaders-hlsl/comp/atomic.comp
+skip shaders-hlsl/comp/barriers.comp reference/shaders-hlsl/comp/barriers.comp
+skip shaders-hlsl/comp/builtins.comp reference/shaders-hlsl/comp/builtins.comp
+skip shaders-hlsl/comp/composite-array-initialization.comp reference/shaders-hlsl/comp/composite-array-initialization.comp
+skip shaders-hlsl/comp/globallycoherent.comp reference/shaders-hlsl/comp/globallycoherent.comp
+skip shaders-hlsl/comp/image.comp reference/shaders-hlsl/comp/image.comp
+skip shaders-hlsl/comp/inverse.comp reference/shaders-hlsl/comp/inverse.comp
+skip shaders-hlsl/comp/num-workgroups-alone.comp reference/shaders-hlsl/comp/num-workgroups-alone.comp
+skip shaders-hlsl/comp/num-workgroups-with-builtins.comp reference/shaders-hlsl/comp/num-workgroups-with-builtins.comp
+skip shaders-hlsl/comp/rmw-matrix.comp reference/shaders-hlsl/comp/rmw-matrix.comp
+skip shaders-hlsl/comp/rwbuffer-matrix.comp reference/shaders-hlsl/comp/rwbuffer-matrix.comp
+skip shaders-hlsl/comp/shared.comp reference/shaders-hlsl/comp/shared.comp
+skip shaders-hlsl/comp/spec-constant-op-member-array.comp reference/shaders-hlsl/comp/spec-constant-op-member-array.comp
+skip shaders-hlsl/comp/spec-constant-work-group-size.comp reference/shaders-hlsl/comp/spec-constant-work-group-size.comp
+skip shaders-hlsl/comp/ssbo-array.comp reference/shaders-hlsl/comp/ssbo-array.comp
+skip shaders-hlsl/comp/subgroups.invalid.nofxc.sm60.comp reference/shaders-hlsl/comp/subgroups.invalid.nofxc.sm60.comp
+skip shaders-hlsl/frag/array-lut-no-loop-variable.frag reference/shaders-hlsl/frag/array-lut-no-loop-variable.frag
+skip shaders-hlsl/frag/basic-color-3comp.sm30.frag reference/shaders-hlsl/frag/basic-color-3comp.sm30.frag
+skip shaders-hlsl/frag/basic-color-3comp.sm50.frag reference/shaders-hlsl/frag/basic-color-3comp.sm50.frag
+skip shaders-hlsl/frag/basic.frag reference/shaders-hlsl/frag/basic.frag
+skip shaders-hlsl/frag/bit-conversions.frag reference/shaders-hlsl/frag/bit-conversions.frag
+skip shaders-hlsl/frag/boolean-mix.frag reference/shaders-hlsl/frag/boolean-mix.frag
+skip shaders-hlsl/frag/builtins.frag reference/shaders-hlsl/frag/builtins.frag
+skip shaders-hlsl/frag/bvec-operations.frag reference/shaders-hlsl/frag/bvec-operations.frag
+skip shaders-hlsl/frag/clip-cull-distance.frag reference/shaders-hlsl/frag/clip-cull-distance.frag
+skip shaders-hlsl/frag/combined-texture-sampler-parameter.frag reference/shaders-hlsl/frag/combined-texture-sampler-parameter.frag
+skip shaders-hlsl/frag/combined-texture-sampler-shadow.frag reference/shaders-hlsl/frag/combined-texture-sampler-shadow.frag
+skip shaders-hlsl/frag/complex-expression-in-access-chain.frag reference/shaders-hlsl/frag/complex-expression-in-access-chain.frag
+skip shaders-hlsl/frag/constant-buffer-array.invalid.sm51.frag reference/shaders-hlsl/frag/constant-buffer-array.invalid.sm51.frag
+skip shaders-hlsl/frag/constant-composites.frag reference/shaders-hlsl/frag/constant-composites.frag
+skip shaders-hlsl/frag/control-dependent-in-branch.desktop.frag reference/shaders-hlsl/frag/control-dependent-in-branch.desktop.frag
+skip shaders-hlsl/frag/depth-greater-than.frag reference/shaders-hlsl/frag/depth-greater-than.frag
+skip shaders-hlsl/frag/depth-less-than.frag reference/shaders-hlsl/frag/depth-less-than.frag
+skip shaders-hlsl/frag/early-fragment-test.frag reference/shaders-hlsl/frag/early-fragment-test.frag
+skip shaders-hlsl/frag/fp16-packing.frag reference/shaders-hlsl/frag/fp16-packing.frag
+skip shaders-hlsl/frag/fp16.invalid.desktop.frag reference/shaders-hlsl/frag/fp16.invalid.desktop.frag
+skip shaders-hlsl/frag/front-facing.frag reference/shaders-hlsl/frag/front-facing.frag
+skip shaders-hlsl/frag/image-query-selective.frag reference/shaders-hlsl/frag/image-query-selective.frag
+skip shaders-hlsl/frag/image-query.frag reference/shaders-hlsl/frag/image-query.frag
+skip shaders-hlsl/frag/input-attachment-ms.frag reference/shaders-hlsl/frag/input-attachment-ms.frag
+skip shaders-hlsl/frag/input-attachment.frag reference/shaders-hlsl/frag/input-attachment.frag
+skip shaders-hlsl/frag/io-block.frag reference/shaders-hlsl/frag/io-block.frag
+skip shaders-hlsl/frag/lut-promotion.frag reference/shaders-hlsl/frag/lut-promotion.frag
+skip shaders-hlsl/frag/matrix-input.frag reference/shaders-hlsl/frag/matrix-input.frag
+skip shaders-hlsl/frag/mod.frag reference/shaders-hlsl/frag/mod.frag
+skip shaders-hlsl/frag/mrt.frag reference/shaders-hlsl/frag/mrt.frag
+skip shaders-hlsl/frag/no-return.frag reference/shaders-hlsl/frag/no-return.frag
+skip shaders-hlsl/frag/no-return2.frag reference/shaders-hlsl/frag/no-return2.frag
+skip shaders-hlsl/frag/partial-write-preserve.frag reference/shaders-hlsl/frag/partial-write-preserve.frag
+skip shaders-hlsl/frag/point-coord-compat.frag reference/shaders-hlsl/frag/point-coord-compat.frag
+skip shaders-hlsl/frag/query-lod.desktop.frag reference/shaders-hlsl/frag/query-lod.desktop.frag
+skip shaders-hlsl/frag/resources.frag reference/shaders-hlsl/frag/resources.frag
+skip shaders-hlsl/frag/row-major-layout-in-struct.frag reference/shaders-hlsl/frag/row-major-layout-in-struct.frag
+skip shaders-hlsl/frag/sample-cmp-level-zero.frag reference/shaders-hlsl/frag/sample-cmp-level-zero.frag
+skip shaders-hlsl/frag/sampler-array.frag reference/shaders-hlsl/frag/sampler-array.frag
+skip shaders-hlsl/frag/sampler-image-arrays.frag reference/shaders-hlsl/frag/sampler-image-arrays.frag
+skip shaders-hlsl/frag/separate-combined-fake-overload.sm30.frag reference/shaders-hlsl/frag/separate-combined-fake-overload.sm30.frag
+skip shaders-hlsl/frag/spec-constant-block-size.frag reference/shaders-hlsl/frag/spec-constant-block-size.frag
+skip shaders-hlsl/frag/spec-constant-ternary.frag reference/shaders-hlsl/frag/spec-constant-ternary.frag
+skip shaders-hlsl/frag/switch-unsigned-case.frag reference/shaders-hlsl/frag/switch-unsigned-case.frag
+skip shaders-hlsl/frag/swizzle-scalar.frag reference/shaders-hlsl/frag/swizzle-scalar.frag
+skip shaders-hlsl/frag/tex-sampling-ms.frag reference/shaders-hlsl/frag/tex-sampling-ms.frag
+skip shaders-hlsl/frag/tex-sampling.frag reference/shaders-hlsl/frag/tex-sampling.frag
+skip shaders-hlsl/frag/texel-fetch-offset.frag reference/shaders-hlsl/frag/texel-fetch-offset.frag
+skip shaders-hlsl/frag/texture-proj-shadow.frag reference/shaders-hlsl/frag/texture-proj-shadow.frag
+skip shaders-hlsl/frag/texture-size-combined-image-sampler.frag reference/shaders-hlsl/frag/texture-size-combined-image-sampler.frag
+skip shaders-hlsl/frag/unary-enclose.frag reference/shaders-hlsl/frag/unary-enclose.frag
+skip shaders-hlsl/frag/unorm-snorm-packing.frag reference/shaders-hlsl/frag/unorm-snorm-packing.frag
+skip shaders-hlsl/frag/various-glsl-ops.frag reference/shaders-hlsl/frag/various-glsl-ops.frag
+skip shaders-hlsl/vert/basic.vert reference/shaders-hlsl/vert/basic.vert
+skip shaders-hlsl/vert/clip-cull-distance.vert reference/shaders-hlsl/vert/clip-cull-distance.vert
+skip shaders-hlsl/vert/instancing.vert reference/shaders-hlsl/vert/instancing.vert
+skip shaders-hlsl/vert/locations.vert reference/shaders-hlsl/vert/locations.vert
+skip shaders-hlsl/vert/matrix-attribute.vert reference/shaders-hlsl/vert/matrix-attribute.vert
+skip shaders-hlsl/vert/matrix-output.vert reference/shaders-hlsl/vert/matrix-output.vert
+skip shaders-hlsl/vert/no-input.vert reference/shaders-hlsl/vert/no-input.vert
+skip shaders-hlsl/vert/point-size-compat.vert reference/shaders-hlsl/vert/point-size-compat.vert
+skip shaders-hlsl/vert/qualifiers.vert reference/shaders-hlsl/vert/qualifiers.vert
+skip shaders-hlsl/vert/read-from-row-major-array.vert reference/shaders-hlsl/vert/read-from-row-major-array.vert
+skip shaders-hlsl/vert/return-array.vert reference/shaders-hlsl/vert/return-array.vert
+skip shaders-hlsl/vert/sampler-buffers.vert reference/shaders-hlsl/vert/sampler-buffers.vert
+skip shaders-hlsl/vert/struct-composite-decl.vert reference/shaders-hlsl/vert/struct-composite-decl.vert
+skip shaders-hlsl/vert/texture_buffer.vert reference/shaders-hlsl/vert/texture_buffer.vert
+skip shaders-hlsl-no-opt/asm/comp/specialization-constant-workgroup.nofxc.asm.comp reference/shaders-hlsl-no-opt/asm/comp/specialization-constant-workgroup.nofxc.asm.comp
+skip shaders-hlsl-no-opt/asm/vert/empty-struct-composite.asm.vert reference/shaders-hlsl-no-opt/asm/vert/empty-struct-composite.asm.vert
+skip shaders-hlsl-no-opt/comp/bitfield.comp reference/shaders-hlsl-no-opt/comp/bitfield.comp
+skip shaders-hlsl-no-opt/frag/spec-constant.frag reference/shaders-hlsl-no-opt/frag/spec-constant.frag
+skip shaders-reflection/asm/aliased-entry-point-names.asm.multi reference/shaders-reflection/asm/aliased-entry-point-names.asm.multi
+skip shaders-reflection/comp/struct-layout.comp reference/shaders-reflection/comp/struct-layout.comp
+skip shaders-reflection/comp/struct-packing.comp reference/shaders-reflection/comp/struct-packing.comp
+skip shaders-reflection/frag/combined-texture-sampler-shadow.vk.frag reference/shaders-reflection/frag/combined-texture-sampler-shadow.vk.frag
+skip shaders-reflection/frag/combined-texture-sampler.vk.frag reference/shaders-reflection/frag/combined-texture-sampler.vk.frag
+skip shaders-reflection/frag/image-load-store-uint-coord.asm.frag reference/shaders-reflection/frag/image-load-store-uint-coord.asm.frag
+skip shaders-reflection/frag/input-attachment-ms.vk.frag reference/shaders-reflection/frag/input-attachment-ms.vk.frag
+skip shaders-reflection/frag/input-attachment.vk.frag reference/shaders-reflection/frag/input-attachment.vk.frag
+skip shaders-reflection/frag/push-constant.vk.frag reference/shaders-reflection/frag/push-constant.vk.frag
+skip shaders-reflection/frag/separate-sampler-texture-array.vk.frag reference/shaders-reflection/frag/separate-sampler-texture-array.vk.frag
+skip shaders-reflection/frag/spec-constant.vk.frag reference/shaders-reflection/frag/spec-constant.vk.frag
+skip shaders-reflection/vert/read-from-row-major-array.vert reference/shaders-reflection/vert/read-from-row-major-array.vert
+skip shaders-reflection/vert/texture_buffer.vert reference/shaders-reflection/vert/texture_buffer.vert
