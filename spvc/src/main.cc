@@ -46,7 +46,7 @@ Options:
 )";
 }
 
-// TODO factor out
+// TODO(fjhenigman): factor out
 // Gets the option argument for the option at *index in argv in a way consistent
 // with clang/gcc. On success, returns true and writes the parsed argument into
 // *option_argument. Returns false if any errors occur. After calling this
@@ -60,19 +60,20 @@ bool GetOptionArgument(int argc, char** argv, int* index,
   if (arg.size() != option.size()) {
     *option_argument = arg.substr(option.size());
     return true;
-  } else {
-    if (option.back() == '=') {
-      *option_argument = "";
-      return true;
-    }
-    if (++(*index) >= argc) return false;
-    *option_argument = argv[*index];
+  }
+  if (option.back() == '=') {
+    *option_argument = "";
     return true;
   }
+  if (++(*index) >= argc)
+    return false;
+  *option_argument = argv[*index];
+  return true;
+
 }
 
 const char kBuildVersion[] = ""
-    // TODO #include "build-version.inc"
+    // TODO(fjhenigman): #include "build-version.inc"
     ;
 
 bool ReadFile(const std::string& path, std::vector<uint32_t>* out) {
@@ -136,12 +137,6 @@ int main(int argc, char** argv) {
       } else if (target_env == "vulkan1.1") {
         options.SetTargetEnvironment(shaderc_target_env_vulkan,
                                      shaderc_env_version_vulkan_1_1);
-      } else if (target_env == "opengl") {
-        options.SetTargetEnvironment(shaderc_target_env_opengl,
-                                     shaderc_env_version_vulkan_1_1);
-      } else if (target_env == "opengl4.5") {
-        options.SetTargetEnvironment(shaderc_target_env_opengl,
-                                     shaderc_env_version_vulkan_1_1);
       } else {
         std::cerr << "spvc: error: invalid value '" << target_env
                   << "' in '--validate=" << target_env << "'" << std::endl;
@@ -161,7 +156,8 @@ int main(int argc, char** argv) {
   if (status == shaderc_compilation_status_validation_error) {
     std::cerr << "validation failed:\n" << result.GetMessages() << std::endl;
     return 1;
-  } else if (status == shaderc_compilation_status_success) {
+  }
+  if (status == shaderc_compilation_status_success) {
     const char* path = output_path.data();
     if (path && strcmp(path, "-")) {
       std::basic_ofstream<char>(path) << result.GetOutput();
@@ -169,7 +165,8 @@ int main(int argc, char** argv) {
       std::cout << result.GetOutput();
     }
     return 0;
-  } else if (status == shaderc_compilation_status_compilation_error) {
+  }
+  if (status == shaderc_compilation_status_compilation_error) {
     std::cerr << "compilation failed:\n" << result.GetMessages() << std::endl;
     return 0;
   }
