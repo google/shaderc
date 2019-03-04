@@ -109,6 +109,7 @@ int main() {
   shaderc_result_release(res);
   shaderc_spvc_compile_options_release(options);
   shaderc_spvc_compiler_release(compiler);
+  shaderc_compiler_release(shaderc);
 
   return ret_code;
 }
