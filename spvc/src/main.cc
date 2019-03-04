@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
       // TODO
     } else if (arg.starts_with("--validate=")) {
       string_piece target_env;
-      assert(GetOptionArgument(argc, argv, &i, "--validate=", &target_env));
+      GetOptionArgument(argc, argv, &i, "--validate=", &target_env);
       if (target_env == "vulkan") {
         options.SetTargetEnvironment(shaderc_target_env_vulkan,
                                      shaderc_env_version_vulkan_1_0);
