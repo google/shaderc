@@ -73,6 +73,9 @@ int main() {
     printf("failed to produce glsl\n");
     return -1;
   }
+  printf("success! %lu characters of glsl\n",
+         (unsigned long)(strlen(shaderc_spvc_result_get_output(result))));
+  shaderc_spvc_result_release(result);
 
   result = shaderc_spvc_compile_into_hlsl(
       compiler, (const uint32_t *)shaderc_result_get_bytes(res),
@@ -83,6 +86,9 @@ int main() {
     printf("failed to produce hlsl\n");
     return -1;
   }
+  printf("success! %lu characters of hlsl\n",
+         (unsigned long)(strlen(shaderc_spvc_result_get_output(result))));
+  shaderc_spvc_result_release(result);
 
   result = shaderc_spvc_compile_into_msl(
       compiler, (const uint32_t *)shaderc_result_get_bytes(res),
@@ -93,12 +99,12 @@ int main() {
     printf("failed to produce msl\n");
     return -1;
   }
-
-  printf("success! %lu characters of compiler output\n",
+  printf("success! %lu characters of msl\n",
          (unsigned long)(strlen(shaderc_spvc_result_get_output(result))));
+  shaderc_spvc_result_release(result);
+
   shaderc_compile_options_release(opt);
   shaderc_result_release(res);
-  shaderc_spvc_result_release(result);
   shaderc_spvc_compile_options_release(options);
   shaderc_spvc_compiler_release(compiler);
 
