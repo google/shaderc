@@ -16,6 +16,7 @@ import expect
 import os.path
 from glslc_test_framework import inside_glslc_testsuite
 from placeholder import FileShader, TempFileName
+from builtins import bytes
 
 
 @inside_glslc_testsuite('OptionDashO')
@@ -86,12 +87,12 @@ class OutputFileBinaryAvoidsCRLFTranslation(expect.ReturnCodeIsZero,
     glslc_args = [shader, '-o', '-']
 
     def check_stdout_binary(self, status):
-        binary = status.stdout
-        newlines = [x for x in binary if x == '\n']
+        binary = bytes(status.stdout)
+        newlines = [x for x in binary if x == ord('\n')]
         num_newlines = len(newlines)
         if num_newlines % 4 == 0:
             return False, "Bad test. Need nontrivial number of newlines"
         if num_newlines != 3:
             return False, ("Update this test. Expected 3 newlines in the "
                            "binary, but found {}").format(num_newlines)
-        return self.verify_binary_length_and_header(status.stdout)
+        return self.verify_binary_length_and_header(bytes(status.stdout))
