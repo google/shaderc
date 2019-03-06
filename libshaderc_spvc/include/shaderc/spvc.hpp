@@ -102,6 +102,32 @@ class CompileOptions {
     shaderc_spvc_compile_options_set_target_env(options_, target, version);
   }
 
+  // Set the entry point.
+  void SetEntryPoint(const std::string& entry_point) {
+    shaderc_spvc_compile_options_set_entry_point(options_, entry_point.c_str());
+  }
+
+  // If true, unused variables will not appear in the output.
+  void SetRemoveUnusedVariables(bool b) {
+    shaderc_spvc_compile_options_set_remove_unused_variables(options_, b);
+  }
+
+  // If true, Vulkan GLSL features are used instead of GL-compatible features.
+  void SetVulkanSemantics(bool b) {
+    shaderc_spvc_compile_options_set_vulkan_semantics(options_, b);
+  }
+
+  // If true, gl_PerVertex is explicitly redeclared in vertex, geometry and tessellation shaders.
+  // The members of gl_PerVertex is determined by which built-ins are declared by the shader.
+  void SetSeparateShaderObjects(bool b) {
+    shaderc_spvc_compile_options_set_separate_shader_objects(options_, b);
+  }
+
+  // Flatten uniform or push constant variable into (i|u)vec4 array.
+  void SetFlattenUbo(bool b) {
+    shaderc_spvc_compile_options_set_flatten_ubo(options_, b);
+  }
+
   // Which GLSL version should be produced.  Default is 450.
   void SetOutputLanguageVersion(uint32_t version) {
     shaderc_spvc_compile_options_set_output_language_version(options_, version);

@@ -107,16 +107,27 @@ def test_glsl(shader, filename, optimize):
     # Run spvc to convert Vulkan to GLSL.  Up to two tests are performed:
     # - Regular test on most files
     # - Vulkan-specific test on Vulkan test input
-    flags = []
+    flags = ['--entry=main']
+    if not '.noeliminate' in filename:
+        flags.append('--remove-unused-variables')
+    if '.legacy.' in filename:
+        flags.extend(['--version=100', '--es'])
+    if '.flatten.' in filename:
+        flags.append('--flatten-ubo')
+    if '.flatten_dim.' in filename:
+        flags.append('--flatten-multidimensional-arrays')
+    if '.sso.' in filename:
+        flags.append('--separate-shader-objects')
+
     output = None
     if not '.nocompat.' in filename:
         test_count += 1
         output = spvc(tmpfile, tmpfile + filename , flags)
+
     output_vk = None
     if '.vk.' in filename or '.asm.' in filename:
-        #TODO(fjhenigman): add Vulkan-specific flags.
         test_count += 1
-        output_vk = spvc(tmpfile, tmpfile + 'vk' + filename, flags)
+        output_vk = spvc(tmpfile, tmpfile + 'vk' + filename, flags + ['--vulkan-semantics'])
 
     # Check results.
     # Compare either or both files produced above to appropriate reference file.
@@ -163,4 +174,4 @@ spvc_path, spirv_as_path, spirv_opt_path, glslangValidator_path, spirv_cross_dir
 main(spirv_cross_dir)
 
 # TODO: remove the magic number once all tests pass
-sys.exit(pass_count != 169)
+sys.exit(pass_count != 526)
