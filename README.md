@@ -5,6 +5,7 @@
 <img alt="Windows" src="kokoro/img/windows.png" width="20px" height="20px" hspace="2px"/>![Windows Build Status](https://storage.googleapis.com/shaderc/badges/build_status_windows_release.svg)
 
 A collection of tools, libraries and tests for shader compilation.
+
 At the moment it includes:
 
 - [`glslc`](glslc), a command line compiler for GLSL/HLSL to SPIR-V, and
