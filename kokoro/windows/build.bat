@@ -21,8 +21,8 @@ set SRC=%cd%\github\shaderc
 set BUILD_TYPE=%1
 set VS_VERSION=%2
 
-:: Force usage of python 2.7 rather than 3.6
-set PATH=C:\python27;%PATH%
+:: Force usage of python 3.6.
+set PATH=C:\python36;%PATH%
 
 cd %SRC%
 python utils\git-sync-deps

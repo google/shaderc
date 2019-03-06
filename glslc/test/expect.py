@@ -561,7 +561,7 @@ class StdoutMatch(GlslCTest):
                 status.stdout.decode('utf8'))):
                 return False, ('Incorrect stdout output:\n{ac}\n'
                                'Expected to match regex:\n{ex}'.format(
-                                   ac=status.stdout.decode('uft8'),
+                                   ac=status.stdout.decode('utf8'),
                                    ex=self.expected_stdout.pattern))
         return True, ''
 
