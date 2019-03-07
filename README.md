@@ -145,6 +145,13 @@ installed regardless of your OS:
 - [CMake](http://www.cmake.org/): for generating compilation targets.
 - [Python](http://www.python.org/): for utility scripts and running the test suite.
 
+Both Python2 and Python3 work.  However, if you use Python2, you will need the
+Python-future package installed:
+
+```
+pip install future
+```
+
 On Linux, the following tools should be installed:
 
 - [`gcov`](https://gcc.gnu.org/onlinedocs/gcc/Gcov.html): for testing code
