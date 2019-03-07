@@ -19,10 +19,12 @@ as superclass and providing the expected_* variables required by the check_*()
 methods in the mixin classes.
 """
 import difflib
+import functools
 import os
 import re
 import subprocess
 from glslc_test_framework import GlslCTest
+from builtins import bytes
 
 
 def convert_to_unix_line_endings(source):
@@ -133,7 +135,7 @@ class CorrectBinaryLengthAndPreamble(GlslCTest):
             word = binary[index * 4:(index + 1) * 4]
             if little_endian:
                 word = reversed(word)
-            return reduce(lambda w, b: (w << 8) | ord(b), word, 0)
+            return functools.reduce(lambda w, b: (w << 8) | b, word, 0)
 
         def check_endianness(binary):
             """Checks the endianness of the given SPIR-V binary.
@@ -277,7 +279,7 @@ class ValidObjectFileWithAssemblySubstr(SuccessfulReturn, CorrectObjectFilePream
             disassembly = output[0]
             if not isinstance(an_input.assembly_substr, str):
                 return False, "Missing assembly_substr member"
-            if an_input.assembly_substr not in disassembly:
+            if bytes(an_input.assembly_substr, 'utf-8') not in disassembly:
                 return False, ('Incorrect disassembly output:\n{asm}\n'
                     'Expected substring not found:\n{exp}'.format(
                     asm=disassembly, exp=an_input.assembly_substr))
@@ -442,7 +444,7 @@ class ErrorMessage(GlslCTest):
                            'signal ' + str(status.returncode))
         if not status.stderr:
             return False, 'Expected error message, but no output on stderr'
-        if self.expected_error != convert_to_unix_line_endings(status.stderr):
+        if self.expected_error != convert_to_unix_line_endings(status.stderr.decode('utf8')):
             return False, ('Incorrect stderr output:\n{act}\n'
                            'Expected:\n{exp}'.format(
                                act=status.stderr, exp=self.expected_error))
@@ -471,7 +473,7 @@ class ErrorMessageSubstr(GlslCTest):
                            'signal ' + str(status.returncode))
         if not status.stderr:
             return False, 'Expected error message, but no output on stderr'
-        if self.expected_error_substr not in convert_to_unix_line_endings(status.stderr):
+        if self.expected_error_substr not in convert_to_unix_line_endings(status.stderr.decode('utf8')):
             return False, ('Incorrect stderr output:\n{act}\n'
                            'Expected substring not found in stderr:\n{exp}'.format(
                                act=status.stderr, exp=self.expected_error_substr))
@@ -491,7 +493,7 @@ class WarningMessage(GlslCTest):
                            ' glslc')
         if not status.stderr:
             return False, 'Expected warning message, but no output on stderr'
-        if self.expected_warning != convert_to_unix_line_endings(status.stderr):
+        if self.expected_warning != convert_to_unix_line_endings(status.stderr.decode('utf8')):
             return False, ('Incorrect stderr output:\n{act}\n'
                            'Expected:\n{exp}'.format(
                                act=status.stderr, exp=self.expected_warning))
@@ -550,16 +552,16 @@ class StdoutMatch(GlslCTest):
                 return False, 'Expected something on stdout'
         elif type(self.expected_stdout) == str:
             if self.expected_stdout != convert_to_unix_line_endings(
-                status.stdout):
+                status.stdout.decode('utf8')):
                 return False, ('Incorrect stdout output:\n{ac}\n'
                                'Expected:\n{ex}'.format(
                                    ac=status.stdout, ex=self.expected_stdout))
         else:
             if not self.expected_stdout.search(convert_to_unix_line_endings(
-                status.stdout)):
+                status.stdout.decode('utf8'))):
                 return False, ('Incorrect stdout output:\n{ac}\n'
                                'Expected to match regex:\n{ex}'.format(
-                                   ac=status.stdout,
+                                   ac=status.stdout.decode('utf8'),
                                    ex=self.expected_stdout.pattern))
         return True, ''
 
@@ -583,7 +585,7 @@ class StderrMatch(GlslCTest):
                 return False, 'Expected something on stderr'
         else:
             if self.expected_stderr != convert_to_unix_line_endings(
-                status.stderr):
+                status.stderr.decode('utf8')):
                 return False, ('Incorrect stderr output:\n{ac}\n'
                                'Expected:\n{ex}'.format(
                                    ac=status.stderr, ex=self.expected_stderr))

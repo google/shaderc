@@ -100,7 +100,7 @@ class DependencyInfoStdoutMatch(GlslCTest):
         if not status.stdout:
             return False, 'Expect dependency rules on stdout'
 
-        rules = parse_text_rules(status.stdout.split('\n'))
+        rules = parse_text_rules(status.stdout.decode('utf-8').split('\n'))
 
         process_test_specified_dependency_info_rules(
             self.dependency_rules_expected)

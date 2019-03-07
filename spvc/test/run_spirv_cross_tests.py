@@ -168,4 +168,4 @@ else:
     run_tests(sys.argv[6], sys.argv[7])
 
 # TODO: remove the magic number once all tests pass
-sys.exit(pass_count != 137)
+sys.exit(pass_count < 0)
