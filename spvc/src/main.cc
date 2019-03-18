@@ -168,7 +168,7 @@ int main(int argc, char** argv) {
   }
   if (status == shaderc_compilation_status_compilation_error) {
     std::cerr << "compilation failed:\n" << result.GetMessages() << std::endl;
-    return 0;
+    return 1;
   }
 
   std::cerr << "unexpected error " << status << std::endl;
