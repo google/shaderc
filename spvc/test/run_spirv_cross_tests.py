@@ -68,35 +68,41 @@ def spvc(inp, out, flags):
 def check_reference(result, reference):
     global spirv_cross_dir
     global pass_count
-    #log('reference', reference)
     if result and filecmp.cmp(result, os.path.join(spirv_cross_dir, reference), False):
         pass_count += 1
 
+def remove_files(*filenames):
+    for i in filenames:
+        try:
+            os.remove(i)
+        except:
+            pass
+
 def test_glsl(shader, filename, optimize):
-    global spirv_cross_dir
+    global spirv_cross_dir, tmpfile
     shader_path = os.path.join(spirv_cross_dir, shader)
-    temp = '/tmp/cross-'
 
     # compile shader
     if '.asm.' in filename:
         flags = []
         if '.preserve.' in filename:
             flags.append('--preserve-numeric-ids')
-        spirv_as(shader_path, temp, flags)
+        spirv_as(shader_path, tmpfile, flags)
     else:
-        glslang_compile(shader_path, temp, ['--target-env', 'vulkan1.1', '-V'])
+        glslang_compile(shader_path, tmpfile, ['--target-env', 'vulkan1.1', '-V'])
     if optimize and not '.noopt.' in filename and not '.invalid.' in filename:
-        spirv_opt(temp, temp, [])
+        spirv_opt(tmpfile, tmpfile, [])
 
     # run spvc
     flags = []
+    output = output_vk = ""
     if not '.nocompat.' in filename:
-        output = temp + filename
-        if spvc(temp, output, flags):
+        output = tmpfile + filename
+        if spvc(tmpfile, output, flags):
             output = ""
     if '.vk.' in filename or '.asm.' in filename:
-        output_vk = temp + 'vk' + filename
-        if spvc(temp, output_vk, flags):
+        output_vk = tmpfile + 'vk' + filename
+        if spvc(tmpfile, output_vk, flags):
             output_vk = ""
 
     # check result
@@ -109,9 +115,12 @@ def test_glsl(shader, filename, optimize):
     if '.vk.' in filename:
         check_reference(output_vk, reference + '.vk')
 
+    remove_files(tmpfile, output, output_vk)
+
 def main(shader_dir):
-    global devnull
+    global devnull, tmpfile
     devnull = open(os.devnull, 'w')
+    not_used, tmpfile = tempfile.mkstemp()
 
     global test_count, pass_count
     test_count = 0
