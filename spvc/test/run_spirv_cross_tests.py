@@ -43,34 +43,39 @@ test_case_dirs = (
 test_count = 0
 pass_count = 0
 
+devnull = None
+not_used, tmpfile = tempfile.mkstemp()
+
+# Quietly run a command.  Throw exception on failure.
 def check_call(cmd):
     global devnull
-    if subprocess.call(cmd, stdout=devnull):
-        print('failed command: ', ' '.join(cmd))
-        sys.exit(1)
+    subprocess.check_call(cmd, stdout=devnull)
 
+# Run spirv-as.  Throw exception on failure.
 def spirv_as(inp, out, flags):
     check_call([spirv_as_path] + flags + ['-o', out, inp])
 
+# Run spirv-opt.  Throw exception on failure.
 def spirv_opt(inp, out, flags):
     check_call([spirv_opt_path] + flags + ['--skip-validation', '-O', '-o', out, inp])
 
+# Run glslangValidator as a compiler.  Throw exception on failure.
 def glslang_compile(inp, out, flags):
     check_call([glslangValidator_path] + flags + ['-o', out, inp])
 
+# Run spvc, return 'out' on success, None on failure.
 def spvc(inp, out, flags):
     global devnull
-    global test_count
-    test_count += 1
     cmd = [spvc_path] + flags + ['-o', out, '--validate=vulkan1.1', inp]
-    return subprocess.call(cmd, stdout=devnull)
+    return None if subprocess.call(cmd, stdout=devnull) else out
 
+# Compare result file to reference file and count matches.
 def check_reference(result, reference):
-    global spirv_cross_dir
     global pass_count
-    if result and filecmp.cmp(result, os.path.join(spirv_cross_dir, reference), False):
+    if filecmp.cmp(result, reference, False):
         pass_count += 1
 
+# Remove files and be quiet if they don't exist or can't be removed.
 def remove_files(*filenames):
     for i in filenames:
         try:
@@ -78,11 +83,17 @@ def remove_files(*filenames):
         except:
             pass
 
+# Test spvc producing GLSL the same way SPIRV-Cross is tested.
+# There are three steps: prepare input, convert to GLSL, check result.
 def test_glsl(shader, filename, optimize):
     global spirv_cross_dir, tmpfile
+    global test_count
     shader_path = os.path.join(spirv_cross_dir, shader)
 
-    # compile shader
+    # Prepare Vulkan binary.  The test input is either:
+    # - Vulkan text, assembled with spirv-as
+    # - GLSL, converted with glslang
+    # Optionally pass through spirv-opt.
     if '.asm.' in filename:
         flags = []
         if '.preserve.' in filename:
@@ -93,38 +104,40 @@ def test_glsl(shader, filename, optimize):
     if optimize and not '.noopt.' in filename and not '.invalid.' in filename:
         spirv_opt(tmpfile, tmpfile, [])
 
-    # run spvc
+    # Run spvc to convert Vulkan to GLSL.  Up to two tests are performed:
+    # - Regular test on most files
+    # - Vulkan-specific test on Vulkan test input
     flags = []
-    output = output_vk = ""
+    output = None
     if not '.nocompat.' in filename:
-        output = tmpfile + filename
-        if spvc(tmpfile, output, flags):
-            output = ""
+        test_count += 1
+        output = spvc(tmpfile, tmpfile + filename , flags)
+    output_vk = None
     if '.vk.' in filename or '.asm.' in filename:
-        output_vk = tmpfile + 'vk' + filename
-        if spvc(tmpfile, output_vk, flags):
-            output_vk = ""
+        #TODO(fjhenigman): add Vulkan-specific flags.
+        test_count += 1
+        output_vk = spvc(tmpfile, tmpfile + 'vk' + filename, flags)
 
-    # check result
-    reference = ['reference', shader]
+    # Check results.
+    # Compare either or both files produced above to appropriate reference file.
     if optimize:
-        reference.insert(1, 'opt')
-    reference = os.path.join(*reference)
-    if not '.nocompat.' in filename:
+        reference = os.path.join(spirv_cross_dir, 'reference', 'opt', shader)
+    else:
+        reference = os.path.join(spirv_cross_dir, 'reference', shader)
+    if not '.nocompat.' in filename and output:
         check_reference(output, reference)
-    if '.vk.' in filename:
+    if '.vk.' in filename and output_vk:
         check_reference(output_vk, reference + '.vk')
 
+    # Clean up.
     remove_files(tmpfile, output, output_vk)
 
 def main(shader_dir):
-    global devnull, tmpfile
-    devnull = open(os.devnull, 'w')
-    not_used, tmpfile = tempfile.mkstemp()
-
+    global devnull
     global test_count, pass_count
     test_count = 0
     pass_count = 0
+    devnull = open(os.devnull, 'w')
 
     for test_case_dir, language, optimize in test_case_dirs:
         walk_dir = os.path.join(shader_dir, test_case_dir)
@@ -139,7 +152,6 @@ def main(shader_dir):
 
     print(test_count, 'test cases')
     print(pass_count, 'passed')
-
     devnull.close()
 
 if len(sys.argv) != 6:
