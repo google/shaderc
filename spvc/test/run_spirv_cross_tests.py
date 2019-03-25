@@ -14,9 +14,6 @@
 
 '''
 Run the spirv-cross tests on spvc.
-
-Repeat runs are fast because we use a saved, compiled version of each shader
-instead of re-compiling.  To re-compile the shaders just delete the cache.
 '''
 
 from __future__ import print_function
@@ -28,6 +25,7 @@ import subprocess
 import sys
 import tempfile
 
+# TODO(fjhenigman): Allow our own tests, not just spirv-cross tests.
 test_case_dirs = (
 # directory           language  optimize
 ('shaders'            , 'glsl', ''   ),
@@ -45,127 +43,124 @@ test_case_dirs = (
 test_count = 0
 pass_count = 0
 
+devnull = None
 not_used, tmpfile = tempfile.mkstemp()
-devnull = open(os.devnull, 'w')
 
-def mkdir_p(filepath):
-    ''' make sure directory exists to contain given file '''
-    dirpath = os.path.dirname(filepath)
-    try:
-        os.makedirs(dirpath)
-    except OSError as exc:
-        if not (exc.errno == errno.EEXIST and os.path.isdir(dirpath)):
-            raise
+# Quietly run a command.  Throw exception on failure.
+def check_call(cmd):
+    global devnull
+    subprocess.check_call(cmd, stdout=devnull)
 
-def spirv_as(inp, out):
-    subprocess.check_call([spirv_as_path, '-o', out, inp], stdout=devnull)
+# Run spirv-as.  Throw exception on failure.
+def spirv_as(inp, out, flags):
+    check_call([spirv_as_path] + flags + ['-o', out, inp])
 
-def spirv_opt(inp, out):
-    subprocess.check_call([spirv_opt_path, '-o', out, inp], stdout=devnull)
+# Run spirv-opt.  Throw exception on failure.
+def spirv_opt(inp, out, flags):
+    check_call([spirv_opt_path] + flags + ['--skip-validation', '-O', '-o', out, inp])
 
-def glslangValidator(inp, out):
-    subprocess.check_call([glslangValidator_path , '--target-env', 'vulkan1.1', '-V', '-o',
-                          out, inp], stdout=devnull)
+# Run glslangValidator as a compiler.  Throw exception on failure.
+def glslang_compile(inp, out, flags):
+    check_call([glslangValidator_path] + flags + ['-o', out, inp])
 
+# Run spvc, return 'out' on success, None on failure.
 def spvc(inp, out, flags):
-    return subprocess.call([spvc_path, '-o', out, '--validate=vulkan1.1'] + flags + [inp],
-                           stdout=devnull)
+    global devnull
+    cmd = [spvc_path] + flags + ['-o', out, '--validate=vulkan1.1', inp]
+    return None if subprocess.call(cmd, stdout=devnull) else out
 
-def compile_shader(source_path, binary_path, filename, optimize):
-    # Note: filename is the last component of source_path.
-    mkdir_p(binary_path)
-    if '.asm.' in filename:
-        spirv_as(source_path, binary_path)
-    else:
-        glslangValidator(source_path, binary_path)
-    if optimize:
-        spirv_opt(binary_path, binary_path)
-
-def do_test(binary_path, reference_path, flags):
-    global test_count, pass_count
-    test_count += 1
-    if spvc(binary_path, tmpfile, flags) == 0 and filecmp.cmp(tmpfile, reference_path):
+# Compare result file to reference file and count matches.
+def check_reference(result, reference):
+    global pass_count
+    if filecmp.cmp(result, reference, False):
         pass_count += 1
 
-def skip_test():
+# Remove files and be quiet if they don't exist or can't be removed.
+def remove_files(*filenames):
+    for i in filenames:
+        try:
+            os.remove(i)
+        except:
+            pass
+
+# Test spvc producing GLSL the same way SPIRV-Cross is tested.
+# There are three steps: prepare input, convert to GLSL, check result.
+def test_glsl(shader, filename, optimize):
+    global spirv_cross_dir, tmpfile
     global test_count
-    test_count += 1
+    shader_path = os.path.join(spirv_cross_dir, shader)
 
-def test_shader(binary_path, reference_path, filename, language, optimize):
-    # Note: filename is the last component of binary_path.
-    if language == 'glsl':
+    # Prepare Vulkan binary.  The test input is either:
+    # - Vulkan text, assembled with spirv-as
+    # - GLSL, converted with glslang
+    # Optionally pass through spirv-opt.
+    if '.asm.' in filename:
         flags = []
-        if not '.noeliminate' in filename:
-            flags.append('--remove-unused-variables')
-        if '.legacy.' in filename:
-            flags.append('--version 100 --es')
-        if '.flatten.' in filename:
-            flags.append('--flatten-ubo')
-        if '.flatten_dim.' in filename:
-            flags.append('--flatten-multidimensional-arrays')
-        if '.sso.' in filename:
-            flags.append('--separate-shader-objects')
-
-        if not '.nocompat.' in filename:
-            do_test(binary_path, reference_path, flags)
-        if '.vk.' in filename:
-            do_test(binary_path, reference_path + '.vk', flags + ['--vulkan-semantics'])
+        if '.preserve.' in filename:
+            flags.append('--preserve-numeric-ids')
+        spirv_as(shader_path, tmpfile, flags)
     else:
-        # TODO: other languages
-        skip_test()
+        glslang_compile(shader_path, tmpfile, ['--target-env', 'vulkan1.1', '-V'])
+    if optimize and not '.noopt.' in filename and not '.invalid.' in filename:
+        spirv_opt(tmpfile, tmpfile, [])
 
-def run_tests(binary_dir, source_dir):
-    '''
-    If binary_dir exists, run the tests in it, otherwise run the tests in
-    source_dir, saving the compiled form to binary_dir as we go.
-    '''
-    if os.path.isdir(binary_dir):
-        top_dir = binary_dir
-        use_source = False
+    # Run spvc to convert Vulkan to GLSL.  Up to two tests are performed:
+    # - Regular test on most files
+    # - Vulkan-specific test on Vulkan test input
+    flags = []
+    output = None
+    if not '.nocompat.' in filename:
+        test_count += 1
+        output = spvc(tmpfile, tmpfile + filename , flags)
+    output_vk = None
+    if '.vk.' in filename or '.asm.' in filename:
+        #TODO(fjhenigman): add Vulkan-specific flags.
+        test_count += 1
+        output_vk = spvc(tmpfile, tmpfile + 'vk' + filename, flags)
+
+    # Check results.
+    # Compare either or both files produced above to appropriate reference file.
+    if optimize:
+        reference = os.path.join(spirv_cross_dir, 'reference', 'opt', shader)
     else:
-        if source_dir is None:
-            print('Binary directory "' + binary_dir + '"not found and no source directory given',
-                  file=sys.stderr)
-            sys.exit(1)
-        top_dir = source_dir
-        use_source = True
+        reference = os.path.join(spirv_cross_dir, 'reference', shader)
+    if not '.nocompat.' in filename and output:
+        check_reference(output, reference)
+    if '.vk.' in filename and output_vk:
+        check_reference(output_vk, reference + '.vk')
 
+    # Clean up.
+    remove_files(tmpfile, output, output_vk)
+
+def main(shader_dir):
+    global devnull
     global test_count, pass_count
     test_count = 0
     pass_count = 0
-    compiled = set()
+    devnull = open(os.devnull, 'w')
 
     for test_case_dir, language, optimize in test_case_dirs:
-        walk_dir = os.path.join(top_dir, test_case_dir)
+        walk_dir = os.path.join(shader_dir, test_case_dir)
         for dirpath, dirnames, filenames in os.walk(walk_dir):
             dirnames.sort()
+            reldir = os.path.relpath(dirpath, shader_dir)
             for filename in sorted(filenames):
-                relpath = os.path.relpath(dirpath, top_dir)
-                binary_path = os.path.join(binary_dir, relpath, filename)
-                reference_path = os.path.join(spirv_cross_dir, 'reference', relpath, filename)
-                if use_source:
-                    source_path = os.path.join(source_dir, relpath, filename)
-                    if source_path not in compiled:
-                        compile_shader(source_path, binary_path, filename, optimize)
-                        compiled.add(source_path)
-                test_shader(binary_path, reference_path, filename, language, optimize)
+                if language == 'glsl':
+                    test_glsl(os.path.join(reldir, filename), filename, bool(optimize))
+                else:
+                    test_count += 1
 
     print(test_count, 'test cases')
     print(pass_count, 'passed')
+    devnull.close()
 
-if not 6 <= len(sys.argv) <= 8:
+if len(sys.argv) != 6:
     print('usage:', sys.argv[0], '<spvc> <spirv-as> <spirv-opt> <glslangValidator>',
-          '<SPIRV-cross directory> [binary-directory [source-directory]]', file=sys.stderr)
+          '<SPIRV-cross directory>', file=sys.stderr)
     sys.exit(1)
 
 spvc_path, spirv_as_path, spirv_opt_path, glslangValidator_path, spirv_cross_dir = sys.argv[1:6]
-
-if len(sys.argv) == 6:
-    run_tests('shader_cache', spirv_cross_dir)
-elif len(sys.argv) == 7:
-    run_tests(sys.argv[6], None)
-else:
-    run_tests(sys.argv[6], sys.argv[7])
+main(spirv_cross_dir)
 
 # TODO: remove the magic number once all tests pass
-sys.exit(pass_count < 0)
+sys.exit(pass_count != 169)
