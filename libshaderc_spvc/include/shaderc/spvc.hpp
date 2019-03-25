@@ -117,8 +117,9 @@ class CompileOptions {
     shaderc_spvc_compile_options_set_vulkan_semantics(options_, b);
   }
 
-  // If true, gl_PerVertex is explicitly redeclared in vertex, geometry and tessellation shaders.
-  // The members of gl_PerVertex is determined by which built-ins are declared by the shader.
+  // If true, gl_PerVertex is explicitly redeclared in vertex, geometry and
+  // tessellation shaders. The members of gl_PerVertex is determined by which
+  // built-ins are declared by the shader.
   void SetSeparateShaderObjects(bool b) {
     shaderc_spvc_compile_options_set_separate_shader_objects(options_, b);
   }

@@ -69,8 +69,7 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_release(
 
 // Sets the entry point.
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_entry_point(
-    shaderc_spvc_compile_options_t options,
-    const char *entry_point);
+    shaderc_spvc_compile_options_t options, const char* entry_point);
 
 // If true, unused variables will not appear in the output.
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_remove_unused_variables(
@@ -86,8 +85,9 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_set_target_env(
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_vulkan_semantics(
     shaderc_spvc_compile_options_t options, bool b);
 
-// If true, gl_PerVertex is explicitly redeclared in vertex, geometry and tessellation shaders.
-// The members of gl_PerVertex is determined by which built-ins are declared by the shader.
+// If true, gl_PerVertex is explicitly redeclared in vertex, geometry and
+// tessellation shaders. The members of gl_PerVertex is determined by which
+// built-ins are declared by the shader.
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_separate_shader_objects(
     shaderc_spvc_compile_options_t options, bool b);
 

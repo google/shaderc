@@ -20,6 +20,9 @@
 #include "spirv-cross/spirv_msl.hpp"
 #include "spirv-tools/libspirv.hpp"
 
+// GLSL version produced when none specified nor detected from source.
+#define DEFAULT_GLSL_VERSION 450
+
 struct shaderc_spvc_compiler {};
 
 // Described in spvc.h.
@@ -42,7 +45,8 @@ struct shaderc_spvc_compile_options {
 };
 
 shaderc_spvc_compile_options_t shaderc_spvc_compile_options_initialize() {
-  shaderc_spvc_compile_options_t options = new (std::nothrow) shaderc_spvc_compile_options;
+  shaderc_spvc_compile_options_t options =
+      new (std::nothrow) shaderc_spvc_compile_options;
   if (options) options->glsl.version = 0;
   return options;
 }
@@ -90,14 +94,13 @@ void shaderc_spvc_compile_options_set_target_env(
 }
 
 void shaderc_spvc_compile_options_set_entry_point(
-    shaderc_spvc_compile_options_t options,
-    const char *entry_point) {
-    options->entry_point = entry_point;
+    shaderc_spvc_compile_options_t options, const char* entry_point) {
+  options->entry_point = entry_point;
 }
 
 void shaderc_spvc_compile_options_set_remove_unused_variables(
     shaderc_spvc_compile_options_t options, bool b) {
-    options->remove_unused_variables = b;
+  options->remove_unused_variables = b;
 }
 
 void shaderc_spvc_compile_options_set_vulkan_semantics(
@@ -112,7 +115,7 @@ void shaderc_spvc_compile_options_set_separate_shader_objects(
 
 void shaderc_spvc_compile_options_set_flatten_ubo(
     shaderc_spvc_compile_options_t options, bool b) {
-    options->flatten_ubo = b;
+  options->flatten_ubo = b;
 }
 
 void shaderc_spvc_compile_options_set_output_language_version(
@@ -212,7 +215,7 @@ shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_glsl(
     options->glsl.version = compiler.get_common_options().version;
     if (options->glsl.version == 0) {
       // no version detected in source, use default
-      options->glsl.version = 450;
+      options->glsl.version = DEFAULT_GLSL_VERSION;
     } else {
       // version detected implies ES also detected
       options->glsl.es = compiler.get_common_options().es;
@@ -222,9 +225,10 @@ shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_glsl(
   auto entry_points = compiler.get_entry_points_and_stages();
   spv::ExecutionModel model = spv::ExecutionModelMax;
   if (!options->entry_point.empty()) {
-    // Make sure there is just one entry point with this name, or the stage is ambiguous.
+    // Make sure there is just one entry point with this name, or the stage is
+    // ambiguous.
     uint32_t stage_count = 0;
-    for (auto &e : entry_points) {
+    for (auto& e : entry_points) {
       if (e.name == options->entry_point) {
         stage_count++;
         model = e.execution_model;
@@ -232,16 +236,18 @@ shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_glsl(
     }
     if (stage_count != 1) {
       result->status = shaderc_compilation_status_compilation_error;
-      if (stage_count)
-        result->messages = "There is no entry point with name: " + options->entry_point;
+      if (stage_count == 0)
+        result->messages =
+            "There is no entry point with name: " + options->entry_point;
       else
-        result->messages = "There is more than one entry point with name: " + options->entry_point + ". Use --stage.";
+        result->messages = "There is more than one entry point with name: " +
+                           options->entry_point + ". Use --stage.";
       return result;
     }
   }
   if (!options->entry_point.empty()) {
     compiler.set_entry_point(options->entry_point, model);
-    }
+  }
 
   if (!options->glsl.vulkan_semantics) {
     uint32_t sampler = compiler.build_dummy_sampler_for_combined_images();
@@ -262,24 +268,23 @@ shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_glsl(
   }
 
   if (options->flatten_ubo) {
-    for (auto &ubo : res.uniform_buffers)
-      compiler.flatten_buffer_block(ubo.id);
-    for (auto &ubo : res.push_constant_buffers)
+    for (auto& ubo : res.uniform_buffers) compiler.flatten_buffer_block(ubo.id);
+    for (auto& ubo : res.push_constant_buffers)
       compiler.flatten_buffer_block(ubo.id);
   }
 
   if (!options->glsl.vulkan_semantics) {
     compiler.build_combined_image_samplers();
 
-    //if (args.combined_samplers_inherit_bindings)
+    // if (args.combined_samplers_inherit_bindings)
     //  spirv_cross_util::inherit_combined_sampler_bindings(*compiler);
 
     // Give the remapped combined samplers new names.
-    for (auto &remap : compiler.get_combined_image_samplers()) {
-      compiler.set_name(remap.combined_id, spirv_cross::join(
-          "SPIRV_Cross_Combined",
-          compiler.get_name(remap.image_id),
-          compiler.get_name(remap.sampler_id)));
+    for (auto& remap : compiler.get_combined_image_samplers()) {
+      compiler.set_name(remap.combined_id,
+                        spirv_cross::join("SPIRV_Cross_Combined",
+                                          compiler.get_name(remap.image_id),
+                                          compiler.get_name(remap.sampler_id)));
     }
   }
 
