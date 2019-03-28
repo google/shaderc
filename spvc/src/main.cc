@@ -38,15 +38,24 @@ An input file of - represents standard input.
 
 Options:
   --help                Display available options.
-  --version             Display compiler version information.
+  -v                    Display compiler version information.
   -o <output file>      '-' means standard output.
-  --validate=[<env>]    Validate SPIR-V source with given environment
-                        <env> is empty to skip validation, or one of the following:
-                        vulkan1.0 (default) vulkan1.1 opengl opengl4.5
+  --validate=<env>      Validate SPIR-V source with given environment
+                          <env> is vulkan1.0 (the default) or vulkan1.1
+  --entry=<name>        Specify entry point.
+  --version=<unsigned>  Specify GLSL output language version, e.g. 100
+                          Default is 450 if not detected from input.
+
+  The following flags behave as in spirv-cross:
+
+  --remove-unused-variables
+  --vulkan-semantics
+  --separate-shader-objects
+  --flatten-ubo
 )";
 }
 
-// TODO(fjhenigman): factor out
+// TODO(fjhenigman): factor out with glslc
 // Gets the option argument for the option at *index in argv in a way consistent
 // with clang/gcc. On success, returns true and writes the parsed argument into
 // *option_argument. Returns false if any errors occur. After calling this
@@ -70,6 +79,29 @@ bool GetOptionArgument(int argc, char** argv, int* index,
   *option_argument = argv[*index];
   return true;
 
+}
+
+// TODO(fjhenigman): factor out with glslc
+// Parses the given string as a number of the specified type.  Returns true
+// if parsing succeeded, and stores the parsed value via |value|.
+bool ParseUint32(const std::string& str, uint32_t* value) {
+  std::istringstream iss(str);
+
+  iss >> std::setbase(0);
+  iss >> *value;
+
+  // We should have read something.
+  bool ok = !str.empty() && !iss.bad();
+  // It should have been all the text.
+  ok = ok && iss.eof();
+  // It should have been in range.
+  ok = ok && !iss.fail();
+
+  // Work around a bugs in various C++ standard libraries.
+  // Count any negative number as an error, including "-0".
+  ok = ok && (str[0] != '-');
+
+  return ok;
 }
 
 const char kBuildVersion[] = ""
@@ -111,7 +143,7 @@ int main(int argc, char** argv) {
     if (arg == "--help") {
       ::PrintHelp(&std::cout);
       return 0;
-    } else if (arg == "--version") {
+    } else if (arg == "-v") {
       std::cout << kBuildVersion << std::endl;
       std::cout << "Target: " << spvTargetEnvDescription(SPV_ENV_UNIVERSAL_1_0)
                 << std::endl;
@@ -123,15 +155,36 @@ int main(int argc, char** argv) {
             << std::endl;
         return 1;
       }
+    } else if (arg.starts_with("--entry=")) {
+      string_piece entry_point;
+      GetOptionArgument(argc, argv, &i, "--entry=", &entry_point);
+      options.SetEntryPoint(entry_point.data());
+    } else if (arg.starts_with("--version=")) {
+      string_piece version_str;
+      GetOptionArgument(argc, argv, &i, "--version=", &version_str);
+      uint32_t version_num;
+      if (!ParseUint32(version_str.str(), &version_num)) {
+        std::cerr << "spvc: error: invalid value '" << version_str
+                  << "' in --version=" << std::endl;
+        return 1;
+      }
+      options.SetOutputLanguageVersion(version_num);
     } else if (arg == "--remove-unused-variables") {
-      // TODO
+      options.SetRemoveUnusedVariables(true);
+    } else if (arg == "--vulkan-semantics") {
+      options.SetVulkanSemantics(true);
+    } else if (arg == "--separate-shader-objects") {
+      options.SetSeparateShaderObjects(true);
+    } else if (arg == "--flatten-ubo") {
+      options.SetFlattenUbo(true);
+    } else if (arg == "--flatten-multidimensional-arrays") {
+      // TODO(fjhenigman)
+    } else if (arg == "--es") {
+      // TODO(fjhenigman)
     } else if (arg.starts_with("--validate=")) {
       string_piece target_env;
       GetOptionArgument(argc, argv, &i, "--validate=", &target_env);
-      if (target_env == "vulkan") {
-        options.SetTargetEnvironment(shaderc_target_env_vulkan,
-                                     shaderc_env_version_vulkan_1_0);
-      } else if (target_env == "vulkan1.0") {
+      if (target_env == "vulkan1.0") {
         options.SetTargetEnvironment(shaderc_target_env_vulkan,
                                      shaderc_env_version_vulkan_1_0);
       } else if (target_env == "vulkan1.1") {
@@ -139,7 +192,7 @@ int main(int argc, char** argv) {
                                      shaderc_env_version_vulkan_1_1);
       } else {
         std::cerr << "spvc: error: invalid value '" << target_env
-                  << "' in '--validate=" << target_env << "'" << std::endl;
+                  << "' in --validate=" << std::endl;
         return 1;
       }
     } else {
