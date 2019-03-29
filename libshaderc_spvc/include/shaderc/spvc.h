@@ -95,8 +95,12 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_set_separate_shader_objects(
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_flatten_ubo(
     shaderc_spvc_compile_options_t options, bool b);
 
-// Set language version.  Default is 450.
-SHADERC_EXPORT void shaderc_spvc_compile_options_set_output_language_version(
+// Set GLSL language version.  Default is 450 (i.e. 4.5).
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_glsl_language_version(
+    shaderc_spvc_compile_options_t options, uint32_t version);
+
+// Set MSL language version.  Default is 10200 (i.e. 1.2).
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_msl_language_version(
     shaderc_spvc_compile_options_t options, uint32_t version);
 
 // Set HLSL shader model.  Default is 30.
