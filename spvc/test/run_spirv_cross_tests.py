@@ -237,4 +237,4 @@ def main():
 main()
 
 # TODO: remove the magic number once all tests pass
-sys.exit(pass_count != 526)
+sys.exit(pass_count != 546)
