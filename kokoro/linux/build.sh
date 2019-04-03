@@ -108,3 +108,6 @@ echo $(date): ctest completed.
 ninja install
 cd $(dirname $INSTALL_DIR)
 zip -r $KOKORO_ARTIFACTS_DIR/install.zip $(basename $INSTALL_DIR)
+
+# Test if gsutil to write to gcs
+gsutil cp /etc/passwd gs://shaderc/artifacts
