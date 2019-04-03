@@ -95,6 +95,12 @@ class CompileOptions {
     other.options_ = nullptr;
   }
 
+  // Which parser should be used to read the input SPIR-V.  Default is
+  // SPIRV-Tools.
+  void SetParser(shaderc_spvc_parser parser) {
+    shaderc_spvc_compile_options_set_parser(options_, parser);
+  }
+
   // Which environment should be used to validate the input SPIR-V.  Default is
   // Vulkan 1.0.
   void SetTargetEnvironment(shaderc_target_env target,

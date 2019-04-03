@@ -40,6 +40,9 @@ Options:
   --help                Display available options.
   -v                    Display compiler version information.
   -o <output file>      '-' means standard output.
+  --parser=<parser>     Select SPIR-V parser.
+                          <parser> is 'tools' for SPIRV-Tools (default),
+                          or 'cross' for SPIRV-Cross.
   --validate=<env>      Validate SPIR-V source with given environment
                           <env> is vulkan1.0 (the default) or vulkan1.1
   --entry=<name>        Specify entry point.
@@ -219,6 +222,18 @@ int main(int argc, char** argv) {
         return 1;
       }
       options.SetShaderModel(shader_model_num);
+    } else if (arg.starts_with("--parser=")) {
+      string_piece parser;
+      GetOptionArgument(argc, argv, &i, "--parser=", &parser);
+      if (parser == "tools") {
+        options.SetParser(shaderc_spvc_parser_spirv_tools);
+      } else if (parser == "cross") {
+        options.SetParser(shaderc_spvc_parser_spirv_cross);
+      } else {
+        std::cerr << "spvc: error: invalid value '" << parser
+                  << "' in --parser=" << std::endl;
+        return 1;
+      }
     } else if (arg.starts_with("--validate=")) {
       string_piece target_env;
       GetOptionArgument(argc, argv, &i, "--validate=", &target_env);
@@ -272,6 +287,6 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  std::cerr << "unexpected error " << status << std::endl;
+  std::cerr << "unexpected error:\n " << result.GetMessages() << std::endl;
   return 1;
 }

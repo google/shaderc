@@ -137,7 +137,7 @@ def test_glsl(shader, filename, optimize):
     # Run spvc to convert Vulkan to GLSL.  Up to two tests are performed:
     # - Regular test on most files
     # - Vulkan-specific test on Vulkan test input
-    flags = ['--entry=main', '--language=glsl']
+    flags = ['--parser=' + args.parser, '--entry=main', '--language=glsl']
     if not '.noeliminate' in filename:
         flags.append('--remove-unused-variables')
     if '.legacy.' in filename:
@@ -217,7 +217,8 @@ def test_msl(shader, filename, optimize):
     input = compile_input_shader(shader, filename, optimize and not '.noopt.' in filename)
 
     # Run spvc to convert Vulkan to MSL.
-    flags = ['--entry=main', '--language=msl', '--msl-version=' + lookup(msl_standards, filename)]
+    flags = ['--parser=' + args.parser, '--entry=main', '--language=msl',
+             '--msl-version=' + lookup(msl_standards, filename)]
     # TODO(fjhenigman): add these flags to spvc and uncomment these lines
     #if '.swizzle.' in filename:
     #    flags.append('--msl-swizzle-texture-samples')
@@ -264,7 +265,9 @@ def test_hlsl(shader, filename, optimize):
 
     # Run spvc to convert Vulkan to HLSL.
     test_count += 1
-    output = spvc(input, input + filename, ['--entry=main', '--language=hlsl', '--hlsl-enable-compat', '--shader-model=' + lookup(shader_models, filename)])
+    flags = ['--parser=' + args.parser, '--entry=main', '--language=hlsl', '--hlsl-enable-compat',
+             '--shader-model=' + lookup(shader_models, filename)]
+    output = spvc(input, input + filename, flags)
     if not '.invalid.' in filename:
         # logged for compatibility with SPIRV-Cross test script
         log_command(['spirv-val', '--target-env', 'vulkan1.1', input])
@@ -315,6 +318,7 @@ def main():
     global test_count, pass_count
 
     parser = argparse.ArgumentParser()
+    parser.add_argument('--parser', choices=('cross', 'tools'), default='tools')
     parser.add_argument('--log', action=FileArgAction, help='log commands to file')
     parser.add_argument('-n', '--dry-run', dest='dry_run', action='store_true',
                         help = 'do not execute commands')
@@ -347,5 +351,5 @@ def main():
 
 main()
 
-# TODO: remove the magic number once all tests pass
-sys.exit(pass_count != 1219)
+# TODO: remove the magic numbers once all tests pass
+sys.exit(pass_count != (1219 if args.parser == 'cross' else 2))

@@ -27,6 +27,11 @@ extern "C" {
 #include "shaderc/status.h"
 #include "shaderc/visibility.h"
 
+typedef enum {
+  shaderc_spvc_parser_spirv_tools,
+  shaderc_spvc_parser_spirv_cross,
+} shaderc_spvc_parser;
+
 // An opaque handle to an object that manages all compiler state.
 typedef struct shaderc_spvc_compiler* shaderc_spvc_compiler_t;
 
@@ -74,6 +79,10 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_set_entry_point(
 // If true, unused variables will not appear in the output.
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_remove_unused_variables(
     shaderc_spvc_compile_options_t options, bool b);
+
+// Choose parser to read input.  Default is SPIRV-Tools parser.
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_parser(
+    shaderc_spvc_compile_options_t options, shaderc_spvc_parser parser);
 
 // Sets the target shader environment, affecting which warnings or errors will
 // be issued during validation.
