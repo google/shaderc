@@ -43,8 +43,12 @@ Options:
   --validate=<env>      Validate SPIR-V source with given environment
                           <env> is vulkan1.0 (the default) or vulkan1.1
   --entry=<name>        Specify entry point.
-  --version=<unsigned>  Specify GLSL output language version, e.g. 100
+  --language=<lang>     Specify output language.
+                          <lang> is glsl (the default), msl or hlsl.
+  --glsl-version=<ver>  Specify GLSL output language version, e.g. 100
                           Default is 450 if not detected from input.
+  --msl-version=<ver>   Specify MSL output language version, e.g. 100
+                          Default is 10200.
 
   The following flags behave as in spirv-cross:
 
@@ -52,6 +56,7 @@ Options:
   --vulkan-semantics
   --separate-shader-objects
   --flatten-ubo
+  --shader-model=<model>
 )";
 }
 
@@ -137,6 +142,7 @@ int main(int argc, char** argv) {
   shaderc_spvc::CompileOptions options;
   std::vector<uint32_t> input;
   string_piece output_path;
+  string_piece output_language;
 
   for (int i = 1; i < argc; ++i) {
     const string_piece arg = argv[i];
@@ -159,16 +165,34 @@ int main(int argc, char** argv) {
       string_piece entry_point;
       GetOptionArgument(argc, argv, &i, "--entry=", &entry_point);
       options.SetEntryPoint(entry_point.data());
-    } else if (arg.starts_with("--version=")) {
+    } else if (arg.starts_with("--glsl-version=")) {
       string_piece version_str;
-      GetOptionArgument(argc, argv, &i, "--version=", &version_str);
+      GetOptionArgument(argc, argv, &i, "--glsl-version=", &version_str);
       uint32_t version_num;
       if (!ParseUint32(version_str.str(), &version_num)) {
         std::cerr << "spvc: error: invalid value '" << version_str
-                  << "' in --version=" << std::endl;
+                  << "' in --glsl-version=" << std::endl;
         return 1;
       }
-      options.SetOutputLanguageVersion(version_num);
+      options.SetGLSLLanguageVersion(version_num);
+    } else if (arg.starts_with("--msl-version=")) {
+      string_piece version_str;
+      GetOptionArgument(argc, argv, &i, "--msl-version=", &version_str);
+      uint32_t version_num;
+      if (!ParseUint32(version_str.str(), &version_num)) {
+        std::cerr << "spvc: error: invalid value '" << version_str
+                  << "' in --msl-version=" << std::endl;
+        return 1;
+      }
+      options.SetMSLLanguageVersion(version_num);
+    } else if (arg.starts_with("--language=")) {
+      GetOptionArgument(argc, argv, &i, "--language=", &output_language);
+      if (!(output_language == "glsl" || output_language == "msl" ||
+            output_language == "hlsl")) {
+        std::cerr << "spvc: error: invalid value '" << output_language
+                  << "' in --language=" << std::endl;
+        return 1;
+      }
     } else if (arg == "--remove-unused-variables") {
       options.SetRemoveUnusedVariables(true);
     } else if (arg == "--vulkan-semantics") {
@@ -181,6 +205,20 @@ int main(int argc, char** argv) {
       // TODO(fjhenigman)
     } else if (arg == "--es") {
       // TODO(fjhenigman)
+    } else if (arg == "--hlsl-enable-compat") {
+      // TODO(fjhenigman)
+    } else if (arg == "--glsl-emit-push-constant-as-ubo") {
+      // TODO(fjhenigman)
+    } else if (arg.starts_with("--shader-model=")) {
+      string_piece shader_model_str;
+      GetOptionArgument(argc, argv, &i, "--shader-model=", &shader_model_str);
+      uint32_t shader_model_num;
+      if (!ParseUint32(shader_model_str.str(), &shader_model_num)) {
+        std::cerr << "spvc: error: invalid value '" << shader_model_str
+                  << "' in --shader-model=" << std::endl;
+        return 1;
+      }
+      options.SetShaderModel(shader_model_num);
     } else if (arg.starts_with("--validate=")) {
       string_piece target_env;
       GetOptionArgument(argc, argv, &i, "--validate=", &target_env);
@@ -203,8 +241,17 @@ int main(int argc, char** argv) {
     }
   }
 
-  shaderc_spvc::CompilationResult result = compiler.CompileSpvToGlsl(
-      (const uint32_t*)input.data(), input.size(), options);
+  shaderc_spvc::CompilationResult result;
+  if (output_language == "glsl") {
+    result = compiler.CompileSpvToGlsl((const uint32_t*)input.data(),
+                                       input.size(), options);
+  } else if (output_language == "msl") {
+    result = compiler.CompileSpvToMsl((const uint32_t*)input.data(),
+                                      input.size(), options);
+  } else if (output_language == "hlsl") {
+    result = compiler.CompileSpvToHlsl((const uint32_t*)input.data(),
+                                       input.size(), options);
+  }
   auto status = result.GetCompilationStatus();
   if (status == shaderc_compilation_status_validation_error) {
     std::cerr << "validation failed:\n" << result.GetMessages() << std::endl;
@@ -219,6 +266,7 @@ int main(int argc, char** argv) {
     }
     return 0;
   }
+
   if (status == shaderc_compilation_status_compilation_error) {
     std::cerr << "compilation failed:\n" << result.GetMessages() << std::endl;
     return 1;

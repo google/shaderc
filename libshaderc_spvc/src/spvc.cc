@@ -47,7 +47,11 @@ struct shaderc_spvc_compile_options {
 shaderc_spvc_compile_options_t shaderc_spvc_compile_options_initialize() {
   shaderc_spvc_compile_options_t options =
       new (std::nothrow) shaderc_spvc_compile_options;
-  if (options) options->glsl.version = 0;
+  if (options) {
+    options->glsl.version = 0;
+    options->hlsl.point_size_compat = true;
+    options->hlsl.point_coord_compat = true;
+  }
   return options;
 }
 
@@ -118,9 +122,14 @@ void shaderc_spvc_compile_options_set_flatten_ubo(
   options->flatten_ubo = b;
 }
 
-void shaderc_spvc_compile_options_set_output_language_version(
+void shaderc_spvc_compile_options_set_glsl_language_version(
     shaderc_spvc_compile_options_t options, uint32_t version) {
   options->glsl.version = version;
+}
+
+void shaderc_spvc_compile_options_set_msl_language_version(
+    shaderc_spvc_compile_options_t options, uint32_t version) {
+  options->msl.msl_version = version;
 }
 
 void shaderc_spvc_compile_options_set_shader_model(

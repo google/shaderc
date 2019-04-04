@@ -81,14 +81,19 @@ def spvc(inp, out, flags):
         sys.exit()
 
 # Compare result file to reference file and count matches.
-def check_reference(result, reference):
+def check_reference(result, shader, optimize):
     global args
     global pass_count
+    if optimize:
+        reference = os.path.join('reference', 'opt', shader)
+    else:
+        reference = os.path.join('reference', shader)
     log_command(['reference', reference])
     if args.dry_run or filecmp.cmp(result, os.path.join(args.cross_dir, reference), False):
         pass_count += 1
     elif args.give_up:
         sys.exit()
+    return reference
 
 # Remove files and be quiet if they don't exist or can't be removed.
 def remove_files(*filenames):
@@ -98,18 +103,14 @@ def remove_files(*filenames):
         except:
             pass
 
-# Test spvc producing GLSL the same way SPIRV-Cross is tested.
-# There are three steps: prepare input, convert to GLSL, check result.
-def test_glsl(shader, filename, optimize):
+# Prepare Vulkan binary for input to spvc.  The test input is either:
+# - Vulkan text, assembled with spirv-as
+# - GLSL, converted with glslang
+# Optionally pass through spirv-opt.
+def compile_input_shader(shader, filename, optimize):
     global args
     global tmpfile
-    global test_count
     shader_path = os.path.join(args.cross_dir, shader)
-
-    # Prepare Vulkan binary.  The test input is either:
-    # - Vulkan text, assembled with spirv-as
-    # - GLSL, converted with glslang
-    # Optionally pass through spirv-opt.
     if '.asm.' in filename:
         flags = []
         if '.preserve.' in filename:
@@ -117,59 +118,169 @@ def test_glsl(shader, filename, optimize):
         spirv_as(shader_path, tmpfile, flags)
     else:
         glslang_compile(shader_path, tmpfile, ['--target-env', 'vulkan1.1', '-V'])
-    if optimize and not '.noopt.' in filename and not '.invalid.' in filename:
+    if optimize:
         spirv_opt(tmpfile, tmpfile, [])
+    return tmpfile
+
+# Test spvc producing GLSL the same way SPIRV-Cross is tested.
+# There are three steps: compile input, convert to GLSL, check result.
+def test_glsl(shader, filename, optimize):
+    global args
+    global test_count
+
+    input = compile_input_shader(shader, filename,
+                  optimize and not '.noopt.' in filename and not '.invalid.' in filename)
     if not '.invalid.' in filename:
         # logged for compatibility with SPIRV-Cross test script
-        log_command(['spirv-val', '--target-env', 'vulkan1.1', tmpfile])
+        log_command(['spirv-val', '--target-env', 'vulkan1.1', input])
 
     # Run spvc to convert Vulkan to GLSL.  Up to two tests are performed:
     # - Regular test on most files
     # - Vulkan-specific test on Vulkan test input
-    flags = ['--entry=main']
+    flags = ['--entry=main', '--language=glsl']
     if not '.noeliminate' in filename:
         flags.append('--remove-unused-variables')
     if '.legacy.' in filename:
-        flags.extend(['--version=100', '--es'])
+        flags.extend(['--glsl-version=100', '--es'])
     if '.flatten.' in filename:
         flags.append('--flatten-ubo')
     if '.flatten_dim.' in filename:
         flags.append('--flatten-multidimensional-arrays')
+    if '.push-ubo.' in filename:
+        flags.append('--glsl-emit-push-constant-as-ubo')
     if '.sso.' in filename:
         flags.append('--separate-shader-objects')
 
     output = None
     if not '.nocompat.' in filename:
         test_count += 1
-        output = spvc(tmpfile, tmpfile + filename , flags)
+        output = spvc(input, input + filename , flags)
         # logged for compatibility with SPIRV-Cross test script
         log_command([args.glslang, output])
 
     output_vk = None
     if '.vk.' in filename or '.asm.' in filename:
         test_count += 1
-        output_vk = spvc(tmpfile, tmpfile + 'vk' + filename, flags + ['--vulkan-semantics'])
+        output_vk = spvc(input, input + 'vk' + filename, flags + ['--vulkan-semantics'])
         # logged for compatibility with SPIRV-Cross test script
         log_command([args.glslang, '--target-env', 'vulkan1.1', '-V', output_vk])
 
-    # Check results.
+    # Check result(s).
     # Compare either or both files produced above to appropriate reference file.
-    if optimize:
-        reference = os.path.join('reference', 'opt', shader)
-    else:
-        reference = os.path.join('reference', shader)
     if not '.nocompat.' in filename and output:
-        check_reference(output, reference)
+        check_reference(output, shader, optimize)
     if '.vk.' in filename and output_vk:
-        check_reference(output_vk, reference + '.vk')
+        check_reference(output_vk, shader + '.vk', optimize)
 
-    # Clean up.
-    remove_files(tmpfile, output, output_vk)
+    remove_files(input, output, output_vk)
 
-# Stub for tests not yet implemented.
-def test_todo(shader, filename, optimize):
+# Search first column of 'table' to return item from second column.
+# The last item will be returned if nothing earlier matches.
+def lookup(table, filename):
+    for needle, haystack in zip(table[0::2], table[1::2]):
+        if '.' + needle + '.' in filename:
+            break
+    return haystack
+
+shader_models = (
+    'sm60', '60',
+    'sm51', '51',
+    'sm30', '30',
+    ''    , '50',
+)
+msl_standards = (
+    'msl2' , '20000',
+    'msl21', '20100',
+    'msl11', '10100',
+    ''     , '10200',
+)
+msl_standards_ios = (
+    'msl2' , '-std=ios-metal2.0',
+    'msl21', '-std=ios-metal2.1',
+    'msl11', '-std=ios-metal1.1',
+    'msl10', '-std=ios-metal1.0',
+    ''     , '-std=ios-metal1.2',
+)
+msl_standards_macos = (
+    'msl2' , '-std=macos-metal2.0',
+    'msl21', '-std=macos-metal2.1',
+    'msl11', '-std=macos-metal1.1',
+    ''     , '-std=macos-metal1.2',
+)
+
+# Test spvc producing MSL the same way SPIRV-Cross is tested.
+# There are three steps: compile input, convert to HLSL, check result.
+def test_msl(shader, filename, optimize):
+    global args
+    global test_count
+
+    input = compile_input_shader(shader, filename, optimize and not '.noopt.' in filename)
+
+    # Run spvc to convert Vulkan to MSL.
+    flags = ['--entry=main', '--language=msl', '--msl-version=' + lookup(msl_standards, filename)]
+    # TODO(fjhenigman): add these flags to spvc and uncomment these lines
+    #if '.swizzle.' in filename:
+    #    flags.append('--msl-swizzle-texture-samples')
+    #if '.ios.' in filename:
+    #    flags.append('--msl-ios')
+    #if '.pad-fragment.' in filename:
+    #    flags.append('--msl-pad-fragment-output')
+    #if '.capture.' in filename:
+    #    flags.append('--msl-capture-output')
+    #if '.domain.' in filename:
+    #    flags.append('--msl-domain-lower-left')
+    #if '.argument.' in shader:
+    #    flags.append('--msl-argument-buffers')
+    #if '.discrete.' in shader:
+    #    flags.append('--msl-discrete-descriptor-set=2')
+    #    flags.append('--msl-discrete-descriptor-set=3')
+
+    test_count += 1
+    output = spvc(input, input + filename, flags)
+    if not '.invalid.' in filename:
+        # logged for compatibility with SPIRV-Cross test script
+        log_command(['spirv-val', '--target-env', 'vulkan1.1', input])
+
+    # Check result.
+    if output:
+        reference = check_reference(output, shader, optimize)
+        # logged for compatibility with SPIRV-Cross test script
+        log_command(['xcrun', '--sdk',
+                     'iphoneos' if '.ios.' in filename else 'macosx',
+                     'metal', '-x', 'metal',
+                     lookup(msl_standards_ios if '.ios.' in filename else msl_standards_macos,
+                            filename),
+                     '-Werror', '-Wno-unused-variable', reference])
+
+    remove_files(input, output)
+
+# Test spvc producing HLSL the same way SPIRV-Cross is tested.
+# There are three steps: compile input, convert to HLSL, check result.
+def test_hlsl(shader, filename, optimize):
+    global args
+    global test_count
+
+    input = compile_input_shader(shader, filename, optimize and not '.noopt.' in filename)
+
+    # Run spvc to convert Vulkan to HLSL.
+    test_count += 1
+    output = spvc(input, input + filename, ['--entry=main', '--language=hlsl', '--hlsl-enable-compat', '--shader-model=' + lookup(shader_models, filename)])
+    if not '.invalid.' in filename:
+        # logged for compatibility with SPIRV-Cross test script
+        log_command(['spirv-val', '--target-env', 'vulkan1.1', input])
+
+    if output:
+        # logged for compatibility with SPIRV-Cross test script
+        log_command([args.glslang, '-e', 'main', '-D', '--target-env', 'vulkan1.1', '-V', output])
+        # TODO(fjhenigman): log fxc run here
+        check_reference(output, shader, optimize)
+
+    remove_files(input, output)
+
+def test_reflection(shader, filename):
     global test_count
     test_count += 1
+    # TODO(fjhenigman)
 
 # TODO(fjhenigman): Allow our own tests, not just spirv-cross tests.
 test_case_dirs = (
@@ -177,13 +288,13 @@ test_case_dirs = (
 ('shaders'            , test_glsl, {'optimize':False}),
 ('shaders'            , test_glsl, {'optimize':True }),
 ('shaders-no-opt'     , test_glsl, {'optimize':False}),
-('shaders-msl'        , test_todo, {'optimize':False}),
-('shaders-msl'        , test_todo, {'optimize':True }),
-('shaders-msl-no-opt' , test_todo, {'optimize':False}),
-('shaders-hlsl'       , test_todo, {'optimize':False}),
-('shaders-hlsl'       , test_todo, {'optimize':True }),
-('shaders-hlsl-no-opt', test_todo, {'optimize':False}),
-('shaders-reflection' , test_todo, {'optimize':False}),
+('shaders-msl'        , test_msl , {'optimize':False}),
+('shaders-msl'        , test_msl , {'optimize':True }),
+('shaders-msl-no-opt' , test_msl , {'optimize':False}),
+('shaders-hlsl'       , test_hlsl, {'optimize':False}),
+('shaders-hlsl'       , test_hlsl, {'optimize':True }),
+('shaders-hlsl-no-opt', test_hlsl, {'optimize':False}),
+('shaders-reflection' , test_reflection, {}),
 )
 
 class FileArgAction(argparse.Action):
@@ -237,4 +348,4 @@ def main():
 main()
 
 # TODO: remove the magic number once all tests pass
-sys.exit(pass_count != 546)
+sys.exit(pass_count != 1219)
