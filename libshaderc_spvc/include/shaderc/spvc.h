@@ -80,7 +80,7 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_set_entry_point(
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_remove_unused_variables(
     shaderc_spvc_compile_options_t options, bool b);
 
-// Choose parser to read input.  Default is SPIRV-Tools parser.
+// Choose parser to read input.  Default is SPIRV-Cross parser.
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_parser(
     shaderc_spvc_compile_options_t options, shaderc_spvc_parser parser);
 

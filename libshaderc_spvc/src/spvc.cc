@@ -36,7 +36,7 @@ struct shaderc_spvc_compilation_result {
 };
 
 struct shaderc_spvc_compile_options {
-  shaderc_spvc_parser parser = shaderc_spvc_parser_spirv_tools;
+  shaderc_spvc_parser parser = shaderc_spvc_parser_spirv_cross;
   bool validate = true;
   bool remove_unused_variables = false;
   bool flatten_ubo = false;

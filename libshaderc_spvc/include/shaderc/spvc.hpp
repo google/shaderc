@@ -96,7 +96,7 @@ class CompileOptions {
   }
 
   // Which parser should be used to read the input SPIR-V.  Default is
-  // SPIRV-Tools.
+  // SPIRV-Cross.
   void SetParser(shaderc_spvc_parser parser) {
     shaderc_spvc_compile_options_set_parser(options_, parser);
   }

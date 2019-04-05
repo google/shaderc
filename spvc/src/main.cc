@@ -41,8 +41,8 @@ Options:
   -v                    Display compiler version information.
   -o <output file>      '-' means standard output.
   --parser=<parser>     Select SPIR-V parser.
-                          <parser> is 'tools' for SPIRV-Tools (default),
-                          or 'cross' for SPIRV-Cross.
+                          <parser> is 'tools' for SPIRV-Tools,
+                          or 'cross' for SPIRV-Cross (default).
   --validate=<env>      Validate SPIR-V source with given environment
                           <env> is vulkan1.0 (the default) or vulkan1.1
   --entry=<name>        Specify entry point.
