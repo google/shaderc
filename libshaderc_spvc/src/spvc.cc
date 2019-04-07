@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <iterator>
+
 #include "shaderc/spvc.h"
 #include "libshaderc_util/exceptions.h"
 
@@ -205,7 +207,7 @@ void GetOp(const spv_parsed_instruction_t* inst, unsigned index,
     const spv_parsed_operand_t& op = inst->operands[index];
     assert(op.type == SPV_OPERAND_TYPE_ID);
     const uint32_t* p = inst->words + op.offset;
-    std::copy(p, p + inst->num_operands - index, back_inserter(out));
+    std::copy(p, p + inst->num_operands - index, std::back_inserter(out));
   }
 }
 
