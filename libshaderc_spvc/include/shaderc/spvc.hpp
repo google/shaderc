@@ -134,14 +134,80 @@ class CompileOptions {
     shaderc_spvc_compile_options_set_glsl_language_version(options_, version);
   }
 
+  // If true, flatten multidimensional arrays, e.g. foo[a][b][c] -> foo[a*b*c].
+  // Default is false.
+  void SetFlattenMultidimensionalArrays(bool b) {
+    shaderc_spvc_compile_options_set_flatten_multidimensional_arrays(options_,
+                                                                     b);
+  }
+
+  // Force interpretion as ES, or not.  Default is to detect from source.
+  void SetES(bool b) { shaderc_spvc_compile_options_set_es(options_, b); }
+
+  // If true, emit push constants as uniform buffer objects.  Default is false.
+  void SetGLSLEmitPushConstantAsUBO(bool b) {
+    shaderc_spvc_compile_options_set_glsl_emit_push_constant_as_ubo(options_,
+                                                                    b);
+  }
+
   // Which MSL version should be produced.  Default is 10200 (i.e. 1.2).
   void SetMSLLanguageVersion(uint32_t version) {
     shaderc_spvc_compile_options_set_msl_language_version(options_, version);
   }
 
+  // If true, swizzle MSL texture samples.  Default is false.
+  void SetMSLSwizzleTextureSamples(bool b) {
+    shaderc_spvc_compile_options_set_msl_swizzle_texture_samples(options_, b);
+  }
+
+  // Choose MSL platform.  Default is MacOS.
+  void SetMSLPlatform(shaderc_spvc_msl_platform platform) {
+    shaderc_spvc_compile_options_set_msl_platform(options_, platform);
+  }
+
+  // If true, pad MSL fragment output.  Default is false.
+  void SetMSLPadFragmentOutput(bool b) {
+    shaderc_spvc_compile_options_set_msl_pad_fragment_output(options_, b);
+  }
+
+  // If true, capture MSL output to buffer.  Default is false.
+  void SetMSLCapture(bool b) {
+    shaderc_spvc_compile_options_set_msl_capture(options_, b);
+  }
+
+  // If true, flip the Y-coord of the built-in "TessCoord."  Default is top
+  // left.
+  void SetMSLDomainLowerLeft(bool b) {
+    shaderc_spvc_compile_options_set_msl_domain_lower_left(options_, b);
+  }
+
+  // Enable use of MSL 2.0 indirect argument buffers.  Default is not to use
+  // them.
+  void SetMSLArgumentBuffers(bool b) {
+    shaderc_spvc_compile_options_set_msl_argument_buffers(options_, b);
+  }
+
+  // When using MSL argument buffers, force "classic" MSL 1.0 binding for the
+  // given descriptor sets. This corresponds to VK_KHR_push_descriptor in
+  // Vulkan.
+  void SetMSLDiscreteDescriptorSets(const std::vector<uint32_t> descriptors) {
+    shaderc_spvc_compile_options_set_msl_discrete_descriptor_sets(
+        options_, descriptors.data(), descriptors.size());
+  }
+
   // Which HLSL shader model should be used.  Default is 30.
-  void SetShaderModel(uint32_t model) {
-    shaderc_spvc_compile_options_set_shader_model(options_, model);
+  void SetHLSLShaderModel(uint32_t model) {
+    shaderc_spvc_compile_options_set_hlsl_shader_model(options_, model);
+  }
+
+  // If true, ignore PointSize.  Default is false.
+  void SetHLSLPointSizeCompat(bool b) {
+    shaderc_spvc_compile_options_set_hlsl_point_size_compat(options_, b);
+  }
+
+  // If true, ignore PointCoord.  Default is false.
+  void SetHLSLPointCoordCompat(bool b) {
+    shaderc_spvc_compile_options_set_hlsl_point_coord_compat(options_, b);
   }
 
   // If true (default is false):
