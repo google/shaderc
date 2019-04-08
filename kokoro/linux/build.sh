@@ -24,6 +24,7 @@ set -x
 
 BUILD_ROOT=$PWD
 SRC=$PWD/github/shaderc
+INSTALL_DIR="$SRC/install"
 CONFIG=$1
 COMPILER=$2
 
@@ -77,7 +78,7 @@ cd $SRC/build
 # Invoke the build.
 BUILD_SHA=${KOKORO_GITHUB_COMMIT:-$KOKORO_GITHUB_PULL_REQUEST_COMMIT}
 echo $(date): Starting build...
-cmake -GNinja -DSHADERC_ENABLE_SPVC=ON -DRE2_BUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=$BUILD_TYPE $ADDITIONAL_CMAKE_FLAGS $CMAKE_C_CXX_COMPILER ..
+cmake -GNinja -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR -DSHADERC_ENABLE_SPVC=ON -DRE2_BUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=$BUILD_TYPE $ADDITIONAL_CMAKE_FLAGS $CMAKE_C_CXX_COMPILER ..
 
 echo $(date): Build glslang...
 ninja glslangValidator
@@ -103,3 +104,7 @@ then
 fi
 echo $(date): ctest completed.
 
+# Package the build.
+ninja install
+cd $(dirname $INSTALL_DIR)
+tar czf $KOKORO_ARTIFACTS_DIR/install.tgz $(basename $INSTALL_DIR)
