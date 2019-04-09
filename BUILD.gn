@@ -72,8 +72,11 @@ component("libshaderc") {
   defines = [ "SHADERC_IMPLEMENTATION" ]
 
   sources = [
+    "libshaderc/include/shaderc/env.h",
     "libshaderc/include/shaderc/shaderc.h",
     "libshaderc/include/shaderc/shaderc.hpp",
+    "libshaderc/include/shaderc/status.h",
+    "libshaderc/include/shaderc/visibility.h",
     "libshaderc/src/shaderc.cc",
     "libshaderc/src/shaderc_private.h",
   ]
@@ -90,7 +93,10 @@ component("libshaderc") {
 }
 
 config("shaderc_spvc_public") {
-  include_dirs = [ "libshaderc_spvc/include" ]
+  include_dirs = [
+    "libshaderc/include",
+    "libshaderc_spvc/include",
+  ]
   if (is_component_build) {
     defines = [ "SHADERC_SHAREDLIB" ]
   }
