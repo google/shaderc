@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <iterator>
+#include <sstream>
 
 #include "shaderc/spvc.h"
 #include "libshaderc_util/exceptions.h"
@@ -177,16 +178,16 @@ namespace {
 
 // Put the index-th operand of the instruction into 'out'
 template <typename Out>
-void GetOp(const spv_parsed_instruction_t* inst, unsigned index, Out& out) {
+void GetOp(const spv_parsed_instruction_t* inst, unsigned index, Out* out) {
   static_assert(sizeof(Out) == sizeof(uint32_t), "unexpected operand size");
   assert(index < inst->num_operands);
-  out = static_cast<Out>(inst->words[inst->operands[index].offset]);
+  *out = static_cast<Out>(inst->words[inst->operands[index].offset]);
 }
 
 // Specialized for string.
 template <>
 void GetOp(const spv_parsed_instruction_t* inst, unsigned index,
-           std::string& out) {
+           std::string* out) {
   assert(index < inst->num_operands);
   const spv_parsed_operand_t& op = inst->operands[index];
   assert(op.type == SPV_OPERAND_TYPE_LITERAL_STRING);
@@ -194,7 +195,7 @@ void GetOp(const spv_parsed_instruction_t* inst, unsigned index,
     for (unsigned i = 0; i < 4; ++i) {
       unsigned char c = (*p >> (i * 8)) & 0xff;
       if (!c) return;
-      out.push_back(c);
+      out->push_back(c);
     }
   }
 }
@@ -202,12 +203,25 @@ void GetOp(const spv_parsed_instruction_t* inst, unsigned index,
 // Specialized for ID list.
 template <>
 void GetOp(const spv_parsed_instruction_t* inst, unsigned index,
-           std::vector<uint32_t>& out) {
+           std::vector<uint32_t>* out) {
   if (index < inst->num_operands) {
     const spv_parsed_operand_t& op = inst->operands[index];
     assert(op.type == SPV_OPERAND_TYPE_ID);
     const uint32_t* p = inst->words + op.offset;
-    std::copy(p, p + inst->num_operands - index, std::back_inserter(out));
+    std::copy(p, p + inst->num_operands - index, std::back_inserter(*out));
+  }
+}
+
+// Specialized for ID list.
+template <>
+void GetOp(const spv_parsed_instruction_t* inst, unsigned index,
+           spirv_cross::SmallVector<uint32_t>* out) {
+  if (index < inst->num_operands) {
+    const spv_parsed_operand_t& op = inst->operands[index];
+    assert(op.type == SPV_OPERAND_TYPE_ID);
+    const uint32_t* p = inst->words + op.offset;
+    for (unsigned i=0; i<inst->num_operands - index;++i) out->push_back(p[i]);
+    //std::copy(p, p + inst->num_operands - index, std::back_inserter(*out));
   }
 }
 
@@ -217,14 +231,14 @@ void GetOpsRecur(const spv_parsed_instruction_t* inst, unsigned index) {}
 // Recursive template to do any number of GetOp().
 template <typename First, typename... Rest>
 void GetOpsRecur(const spv_parsed_instruction_t* inst, unsigned index,
-                 First& first, Rest&... rest) {
+                 First* first, Rest*... rest) {
   GetOp(inst, index, first);
   GetOpsRecur(inst, index + 1, rest...);
 }
 
 // Start the recursive template.
 template <typename... Outs>
-void GetOps(const spv_parsed_instruction_t* inst, Outs&... outs) {
+void GetOps(const spv_parsed_instruction_t* inst, Outs*... outs) {
   GetOpsRecur(inst, 0, outs...);
 }
 
@@ -275,7 +289,7 @@ struct Compiler {
       case spv::OpExtInstImport: {
         uint32_t id;
         std::string ext;
-        GetOps(inst, id, ext);
+        GetOps(inst, &id, &ext);
         if (ext == "GLSL.std.450")
           set<spirv_cross::SPIRExtension>(id, spirv_cross::SPIRExtension::GLSL);
         else if (ext == "SPV_AMD_shader_ballot")
@@ -303,13 +317,12 @@ struct Compiler {
         uint32_t id;
         std::string name;
         std::vector<uint32_t> interface_variables;
-        GetOps(inst, model, id, name, interface_variables);
+        GetOps(inst, &model, &id, &name, &interface_variables);
 
         auto itr = ir.entry_points.insert(
             std::make_pair(id, spirv_cross::SPIREntryPoint(id, model, name)));
         auto& e = itr.first->second;
-        std::copy(interface_variables.begin(), interface_variables.end(),
-                  back_inserter(e.interface_variables));
+        for (const auto& i : interface_variables) e.interface_variables.push_back(i);
         ir.set_name(id, e.name);
         if (!ir.default_entry_point) ir.default_entry_point = id;
       } break;
@@ -317,21 +330,21 @@ struct Compiler {
       case spv::OpExecutionMode: {
         uint32_t entry_point;
         spv::ExecutionMode mode;
-        GetOps(inst, entry_point, mode);
+        GetOps(inst, &entry_point, &mode);
 
         auto& execution = ir.entry_points[entry_point];
         execution.flags.set(mode);
 
         switch (mode) {
           case spv::ExecutionModeInvocations:
-            GetOpsRecur(inst, 2, execution.invocations);
+            GetOpsRecur(inst, 2, &execution.invocations);
             break;
           case spv::ExecutionModeLocalSize:
-            GetOpsRecur(inst, 2, execution.workgroup_size.x,
-                        execution.workgroup_size.y, execution.workgroup_size.z);
+            GetOpsRecur(inst, 2, &execution.workgroup_size.x,
+                        &execution.workgroup_size.y, &execution.workgroup_size.z);
             break;
           case spv::ExecutionModeOutputVertices:
-            GetOpsRecur(inst, 2, execution.output_vertices);
+            GetOpsRecur(inst, 2, &execution.output_vertices);
             break;
           default:
             break;
@@ -340,7 +353,7 @@ struct Compiler {
 
       case spv::OpCapability: {
         spv::Capability cap;
-        GetOps(inst, cap);
+        GetOps(inst, &cap);
         if (cap == spv::CapabilityKernel) {
           result->messages.append("Kernel capability not supported.");
           return SPV_REQUESTED_TERMINATION;
@@ -350,7 +363,7 @@ struct Compiler {
 
       case spv::OpTypeVoid: {
         uint32_t id;
-        GetOps(inst, id);
+        GetOps(inst, &id);
         auto& type = set<spirv_cross::SPIRType>(inst->result_id);
         type.basetype = spirv_cross::SPIRType::Void;
       } break;
@@ -360,12 +373,12 @@ struct Compiler {
         uint32_t ret;
         auto& func =
             set<spirv_cross::SPIRFunctionPrototype>(inst->result_id, ret);
-        GetOps(inst, id, ret, func.parameter_types);
+        GetOps(inst, &id, &ret, &func.parameter_types);
       } break;
 
       case spv::OpFunction: {
         uint32_t res, id, control, type;
-        GetOps(inst, res, id, control, type);
+        GetOps(inst, &res, &id, &control, &type);
 
         if (current_function) {
           result->messages.append(
@@ -394,7 +407,7 @@ struct Compiler {
           return SPV_REQUESTED_TERMINATION;
         }
         uint32_t id;
-        GetOps(inst, id);
+        GetOps(inst, &id);
 
         current_function->blocks.push_back(inst->result_id);
         if (!current_function->entry_block) {
@@ -447,6 +460,8 @@ struct Compiler {
   }
 
   ~Compiler() { delete cross; }
+  Compiler(const Compiler&) = delete;
+  Compiler& operator=(const Compiler&) = delete;
 
   // Validate the source spir-v if requested.  If valid parse with either the
   // SPIRV-Cross parser or the SPIRV-Tools parser then use the result to
