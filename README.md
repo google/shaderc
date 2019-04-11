@@ -143,14 +143,7 @@ For building, testing, and profiling Shaderc, the following tools should be
 installed regardless of your OS:
 
 - [CMake](http://www.cmake.org/): for generating compilation targets.
-- [Python](http://www.python.org/): for utility scripts and running the test suite.
-
-Both Python2 and Python3 work.  However, if you use Python2, you will need the
-Python-future package installed:
-
-```
-pip install future
-```
+- [Python 3](http://www.python.org/): for utility scripts and running the test suite.
 
 On Linux, the following tools should be installed:
 

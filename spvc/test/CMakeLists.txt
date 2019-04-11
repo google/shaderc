@@ -1,6 +1,6 @@
 if(${SHADERC_ENABLE_TESTS})
   add_test(NAME spvc_spirv_cross_tests
-    COMMAND ${PYTHON_EXE}
+    COMMAND ${PYTHON_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/run_spirv_cross_tests.py
     $<TARGET_FILE:spvc_exe>
     $<TARGET_FILE:spirv-as>
