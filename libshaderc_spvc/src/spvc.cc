@@ -242,6 +242,81 @@ void GetOps(const spv_parsed_instruction_t* inst, Outs*... outs) {
   GetOpsRecur(inst, 0, outs...);
 }
 
+#if 0
+ideas
+
+foo f;
+bla b;
+get(i,f,b);
+  vs.
+auto f=get<foo>(i,0);  // not terrible.  don't even use a variable, though it is documentation.  down side is the indices
+auto b=get<bla>(i,1);
+
+// can wrap instructions
+class wrap {
+  public:
+    wrap spv_parsed_instruction_t& i) : inst(i) {}
+
+    uint32_t op_id(int index) const {
+      return inst.words[inst.operands[index].offset];
+    }
+    const char *op_str(int index) const {
+      return (const char *)(inst.words + inst.operands[index].offset);
+    }
+
+  protected:
+    const spv_parsed_instruction_t& inst;
+};
+
+// dispatch, mapping from instruction to handler
+template<uint32_t Opcode> struct Handler {
+  static constexpr uint32_t opcode = Opcode;
+};
+for i in { Handler<foo>(), Handler<bar>() ... } map[i.opcode]=i
+
+for i in { op1, op2 } ??
+
+need to map opcodes to handlers at run time, can we set up the mapping at compile time?
+can we avoid a big switch statement?  we can set up a table (see above)
+- setting up a table might be just as long-winded as a switch, either way we are listing everything
+try to make the switch/table constexpr
+if built at run time, probably want the table to live in our currently empty compiler struct
+handlers need context
+- if functions, they have to be member functions (better) or have context explicitly passed in (worse)
+- if objects, they could have the context built in but it would have to be set up in each handler for each parse (not good) or have context passed in (same as non-member function)
+
+we can loop over opcodes at compile time with a recursive template
+Cool<op1, op2, ...>
+I don't think that can build a table to be used at runtime.  We might be able to generate an if-then-else chain, but that's slower than lookup (or switch, which we expect the compiler to translate to lookup)
+
+there really ought to be a class per instruction, with getters for all the opcodes
+I wonder if we can mixin the getters instead of writing them repeatedly
+we couldn't give them meaningful names...
+
+// processing a list at compile time with a recursive template
+template<typename First, typename Rest...rest>
+void foo() {
+  foo1<First>();
+  foo(rest...);
+}
+
+foo<
+  spv::OpExtInstImport,
+  spv::OpEntryPoint,
+  spv::OpExecutionMode,
+  //...
+>();
+
+
+conclusion: we can't do anything fancy at all
+we could set up the jump table at compile time, if not for the big gaps in the opcodes :(
+we could deal with the gaps by doing setup<1,2,3,...,100,101,102,5000,6000> but we should trust the compiler to generate an optimal table/if-else/map/whatever for the switch statement
+we can make the switch function constexpr but there's no point, it doesn't get used at compile time
+
+actually doing a function per-instruction just adds typing, not much else
+#endif
+
+
 // This struct holds a SPIRV-Cross compiler object of type 'CompilerType,'
 // all the state needed while building the spirv_cross::ParsedIR object consumed
 // by the compiler, and a shaderc_spvc_compilation_result_t which indicates
@@ -280,8 +355,31 @@ struct Compiler {
 
   static spv_result_t parse_instruction(void* user_data,
                                         const spv_parsed_instruction_t* inst) {
-    return ((Compiler*)user_data)->parse_instruction(inst);
+    auto compiler = static_cast<Compiler*>(user_data);
+    Inst wrap(isnt);
+    switch(inst->opcode) {
+      case spv::OpExtInstImport: return compiler->OpExtInstImport(wrap);
+    }
+    return SPV_REQUESTED_TERMINATION;
   }
+
+/*
+// with member functions as handlers, we don't have instruction classes to customize with op getters
+  spv_result_t parse_instruction(const spv_parsed_instruction_t* inst) {
+    //XXX we could wrap inst with something useful here
+    Inst i(inst);
+    return handlers[inst->opcode](i);
+
+    return handlers[inst->opcode](inst); //XXX these need the context of current_function/block, ir under construction, etc. - could make them member functions
+  }
+
+  // no need for a template - may as well have parse_foo, parse_blah, etc. - will have to set up as table[foo]=parse_foo, table[bla]=parse_pla etc.
+  template<uint32_t Opcode>
+  void parse(const spv_parsed_instruction_t* inst) {}
+
+  template<>
+  void parse<spv::OpExtInstImport>(const spv_parsed_instruction_t* inst) {}
+*/
 
   // Duplicate behavior of SPIRV-Cross.
   spv_result_t parse_instruction(const spv_parsed_instruction_t* inst) {
