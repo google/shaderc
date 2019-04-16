@@ -176,6 +176,7 @@ void shaderc_spvc_compiler_release(shaderc_spvc_compiler_t compiler) {
 
 namespace {
 
+#if 0
 // Put the index-th operand of the instruction into 'out'
 template <typename Out>
 void GetOp(const spv_parsed_instruction_t* inst, unsigned index, Out* out) {
@@ -242,7 +243,6 @@ void GetOps(const spv_parsed_instruction_t* inst, Outs*... outs) {
   GetOpsRecur(inst, 0, outs...);
 }
 
-#if 0
 ideas
 
 foo f;
@@ -291,7 +291,7 @@ I don't think that can build a table to be used at runtime.  We might be able to
 
 there really ought to be a class per instruction, with getters for all the opcodes
 I wonder if we can mixin the getters instead of writing them repeatedly
-we couldn't give them meaningful names...
+we couldnt give them meaningful names...
 
 // processing a list at compile time with a recursive template
 template<typename First, typename Rest...rest>
@@ -308,13 +308,14 @@ foo<
 >();
 
 
-conclusion: we can't do anything fancy at all
+conclusion: we cant do anything fancy at all
 we could set up the jump table at compile time, if not for the big gaps in the opcodes :(
 we could deal with the gaps by doing setup<1,2,3,...,100,101,102,5000,6000> but we should trust the compiler to generate an optimal table/if-else/map/whatever for the switch statement
 we can make the switch function constexpr but there's no point, it doesn't get used at compile time
 
 actually doing a function per-instruction just adds typing, not much else
 #endif
+#include <inst.hpp>
 
 
 // This struct holds a SPIRV-Cross compiler object of type 'CompilerType,'
@@ -322,7 +323,7 @@ actually doing a function per-instruction just adds typing, not much else
 // by the compiler, and a shaderc_spvc_compilation_result_t which indicates
 // the result of validation/parsing/compiling.
 template <class CompilerType>
-struct Compiler {
+struct Compiler : callback {
   CompilerType* cross = nullptr;
   spirv_cross::SPIRFunction* current_function = nullptr;
   spirv_cross::SPIRBlock* current_block = nullptr;
@@ -356,14 +357,52 @@ struct Compiler {
   static spv_result_t parse_instruction(void* user_data,
                                         const spv_parsed_instruction_t* inst) {
     auto compiler = static_cast<Compiler*>(user_data);
-    Inst wrap(isnt);
-    switch(inst->opcode) {
-      case spv::OpExtInstImport: return compiler->OpExtInstImport(wrap);
-    }
-    return SPV_REQUESTED_TERMINATION;
+    return compiler->call(*inst);
   }
 
-/*
+  spv_result_t do_ExtInstImport(const ExtInstImport& inst) {
+    const Id &id = inst.GetIdResult();
+    const std::string ext = inst.GetName();
+    if (ext == "GLSL.std.450")
+      set<spirv_cross::SPIRExtension>(id, spirv_cross::SPIRExtension::GLSL);
+    else if (ext == "SPV_AMD_shader_ballot")
+      set<spirv_cross::SPIRExtension>(
+          id, spirv_cross::SPIRExtension::SPV_AMD_shader_ballot);
+    else if (ext == "SPV_AMD_shader_explicit_vertex_parameter")
+      set<spirv_cross::SPIRExtension>(
+          id, spirv_cross::SPIRExtension::
+                  SPV_AMD_shader_explicit_vertex_parameter);
+    else if (ext == "SPV_AMD_shader_trinary_minmax")
+      set<spirv_cross::SPIRExtension>(
+          id, spirv_cross::SPIRExtension::SPV_AMD_shader_trinary_minmax);
+    else if (ext == "SPV_AMD_gcn_shader")
+      set<spirv_cross::SPIRExtension>(
+          id, spirv_cross::SPIRExtension::SPV_AMD_gcn_shader);
+    else
+      set<spirv_cross::SPIRExtension>(
+          id, spirv_cross::SPIRExtension::Unsupported);
+    // Other SPIR-V extensions which have ExtInstrs are currently not
+    // supported.
+    return SPV_SUCCESS;
+  }
+
+  spv_result_t do_OpEntryPoint(const EntryPoint& inst) {
+    const spv::ExecutionModel& model = inst.GetExecutionModel();
+    uint32_t id = inst.GetEntryPoint();
+    std::string name = inst.GetName();
+    std::vector<uint32_t> interface_variables;
+    //GetOps(inst, &model, &id, &name, &interface_variables);
+
+    auto itr = ir.entry_points.insert(
+        std::make_pair(id, spirv_cross::SPIREntryPoint(id, model, name)));
+    auto& e = itr.first->second;
+    for (const auto& i : interface_variables) e.interface_variables.push_back(i);
+    ir.set_name(id, e.name);
+    if (!ir.default_entry_point) ir.default_entry_point = id;
+    return SPV_SUCCESS;
+  }
+
+#if 0
 // with member functions as handlers, we don't have instruction classes to customize with op getters
   spv_result_t parse_instruction(const spv_parsed_instruction_t* inst) {
     //XXX we could wrap inst with something useful here
@@ -379,7 +418,6 @@ struct Compiler {
 
   template<>
   void parse<spv::OpExtInstImport>(const spv_parsed_instruction_t* inst) {}
-*/
 
   // Duplicate behavior of SPIRV-Cross.
   spv_result_t parse_instruction(const spv_parsed_instruction_t* inst) {
@@ -543,6 +581,7 @@ struct Compiler {
 
     return SPV_SUCCESS;
   }
+#endif
 
   // Copied from SPIRV-Cross.
   template <typename T, typename... P>
