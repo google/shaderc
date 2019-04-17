@@ -95,6 +95,7 @@ echo "Tests passed %DATE% %TIME%"
 :: ################################################
 :: Install and package.
 :: ################################################
+ninja install
 cd %SRC%
 zip -r install.zip install
 
