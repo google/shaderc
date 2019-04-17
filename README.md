@@ -1,9 +1,5 @@
 # Shaderc
 
-<img alt="Linux" src="kokoro/img/linux.png" width="20px" height="20px" hspace="2px"/>![Linux Build Status](https://storage.googleapis.com/shaderc/badges/build_status_linux_release.svg)
-<img alt="MacOS" src="kokoro/img/macos.png" width="20px" height="20px" hspace="2px"/>![MacOS Build Status](https://storage.googleapis.com/shaderc/badges/build_status_macos_release.svg)
-<img alt="Windows" src="kokoro/img/windows.png" width="20px" height="20px" hspace="2px"/>![Windows Build Status](https://storage.googleapis.com/shaderc/badges/build_status_windows_release.svg)
-
 A collection of tools, libraries and tests for shader compilation.
 At the moment it includes:
 
@@ -19,6 +15,14 @@ to provide:
 * an API supporting standard concurrency patterns across multiple
   operating systems
 * increased functionality such as file `#include` support
+
+## Downloads
+
+<img alt="Linux" src="kokoro/img/linux.png" width="20px" height="20px" hspace="2px"/>[![Linux Build Status](https://storage.googleapis.com/shaderc/badges/build_status_linux_clang_release.svg)](https://storage.googleapis.com/shaderc/badges/build_link_linux_clang_release.html)
+<img alt="MacOS" src="kokoro/img/macos.png" width="20px" height="20px" hspace="2px"/>[![MacOS Build Status](https://storage.googleapis.com/shaderc/badges/build_status_macos_clang_release.svg)](https://storage.googleapis.com/shaderc/badges/build_link_macos_clang_release.html)
+<img alt="Windows" src="kokoro/img/windows.png" width="20px" height="20px" hspace="2px"/>[![Windows Build Status](https://storage.googleapis.com/shaderc/badges/build_status_windows_vs2017_release.svg)](https://storage.googleapis.com/shaderc/badges/build_link_windows_vs2017_release.html)
+
+[More downloads](downloads.md)
 
 ## Status
 
