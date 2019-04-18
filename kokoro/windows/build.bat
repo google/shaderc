@@ -97,11 +97,14 @@ echo "Tests passed %DATE% %TIME%"
 :: ################################################
 ninja install
 cd %SRC%
+dir install
+dir
 zip -r install.zip install
+dir
 
 :: Clean up some directories.
-rm -rf %SRC%\build
-rm -rf %SRC%\install
-rm -rf %SRC%\third_party
+::rm -rf %SRC%\build
+::rm -rf %SRC%\install
+::rm -rf %SRC%\third_party
 
 exit /b 0
