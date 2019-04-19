@@ -16,6 +16,8 @@
 
 @echo on
 
+set
+
 set BUILD_ROOT=%cd%
 set SRC=%cd%\github\shaderc
 set BUILD_TYPE=%1
@@ -56,7 +58,7 @@ if "%KOKORO_GITHUB_COMMIT%." == "." (
   set BUILD_SHA=%KOKORO_GITHUB_COMMIT%
 )
 
-set CMAKE_FLAGS=-DCMAKE_INSTALL_PREFIX=%SRC%\install -DSHADERC_ENABLE_SPVC=ON -DRE2_BUILD_TESTING=OFF -GNinja -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe
+set CMAKE_FLAGS=-DCMAKE_INSTALL_PREFIX=%KOKORO_ARTIFACTS_DIR%\install -DSHADERC_ENABLE_SPVC=ON -DRE2_BUILD_TESTING=OFF -GNinja -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe
 
 :: Skip building SPIRV-Tools tests for VS2013
 if %VS_VERSION% == 2013 (
@@ -66,18 +68,18 @@ if %VS_VERSION% == 2013 (
 cmake %CMAKE_FLAGS% ..
 if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 
-echo "Build glslang... %DATE% %TIME%"
-ninja glslangValidator
-if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
+:: echo "Build glslang... %DATE% %TIME%"
+:: ninja glslangValidator
+:: if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 
 echo "Build everything... %DATE% %TIME%"
-ninja
+ninja libglslc.a
 if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 
-echo "Check Shaderc for copyright notices... %DATE% %TIME%"
-ninja check-copyright
-if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
-echo "Build Completed %DATE% %TIME%"
+:: echo "Check Shaderc for copyright notices... %DATE% %TIME%"
+:: ninja check-copyright
+:: if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
+:: echo "Build Completed %DATE% %TIME%"
 
 :: This lets us use !ERRORLEVEL! inside an IF ... () and get the actual error at that point.
 setlocal ENABLEDELAYEDEXPANSION
@@ -85,22 +87,19 @@ setlocal ENABLEDELAYEDEXPANSION
 :: ################################################
 :: Run the tests (We no longer run tests on VS2013)
 :: ################################################
-echo "Running tests... %DATE% %TIME%"
-if %VS_VERSION% NEQ 2013 (
-  ctest -C %BUILD_TYPE% --output-on-failure -j4
-  if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
-)
-echo "Tests passed %DATE% %TIME%"
+:: echo "Running tests... %DATE% %TIME%"
+:: if %VS_VERSION% NEQ 2013 (
+::   ctest -C %BUILD_TYPE% --output-on-failure -j4
+::   if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
+:: )
+:: echo "Tests passed %DATE% %TIME%"
 
 :: ################################################
 :: Install and package.
 :: ################################################
 ninja install
-cd %SRC%
-dir install
-dir
+cd %KOKORO_ARTIFACTS_DIR%
 zip -r install.zip install
-dir
 
 :: Clean up some directories.
 ::rm -rf %SRC%\build
