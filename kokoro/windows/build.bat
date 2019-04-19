@@ -73,7 +73,7 @@ if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 :: if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 
 echo "Build everything... %DATE% %TIME%"
-ninja libglslc.a
+ninja libglslc.lib
 if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 
 :: echo "Check Shaderc for copyright notices... %DATE% %TIME%"
