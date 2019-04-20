@@ -56,7 +56,7 @@ if "%KOKORO_GITHUB_COMMIT%." == "." (
   set BUILD_SHA=%KOKORO_GITHUB_COMMIT%
 )
 
-set CMAKE_FLAGS=-DCMAKE_INSTALL_PREFIX=%SRC%\install -DSHADERC_ENABLE_SPVC=ON -DRE2_BUILD_TESTING=OFF -GNinja -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe
+set CMAKE_FLAGS=-DCMAKE_INSTALL_PREFIX=%KOKORO_ARTIFACTS_DIR%\install -DSHADERC_ENABLE_SPVC=ON -DRE2_BUILD_TESTING=OFF -GNinja -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe
 
 :: Skip building SPIRV-Tools tests for VS2013
 if %VS_VERSION% == 2013 (
@@ -96,7 +96,7 @@ echo "Tests passed %DATE% %TIME%"
 :: Install and package.
 :: ################################################
 ninja install
-cd %SRC%
+cd %KOKORO_ARTIFACTS_DIR%
 zip -r install.zip install
 
 :: Clean up some directories.
