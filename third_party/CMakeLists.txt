@@ -50,7 +50,7 @@ if (NOT TARGET SPIRV-Tools)
     elseif(NOT "${SPIRV_SKIP_TESTS}")
       # SPIRV-Tools requires effcee and re2 to build tests.
       # re2 tests take a long time and do not add much value, since re2 is a
-      # dependency of a dependency.
+      # dependency of a dependency, so not running them.
       set(RE2_BUILD_TESTING OFF CACHE STRING "Run RE2 Tests")
       add_subdirectory(${SHADERC_RE2_DIR} re2)
       add_subdirectory(${SHADERC_EFFCEE_DIR} effcee)
