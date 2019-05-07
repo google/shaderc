@@ -47,9 +47,9 @@ with a `.glsl,` `.hlsl` or `.msl` extension, as appropriate.
 
 `--version` displays version information.
 
-==== `--validate=<target env>`
+==== `--validate=<source env>`
 
-`--validate` validates the input with the given target environment, which is one of:
+`--validate` validates the input with the given environment, which is one of:
 
 * vulkan1.0
 * vulkan1.1

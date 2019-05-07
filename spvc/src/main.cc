@@ -220,16 +220,16 @@ int main(int argc, char** argv) {
       }
       options.SetShaderModel(shader_model_num);
     } else if (arg.starts_with("--validate=")) {
-      string_piece target_env;
-      GetOptionArgument(argc, argv, &i, "--validate=", &target_env);
-      if (target_env == "vulkan1.0") {
-        options.SetTargetEnvironment(shaderc_target_env_vulkan,
+      string_piece env;
+      GetOptionArgument(argc, argv, &i, "--validate=", &env);
+      if (env == "vulkan1.0") {
+        options.SetSourceEnvironment(shaderc_target_env_vulkan,
                                      shaderc_env_version_vulkan_1_0);
-      } else if (target_env == "vulkan1.1") {
-        options.SetTargetEnvironment(shaderc_target_env_vulkan,
+      } else if (env == "vulkan1.1") {
+        options.SetSourceEnvironment(shaderc_target_env_vulkan,
                                      shaderc_env_version_vulkan_1_1);
       } else {
-        std::cerr << "spvc: error: invalid value '" << target_env
+        std::cerr << "spvc: error: invalid value '" << env
                   << "' in --validate=" << std::endl;
         return 1;
       }

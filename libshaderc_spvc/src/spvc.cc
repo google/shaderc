@@ -38,7 +38,7 @@ struct shaderc_spvc_compile_options {
   bool remove_unused_variables = false;
   bool flatten_ubo = false;
   std::string entry_point;
-  spv_target_env target_env = SPV_ENV_VULKAN_1_0;
+  spv_target_env source_env = SPV_ENV_VULKAN_1_0;
   spirv_cross::CompilerGLSL::Options glsl;
   spirv_cross::CompilerHLSL::Options hlsl;
   spirv_cross::CompilerMSL::Options msl;
@@ -66,15 +66,15 @@ void shaderc_spvc_compile_options_release(
   delete options;
 }
 
-void shaderc_spvc_compile_options_set_target_env(
-    shaderc_spvc_compile_options_t options, shaderc_target_env target,
+void shaderc_spvc_compile_options_set_source_env(
+    shaderc_spvc_compile_options_t options, shaderc_target_env env,
     shaderc_env_version version) {
-  switch (target) {
+  switch (env) {
     case shaderc_target_env_opengl:
     case shaderc_target_env_opengl_compat:
       switch (version) {
         case shaderc_env_version_opengl_4_5:
-          options->target_env = SPV_ENV_OPENGL_4_5;
+          options->source_env = SPV_ENV_OPENGL_4_5;
           break;
         default:
           break;
@@ -83,10 +83,10 @@ void shaderc_spvc_compile_options_set_target_env(
     case shaderc_target_env_vulkan:
       switch (version) {
         case shaderc_env_version_vulkan_1_0:
-          options->target_env = SPV_ENV_VULKAN_1_0;
+          options->source_env = SPV_ENV_VULKAN_1_0;
           break;
         case shaderc_env_version_vulkan_1_1:
-          options->target_env = SPV_ENV_VULKAN_1_1;
+          options->source_env = SPV_ENV_VULKAN_1_1;
           break;
         default:
           break;
@@ -184,7 +184,7 @@ shaderc_spvc_compilation_result_t validate_and_compile(
   if (!result) return nullptr;
 
   if (options->validate) {
-    spvtools::SpirvTools tools(options->target_env);
+    spvtools::SpirvTools tools(options->source_env);
     if (!tools.IsValid()) return nullptr;
     tools.SetMessageConsumer(std::bind(
         consume_validation_message, result, std::placeholders::_1,
