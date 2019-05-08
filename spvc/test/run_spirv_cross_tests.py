@@ -112,7 +112,7 @@ def compile_input_shader(shader, filename, optimize):
     global tmpfile
     shader_path = os.path.join(args.cross_dir, shader)
     if '.asm.' in filename:
-        flags = []
+        flags = ['--target-env', 'vulkan1.1']
         if '.preserve.' in filename:
             flags.append('--preserve-numeric-ids')
         spirv_as(shader_path, tmpfile, flags)
