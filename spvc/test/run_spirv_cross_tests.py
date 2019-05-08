@@ -37,7 +37,7 @@ def log_command(cmd):
     global args
     if args.log:
         # make sure it's all strings
-        cmd = map(str, cmd)
+        cmd = [str(x) for x in cmd]
         # first item is the command path, keep only last component
         cmd[0] = os.path.basename(cmd[0])
         # if last item is a path in SPIRV-Cross dir, trim that dir
