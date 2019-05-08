@@ -1,7 +1,26 @@
 Revision history for Shaderc
 
-v2018.1-dev 2018-10-01
- - Start v2018.1 development
+v2019.0-dev 2019-05-08
+ - Add optional spvc, libshaderc_spvc as wrapper around SPIRV-Cross:
+   - Rejects bad modules by running the SPIR-V validator first
+   - Skips exception-heavy SPIRV-Cross SPIR-V parser
+ - Support NV extensions for shader stages
+ - Require SPIRV-Tools and SPIRV-Headers with SPIR-V 1.4 support
+ Build support:
+ - Use KhronosGroup/glslang instead of google/glslang
+ - Stop running tests on VS 2013 (googletest no longer supports VS2013)
+ - Require Python3 for building
+ - Support Chromium's GN build system
+ - Kokoro build fixes
+ - Cmake build fixes: Only build subdirs if those targets are not yet defined
+ - Use Android.mk from Glslang
+ - Dockerfile gets re2 and effcee sources
+ - Fixes for newer googletest
+ - Add address sanitizer presubmit bot
+ - Generate config files for pkg-config
+ Fixes:
+  #499: In HLSL compilation, relax layout and logical pointer validation rules
+   prior to running the legalization recipe.
 
 v2018.0 2018-10-01
  - Support -fhlsl_functionality1 (also -fhlsl-functionality1)
