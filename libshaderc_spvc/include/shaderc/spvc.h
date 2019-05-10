@@ -75,10 +75,10 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_set_entry_point(
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_remove_unused_variables(
     shaderc_spvc_compile_options_t options, bool b);
 
-// Sets the target shader environment, affecting which warnings or errors will
-// be issued during validation.
-SHADERC_EXPORT void shaderc_spvc_compile_options_set_target_env(
-    shaderc_spvc_compile_options_t options, shaderc_target_env target,
+// Sets the source shader environment, affecting which warnings or errors will
+// be issued during validation. Default value for environment is Vulkan 1.0.
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_source_env(
+    shaderc_spvc_compile_options_t options, shaderc_target_env env,
     shaderc_env_version version);
 
 // If true, Vulkan GLSL features are used instead of GL-compatible features.

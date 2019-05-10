@@ -95,11 +95,10 @@ class CompileOptions {
     other.options_ = nullptr;
   }
 
-  // Which environment should be used to validate the input SPIR-V.  Default is
-  // Vulkan 1.0.
-  void SetTargetEnvironment(shaderc_target_env target,
+  // Set the environment for the input SPIR-V.  Default is Vulkan 1.0.
+  void SetSourceEnvironment(shaderc_target_env env,
                             shaderc_env_version version) {
-    shaderc_spvc_compile_options_set_target_env(options_, target, version);
+    shaderc_spvc_compile_options_set_source_env(options_, env, version);
   }
 
   // Set the entry point.
