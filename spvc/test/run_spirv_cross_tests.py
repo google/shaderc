@@ -12,14 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''
+"""
 Run the spirv-cross tests on spvc.
-'''
-
-from __future__ import print_function
+"""
 
 import argparse
-import errno
 import filecmp
 import os
 import subprocess
@@ -33,6 +30,7 @@ args = None # command line arguments
 not_used, tmpfile = tempfile.mkstemp()
 devnull = None
 
+
 def log_command(cmd):
     global args
     if args.log:
@@ -43,8 +41,9 @@ def log_command(cmd):
         # if last item is a path in SPIRV-Cross dir, trim that dir
         if cmd[-1].startswith(args.cross_dir):
             cmd[-1] = cmd[-1][len(args.cross_dir) + 1:]
-        print(' '.join(cmd), file=args.log)
+        args.log.write(''.join(cmd) + '\n')
         args.log.flush()
+
 
 # Quietly run a command.  Throw exception on failure.
 def check_call(cmd):
@@ -54,20 +53,24 @@ def check_call(cmd):
     if not args.dry_run:
         subprocess.check_call(cmd, stdout=devnull)
 
+
 # Run spirv-as.  Throw exception on failure.
 def spirv_as(inp, out, flags):
     global args
     check_call([args.spirv_as] + flags + ['-o', out, inp])
+
 
 # Run spirv-opt.  Throw exception on failure.
 def spirv_opt(inp, out, flags):
     global args
     check_call([args.spirv_opt] + flags + ['--skip-validation', '-O', '-o', out, inp])
 
+
 # Run glslangValidator as a compiler.  Throw exception on failure.
 def glslang_compile(inp, out, flags):
     global args
     check_call([args.glslang] + flags + ['-o', out, inp])
+
 
 # Run spvc, return 'out' on success, None on failure.
 def spvc(inp, out, flags):
@@ -79,6 +82,7 @@ def spvc(inp, out, flags):
         return out
     if args.give_up:
         sys.exit()
+
 
 # Compare result file to reference file and count matches.
 def check_reference(result, shader, optimize):
@@ -95,6 +99,7 @@ def check_reference(result, shader, optimize):
         sys.exit()
     return reference
 
+
 # Remove files and be quiet if they don't exist or can't be removed.
 def remove_files(*filenames):
     for i in filenames:
@@ -102,6 +107,7 @@ def remove_files(*filenames):
             os.remove(i)
         except:
             pass
+
 
 # Prepare Vulkan binary for input to spvc.  The test input is either:
 # - Vulkan text, assembled with spirv-as
@@ -121,6 +127,7 @@ def compile_input_shader(shader, filename, optimize):
     if optimize:
         spirv_opt(tmpfile, tmpfile, [])
     return tmpfile
+
 
 # Test spvc producing GLSL the same way SPIRV-Cross is tested.
 # There are three steps: compile input, convert to GLSL, check result.
@@ -174,6 +181,7 @@ def test_glsl(shader, filename, optimize):
 
     remove_files(input, output, output_vk)
 
+
 # Search first column of 'table' to return item from second column.
 # The last item will be returned if nothing earlier matches.
 def lookup(table, filename):
@@ -207,6 +215,7 @@ msl_standards_macos = (
     'msl11', '-std=macos-metal1.1',
     ''     , '-std=macos-metal1.2',
 )
+
 
 # Test spvc producing MSL the same way SPIRV-Cross is tested.
 # There are three steps: compile input, convert to HLSL, check result.
@@ -254,6 +263,7 @@ def test_msl(shader, filename, optimize):
 
     remove_files(input, output)
 
+
 # Test spvc producing HLSL the same way SPIRV-Cross is tested.
 # There are three steps: compile input, convert to HLSL, check result.
 def test_hlsl(shader, filename, optimize):
@@ -277,25 +287,28 @@ def test_hlsl(shader, filename, optimize):
 
     remove_files(input, output)
 
+
 def test_reflection(shader, filename):
     global test_count
     test_count += 1
     # TODO(fjhenigman)
 
+
 # TODO(fjhenigman): Allow our own tests, not just spirv-cross tests.
 test_case_dirs = (
-# directory             function    args
-('shaders'            , test_glsl, {'optimize':False}),
-('shaders'            , test_glsl, {'optimize':True }),
-('shaders-no-opt'     , test_glsl, {'optimize':False}),
-('shaders-msl'        , test_msl , {'optimize':False}),
-('shaders-msl'        , test_msl , {'optimize':True }),
-('shaders-msl-no-opt' , test_msl , {'optimize':False}),
-('shaders-hlsl'       , test_hlsl, {'optimize':False}),
-('shaders-hlsl'       , test_hlsl, {'optimize':True }),
-('shaders-hlsl-no-opt', test_hlsl, {'optimize':False}),
-('shaders-reflection' , test_reflection, {}),
+    # directory             function    args
+    ('shaders'            , test_glsl, {'optimize': False}),
+    ('shaders'            , test_glsl, {'optimize': True }),
+    ('shaders-no-opt'     , test_glsl, {'optimize': False}),
+    ('shaders-msl'        , test_msl , {'optimize': False}),
+    ('shaders-msl'        , test_msl , {'optimize': True }),
+    ('shaders-msl-no-opt' , test_msl , {'optimize': False}),
+    ('shaders-hlsl'       , test_hlsl, {'optimize': False}),
+    ('shaders-hlsl'       , test_hlsl, {'optimize': True }),
+    ('shaders-hlsl-no-opt', test_hlsl, {'optimize': False}),
+    ('shaders-reflection' , test_reflection, {}),
 )
+
 
 class FileArgAction(argparse.Action):
     def __call__(self, parser, namespace, value, option):
@@ -308,6 +321,7 @@ class FileArgAction(argparse.Action):
                 print("could not open log file '%s' for writing" % value)
                 raise
         setattr(namespace, self.dest, log)
+
 
 def main():
     global args
@@ -345,7 +359,8 @@ def main():
     if args.log is not None and args.log is not sys.stdout:
         args.log.close()
 
-main()
 
-# TODO: remove the magic number once all tests pass
-sys.exit(pass_count != 1246)
+if __name__ == "__main__":
+    main()
+    # TODO: remove the magic number once all tests pass
+    sys.exit(pass_count != 1246)

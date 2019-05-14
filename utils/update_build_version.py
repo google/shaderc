@@ -23,8 +23,6 @@
 # directory's "git describe" output enclosed in double quotes and appropriately
 # escaped.
 
-from __future__ import print_function
-
 import datetime
 import os.path
 import re

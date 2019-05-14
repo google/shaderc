@@ -39,6 +39,8 @@ if(SHADERC_ENABLE_NV_EXTENSIONS)
     add_definitions(-DNV_EXTENSIONS)
 endif(SHADERC_ENABLE_NV_EXTENSIONS)
 
+find_host_package(PythonInterp 3 REQUIRED)
+
 add_custom_target(check-copyright ALL
   ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/add_copyright.py
   --check

@@ -17,7 +17,6 @@
 """Builds the Shaderc project, on Linux, Mac, or Windows.
 """
 
-from __future__ import print_function
 import argparse
 import os
 import platform
@@ -94,6 +93,7 @@ def build(args):
 def cygpath(f):
     p = subprocess.Popen(['cygpath', '-w', f], stdout=subprocess.PIPE)
     return p.communicate()[0].rstrip()
+
 
 def main():
     """Builds Shaderc after parsing argument specifying locations of

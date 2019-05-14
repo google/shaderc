@@ -21,8 +21,6 @@ With --check, prints out all the files missing the copyright notice and exits
 with status 1 if any such files are found, 0 if none.
 """
 
-from __future__ import print_function
-
 import fileinput
 import fnmatch
 import os
