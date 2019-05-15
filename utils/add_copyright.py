@@ -12,8 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Adds copyright notices to all the files that need them under the
-current directory.
+"""Adds copyright notices to all the files that need them under the current
+directory.
 
 usage: add_copyright.py [--check]
 
@@ -74,8 +74,8 @@ def skip(line):
 def comment(text, prefix):
     """Returns commented-out text.
 
-    Each line of text will be prefixed by prefix and a space character.  Any
-    trailing whitespace will be trimmed.
+    Each line of text will be prefixed by prefix and a space character.
+    Any trailing whitespace will be trimmed.
     """
     accum = []
     for line in text.split('\n'):
@@ -84,11 +84,12 @@ def comment(text, prefix):
 
 
 def insert_copyright(glob, comment_prefix):
-    """Finds all glob-matching files under the current directory and inserts the
-    copyright message into them unless they already have it or are empty.
+    """Finds all glob-matching files under the current directory and inserts
+    the copyright message into them unless they already have it or are empty.
 
-    The copyright message goes into the first non-whitespace, non-shebang line
-    in a file.  It is prefixed on each line by comment_prefix and a space.
+    The copyright message goes into the first non-whitespace, non-
+    shebang line in a file.  It is prefixed on each line by
+    comment_prefix and a space.
     """
     copyright = comment(COPYRIGHT, comment_prefix) + '\n'
     licensed = comment(LICENSED, comment_prefix) + '\n\n'

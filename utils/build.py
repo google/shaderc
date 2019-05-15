@@ -14,8 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Builds the Shaderc project, on Linux, Mac, or Windows.
-"""
+"""Builds the Shaderc project, on Linux, Mac, or Windows."""
 
 import argparse
 import os
@@ -50,7 +49,7 @@ def run(cmd, cwd, env, justprint):
 
 
 def build(args):
-    """ Builds Shaderc under specified conditions.
+    """Builds Shaderc under specified conditions.
 
     Args:
         args: An object with attributes:
@@ -96,9 +95,9 @@ def cygpath(f):
 
 
 def main():
-    """Builds Shaderc after parsing argument specifying locations of
-    files, level of parallelism, and whether it's a dry run that should
-    skip actual compilation and installation."""
+    """Builds Shaderc after parsing argument specifying locations of files,
+    level of parallelism, and whether it's a dry run that should skip actual
+    compilation and installation."""
 
     parser = argparse.ArgumentParser(description='Build Shaderc simply')
     parser.add_argument('-n', '--dry_run', dest='dry_run', default=False,
@@ -148,11 +147,11 @@ def main():
         winargv = []
         args_dict = vars(args)
         for k in args_dict:
-            if k=='path' or k.endswith('dir'):
+            if k == 'path' or k.endswith('dir'):
                 winargv.extend(['--%s' % k, cygpath(args_dict[k])])
-            elif k=='buildtype':
+            elif k == 'buildtype':
                 winargv.extend(['--type', args.buildtype])
-            elif k=='dry_run':
+            elif k == 'dry_run':
                 if args.dry_run:
                     winargv.append('-n')
             else:
