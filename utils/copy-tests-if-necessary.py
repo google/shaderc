@@ -14,8 +14,8 @@
 # limitations under the License.
 
 """Copies tests from the source directory to the binary directory if something
-in the source directory has changed. It also updates the path in runtests
-to point to the correct binary directory.
+in the source directory has changed. It also updates the path in runtests to
+point to the correct binary directory.
 
 Arguments: glslang_test_source_dir glslang_test_bin_dir [intermediate-dir]
 
@@ -31,24 +31,23 @@ import sys
 
 def get_modified_times(path):
     """Returns a string containing a newline-separated set of
-    filename:last_modified_time pairs for all files rooted at path.
-    """
+    filename:last_modified_time pairs for all files rooted at path."""
     output = []
     for root, _, filenames in os.walk(path):
         for filename in filenames:
             fullpath = os.path.join(root, filename)
             output.append(
-                filename + ":" +
-                str(os.path.getmtime(fullpath)) + "\n")
-    return "".join(sorted(output))
+                filename + ':' +
+                str(os.path.getmtime(fullpath)) + '\n')
+    return ''.join(sorted(output))
 
 
 def read_file(path):
     """Reads a file and returns the data as a string."""
-    output = ""
+    output = ''
     try:
         # If we could not open then we simply return "" as the output
-        with open(path, "r") as content:
+        with open(path, 'r') as content:
             output = content.read()
     except:
         pass
@@ -57,18 +56,18 @@ def read_file(path):
 
 def write_file(path, output):
     """Writes an output string to the file located at path."""
-    with open(path, "w") as content:
+    with open(path, 'w') as content:
         content.write(output)
 
 
 def substitute_file(path, substitution):
-    """Substitutes all instances of substitution[0] with substitution[1] for the
-    file located at path."""
-    with open(path, "r") as content:
+    """Substitutes all instances of substitution[0] with substitution[1] for
+    the file located at path."""
+    with open(path, 'r') as content:
         f_input = content.read()
     if f_input:
         f_input = f_input.replace(substitution[0], substitution[1])
-    with open(path, "w") as content:
+    with open(path, 'w') as content:
         content.write(f_input)
 
 
@@ -81,8 +80,7 @@ def substitute_files(path, substitution):
 
 def setup_directory(source, dest):
     """Removes the destination directory if it exists and copies the source
-    directory over the destination if it exists.
-    """
+    directory over the destination if it exists."""
     try:
         shutil.rmtree(dest)
     except OSError as e:
@@ -100,23 +98,23 @@ def main():
     intermediate_directory = None
     if (len(sys.argv) > 3):
         intermediate_directory = sys.argv[3]
-    glsl_list_file = os.path.join(glsl_bin_dir, "glsl_test_list")
+    glsl_list_file = os.path.join(glsl_bin_dir, 'glsl_test_list')
 
     src_glsl_stamp = get_modified_times(glsl_src_dir)
     old_glsl_stamp = read_file(glsl_list_file)
 
-    target_location = "../glslang/StandAlone/"
+    target_location = '../glslang/StandAlone/'
     if intermediate_directory:
-        target_location = "../" + target_location + intermediate_directory + "/"
-    target_location = "EXE=" + target_location
+        target_location = '../' + target_location + intermediate_directory + '/'
+    target_location = 'EXE=' + target_location
 
     if src_glsl_stamp != old_glsl_stamp:
         setup_directory(glsl_src_dir, glsl_bin_dir)
-        runtests_script = os.path.join(glsl_bin_dir, "runtests")
+        runtests_script = os.path.join(glsl_bin_dir, 'runtests')
         substitute_file(runtests_script,
-                        ("EXE=../build/install/bin/", target_location))
+                        ('EXE=../build/install/bin/', target_location))
         write_file(glsl_list_file, src_glsl_stamp)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
