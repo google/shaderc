@@ -16,6 +16,7 @@
 Run the spirv-cross tests on spvc.
 """
 
+from multiprocessing import Pool
 import argparse
 import filecmp
 import os
@@ -23,11 +24,8 @@ import subprocess
 import sys
 import tempfile
 
-test_count = 0
 pass_count = 0
-
 args = None # command line arguments
-not_used, tmpfile = tempfile.mkstemp()
 devnull = None
 
 
@@ -87,17 +85,16 @@ def spvc(inp, out, flags):
 # Compare result file to reference file and count matches.
 def check_reference(result, shader, optimize):
     global args
-    global pass_count
     if optimize:
         reference = os.path.join('reference', 'opt', shader)
     else:
         reference = os.path.join('reference', shader)
     log_command(['reference', reference])
     if args.dry_run or filecmp.cmp(result, os.path.join(args.cross_dir, reference), False):
-        pass_count += 1
+        return True, reference
     elif args.give_up:
         sys.exit()
-    return reference
+    return False, reference
 
 
 # Remove files and be quiet if they don't exist or can't be removed.
@@ -115,7 +112,7 @@ def remove_files(*filenames):
 # Optionally pass through spirv-opt.
 def compile_input_shader(shader, filename, optimize):
     global args
-    global tmpfile
+    _, tmpfile = tempfile.mkstemp()
     shader_path = os.path.join(args.cross_dir, shader)
     if '.asm.' in filename:
         flags = ['--target-env', 'vulkan1.1']
@@ -133,7 +130,6 @@ def compile_input_shader(shader, filename, optimize):
 # There are three steps: compile input, convert to GLSL, check result.
 def test_glsl(shader, filename, optimize):
     global args
-    global test_count
 
     input = compile_input_shader(shader, filename,
                   optimize and not '.noopt.' in filename and not '.invalid.' in filename)
@@ -159,15 +155,17 @@ def test_glsl(shader, filename, optimize):
         flags.append('--separate-shader-objects')
 
     output = None
+    tests = 0
+    passes = 0
     if not '.nocompat.' in filename:
-        test_count += 1
+        tests += 1
         output = spvc(input, input + filename , flags)
         # logged for compatibility with SPIRV-Cross test script
         log_command([args.glslang, output])
 
     output_vk = None
     if '.vk.' in filename or '.asm.' in filename:
-        test_count += 1
+        tests += 1
         output_vk = spvc(input, input + 'vk' + filename, flags + ['--vulkan-semantics'])
         # logged for compatibility with SPIRV-Cross test script
         log_command([args.glslang, '--target-env', 'vulkan1.1', '-V', output_vk])
@@ -175,11 +173,16 @@ def test_glsl(shader, filename, optimize):
     # Check result(s).
     # Compare either or both files produced above to appropriate reference file.
     if not '.nocompat.' in filename and output:
-        check_reference(output, shader, optimize)
+        result, _ = check_reference(output, shader, optimize)
+        if result:
+            passes += 1
     if '.vk.' in filename and output_vk:
-        check_reference(output_vk, shader + '.vk', optimize)
+        result, _ = check_reference(output_vk, shader + '.vk', optimize)
+        if result:
+            passes += 1
 
     remove_files(input, output, output_vk)
+    return tests, passes
 
 
 # Search first column of 'table' to return item from second column.
@@ -190,30 +193,31 @@ def lookup(table, filename):
             break
     return haystack
 
+
 shader_models = (
     'sm60', '60',
     'sm51', '51',
     'sm30', '30',
-    ''    , '50',
+    '',     '50',
 )
 msl_standards = (
-    'msl2' , '20000',
+    'msl2',  '20000',
     'msl21', '20100',
     'msl11', '10100',
-    ''     , '10200',
+    '',      '10200',
 )
 msl_standards_ios = (
-    'msl2' , '-std=ios-metal2.0',
+    'msl2',  '-std=ios-metal2.0',
     'msl21', '-std=ios-metal2.1',
     'msl11', '-std=ios-metal1.1',
     'msl10', '-std=ios-metal1.0',
-    ''     , '-std=ios-metal1.2',
+    '',      '-std=ios-metal1.2',
 )
 msl_standards_macos = (
-    'msl2' , '-std=macos-metal2.0',
+    'msl2',  '-std=macos-metal2.0',
     'msl21', '-std=macos-metal2.1',
     'msl11', '-std=macos-metal1.1',
-    ''     , '-std=macos-metal1.2',
+    '',      '-std=macos-metal1.2',
 )
 
 
@@ -221,7 +225,6 @@ msl_standards_macos = (
 # There are three steps: compile input, convert to HLSL, check result.
 def test_msl(shader, filename, optimize):
     global args
-    global test_count
 
     input = compile_input_shader(shader, filename, optimize and not '.noopt.' in filename)
 
@@ -244,15 +247,19 @@ def test_msl(shader, filename, optimize):
     #    flags.append('--msl-discrete-descriptor-set=2')
     #    flags.append('--msl-discrete-descriptor-set=3')
 
-    test_count += 1
+    tests = 1
     output = spvc(input, input + filename, flags)
     if not '.invalid.' in filename:
         # logged for compatibility with SPIRV-Cross test script
         log_command(['spirv-val', '--target-env', 'vulkan1.1', input])
 
     # Check result.
+    passes = 0
     if output:
-        reference = check_reference(output, shader, optimize)
+        result, reference = check_reference(output, shader, optimize)
+        if result:
+            passes += 1
+
         # logged for compatibility with SPIRV-Cross test script
         log_command(['xcrun', '--sdk',
                      'iphoneos' if '.ios.' in filename else 'macosx',
@@ -262,51 +269,54 @@ def test_msl(shader, filename, optimize):
                      '-Werror', '-Wno-unused-variable', reference])
 
     remove_files(input, output)
+    return tests, passes
 
 
 # Test spvc producing HLSL the same way SPIRV-Cross is tested.
 # There are three steps: compile input, convert to HLSL, check result.
 def test_hlsl(shader, filename, optimize):
     global args
-    global test_count
 
     input = compile_input_shader(shader, filename, optimize and not '.noopt.' in filename)
 
     # Run spvc to convert Vulkan to HLSL.
-    test_count += 1
+    tests = 1
     output = spvc(input, input + filename, ['--entry=main', '--language=hlsl', '--hlsl-enable-compat', '--shader-model=' + lookup(shader_models, filename)])
     if not '.invalid.' in filename:
         # logged for compatibility with SPIRV-Cross test script
         log_command(['spirv-val', '--target-env', 'vulkan1.1', input])
 
+    passes = 0
     if output:
         # logged for compatibility with SPIRV-Cross test script
         log_command([args.glslang, '-e', 'main', '-D', '--target-env', 'vulkan1.1', '-V', output])
         # TODO(fjhenigman): log fxc run here
-        check_reference(output, shader, optimize)
+        result, _ = check_reference(output, shader, optimize)
+        if result:
+            passes += 1
 
     remove_files(input, output)
+    return tests, passes
 
 
-def test_reflection(shader, filename):
-    global test_count
-    test_count += 1
+def test_reflection(shader, filename, optimize):
+    return 1, 0
     # TODO(fjhenigman)
 
 
 # TODO(fjhenigman): Allow our own tests, not just spirv-cross tests.
 test_case_dirs = (
-    # directory             function    args
-    ('shaders'            , test_glsl, {'optimize': False}),
-    ('shaders'            , test_glsl, {'optimize': True }),
-    ('shaders-no-opt'     , test_glsl, {'optimize': False}),
-    ('shaders-msl'        , test_msl , {'optimize': False}),
-    ('shaders-msl'        , test_msl , {'optimize': True }),
-    ('shaders-msl-no-opt' , test_msl , {'optimize': False}),
-    ('shaders-hlsl'       , test_hlsl, {'optimize': False}),
-    ('shaders-hlsl'       , test_hlsl, {'optimize': True }),
-    ('shaders-hlsl-no-opt', test_hlsl, {'optimize': False}),
-    ('shaders-reflection' , test_reflection, {}),
+    # directory             function         optimize
+    ('shaders',             test_glsl,       False),
+    ('shaders',             test_glsl,       True),
+    ('shaders-no-opt',      test_glsl,       False),
+    ('shaders-msl',         test_msl,        False),
+    ('shaders-msl',         test_msl,        True),
+    ('shaders-msl-no-opt',  test_msl,        False),
+    ('shaders-hlsl',        test_hlsl,       False),
+    ('shaders-hlsl',        test_hlsl,       True),
+    ('shaders-hlsl-no-opt', test_hlsl,       False),
+    ('shaders-reflection',  test_reflection, False),
 )
 
 
@@ -323,10 +333,15 @@ class FileArgAction(argparse.Action):
         setattr(namespace, self.dest, log)
 
 
+def work_function(work_args):
+    (test_function, shader, filename, optimize) = work_args
+    return test_function(shader, filename, optimize)
+    
+
 def main():
     global args
     global devnull
-    global test_count, pass_count
+    global pass_count
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--log', action=FileArgAction, help='log commands to file')
@@ -341,20 +356,27 @@ def main():
     parser.add_argument('cross_dir', metavar='<SPIRV-cross directory>')
     args = parser.parse_args()
 
-    test_count = 0
     pass_count = 0
     devnull = open(os.devnull, 'w')
+    tests = []
 
-    for test_case_dir, function, function_args in test_case_dirs:
+    for test_case_dir, test_function, optimize in test_case_dirs:
         walk_dir = os.path.join(args.cross_dir, test_case_dir)
         for dirpath, dirnames, filenames in os.walk(walk_dir):
             dirnames.sort()
             reldir = os.path.relpath(dirpath, args.cross_dir)
             for filename in sorted(filenames):
-                function(os.path.join(reldir, filename), filename, **function_args)
+                tests.append((test_function, os.path.join(reldir, filename), filename, optimize))
 
-    print(test_count, 'test cases')
-    print(pass_count, 'passed')
+    pool = Pool()
+    results = pool.map(work_function, tests)
+
+    tests, passes = zip(*results)
+
+    pass_count = sum(passes)
+    print("{} test cases".format(sum(tests)))
+    print("{} passed".format(pass_count))
+
     devnull.close()
     if args.log is not None and args.log is not sys.stdout:
         args.log.close()
