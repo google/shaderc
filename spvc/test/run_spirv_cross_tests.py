@@ -18,11 +18,10 @@ from multiprocessing import Pool
 import argparse
 import filecmp
 import os
+import re
 import subprocess
 import sys
 import tempfile
-
-pass_count = 0
 
 
 def log_command(script_args, cmd):
@@ -347,12 +346,20 @@ def main():
                         help='do not execute commands')
     parser.add_argument('-g', '--give-up', dest='give_up', action='store_true',
                         help='quit after first failure')
+    parser.add_argument('-f', '--test-filter', dest='test_filter',
+                        action='store', metavar='<test filter regex>',
+                        help='only run tests that contain given regex string')
     parser.add_argument('spvc', metavar='<spvc executable>')
     parser.add_argument('spirv_as', metavar='<spirv-as executable>')
     parser.add_argument('spirv_opt', metavar='<spirv-opt executable>')
     parser.add_argument('glslang', metavar='<glslangValidator executable>')
     parser.add_argument('cross_dir', metavar='<SPIRV-cross directory>')
     script_args = parser.parse_args()
+
+    test_regex = None
+    if script_args.test_filter:
+        print('Filtering tests using \'{}\''.format(script_args.test_filter))
+        test_regex = re.compile(script_args.test_filter)
 
     tests = []
     for test_case_dir, test_function, optimize in test_case_dirs:
@@ -361,8 +368,10 @@ def main():
             dirnames.sort()
             reldir = os.path.relpath(dirpath, script_args.cross_dir)
             for filename in sorted(filenames):
-                tests.append((test_function, script_args, os.path.join(
-                    reldir, filename), filename, optimize))
+                shader = os.path.join(reldir, filename)
+                if not test_regex or re.search(test_regex, shader):
+                    tests.append((test_function, script_args,
+                                  shader, filename, optimize))
 
     pool = Pool()
     results = pool.map(work_function, tests)
