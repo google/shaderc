@@ -17,11 +17,53 @@
 from multiprocessing import Pool
 import argparse
 import filecmp
+import itertools
 import os
 import re
 import subprocess
 import sys
 import tempfile
+
+
+def log_unexpected_successes(script_args, successes):
+    if not len(successes):
+        log_string = 'Encountered 0 unexpected successes'
+    else:
+        log_string = 'Encountered {} unexpected success(es):\n'.format(
+            len(successes))
+        for success in successes:
+            log_string += '\t{}\n'.format(success)
+
+    if script_args.log:
+        script_args.log.write(log_string + '\n')
+        script_args.log.flush()
+    else:
+        print(log_string)
+
+
+def log_unexpected_failures(script_args, failures):
+    if not len(failures):
+        log_string = 'Encountered 0 unexpected failures'
+    else:
+        log_string = 'Encountered {} unexpected failures(s):\n'.format(
+            len(failures))
+        for failure in failures:
+            log_string += '\t{}\n'.format(failure)
+
+    if script_args.log:
+        script_args.log.write(log_string + '\n')
+        script_args.log.flush()
+    else:
+        print(log_string)
+
+
+def log_failure(script_args, shader, optimize):
+    log_string = 'FAILED {}, optimize = {}'.format(shader, optimize)
+    if script_args.log:
+        script_args.log.write(log_string + '\n')
+        script_args.log.flush()
+    else:
+        print(log_string)
 
 
 def log_command(script_args, cmd):
@@ -118,7 +160,7 @@ def compile_input_shader(script_args, shader, filename, optimize):
 
 # Test spvc producing GLSL the same way SPIRV-Cross is tested.
 # There are three steps: compile input, convert to GLSL, check result.
-# Returns the number of tests run and the number of them that passed.
+# Returns a list of successful tests and a list of failed tests.
 def test_glsl(script_args, shader, filename, optimize):
     input = compile_input_shader(script_args, shader, filename,
                                  optimize and not '.noopt.' in filename and not '.invalid.' in filename)
@@ -127,6 +169,8 @@ def test_glsl(script_args, shader, filename, optimize):
         log_command(script_args, ['spirv-val',
                                   '--target-env', 'vulkan1.1', input])
 
+    successes = []
+    failures = []
     # Run spvc to convert Vulkan to GLSL.  Up to two tests are performed:
     # - Regular test on most files
     # - Vulkan-specific test on Vulkan test input
@@ -145,17 +189,13 @@ def test_glsl(script_args, shader, filename, optimize):
         flags.append('--separate-shader-objects')
 
     output = None
-    tests = 0
-    passes = 0
     if not '.nocompat.' in filename:
-        tests += 1
         output = spvc(script_args, input, input + filename, flags)
         # logged for compatibility with SPIRV-Cross test script
         log_command(script_args, [script_args.glslang, output])
 
     output_vk = None
-    if '.vk.' in filename or '.asm.' in filename:
-        tests += 1
+    if '.vk.' in filename:
         output_vk = spvc(script_args, input, input + 'vk' +
                          filename, flags + ['--vulkan-semantics'])
         # logged for compatibility with SPIRV-Cross test script
@@ -164,18 +204,33 @@ def test_glsl(script_args, shader, filename, optimize):
 
     # Check result(s).
     # Compare either or both files produced above to appropriate reference file.
-    if not '.nocompat.' in filename and output:
-        result, _ = check_reference(script_args, output, shader, optimize)
-        if result:
-            passes += 1
-    if '.vk.' in filename and output_vk:
-        result, _ = check_reference(
-            script_args, output_vk, shader + '.vk', optimize)
-        if result:
-            passes += 1
+    if not '.nocompat.' in filename:
+        if output:
+            result, _ = check_reference(script_args, output, shader, optimize)
+            if result:
+                successes.append((shader, optimize))
+            else:
+                failures.append((shader, optimize))
+                log_failure(script_args, shader, optimize)
+        else:
+            failures.append((shader, optimize))
+            log_failure(script_args, shader, optimize)
+
+    if '.vk.' in filename:
+        if output_vk:
+            result, _ = check_reference(
+                script_args, output_vk, shader + '.vk', optimize)
+            if result:
+                successes.append((shader + '.vk', optimize))
+            else:
+                failures.append((shader + '.vk', optimize))
+                log_failure(script_args, shader + '.vk', optimize)
+        else:
+            failures.append((shader + '.vk', optimize))
+            log_failure(script_args, shader + '.vk', optimize)
 
     remove_files(input, output, output_vk)
-    return tests, passes
+    return successes, failures
 
 
 # Search first column of 'table' to return item from second column.
@@ -216,11 +271,13 @@ msl_standards_macos = (
 
 # Test spvc producing MSL the same way SPIRV-Cross is tested.
 # There are three steps: compile input, convert to HLSL, check result.
-# Returns the number of tests run and the number of them that passed.
+# Returns a list of successful tests and a list of failed tests.
 def test_msl(script_args, shader, filename, optimize):
     input = compile_input_shader(
         script_args, shader, filename, optimize and not '.noopt.' in filename)
 
+    successes = []
+    failures = []
     # Run spvc to convert Vulkan to MSL.
     flags = ['--entry=main', '--language=msl',
              '--msl-version=' + lookup(msl_standards, filename)]
@@ -241,7 +298,6 @@ def test_msl(script_args, shader, filename, optimize):
     #    flags.append('--msl-discrete-descriptor-set=2')
     #    flags.append('--msl-discrete-descriptor-set=3')
 
-    tests = 1
     output = spvc(script_args, input, input + filename, flags)
     if not '.invalid.' in filename:
         # logged for compatibility with SPIRV-Cross test script
@@ -249,34 +305,41 @@ def test_msl(script_args, shader, filename, optimize):
                                   '--target-env', 'vulkan1.1', input])
 
     # Check result.
-    passes = 0
     if output:
         result, reference = check_reference(
             script_args, output, shader, optimize)
         if result:
-            passes += 1
-
+            successes.append((shader, optimize))
+        else:
+            failures.append((shader, optimize))
+            log_failure(script_args, shader, optimize)
         # logged for compatibility with SPIRV-Cross test script
         log_command(script_args, ['xcrun', '--sdk',
                                   'iphoneos' if '.ios.' in filename else 'macosx',
                                   'metal', '-x', 'metal',
-                                  lookup(msl_standards_ios if '.ios.' in filename else msl_standards_macos,
-                                         filename),
-                                  '-Werror', '-Wno-unused-variable', reference])
+                                  lookup(
+                                      msl_standards_ios if '.ios.' in filename else msl_standards_macos,
+                                      filename),
+                                  '-Werror', '-Wno-unused-variable',
+                                  reference])
+    else:
+        failures.append((shader, optimize))
+        log_failure(script_args, shader, optimize)
 
     remove_files(input, output)
-    return tests, passes
+    return successes, failures
 
 
 # Test spvc producing HLSL the same way SPIRV-Cross is tested.
 # There are three steps: compile input, convert to HLSL, check result.
-# Returns the number of tests run and the number of them that passed.
+# Returns a list of successful tests and a list of failed tests.
 def test_hlsl(script_args, shader, filename, optimize):
     input = compile_input_shader(
         script_args, shader, filename, optimize and not '.noopt.' in filename)
 
+    successes = []
+    failures = []
     # Run spvc to convert Vulkan to HLSL.
-    tests = 1
     output = spvc(script_args, input, input + filename,
                   ['--entry=main', '--language=hlsl', '--hlsl-enable-compat', '--shader-model=' + lookup(shader_models, filename)])
     if not '.invalid.' in filename:
@@ -284,7 +347,6 @@ def test_hlsl(script_args, shader, filename, optimize):
         log_command(script_args, ['spirv-val',
                                   '--target-env', 'vulkan1.1', input])
 
-    passes = 0
     if output:
         # logged for compatibility with SPIRV-Cross test script
         log_command(script_args, [script_args.glslang, '-e', 'main',
@@ -292,15 +354,23 @@ def test_hlsl(script_args, shader, filename, optimize):
         # TODO(fjhenigman): log fxc run here
         result, _ = check_reference(script_args, output, shader, optimize)
         if result:
-            passes += 1
+            successes.append((shader, optimize))
+        else:
+            failures.append((shader, optimize))
+            log_failure(script_args, shader, optimize)
+    else:
+        failures.append((shader, optimize))
+        log_failure(script_args, shader, optimize)
 
     remove_files(input, output)
-    return tests, passes
+    return successes, failures
 
 
-# Currently a no-op test. Needs to be implemented.
+# Currently a no-op test. Needs to be implemented. Currently returns a tuple
+# indicating the passed in test has failed.
 def test_reflection(script_args, shader, filename, optimize):
-    return 1, 0
+    log_failure(script_args, shader, optimize)
+    return [], [(shader, optimize)]
     # TODO(fjhenigman)
 
 
@@ -376,17 +446,41 @@ def main():
     pool = Pool()
     results = pool.map(work_function, tests)
 
-    tests, passes = zip(*results)
+    successes, failures = zip(*results)
+    # Flattening lists of lists
+    successes = list(itertools.chain.from_iterable(successes))
+    failures = list(itertools.chain.from_iterable(failures))
 
-    pass_count = sum(passes)
-    print('{} test cases'.format(sum(tests)))
-    print('{} passed'.format(pass_count))
+    print('{} test cases'.format(len(successes) + len(failures)))
+    print('{} passed'.format(len(successes)))
+
+    fail_file = os.path.join(os.path.dirname(
+        os.path.realpath(__file__)), 'known_failures')
+    with open(fail_file, 'r') as f:
+        known_failures = f.read().splitlines()
+
+    known_failures = set(
+        map(lambda x: (x.split(',')[0], x.split(',')[1] == 'True'), known_failures))
+
+    unexpected_successes = []
+    unexpected_failures = []
+
+    for success in successes:
+        if success in known_failures:
+            unexpected_successes.append(success)
+
+    for failure in failures:
+        if failure not in known_failures:
+            unexpected_failures.append(failure)
+
+    log_unexpected_successes(script_args, unexpected_successes)
+    log_unexpected_failures(script_args, unexpected_failures)
 
     if script_args.log is not None and script_args.log is not sys.stdout:
         script_args.log.close()
-    return pass_count
+
+    return len(unexpected_successes) != 0 or len(unexpected_failures) != 0
 
 
 if __name__ == '__main__':
-    # TODO: remove the magic number once all tests pass
-    sys.exit(main() != 1246)
+    sys.exit(main())
