@@ -31,8 +31,8 @@ def log_unexpected_successes(script_args, successes):
     else:
         log_string = 'Encountered {} unexpected success(es):\n'.format(
             len(successes))
-        for success in successes:
-            log_string += '\t{}\n'.format(success)
+        successes = ['\t{}'.format(success) for success in successes]
+        log_string += '\n'.join(successes)
 
     if script_args.log:
         script_args.log.write(log_string + '\n')
@@ -47,8 +47,8 @@ def log_unexpected_failures(script_args, failures):
     else:
         log_string = 'Encountered {} unexpected failures(s):\n'.format(
             len(failures))
-        for failure in failures:
-            log_string += '\t{}\n'.format(failure)
+        failures = ['\t{}'.format(failure) for failure in failures]
+        log_string += '\n'.join(failures)
 
     if script_args.log:
         script_args.log.write(log_string + '\n')
@@ -106,7 +106,8 @@ def glslang_compile(script_args, inp, out, flags):
 def spvc(script_args, inp, out, flags):
     cmd = [script_args.spvc] + flags + ['-o', out, '--validate=vulkan1.1', inp]
     log_command(script_args, cmd)
-    if script_args.dry_run or subprocess.call(cmd, stdout=subprocess.DEVNULL) == 0:
+    if script_args.dry_run or subprocess.call(
+            cmd, stdout=subprocess.DEVNULL) == 0:
         return out
     if script_args.give_up:
         sys.exit()
@@ -121,7 +122,8 @@ def check_reference(script_args, result, shader, optimize):
     else:
         reference = os.path.join('reference', shader)
     log_command(script_args, ['reference', reference])
-    if script_args.dry_run or filecmp.cmp(result, os.path.join(script_args.cross_dir, reference), False):
+    if script_args.dry_run or filecmp.cmp(
+            result, os.path.join(script_args.cross_dir, reference), False):
         return True, reference
     elif script_args.give_up:
         sys.exit()
@@ -203,7 +205,8 @@ def test_glsl(script_args, shader, filename, optimize):
                                   '--target-env', 'vulkan1.1', '-V', output_vk])
 
     # Check result(s).
-    # Compare either or both files produced above to appropriate reference file.
+    # Compare either or both files produced above to appropriate reference
+    # file.
     if not '.nocompat.' in filename:
         if output:
             result, _ = check_reference(script_args, output, shader, optimize)
