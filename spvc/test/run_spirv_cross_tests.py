@@ -450,9 +450,11 @@ def main():
     results = pool.map(work_function, tests)
 
     successes, failures = zip(*results)
-    # Flattening lists of lists
+    # Flattening lists of lists, and convert path markers if needed
     successes = list(itertools.chain.from_iterable(successes))
+    successes = list(map(lambda x: x.replace('\\\\', '/'), successes))
     failures = list(itertools.chain.from_iterable(failures))
+    failures = list(map(lambda x: x.replace('\\\\', '/'), failures))
 
     print('{} test cases'.format(len(successes) + len(failures)))
     print('{} passed'.format(len(successes)))
