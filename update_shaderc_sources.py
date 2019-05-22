@@ -14,11 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Get source files for Shaderc and its dependencies from public repositories.
-"""
+"""Get source files for Shaderc and its dependencies from public
+repositories."""
 
-from __future__ import print_function
-
+from operator import attrgetter
 import argparse
 import json
 import distutils.dir_util
@@ -29,8 +28,8 @@ import sys
 KNOWN_GOOD_FILE = 'known_good.json'
 
 # Maps a site name to its hostname.
-SITE_TO_HOST = { 'github' : 'github.com',
-                 'gitlab' : 'gitlab.com'}
+SITE_TO_HOST = {'github': 'github.com',
+                'gitlab': 'gitlab.com'}
 
 VERBOSE = True
 
@@ -76,20 +75,21 @@ class GoodCommit(object):
         host = SITE_TO_HOST[self.site]
         sep = '/' if (style is 'https') else ':'
         return '{style}://{host}{sep}{subrepo}'.format(
-                    style=style,
-                    host=host,
-                    sep=sep,
-                    subrepo=self.subrepo)
+            style=style,
+            host=host,
+            sep=sep,
+            subrepo=self.subrepo)
 
     def AddRemote(self):
         """Add the remote 'known-good' if it does not exist."""
         if len(command_output(['git', 'remote', 'get-url', 'known-good'], self.subdir, fail_ok=True)) == 0:
-            command_output(['git', 'remote', 'add', 'known-good', self.GetUrl()], self.subdir)
+            command_output(
+                ['git', 'remote', 'add', 'known-good', self.GetUrl()], self.subdir)
 
     def HasCommit(self):
         """Check if the repository contains the known-good commit."""
         return 0 == subprocess.call(['git', 'rev-parse', '--verify', '--quiet',
-                                     self.commit + "^{commit}"],
+                                     self.commit + '^{commit}'],
                                     cwd=self.subdir)
 
     def Clone(self):
@@ -100,7 +100,7 @@ class GoodCommit(object):
         command_output(['git', 'fetch', 'known-good'], self.subdir)
 
     def Checkout(self):
-        if not os.path.exists(os.path.join(self.subdir,'.git')):
+        if not os.path.exists(os.path.join(self.subdir, '.git')):
             self.Clone()
         self.AddRemote()
         if not self.HasCommit():
@@ -115,7 +115,8 @@ def GetGoodCommits(known_good_file):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Get Shaderc source dependencies at a known-good commit')
+    parser = argparse.ArgumentParser(
+        description='Get Shaderc source dependencies at a known-good commit')
     parser.add_argument('--dir', dest='dir', default='src',
                         help="Set target directory for Shaderc source root. Default is \'src\'.")
     parser.add_argument('--file', dest='known_good_file', default=KNOWN_GOOD_FILE,
@@ -131,7 +132,7 @@ def main():
 
     # Create the subdirectories in sorted order so that parent git repositories
     # are created first.
-    for c in sorted(commits, cmp=lambda x,y: cmp(x.subdir, y.subdir)):
+    for c in sorted(commits, key=attrgetter('subdir')):
         print('Get {n}\n'.format(n=c.name))
         c.Checkout()
     sys.exit(0)
