@@ -452,9 +452,10 @@ def main():
     successes, failures = zip(*results)
     # Flattening lists of lists, and convert path markers if needed
     successes = list(itertools.chain.from_iterable(successes))
-    successes = list(map(lambda x: x.replace('\\\\', '/'), successes))
+    successes = list(
+        map(lambda x: (x[0].replace('\\\\', '/'), x[1]), successes))
     failures = list(itertools.chain.from_iterable(failures))
-    failures = list(map(lambda x: x.replace('\\\\', '/'), failures))
+    failures = list(map(lambda x: (x[0].replace('\\\\', '/'), x[1]), failures))
 
     print('{} test cases'.format(len(successes) + len(failures)))
     print('{} passed'.format(len(successes)))
