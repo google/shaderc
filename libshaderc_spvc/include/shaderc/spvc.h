@@ -95,6 +95,10 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_set_separate_shader_objects(
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_flatten_ubo(
     shaderc_spvc_compile_options_t options, bool b);
 
+// Transform the input to WebGPU compatible SPIRV before cross-compiling.
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_transform_to_webgpu(
+    shaderc_spvc_compile_options_t options, bool b);
+
 // Set GLSL language version.  Default is 450 (i.e. 4.5).
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_glsl_language_version(
     shaderc_spvc_compile_options_t options, uint32_t version);

@@ -13,12 +13,13 @@
 // limitations under the License.
 
 #include "shaderc/spvc.h"
-#include "libshaderc_util/exceptions.h"
 
+#include "libshaderc_util/exceptions.h"
 #include "spirv-cross/spirv_glsl.hpp"
 #include "spirv-cross/spirv_hlsl.hpp"
 #include "spirv-cross/spirv_msl.hpp"
 #include "spirv-tools/libspirv.hpp"
+#include "spirv-tools/optimizer.hpp"
 
 // GLSL version produced when none specified nor detected from source.
 #define DEFAULT_GLSL_VERSION 450
@@ -37,6 +38,7 @@ struct shaderc_spvc_compile_options {
   bool validate = true;
   bool remove_unused_variables = false;
   bool flatten_ubo = false;
+  bool transform_to_webgpu = false;
   std::string entry_point;
   spv_target_env source_env = SPV_ENV_VULKAN_1_0;
   spirv_cross::CompilerGLSL::Options glsl;
@@ -122,6 +124,11 @@ void shaderc_spvc_compile_options_set_flatten_ubo(
   options->flatten_ubo = b;
 }
 
+void shaderc_spvc_compile_options_set_transform_to_webgpu(
+    shaderc_spvc_compile_options_t options, bool b) {
+  options->transform_to_webgpu = b;
+}
+
 void shaderc_spvc_compile_options_set_glsl_language_version(
     shaderc_spvc_compile_options_t options, uint32_t version) {
   options->glsl.version = version;
@@ -164,13 +171,19 @@ void shaderc_spvc_compiler_release(shaderc_spvc_compiler_t compiler) {
 }
 
 namespace {
-void consume_validation_message(shaderc_spvc_compilation_result* result,
-                                spv_message_level_t level, const char* src,
-                                const spv_position_t& pos,
-                                const char* message) {
+void consume_spirv_tools_message(shaderc_spvc_compilation_result* result,
+                                 spv_message_level_t level, const char* src,
+                                 const spv_position_t& pos,
+                                 const char* message) {
   result->messages.append(message);
   result->messages.append("\n");
 }
+
+using CompilerBuilder = std::function<
+    std::tuple<shaderc_spvc_compilation_result*, spirv_cross::CompilerGLSL*>(
+        const uint32_t* /* source */, size_t /* source_len */,
+        shaderc_spvc_compile_options_t /* options */
+        )>;
 
 // Validate the source spir-v if requested, and if valid use the given compiler
 // to translate it to a higher level language. CompilerGLSL is the base class
@@ -178,8 +191,8 @@ void consume_validation_message(shaderc_spvc_compilation_result* result,
 // output language. The given compiler should already have its options set by
 // the caller.
 shaderc_spvc_compilation_result_t validate_and_compile(
-    spirv_cross::CompilerGLSL* compiler, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options) {
+    CompilerBuilder builder, const uint32_t* source, size_t source_len,
+    shaderc_spvc_compile_options_t options) {
   auto* result = new (std::nothrow) shaderc_spvc_compilation_result;
   if (!result) return nullptr;
 
@@ -187,7 +200,7 @@ shaderc_spvc_compilation_result_t validate_and_compile(
     spvtools::SpirvTools tools(options->source_env);
     if (!tools.IsValid()) return nullptr;
     tools.SetMessageConsumer(std::bind(
-        consume_validation_message, result, std::placeholders::_1,
+        consume_spirv_tools_message, result, std::placeholders::_1,
         std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
     if (!tools.Validate(source, source_len, spvtools::ValidatorOptions())) {
       result->status = shaderc_compilation_status_validation_error;
@@ -195,6 +208,43 @@ shaderc_spvc_compilation_result_t validate_and_compile(
     }
   }
 
+  std::vector<uint32_t> intermediate_source;
+  if (options->transform_to_webgpu) {
+    spvtools::Optimizer opt(SPV_ENV_WEBGPU_0);
+    opt.SetMessageConsumer(std::bind(
+        consume_spirv_tools_message, result, std::placeholders::_1,
+        std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+    opt.RegisterVulkanToWebGPUPasses();
+    if (!opt.Run(source, source_len, &intermediate_source)) {
+      result->status = shaderc_compilation_status_tranformation_error;
+      return result;
+    }
+
+    spvtools::SpirvTools tools(SPV_ENV_WEBGPU_0);
+    if (!tools.IsValid()) return nullptr;
+    tools.SetMessageConsumer(std::bind(
+        consume_spirv_tools_message, result, std::placeholders::_1,
+        std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+    if (!tools.Validate(intermediate_source.data(), intermediate_source.size(),
+                        spvtools::ValidatorOptions())) {
+      result->status = shaderc_compilation_status_validation_error;
+      return result;
+    }
+  } else {
+    intermediate_source.resize(source_len);
+    memcpy(intermediate_source.data(), source, source_len * sizeof(uint32_t));
+  }
+
+  shaderc_spvc_compilation_result* builder_result;
+  spirv_cross::CompilerGLSL* builder_compiler;
+  std::tie(builder_result, builder_compiler) =
+      builder(intermediate_source.data(), intermediate_source.size(), options);
+  if (builder_result) {
+    shaderc_spvc_result_release(result);
+    return builder_result;
+  }
+
+  std::unique_ptr<spirv_cross::CompilerGLSL> compiler(builder_compiler);
   TRY_IF_EXCEPTIONS_ENABLED {
     result->output = compiler->compile();
     // An exception during compiling would crash (if exceptions off) or jump to
@@ -214,109 +264,136 @@ shaderc_spvc_compilation_result_t validate_and_compile(
 shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_glsl(
     const shaderc_spvc_compiler_t, const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options) {
-  auto* result = new (std::nothrow) shaderc_spvc_compilation_result;
-  if (!result) return nullptr;
+  CompilerBuilder builder = [](const uint32_t* source, size_t source_len,
+                               shaderc_spvc_compile_options_t options)
+      -> std::tuple<shaderc_spvc_compilation_result*,
+                    spirv_cross::CompilerGLSL*> {
+    std::unique_ptr<shaderc_spvc_compilation_result> result(
+        new (std::nothrow) shaderc_spvc_compilation_result);
+    if (!result) return std::make_tuple(nullptr, nullptr);
 
-  spirv_cross::CompilerGLSL compiler(source, source_len);
+    std::unique_ptr<spirv_cross::CompilerGLSL> compiler(
+        new (std::nothrow) spirv_cross::CompilerGLSL(source, source_len));
+    if (!compiler) return std::make_tuple(nullptr, nullptr);
 
-  if (options->glsl.version == 0) {
-    // no version requested, was one detected in source?
-    options->glsl.version = compiler.get_common_options().version;
     if (options->glsl.version == 0) {
-      // no version detected in source, use default
-      options->glsl.version = DEFAULT_GLSL_VERSION;
-    } else {
-      // version detected implies ES also detected
-      options->glsl.es = compiler.get_common_options().es;
-    }
-  }
-
-  auto entry_points = compiler.get_entry_points_and_stages();
-  spv::ExecutionModel model = spv::ExecutionModelMax;
-  if (!options->entry_point.empty()) {
-    // Make sure there is just one entry point with this name, or the stage is
-    // ambiguous.
-    uint32_t stage_count = 0;
-    for (auto& e : entry_points) {
-      if (e.name == options->entry_point) {
-        stage_count++;
-        model = e.execution_model;
+      // no version requested, was one detected in source?
+      options->glsl.version = compiler->get_common_options().version;
+      if (options->glsl.version == 0) {
+        // no version detected in source, use default
+        options->glsl.version = DEFAULT_GLSL_VERSION;
+      } else {
+        // version detected implies ES also detected
+        options->glsl.es = compiler->get_common_options().es;
       }
     }
-    if (stage_count != 1) {
-      result->status = shaderc_compilation_status_compilation_error;
-      if (stage_count == 0)
-        result->messages =
-            "There is no entry point with name: " + options->entry_point;
-      else
-        result->messages = "There is more than one entry point with name: " +
-                           options->entry_point + ". Use --stage.";
-      return result;
+
+    auto entry_points = compiler->get_entry_points_and_stages();
+    spv::ExecutionModel model = spv::ExecutionModelMax;
+    if (!options->entry_point.empty()) {
+      // Make sure there is just one entry point with this name, or the stage is
+      // ambiguous.
+      uint32_t stage_count = 0;
+      for (auto& e : entry_points) {
+        if (e.name == options->entry_point) {
+          stage_count++;
+          model = e.execution_model;
+        }
+      }
+      if (stage_count != 1) {
+        result->status = shaderc_compilation_status_compilation_error;
+        if (stage_count == 0)
+          result->messages =
+              "There is no entry point with name: " + options->entry_point;
+        else
+          result->messages = "There is more than one entry point with name: " +
+                             options->entry_point + ". Use --stage.";
+        return std::make_tuple(result.release(), nullptr);
+      }
     }
-  }
-  if (!options->entry_point.empty()) {
-    compiler.set_entry_point(options->entry_point, model);
-  }
-
-  if (!options->glsl.vulkan_semantics) {
-    uint32_t sampler = compiler.build_dummy_sampler_for_combined_images();
-    if (sampler) {
-      // Set some defaults to make validation happy.
-      compiler.set_decoration(sampler, spv::DecorationDescriptorSet, 0);
-      compiler.set_decoration(sampler, spv::DecorationBinding, 0);
+    if (!options->entry_point.empty()) {
+      compiler->set_entry_point(options->entry_point, model);
     }
-  }
 
-  spirv_cross::ShaderResources res;
-  if (options->remove_unused_variables) {
-    auto active = compiler.get_active_interface_variables();
-    res = compiler.get_shader_resources(active);
-    compiler.set_enabled_interface_variables(move(active));
-  } else {
-    res = compiler.get_shader_resources();
-  }
-
-  if (options->flatten_ubo) {
-    for (auto& ubo : res.uniform_buffers) compiler.flatten_buffer_block(ubo.id);
-    for (auto& ubo : res.push_constant_buffers)
-      compiler.flatten_buffer_block(ubo.id);
-  }
-
-  if (!options->glsl.vulkan_semantics) {
-    compiler.build_combined_image_samplers();
-
-    // if (args.combined_samplers_inherit_bindings)
-    //  spirv_cross_util::inherit_combined_sampler_bindings(*compiler);
-
-    // Give the remapped combined samplers new names.
-    for (auto& remap : compiler.get_combined_image_samplers()) {
-      compiler.set_name(remap.combined_id,
-                        spirv_cross::join("SPIRV_Cross_Combined",
-                                          compiler.get_name(remap.image_id),
-                                          compiler.get_name(remap.sampler_id)));
+    if (!options->glsl.vulkan_semantics) {
+      uint32_t sampler = compiler->build_dummy_sampler_for_combined_images();
+      if (sampler) {
+        // Set some defaults to make validation happy.
+        compiler->set_decoration(sampler, spv::DecorationDescriptorSet, 0);
+        compiler->set_decoration(sampler, spv::DecorationBinding, 0);
+      }
     }
-  }
 
-  shaderc_spvc_result_release(result);
-  compiler.set_common_options(options->glsl);
-  return validate_and_compile(&compiler, source, source_len, options);
+    spirv_cross::ShaderResources res;
+    if (options->remove_unused_variables) {
+      auto active = compiler->get_active_interface_variables();
+      res = compiler->get_shader_resources(active);
+      compiler->set_enabled_interface_variables(move(active));
+    } else {
+      res = compiler->get_shader_resources();
+    }
+
+    if (options->flatten_ubo) {
+      for (auto& ubo : res.uniform_buffers)
+        compiler->flatten_buffer_block(ubo.id);
+      for (auto& ubo : res.push_constant_buffers)
+        compiler->flatten_buffer_block(ubo.id);
+    }
+
+    if (!options->glsl.vulkan_semantics) {
+      compiler->build_combined_image_samplers();
+
+      // if (args.combined_samplers_inherit_bindings)
+      //  spirv_cross_util::inherit_combined_sampler_bindings(*compiler);
+
+      // Give the remapped combined samplers new names.
+      for (auto& remap : compiler->get_combined_image_samplers()) {
+        compiler->set_name(
+            remap.combined_id,
+            spirv_cross::join("SPIRV_Cross_Combined",
+                              compiler->get_name(remap.image_id),
+                              compiler->get_name(remap.sampler_id)));
+      }
+    }
+
+    compiler->set_common_options(options->glsl);
+    return std::make_tuple(nullptr, compiler.release());
+  };
+  return validate_and_compile(builder, source, source_len, options);
 }
 
 shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_hlsl(
     const shaderc_spvc_compiler_t, const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options) {
-  spirv_cross::CompilerHLSL compiler(source, source_len);
-  compiler.set_common_options(options->glsl);
-  compiler.set_hlsl_options(options->hlsl);
-  return validate_and_compile(&compiler, source, source_len, options);
+  CompilerBuilder builder = [](const uint32_t* source, size_t source_len,
+                               shaderc_spvc_compile_options_t options)
+      -> std::tuple<shaderc_spvc_compilation_result*,
+                    spirv_cross::CompilerGLSL*> {
+    std::unique_ptr<spirv_cross::CompilerHLSL> compiler(
+        new (std::nothrow) spirv_cross::CompilerHLSL(source, source_len));
+    if (!compiler) return std::make_tuple(nullptr, nullptr);
+
+    compiler->set_common_options(options->glsl);
+    compiler->set_hlsl_options(options->hlsl);
+    return std::make_tuple(nullptr, compiler.release());
+  };
+  return validate_and_compile(builder, source, source_len, options);
 }
 
 shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_msl(
     const shaderc_spvc_compiler_t, const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options) {
-  spirv_cross::CompilerMSL compiler(source, source_len);
-  compiler.set_common_options(options->glsl);
-  return validate_and_compile(&compiler, source, source_len, options);
+  CompilerBuilder builder = [](const uint32_t* source, size_t source_len,
+                               shaderc_spvc_compile_options_t options)
+      -> std::tuple<shaderc_spvc_compilation_result*,
+                    spirv_cross::CompilerGLSL*> {
+    std::unique_ptr<spirv_cross::CompilerMSL> compiler(
+        new (std::nothrow) spirv_cross::CompilerMSL(source, source_len));
+    if (!compiler) return std::make_tuple(nullptr, nullptr);
+    compiler->set_common_options(options->glsl);
+    return std::make_tuple(nullptr, compiler.release());
+  };
+  return validate_and_compile(builder, source, source_len, options);
 }
 
 const char* shaderc_spvc_result_get_output(

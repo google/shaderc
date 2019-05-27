@@ -1,4 +1,4 @@
-// Copyright 2018 The Shaderc Authors. All rights reserved.
+// Copyright 2019 The Shaderc Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,4 +17,4 @@
 
 // This test is meant to be for the C API, so using a plain old C file, thus
 // gtest cannot be used, so running as a simple smoke test.
-int main() { return run_smoke_test(kSmokeShader, 0); }
+int main() { return run_smoke_test(kWebGPUShader, 1); }

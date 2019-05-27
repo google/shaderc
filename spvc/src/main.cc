@@ -50,6 +50,9 @@ Options:
   --msl-version=<ver>   Specify MSL output language version, e.g. 100
                           Default is 10200.
 
+  --transform-to-webgpu Attempt to translate the input into WebGPU
+                        compatible SPIR-V before cross compiling.
+
   The following flags behave as in spirv-cross:
 
   --remove-unused-variables
@@ -233,6 +236,8 @@ int main(int argc, char** argv) {
                   << "' in --validate=" << std::endl;
         return 1;
       }
+    } else if (arg.starts_with("--transform-to-webgpu")) {
+      options.SetTransformToWebGPU(true);
     } else {
       if (!ReadFile(arg.str(), &input)) {
         std::cerr << "spvc: error: could not read file" << std::endl;

@@ -1,4 +1,4 @@
-// Copyright 2018 The Shaderc Authors. All rights reserved.
+// Copyright 2019 The Shaderc Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "common_shaders_for_test.h"
-#include "spvc_smoke_test_util.h"
-
-// This test is meant to be for the C API, so using a plain old C file, thus
-// gtest cannot be used, so running as a simple smoke test.
-int main() { return run_smoke_test(kSmokeShader, 0); }
+// Runs the smoke test on the given shader with or without transforming the
+// input into WebGPU specific SPIR-V.
+extern int run_smoke_test(const char* shader, int transform_to_webgpu);

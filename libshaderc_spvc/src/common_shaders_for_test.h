@@ -16,38 +16,45 @@
 #define COMMON_SHADERS_FOR_TESTS_H_
 
 #ifdef __cplusplus
+#include <cstdint>
+#else
+#include <stdint.h>
+#endif  // __cplusplus
+
+#ifdef __cplusplus
 extern "C" {
 #endif
 
-const uint32_t kShader1[] = {
-    /*
-                   OpCapability Shader
-              %1 = OpExtInstImport "GLSL.std.450"
-                   OpMemoryModel Logical GLSL450
-                   OpEntryPoint Vertex %main "main" %outColor %vtxColor
-                   OpSource ESSL 310
-                   OpSourceExtension "GL_GOOGLE_cpp_style_line_directive"
-                   OpSourceExtension "GL_GOOGLE_include_directive"
-                   OpName %main "main"
-                   OpName %outColor "outColor"
-                   OpName %vtxColor "vtxColor"
-                   OpDecorate %outColor Location 0
-                   OpDecorate %vtxColor Location 0
-           %void = OpTypeVoid
-              %3 = OpTypeFunction %void
-          %float = OpTypeFloat 32
-        %v4float = OpTypeVector %float 4
-    %_ptr_Output_v4float = OpTypePointer Output %v4float
-       %outColor = OpVariable %_ptr_Output_v4float Output
-    %_ptr_Input_v4float = OpTypePointer Input %v4float
-       %vtxColor = OpVariable %_ptr_Input_v4float Input
-           %main = OpFunction %void None %3
-              %5 = OpLabel
-             %12 = OpLoad %v4float %vtxColor
-                   OpStore %outColor %12
-                   OpReturn
-                   OpFunctionEnd
-    */
+const char* kSmokeShader =
+    "               OpCapability Shader\n"
+    "          %1 = OpExtInstImport \"GLSL.std.450\"\n"
+    "               OpMemoryModel Logical GLSL450\n"
+    "               OpEntryPoint Vertex %main \"main\" %outColor %vtxColor\n"
+    "               OpSource ESSL 310\n"
+    "               OpSourceExtension "
+    "\"GL_GOOGLE_cpp_style_line_directive\"\n"
+    "               OpSourceExtension \"GL_GOOGLE_include_directive\"\n"
+    "               OpName %main \"main\"\n"
+    "               OpName %outColor \"outColor\"\n"
+    "               OpName %vtxColor \"vtxColor\"\n"
+    "               OpDecorate %outColor Location 0\n"
+    "               OpDecorate %vtxColor Location 0\n"
+    "       %void = OpTypeVoid\n"
+    "          %3 = OpTypeFunction %void\n"
+    "      %float = OpTypeFloat 32\n"
+    "    %v4float = OpTypeVector %float 4\n"
+    "%_ptr_Output_v4float = OpTypePointer Output %v4float\n"
+    "   %outColor = OpVariable %_ptr_Output_v4float Output\n"
+    "%_ptr_Input_v4float = OpTypePointer Input %v4float\n"
+    "   %vtxColor = OpVariable %_ptr_Input_v4float Input\n"
+    "       %main = OpFunction %void None %3\n"
+    "          %5 = OpLabel\n"
+    "         %12 = OpLoad %v4float %vtxColor\n"
+    "               OpStore %outColor %12\n"
+    "               OpReturn\n"
+    "               OpFunctionEnd\n";
+
+const uint32_t kSmokeShaderBinary[] = {
     0x07230203, 0x00010000, 0x000d0007, 0x0000000d, 0x00000000, 0x00020011,
     0x00000001, 0x0006000b, 0x00000001, 0x4c534c47, 0x6474732e, 0x3035342e,
     0x00000000, 0x0003000e, 0x00000000, 0x00000001, 0x0007000f, 0x00000000,
@@ -67,6 +74,29 @@ const uint32_t kShader1[] = {
     0x00000004, 0x00000000, 0x00000003, 0x000200f8, 0x00000005, 0x0004003d,
     0x00000007, 0x0000000c, 0x0000000b, 0x0003003e, 0x00000009, 0x0000000c,
     0x000100fd, 0x00010038,
+};
+
+const char* kWebGPUShader =
+    "          OpCapability Shader\n"
+    "          OpCapability VulkanMemoryModelKHR\n"
+    "          OpExtension \"SPV_KHR_vulkan_memory_model\"\n"
+    "          OpMemoryModel Logical VulkanKHR\n"
+    "          OpEntryPoint Vertex %func \"shader\"\n"
+    "%void   = OpTypeVoid\n"
+    "%void_f = OpTypeFunction %void\n"
+    "%func   = OpFunction %void None %void_f\n"
+    "%label  = OpLabel\n"
+    "          OpReturn\n"
+    "          OpFunctionEnd\n";
+
+const uint32_t kWebGPUShaderBinary[] = {
+    0x07230203, 0x00010000, 0x00070000, 0x00000005, 0x00000000, 0x00020011,
+    0x00000001, 0x00020011, 0x000014E1, 0x0008000A, 0x5F565053, 0x5F52484B,
+    0x6B6C7576, 0x6D5F6E61, 0x726F6D65, 0x6F6D5F79, 0x006C6564, 0x0003000E,
+    0x00000000, 0x00000003, 0x0005000F, 0x00000000, 0x00000001, 0x64616873,
+    0x00007265, 0x00020013, 0x00000002, 0x00030021, 0x00000003, 0x00000002,
+    0x00050036, 0x00000002, 0x00000001, 0x00000000, 0x00000003, 0x000200F8,
+    0x00000004, 0x000100FD, 0x00010038,
 };
 
 #ifdef __cplusplus

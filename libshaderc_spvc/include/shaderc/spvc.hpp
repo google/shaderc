@@ -128,6 +128,11 @@ class CompileOptions {
     shaderc_spvc_compile_options_set_flatten_ubo(options_, b);
   }
 
+  // Tranform input to WebGPU SPIR-V before cross compiling.
+  void SetTransformToWebGPU(bool b) {
+    shaderc_spvc_compile_options_set_transform_to_webgpu(options_, b);
+  }
+
   // Which GLSL version should be produced.  Default is 450 (i.e. 4.5).
   void SetGLSLLanguageVersion(uint32_t version) {
     shaderc_spvc_compile_options_set_glsl_language_version(options_, version);
