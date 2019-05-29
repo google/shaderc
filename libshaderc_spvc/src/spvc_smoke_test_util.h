@@ -13,5 +13,5 @@
 // limitations under the License.
 
 // Runs the smoke test on the given shader with or without transforming the
-// input into WebGPU specific SPIR-V.
-extern int run_smoke_test(const char* shader, int transform_to_webgpu);
+// input from WebGPU specific SPIR-V.
+int run_smoke_test(const char* shader, int transform_from_webgpu);

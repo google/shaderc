@@ -81,7 +81,7 @@ int run_msl(shaderc_spvc_compiler_t compiler,
                    shaderc_spvc_compile_into_msl, "msl");
 }
 
-int run_smoke_test(const char* shader, int transform_to_webgpu) {
+int run_smoke_test(const char* shader, int transform_from_webgpu) {
   shaderc_compilation_result_t assembled_shader = assemble_shader(shader);
   if (assembled_shader == NULL) {
     printf("failed to assemble input!\n");
@@ -89,17 +89,18 @@ int run_smoke_test(const char* shader, int transform_to_webgpu) {
   }
 
   int ret_code = 0;
-  shaderc_spvc_compiler_t compiler;
-  compiler = shaderc_spvc_compiler_initialize();
+  shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
   shaderc_spvc_compile_options_t options =
       shaderc_spvc_compile_options_initialize();
-  shaderc_spvc_compile_options_set_transform_to_webgpu(options,
-                                                       transform_to_webgpu);
+  if (transform_from_webgpu) {
+    shaderc_spvc_compile_options_set_source_env(
+        options, shaderc_target_env_webgpu, shaderc_env_version_webgpu);
+    shaderc_spvc_compile_options_set_webgpu_to_vulkan(options,
+                                                      transform_from_webgpu);
+  }
 
   if (!run_glsl(compiler, options, assembled_shader)) ret_code = -1;
-
   if (!run_hlsl(compiler, options, assembled_shader)) ret_code = -1;
-
   if (!run_msl(compiler, options, assembled_shader)) ret_code = -1;
 
   shaderc_spvc_compile_options_release(options);

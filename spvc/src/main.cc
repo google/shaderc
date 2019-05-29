@@ -37,21 +37,21 @@ Usage: spvc [options] file
 An input file of - represents standard input.
 
 Options:
-  --help                Display available options.
-  -v                    Display compiler version information.
-  -o <output file>      '-' means standard output.
-  --validate=<env>      Validate SPIR-V source with given environment
-                          <env> is vulkan1.0 (the default) or vulkan1.1
-  --entry=<name>        Specify entry point.
-  --language=<lang>     Specify output language.
-                          <lang> is glsl (the default), msl or hlsl.
-  --glsl-version=<ver>  Specify GLSL output language version, e.g. 100
-                          Default is 450 if not detected from input.
-  --msl-version=<ver>   Specify MSL output language version, e.g. 100
-                          Default is 10200.
-
-  --transform-to-webgpu Attempt to translate the input into WebGPU
-                        compatible SPIR-V before cross compiling.
+  --help                   Display available options.
+  -v                       Display compiler version information.
+  -o <output file>         '-' means standard output.
+  --validate=<env>         Validate SPIR-V source with given environment
+                             <env> is vulkan1.0 (the default), vulkan1.1,
+                             or webgpu0
+  --entry=<name>           Specify entry point.
+  --language=<lang>        Specify output language.
+                             <lang> is glsl (the default), msl or hlsl.
+  --glsl-version=<ver>     Specify GLSL output language version, e.g. 100
+                             Default is 450 if not detected from input.
+  --msl-version=<ver>      Specify MSL output language version, e.g. 100
+                             Default is 10200.
+  --transform-from-webgpu  Attempt to translate the input from WebGPU
+                           compatible SPIR-V before cross compiling.
 
   The following flags behave as in spirv-cross:
 
@@ -223,6 +223,8 @@ int main(int argc, char** argv) {
       }
       options.SetShaderModel(shader_model_num);
     } else if (arg.starts_with("--validate=")) {
+      // TODO(zoddicus): Actually set the validate bit here, once the API is
+      // exposed.
       string_piece env;
       GetOptionArgument(argc, argv, &i, "--validate=", &env);
       if (env == "vulkan1.0") {
@@ -231,13 +233,18 @@ int main(int argc, char** argv) {
       } else if (env == "vulkan1.1") {
         options.SetSourceEnvironment(shaderc_target_env_vulkan,
                                      shaderc_env_version_vulkan_1_1);
+      } else if (env == "webgpu0") {
+        options.SetSourceEnvironment(shaderc_target_env_webgpu,
+                                     shaderc_env_version_webgpu);
       } else {
         std::cerr << "spvc: error: invalid value '" << env
                   << "' in --validate=" << std::endl;
         return 1;
       }
-    } else if (arg.starts_with("--transform-to-webgpu")) {
-      options.SetTransformToWebGPU(true);
+    } else if (arg.starts_with("--transform-from-webgpu")) {
+      options.SetSourceEnvironment(shaderc_target_env_webgpu,
+                                   shaderc_env_version_webgpu);
+      options.SetWebGPUToVulkan(true);
     } else {
       if (!ReadFile(arg.str(), &input)) {
         std::cerr << "spvc: error: could not read file" << std::endl;

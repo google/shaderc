@@ -26,6 +26,9 @@ namespace {
 TEST(Compile, Glsl) {
   Compiler compiler;
   CompileOptions options;
+  options.SetSourceEnvironment(shaderc_target_env_webgpu,
+                               shaderc_env_version_webgpu);
+  options.SetWebGPUToVulkan(true);
 
   CompilationResult result = compiler.CompileSpvToGlsl(
       kWebGPUShaderBinary, sizeof(kWebGPUShaderBinary) / sizeof(uint32_t),
@@ -37,6 +40,9 @@ TEST(Compile, Glsl) {
 TEST(Compile, Hlsl) {
   Compiler compiler;
   CompileOptions options;
+  options.SetSourceEnvironment(shaderc_target_env_webgpu,
+                               shaderc_env_version_webgpu);
+  options.SetWebGPUToVulkan(true);
 
   CompilationResult result = compiler.CompileSpvToHlsl(
       kWebGPUShaderBinary, sizeof(kWebGPUShaderBinary) / sizeof(uint32_t),
@@ -48,6 +54,9 @@ TEST(Compile, Hlsl) {
 TEST(Compile, Msl) {
   Compiler compiler;
   CompileOptions options;
+  options.SetSourceEnvironment(shaderc_target_env_webgpu,
+                               shaderc_env_version_webgpu);
+  options.SetWebGPUToVulkan(true);
 
   CompilationResult result = compiler.CompileSpvToMsl(
       kWebGPUShaderBinary, sizeof(kWebGPUShaderBinary) / sizeof(uint32_t),

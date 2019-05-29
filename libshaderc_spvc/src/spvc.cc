@@ -38,7 +38,7 @@ struct shaderc_spvc_compile_options {
   bool validate = true;
   bool remove_unused_variables = false;
   bool flatten_ubo = false;
-  bool transform_to_webgpu = false;
+  bool webgpu_to_vulkan = false;
   std::string entry_point;
   spv_target_env source_env = SPV_ENV_VULKAN_1_0;
   spirv_cross::CompilerGLSL::Options glsl;
@@ -94,6 +94,8 @@ void shaderc_spvc_compile_options_set_source_env(
           break;
       }
       break;
+    case shaderc_target_env_webgpu:
+      options->source_env = SPV_ENV_WEBGPU_0;
     default:
       break;
   }
@@ -124,9 +126,9 @@ void shaderc_spvc_compile_options_set_flatten_ubo(
   options->flatten_ubo = b;
 }
 
-void shaderc_spvc_compile_options_set_transform_to_webgpu(
+void shaderc_spvc_compile_options_set_webgpu_to_vulkan(
     shaderc_spvc_compile_options_t options, bool b) {
-  options->transform_to_webgpu = b;
+  options->webgpu_to_vulkan = b;
 }
 
 void shaderc_spvc_compile_options_set_glsl_language_version(
@@ -209,26 +211,35 @@ shaderc_spvc_compilation_result_t validate_and_compile(
   }
 
   std::vector<uint32_t> intermediate_source;
-  if (options->transform_to_webgpu) {
-    spvtools::Optimizer opt(SPV_ENV_WEBGPU_0);
+  if (options->webgpu_to_vulkan) {
+    if (options->source_env != SPV_ENV_WEBGPU_0) {
+      result->messages.append(
+          "WARNING: Converting from WebGPU to Vulkan, with "
+          "non-WebGPU source env set, this may cause "
+          "unexpected behaviour...\n");
+    }
+    spvtools::Optimizer opt(SPV_ENV_VULKAN_1_1);
     opt.SetMessageConsumer(std::bind(
         consume_spirv_tools_message, result, std::placeholders::_1,
         std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-    opt.RegisterVulkanToWebGPUPasses();
+    opt.RegisterWebGPUToVulkanPasses();
     if (!opt.Run(source, source_len, &intermediate_source)) {
       result->status = shaderc_compilation_status_tranformation_error;
       return result;
     }
 
-    spvtools::SpirvTools tools(SPV_ENV_WEBGPU_0);
-    if (!tools.IsValid()) return nullptr;
-    tools.SetMessageConsumer(std::bind(
-        consume_spirv_tools_message, result, std::placeholders::_1,
-        std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-    if (!tools.Validate(intermediate_source.data(), intermediate_source.size(),
-                        spvtools::ValidatorOptions())) {
-      result->status = shaderc_compilation_status_validation_error;
-      return result;
+    if (options->validate) {
+      spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_1);
+      if (!tools.IsValid()) return nullptr;
+      tools.SetMessageConsumer(std::bind(
+          consume_spirv_tools_message, result, std::placeholders::_1,
+          std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+      if (!tools.Validate(intermediate_source.data(),
+                          intermediate_source.size(),
+                          spvtools::ValidatorOptions())) {
+        result->status = shaderc_compilation_status_validation_error;
+        return result;
+      }
     }
   } else {
     intermediate_source.resize(source_len);
