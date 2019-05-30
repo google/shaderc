@@ -214,7 +214,7 @@ def git_sync_deps(deps_file_path, command_line_os_requests, verbose):
   dependencies = deps_file['deps'].copy()
   os_specific_dependencies = deps_file.get('deps_os', dict())
   if 'all' in command_line_os_requests:
-    for value in os_specific_dependencies.values():
+    for value in list(os_specific_dependencies.values()):
       dependencies.update(value)
   else:
     for os_name in command_line_os_requests:
