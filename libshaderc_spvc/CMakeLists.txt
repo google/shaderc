@@ -47,6 +47,7 @@ find_package(Threads)
 set(SPVC_LIBS
   ${CMAKE_THREAD_LIBS_INIT}
   SPIRV-Tools
+  SPIRV-Tools-opt
   spirv-cross-glsl
   spirv-cross-hlsl
   spirv-cross-msl
@@ -61,15 +62,19 @@ shaderc_add_tests(
   INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc/include ${SPIRV-Cross_SOURCE_DIR}/..
   TEST_NAMES
     spvc
-    spvc_cpp)
+    spvc_cpp
+    spvc_webgpu
+    spvc_webgpu_cpp)
 
 shaderc_add_tests(
   TEST_PREFIX shaderc_shared
-  LINK_LIBS shaderc_spvc_shared SPIRV-Tools
+  LINK_LIBS shaderc_spvc_shared SPIRV-Tools SPIRV-Tools-opt
   INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc/include ${SPIRV-Cross_SOURCE_DIR}/..
   TEST_NAMES
     spvc
-    spvc_cpp)
+    spvc_cpp
+    spvc_webgpu
+    spvc_webgpu_cpp)
 
 shaderc_combine_static_lib(shaderc_spvc_combined shaderc_spvc)
 
@@ -99,9 +104,15 @@ shaderc_add_tests(
     spvc_cpp)
 
 if(${SHADERC_ENABLE_TESTS})
-  add_executable(spvc_c_smoke_test ./src/spvc_c_smoke_test.c)
+  add_executable(spvc_c_smoke_test ./src/spvc_smoke_test_util.c ./src/spvc_c_smoke_test.c)
   target_include_directories(spvc_c_smoke_test PUBLIC include PRIVATE ${shaderc_SOURCE_DIR}/libshaderc/include)
   shaderc_default_c_compile_options(spvc_c_smoke_test)
   target_link_libraries(spvc_c_smoke_test PRIVATE shaderc_spvc shaderc)
   add_test(NAME spvc_c_smoke_test COMMAND spvc_c_smoke_test)
+
+  add_executable(spvc_webgpu_c_smoke_test ./src/spvc_smoke_test_util.c ./src/spvc_webgpu_c_smoke_test.c)
+  target_include_directories(spvc_webgpu_c_smoke_test PUBLIC include PRIVATE ${shaderc_SOURCE_DIR}/libshaderc/include)
+  shaderc_default_c_compile_options(spvc_webgpu_c_smoke_test)
+  target_link_libraries(spvc_webgpu_c_smoke_test PRIVATE shaderc_spvc shaderc)
+  add_test(NAME spvc_webgpu_c_smoke_test COMMAND spvc_webgpu_c_smoke_test)
 endif()

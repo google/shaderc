@@ -1,4 +1,4 @@
-// Copyright 2018 The Shaderc Authors. All rights reserved.
+// Copyright 2019 The Shaderc Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <gtest/gtest.h>
+
 #include <thread>
 
 #include "common_shaders_for_test.h"
@@ -20,45 +21,18 @@
 
 namespace {
 
-TEST(Init, MultipleCalls) {
-  shaderc_spvc_compiler_t compiler1, compiler2, compiler3;
-  EXPECT_NE(nullptr, compiler1 = shaderc_spvc_compiler_initialize());
-  EXPECT_NE(nullptr, compiler2 = shaderc_spvc_compiler_initialize());
-  EXPECT_NE(nullptr, compiler3 = shaderc_spvc_compiler_initialize());
-  shaderc_spvc_compiler_release(compiler1);
-  shaderc_spvc_compiler_release(compiler2);
-  shaderc_spvc_compiler_release(compiler3);
-}
-
-#ifndef SHADERC_DISABLE_THREADED_TESTS
-TEST(Init, MultipleThreadsCalling) {
-  shaderc_spvc_compiler_t compiler1, compiler2, compiler3;
-  std::thread t1(
-      [&compiler1]() { compiler1 = shaderc_spvc_compiler_initialize(); });
-  std::thread t2(
-      [&compiler2]() { compiler2 = shaderc_spvc_compiler_initialize(); });
-  std::thread t3(
-      [&compiler3]() { compiler3 = shaderc_spvc_compiler_initialize(); });
-  t1.join();
-  t2.join();
-  t3.join();
-  EXPECT_NE(nullptr, compiler1);
-  EXPECT_NE(nullptr, compiler2);
-  EXPECT_NE(nullptr, compiler3);
-  shaderc_spvc_compiler_release(compiler1);
-  shaderc_spvc_compiler_release(compiler2);
-  shaderc_spvc_compiler_release(compiler3);
-}
-#endif
-
 TEST(Compile, Glsl) {
   shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
   shaderc_spvc_compile_options_t options =
       shaderc_spvc_compile_options_initialize();
 
+  shaderc_spvc_compile_options_set_source_env(
+      options, shaderc_target_env_webgpu, shaderc_env_version_webgpu);
+  shaderc_spvc_compile_options_set_webgpu_to_vulkan(options, true);
+
   shaderc_spvc_compilation_result_t result = shaderc_spvc_compile_into_glsl(
-      compiler, kSmokeShaderBinary,
-      sizeof(kSmokeShaderBinary) / sizeof(uint32_t), options);
+      compiler, kWebGPUShaderBinary,
+      sizeof(kWebGPUShaderBinary) / sizeof(uint32_t), options);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(shaderc_compilation_status_success,
             shaderc_spvc_result_get_status(result));
@@ -73,9 +47,13 @@ TEST(Compile, Hlsl) {
   shaderc_spvc_compile_options_t options =
       shaderc_spvc_compile_options_initialize();
 
+  shaderc_spvc_compile_options_set_source_env(
+      options, shaderc_target_env_webgpu, shaderc_env_version_webgpu);
+  shaderc_spvc_compile_options_set_webgpu_to_vulkan(options, true);
+
   shaderc_spvc_compilation_result_t result = shaderc_spvc_compile_into_hlsl(
-      compiler, kSmokeShaderBinary,
-      sizeof(kSmokeShaderBinary) / sizeof(uint32_t), options);
+      compiler, kWebGPUShaderBinary,
+      sizeof(kWebGPUShaderBinary) / sizeof(uint32_t), options);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(shaderc_compilation_status_success,
             shaderc_spvc_result_get_status(result));
@@ -90,9 +68,13 @@ TEST(Compile, Msl) {
   shaderc_spvc_compile_options_t options =
       shaderc_spvc_compile_options_initialize();
 
+  shaderc_spvc_compile_options_set_source_env(
+      options, shaderc_target_env_webgpu, shaderc_env_version_webgpu);
+  shaderc_spvc_compile_options_set_webgpu_to_vulkan(options, true);
+
   shaderc_spvc_compilation_result_t result = shaderc_spvc_compile_into_msl(
-      compiler, kSmokeShaderBinary,
-      sizeof(kSmokeShaderBinary) / sizeof(uint32_t), options);
+      compiler, kWebGPUShaderBinary,
+      sizeof(kWebGPUShaderBinary) / sizeof(uint32_t), options);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(shaderc_compilation_status_success,
             shaderc_spvc_result_get_status(result));
