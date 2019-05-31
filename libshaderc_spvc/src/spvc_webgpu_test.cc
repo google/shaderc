@@ -28,7 +28,8 @@ TEST(Compile, Glsl) {
 
   shaderc_spvc_compile_options_set_source_env(
       options, shaderc_target_env_webgpu, shaderc_env_version_webgpu);
-  shaderc_spvc_compile_options_set_webgpu_to_vulkan(options, true);
+  shaderc_spvc_compile_options_set_target_env(
+      options, shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
 
   shaderc_spvc_compilation_result_t result = shaderc_spvc_compile_into_glsl(
       compiler, kWebGPUShaderBinary,
@@ -49,7 +50,8 @@ TEST(Compile, Hlsl) {
 
   shaderc_spvc_compile_options_set_source_env(
       options, shaderc_target_env_webgpu, shaderc_env_version_webgpu);
-  shaderc_spvc_compile_options_set_webgpu_to_vulkan(options, true);
+  shaderc_spvc_compile_options_set_target_env(
+      options, shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
 
   shaderc_spvc_compilation_result_t result = shaderc_spvc_compile_into_hlsl(
       compiler, kWebGPUShaderBinary,
@@ -70,7 +72,8 @@ TEST(Compile, Msl) {
 
   shaderc_spvc_compile_options_set_source_env(
       options, shaderc_target_env_webgpu, shaderc_env_version_webgpu);
-  shaderc_spvc_compile_options_set_webgpu_to_vulkan(options, true);
+  shaderc_spvc_compile_options_set_target_env(
+      options, shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
 
   shaderc_spvc_compilation_result_t result = shaderc_spvc_compile_into_msl(
       compiler, kWebGPUShaderBinary,

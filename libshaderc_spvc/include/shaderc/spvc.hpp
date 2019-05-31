@@ -101,6 +101,15 @@ class CompileOptions {
     shaderc_spvc_compile_options_set_source_env(options_, env, version);
   }
 
+  // Set the target environment for the SPIR-V to be cross-compiled. If this is
+  // different then the source a transformation will need to be applied.
+  // Currently only Vulkan 1.1 <-> WebGPU transforms are defined. Default is
+  // Vulkan 1.0.
+  void SetTargetEnvironment(shaderc_target_env env,
+                            shaderc_env_version version) {
+    shaderc_spvc_compile_options_set_target_env(options_, env, version);
+  }
+
   // Set the entry point.
   void SetEntryPoint(const std::string& entry_point) {
     shaderc_spvc_compile_options_set_entry_point(options_, entry_point.c_str());
@@ -126,11 +135,6 @@ class CompileOptions {
   // Flatten uniform or push constant variable into (i|u)vec4 array.
   void SetFlattenUbo(bool b) {
     shaderc_spvc_compile_options_set_flatten_ubo(options_, b);
-  }
-
-  // Tranform input WebGPU to Vulkan SPIR-V before cross compiling.
-  void SetWebGPUToVulkan(bool b) {
-    shaderc_spvc_compile_options_set_webgpu_to_vulkan(options_, b);
   }
 
   // Which GLSL version should be produced.  Default is 450 (i.e. 4.5).
@@ -159,6 +163,11 @@ class CompileOptions {
   // If true invert gl_Position.y or equivalent.  Default is false.
   void SetFlipVertY(bool b) {
     shaderc_spvc_compile_options_set_flip_vert_y(options_, b);
+  }
+
+  // If true validate input and intermediate source. Default is true.
+  void SetValidate(bool b) {
+    shaderc_spvc_compile_options_set_validate(options_, b);
   }
 
   // Fill options with given data.  Return amount of data used, or zero

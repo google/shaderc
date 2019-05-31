@@ -76,8 +76,17 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_set_remove_unused_variables(
     shaderc_spvc_compile_options_t options, bool b);
 
 // Sets the source shader environment, affecting which warnings or errors will
-// be issued during validation. Default value for environment is Vulkan 1.0.
+// be issued during validation.
+// Default value for environment is Vulkan 1.0.
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_source_env(
+    shaderc_spvc_compile_options_t options, shaderc_target_env env,
+    shaderc_env_version version);
+
+// Sets the target shader environment, if this is different from the source
+// environment, then a transform between the environments will be performed if
+// possible. Currently only WebGPU <-> Vulkan 1.1 are defined.
+// Default value for environment is Vulkan 1.0.
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_target_env(
     shaderc_spvc_compile_options_t options, shaderc_target_env env,
     shaderc_env_version version);
 
@@ -93,11 +102,6 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_set_separate_shader_objects(
 
 // Flatten uniform or push constant variable into (i|u)vec4 array.
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_flatten_ubo(
-    shaderc_spvc_compile_options_t options, bool b);
-
-// Transform the input from WebGPU to Vulkan compatible SPIRV before
-// cross-compiling.
-SHADERC_EXPORT void shaderc_spvc_compile_options_set_webgpu_to_vulkan(
     shaderc_spvc_compile_options_t options, bool b);
 
 // Set GLSL language version.  Default is 450 (i.e. 4.5).
@@ -121,6 +125,10 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_set_fixup_clipspace(
 
 // If true invert gl_Position.y or equivalent.  Default is false.
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_flip_vert_y(
+    shaderc_spvc_compile_options_t options, bool b);
+
+// Set if validation should be performed. Default is true.
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_validate(
     shaderc_spvc_compile_options_t options, bool b);
 
 // Fill options with given data.  Return amount of data used, or zero

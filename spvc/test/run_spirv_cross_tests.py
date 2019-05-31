@@ -104,7 +104,8 @@ def glslang_compile(script_args, inp, out, flags):
 
 # Run spvc, return 'out' on success, None on failure.
 def spvc(script_args, inp, out, flags):
-    cmd = [script_args.spvc] + flags + ['-o', out, '--validate=vulkan1.1', inp]
+    cmd = [script_args.spvc] + flags + ['-o', out,
+                                        '--source-env=vulkan1.1', '--target-env=vulkan1.1', inp]
     log_command(script_args, cmd)
     if script_args.dry_run or subprocess.call(
             cmd, stdout=subprocess.DEVNULL) == 0:

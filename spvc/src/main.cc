@@ -40,7 +40,9 @@ Options:
   --help                   Display available options.
   -v                       Display compiler version information.
   -o <output file>         '-' means standard output.
-  --validate=<env>         Validate SPIR-V source with given environment
+  --no-validate            Disable validating input and intermediate source.
+                             Validation is by default enabled.
+  --source-env=<env>       Execution environment of the input source.
                              <env> is vulkan1.0 (the default), vulkan1.1,
                              or webgpu0
   --entry=<name>           Specify entry point.
@@ -50,8 +52,19 @@ Options:
                              Default is 450 if not detected from input.
   --msl-version=<ver>      Specify MSL output language version, e.g. 100
                              Default is 10200.
-  --transform-from-webgpu  Attempt to translate the input from WebGPU
-                           compatible SPIR-V before cross compiling.
+  --target-env=<env>       Target intermediate execution environment to
+                           transform the source to before cross-compiling.
+                           Defaults to the value set for source-env.
+                           <env> must be one of the legal values for source-env.
+
+                           If target-env and source-env are the same, then no
+                           transformation is performed.
+                           If there is no defined transformation between source
+                           and target the operation will fail.
+                           Defined transforms:
+                             webgpu0 -> vulkan1.1
+                             vulkan1.1 -> webgpu0
+
 
   The following flags behave as in spirv-cross:
 
@@ -146,6 +159,8 @@ int main(int argc, char** argv) {
   std::vector<uint32_t> input;
   string_piece output_path;
   string_piece output_language;
+  string_piece source_env = "vulkan1.0";
+  string_piece target_env = "";
 
   for (int i = 1; i < argc; ++i) {
     const string_piece arg = argv[i];
@@ -222,11 +237,10 @@ int main(int argc, char** argv) {
         return 1;
       }
       options.SetShaderModel(shader_model_num);
-    } else if (arg.starts_with("--validate=")) {
-      // TODO(zoddicus): Actually set the validate bit here, once the API is
-      // exposed.
+    } else if (arg.starts_with("--source-env=")) {
       string_piece env;
-      GetOptionArgument(argc, argv, &i, "--validate=", &env);
+      GetOptionArgument(argc, argv, &i, "--source-env=", &env);
+      source_env = env;
       if (env == "vulkan1.0") {
         options.SetSourceEnvironment(shaderc_target_env_vulkan,
                                      shaderc_env_version_vulkan_1_0);
@@ -238,18 +252,50 @@ int main(int argc, char** argv) {
                                      shaderc_env_version_webgpu);
       } else {
         std::cerr << "spvc: error: invalid value '" << env
-                  << "' in --validate=" << std::endl;
+                  << "' in --source-env=" << std::endl;
         return 1;
       }
-    } else if (arg.starts_with("--transform-from-webgpu")) {
-      options.SetSourceEnvironment(shaderc_target_env_webgpu,
-                                   shaderc_env_version_webgpu);
-      options.SetWebGPUToVulkan(true);
+    } else if (arg.starts_with("--target-env=")) {
+      string_piece env;
+      GetOptionArgument(argc, argv, &i, "--target-env=", &env);
+      target_env = env;
+      if (env == "vulkan1.0") {
+        options.SetTargetEnvironment(shaderc_target_env_vulkan,
+                                     shaderc_env_version_vulkan_1_0);
+      } else if (env == "vulkan1.1") {
+        options.SetTargetEnvironment(shaderc_target_env_vulkan,
+                                     shaderc_env_version_vulkan_1_1);
+      } else if (env == "webgpu0") {
+        options.SetTargetEnvironment(shaderc_target_env_webgpu,
+                                     shaderc_env_version_webgpu);
+      } else {
+        std::cerr << "spvc: error: invalid value '" << env
+                  << "' in --target-env=" << std::endl;
+        return 1;
+      }
     } else {
       if (!ReadFile(arg.str(), &input)) {
         std::cerr << "spvc: error: could not read file" << std::endl;
         return 1;
       }
+    }
+  }
+
+  if (target_env == "") {
+    if (source_env == "vulkan1.0") {
+      options.SetTargetEnvironment(shaderc_target_env_vulkan,
+                                   shaderc_env_version_vulkan_1_0);
+    } else if (source_env == "vulkan1.1") {
+      options.SetTargetEnvironment(shaderc_target_env_vulkan,
+                                   shaderc_env_version_vulkan_1_1);
+    } else if (source_env == "webgpu0") {
+      options.SetTargetEnvironment(shaderc_target_env_webgpu,
+                                   shaderc_env_version_webgpu);
+    } else {
+      // This should be caught above when parsing --source-target=
+      std::cerr << "spvc: error: invalid value '" << source_env
+                << "' in --source-env=" << std::endl;
+      return 1;
     }
   }
 
