@@ -38,9 +38,9 @@ struct shaderc_spvc_compile_options {
   bool validate = true;
   bool remove_unused_variables = false;
   bool flatten_ubo = false;
-  bool webgpu_to_vulkan = false;
   std::string entry_point;
   spv_target_env source_env = SPV_ENV_VULKAN_1_0;
+  spv_target_env target_env = SPV_ENV_VULKAN_1_0;
   spirv_cross::CompilerGLSL::Options glsl;
   spirv_cross::CompilerHLSL::Options hlsl;
   spirv_cross::CompilerMSL::Options msl;
@@ -68,16 +68,14 @@ void shaderc_spvc_compile_options_release(
   delete options;
 }
 
-void shaderc_spvc_compile_options_set_source_env(
-    shaderc_spvc_compile_options_t options, shaderc_target_env env,
-    shaderc_env_version version) {
+spv_target_env get_spv_target_env(shaderc_target_env env,
+                                  shaderc_env_version version) {
   switch (env) {
     case shaderc_target_env_opengl:
     case shaderc_target_env_opengl_compat:
       switch (version) {
         case shaderc_env_version_opengl_4_5:
-          options->source_env = SPV_ENV_OPENGL_4_5;
-          break;
+          return SPV_ENV_OPENGL_4_5;
         default:
           break;
       }
@@ -85,20 +83,31 @@ void shaderc_spvc_compile_options_set_source_env(
     case shaderc_target_env_vulkan:
       switch (version) {
         case shaderc_env_version_vulkan_1_0:
-          options->source_env = SPV_ENV_VULKAN_1_0;
-          break;
+          return SPV_ENV_VULKAN_1_0;
         case shaderc_env_version_vulkan_1_1:
-          options->source_env = SPV_ENV_VULKAN_1_1;
-          break;
+          return SPV_ENV_VULKAN_1_1;
         default:
           break;
       }
       break;
     case shaderc_target_env_webgpu:
-      options->source_env = SPV_ENV_WEBGPU_0;
+      return SPV_ENV_WEBGPU_0;
     default:
       break;
   }
+  return SPV_ENV_VULKAN_1_0;
+}
+
+void shaderc_spvc_compile_options_set_source_env(
+    shaderc_spvc_compile_options_t options, shaderc_target_env env,
+    shaderc_env_version version) {
+  options->source_env = get_spv_target_env(env, version);
+}
+
+void shaderc_spvc_compile_options_set_target_env(
+    shaderc_spvc_compile_options_t options, shaderc_target_env env,
+    shaderc_env_version version) {
+  options->target_env = get_spv_target_env(env, version);
 }
 
 void shaderc_spvc_compile_options_set_entry_point(
@@ -126,11 +135,6 @@ void shaderc_spvc_compile_options_set_flatten_ubo(
   options->flatten_ubo = b;
 }
 
-void shaderc_spvc_compile_options_set_webgpu_to_vulkan(
-    shaderc_spvc_compile_options_t options, bool b) {
-  options->webgpu_to_vulkan = b;
-}
-
 void shaderc_spvc_compile_options_set_glsl_language_version(
     shaderc_spvc_compile_options_t options, uint32_t version) {
   options->glsl.version = version;
@@ -154,6 +158,11 @@ void shaderc_spvc_compile_options_set_fixup_clipspace(
 void shaderc_spvc_compile_options_set_flip_vert_y(
     shaderc_spvc_compile_options_t options, bool b) {
   options->glsl.vertex.flip_vert_y = b;
+}
+
+void shaderc_spvc_compile_options_set_validate(
+    shaderc_spvc_compile_options_t options, bool b) {
+  options->validate = b;
 }
 
 size_t shaderc_spvc_compile_options_set_for_fuzzing(
@@ -205,31 +214,46 @@ shaderc_spvc_compilation_result_t validate_and_compile(
         consume_spirv_tools_message, result, std::placeholders::_1,
         std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
     if (!tools.Validate(source, source_len, spvtools::ValidatorOptions())) {
+      result->messages.append("Validation of input source failed.");
+      result->messages.append("\n");
       result->status = shaderc_compilation_status_validation_error;
       return result;
     }
   }
 
   std::vector<uint32_t> intermediate_source;
-  if (options->webgpu_to_vulkan) {
-    if (options->source_env != SPV_ENV_WEBGPU_0) {
-      result->messages.append(
-          "WARNING: Converting from WebGPU to Vulkan, with "
-          "non-WebGPU source env set, this may cause "
-          "unexpected behaviour...\n");
-    }
-    spvtools::Optimizer opt(SPV_ENV_VULKAN_1_1);
+  if (options->source_env != options->target_env) {
+    spvtools::Optimizer opt(options->target_env);
     opt.SetMessageConsumer(std::bind(
         consume_spirv_tools_message, result, std::placeholders::_1,
         std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-    opt.RegisterWebGPUToVulkanPasses();
+
+    if (options->source_env == SPV_ENV_WEBGPU_0 &&
+        options->target_env == SPV_ENV_VULKAN_1_1) {
+      opt.RegisterWebGPUToVulkanPasses();
+    } else if (options->source_env == SPV_ENV_VULKAN_1_1 &&
+               options->target_env == SPV_ENV_WEBGPU_0) {
+      opt.RegisterVulkanToWebGPUPasses();
+    } else {
+      result->messages.append(
+          "No defined transformation between source and "
+          "target execution environments.");
+      result->messages.append("\n");
+      result->status = shaderc_compilation_status_transformation_error;
+      return result;
+    }
+
     if (!opt.Run(source, source_len, &intermediate_source)) {
-      result->status = shaderc_compilation_status_tranformation_error;
+      result->messages.append(
+          "Transformations between source and target "
+          "execution environments failed.");
+      result->messages.append("\n");
+      result->status = shaderc_compilation_status_transformation_error;
       return result;
     }
 
     if (options->validate) {
-      spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_1);
+      spvtools::SpirvTools tools(options->target_env);
       if (!tools.IsValid()) return nullptr;
       tools.SetMessageConsumer(std::bind(
           consume_spirv_tools_message, result, std::placeholders::_1,
@@ -237,6 +261,8 @@ shaderc_spvc_compilation_result_t validate_and_compile(
       if (!tools.Validate(intermediate_source.data(),
                           intermediate_source.size(),
                           spvtools::ValidatorOptions())) {
+        result->messages.append("Validation of transformed source failed.");
+        result->messages.append("\n");
         result->status = shaderc_compilation_status_validation_error;
         return result;
       }
