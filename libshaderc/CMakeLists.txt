@@ -84,7 +84,7 @@ if(SHADERC_ENABLE_INSTALL)
     # around this problem by manually substitution.
     string(REPLACE "$(Configuration)" "\${CMAKE_INSTALL_CONFIG_NAME}"
       install_location "${generated_location}")
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${install_location} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    install(FILES ${install_location} DESTINATION ${CMAKE_INSTALL_LIBDIR})
   else()
     install(FILES ${generated_location} DESTINATION ${CMAKE_INSTALL_LIBDIR})
   endif()
