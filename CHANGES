@@ -1,5 +1,8 @@
 Revision history for Shaderc
 
+v2019.1-dev 2019-06-04
+ - Start v2019.1-dev
+
 v2019.0 2019-06-04
  - Add optional spvc, libshaderc_spvc as wrapper around SPIRV-Cross:
    - Rejects bad modules by running the SPIR-V validator first
