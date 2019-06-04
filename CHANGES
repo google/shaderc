@@ -18,6 +18,10 @@ v2019.0-dev 2019-05-08
  - Fixes for newer googletest
  - Add address sanitizer presubmit bot
  - Generate config files for pkg-config
+ Spvc:
+ - Add option to specify source environment.  Spvc will transform from source
+   to target environment if they are different.  This only works for WebGPU0
+   and Vulkan 1.1.
  Fixes:
   #499: In HLSL compilation, relax layout and logical pointer validation rules
    prior to running the legalization recipe.
