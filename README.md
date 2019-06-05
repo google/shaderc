@@ -32,7 +32,7 @@ provide:
 * validation and transformation of inputs before cross-compiling
 * an API designed around integration with specific projects like [Dawn][dawn]
 
-**Note:** `spvc` and its libary are WIP and optional artifacts that are by
+**Note:** `spvc` and its library are WIP and optional artifacts that are by
 default disabled in the build. How to enabled is detailed below.
 
 ## Downloads
@@ -229,7 +229,7 @@ The value `SHADERC_ENABLE_SPVC` in `CMakeLists.txt` must be set to `ON` to
 enable building `spvc`.
 
 This can be achieved by either editing the file in your checkout, or passing
-`-DSHADERC_ENABLE_SPVC=ON` to `cmake` to override value.
+`-DSHADERC_ENABLE_SPVC=ON` to `cmake` to set the value.
 
 ## Bug tracking
 
