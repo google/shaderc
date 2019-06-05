@@ -4,7 +4,8 @@ include $(CLEAR_VARS)
 LOCAL_MODULE:=shaderc_util
 LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti -DNV_EXTENSIONS
 LOCAL_EXPORT_C_INCLUDES:=$(LOCAL_PATH)/include
-LOCAL_SRC_FILES:=src/compiler.cc \
+LOCAL_SRC_FILES:=src/args.cc \
+                src/compiler.cc \
 		src/file_finder.cc \
 		src/io.cc \
 		src/message.cc \

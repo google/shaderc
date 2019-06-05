@@ -19,21 +19,21 @@
 #include <iomanip>
 #include <iostream>
 #include <list>
-#include <tuple>
-#include <string>
 #include <sstream>
+#include <string>
+#include <tuple>
 #include <utility>
-
-#include "libshaderc_util/compiler.h"
-#include "libshaderc_util/io.h"
-#include "libshaderc_util/string_piece.h"
-#include "shaderc/shaderc.h"
-#include "spirv-tools/libspirv.h"
 
 #include "file.h"
 #include "file_compiler.h"
+#include "libshaderc_util/args.h"
+#include "libshaderc_util/compiler.h"
+#include "libshaderc_util/io.h"
+#include "libshaderc_util/string_piece.h"
 #include "resource_parse.h"
 #include "shader_stage.h"
+#include "shaderc/shaderc.h"
+#include "spirv-tools/libspirv.h"
 
 using shaderc_util::string_piece;
 
@@ -160,29 +160,6 @@ Options:
 )";
 }
 
-// Gets the option argument for the option at *index in argv in a way consistent
-// with clang/gcc. On success, returns true and writes the parsed argument into
-// *option_argument. Returns false if any errors occur. After calling this
-// function, *index will be the index of the last command line argument consumed.
-bool GetOptionArgument(int argc, char** argv, int* index,
-                       const std::string& option,
-                       string_piece* option_argument) {
-  const string_piece arg = argv[*index];
-  assert(arg.starts_with(option));
-  if (arg.size() != option.size()) {
-    *option_argument = arg.substr(option.size());
-    return true;
-  } else {
-    if (option.back() == '=') {
-      *option_argument = "";
-      return true;
-    }
-    if (++(*index) >= argc) return false;
-    *option_argument = argv[*index];
-    return true;
-  }
-}
-
 // Sets resource limits according to the given string. The string
 // should be formated as required for ParseResourceSettings.
 // Returns true on success.  Otherwise returns false and sets err
@@ -202,31 +179,6 @@ bool SetResourceLimits(const std::string& str, shaderc::CompileOptions* options,
 const char kBuildVersion[] =
 #include "build-version.inc"
     ;
-
-
-// Parses the given string as a number of the specified type.  Returns true
-// if parsing succeeded, and stores the parsed value via |value|.
-// (I've worked out the general case for this in
-// SPIRV-Tools source/util/parse_number.h. -- dneto)
-bool ParseUint32(const std::string& str, uint32_t* value) {
-  std::istringstream iss(str);
-
-  iss >> std::setbase(0);
-  iss >> *value;
-
-  // We should have read something.
-  bool ok = !str.empty() && !iss.bad();
-  // It should have been all the text.
-  ok = ok && iss.eof();
-  // It should have been in range.
-  ok = ok && !iss.fail();
-
-  // Work around a bugs in various C++ standard libraries.
-  // Count any negative number as an error, including "-0".
-  ok = ok && (str[0] != '-');
-
-  return ok;
-}
 
 // Gets an optional stage name followed by required offset argument.  Returns
 // false and emits a message to *errs if any errors occur.  After calling this
@@ -253,7 +205,7 @@ bool GetOptionalStageThenOffsetArgument(const shaderc_util::string_piece option,
       return false;
     }
   }
-  if (!ParseUint32(argv[argi + 1], offset)) {
+  if (!shaderc_util::ParseUint32(argv[argi + 1], offset)) {
     *errs << "glslc: error: invalid offset value " << argv[argi + 1] << " for "
           << option << std::endl;
     return false;
@@ -319,7 +271,7 @@ int main(int argc, char** argv) {
       return 0;
     } else if (arg.starts_with("-o")) {
       string_piece file_name;
-      if (!GetOptionArgument(argc, argv, &i, "-o", &file_name)) {
+      if (!shaderc_util::GetOptionArgument(argc, argv, &i, "-o", &file_name)) {
         std::cerr
             << "glslc: error: argument to '-o' is missing (expected 1 value)"
             << std::endl;
@@ -378,13 +330,13 @@ int main(int argc, char** argv) {
              argv[i + 3][0] != '-') {
         seen_triple = true;
         uint32_t set = 0;
-        if (!ParseUint32(argv[i + 2], &set)) {
+        if (!shaderc_util::ParseUint32(argv[i + 2], &set)) {
           std::cerr << "glslc: error: Invalid set number: " << argv[i + 2]
                     << std::endl;
           return 1;
         }
         uint32_t binding = 0;
-        if (!ParseUint32(argv[i + 3], &binding)) {
+        if (!shaderc_util::ParseUint32(argv[i + 3], &binding)) {
           std::cerr << "glslc: error: Invalid binding number: " << argv[i + 3]
                     << std::endl;
           return 1;
@@ -412,7 +364,8 @@ int main(int argc, char** argv) {
     } else if (arg.starts_with("-flimit-file")) {
       std::string err;
       string_piece limits_file;
-      if (!GetOptionArgument(argc, argv, &i, "-flimit-file", &limits_file)) {
+      if (!shaderc_util::GetOptionArgument(argc, argv, &i, "-flimit-file",
+                                           &limits_file)) {
         std::cerr << "glslc: error: argument to '-flimit-file' is missing"
                   << std::endl;
         return 1;
@@ -487,7 +440,7 @@ int main(int argc, char** argv) {
       }
     } else if (arg.starts_with("-x")) {
       string_piece option_arg;
-      if (!GetOptionArgument(argc, argv, &i, "-x", &option_arg)) {
+      if (!shaderc_util::GetOptionArgument(argc, argv, &i, "-x", &option_arg)) {
         std::cerr
             << "glslc: error: argument to '-x' is missing (expected 1 value)"
             << std::endl;
@@ -533,7 +486,8 @@ int main(int argc, char** argv) {
       }
     } else if (arg == "-MF") {
       string_piece dep_file_name;
-      if (!GetOptionArgument(argc, argv, &i, "-MF", &dep_file_name)) {
+      if (!shaderc_util::GetOptionArgument(argc, argv, &i, "-MF",
+                                           &dep_file_name)) {
         std::cerr
             << "glslc: error: missing dependency info filename after '-MF'"
             << std::endl;
@@ -543,7 +497,8 @@ int main(int argc, char** argv) {
           std::string(dep_file_name.data(), dep_file_name.size()));
     } else if (arg == "-MT") {
       string_piece dep_file_name;
-      if (!GetOptionArgument(argc, argv, &i, "-MT", &dep_file_name)) {
+      if (!shaderc_util::GetOptionArgument(argc, argv, &i, "-MT",
+                                           &dep_file_name)) {
         std::cerr << "glslc: error: missing dependency info target after '-MT'"
                   << std::endl;
         return 1;
@@ -589,7 +544,7 @@ int main(int argc, char** argv) {
       }
     } else if (arg.starts_with("-I")) {
       string_piece option_arg;
-      if (!GetOptionArgument(argc, argv, &i, "-I", &option_arg)) {
+      if (!shaderc_util::GetOptionArgument(argc, argv, &i, "-I", &option_arg)) {
         std::cerr
             << "glslc: error: argument to '-I' is missing (expected 1 value)"
             << std::endl;

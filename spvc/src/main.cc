@@ -18,6 +18,7 @@
 #include <sstream>
 #include <vector>
 
+#include "libshaderc_util/args.h"
 #include "libshaderc_util/string_piece.h"
 #include "shaderc/env.h"
 #include "shaderc/spvc.hpp"
@@ -76,55 +77,6 @@ Options:
 )";
 }
 
-// TODO(fjhenigman): factor out with glslc
-// Gets the option argument for the option at *index in argv in a way consistent
-// with clang/gcc. On success, returns true and writes the parsed argument into
-// *option_argument. Returns false if any errors occur. After calling this
-// function, *index will be the index of the last command line argument
-// consumed.
-bool GetOptionArgument(int argc, char** argv, int* index,
-                       const std::string& option,
-                       string_piece* option_argument) {
-  const string_piece arg = argv[*index];
-  assert(arg.starts_with(option));
-  if (arg.size() != option.size()) {
-    *option_argument = arg.substr(option.size());
-    return true;
-  }
-  if (option.back() == '=') {
-    *option_argument = "";
-    return true;
-  }
-  if (++(*index) >= argc)
-    return false;
-  *option_argument = argv[*index];
-  return true;
-
-}
-
-// TODO(fjhenigman): factor out with glslc
-// Parses the given string as a number of the specified type.  Returns true
-// if parsing succeeded, and stores the parsed value via |value|.
-bool ParseUint32(const std::string& str, uint32_t* value) {
-  std::istringstream iss(str);
-
-  iss >> std::setbase(0);
-  iss >> *value;
-
-  // We should have read something.
-  bool ok = !str.empty() && !iss.bad();
-  // It should have been all the text.
-  ok = ok && iss.eof();
-  // It should have been in range.
-  ok = ok && !iss.fail();
-
-  // Work around a bugs in various C++ standard libraries.
-  // Count any negative number as an error, including "-0".
-  ok = ok && (str[0] != '-');
-
-  return ok;
-}
-
 const char kBuildVersion[] = ""
     // TODO(fjhenigman): #include "build-version.inc"
     ;
@@ -173,7 +125,8 @@ int main(int argc, char** argv) {
                 << std::endl;
       return 0;
     } else if (arg.starts_with("-o")) {
-      if (!GetOptionArgument(argc, argv, &i, "-o", &output_path)) {
+      if (!shaderc_util::GetOptionArgument(argc, argv, &i, "-o",
+                                           &output_path)) {
         std::cerr
             << "spvc: error: argument to '-o' is missing (expected 1 value)"
             << std::endl;
@@ -181,13 +134,14 @@ int main(int argc, char** argv) {
       }
     } else if (arg.starts_with("--entry=")) {
       string_piece entry_point;
-      GetOptionArgument(argc, argv, &i, "--entry=", &entry_point);
+      shaderc_util::GetOptionArgument(argc, argv, &i, "--entry=", &entry_point);
       options.SetEntryPoint(entry_point.data());
     } else if (arg.starts_with("--glsl-version=")) {
       string_piece version_str;
-      GetOptionArgument(argc, argv, &i, "--glsl-version=", &version_str);
+      shaderc_util::GetOptionArgument(argc, argv, &i,
+                                      "--glsl-version=", &version_str);
       uint32_t version_num;
-      if (!ParseUint32(version_str.str(), &version_num)) {
+      if (!shaderc_util::ParseUint32(version_str.str(), &version_num)) {
         std::cerr << "spvc: error: invalid value '" << version_str
                   << "' in --glsl-version=" << std::endl;
         return 1;
@@ -195,16 +149,18 @@ int main(int argc, char** argv) {
       options.SetGLSLLanguageVersion(version_num);
     } else if (arg.starts_with("--msl-version=")) {
       string_piece version_str;
-      GetOptionArgument(argc, argv, &i, "--msl-version=", &version_str);
+      shaderc_util::GetOptionArgument(argc, argv, &i,
+                                      "--msl-version=", &version_str);
       uint32_t version_num;
-      if (!ParseUint32(version_str.str(), &version_num)) {
+      if (!shaderc_util::ParseUint32(version_str.str(), &version_num)) {
         std::cerr << "spvc: error: invalid value '" << version_str
                   << "' in --msl-version=" << std::endl;
         return 1;
       }
       options.SetMSLLanguageVersion(version_num);
     } else if (arg.starts_with("--language=")) {
-      GetOptionArgument(argc, argv, &i, "--language=", &output_language);
+      shaderc_util::GetOptionArgument(argc, argv, &i,
+                                      "--language=", &output_language);
       if (!(output_language == "glsl" || output_language == "msl" ||
             output_language == "hlsl")) {
         std::cerr << "spvc: error: invalid value '" << output_language
@@ -229,9 +185,11 @@ int main(int argc, char** argv) {
       // TODO(fjhenigman)
     } else if (arg.starts_with("--shader-model=")) {
       string_piece shader_model_str;
-      GetOptionArgument(argc, argv, &i, "--shader-model=", &shader_model_str);
+      shaderc_util::GetOptionArgument(argc, argv, &i,
+                                      "--shader-model=", &shader_model_str);
       uint32_t shader_model_num;
-      if (!ParseUint32(shader_model_str.str(), &shader_model_num)) {
+      if (!shaderc_util::ParseUint32(shader_model_str.str(),
+                                     &shader_model_num)) {
         std::cerr << "spvc: error: invalid value '" << shader_model_str
                   << "' in --shader-model=" << std::endl;
         return 1;
@@ -239,7 +197,7 @@ int main(int argc, char** argv) {
       options.SetShaderModel(shader_model_num);
     } else if (arg.starts_with("--source-env=")) {
       string_piece env;
-      GetOptionArgument(argc, argv, &i, "--source-env=", &env);
+      shaderc_util::GetOptionArgument(argc, argv, &i, "--source-env=", &env);
       source_env = env;
       if (env == "vulkan1.0") {
         options.SetSourceEnvironment(shaderc_target_env_vulkan,
@@ -257,7 +215,7 @@ int main(int argc, char** argv) {
       }
     } else if (arg.starts_with("--target-env=")) {
       string_piece env;
-      GetOptionArgument(argc, argv, &i, "--target-env=", &env);
+      shaderc_util::GetOptionArgument(argc, argv, &i, "--target-env=", &env);
       target_env = env;
       if (env == "vulkan1.0") {
         options.SetTargetEnvironment(shaderc_target_env_vulkan,
