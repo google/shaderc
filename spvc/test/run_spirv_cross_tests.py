@@ -285,19 +285,25 @@ def test_msl(script_args, shader, filename, optimize):
     # Run spvc to convert Vulkan to MSL.
     flags = ['--entry=main', '--language=msl',
              '--msl-version=' + lookup(msl_standards, filename)]
-    # TODO(fjhenigman): add these flags to spvc and uncomment these lines
+    # TODO(641): Uncomment when flag is added to spvc
     # if '.swizzle.' in filename:
     #    flags.append('--msl-swizzle-texture-samples')
+    # TODO(642): Uncomment when flag is added to spvc
     # if '.ios.' in filename:
     #    flags.append('--msl-ios')
+    # TODO(643): Uncomment when flag is added to spvc
     # if '.pad-fragment.' in filename:
     #    flags.append('--msl-pad-fragment-output')
+    # TODO(644): Uncomment when flag is added to spvc
     # if '.capture.' in filename:
     #    flags.append('--msl-capture-output')
+    # TODO(645): Uncomment when flag is added to spvc
     # if '.domain.' in filename:
     #    flags.append('--msl-domain-lower-left')
+    # TODO(646): Uncomment when flag is added to spvc
     # if '.argument.' in shader:
     #    flags.append('--msl-argument-buffers')
+    # TODO(647): Uncomment when flag is added to spvc
     # if '.discrete.' in shader:
     #    flags.append('--msl-discrete-descriptor-set=2')
     #    flags.append('--msl-discrete-descriptor-set=3')
@@ -347,15 +353,15 @@ def test_hlsl(script_args, shader, filename, optimize):
     output = spvc(script_args, input, input + filename,
                   ['--entry=main', '--language=hlsl', '--hlsl-enable-compat', '--shader-model=' + lookup(shader_models, filename)])
     if not '.invalid.' in filename:
-        # logged for compatibility with SPIRV-Cross test script
+        # Logged for compatibility with SPIRV-Cross test script
         log_command(script_args, ['spirv-val',
                                   '--target-env', 'vulkan1.1', input])
 
     if output:
-        # logged for compatibility with SPIRV-Cross test script
+        # Logged for compatibility with SPIRV-Cross test script
         log_command(script_args, [script_args.glslang, '-e', 'main',
                                   '-D', '--target-env', 'vulkan1.1', '-V', output])
-        # TODO(fjhenigman): log fxc run here
+        # TODO(649): Log dxc run here
         result, _ = check_reference(script_args, output, shader, optimize)
         if result:
             successes.append((shader, optimize))
@@ -375,10 +381,10 @@ def test_hlsl(script_args, shader, filename, optimize):
 def test_reflection(script_args, shader, filename, optimize):
     log_failure(script_args, shader, optimize)
     return [], [(shader, optimize)]
-    # TODO(fjhenigman)
+    # TODO(650): Implement this test
 
 
-# TODO(fjhenigman): Allow our own tests, not just spirv-cross tests.
+# TODO(651): Allow our own tests, not just spirv-cross tests.
 test_case_dirs = (
     # directory             function         optimize
     ('shaders',             test_glsl,       False),

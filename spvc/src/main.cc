@@ -76,7 +76,7 @@ Options:
 )";
 }
 
-// TODO(fjhenigman): factor out with glslc
+// TODO(652): factor out with glslc
 // Gets the option argument for the option at *index in argv in a way consistent
 // with clang/gcc. On success, returns true and writes the parsed argument into
 // *option_argument. Returns false if any errors occur. After calling this
@@ -102,7 +102,7 @@ bool GetOptionArgument(int argc, char** argv, int* index,
 
 }
 
-// TODO(fjhenigman): factor out with glslc
+// TODO(652): factor out with glslc
 // Parses the given string as a number of the specified type.  Returns true
 // if parsing succeeded, and stores the parsed value via |value|.
 bool ParseUint32(const std::string& str, uint32_t* value) {
@@ -126,7 +126,7 @@ bool ParseUint32(const std::string& str, uint32_t* value) {
 }
 
 const char kBuildVersion[] = ""
-    // TODO(fjhenigman): #include "build-version.inc"
+    // TODO(653): #include "build-version.inc"
     ;
 
 bool ReadFile(const std::string& path, std::vector<uint32_t>* out) {
@@ -220,13 +220,13 @@ int main(int argc, char** argv) {
     } else if (arg == "--flatten-ubo") {
       options.SetFlattenUbo(true);
     } else if (arg == "--flatten-multidimensional-arrays") {
-      // TODO(fjhenigman)
+      // TODO(654)
     } else if (arg == "--es") {
-      // TODO(fjhenigman)
+      // TODO(655)
     } else if (arg == "--hlsl-enable-compat") {
-      // TODO(fjhenigman)
+      // TODO(656)
     } else if (arg == "--glsl-emit-push-constant-as-ubo") {
-      // TODO(fjhenigman)
+      // TODO(657)
     } else if (arg.starts_with("--shader-model=")) {
       string_piece shader_model_str;
       GetOptionArgument(argc, argv, &i, "--shader-model=", &shader_model_str);
