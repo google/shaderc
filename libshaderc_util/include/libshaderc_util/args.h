@@ -15,6 +15,7 @@
 #ifndef LIBSHADERC_UTIL_INC_ARGS_H
 #define LIBSHADERC_UTIL_INC_ARGS_H
 
+#include <cstdint>
 #include <string>
 
 #include "libshaderc_util/string_piece.h"
