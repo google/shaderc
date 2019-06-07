@@ -346,15 +346,15 @@ def test_hlsl(script_args, shader, filename, optimize):
     output = spvc(script_args, input, input + filename,
                   ['--entry=main', '--language=hlsl', '--hlsl-enable-compat', '--shader-model=' + lookup(shader_models, filename)])
     if not '.invalid.' in filename:
-        # Logged for compatibility with SPIRV-Cross test script
+        # logged for compatibility with SPIRV-Cross test script
         log_command(script_args, ['spirv-val',
                                   '--target-env', 'vulkan1.1', input])
 
     if output:
-        # Logged for compatibility with SPIRV-Cross test script
+        # logged for compatibility with SPIRV-Cross test script
         log_command(script_args, [script_args.glslang, '-e', 'main',
                                   '-D', '--target-env', 'vulkan1.1', '-V', output])
-        # TODO(649): Log dxc run here
+        # TODO(bug 649): Log dxc run here
         result, _ = check_reference(script_args, output, shader, optimize)
         if result:
             successes.append((shader, optimize))
@@ -374,10 +374,10 @@ def test_hlsl(script_args, shader, filename, optimize):
 def test_reflection(script_args, shader, filename, optimize):
     log_failure(script_args, shader, optimize)
     return [], [(shader, optimize)]
-    # TODO(650): Implement this test
+    # TODO(bug 650): Implement this test
 
 
-# TODO(651): Allow our own tests, not just spirv-cross tests.
+# TODO(bug 651): Allow our own tests, not just spirv-cross tests.
 test_case_dirs = (
     # directory             function         optimize
     ('shaders',             test_glsl,       False),
