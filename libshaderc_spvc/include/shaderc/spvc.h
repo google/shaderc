@@ -164,6 +164,10 @@ shaderc_spvc_compile_options_set_msl_discrete_descriptor_sets(
     shaderc_spvc_compile_options_t options, const uint32_t* descriptors,
     size_t num_descriptors);
 
+// DEPRECATED: Set HLSL shader model.  Default is 30.
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_shader_model(
+    shaderc_spvc_compile_options_t options, uint32_t model);
+
 // Set HLSL shader model.  Default is 30.
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_hlsl_shader_model(
     shaderc_spvc_compile_options_t options, uint32_t model);
