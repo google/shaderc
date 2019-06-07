@@ -203,6 +203,11 @@ class CompileOptions {
         options_, descriptors.data(), descriptors.size());
   }
 
+  // DEPRECATED: Which HLSL shader model should be used.  Default is 30.
+  void SetShaderModel(uint32_t model) {
+    shaderc_spvc_compile_options_set_shader_model(options_, model);
+  }
+
   // Which HLSL shader model should be used.  Default is 30.
   void SetHLSLShaderModel(uint32_t model) {
     shaderc_spvc_compile_options_set_hlsl_shader_model(options_, model);
