@@ -196,8 +196,6 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_set_validate(
 SHADERC_EXPORT size_t shaderc_spvc_compile_options_set_for_fuzzing(
     shaderc_spvc_compile_options_t options, const uint8_t* data, size_t size);
 
-// TODO(fjhenigman): Add more options to control validator and compiler.
-
 // An opaque handle to the results of a call to any
 // shaderc_spvc_compile_into_*() function.
 typedef struct shaderc_spvc_compilation_result*

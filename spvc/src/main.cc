@@ -88,7 +88,7 @@ Options:
 )";
 }
 
-// TODO(fjhenigman): factor out with glslc
+// TODO(bug 652): factor out with glslc
 // Gets the option argument for the option at *index in argv in a way consistent
 // with clang/gcc. On success, returns true and writes the parsed argument into
 // *option_argument. Returns false if any errors occur. After calling this
@@ -114,7 +114,7 @@ bool GetOptionArgument(int argc, char** argv, int* index,
 
 }
 
-// TODO(fjhenigman): factor out with glslc
+// TODO(bug 652): factor out with glslc
 // Parses the given string as a number of the specified type.  Returns true
 // if parsing succeeded, and stores the parsed value via |value|.
 bool ParseUint32(const std::string& str, uint32_t* value) {
@@ -138,7 +138,7 @@ bool ParseUint32(const std::string& str, uint32_t* value) {
 }
 
 const char kBuildVersion[] = ""
-    // TODO(fjhenigman): #include "build-version.inc"
+    // TODO(bug 653): #include "build-version.inc"
     ;
 
 bool ReadFile(const std::string& path, std::vector<uint32_t>* out) {
