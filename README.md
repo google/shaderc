@@ -25,7 +25,7 @@ to provide:
   operating systems
 * increased functionality such as file `#include` support
 
-`spvc` wraps around core functionality in [spirv-cross][khr-glslang]
+`spvc` wraps around core functionality in [spirv-cross][spirv-cross]
 and [SPIRV-Tools][spirv-tools]. `spirv` and its library aims to
 provide:
 
