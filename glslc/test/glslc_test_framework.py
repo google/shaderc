@@ -45,8 +45,6 @@ If --leave-output was not specified, all temporary files and directories will
 be deleted.
 """
 
-from __future__ import print_function
-
 import argparse
 import fnmatch
 import inspect
@@ -305,7 +303,7 @@ class TestCase:
             run_results = [getattr(self.test, test_method)(test_status)
                            for test_method in get_all_test_methods(
                                self.test.__class__)]
-            success, message = zip(*run_results)
+            success, message = list(zip(*run_results))
             success = all(success)
             message = '\n'.join(message)
         except Exception as e:
