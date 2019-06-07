@@ -21,7 +21,7 @@ RUN apk add --update \
     cmake \
     git \
     ninja \
-    python \
+    python3 \
     py-pip \
   && rm -rf /var/cache/apk/*
 
