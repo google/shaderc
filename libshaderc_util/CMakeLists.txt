@@ -12,6 +12,7 @@ add_library(shaderc_util STATIC
   include/libshaderc_util/string_piece.h
   include/libshaderc_util/universal_unistd.h
   include/libshaderc_util/version_profile.h
+  src/args.cc
   src/compiler.cc
   src/file_finder.cc
   src/io.cc
