@@ -285,28 +285,21 @@ def test_msl(script_args, shader, filename, optimize):
     # Run spvc to convert Vulkan to MSL.
     flags = ['--entry=main', '--language=msl',
              '--msl-version=' + lookup(msl_standards, filename)]
-    # TODO(641): Uncomment when flag is added to spvc
-    # if '.swizzle.' in filename:
-    #    flags.append('--msl-swizzle-texture-samples')
-    # TODO(642): Uncomment when flag is added to spvc
-    # if '.ios.' in filename:
-    #    flags.append('--msl-ios')
-    # TODO(643): Uncomment when flag is added to spvc
-    # if '.pad-fragment.' in filename:
-    #    flags.append('--msl-pad-fragment-output')
-    # TODO(644): Uncomment when flag is added to spvc
-    # if '.capture.' in filename:
-    #    flags.append('--msl-capture-output')
-    # TODO(645): Uncomment when flag is added to spvc
-    # if '.domain.' in filename:
-    #    flags.append('--msl-domain-lower-left')
-    # TODO(646): Uncomment when flag is added to spvc
-    # if '.argument.' in shader:
-    #    flags.append('--msl-argument-buffers')
-    # TODO(647): Uncomment when flag is added to spvc
-    # if '.discrete.' in shader:
-    #    flags.append('--msl-discrete-descriptor-set=2')
-    #    flags.append('--msl-discrete-descriptor-set=3')
+    if '.swizzle.' in filename:
+        flags.append('--msl-swizzle-texture-samples')
+    if '.ios.' in filename:
+        flags.append('--msl-platform=ios')
+    if '.pad-fragment.' in filename:
+        flags.append('--msl-pad-fragment-output')
+    if '.capture.' in filename:
+        flags.append('--msl-capture-output')
+    if '.domain.' in filename:
+        flags.append('--msl-domain-lower-left')
+    if '.argument.' in shader:
+        flags.append('--msl-argument-buffers')
+    if '.discrete.' in shader:
+        flags.append('--msl-discrete-descriptor-set=2')
+        flags.append('--msl-discrete-descriptor-set=3')
 
     output = spvc(script_args, input, input + filename, flags)
     if not '.invalid.' in filename:

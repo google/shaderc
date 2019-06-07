@@ -53,6 +53,7 @@ Git Config:
 
 
 import os
+import re
 import subprocess
 import sys
 import threading
@@ -190,7 +191,12 @@ def git_checkout_to_directory(git, repo, checkoutable, directory, verbose):
 
 def parse_file_to_dict(path):
   dictionary = {}
-  exec(open(path).read(), dictionary)
+  contents = open(path).read()
+  # Need to convert Var() to vars[], so that the DEPS is actually Python. Var()
+  # comes from Autoroller using gclient which has a slightly different DEPS
+  # format.
+  contents = re.sub(r"Var\((.*)\)", r"vars[\1]", contents)
+  exec(contents, dictionary)
   return dictionary
 
 

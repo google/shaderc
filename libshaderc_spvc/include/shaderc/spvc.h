@@ -27,6 +27,11 @@ extern "C" {
 #include "shaderc/status.h"
 #include "shaderc/visibility.h"
 
+typedef enum {
+  shaderc_spvc_msl_platform_ios,
+  shaderc_spvc_msl_platform_macos,
+} shaderc_spvc_msl_platform;
+
 // An opaque handle to an object that manages all compiler state.
 typedef struct shaderc_spvc_compiler* shaderc_spvc_compiler_t;
 
@@ -108,13 +113,68 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_set_flatten_ubo(
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_glsl_language_version(
     shaderc_spvc_compile_options_t options, uint32_t version);
 
+// If true, flatten multidimensional arrays, e.g. foo[a][b][c] -> foo[a*b*c].
+// Default is false.
+SHADERC_EXPORT void
+shaderc_spvc_compile_options_set_flatten_multidimensional_arrays(
+    shaderc_spvc_compile_options_t options, bool b);
+
+// Force interpretion as ES, or not.  Default is to detect from source.
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_es(
+    shaderc_spvc_compile_options_t options, bool b);
+
+// If true, emit push constants as uniform buffer objects.  Default is false.
+SHADERC_EXPORT void
+shaderc_spvc_compile_options_set_glsl_emit_push_constant_as_ubo(
+    shaderc_spvc_compile_options_t options, bool b);
+
 // Set MSL language version.  Default is 10200 (i.e. 1.2).
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_msl_language_version(
     shaderc_spvc_compile_options_t options, uint32_t version);
 
+// If true, swizzle MSL texture samples.  Default is false.
+SHADERC_EXPORT void
+shaderc_spvc_compile_options_set_msl_swizzle_texture_samples(
+    shaderc_spvc_compile_options_t options, bool b);
+
+// Choose MSL platform.  Default is MacOS.
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_msl_platform(
+    shaderc_spvc_compile_options_t options, shaderc_spvc_msl_platform platform);
+
+// If true, pad MSL fragment output.  Default is false.
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_msl_pad_fragment_output(
+    shaderc_spvc_compile_options_t options, bool b);
+
+// If true, capture MSL output to buffer.  Default is false.
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_msl_capture(
+    shaderc_spvc_compile_options_t options, bool b);
+
+// If true, flip the Y-coord of the built-in "TessCoord."  Default is top left.
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_msl_domain_lower_left(
+    shaderc_spvc_compile_options_t options, bool b);
+
+// Enable use of MSL 2.0 indirect argument buffers.  Default is not to use them.
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_msl_argument_buffers(
+    shaderc_spvc_compile_options_t options, bool b);
+
+// When using MSL argument buffers, force "classic" MSL 1.0 binding for the
+// given descriptor sets. This corresponds to VK_KHR_push_descriptor in Vulkan.
+SHADERC_EXPORT void
+shaderc_spvc_compile_options_set_msl_discrete_descriptor_sets(
+    shaderc_spvc_compile_options_t options, const uint32_t* descriptors,
+    size_t num_descriptors);
+
 // Set HLSL shader model.  Default is 30.
-SHADERC_EXPORT void shaderc_spvc_compile_options_set_shader_model(
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_hlsl_shader_model(
     shaderc_spvc_compile_options_t options, uint32_t model);
+
+// If true, ignore PointSize.  Default is false.
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_hlsl_point_size_compat(
+    shaderc_spvc_compile_options_t options, bool b);
+
+// If true, ignore PointCoord.  Default is false.
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_hlsl_point_coord_compat(
+    shaderc_spvc_compile_options_t options, bool b);
 
 // If true (default is false):
 //   GLSL: map depth from Vulkan/D3D style to GL style, i.e. [ 0,w] -> [-w,w]
