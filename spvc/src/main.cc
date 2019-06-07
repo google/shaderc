@@ -72,6 +72,18 @@ Options:
   --vulkan-semantics
   --separate-shader-objects
   --flatten-ubo
+  --flatten-multidimensional-arrays
+  --es
+  --no-es
+  --glsl-emit-push-constant-as-ubo
+  --msl-swizzle-texture-samples
+  --msl-platform=ios|macos
+  --msl-pad-fragment-output
+  --msl-capture-output
+  --msl-domain-lower-left
+  --msl-argument-buffers
+  --msl-discrete-descriptor-set=<number>
+  --hlsl-enable-compat
   --shader-model=<model>
 )";
 }
@@ -157,6 +169,7 @@ int main(int argc, char** argv) {
   shaderc_spvc::Compiler compiler;
   shaderc_spvc::CompileOptions options;
   std::vector<uint32_t> input;
+  std::vector<uint32_t> msl_discrete_descriptor;
   string_piece output_path;
   string_piece output_language;
   string_piece source_env = "vulkan1.0";
@@ -220,13 +233,49 @@ int main(int argc, char** argv) {
     } else if (arg == "--flatten-ubo") {
       options.SetFlattenUbo(true);
     } else if (arg == "--flatten-multidimensional-arrays") {
-      // TODO(fjhenigman)
+      options.SetFlattenMultidimensionalArrays(true);
     } else if (arg == "--es") {
-      // TODO(fjhenigman)
+      options.SetES(true);
+    } else if (arg == "--no-es") {
+      options.SetES(false);
     } else if (arg == "--hlsl-enable-compat") {
-      // TODO(fjhenigman)
+      options.SetHLSLPointSizeCompat(true);
+      options.SetHLSLPointCoordCompat(true);
     } else if (arg == "--glsl-emit-push-constant-as-ubo") {
-      // TODO(fjhenigman)
+      options.SetGLSLEmitPushConstantAsUBO(true);
+    } else if (arg == "--msl-swizzle-texture-samples") {
+      options.SetMSLSwizzleTextureSamples(true);
+    } else if (arg.starts_with("--msl-platform=")) {
+      string_piece platform;
+      GetOptionArgument(argc, argv, &i, "--msl-platform=", &platform);
+      if (platform == "ios") {
+        options.SetMSLPlatform(shaderc_spvc_msl_platform_ios);
+      } else if (platform == "macos") {
+        options.SetMSLPlatform(shaderc_spvc_msl_platform_macos);
+      } else {
+        std::cerr << "spvc: error: invalid value '" << platform
+                  << "' in --msl-platform=" << std::endl;
+        return 1;
+      }
+    } else if (arg == "--msl-pad-fragment-output") {
+      options.SetMSLPadFragmentOutput(true);
+    } else if (arg == "--msl-capture-output") {
+      options.SetMSLCapture(true);
+    } else if (arg == "--msl-domain-lower-left") {
+      options.SetMSLDomainLowerLeft(true);
+    } else if (arg == "--msl-argument-buffers") {
+      options.SetMSLArgumentBuffers(true);
+    } else if (arg.starts_with("--msl-discrete-descriptor-set=")) {
+      string_piece descriptor_str;
+      GetOptionArgument(argc, argv, &i,
+                        "--msl-discrete-descriptor-set=", &descriptor_str);
+      uint32_t descriptor_num;
+      if (!ParseUint32(descriptor_str.str(), &descriptor_num)) {
+        std::cerr << "spvc: error: invalid value '" << descriptor_str
+                  << "' in --msl-discrete-descriptor-set=" << std::endl;
+        return 1;
+      }
+      msl_discrete_descriptor.push_back(descriptor_num);
     } else if (arg.starts_with("--shader-model=")) {
       string_piece shader_model_str;
       GetOptionArgument(argc, argv, &i, "--shader-model=", &shader_model_str);
@@ -236,7 +285,7 @@ int main(int argc, char** argv) {
                   << "' in --shader-model=" << std::endl;
         return 1;
       }
-      options.SetShaderModel(shader_model_num);
+      options.SetHLSLShaderModel(shader_model_num);
     } else if (arg.starts_with("--source-env=")) {
       string_piece env;
       GetOptionArgument(argc, argv, &i, "--source-env=", &env);
@@ -298,6 +347,8 @@ int main(int argc, char** argv) {
       return 1;
     }
   }
+
+  options.SetMSLDiscreteDescriptorSets(msl_discrete_descriptor);
 
   shaderc_spvc::CompilationResult result;
   if (output_language == "glsl") {
