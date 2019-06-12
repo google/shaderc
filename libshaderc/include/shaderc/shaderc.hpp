@@ -326,6 +326,11 @@ class CompileOptions {
     shaderc_compile_options_set_hlsl_functionality1(options_, enable);
   }
 
+  // Sets whether the compiler should invert position.Y output in vertex shader.
+  void SetInvertY(bool enable) {
+    shaderc_compile_options_set_invert_y(options_, enable);
+  }
+
  private:
   CompileOptions& operator=(const CompileOptions& other) = delete;
   shaderc_compile_options_t options_;

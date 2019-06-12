@@ -231,6 +231,7 @@ class Compiler {
         hlsl_offsets_(false),
         hlsl_legalization_enabled_(true),
         hlsl_functionality1_enabled_(false),
+        invert_y_enabled_(false),
         hlsl_explicit_bindings_() {}
 
   // Requests that the compiler place debug information into the object code,
@@ -246,6 +247,9 @@ class Compiler {
 
   // Enables or disables extension SPV_GOOGLE_hlsl_functionality1
   void EnableHlslFunctionality1(bool enable);
+
+  // Enables or disables invert position.Y output in vertex shader.
+  void EnableInvertY(bool enable);
 
   // When a warning is encountered it treat it as an error.
   void SetWarningsAsErrors();
@@ -517,6 +521,9 @@ class Compiler {
 
   // True if the compiler should support extension SPV_GOOGLE_hlsl_functionality1.
   bool hlsl_functionality1_enabled_;
+
+  // True if the compiler should invert position.Y output in vertex shader.
+  bool invert_y_enabled_;
 
   // A sequence of triples, each triple representing a specific HLSL register
   // name, and the set and binding numbers it should be mapped to, but in

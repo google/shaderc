@@ -301,6 +301,7 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   if (hlsl_functionality1_enabled_) {
     shader.setEnvTargetHlslFunctionality1();
   }
+  shader.setInvertY(invert_y_enabled_);
 
   const EShMessages rules = GetMessageRules(target_env_, source_language_,
                                             hlsl_offsets_,
@@ -449,6 +450,10 @@ void Compiler::EnableHlslFunctionality1(bool enable) {
   hlsl_functionality1_enabled_ = enable;
 }
 
+void Compiler::EnableInvertY(bool enable) {
+  invert_y_enabled_ = enable;
+}
+
 void Compiler::SetSuppressWarnings() { suppress_warnings_ = true; }
 
 std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
@@ -481,6 +486,7 @@ std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
   if (hlsl_functionality1_enabled_) {
     shader.setEnvTargetHlslFunctionality1();
   }
+  shader.setInvertY(invert_y_enabled_);
 
   // The preprocessor might be sensitive to the target environment.
   // So combine the existing rules with the just-give-me-preprocessor-output
