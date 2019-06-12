@@ -10,7 +10,7 @@ vars = {
   're2_revision': '0c95bcce2f1f0f071a786ca2c42384b211b8caba',
   'spirv_headers_revision': '9cf7c3a7d2d203b1ee35896547b9644e28d9280e',
   'spirv_tools_revision': '9c0830133b07203a47ddc101fa4b298bab4438d8',
-  'spirv_cross_revision': '5e9e8918f9a22d488811c575a97ccda2d8a8726d',
+  'spirv_cross_revision': 'fccf1d046204802aa04f05b4af7ca91fab37c50f',
 }
 
 deps = {
