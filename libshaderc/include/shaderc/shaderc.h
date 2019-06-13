@@ -450,6 +450,10 @@ SHADERC_EXPORT void shaderc_compile_options_set_hlsl_register_set_and_binding(
 SHADERC_EXPORT void shaderc_compile_options_set_hlsl_functionality1(
     shaderc_compile_options_t options, bool enable);
 
+// Sets whether the compiler should invert position.Y output in vertex shader.
+SHADERC_EXPORT void shaderc_compile_options_set_invert_y(
+    shaderc_compile_options_t options, bool enable);
+
 // An opaque handle to the results of a call to any shaderc_compile_into_*()
 // function.
 typedef struct shaderc_compilation_result* shaderc_compilation_result_t;

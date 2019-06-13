@@ -66,6 +66,7 @@ Options:
   -fhlsl_functionality1, -fhlsl-functionality1
                     Enable extension SPV_GOOGLE_hlsl_functionality1 for HLSL
                     compilation.
+  -finvert-y        Invert position.Y output in vertex shader.
   -fhlsl-iomap      Use HLSL IO mappings for bindings.
   -fhlsl-offsets    Use HLSL offset rules for packing members of blocks.
                     Affects only GLSL.  HLSL rules are always used for HLSL.
@@ -296,6 +297,8 @@ int main(int argc, char** argv) {
       compiler.options().SetHlslOffsets(true);
     } else if (arg == "-fhlsl_functionality1" || arg == "-fhlsl-functionality1") {
       compiler.options().SetHlslFunctionality1(true);
+    } else if (arg == "-finvert-y") {
+      compiler.options().SetInvertY(true);
     } else if (((u_kind = shaderc_uniform_kind_image),
                 (arg == "-fimage-binding-base")) ||
                ((u_kind = shaderc_uniform_kind_texture),
