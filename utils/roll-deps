@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Copyright 2019 The Shaderc Authors. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Attempts to roll all entries in DEPS to origin/master and creates a
+# commit.
+#
+# Depends on roll-dep from depot_path being in PATH.
+# Assumes that it is invoked from the root of the repo.
+
+set +e
+set +x
+
+effcee_dir="third_party/effcee/"
+glslang_dir="third_party/glslang/"
+googletest_dir="third_party/googletest/"
+re2_dir="third_party/re2/"
+spirv_cross_dir="third_party/spirv-cross/"
+spirv_headers_dir="third_party/spirv-headers/"
+spirv_tools_dir="third_party/spirv-tools/"
+
+roll-dep "${effcee_dir}" "${glslang_dir}" "${googletest_dir}" "${re2_dir}" "${spirv_cross_dir}" "${spirv_headers_dir}" "${spirv_tools_dir}"
