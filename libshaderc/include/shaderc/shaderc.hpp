@@ -331,6 +331,14 @@ class CompileOptions {
     shaderc_compile_options_set_invert_y(options_, enable);
   }
 
+  // Sets whether the compiler should generates code for max an min which,
+  // if given a NaN operand, will return the other operand. Similarly, the
+  // clamp builtin will favour the non-NaN operands, as if clamp were
+  // implemented as a composition of max and min.
+  void SetNanClamp(bool enable) {
+    shaderc_compile_options_set_nan_clamp(options_, enable);
+  }
+
  private:
   CompileOptions& operator=(const CompileOptions& other) = delete;
   shaderc_compile_options_t options_;

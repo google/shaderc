@@ -1437,4 +1437,28 @@ TEST_F(CppInterface, HlslFunctionality1SurvivesCloning) {
   EXPECT_THAT(disassembly_text, HasSubstr("OpDecorateString"));
 }
 
+TEST_F(CppInterface, NanClampDefaultsOff) {
+  CompileOptions options;
+  const std::string disassembly_text = AssemblyOutput(
+      kGlslShaderWithClamp, shaderc_glsl_fragment_shader, options);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpExtInst %v4float %1 FClamp"));
+}
+
+TEST_F(CppInterface, NanClampMapsClampToNClamp) {
+  CompileOptions options;
+  options.SetNanClamp(true);
+  const std::string disassembly_text = AssemblyOutput(
+      kGlslShaderWithClamp, shaderc_glsl_fragment_shader, options);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpExtInst %v4float %1 NClamp"));
+}
+
+TEST_F(CppInterface, NanClampSurvivesCloning) {
+  CompileOptions options;
+  options.SetNanClamp(true);
+  CompileOptions cloned_options(options);
+  const std::string disassembly_text = AssemblyOutput(
+      kGlslShaderWithClamp, shaderc_glsl_fragment_shader, cloned_options);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpExtInst %v4float %1 NClamp"));
+}
+
 }  // anonymous namespace

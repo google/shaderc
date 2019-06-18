@@ -82,6 +82,10 @@ Options:
                     several times, only the last setting takes effect.
   -flimit-file <file>
                     Set limits as specified in the given file.
+  -fnan-clamp       Generate code for max and min builtins so that, when given
+                    a NaN operand, the other operand is returned. Similarly,
+                    the clamp builtin will favour the non-NaN operands, as if
+                    clamp were implemented as a composition of max and min.
   -fresource-set-binding [stage] <reg0> <set0> <binding0>
                         [<reg1> <set1> <binding1>...]
                     Explicitly sets the descriptor set and binding for
