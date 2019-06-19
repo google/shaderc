@@ -206,11 +206,6 @@ void shaderc_spvc_compile_options_set_msl_discrete_descriptor_sets(
               options->msl_discrete_descriptor_sets.begin());
 }
 
-void shaderc_spvc_compile_options_set_shader_model(
-    shaderc_spvc_compile_options_t options, uint32_t model) {
-  options->hlsl.shader_model = model;
-}
-
 void shaderc_spvc_compile_options_set_hlsl_shader_model(
     shaderc_spvc_compile_options_t options, uint32_t model) {
   options->hlsl.shader_model = model;
