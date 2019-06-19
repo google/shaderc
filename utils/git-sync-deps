@@ -195,7 +195,7 @@ def parse_file_to_dict(path):
   # Need to convert Var() to vars[], so that the DEPS is actually Python. Var()
   # comes from Autoroller using gclient which has a slightly different DEPS
   # format.
-  contents = re.sub(r"Var\((.*)\)", r"vars[\1]", contents)
+  contents = re.sub(r"Var\((.*?)\)", r"vars[\1]", contents)
   exec(contents, dictionary)
   return dictionary
 
