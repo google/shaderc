@@ -1,10 +1,33 @@
 Revision history for Shaderc
 
 v2019.1-dev 2019-06-04
- - Add -fnan-clamp: Generate code for max and min builtins so that,
-   given a NaN operand, will return the other operand. Similarly, the
-   clamp builtin favours non-NaN operands, as if clamp was implemented
-   as the composition of max and min.
+ - glslc, libshaderc:
+   - Add -fnan-clamp: Generate code for max and min builtins so that,
+     given a NaN operand, will return the other operand. Similarly, the
+     clamp builtin favours non-NaN operands, as if clamp was implemented
+     as the composition of max and min.
+   - Add -finvert-y
+ - spvc:
+   - Add many options:
+	--flatten-multidimensional-arrays
+	--es
+	--no-es
+	--glsl-emit-push-constant-as-ubo
+	--msl-swizzle-texture-samples
+	--msl-platform=ios|macos
+	--msl-pad-fragment-output
+	--msl-capture-output
+	--msl-domain-lower-left
+	--msl-argument-buffers
+	--msl-discrete-descriptor-set=<number>
+	--hlsl-enable-compat
+   - Reintroduce shaderc_spvc_compile_options_set_shader_model
+ - Infrastructure
+   - Update DEPS with cross-verified commits from associated repos.
+   - Add utils/roll-deps
+ - Fixes:
+   - Fix duplicate install paths when using VisualStudio
+   #666: Update Docker file to use Python3
 
 v2019.0 2019-06-04
  - Add optional spvc, libshaderc_spvc as wrapper around SPIRV-Cross:
