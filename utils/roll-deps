@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 # Copyright 2019 The Shaderc Authors. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,10 +18,9 @@
 # commit.
 #
 # Depends on roll-dep from depot_path being in PATH.
-# Assumes that it is invoked from the root of the repo.
 
-set +e
-set +x
+# This script assumes it's parent directory is the repo root.
+repo_path=$(dirname "$0")/..
 
 effcee_dir="third_party/effcee/"
 glslang_dir="third_party/glslang/"
@@ -29,5 +29,7 @@ re2_dir="third_party/re2/"
 spirv_cross_dir="third_party/spirv-cross/"
 spirv_headers_dir="third_party/spirv-headers/"
 spirv_tools_dir="third_party/spirv-tools/"
+
+cd "$repo_path"
 
 roll-dep "${effcee_dir}" "${glslang_dir}" "${googletest_dir}" "${re2_dir}" "${spirv_cross_dir}" "${spirv_headers_dir}" "${spirv_tools_dir}"
