@@ -302,6 +302,7 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
     shader.setEnvTargetHlslFunctionality1();
   }
   shader.setInvertY(invert_y_enabled_);
+  shader.setNanMinMaxClamp(nan_clamp_);
 
   const EShMessages rules = GetMessageRules(target_env_, source_language_,
                                             hlsl_offsets_,
@@ -454,6 +455,8 @@ void Compiler::EnableInvertY(bool enable) {
   invert_y_enabled_ = enable;
 }
 
+void Compiler::SetNanClamp(bool enable) { nan_clamp_ = enable; }
+
 void Compiler::SetSuppressWarnings() { suppress_warnings_ = true; }
 
 std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
@@ -487,6 +490,7 @@ std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
     shader.setEnvTargetHlslFunctionality1();
   }
   shader.setInvertY(invert_y_enabled_);
+  shader.setNanMinMaxClamp(nan_clamp_);
 
   // The preprocessor might be sensitive to the target environment.
   // So combine the existing rules with the just-give-me-preprocessor-output

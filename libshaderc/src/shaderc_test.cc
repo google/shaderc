@@ -1843,4 +1843,29 @@ TEST_F(CompileStringWithOptionsTest, HlslFlexibleMemoryLayoutAllowed) {
                                  shaderc_fragment_shader, options_.get()));
 }
 
+TEST_F(CompileStringWithOptionsTest, ClampMapsToFClampByDefault) {
+  const std::string disassembly_text =
+      CompilationOutput(kGlslShaderWithClamp, shaderc_fragment_shader,
+                        options_.get(), OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpExtInst %v4float %1 FClamp"));
+}
+
+TEST_F(CompileStringWithOptionsTest, ClampMapsToNClampWithNanClamp) {
+  shaderc_compile_options_set_nan_clamp(options_.get(), true);
+  const std::string disassembly_text =
+      CompilationOutput(kGlslShaderWithClamp, shaderc_fragment_shader,
+                        options_.get(), OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpExtInst %v4float %1 NClamp"));
+}
+
+TEST_F(CompileStringWithOptionsTest, NanClampSurvivesCloning) {
+  shaderc_compile_options_set_nan_clamp(options_.get(), true);
+  compile_options_ptr cloned_options(
+      shaderc_compile_options_clone(options_.get()));
+  const std::string disassembly_text =
+      CompilationOutput(kGlslShaderWithClamp, shaderc_fragment_shader,
+                        cloned_options.get(), OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text, HasSubstr("OpExtInst %v4float %1 NClamp"));
+}
+
 }  // anonymous namespace

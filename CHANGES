@@ -1,7 +1,10 @@
 Revision history for Shaderc
 
 v2019.1-dev 2019-06-04
- - Start v2019.1-dev
+ - Add -fnan-clamp: Generate code for max and min builtins so that,
+   given a NaN operand, will return the other operand. Similarly, the
+   clamp builtin favours non-NaN operands, as if clamp was implemented
+   as the composition of max and min.
 
 v2019.0 2019-06-04
  - Add optional spvc, libshaderc_spvc as wrapper around SPIRV-Cross:

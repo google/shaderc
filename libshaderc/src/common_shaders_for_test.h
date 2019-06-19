@@ -400,6 +400,13 @@ const char kHlslMemLayoutResourceSelect[] =
          return Tex.Sample(samp, float2(0.5, 0.5)) + float4(a, b);
        })";
 
+const char kGlslShaderWithClamp[] =
+    R"(#version 450
+    layout(location=0) in vec4 i;
+    layout(location=0) out vec4 o;
+    void main() { o = clamp(i, vec4(0.5), vec4(1.0)); }
+    )";
+
 #ifdef __cplusplus
 }
 #endif  // __cplusplus

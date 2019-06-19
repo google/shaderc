@@ -454,6 +454,13 @@ SHADERC_EXPORT void shaderc_compile_options_set_hlsl_functionality1(
 SHADERC_EXPORT void shaderc_compile_options_set_invert_y(
     shaderc_compile_options_t options, bool enable);
 
+// Sets whether the compiler generates code for max and min builtins which,
+// if given a NaN operand, will return the other operand. Similarly, the clamp
+// builtin will favour the non-NaN operands, as if clamp were implemented
+// as a composition of max and min.
+SHADERC_EXPORT void shaderc_compile_options_set_nan_clamp(
+    shaderc_compile_options_t options, bool enable);
+
 // An opaque handle to the results of a call to any shaderc_compile_into_*()
 // function.
 typedef struct shaderc_compilation_result* shaderc_compilation_result_t;

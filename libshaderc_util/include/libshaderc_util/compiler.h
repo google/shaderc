@@ -232,6 +232,7 @@ class Compiler {
         hlsl_legalization_enabled_(true),
         hlsl_functionality1_enabled_(false),
         invert_y_enabled_(false),
+        nan_clamp_(false),
         hlsl_explicit_bindings_() {}
 
   // Requests that the compiler place debug information into the object code,
@@ -250,6 +251,12 @@ class Compiler {
 
   // Enables or disables invert position.Y output in vertex shader.
   void EnableInvertY(bool enable);
+
+  // Sets whether the compiler generates code for max and min builtins which,
+  // if given a NaN operand, will return the other operand.  Also, the clamp
+  // builtin will favour the non-NaN operands, as if clamp were implemented
+  // as a composition of max and min.
+  void SetNanClamp(bool enable);
 
   // When a warning is encountered it treat it as an error.
   void SetWarningsAsErrors();
@@ -524,6 +531,12 @@ class Compiler {
 
   // True if the compiler should invert position.Y output in vertex shader.
   bool invert_y_enabled_;
+
+  // True if the compiler generates code for max and min builtins which,
+  // if given a NaN operand, will return the other operand.  Also, the clamp
+  // builtin will favour the non-NaN operands, as if clamp were implemented
+  // as a composition of max and min.
+  bool nan_clamp_;
 
   // A sequence of triples, each triple representing a specific HLSL register
   // name, and the set and binding numbers it should be mapped to, but in

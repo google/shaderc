@@ -152,6 +152,12 @@ float4 main() : SV_Target0 {
 }
 )";
 
+const char kGlslShaderWithClamp[] = R"(#version 450
+layout(location=0) in vec4 i;
+layout(location=0) out vec4 o;
+void main() { o = clamp(i, vec4(0.5), vec4(1.0)); }
+)";
+
 // Returns the disassembly of the given SPIR-V binary, as a string.
 // Assumes the disassembly will be successful when targeting Vulkan.
 std::string Disassemble(const std::vector<uint32_t> binary) {
@@ -738,6 +744,23 @@ TEST_F(CompilerTest, HlslFunctionality1Enabled) {
   EXPECT_THAT(disassembly,
               HasSubstr("OpDecorateString %_entryPointOutput "
                         "UserSemantic \"SV_TARGET0\""))
+      << disassembly;
+}
+
+TEST_F(CompilerTest, ClampMapsToFClampByDefault) {
+  const auto words =
+      SimpleCompilationBinary(kGlslShaderWithClamp, EShLangFragment);
+  const auto disassembly = Disassemble(words);
+  EXPECT_THAT(disassembly, HasSubstr("OpExtInst %v4float %1 FClamp"))
+      << disassembly;
+}
+
+TEST_F(CompilerTest, ClampMapsToFClampWithNanClamp) {
+  compiler_.SetNanClamp(true);
+  const auto words =
+      SimpleCompilationBinary(kGlslShaderWithClamp, EShLangFragment);
+  const auto disassembly = Disassemble(words);
+  EXPECT_THAT(disassembly, HasSubstr("OpExtInst %v4float %1 NClamp"))
       << disassembly;
 }
 
