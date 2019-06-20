@@ -32,4 +32,4 @@ spirv_tools_dir="third_party/spirv-tools/"
 
 cd "$repo_path"
 
-roll-dep "${effcee_dir}" "${glslang_dir}" "${googletest_dir}" "${re2_dir}" "${spirv_cross_dir}" "${spirv_headers_dir}" "${spirv_tools_dir}"
+roll-dep "$@" "${effcee_dir}" "${glslang_dir}" "${googletest_dir}" "${re2_dir}" "${spirv_cross_dir}" "${spirv_headers_dir}" "${spirv_tools_dir}"
