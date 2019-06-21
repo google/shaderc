@@ -27,8 +27,6 @@ config("shaderc_internal_config") {
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
-  } else if (is_clang) {
-    cflags = [ "-Wno-newline-eof" ]
   }
 }
 
