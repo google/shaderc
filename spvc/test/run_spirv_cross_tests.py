@@ -465,12 +465,13 @@ def main():
     parser.add_argument('-f', '--test-filter', dest='test_filter',
                         action='store', metavar='<test filter regex>',
                         help='only run tests that contain given regex string')
+    parser.add_argument('-j', '--jobs', dest='jobs', type=int, default=0, action='store',
+                        metavar='<number of processes to use>', help='Use as many processes as specified, 0 indicates let the script decide.')
     parser.add_argument('spvc', metavar='<spvc executable>')
     parser.add_argument('spirv_as', metavar='<spirv-as executable>')
     parser.add_argument('spirv_opt', metavar='<spirv-opt executable>')
     parser.add_argument('glslang', metavar='<glslangValidator executable>')
-    parser.add_argument(
-        'cross_dir', metavar='<SPIRV-cross directory>')
+    parser.add_argument('cross_dir', metavar='<SPIRV-cross directory>')
     script_args = parser.parse_args()
 
     test_env = TestEnv(script_args)
@@ -492,7 +493,10 @@ def main():
                     tests.append((test_function, test_env,
                                   shader, filename, optimize))
 
-    pool = Pool()
+    if not script_args.jobs:
+        pool = Pool()
+    else:
+        pool = Pool(script_args.jobs)
     results = pool.map(work_function, tests)
 
     successes, failures = zip(*results)
