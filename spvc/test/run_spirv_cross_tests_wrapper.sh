@@ -30,7 +30,7 @@
 #                 to.
 
 if [ "$#" -lt 2 ]; then
-  echo "Atleast 2 arguments are required, $# provided"
+  echo "At least 2 arguments are required, $# provided"
   exit 1
 fi
 
