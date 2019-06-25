@@ -88,9 +88,10 @@ Shaderc into.
 
 ## Getting and building Shaderc
 
-**Experimental:** On Windows, instead of building from source, you can get the
-artifacts built by [Appveyor][appveyor] for the top of the tree of the master
-branch under the "Artifacts" tab of a certain job.
+**If you only want prebuilt executables or libraries, see the
+[Downloads](#downloads) section.**
+
+The rest of this section describes how to build Shaderc from sources.
 
 1) Check out the source code:
 
