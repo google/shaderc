@@ -23,13 +23,6 @@ config("shaderc_util_public") {
   include_dirs = [ "libshaderc_util/include" ]
 }
 
-config("shaderc_internal_config") {
-  if (build_with_chromium) {
-    configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
-  }
-}
-
 source_set("shaderc_util_sources") {
   sources = [
     "libshaderc_util/include/libshaderc_util/counting_includer.h",
@@ -61,7 +54,10 @@ source_set("shaderc_util_sources") {
     "${spirv_tools_dir}:spvtools",
   ]
 
-  configs += [ ":shaderc_internal_config" ]
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
 }
 
 config("shaderc_public") {
@@ -96,7 +92,10 @@ component("libshaderc") {
     "${glslang_dir}:glslang_sources",
   ]
 
-  configs += [ ":shaderc_internal_config" ]
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
 }
 
 config("shaderc_spvc_public") {
@@ -134,5 +133,8 @@ component("libshaderc_spvc") {
     "${spirv_cross_dir}:spirv_cross_full_for_fuzzers",
   ]
 
-  configs += [ ":shaderc_internal_config" ]
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
 }
