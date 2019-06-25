@@ -34,14 +34,10 @@ class TestEnv:
         self.dry_run = script_args.dry_run
         self.give_up = script_args.give_up
         self.cross_dir = script_args.cross_dir
-        self.spvc = os.path.join(script_args.build_dir, 'spvc', 'spvc')
-        self.glslang = os.path.join(
-            script_args.build_dir, 'third_party', 'glslang', 'StandAlone', 'glslangValidator')
-        spirv_tools_dir = os.path.join(
-            script_args.build_dir, 'third_party', 'spirv-tools', 'tools')
-
-        self.spirv_as = os.path.join(spirv_tools_dir, 'spirv-as')
-        self.spirv_opt = os.path.join(spirv_tools_dir, 'spirv-opt')
+        self.spvc = script_args.spvc
+        self.spirv_as = script_args.spirv_as
+        self.spirv_opt = script_args.spirv_opt
+        self.glslang = script_args.glslang
 
     def log_unexpected_successes(self, successes):
         """Log list of unexpected test case successes."""
@@ -469,9 +465,12 @@ def main():
     parser.add_argument('-f', '--test-filter', dest='test_filter',
                         action='store', metavar='<test filter regex>',
                         help='only run tests that contain given regex string')
-    parser.add_argument('build_dir', metavar='<build dir directory>')
+    parser.add_argument('spvc', metavar='<spvc executable>')
+    parser.add_argument('spirv_as', metavar='<spirv-as executable>')
+    parser.add_argument('spirv_opt', metavar='<spirv-opt executable>')
+    parser.add_argument('glslang', metavar='<glslangValidator executable>')
     parser.add_argument(
-        'cross_dir', metavar='<SPIRV-cross directory, where tests are located>')
+        'cross_dir', metavar='<SPIRV-cross directory>')
     script_args = parser.parse_args()
 
     test_env = TestEnv(script_args)
