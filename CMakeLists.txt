@@ -28,6 +28,8 @@ endif()
 
 set (CMAKE_CXX_STANDARD 11)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wimplicit-fallthrough")
+
 option(SHADERC_ENABLE_NV_EXTENSIONS "Enables support of Nvidia-specific extensions" ON)
 
 include(GNUInstallDirs)
