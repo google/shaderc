@@ -9,8 +9,8 @@ vars = {
   'googletest_revision': '437e1008c97b6bf595fec85da42c6925babd96b2',
   're2_revision': '848dfb7e1d7ba641d598cb66f81590f3999a555a',
   'spirv_headers_revision': 'de99d4d834aeb51dd9f099baa285bd44fd04bb3d',
-  'spirv_tools_revision': '6ccb52b86492f8e27383abb821c8a808625c78ed',
-  'spirv_cross_revision': '02b2a1015d2b5a7bf29eec7a8f3fbf62b14a443c',
+  'spirv_tools_revision': 'e6e3e2ccc6a2a9bf43730d8edccf0b1a212d660a',
+  'spirv_cross_revision': '8ee8e60f70f937c72379ab1fc404a1c36d660a31',
 }
 
 deps = {
