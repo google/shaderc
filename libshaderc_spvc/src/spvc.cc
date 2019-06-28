@@ -173,8 +173,10 @@ void shaderc_spvc_compile_options_set_msl_platform(
   switch (platform) {
     case shaderc_spvc_msl_platform_ios:
       options->msl.platform = spirv_cross::CompilerMSL::Options::iOS;
+    break;
     case shaderc_spvc_msl_platform_macos:
       options->msl.platform = spirv_cross::CompilerMSL::Options::macOS;
+    break;
   }
 }
 

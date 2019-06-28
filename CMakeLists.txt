@@ -33,7 +33,15 @@ option(SHADERC_ENABLE_NV_EXTENSIONS "Enables support of Nvidia-specific extensio
 include(GNUInstallDirs)
 include(cmake/setup_build.cmake)
 include(cmake/utils.cmake)
+include(CheckCXXCompilerFlag)
 
+# This flag is not supported on Windows and some older version of GCC
+# that our bots use.
+unset(COMPILER_SUPPORTS_FALLTHROUGH_WARNING CACHE)
+check_cxx_compiler_flag(-Wimplicit-fallthrough COMPILER_SUPPORTS_FALLTHROUGH_WARNING)
+if (COMPILER_SUPPORTS_FALLTHROUGH_WARNING)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wimplicit-fallthrough")
+endif()
 
 if(SHADERC_ENABLE_NV_EXTENSIONS)
     add_definitions(-DNV_EXTENSIONS)
