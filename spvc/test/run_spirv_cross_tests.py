@@ -30,7 +30,6 @@ class TestEnv:
 
     def __init__(self, script_args):
         """Takes in the output of ArgumentParser.parse_args()"""
-        # TODO(bug 737): Add new log data structure.
         self.dry_run = script_args.dry_run
         self.give_up = script_args.give_up
         self.cross_dir = script_args.cross_dir
@@ -48,12 +47,6 @@ class TestEnv:
                 len(successes))
             successes = ['\t{}'.format(success) for success in successes]
             log_string += '\n'.join(successes)
-
-        # TODO(but 737): Re-enable after fixing log support
-        # if test_env.log:
-        #     test_env.log.write(log_string + '\n')
-        #     test_env.log.flush()
-        # else:
         print(log_string)
 
     def log_unexpected_failures(self, failures):
@@ -65,40 +58,24 @@ class TestEnv:
                 len(failures))
             failures = ['\t{}'.format(failure) for failure in failures]
             log_string += '\n'.join(failures)
-
-        # TODO(but 737): Re-enable after fixing log support
-        # if test_env.log:
-        #     test_env.log.write(log_string + '\n')
-        #     test_env.log.flush()
-        # else:
         print(log_string)
 
     def log_failure(self, shader, optimize):
         """Log a test case failure."""
         log_string = 'FAILED {}, optimize = {}'.format(shader, optimize)
-        # TODO(but 737): Re-enable after fixing log support
-        # if test_env.log:
-        #     test_env.log.write(log_string + '\n')
-        #     test_env.log.flush()
-        # else:
         print(log_string)
 
     def log_command(self, cmd):
         """Log calling a command."""
-        # TODO(but 737): Re-enable after fixing log support
-        # if test_env.log:
-        #     # make sure it's all strings
-        #     cmd = [str(x) for x in cmd]
-        #     # first item is the command path, keep only last component
-        #     cmd[0] = os.path.basename(cmd[0])
-        #     # if last item is a path in SPIRV-Cross dir, trim that dir
-        #     if cmd[-1].startswith(test_env.cross_dir):
-        #         cmd[-1] = cmd[-1][len(test_env.cross_dir) + 1:]
-        #     log_string = ''.join(cmd) + '\n'
-        #     print(log_string)
-        #     test_env.log.write(log_string)
-        #     test_env.log.flush()
-        pass
+        # make sure it's all strings
+        cmd = [str(x) for x in cmd]
+        # first item is the command path, keep only last component
+        cmd[0] = os.path.basename(cmd[0])
+        # if last item is a path in SPIRV-Cross dir, trim that dir
+        if cmd[-1].startswith(self.cross_dir):
+            cmd[-1] = cmd[-1][len(self.cross_dir) + 1:]
+        log_string = ''.join(cmd) + '\n'
+        print(log_string)
 
     def check_output(self, cmd):
         """Quietly run a command.
@@ -139,22 +116,22 @@ class TestEnv:
     def run_spvc(self, inp, out, flags):
         """Run spvc.
 
-        Returns status of spvc, output of spvc.
-        Exits entirely if spvc fails and give_up flag is set.
+        Returns status of spvc, output of spvc. Exits entirely if spvc
+        fails and give_up flag is set.
         """
-        status, output = self.check_output([self.spvc] + flags + ['-o', out, '--source-env=vulkan1.1', '--target-env=vulkan1.1', inp])
+        status, output = self.check_output(
+            [self.spvc] + flags + ['-o', out, '--source-env=vulkan1.1', '--target-env=vulkan1.1', inp])
         if not status and self.give_up:
-            print("Bailing due to failure in run_spvc with give_up set")
+            print('Bailing due to failure in run_spvc with give_up set')
             sys.exit()
         return status, output
-
 
     def check_reference(self, result, shader, optimize):
         """Compare result file to reference file and count matches.
 
         Returns the result of the comparison and the reference file
-        being used.
-        Exits entirely if spvc fails and give_up flag is set.
+        being used. Exits entirely if spvc fails and give_up flag is
+        set.
         """
         if optimize:
             reference = os.path.join('reference', 'opt', shader)
@@ -165,7 +142,7 @@ class TestEnv:
                 result, os.path.join(self.cross_dir, reference), False):
             return True, reference
         elif self.give_up:
-            print("Bailing due to failure in check_reference with give_up set")
+            print('Bailing due to failure in check_reference with give_up set')
             sys.exit()
 
         return False, reference
@@ -224,7 +201,8 @@ def test_glsl(test_env, shader, filename, optimize):
 
     if not '.invalid.' in filename:
         # logged for compatibility with SPIRV-Cross test script
-        test_env.log_command(['spirv-val', '--target-env', 'vulkan1.1', input_shader])
+        test_env.log_command(
+            ['spirv-val', '--target-env', 'vulkan1.1', input_shader])
 
     # Run spvc to convert Vulkan to GLSL.  Up to two tests are performed:
     # - Regular test on most files
@@ -255,7 +233,8 @@ def test_glsl(test_env, shader, filename, optimize):
     output_vk = None
     if '.vk.' in filename:
         output_vk = input_shader + 'vk' + filename
-        status, _ = test_env.run_spvc(input_shader, output_vk, flags + ['--vulkan-semantics'])
+        status, _ = test_env.run_spvc(
+            input_shader, output_vk, flags + ['--vulkan-semantics'])
         if not status:
             output_vk = None
         # logged for compatibility with SPIRV-Cross test script
@@ -376,7 +355,8 @@ def test_msl(test_env, shader, filename, optimize):
 
     if not '.invalid.' in filename:
         # logged for compatibility with SPIRV-Cross test script
-        test_env.log_command(['spirv-val', '--target-env', 'vulkan1.1', input_shader])
+        test_env.log_command(
+            ['spirv-val', '--target-env', 'vulkan1.1', input_shader])
 
     # Check result.
     if output:
@@ -433,7 +413,8 @@ def test_hlsl(test_env, shader, filename, optimize):
 
     if not '.invalid.' in filename:
         # logged for compatibility with SPIRV-Cross test script
-        test_env.log_command(['spirv-val', '--target-env', 'vulkan1.1', input_shader])
+        test_env.log_command(
+            ['spirv-val', '--target-env', 'vulkan1.1', input_shader])
 
     if output:
         # logged for compatibility with SPIRV-Cross test script
@@ -480,20 +461,6 @@ test_case_dirs = (
 )
 
 
-# TODO(bug 737): Replace this with the new multiprocessing safe infra.
-class FileArgAction(argparse.Action):
-    def __call__(self, parser, namespace, value, option):
-        if value == '-':
-            log = sys.stdout
-        else:
-            try:
-                log = open(value, 'w')
-            except:
-                print("could not open log file '%s' for writing" % value)
-                raise
-        setattr(namespace, self.dest, log)
-
-
 def work_function(work_args):
     """"Unpacks the test case args and invokes the appropriate in test
     function."""
@@ -503,13 +470,11 @@ def work_function(work_args):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--log', action=FileArgAction,
-                        help='log commands to file. Currently broken, see issue #737 for status..')
     parser.add_argument('-n', '--dry-run', dest='dry_run', action='store_true',
                         help='do not execute commands')
     parser.add_argument('-g', '--give-up', dest='give_up',
                         action='store_true',
-                        help = 'quit after first failure')
+                        help='quit after first failure')
     parser.add_argument('-f', '--test-filter', dest='test_filter',
                         action='store', metavar='<test filter regex>',
                         help='only run tests that contain given regex string')
@@ -580,9 +545,6 @@ def main():
 
     test_env.log_unexpected_successes(unexpected_successes)
     test_env.log_unexpected_failures(unexpected_failures)
-
-    if script_args.log is not None and script_args.log is not sys.stdout:
-        script_args.log.close()
 
     return len(unexpected_successes) != 0 or len(unexpected_failures) != 0
 
