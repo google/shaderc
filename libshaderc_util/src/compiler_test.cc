@@ -25,6 +25,7 @@
 namespace {
 
 using shaderc_util::Compiler;
+using shaderc_util::GlslangClientInfo;
 using ::testing::Eq;
 using ::testing::HasSubstr;
 using ::testing::Not;
@@ -327,12 +328,56 @@ TEST_F(CompilerTest, BadTargetEnvFails) {
   EXPECT_THAT(errors_, HasSubstr("Invalid target client environment 32767"));
 }
 
-TEST_F(CompilerTest, BadTargetEnvVersionFails) {
+TEST_F(CompilerTest, BadTargetEnvVulkanVersionFails) {
   compiler_.SetTargetEnv(Compiler::TargetEnv::Vulkan,
                          static_cast<Compiler::TargetEnvVersion>(123));
   EXPECT_FALSE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
   EXPECT_THAT(errors_,
-              HasSubstr("Invalid target client version 123 for environment 0"));
+              HasSubstr("Invalid target client version 123 for Vulkan environment 0"));
+}
+
+TEST_F(CompilerTest, BadTargetEnvOpenGLVersionFails) {
+  compiler_.SetTargetEnv(Compiler::TargetEnv::OpenGL,
+                         static_cast<Compiler::TargetEnvVersion>(123));
+  EXPECT_FALSE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
+  EXPECT_THAT(errors_,
+              HasSubstr("Invalid target client version 123 for OpenGL environment 1"));
+}
+
+TEST_F(CompilerTest, SpirvTargetVersion1_0Succeeds) {
+  compiler_.SetTargetSpirv(Compiler::SpirvVersion::v1_0);
+  EXPECT_TRUE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
+  EXPECT_THAT(errors_, Eq(""));
+}
+
+TEST_F(CompilerTest, SpirvTargetVersion1_1Succeeds) {
+  compiler_.SetTargetSpirv(Compiler::SpirvVersion::v1_1);
+  EXPECT_TRUE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
+  EXPECT_THAT(errors_, Eq(""));
+}
+
+TEST_F(CompilerTest, SpirvTargetVersion1_2Succeeds) {
+  compiler_.SetTargetSpirv(Compiler::SpirvVersion::v1_2);
+  EXPECT_TRUE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
+  EXPECT_THAT(errors_, Eq(""));
+}
+
+TEST_F(CompilerTest, SpirvTargetVersion1_3Succeeds) {
+  compiler_.SetTargetSpirv(Compiler::SpirvVersion::v1_3);
+  EXPECT_TRUE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
+  EXPECT_THAT(errors_, Eq(""));
+}
+
+TEST_F(CompilerTest, SpirvTargetVersion1_4Succeeds) {
+  compiler_.SetTargetSpirv(Compiler::SpirvVersion::v1_4);
+  EXPECT_TRUE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
+  EXPECT_THAT(errors_, Eq(""));
+}
+
+TEST_F(CompilerTest, SpirvTargetBadVersionFails) {
+  compiler_.SetTargetSpirv(static_cast<Compiler::SpirvVersion>(0x090900));
+  EXPECT_FALSE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
+  EXPECT_THAT(errors_, HasSubstr(": Unknown SPIR-V version 90900"));
 }
 
 TEST_F(CompilerTest, AddMacroDefinition) {
@@ -764,4 +809,121 @@ TEST_F(CompilerTest, ClampMapsToFClampWithNanClamp) {
       << disassembly;
 }
 
+// A test coase for Glslang
+// expected vector after the conversion.
+struct GetGlslangClientInfoCase {
+  std::string prefix;
+  Compiler::TargetEnv env;
+  Compiler::TargetEnvVersion env_version;
+  Compiler::SpirvVersion spv_version;
+  bool spv_forced;
+  // Expected results.  The error field is matched as a substring.
+  GlslangClientInfo expected;
+};
+
+// Test the shaderc_util::GetGlslangClientInfo function.
+using GetGlslangClientInfoTest =
+    testing::TestWithParam<GetGlslangClientInfoCase>;
+
+TEST_P(GetGlslangClientInfoTest, Sample) {
+  const auto& c = GetParam();
+  const auto& expected = c.expected;
+  auto result = shaderc_util::GetGlslangClientInfo(
+      c.prefix, c.env, c.env_version, c.spv_version, c.spv_forced);
+
+  EXPECT_THAT(result.error.empty(), Eq(expected.error.empty()));
+  if (result.error.empty()) {
+    EXPECT_THAT(result.client, Eq(expected.client));
+    EXPECT_THAT(result.client_version, Eq(expected.client_version));
+    EXPECT_THAT(result.target_language, Eq(expected.target_language));
+    EXPECT_THAT(result.target_language_version,
+                Eq(expected.target_language_version));
+  } else {
+    EXPECT_THAT(result.error, HasSubstr(expected.error));
+  }
+}
+
+#define CASE_VK(VKVER, SPVVER)                                                 \
+  "", Compiler::TargetEnv::Vulkan, Compiler::TargetEnvVersion::Vulkan_##VKVER, \
+      Compiler::SpirvVersion::v##SPVVER
+
+#define BADCASE_VK(STR, VKVER, SPVVER)                \
+  STR, Compiler::TargetEnv::Vulkan,                   \
+      static_cast<Compiler::TargetEnvVersion>(VKVER), \
+      static_cast<Compiler::SpirvVersion>(SPVVER)
+
+#define CASE_GL(GLVER, SPVVER)                                                 \
+  "", Compiler::TargetEnv::OpenGL, Compiler::TargetEnvVersion::OpenGL_##GLVER, \
+      Compiler::SpirvVersion::v##SPVVER
+
+#define BADCASE_GL(STR, GLVER, SPVVER)                \
+  STR, Compiler::TargetEnv::OpenGL,                   \
+      static_cast<Compiler::TargetEnvVersion>(GLVER), \
+      static_cast<Compiler::SpirvVersion>(SPVVER)
+
+#define GCASE_VK(STR, VKVER, SPVVER)                             \
+  shaderc_util::GlslangClientInfo {                              \
+    std::string(STR), glslang::EShClientVulkan,                  \
+        glslang::EShTargetVulkan_##VKVER, glslang::EShTargetSpv, \
+        glslang::EShTargetSpv_##SPVVER                           \
+  }
+
+#define GCASE_GL(STR, GLVER, SPVVER)                             \
+  shaderc_util::GlslangClientInfo {                              \
+    std::string(STR), glslang::EShClientOpenGL,                  \
+        glslang::EShTargetOpenGL_##GLVER, glslang::EShTargetSpv, \
+        glslang::EShTargetSpv_##SPVVER                           \
+  }
+
+INSTANTIATE_TEST_SUITE_P(
+    UnforcedSpirvSuccess, GetGlslangClientInfoTest,
+    testing::ValuesIn(std::vector<GetGlslangClientInfoCase>{
+        // Unforced SPIR-V version. Success cases.
+        {CASE_VK(1_0, 1_4), false, GCASE_VK("", 1_0, 1_0)},
+        {CASE_VK(1_1, 1_4), false, GCASE_VK("", 1_1, 1_3)},
+        {CASE_GL(4_5, 1_4), false, GCASE_GL("", 450, 1_0)},
+    }));
+
+INSTANTIATE_TEST_SUITE_P(
+    ForcedSpirvSuccess, GetGlslangClientInfoTest,
+    testing::ValuesIn(std::vector<GetGlslangClientInfoCase>{
+        // Forced SPIR-V version. Success cases.
+        {CASE_VK(1_0, 1_0), true, GCASE_VK("", 1_0, 1_0)},
+        {CASE_VK(1_0, 1_1), true, GCASE_VK("", 1_0, 1_1)},
+        {CASE_VK(1_0, 1_2), true, GCASE_VK("", 1_0, 1_2)},
+        {CASE_VK(1_0, 1_3), true, GCASE_VK("", 1_0, 1_3)},
+        {CASE_VK(1_1, 1_0), true, GCASE_VK("", 1_1, 1_0)},
+        {CASE_VK(1_1, 1_1), true, GCASE_VK("", 1_1, 1_1)},
+        {CASE_VK(1_1, 1_2), true, GCASE_VK("", 1_1, 1_2)},
+        {CASE_VK(1_1, 1_3), true, GCASE_VK("", 1_1, 1_3)},
+        {CASE_GL(4_5, 1_0), true, GCASE_GL("", 450, 1_0)},
+        {CASE_GL(4_5, 1_1), true, GCASE_GL("", 450, 1_1)},
+        {CASE_GL(4_5, 1_2), true, GCASE_GL("", 450, 1_2)},
+    }));
+
+INSTANTIATE_TEST_SUITE_P(
+    Failure, GetGlslangClientInfoTest,
+    testing::ValuesIn(std::vector<GetGlslangClientInfoCase>{
+        // Failure cases.
+        {BADCASE_VK("foo", 999, Compiler::SpirvVersion::v1_0), false,
+         GCASE_VK("error:foo: Invalid target client version 999 for Vulkan "
+                  "environment 0",
+                  1_0, 1_0)},
+        {BADCASE_GL("foo", 999, Compiler::SpirvVersion::v1_0), false,
+         GCASE_GL("error:foo: Invalid target client version 999 for OpenGL "
+                  "environment 1",
+                  450, 1_0)},
+        // For bad SPIR-V versions, have to force=true to make it pay attention.
+        {BADCASE_VK("foo", Compiler::TargetEnvVersion::Vulkan_1_0, 999), true,
+         GCASE_VK("error:foo: Unknown SPIR-V version 3e7", 1_0, 1_0)},
+        {BADCASE_GL("foo", Compiler::TargetEnvVersion::OpenGL_4_5, 999), true,
+         GCASE_GL("error:foo: Unknown SPIR-V version 3e7", 450, 1_0)},
+    }));
+
+#undef CASE_VK
+#undef CASE_GL
+#undef BADCASE_VK
+#undef BADCASE_GL
+#undef GCASE_VK
+#undef GCASE_GL
 }  // anonymous namespace

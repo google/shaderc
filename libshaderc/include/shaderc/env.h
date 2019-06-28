@@ -48,6 +48,20 @@ typedef enum {
   shaderc_env_version_webgpu,
 } shaderc_env_version;
 
+// The known versions of SPIR-V.
+typedef enum {
+  // Use the values used for word 1 of a SPIR-V binary:
+  // - bits 24 to 31: zero
+  // - bits 16 to 23: major version number
+  // - bits 8 to 15: minor version number
+  // - bits 0 to 7: zero
+  shaderc_spirv_version_1_0 = (((uint32_t)0x010000)),
+  shaderc_spirv_version_1_1 = (((uint32_t)0x010100)),
+  shaderc_spirv_version_1_2 = (((uint32_t)0x010200)),
+  shaderc_spirv_version_1_3 = (((uint32_t)0x010300)),
+  shaderc_spirv_version_1_4 = (((uint32_t)0x010400))
+} shaderc_spirv_version;
+
 #ifdef __cplusplus
 }
 #endif  // __cplusplus
