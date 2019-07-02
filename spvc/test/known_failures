@@ -35,6 +35,10 @@ shaders-msl/frag/subgroup-builtins.msl22.frag,False
 shaders-msl/frag/subgroup-builtins.msl22.frag,True
 shaders-msl/vert/texture_buffer.texture-buffer-native.msl21.vert,False
 shaders-msl/vert/texture_buffer.texture-buffer-native.msl21.vert,True
+shaders-msl/vulkan/frag/basic.multiview.nocompat.vk.frag,False
+shaders-msl/vulkan/frag/basic.multiview.nocompat.vk.frag,True
+shaders-msl/vulkan/vert/multiview.multiview.nocompat.vk.vert,False
+shaders-msl/vulkan/vert/multiview.multiview.nocompat.vk.vert,True
 shaders-reflection/asm/aliased-entry-point-names.asm.multi,False
 shaders-reflection/asm/op-source-glsl-ssbo-1.asm.comp,False
 shaders-reflection/asm/op-source-glsl-ssbo-2.asm.comp,False
