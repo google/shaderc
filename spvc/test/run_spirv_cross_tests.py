@@ -31,6 +31,7 @@ class TestEnv:
     def __init__(self, script_args):
         """Takes in the output of ArgumentParser.parse_args()"""
         self.dry_run = script_args.dry_run
+        self.verbose = script_args.verbose
         self.give_up = script_args.give_up
         self.cross_dir = script_args.cross_dir
         self.spvc = script_args.spvc
@@ -62,20 +63,22 @@ class TestEnv:
 
     def log_failure(self, shader, optimize):
         """Log a test case failure."""
-        log_string = 'FAILED {}, optimize = {}'.format(shader, optimize)
-        print(log_string)
+        if self.verbose:
+            log_string = 'FAILED {}, optimize = {}'.format(shader, optimize)
+            print(log_string)
 
     def log_command(self, cmd):
         """Log calling a command."""
-        # make sure it's all strings
-        cmd = [str(x) for x in cmd]
-        # first item is the command path, keep only last component
-        cmd[0] = os.path.basename(cmd[0])
-        # if last item is a path in SPIRV-Cross dir, trim that dir
-        if cmd[-1].startswith(self.cross_dir):
-            cmd[-1] = cmd[-1][len(self.cross_dir) + 1:]
-        log_string = ''.join(cmd) + '\n'
-        print(log_string)
+        if self.verbose:
+            # make sure it's all strings
+            cmd = [str(x) for x in cmd]
+            # first item is the command path, keep only last component
+            cmd[0] = os.path.basename(cmd[0])
+            # if last item is a path in SPIRV-Cross dir, trim that dir
+            if cmd[-1].startswith(self.cross_dir):
+                cmd[-1] = cmd[-1][len(self.cross_dir) + 1:]
+            log_string = ' '.join(cmd) + '\n'
+            print(log_string)
 
     def check_output(self, cmd):
         """Quietly run a command.
@@ -470,14 +473,16 @@ def work_function(work_args):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
+                        help='Enable additional diagnoistic logging')
     parser.add_argument('-n', '--dry-run', dest='dry_run', action='store_true',
-                        help='do not execute commands')
+                        help='Do not execute commands')
     parser.add_argument('-g', '--give-up', dest='give_up',
                         action='store_true',
-                        help='quit after first failure')
+                        help='Quit after first failure')
     parser.add_argument('-f', '--test-filter', dest='test_filter',
                         action='store', metavar='<test filter regex>',
-                        help='only run tests that contain given regex string')
+                        help='Only run tests that contain given regex string')
     parser.add_argument('-j', '--jobs', dest='jobs', type=int, default=0, action='store',
                         metavar='<number of processes to use>', help='Use as many processes as specified, 0 indicates let the script decide.')
     parser.add_argument('spvc', metavar='<spvc executable>')
