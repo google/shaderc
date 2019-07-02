@@ -32,6 +32,7 @@
 #include "libshaderc_util/string_piece.h"
 #include "resource_parse.h"
 #include "shader_stage.h"
+#include "shaderc/env.h"
 #include "shaderc/shaderc.h"
 #include "spirv-tools/libspirv.h"
 
@@ -155,6 +156,14 @@ Options:
                         vulkan          # Same as vulkan1.0
                         opengl4.5
                         opengl          # Same as opengl4.5
+  --target-spv=<spirv-version>
+                    Set the SPIR-V version to be used for the generated SPIR-V
+                    module.  The default is the highest version of SPIR-V
+                    required to be supported for the target environment.
+                    For example, default for vulkan1.0 is spv1.0, and
+                    the default for vulkan1.1 is spv1.3.
+                    Values are:
+                        spv1.0, spv1.1, spv1.2, spv1.3, spv1.4
   --version         Display compiler version information.
   -w                Suppresses all warning messages.
   -Werror           Treat all warnings as errors.
@@ -430,6 +439,25 @@ int main(int argc, char** argv) {
         return 1;
       }
       compiler.options().SetTargetEnvironment(target_env, version);
+    } else if (arg.starts_with("--target-spv=")) {
+      shaderc_spirv_version ver = shaderc_spirv_version_1_0;
+      const string_piece ver_str = arg.substr(std::strlen("--target-spv="));
+      if (ver_str == "spv1.0") {
+        ver = shaderc_spirv_version_1_0;
+      } else if (ver_str == "spv1.1") {
+        ver = shaderc_spirv_version_1_1;
+      } else if (ver_str == "spv1.2") {
+        ver = shaderc_spirv_version_1_2;
+      } else if (ver_str == "spv1.3") {
+        ver = shaderc_spirv_version_1_3;
+      } else if (ver_str == "spv1.4") {
+        ver = shaderc_spirv_version_1_4;
+      } else {
+        std::cerr << "glslc: error: invalid value '" << ver_str
+                  << "' in '--target-spv=" << ver_str << "'" << std::endl;
+        return 1;
+      }
+      compiler.options().SetTargetSpirv(ver);
     } else if (arg.starts_with("-mfmt=")) {
       const string_piece binary_output_format =
           arg.substr(std::strlen("-mfmt="));

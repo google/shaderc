@@ -477,6 +477,13 @@ void shaderc_compile_options_set_target_env(shaderc_compile_options_t options,
                                  GetCompilerTargetEnvVersion(version));
 }
 
+void shaderc_compile_options_set_target_spirv(shaderc_compile_options_t options,
+                                              shaderc_spirv_version ver) {
+  // We made the values match, so we can get away with a static cast.
+  options->compiler.SetTargetSpirv(
+      static_cast<shaderc_util::Compiler::SpirvVersion>(ver));
+}
+
 void shaderc_compile_options_set_warnings_as_errors(
     shaderc_compile_options_t options) {
   options->compiler.SetWarningsAsErrors();
