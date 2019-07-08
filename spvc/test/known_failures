@@ -61,6 +61,8 @@ shaders-reflection/frag/spec-constant.vk.frag,False
 shaders-reflection/rgen/acceleration_structure.vk.rgen,False
 shaders-reflection/vert/read-from-row-major-array.vert,False
 shaders-reflection/vert/texture_buffer.vert,False
+shaders/asm/extended-debug-extinst.invalid.asm.comp,False
+shaders/asm/extended-debug-extinst.invalid.asm.comp,True
 shaders/asm/frag/line-directive.line.asm.frag,False
 shaders/asm/frag/line-directive.line.asm.frag,True
 shaders/flatten/multi-dimensional.desktop.invalid.flatten_dim.frag,False
