@@ -19,6 +19,8 @@ shaders-msl/asm/frag/min-lod.msl22.asm.frag,True
 shaders-msl/asm/frag/min-max-clamp.invalid.asm.frag,False
 shaders-msl/comp/int64.invalid.msl22.comp,False
 shaders-msl/comp/int64.invalid.msl22.comp,True
+shaders-msl/frag/16bit-constants.frag,False
+shaders-msl/frag/16bit-constants.frag,True
 shaders-msl/frag/barycentric-nv-nopersp.msl22.frag,False
 shaders-msl/frag/barycentric-nv-nopersp.msl22.frag,True
 shaders-msl/frag/barycentric-nv.msl22.frag,False
@@ -67,6 +69,8 @@ shaders/asm/frag/line-directive.line.asm.frag,False
 shaders/asm/frag/line-directive.line.asm.frag,True
 shaders/flatten/multi-dimensional.desktop.invalid.flatten_dim.frag,False
 shaders/flatten/multi-dimensional.desktop.invalid.flatten_dim.frag,True
+shaders/frag/16bit-constants.frag,False
+shaders/frag/16bit-constants.frag,True
 shaders/vulkan/comp/struct-packing-scalar.nocompat.invalid.vk.comp.vk,False
 shaders/vulkan/comp/struct-packing-scalar.nocompat.invalid.vk.comp.vk,True
 shaders/vulkan/frag/nonuniform-qualifier.vk.nocompat.frag.vk,False
