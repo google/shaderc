@@ -36,8 +36,8 @@ typedef enum {
 typedef enum {
   // For Vulkan, use Vulkan's mapping of version numbers to integers.
   // See vulkan.h
-  shaderc_env_version_vulkan_1_0 = (((uint32_t)1 << 22)),
-  shaderc_env_version_vulkan_1_1 = (((uint32_t)1 << 22) | (1 << 12)),
+  shaderc_env_version_vulkan_1_0 = ((1u << 22)),
+  shaderc_env_version_vulkan_1_1 = ((1u << 22) | (1 << 12)),
   // For OpenGL, use the number from #version in shaders.
   // TODO(dneto): Currently no difference between OpenGL 4.5 and 4.6.
   // See glslang/Standalone/Standalone.cpp
@@ -55,11 +55,11 @@ typedef enum {
   // - bits 16 to 23: major version number
   // - bits 8 to 15: minor version number
   // - bits 0 to 7: zero
-  shaderc_spirv_version_1_0 = (((uint32_t)0x010000)),
-  shaderc_spirv_version_1_1 = (((uint32_t)0x010100)),
-  shaderc_spirv_version_1_2 = (((uint32_t)0x010200)),
-  shaderc_spirv_version_1_3 = (((uint32_t)0x010300)),
-  shaderc_spirv_version_1_4 = (((uint32_t)0x010400))
+  shaderc_spirv_version_1_0 = 0x010000u,
+  shaderc_spirv_version_1_1 = 0x010100u,
+  shaderc_spirv_version_1_2 = 0x010200u,
+  shaderc_spirv_version_1_3 = 0x010300u,
+  shaderc_spirv_version_1_4 = 0x010400u
 } shaderc_spirv_version;
 
 #ifdef __cplusplus
