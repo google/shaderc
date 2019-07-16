@@ -116,6 +116,8 @@ bool SpirvToolsOptimize(Compiler::TargetEnv env,
   val_opts.SetSkipBlockLayout(true);
   // This allows HLSL legalization regarding resources.
   val_opts.SetRelaxLogicalPointer(true);
+  // This uses relaxed rules for pre-legalized HLSL.
+  val_opts.SetBeforeHlslLegalization(true);
 
   spvtools::OptimizerOptions opt_opts;
   opt_opts.set_validator_options(val_opts);
