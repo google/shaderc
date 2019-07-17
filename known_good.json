@@ -46,7 +46,7 @@
       "site" : "github",
       "subrepo" : "KhronosGroup/SPIRV-Tools",
       "subdir" : "third_party/spirv-tools",
-      "commit" : "230c9e437146e48ec58adb4433890403c23c98fa"
+      "commit" : "aa9e8f538041db3055ea443080e0ccc315fa114f"
     }
   ]
 }
