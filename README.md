@@ -11,7 +11,7 @@ At the moment it includes:
   functionality.
 
 **Note:** The fact that that `libshaderc` is not named `libshaderc_glslc` is a
-quirk of history, and a known inconsistancy. Changing it would require a
+quirk of history, and a known inconsistency. Changing it would require a
 significant amount of renaming and breaking of downstream projects, so it is
 being left as is.
 
