@@ -195,7 +195,7 @@ def test_glsl(test_env, shader, filename, optimize):
     failures = []
 
     status, input_shader = test_env.compile_input_shader(
-        shader, filename, optimize and not '.noopt.' in filename and not '.invalid.' in filename)
+        shader, filename, optimize and ('.noopt.' not in filename) and ('.invalid.' not in filename))
     if not status:
         remove_files(input_shader)
         failures.append((shader, optimize))
@@ -322,7 +322,7 @@ def test_msl(test_env, shader, filename, optimize):
     successes = []
     failures = []
     status, input_shader = test_env.compile_input_shader(
-        shader, filename, optimize and not '.noopt.' in filename)
+        shader, filename, optimize and ('.noopt.' not in filename))
     if not status:
         remove_files(input_shader)
         failures.append((shader, optimize))
@@ -397,7 +397,7 @@ def test_hlsl(test_env, shader, filename, optimize):
     failures = []
 
     status, input_shader = test_env.compile_input_shader(
-        shader, filename, optimize and not '.noopt.' in filename)
+        shader, filename, optimize and ('.noopt.' not in filename))
     if not status:
         remove_files(input_shader)
         failures.append((shader, optimize))
