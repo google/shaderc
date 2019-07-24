@@ -113,7 +113,7 @@ def main():
         setup_directory(glsl_src_dir, glsl_bin_dir)
         runtests_script = os.path.join(glsl_bin_dir, 'runtests')
         substitute_file(runtests_script,
-                        ('EXE=' + os.path.join('..', 'build', 'install', 'bin', target_location)))
+                        ('EXE=' + os.path.join('..', 'build', 'install', 'bin'), target_location))
         write_file(glsl_list_file, src_glsl_stamp)
 
 
