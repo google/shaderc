@@ -96,23 +96,24 @@ def main():
     glsl_src_dir = os.path.normpath(sys.argv[1])
     glsl_bin_dir = os.path.normpath(sys.argv[2])
     intermediate_directory = None
-    if (len(sys.argv) > 3):
+    if len(sys.argv) > 3:
         intermediate_directory = sys.argv[3]
     glsl_list_file = os.path.join(glsl_bin_dir, 'glsl_test_list')
 
     src_glsl_stamp = get_modified_times(glsl_src_dir)
     old_glsl_stamp = read_file(glsl_list_file)
 
-    target_location = '../glslang/StandAlone/'
+    target_location = os.path.join('..', 'glslang', 'StandAlone')
     if intermediate_directory:
-        target_location = '../' + target_location + intermediate_directory + '/'
+        target_location = os.path.join(
+            '..', target_location, intermediate_directory)
     target_location = 'EXE=' + target_location
 
     if src_glsl_stamp != old_glsl_stamp:
         setup_directory(glsl_src_dir, glsl_bin_dir)
         runtests_script = os.path.join(glsl_bin_dir, 'runtests')
         substitute_file(runtests_script,
-                        ('EXE=../build/install/bin/', target_location))
+                        ('EXE=' + os.path.join('..', 'build', 'install', 'bin'), target_location))
         write_file(glsl_list_file, src_glsl_stamp)
 
 
