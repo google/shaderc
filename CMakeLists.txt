@@ -35,16 +35,6 @@ include(cmake/setup_build.cmake)
 include(cmake/utils.cmake)
 include(CheckCXXCompilerFlag)
 
-# Raise warning level and turn warnings into error on Windows
-if(MSVC)
-    # CMake defaults to /W3, and if we just add /W4 there will be a
-    # warning about having both on the command line. It is a decade
-    # long KI with CMake that there isn't a better way to do this...
-    string(REGEX REPLACE " /W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    string(REGEX REPLACE " /W[0-4]" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-    add_compile_options("/W4" "/WX")
-endif()
-
 # These flags are not supported on Windows and some older version of GCC
 # that our bots use.
 # Warning about implicit fallthrough in switch blocks
