@@ -35,12 +35,30 @@ include(cmake/setup_build.cmake)
 include(cmake/utils.cmake)
 include(CheckCXXCompilerFlag)
 
-# This flag is not supported on Windows and some older version of GCC
+# Raise warning level and turn warnings into error on Windows
+if(MSVC)
+    # CMake defaults to /W3, and if we just add /W4 there will be a
+    # warning about having both on the command line. It is a decade
+    # long KI with CMake that there isn't a better way to do this...
+    string(REGEX REPLACE " /W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    string(REGEX REPLACE " /W[0-4]" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    add_compile_options("/W4" "/WX")
+endif()
+
+# These flags are not supported on Windows and some older version of GCC
 # that our bots use.
+# Warning about implicit fallthrough in switch blocks
 unset(COMPILER_SUPPORTS_FALLTHROUGH_WARNING CACHE)
 check_cxx_compiler_flag(-Wimplicit-fallthrough COMPILER_SUPPORTS_FALLTHROUGH_WARNING)
 if (COMPILER_SUPPORTS_FALLTHROUGH_WARNING)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wimplicit-fallthrough")
+endif()
+
+# Warning about extra semi-colons
+unset(COMPILER_SUPPORTS_EXTRA_SEMI_WARNING CACHE)
+check_cxx_compiler_flag(-Wextra-semi COMPILER_SUPPORTS_EXTRA_SEMI_WARNING)
+if (COMPILER_SUPPORTS_EXTRA_SEMI_WARNING)
+    add_compile_options("-Wextra-semi")
 endif()
 
 if(SHADERC_ENABLE_NV_EXTENSIONS)
@@ -75,6 +93,7 @@ if(MSVC)
     endforeach(flag_var)
   endif(NOT SHADERC_ENABLE_SHARED_CRT)
 endif(MSVC)
+
 
 # Configure subdirectories.
 # We depend on these for later projects, so they should come first.
