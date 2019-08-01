@@ -85,15 +85,15 @@ if (SHADERC_ENABLE_SPVC)
 
       # Add -fPIC to SPIRV-Cross build, if supported
       unset(COMPILER_SUPPORTS_PIC CACHE)
-      check_cxx_compiler_flag(-fPIC COMPILER_SUPPORTS_PIC_WARNING)
-      if (COMPILER_SUPPORTS_PIC_WARNING)
+      check_cxx_compiler_flag(-fPIC COMPILER_SUPPORTS_PIC)
+      if (COMPILER_SUPPORTS_PIC)
         set(CXX_BACK ${CMAKE_CXX_FLAGS})
         set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-fPIC")
         # cmake inserts a semicolon, change it to a space.
         string(REGEX REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
       endif()
         add_subdirectory(${SHADERC_SPIRV_CROSS_DIR} spirv-cross)
-      if (COMPILER_SUPPORTS_PIC_WARNING)
+      if (COMPILER_SUPPORTS_PIC)
         set(CMAKE_CXX_FLAGS ${CXX_BACK})
       endif()
     endif()
