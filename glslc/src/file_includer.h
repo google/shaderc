@@ -54,7 +54,7 @@ class FileIncluder : public shaderc::CompileOptions::IncluderInterface {
   // Returns a reference to the member storing the set of included files.
   const std::unordered_set<std::string>& file_path_trace() const {
     return included_files_;
-  };
+  }
 
  private:
   // Used by GetInclude() to get the full filepath.
