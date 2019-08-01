@@ -228,7 +228,7 @@ class CompileStringTest : public testing::Test {
     EXPECT_TRUE(CompilationResultIsSuccess(comp.result())) << kind << '\n'
                                                            << shader;
     return shaderc_result_get_error_message(comp.result());
-  };
+  }
 
   // Compiles a shader, expects compilation failure, and returns the messages.
   const std::string CompilationErrors(
@@ -242,7 +242,7 @@ class CompileStringTest : public testing::Test {
                                                             << shader;
     EXPECT_EQ(0u, shaderc_result_get_length(comp.result()));
     return shaderc_result_get_error_message(comp.result());
-  };
+  }
 
   // Compiles a shader and returns the messages.
   const std::string CompilationMessages(
@@ -252,7 +252,7 @@ class CompileStringTest : public testing::Test {
     const Compilation comp(compiler_.get_compiler_handle(), shader, kind,
                            "shader", "main", options, output_type);
     return shaderc_result_get_error_message(comp.result());
-  };
+  }
 
   // Compiles a shader, expects compilation success, and returns the output
   // bytes.
@@ -273,7 +273,7 @@ class CompileStringTest : public testing::Test {
     // the binary data when it sees a '\0' byte.
     return std::string(shaderc_result_get_bytes(comp.result()),
                        shaderc_result_get_length(comp.result()));
-  };
+  }
 
   Compiler compiler_;
   compile_options_ptr options_;

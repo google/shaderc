@@ -40,7 +40,7 @@ class DependencyInfoDumpingHandler {
   // Sets the name of the file where dependency info will be written.
   void SetDependencyFileName(const std::string& dep_file_name) {
     user_specified_dep_file_name_ = dep_file_name;
-  };
+  }
 
   // Dump depdendency info to a) an extra dependency info file, b) an string
   // which holds the compilation output. The choice depends on the dump
@@ -70,7 +70,7 @@ class DependencyInfoDumpingHandler {
   // Sets to always dump dependency info as an extra file, instead of the normal
   // compilation output. This means the output name specified by -o options
   // won't be used for the dependency info file.
-  void SetDumpToExtraDependencyInfoFiles() { mode_ = dump_as_extra_file; };
+  void SetDumpToExtraDependencyInfoFiles() { mode_ = dump_as_extra_file; }
 
   // Sets to dump dependency info as normal compilation output. The dependency
   // info will be either saved in a file with -o option specified file, or, if

@@ -116,7 +116,7 @@ class FileCompiler {
 
   // Gets the reference of the compiler options which reflects the command-line
   // arguments.
-  shaderc::CompileOptions& options() { return options_; };
+  shaderc::CompileOptions& options() { return options_; }
 
   // Gets a pointer which points to the dependency info dumping hander. Creates
   // such a handler if such one does not exist.
@@ -126,7 +126,7 @@ class FileCompiler {
           new DependencyInfoDumpingHandler());
     }
     return dependency_info_dumping_handler_.get();
-  };
+  }
 
  private:
   enum class OutputType {
