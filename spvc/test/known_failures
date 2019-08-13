@@ -96,6 +96,7 @@ shaders/flatten/multi-dimensional.desktop.invalid.flatten_dim.frag,False
 shaders/flatten/multi-dimensional.desktop.invalid.flatten_dim.frag,True
 shaders/frag/16bit-constants.invalid.frag,False
 shaders/frag/16bit-constants.invalid.frag,True
+shaders/vulkan/comp/buffer-reference.nocompat.vk.comp.vk,True
 shaders/vulkan/comp/struct-packing-scalar.nocompat.invalid.vk.comp.vk,False
 shaders/vulkan/comp/struct-packing-scalar.nocompat.invalid.vk.comp.vk,True
 shaders/vulkan/frag/scalar-block-layout-ubo-std430.vk.nocompat.invalid.frag.vk,False
