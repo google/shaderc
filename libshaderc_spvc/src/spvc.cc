@@ -242,7 +242,7 @@ size_t shaderc_spvc_compile_options_set_for_fuzzing(
     shaderc_spvc_compile_options_t options, const uint8_t* data, size_t size) {
   if (!data || size < sizeof(*options)) return 0;
 
-  memcpy(options, data, sizeof(*options));
+  memcpy(static_cast<void*>(options), data, sizeof(*options));
   return sizeof(*options);
 }
 
