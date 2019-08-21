@@ -63,7 +63,7 @@ def deduce_software_version(directory):
     # Linux.
     pattern = re.compile(r'^(v\d+\.\d+(-dev)?) \d\d\d\d-\d\d-\d\d\s*$')
     changes_file = os.path.join(directory, 'CHANGES')
-    with open(changes_file) as f:
+    with open(changes_file, errors='replace') as f:
         for line in f.readlines():
             match = pattern.match(line)
             if match:
@@ -115,8 +115,8 @@ def get_version_string(project, directory):
 
 def main():
     if len(sys.argv) != 4:
-        print('usage: {} <shaderc-dir> <spirv-tools-dir> <glslang-dir>'.format(
-            sys.argv[0]))
+        print(('usage: {} <shaderc-dir> <spirv-tools-dir> <glslang-dir>'.format(
+            sys.argv[0])))
         sys.exit(1)
 
     projects = ['shaderc', 'spirv-tools', 'glslang']
