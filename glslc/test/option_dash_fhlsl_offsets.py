@@ -19,6 +19,7 @@ from placeholder import FileShader
 
 # A GLSL shader with uniforms without explicit bindings.
 GLSL_SHADER = """#version 450
+  layout(set=0, binding=0)
   buffer B { float x; vec3 y; } my_ssbo;
   void main() {
     my_ssbo.x = 1.0;
