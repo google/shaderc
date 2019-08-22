@@ -120,6 +120,14 @@ class CompileOptions {
     shaderc_spvc_compile_options_set_remove_unused_variables(options_, b);
   }
 
+  // If true, enable robust buffer access pass in the spirv-opt, meaning:
+  // Inject code to clamp indexed accesses to buffers and internal
+  // arrays, providing guarantees satisfying Vulkan's robustBufferAccess rules.
+  // This is useful when an implementation does not support robust-buffer access
+  // as a driver option.
+  void SetRobustBufferAccessPass(bool b){
+    shaderc_spvc_compile_options_set_robust_buffer_access_pass(options_, b);
+  }
   // If true, Vulkan GLSL features are used instead of GL-compatible features.
   void SetVulkanSemantics(bool b) {
     shaderc_spvc_compile_options_set_vulkan_semantics(options_, b);
