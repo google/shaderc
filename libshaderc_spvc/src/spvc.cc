@@ -49,25 +49,7 @@ struct shaderc_spvc_compile_options {
   spirv_cross::CompilerMSL::Options msl;
 };
 
-shaderc_spvc_compile_options_t shaderc_spvc_compile_options_initialize() {
-  shaderc_spvc_compile_options_t options =
-      new (std::nothrow) shaderc_spvc_compile_options;
-  if (options) {
-    options->glsl.version = 0;
-  }
-  return options;
-}
-
-shaderc_spvc_compile_options_t shaderc_spvc_compile_options_clone(
-    shaderc_spvc_compile_options_t options) {
-  if (options) return new (std::nothrow) shaderc_spvc_compile_options(*options);
-  return shaderc_spvc_compile_options_initialize();
-}
-
-void shaderc_spvc_compile_options_release(
-    shaderc_spvc_compile_options_t options) {
-  delete options;
-}
+namespace {
 
 spv_target_env get_spv_target_env(shaderc_target_env env,
                                   shaderc_env_version version) {
@@ -97,6 +79,328 @@ spv_target_env get_spv_target_env(shaderc_target_env env,
       break;
   }
   return SPV_ENV_VULKAN_1_0;
+}
+
+void consume_spirv_tools_message(shaderc_spvc_compilation_result* result,
+                                 spv_message_level_t level, const char* src,
+                                 const spv_position_t& pos,
+                                 const char* message) {
+  result->messages.append(message);
+  result->messages.append("\n");
+}
+
+// Test whether or not the given SPIR-V binary is valid for the specific
+// environment. Invoke spirv-val to perform this operation.
+shaderc_spvc_compilation_result_t validate_spirv(
+    spv_target_env env, const uint32_t* source, size_t source_len,
+    shaderc_spvc_compilation_result_t result) {
+  spvtools::SpirvTools tools(env);
+  if (!tools.IsValid()) {
+    result->messages.append("Could not initialize SPIRV-Tools.\n");
+    result->status = shaderc_compilation_status_internal_error;
+    return result;
+  }
+
+  tools.SetMessageConsumer(std::bind(
+      consume_spirv_tools_message, result, std::placeholders::_1,
+      std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+
+  if (!tools.Validate(source, source_len, spvtools::ValidatorOptions())) {
+    result->messages.append("Validation of shader failed.\n");
+    result->status = shaderc_compilation_status_validation_error;
+    return result;
+  }
+  return result;
+}
+
+// Convert SPIR-V from one environment to another, if there is a known
+// conversion. If the origin and destination environments are the same, then
+// the binary is just copied to the output buffer. Invokes spirv-opt to perform
+// the actual translation.
+shaderc_spvc_compilation_result_t translate_spirv(
+    spv_target_env source_env, spv_target_env target_env,
+    const uint32_t* source, size_t source_len, std::vector<uint32_t>* target,
+    shaderc_spvc_compilation_result_t result) {
+  if (!target) {
+    result->messages.append("null provided for translation destination.\n");
+    result->status = shaderc_compilation_status_transformation_error;
+    return result;
+  }
+
+  if (source_env == target_env) {
+    target->resize(source_len);
+    memcpy(target->data(), source, source_len * sizeof(uint32_t));
+    return result;
+  }
+
+  spvtools::Optimizer opt(target_env);
+  opt.SetMessageConsumer(std::bind(
+      consume_spirv_tools_message, result, std::placeholders::_1,
+      std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+
+  if (source_env == SPV_ENV_WEBGPU_0 && target_env == SPV_ENV_VULKAN_1_1) {
+    opt.RegisterWebGPUToVulkanPasses();
+  } else if (source_env == SPV_ENV_VULKAN_1_1 &&
+             target_env == SPV_ENV_WEBGPU_0) {
+    opt.RegisterVulkanToWebGPUPasses();
+  } else {
+    result->messages.append(
+        "No defined transformation between source and "
+        "target execution environments.\n");
+    result->status = shaderc_compilation_status_transformation_error;
+    return result;
+  }
+
+  if (!opt.Run(source, source_len, target)) {
+    result->messages.append(
+        "Transformations between source and target "
+        "execution environments failed.\n");
+    result->status = shaderc_compilation_status_transformation_error;
+    return result;
+  }
+
+  return result;
+}
+
+// Execute the validation and translate steps. Specifically validates the input,
+// transforms it, then validates the transformed input. All of these steps are
+// only done if needed.
+shaderc_spvc_compilation_result_t validate_and_translate_spirv(
+    const uint32_t* source, size_t source_len,
+    shaderc_spvc_compile_options_t options, std::vector<uint32_t>* target,
+    shaderc_spvc_compilation_result_t result) {
+  if (options->validate) {
+    result = validate_spirv(options->source_env, source, source_len, result);
+    if (result->status != shaderc_compilation_status_success) {
+      result->messages.append("Validation of input source failed.\n");
+      return result;
+    }
+  }
+
+  result = translate_spirv(options->source_env, options->target_env, source,
+                           source_len, target, result);
+  if (result->status != shaderc_compilation_status_success) return result;
+  if (options->validate && (options->source_env != options->target_env)) {
+    // Re-run validation on input if actually transformed.
+    result = validate_spirv(options->target_env, target->data(), target->size(),
+                            result);
+    if (result->status != shaderc_compilation_status_success) {
+      result->messages.append("Validation of transformed source failed.\n");
+      return result;
+    }
+  }
+
+  return result;
+}
+
+// Given a configured compiler run it to generate a shader. Does all of the
+// required trapping to handle if the compile fails.
+shaderc_spvc_compilation_result_t generate_shader(
+    spirv_cross::Compiler* compiler, shaderc_spvc_compilation_result_t result) {
+  TRY_IF_EXCEPTIONS_ENABLED {
+    result->output = compiler->compile();
+    // An exception during compiling would crash (if exceptions off) or jump to
+    // the catch block (if exceptions on) so if we're here we know the compile
+    // worked.
+    result->status = shaderc_compilation_status_success;
+  }
+  CATCH_IF_EXCEPTIONS_ENABLED(...) {
+    result->status = shaderc_compilation_status_compilation_error;
+  }
+  return result;
+}
+
+// Given a Vulkan SPIR-V shader and set of options generate a GLSL shader.
+// Handles correctly setting up the SPIRV-Cross compiler based on the options
+// and then envoking it.
+shaderc_spvc_compilation_result_t generate_glsl_shader(
+    const uint32_t* source, size_t source_len,
+    shaderc_spvc_compile_options_t options,
+    shaderc_spvc_compilation_result_t result) {
+  std::unique_ptr<spirv_cross::CompilerGLSL> compiler(
+      new (std::nothrow) spirv_cross::CompilerGLSL(source, source_len));
+  if (!compiler) {
+    result->messages.append(
+        "Unable to initialize SPIRV-Cross GLSL compiler.\n");
+    result->status = shaderc_compilation_status_compilation_error;
+    return result;
+  }
+
+  if (options->glsl.version == 0) {
+    // no version requested, was one detected in source?
+    options->glsl.version = compiler->get_common_options().version;
+    if (options->glsl.version == 0) {
+      // no version detected in source, use default
+      options->glsl.version = DEFAULT_GLSL_VERSION;
+    } else {
+      // version detected implies ES also detected
+      options->glsl.es = compiler->get_common_options().es;
+    }
+  }
+
+  // Override detected setting, if any.
+  if (options->force_es) options->glsl.es = options->forced_es_setting;
+
+  auto entry_points = compiler->get_entry_points_and_stages();
+  spv::ExecutionModel model = spv::ExecutionModelMax;
+  if (!options->entry_point.empty()) {
+    // Make sure there is just one entry point with this name, or the stage is
+    // ambiguous.
+    uint32_t stage_count = 0;
+    for (auto& e : entry_points) {
+      if (e.name == options->entry_point) {
+        stage_count++;
+        model = e.execution_model;
+      }
+    }
+
+    if (stage_count != 1) {
+      result->status = shaderc_compilation_status_compilation_error;
+      if (stage_count == 0) {
+        result->messages.append("There is no entry point with name: " +
+                                options->entry_point);
+      } else {
+        result->messages.append(
+            "There is more than one entry point with name: " +
+            options->entry_point + ". Use --stage.");
+      }
+      return result;
+    }
+  }
+
+  if (!options->entry_point.empty()) {
+    compiler->set_entry_point(options->entry_point, model);
+  }
+
+  if (!options->glsl.vulkan_semantics) {
+    uint32_t sampler = compiler->build_dummy_sampler_for_combined_images();
+    if (sampler) {
+      // Set some defaults to make validation happy.
+      compiler->set_decoration(sampler, spv::DecorationDescriptorSet, 0);
+      compiler->set_decoration(sampler, spv::DecorationBinding, 0);
+    }
+  }
+
+  spirv_cross::ShaderResources res;
+  if (options->remove_unused_variables) {
+    auto active = compiler->get_active_interface_variables();
+    res = compiler->get_shader_resources(active);
+    compiler->set_enabled_interface_variables(move(active));
+  } else {
+    res = compiler->get_shader_resources();
+  }
+
+  if (options->flatten_ubo) {
+    for (auto& ubo : res.uniform_buffers)
+      compiler->flatten_buffer_block(ubo.id);
+    for (auto& ubo : res.push_constant_buffers)
+      compiler->flatten_buffer_block(ubo.id);
+  }
+
+  if (!options->glsl.vulkan_semantics) {
+    compiler->build_combined_image_samplers();
+
+    // if (args.combined_samplers_inherit_bindings)
+    //  spirv_cross_util::inherit_combined_sampler_bindings(*compiler);
+
+    // Give the remapped combined samplers new names.
+    for (auto& remap : compiler->get_combined_image_samplers()) {
+      compiler->set_name(
+          remap.combined_id,
+          spirv_cross::join("SPIRV_Cross_Combined",
+                            compiler->get_name(remap.image_id),
+                            compiler->get_name(remap.sampler_id)));
+    }
+  }
+
+  compiler->set_common_options(options->glsl);
+
+  result = generate_shader(compiler.get(), result);
+  if (result->status != shaderc_compilation_status_success) {
+    result->messages.append("Compilation failed.  Partial source:\n");
+    result->messages.append(compiler->get_partial_source());
+  }
+
+  return result;
+}
+
+// Given a Vulkan SPIR-V shader and set of options generate a HLSL shader.
+// Handles correctly setting up the SPIRV-Cross compiler based on the options
+// and then envoking it.
+shaderc_spvc_compilation_result_t generate_hlsl_shader(
+    const uint32_t* source, size_t source_len,
+    shaderc_spvc_compile_options_t options,
+    shaderc_spvc_compilation_result_t result) {
+  std::unique_ptr<spirv_cross::CompilerHLSL> compiler(
+      new (std::nothrow) spirv_cross::CompilerHLSL(source, source_len));
+  if (!compiler) {
+    result->messages.append(
+        "Unable to initialize SPIRV-Cross HLSL compiler.\n");
+    result->status = shaderc_compilation_status_compilation_error;
+    return result;
+  }
+
+  compiler->set_common_options(options->glsl);
+  compiler->set_hlsl_options(options->hlsl);
+
+  result = generate_shader(compiler.get(), result);
+  if (result->status != shaderc_compilation_status_success) {
+    result->messages.append("Compilation failed.  Partial source:\n");
+    result->messages.append(compiler->get_partial_source());
+  }
+
+  return result;
+}
+
+// Given a Vulkan SPIR-V shader and set of options generate a MSL shader.
+// Handles correctly setting up the SPIRV-Cross compiler based on the options
+// and then envoking it.
+shaderc_spvc_compilation_result_t generate_msl_shader(
+    const uint32_t* source, size_t source_len,
+    shaderc_spvc_compile_options_t options,
+    shaderc_spvc_compilation_result_t result) {
+  std::unique_ptr<spirv_cross::CompilerMSL> compiler(
+      new (std::nothrow) spirv_cross::CompilerMSL(source, source_len));
+  if (!compiler) {
+    result->messages.append("Unable to initialize SPIRV-Cross MSL compiler.\n");
+    result->status = shaderc_compilation_status_compilation_error;
+    return result;
+  }
+
+  compiler->set_common_options(options->glsl);
+  compiler->set_msl_options(options->msl);
+  for (auto i : options->msl_discrete_descriptor_sets)
+    compiler->add_discrete_descriptor_set(i);
+
+  result = generate_shader(compiler.get(), result);
+  if (result->status != shaderc_compilation_status_success) {
+    result->messages.append("Compilation failed.  Partial source:\n");
+    result->messages.append(compiler->get_partial_source());
+  }
+
+  return result;
+}
+
+}  // namespace
+
+shaderc_spvc_compile_options_t shaderc_spvc_compile_options_initialize() {
+  shaderc_spvc_compile_options_t options =
+      new (std::nothrow) shaderc_spvc_compile_options;
+  if (options) {
+    options->glsl.version = 0;
+  }
+  return options;
+}
+
+shaderc_spvc_compile_options_t shaderc_spvc_compile_options_clone(
+    shaderc_spvc_compile_options_t options) {
+  if (options) return new (std::nothrow) shaderc_spvc_compile_options(*options);
+  return shaderc_spvc_compile_options_initialize();
+}
+
+void shaderc_spvc_compile_options_release(
+    shaderc_spvc_compile_options_t options) {
+  delete options;
 }
 
 void shaderc_spvc_compile_options_set_source_env(
@@ -254,262 +558,76 @@ void shaderc_spvc_compiler_release(shaderc_spvc_compiler_t compiler) {
   delete compiler;
 }
 
-namespace {
-void consume_spirv_tools_message(shaderc_spvc_compilation_result* result,
-                                 spv_message_level_t level, const char* src,
-                                 const spv_position_t& pos,
-                                 const char* message) {
-  result->messages.append(message);
-  result->messages.append("\n");
-}
-
-using CompilerBuilder = std::function<
-    std::tuple<shaderc_spvc_compilation_result*, spirv_cross::CompilerGLSL*>(
-        const uint32_t* /* source */, size_t /* source_len */,
-        shaderc_spvc_compile_options_t /* options */
-        )>;
-
-// Validate the source spir-v if requested, and if valid use the given compiler
-// to translate it to a higher level language. CompilerGLSL is the base class
-// for all spirv-cross compilers so this function works with a compiler for any
-// output language. The given compiler should already have its options set by
-// the caller.
-shaderc_spvc_compilation_result_t validate_and_compile(
-    CompilerBuilder builder, const uint32_t* source, size_t source_len,
-    shaderc_spvc_compile_options_t options) {
-  auto* result = new (std::nothrow) shaderc_spvc_compilation_result;
-  if (!result) return nullptr;
-
-  if (options->validate) {
-    spvtools::SpirvTools tools(options->source_env);
-    if (!tools.IsValid()) return nullptr;
-    tools.SetMessageConsumer(std::bind(
-        consume_spirv_tools_message, result, std::placeholders::_1,
-        std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-    if (!tools.Validate(source, source_len, spvtools::ValidatorOptions())) {
-      result->messages.append("Validation of input source failed.");
-      result->messages.append("\n");
-      result->status = shaderc_compilation_status_validation_error;
-      return result;
-    }
-  }
-
-  std::vector<uint32_t> intermediate_source;
-  if (options->source_env != options->target_env) {
-    spvtools::Optimizer opt(options->target_env);
-    opt.SetMessageConsumer(std::bind(
-        consume_spirv_tools_message, result, std::placeholders::_1,
-        std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-
-    if (options->source_env == SPV_ENV_WEBGPU_0 &&
-        options->target_env == SPV_ENV_VULKAN_1_1) {
-      opt.RegisterWebGPUToVulkanPasses();
-    } else if (options->source_env == SPV_ENV_VULKAN_1_1 &&
-               options->target_env == SPV_ENV_WEBGPU_0) {
-      opt.RegisterVulkanToWebGPUPasses();
-    } else {
-      result->messages.append(
-          "No defined transformation between source and "
-          "target execution environments.");
-      result->messages.append("\n");
-      result->status = shaderc_compilation_status_transformation_error;
-      return result;
-    }
-
-    if (!opt.Run(source, source_len, &intermediate_source)) {
-      result->messages.append(
-          "Transformations between source and target "
-          "execution environments failed.");
-      result->messages.append("\n");
-      result->status = shaderc_compilation_status_transformation_error;
-      return result;
-    }
-
-    if (options->validate) {
-      spvtools::SpirvTools tools(options->target_env);
-      if (!tools.IsValid()) return nullptr;
-      tools.SetMessageConsumer(std::bind(
-          consume_spirv_tools_message, result, std::placeholders::_1,
-          std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-      if (!tools.Validate(intermediate_source.data(),
-                          intermediate_source.size(),
-                          spvtools::ValidatorOptions())) {
-        result->messages.append("Validation of transformed source failed.");
-        result->messages.append("\n");
-        result->status = shaderc_compilation_status_validation_error;
-        return result;
-      }
-    }
-  } else {
-    intermediate_source.resize(source_len);
-    memcpy(intermediate_source.data(), source, source_len * sizeof(uint32_t));
-  }
-
-  shaderc_spvc_compilation_result* builder_result;
-  spirv_cross::CompilerGLSL* builder_compiler;
-  std::tie(builder_result, builder_compiler) =
-      builder(intermediate_source.data(), intermediate_source.size(), options);
-  if (builder_result) {
-    shaderc_spvc_result_release(result);
-    return builder_result;
-  }
-
-  std::unique_ptr<spirv_cross::CompilerGLSL> compiler(builder_compiler);
-  TRY_IF_EXCEPTIONS_ENABLED {
-    result->output = compiler->compile();
-    // An exception during compiling would crash (if exceptions off) or jump to
-    // the catch block (if exceptions on) so if we're here we know the compile
-    // worked.
-    result->status = shaderc_compilation_status_success;
-  }
-  CATCH_IF_EXCEPTIONS_ENABLED(...) {
-    result->status = shaderc_compilation_status_compilation_error;
-    result->messages = "Compilation failed.  Partial source:";
-    result->messages.append(compiler->get_partial_source());
-  }
-  return result;
-}
-}  // namespace
-
 shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_glsl(
     const shaderc_spvc_compiler_t, const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options) {
-  CompilerBuilder builder = [](const uint32_t* source, size_t source_len,
-                               shaderc_spvc_compile_options_t options)
-      -> std::tuple<shaderc_spvc_compilation_result*,
-                    spirv_cross::CompilerGLSL*> {
-    std::unique_ptr<shaderc_spvc_compilation_result> result(
-        new (std::nothrow) shaderc_spvc_compilation_result);
-    if (!result) return std::make_tuple(nullptr, nullptr);
+  auto* result = new (std::nothrow) shaderc_spvc_compilation_result;
+  if (!result) return nullptr;
+  result->status = shaderc_compilation_status_success;
 
-    std::unique_ptr<spirv_cross::CompilerGLSL> compiler(
-        new (std::nothrow) spirv_cross::CompilerGLSL(source, source_len));
-    if (!compiler) return std::make_tuple(nullptr, nullptr);
+  std::vector<uint32_t> intermediate_source;
+  result = validate_and_translate_spirv(source, source_len, options,
+                                        &intermediate_source, result);
+  if (result->status != shaderc_compilation_status_success) {
+    return result;
+  }
 
-    if (options->glsl.version == 0) {
-      // no version requested, was one detected in source?
-      options->glsl.version = compiler->get_common_options().version;
-      if (options->glsl.version == 0) {
-        // no version detected in source, use default
-        options->glsl.version = DEFAULT_GLSL_VERSION;
-      } else {
-        // version detected implies ES also detected
-        options->glsl.es = compiler->get_common_options().es;
-      }
-    }
+  result = generate_glsl_shader(intermediate_source.data(),
+                                intermediate_source.size(), options, result);
+  if (result->status != shaderc_compilation_status_success) {
+    result->messages.append(
+        "Generation of GLSL from transformed source failed.\n");
+  }
 
-    // Override detected setting, if any.
-    if (options->force_es) options->glsl.es = options->forced_es_setting;
-
-    auto entry_points = compiler->get_entry_points_and_stages();
-    spv::ExecutionModel model = spv::ExecutionModelMax;
-    if (!options->entry_point.empty()) {
-      // Make sure there is just one entry point with this name, or the stage is
-      // ambiguous.
-      uint32_t stage_count = 0;
-      for (auto& e : entry_points) {
-        if (e.name == options->entry_point) {
-          stage_count++;
-          model = e.execution_model;
-        }
-      }
-      if (stage_count != 1) {
-        result->status = shaderc_compilation_status_compilation_error;
-        if (stage_count == 0)
-          result->messages =
-              "There is no entry point with name: " + options->entry_point;
-        else
-          result->messages = "There is more than one entry point with name: " +
-                             options->entry_point + ". Use --stage.";
-        return std::make_tuple(result.release(), nullptr);
-      }
-    }
-    if (!options->entry_point.empty()) {
-      compiler->set_entry_point(options->entry_point, model);
-    }
-
-    if (!options->glsl.vulkan_semantics) {
-      uint32_t sampler = compiler->build_dummy_sampler_for_combined_images();
-      if (sampler) {
-        // Set some defaults to make validation happy.
-        compiler->set_decoration(sampler, spv::DecorationDescriptorSet, 0);
-        compiler->set_decoration(sampler, spv::DecorationBinding, 0);
-      }
-    }
-
-    spirv_cross::ShaderResources res;
-    if (options->remove_unused_variables) {
-      auto active = compiler->get_active_interface_variables();
-      res = compiler->get_shader_resources(active);
-      compiler->set_enabled_interface_variables(move(active));
-    } else {
-      res = compiler->get_shader_resources();
-    }
-
-    if (options->flatten_ubo) {
-      for (auto& ubo : res.uniform_buffers)
-        compiler->flatten_buffer_block(ubo.id);
-      for (auto& ubo : res.push_constant_buffers)
-        compiler->flatten_buffer_block(ubo.id);
-    }
-
-    if (!options->glsl.vulkan_semantics) {
-      compiler->build_combined_image_samplers();
-
-      // if (args.combined_samplers_inherit_bindings)
-      //  spirv_cross_util::inherit_combined_sampler_bindings(*compiler);
-
-      // Give the remapped combined samplers new names.
-      for (auto& remap : compiler->get_combined_image_samplers()) {
-        compiler->set_name(
-            remap.combined_id,
-            spirv_cross::join("SPIRV_Cross_Combined",
-                              compiler->get_name(remap.image_id),
-                              compiler->get_name(remap.sampler_id)));
-      }
-    }
-
-    compiler->set_common_options(options->glsl);
-    return std::make_tuple(nullptr, compiler.release());
-  };
-  return validate_and_compile(builder, source, source_len, options);
+  return result;
 }
 
 shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_hlsl(
     const shaderc_spvc_compiler_t, const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options) {
-  CompilerBuilder builder = [](const uint32_t* source, size_t source_len,
-                               shaderc_spvc_compile_options_t options)
-      -> std::tuple<shaderc_spvc_compilation_result*,
-                    spirv_cross::CompilerGLSL*> {
-    std::unique_ptr<spirv_cross::CompilerHLSL> compiler(
-        new (std::nothrow) spirv_cross::CompilerHLSL(source, source_len));
-    if (!compiler) return std::make_tuple(nullptr, nullptr);
+  auto* result = new (std::nothrow) shaderc_spvc_compilation_result;
+  if (!result) return nullptr;
+  result->status = shaderc_compilation_status_success;
 
-    compiler->set_common_options(options->glsl);
-    compiler->set_hlsl_options(options->hlsl);
-    return std::make_tuple(nullptr, compiler.release());
-  };
-  return validate_and_compile(builder, source, source_len, options);
+  std::vector<uint32_t> intermediate_source;
+  result = validate_and_translate_spirv(source, source_len, options,
+                                        &intermediate_source, result);
+  if (result->status != shaderc_compilation_status_success) {
+    return result;
+  }
+
+  result = generate_hlsl_shader(intermediate_source.data(),
+                                intermediate_source.size(), options, result);
+  if (result->status != shaderc_compilation_status_success) {
+    result->messages.append(
+        "Generation of HLSL from transformed source failed.\n");
+  }
+
+  return result;
 }
 
 shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_msl(
     const shaderc_spvc_compiler_t, const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options) {
-  CompilerBuilder builder = [](const uint32_t* source, size_t source_len,
-                               shaderc_spvc_compile_options_t options)
-      -> std::tuple<shaderc_spvc_compilation_result*,
-                    spirv_cross::CompilerGLSL*> {
-    std::unique_ptr<spirv_cross::CompilerMSL> compiler(
-        new (std::nothrow) spirv_cross::CompilerMSL(source, source_len));
-    if (!compiler) return std::make_tuple(nullptr, nullptr);
-    compiler->set_common_options(options->glsl);
-    compiler->set_msl_options(options->msl);
-    for (auto i : options->msl_discrete_descriptor_sets)
-      compiler->add_discrete_descriptor_set(i);
-    return std::make_tuple(nullptr, compiler.release());
-  };
-  return validate_and_compile(builder, source, source_len, options);
+  auto* result = new (std::nothrow) shaderc_spvc_compilation_result;
+  if (!result) return nullptr;
+  result->status = shaderc_compilation_status_success;
+
+  std::vector<uint32_t> intermediate_source;
+  result = validate_and_translate_spirv(source, source_len, options,
+                                        &intermediate_source, result);
+  if (result->status != shaderc_compilation_status_success) {
+    return result;
+  }
+
+  result = generate_msl_shader(intermediate_source.data(),
+                               intermediate_source.size(), options, result);
+  if (result->status != shaderc_compilation_status_success) {
+    result->messages.append(
+        "Generation of MSL from transformed source failed.\n");
+  }
+
+  return result;
 }
 
 const char* shaderc_spvc_result_get_output(
