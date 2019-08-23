@@ -87,4 +87,26 @@ TEST(Compile, Msl) {
   shaderc_spvc_compiler_release(compiler);
 }
 
+TEST(Compile, Vulkan) {
+  shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
+  shaderc_spvc_compile_options_t options =
+      shaderc_spvc_compile_options_initialize();
+
+  shaderc_spvc_compile_options_set_source_env(
+      options, shaderc_target_env_webgpu, shaderc_env_version_webgpu);
+  shaderc_spvc_compile_options_set_target_env(
+      options, shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
+
+  shaderc_spvc_compilation_result_t result = shaderc_spvc_compile_into_vulkan(
+      compiler, kWebGPUShaderBinary,
+      sizeof(kWebGPUShaderBinary) / sizeof(uint32_t), options);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(shaderc_compilation_status_success,
+            shaderc_spvc_result_get_status(result));
+
+  shaderc_spvc_result_release(result);
+  shaderc_spvc_compile_options_release(options);
+  shaderc_spvc_compiler_release(compiler);
+}
+
 }  // anonymous namespace

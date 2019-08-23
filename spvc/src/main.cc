@@ -175,7 +175,7 @@ int main(int argc, char** argv) {
       shaderc_util::GetOptionArgument(argc, argv, &i,
                                       "--language=", &output_language);
       if (!(output_language == "glsl" || output_language == "msl" ||
-            output_language == "hlsl")) {
+            output_language == "hlsl" || output_language == "vulkan")) {
         std::cerr << "spvc: error: invalid value '" << output_language
                   << "' in --language=" << std::endl;
         return 1;
@@ -320,7 +320,11 @@ int main(int argc, char** argv) {
   } else if (output_language == "hlsl") {
     result = compiler.CompileSpvToHlsl((const uint32_t*)input.data(),
                                        input.size(), options);
+  } else if (output_language == "vulkan") {
+    result = compiler.CompileSpvToVulkan((const uint32_t*)input.data(),
+                                         input.size(), options);
   }
+
   auto status = result.GetCompilationStatus();
   if (status == shaderc_compilation_status_validation_error) {
     std::cerr << "validation failed:\n" << result.GetMessages() << std::endl;
@@ -328,10 +332,23 @@ int main(int argc, char** argv) {
   }
   if (status == shaderc_compilation_status_success) {
     const char* path = output_path.data();
-    if (path && strcmp(path, "-")) {
-      std::basic_ofstream<char>(path) << result.GetOutput();
+    if (output_language != "vulkan") {
+      if (path && strcmp(path, "-")) {
+        std::basic_ofstream<char>(path) << result.GetStringOutput();
+      } else {
+        std::cout << result.GetStringOutput();
+      }
     } else {
-      std::cout << result.GetOutput();
+      if (path && strcmp(path, "-")) {
+        std::ofstream out(path, std::ios::binary);
+        out.write((char*)result.GetBinaryOutput().data(),
+                  (sizeof(uint32_t) / sizeof(char)) *
+                      result.GetBinaryOutput().size());
+      } else {
+        std::cerr << "Cowardly refusing to output binary result to screen"
+                  << std::endl;
+        return 1;
+      }
     }
     return 0;
   }

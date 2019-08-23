@@ -28,7 +28,8 @@ struct shaderc_spvc_compiler {};
 
 // Described in spvc.h.
 struct shaderc_spvc_compilation_result {
-  std::string output;
+  std::string string_output;
+  std::vector<uint32_t> binary_output;
   std::string messages;
   shaderc_compilation_status status =
       shaderc_compilation_status_null_result_object;
@@ -204,7 +205,7 @@ shaderc_spvc_compilation_result_t validate_and_translate_spirv(
 shaderc_spvc_compilation_result_t generate_shader(
     spirv_cross::Compiler* compiler, shaderc_spvc_compilation_result_t result) {
   TRY_IF_EXCEPTIONS_ENABLED {
-    result->output = compiler->compile();
+    result->string_output = compiler->compile();
     // An exception during compiling would crash (if exceptions off) or jump to
     // the catch block (if exceptions on) so if we're here we know the compile
     // worked.
@@ -641,9 +642,47 @@ shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_msl(
   return result;
 }
 
-const char* shaderc_spvc_result_get_output(
+shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_vulkan(
+    const shaderc_spvc_compiler_t compiler, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options) {
+  auto* result = new (std::nothrow) shaderc_spvc_compilation_result;
+  if (!result) return nullptr;
+  result->status = shaderc_compilation_status_success;
+
+  if (options->target_env != SPV_ENV_VULKAN_1_1 &&
+      options->target_env != SPV_ENV_VULKAN_1_0 &&
+      options->target_env != SPV_ENV_VULKAN_1_1_SPIRV_1_4) {
+    result->messages.append(
+        "Attempted to compile to Vulkan, but specified non-Vulkan target "
+        "environment.\n");
+    result->status = shaderc_compilation_status_configuration_error;
+    return result;
+  }
+
+  result = validate_and_translate_spirv(source, source_len, options,
+                                        &result->binary_output, result);
+  if (result->status != shaderc_compilation_status_success) {
+    return result;
+  }
+
+  // No generation step since output for this compile method is the binary
+  // SPIR-V.
+  return result;
+}
+
+const char* shaderc_spvc_result_get_string_output(
     const shaderc_spvc_compilation_result_t result) {
-  return result->output.c_str();
+  return result->string_output.c_str();
+}
+
+const uint32_t* shaderc_spvc_result_get_binary_output(
+    const shaderc_spvc_compilation_result_t result) {
+  return result->binary_output.data();
+}
+
+uint32_t shaderc_spvc_result_get_binary_length(
+    const shaderc_spvc_compilation_result_t result) {
+  return result->binary_output.size();
 }
 
 const char* shaderc_spvc_result_get_messages(
