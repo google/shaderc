@@ -182,6 +182,8 @@ int main(int argc, char** argv) {
       }
     } else if (arg == "--remove-unused-variables") {
       options.SetRemoveUnusedVariables(true);
+    } else if (arg == "--robust-buffer-access-pass"){
+      options.SetRobustBufferAccessPass(true);
     } else if (arg == "--vulkan-semantics") {
       options.SetVulkanSemantics(true);
     } else if (arg == "--separate-shader-objects") {

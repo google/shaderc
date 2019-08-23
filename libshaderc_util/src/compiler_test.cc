@@ -119,6 +119,7 @@ const char kGlslVertShaderNoExplicitLocation[] =
 // A GLSL vertex shader with a weirdly packed block.
 const char kGlslShaderWeirdPacking[] =
     R"(#version 450
+       layout(set = 0, binding = 0)
        buffer B { float x; vec3 foo; } my_ssbo;
        void main() { my_ssbo.x = 1.0; })";
 

@@ -37,6 +37,7 @@ struct shaderc_spvc_compilation_result {
 struct shaderc_spvc_compile_options {
   bool validate = true;
   bool remove_unused_variables = false;
+  bool robust_buffer_access_pass = false;
   bool flatten_ubo = false;
   bool force_es = false;
   bool forced_es_setting = false;
@@ -423,6 +424,11 @@ void shaderc_spvc_compile_options_set_entry_point(
 void shaderc_spvc_compile_options_set_remove_unused_variables(
     shaderc_spvc_compile_options_t options, bool b) {
   options->remove_unused_variables = b;
+}
+
+void shaderc_spvc_compile_options_set_robust_buffer_access_pass(
+    shaderc_spvc_compile_options_t options, bool b) {
+  options->robust_buffer_access_pass = b;
 }
 
 void shaderc_spvc_compile_options_set_vulkan_semantics(

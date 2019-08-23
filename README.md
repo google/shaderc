@@ -93,6 +93,14 @@ Shaderc into.
 
 The rest of this section describes how to build Shaderc from sources.
 
+Note: Shaderc assumes Glslang supports HLSL compilation.  The instructions
+below assume you're building Glslang from sources, and in a subtree
+of `shaderc/third_party`.  In that scenario, Glslang's HLSL support
+is automatically enabled.  Shaderc also can be built using a Glslang
+from outside the `shaderc/third_party` tree.  In that case you must
+ensure that that external Glslang is built with HLSL functionality.
+See Glslang's `ENABLE_HLSL` CMake setting.)
+
 1) Check out the source code:
 
 ```sh

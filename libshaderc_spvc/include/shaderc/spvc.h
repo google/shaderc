@@ -80,6 +80,14 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_set_entry_point(
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_remove_unused_variables(
     shaderc_spvc_compile_options_t options, bool b);
 
+// If true, enable robust buffer access pass in the spirv-opt, meaning:
+// Inject code to clamp indexed accesses to buffers and internal
+// arrays, providing guarantees satisfying Vulkan's robustBufferAccess rules.
+// This is useful when an implementation does not support robust-buffer access
+// as a driver option.
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_robust_buffer_access_pass(
+    shaderc_spvc_compile_options_t options, bool b);
+
 // Sets the source shader environment, affecting which warnings or errors will
 // be issued during validation.
 // Default value for environment is Vulkan 1.0.
