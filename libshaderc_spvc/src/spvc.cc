@@ -120,7 +120,8 @@ shaderc_spvc_compilation_result_t validate_spirv(
 // the actual translation.
 shaderc_spvc_compilation_result_t translate_spirv(
     spv_target_env source_env, spv_target_env target_env,
-    const uint32_t* source, size_t source_len, std::vector<uint32_t>* target,
+    const uint32_t* source, size_t source_len,
+    shaderc_spvc_compile_options_t options, std::vector<uint32_t>* target,
     shaderc_spvc_compilation_result_t result) {
   if (!target) {
     result->messages.append("null provided for translation destination.\n");
@@ -152,6 +153,10 @@ shaderc_spvc_compilation_result_t translate_spirv(
     return result;
   }
 
+  if (options->robust_buffer_access_pass) {
+    opt.RegisterPass(spvtools::CreateGraphicsRobustAccessPass());
+  }
+
   if (!opt.Run(source, source_len, target)) {
     result->messages.append(
         "Transformations between source and target "
@@ -179,7 +184,7 @@ shaderc_spvc_compilation_result_t validate_and_translate_spirv(
   }
 
   result = translate_spirv(options->source_env, options->target_env, source,
-                           source_len, target, result);
+                           source_len, options, target, result);
   if (result->status != shaderc_compilation_status_success) return result;
   if (options->validate && (options->source_env != options->target_env)) {
     // Re-run validation on input if actually transformed.
