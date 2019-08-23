@@ -47,6 +47,9 @@ source_set("shaderc_util_sources") {
     "libshaderc_util/src/version_profile.cc",
   ]
 
+  # Configure Glslang's interface to include HLSL-related entry points.
+  defines = [ "ENABLE_HLSL=1" ]
+
   public_configs = [ ":shaderc_util_public" ]
 
   deps = [
