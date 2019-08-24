@@ -1042,13 +1042,13 @@ TEST_F(CppInterface, TargetEnvCompileOptionsOpenGLCompatibilityShadersFail) {
 std::string BarrierComputeShader() {
   return R"(#version 450
     void main() { barrier(); })";
-};
+}
 
 std::string SubgroupBarrierComputeShader() {
   return R"(#version 450
     #extension GL_KHR_shader_subgroup_basic : enable
     void main() { subgroupBarrier(); })";
-};
+}
 
 TEST_F(CppInterface, TargetEnvCompileOptionsVulkanEnvVulkan1_0ShaderSucceeds) {
   options_.SetTargetEnvironment(shaderc_target_env_vulkan, 0);
