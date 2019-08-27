@@ -35,7 +35,8 @@ TEST(Compile, Glsl) {
       kWebGPUShaderBinary, sizeof(kWebGPUShaderBinary) / sizeof(uint32_t),
       options);
   EXPECT_EQ(shaderc_compilation_status_success, result.GetCompilationStatus());
-  EXPECT_NE(0, result.GetOutput().size());
+  EXPECT_NE(0, result.GetStringOutput().size());
+  EXPECT_EQ(0, result.GetBinaryOutput().size());
 }
 
 TEST(Compile, Hlsl) {
@@ -50,7 +51,8 @@ TEST(Compile, Hlsl) {
       kWebGPUShaderBinary, sizeof(kWebGPUShaderBinary) / sizeof(uint32_t),
       options);
   EXPECT_EQ(shaderc_compilation_status_success, result.GetCompilationStatus());
-  EXPECT_NE(0, result.GetOutput().size());
+  EXPECT_NE(0, result.GetStringOutput().size());
+  EXPECT_EQ(0, result.GetBinaryOutput().size());
 }
 
 TEST(Compile, Msl) {
@@ -65,7 +67,24 @@ TEST(Compile, Msl) {
       kWebGPUShaderBinary, sizeof(kWebGPUShaderBinary) / sizeof(uint32_t),
       options);
   EXPECT_EQ(shaderc_compilation_status_success, result.GetCompilationStatus());
-  EXPECT_NE(0, result.GetOutput().size());
+  EXPECT_NE(0, result.GetStringOutput().size());
+  EXPECT_EQ(0, result.GetBinaryOutput().size());
+}
+
+TEST(Compile, Vulkan) {
+  Compiler compiler;
+  CompileOptions options;
+  options.SetSourceEnvironment(shaderc_target_env_webgpu,
+                               shaderc_env_version_webgpu);
+  options.SetTargetEnvironment(shaderc_target_env_vulkan,
+                               shaderc_env_version_vulkan_1_1);
+
+  CompilationResult result = compiler.CompileSpvToVulkan(
+      kWebGPUShaderBinary, sizeof(kWebGPUShaderBinary) / sizeof(uint32_t),
+      options);
+  EXPECT_EQ(shaderc_compilation_status_success, result.GetCompilationStatus());
+  EXPECT_EQ(0, result.GetStringOutput().size());
+  EXPECT_NE(0, result.GetBinaryOutput().size());
 }
 
 }  // anonymous namespace

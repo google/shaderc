@@ -67,8 +67,17 @@ class CompilationResult {
     return shaderc_spvc_result_get_status(result_);
   }
 
-  const std::string GetOutput() const {
-    return shaderc_spvc_result_get_output(result_);
+  const std::string GetStringOutput() const {
+    return shaderc_spvc_result_get_string_output(result_);
+  }
+
+  const std::vector<uint32_t> GetBinaryOutput() const {
+    const uint32_t* binary_output =
+        shaderc_spvc_result_get_binary_output(result_);
+    uint32_t binary_length = shaderc_spvc_result_get_binary_length(result_);
+    if (!binary_output || !binary_length) return {};
+
+    return std::vector<uint32_t>(binary_output, binary_output + binary_length);
   }
 
   const std::string GetMessages() const {
@@ -294,6 +303,16 @@ class Compiler {
     shaderc_spvc_compilation_result_t compilation_result =
         shaderc_spvc_compile_into_msl(compiler_, source, source_len,
                                       options.options_);
+    return CompilationResult(compilation_result);
+  }
+
+  // Compiles the given source SPIR-V to Vulkan SPIR-V.
+  CompilationResult CompileSpvToVulkan(const uint32_t* source,
+                                       size_t source_len,
+                                       const CompileOptions& options) const {
+    shaderc_spvc_compilation_result_t compilation_result =
+        shaderc_spvc_compile_into_vulkan(compiler_, source, source_len,
+                                         options.options_);
     return CompilationResult(compilation_result);
   }
 

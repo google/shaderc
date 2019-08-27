@@ -227,6 +227,13 @@ SHADERC_EXPORT shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_msl(
     const shaderc_spvc_compiler_t compiler, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options);
 
+// Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
+// Vullkan specific SPIR-V.
+SHADERC_EXPORT shaderc_spvc_compilation_result_t
+shaderc_spvc_compile_into_vulkan(const shaderc_spvc_compiler_t compiler,
+                                 const uint32_t* source, size_t source_len,
+                                 shaderc_spvc_compile_options_t options);
+
 // The following functions, operating on shaderc_spvc_compilation_result_t
 // objects, offer only the basic thread-safety guarantee.
 
@@ -245,8 +252,19 @@ shaderc_spvc_result_get_status(const shaderc_spvc_compilation_result_t);
 SHADERC_EXPORT const char* shaderc_spvc_result_get_messages(
     const shaderc_spvc_compilation_result_t result);
 
-// Get validation/compilation result as a string.
-SHADERC_EXPORT const char* shaderc_spvc_result_get_output(
+// Get validation/compilation result as a string. This is only supported
+// compiling to GLSL, HSL, and MSL.
+SHADERC_EXPORT const char* shaderc_spvc_result_get_string_output(
+    const shaderc_spvc_compilation_result_t result);
+
+// Get validation/compilation result as a binary buffer. This is only supported
+// compiling to Vulkan.
+SHADERC_EXPORT const uint32_t* shaderc_spvc_result_get_binary_output(
+    const shaderc_spvc_compilation_result_t result);
+
+// Get length of validation/compilation result as a binary buffer. This is only
+// supported compiling to Vulkan.
+SHADERC_EXPORT uint32_t shaderc_spvc_result_get_binary_length(
     const shaderc_spvc_compilation_result_t result);
 
 #ifdef __cplusplus
