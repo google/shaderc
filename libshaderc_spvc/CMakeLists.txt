@@ -7,6 +7,7 @@ set(SPVC_SOURCES
   include/shaderc/spvc.h
   include/shaderc/spvc.hpp
   src/spvc.cc
+  src/spvc_private.cc
 )
 
 add_library(shaderc_spvc STATIC ${SPVC_SOURCES})
