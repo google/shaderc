@@ -194,6 +194,10 @@ def test_glsl(test_env, shader, filename, optimize):
     successes = []
     failures = []
 
+    # Files with .nocompat. in their name are known to not work with GLSL
+    if not '.nocompat.' in filename:
+        return [], []
+
     status, input_shader = test_env.compile_input_shader(
         shader, filename, optimize and ('.noopt.' not in filename) and ('.invalid.' not in filename))
     if not status:
@@ -224,53 +228,42 @@ def test_glsl(test_env, shader, filename, optimize):
     if '.sso.' in filename:
         flags.append('--separate-shader-objects')
 
-    output = None
-    if not '.nocompat.' in filename:
+    output = input_shader + filename
+    if '.vk.' in filename or '.asm.' in filename:
         output = input_shader + filename
-        status, _ = test_env.run_spvc(input_shader, output, flags)
-        if not status:
-            output = None
-        # logged for compatibility with SPIRV-Cross test script
-        test_env.log_command([test_env.glslang, output])
-
-    output_vk = None
-    if '.vk.' in filename:
-        output_vk = input_shader + 'vk' + filename
         status, _ = test_env.run_spvc(
-            input_shader, output_vk, flags + ['--vulkan-semantics'])
-        if not status:
-            output_vk = None
-        # logged for compatibility with SPIRV-Cross test script
+            input_shader, output, flags + ['--vulkan-semantics'])
+    else:
+        status, _ = test_env.run_spvc(input_shader, output, flags)
+    if not status:
+        output = None
+
+    # logged for compatibility with SPIRV-Cross test script
+    if '.vk.' in filename or '.asm.' in filename:
+        test_env.log_command([test_env.glslang, output])
+    else:
+        test_env.log_command(
+            [test_env.glslang, '--target-env', 'vulkan1.1', '-V', output])
 
     # Check result(s).
     # Compare either or both files produced above to appropriate reference
     # file.
-    if not '.nocompat.' in filename:
-        if output:
-            result, _ = test_env.check_reference(output, shader, optimize)
-            if result:
-                successes.append((shader, optimize))
-            else:
-                failures.append((shader, optimize))
-                test_env.log_failure(shader, optimize)
+    if output:
+        reference_shader = shader
+        if '.vk.' in filename or '.asm.' in filename:
+            reference_shader = shader + '.vk'
+        result, _ = test_env.check_reference(
+            output, reference_shader, optimize)
+        if result:
+            successes.append((shader, optimize))
         else:
             failures.append((shader, optimize))
             test_env.log_failure(shader, optimize)
+    else:
+        failures.append((shader, optimize))
+        test_env.log_failure(shader, optimize)
 
-    if '.vk.' in filename:
-        if output_vk:
-            result, _ = test_env.check_reference(
-                output_vk, shader + '.vk', optimize)
-            if result:
-                successes.append((shader + '.vk', optimize))
-            else:
-                failures.append((shader + '.vk', optimize))
-                test_env.log_failure(shader + '.vk', optimize)
-        else:
-            failures.append((shader + '.vk', optimize))
-            test_env.log_failure(shader + '.vk', optimize)
-
-    remove_files(input_shader, output, output_vk)
+    remove_files(input_shader, output)
     return successes, failures
 
 
