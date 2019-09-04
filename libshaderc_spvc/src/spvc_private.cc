@@ -97,7 +97,7 @@ shaderc_spvc_compilation_result_t translate_spirv(
     return result;
   }
 
-  spvtools::Optimizer opt(target_env);
+  spvtools::Optimizer opt(source_env);
   opt.SetMessageConsumer(std::bind(
       consume_spirv_tools_message, result, std::placeholders::_1,
       std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
