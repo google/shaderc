@@ -17,9 +17,9 @@
 #include <vector>
 
 #include "shaderc/spvc.h"
-#include "spirv-cross/spirv_glsl.hpp"
-#include "spirv-cross/spirv_hlsl.hpp"
-#include "spirv-cross/spirv_msl.hpp"
+#include <spirv_glsl.hpp>
+#include <spirv_hlsl.hpp>
+#include <spirv_msl.hpp>
 #include "spirv-tools/libspirv.hpp"
 
 // GLSL version produced when none specified nor detected from source.
