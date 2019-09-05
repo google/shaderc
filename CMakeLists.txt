@@ -38,14 +38,12 @@ include(CheckCXXCompilerFlag)
 # These flags are not supported on Windows and some older version of GCC
 # that our bots use.
 # Warning about implicit fallthrough in switch blocks
-unset(COMPILER_SUPPORTS_FALLTHROUGH_WARNING CACHE)
 check_cxx_compiler_flag(-Wimplicit-fallthrough COMPILER_SUPPORTS_FALLTHROUGH_WARNING)
 if (COMPILER_SUPPORTS_FALLTHROUGH_WARNING)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wimplicit-fallthrough")
 endif()
 
 # Warning about extra semi-colons
-unset(COMPILER_SUPPORTS_EXTRA_SEMI_WARNING CACHE)
 check_cxx_compiler_flag(-Wextra-semi COMPILER_SUPPORTS_EXTRA_SEMI_WARNING)
 if (COMPILER_SUPPORTS_EXTRA_SEMI_WARNING)
     add_compile_options("-Wextra-semi")

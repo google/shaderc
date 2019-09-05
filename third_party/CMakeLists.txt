@@ -84,7 +84,6 @@ if (SHADERC_ENABLE_SPVC)
       set(SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS ${DISABLE_EXCEPTIONS} CACHE BOOL "tell SPIRV-Cross not to throw" FORCE)
 
       # Add -fPIC to SPIRV-Cross build, if supported
-      unset(COMPILER_SUPPORTS_PIC CACHE)
       check_cxx_compiler_flag(-fPIC COMPILER_SUPPORTS_PIC)
       if (COMPILER_SUPPORTS_PIC)
         set(CXX_BACK ${CMAKE_CXX_FLAGS})
