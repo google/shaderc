@@ -156,8 +156,13 @@ shaders/tesc/water_tess.tesc,False
 shaders/tesc/water_tess.tesc,True
 shaders/vert/basic.vert,False
 shaders/vert/basic.vert,True
+shaders/vulkan/comp/buffer-reference.nocompat.vk.comp,True
 shaders/vulkan/comp/buffer-reference.nocompat.vk.comp.vk,True
+shaders/vulkan/comp/struct-packing-scalar.nocompat.invalid.vk.comp,False
+shaders/vulkan/comp/struct-packing-scalar.nocompat.invalid.vk.comp,True
 shaders/vulkan/comp/struct-packing-scalar.nocompat.invalid.vk.comp.vk,False
 shaders/vulkan/comp/struct-packing-scalar.nocompat.invalid.vk.comp.vk,True
+shaders/vulkan/frag/scalar-block-layout-ubo-std430.vk.nocompat.invalid.frag,False
+shaders/vulkan/frag/scalar-block-layout-ubo-std430.vk.nocompat.invalid.frag,True
 shaders/vulkan/frag/scalar-block-layout-ubo-std430.vk.nocompat.invalid.frag.vk,False
 shaders/vulkan/frag/scalar-block-layout-ubo-std430.vk.nocompat.invalid.frag.vk,True
