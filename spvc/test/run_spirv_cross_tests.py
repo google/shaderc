@@ -230,7 +230,6 @@ def test_glsl(test_env, shader, filename, optimize):
 
     output = input_shader + filename
     if '.vk.' in filename or '.asm.' in filename:
-        output = input_shader + filename
         status, _ = test_env.run_spvc(
             input_shader, output, flags + ['--vulkan-semantics'])
     else:
