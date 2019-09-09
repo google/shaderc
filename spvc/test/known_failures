@@ -35,6 +35,8 @@ shaders-msl/comp/basic.dispatchbase.comp,False
 shaders-msl/comp/basic.dispatchbase.comp,True
 shaders-msl/comp/basic.dispatchbase.msl11.comp,False
 shaders-msl/comp/basic.dispatchbase.msl11.comp,True
+shaders-msl/comp/basic.dynamic-buffer.msl2.comp,False
+shaders-msl/comp/basic.dynamic-buffer.msl2.comp,True
 shaders-msl/comp/int64.invalid.msl22.comp,False
 shaders-msl/comp/int64.invalid.msl22.comp,True
 shaders-msl/desktop-only/vert/basic.desktop.sso.vert,False
