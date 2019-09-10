@@ -99,7 +99,7 @@ add_subdirectory(examples)
 add_custom_target(build-version
   ${PYTHON_EXECUTABLE}
   ${CMAKE_CURRENT_SOURCE_DIR}/utils/update_build_version.py
-  ${shaderc_SOURCE_DIR} ${spirv-tools_SOURCE_DIR} ${glslang_SOURCE_DIR}
+  ${shaderc_SOURCE_DIR} ${spirv-tools_SOURCE_DIR} ${glslang_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/build-version.inc
   COMMENT "Update build-version.inc in the Shaderc build directory (if necessary).")
 
 function(define_pkg_config_file NAME LIBS)

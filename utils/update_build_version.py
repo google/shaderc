@@ -24,14 +24,28 @@
 # escaped.
 
 import datetime
+import errno
 import os.path
 import re
 import subprocess
 import sys
 import time
 
-OUTFILE = 'build-version.inc'
+def mkdir_p(directory):
+    """Make the directory, and all its ancestors as required.  Any of the
+    directories are allowed to already exist."""
 
+    if directory == "":
+        # We're being asked to make the current directory.
+        return
+
+    try:
+        os.makedirs(directory)
+    except OSError as e:
+        if e.errno == errno.EEXIST and os.path.isdir(directory):
+            pass
+        else:
+            raise
 
 def command_output(cmd, directory):
     """Runs a command in a directory and returns its standard output stream.
@@ -114,8 +128,8 @@ def get_version_string(project, directory):
 
 
 def main():
-    if len(sys.argv) != 4:
-        print(('usage: {} <shaderc-dir> <spirv-tools-dir> <glslang-dir>'.format(
+    if len(sys.argv) != 5:
+        print(('usage: {} <shaderc-dir> <spirv-tools-dir> <glslang-dir> <output-file>'.format(
             sys.argv[0])))
         sys.exit(1)
 
@@ -125,11 +139,14 @@ def main():
         for (p, d) in zip(projects, sys.argv[1:])
     ])
 
-    if os.path.isfile(OUTFILE):
-        with open(OUTFILE, 'r') as f:
+    output_file = sys.argv[4]
+    mkdir_p(os.path.dirname(output_file))
+
+    if os.path.isfile(output_file):
+        with open(output_file, 'r') as f:
             if new_content == f.read():
                 return
-    with open(OUTFILE, 'w') as f:
+    with open(output_file, 'w') as f:
         f.write(new_content)
 
 
