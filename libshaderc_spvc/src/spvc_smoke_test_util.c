@@ -17,7 +17,7 @@
 #include <string.h>
 
 #include "shaderc/shaderc.h"
-#include "shaderc/spvc.h"
+#include "spvc/spvc.h"
 
 typedef shaderc_spvc_compilation_result_t (*CompileInto)(
     const shaderc_spvc_compiler_t, const uint32_t*, size_t,

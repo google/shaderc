@@ -4,19 +4,29 @@ project(libshaderc)
 # a dependency here will force clients of the library to rebuild
 # when it changes.
 set(SPVC_SOURCES
-  include/shaderc/spvc.h
-  include/shaderc/spvc.hpp
+  include/spvc/spvc.h
+  include/spvc/spvc.hpp
   src/spvc.cc
   src/spvc_private.cc
 )
 
 add_library(shaderc_spvc STATIC ${SPVC_SOURCES})
 shaderc_default_compile_options(shaderc_spvc)
-target_include_directories(shaderc_spvc PUBLIC include PRIVATE ${shaderc_SOURCE_DIR}/libshaderc/include ${shaderc_SOURCE_DIR}/libshaderc_util/include ${spirv-tools_SOURCE_DIR}/include ${SPIRV-Cross_SOURCE_DIR}/..)
+target_include_directories(shaderc_spvc
+  PUBLIC include
+  ${shaderc_SOURCE_DIR}/libshaderc/include
+  ${shaderc_SOURCE_DIR}/libshaderc_util/include
+  ${spirv-tools_SOURCE_DIR}/include
+  ${SPIRV-Cross_SOURCE_DIR}/..)
 
 add_library(shaderc_spvc_shared SHARED ${SPVC_SOURCES})
 shaderc_default_compile_options(shaderc_spvc_shared)
-target_include_directories(shaderc_spvc_shared PUBLIC include PRIVATE ${shaderc_SOURCE_DIR}/libshaderc/include ${shaderc_SOURCE_DIR}/libshaderc_util/include ${spirv-tools_SOURCE_DIR}/include ${SPIRV-Cross_SOURCE_DIR}/..)
+target_include_directories(shaderc_spvc_shared
+  PUBLIC include
+  ${shaderc_SOURCE_DIR}/libshaderc/include
+  ${shaderc_SOURCE_DIR}/libshaderc_util/include
+  ${spirv-tools_SOURCE_DIR}/include
+  ${SPIRV-Cross_SOURCE_DIR}/..)
 
 target_compile_definitions(shaderc_spvc_shared
     PRIVATE SHADERC_IMPLEMENTATION
@@ -33,8 +43,8 @@ set_target_properties(shaderc_spvc_shared PROPERTIES SOVERSION 1)
 if(SHADERC_ENABLE_INSTALL)
   install(
     FILES
-      include/shaderc/spvc.h
-      include/shaderc/spvc.hpp
+      include/spvc/spvc.h
+      include/spvc/spvc.hpp
     DESTINATION
       ${CMAKE_INSTALL_INCLUDEDIR}/shaderc)
 

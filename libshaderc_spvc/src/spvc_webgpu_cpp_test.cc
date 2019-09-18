@@ -15,7 +15,7 @@
 #include <gtest/gtest.h>
 
 #include "common_shaders_for_test.h"
-#include "shaderc/spvc.hpp"
+#include "spvc/spvc.hpp"
 
 using shaderc_spvc::CompilationResult;
 using shaderc_spvc::CompileOptions;

@@ -17,7 +17,7 @@
 #include <thread>
 
 #include "common_shaders_for_test.h"
-#include "shaderc/spvc.h"
+#include "spvc/spvc.h"
 
 namespace {
 

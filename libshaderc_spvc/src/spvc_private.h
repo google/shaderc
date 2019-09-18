@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-#include "shaderc/spvc.h"
+#include "spvc/spvc.h"
 #include <spirv_glsl.hpp>
 #include <spirv_hlsl.hpp>
 #include <spirv_msl.hpp>
