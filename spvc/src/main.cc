@@ -21,7 +21,7 @@
 #include "libshaderc_util/args.h"
 #include "libshaderc_util/string_piece.h"
 #include "shaderc/env.h"
-#include "shaderc/spvc.hpp"
+#include "spvc/spvc.hpp"
 #include "shaderc/status.h"
 #include "spirv-tools/libspirv.h"
 
