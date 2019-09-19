@@ -194,8 +194,13 @@ def test_glsl(test_env, shader, filename, optimize):
     successes = []
     failures = []
 
-    # Files with .nocompat. in their name are known to not work with GLSL
-    if not '.nocompat.' in filename:
+    # Files with .nocompat. in their name are known to not work.
+    if '.nocompat.' in filename:
+        return [], []
+
+    # Files with .invalid. in their name are known to not pass validation.
+    # TODO(787): This should not be needed once known_invalid list is in place.
+    if '.invalid.' in filename:
         return [], []
 
     status, input_shader = test_env.compile_input_shader(
@@ -205,11 +210,6 @@ def test_glsl(test_env, shader, filename, optimize):
         failures.append((shader, optimize))
         test_env.log_failure(shader, optimize)
         return successes, failures
-
-    if not '.invalid.' in filename:
-        # logged for compatibility with SPIRV-Cross test script
-        test_env.log_command(
-            ['spirv-val', '--target-env', 'vulkan1.1', input_shader])
 
     # Run spvc to convert Vulkan to GLSL.  Up to two tests are performed:
     # - Regular test on most files
@@ -229,7 +229,7 @@ def test_glsl(test_env, shader, filename, optimize):
         flags.append('--separate-shader-objects')
 
     output = input_shader + filename
-    if '.vk.' in filename or '.asm.' in filename:
+    if '.vk.' in filename:
         status, _ = test_env.run_spvc(
             input_shader, output, flags + ['--vulkan-semantics'])
     else:
@@ -237,19 +237,9 @@ def test_glsl(test_env, shader, filename, optimize):
     if not status:
         output = None
 
-    # logged for compatibility with SPIRV-Cross test script
-    if '.vk.' in filename or '.asm.' in filename:
-        test_env.log_command([test_env.glslang, output])
-    else:
-        test_env.log_command(
-            [test_env.glslang, '--target-env', 'vulkan1.1', '-V', output])
-
-    # Check result(s).
-    # Compare either or both files produced above to appropriate reference
-    # file.
     if output:
         reference_shader = shader
-        if '.vk.' in filename or '.asm.' in filename:
+        if '.vk.' in filename:
             reference_shader = shader + '.vk'
         result, _ = test_env.check_reference(
             output, reference_shader, optimize)
@@ -313,6 +303,16 @@ def test_msl(test_env, shader, filename, optimize):
     """
     successes = []
     failures = []
+
+    # Files with .nocompat. in their name are known to not work.
+    if '.nocompat.' in filename:
+        return [], []
+
+    # Files with .invalid. in their name are known to not pass validation.
+    # TODO(787): This should not be needed once known_invalid list is in place.
+    if '.invalid.' in filename:
+        return [], []
+
     status, input_shader = test_env.compile_input_shader(
         shader, filename, optimize and ('.noopt.' not in filename))
     if not status:
@@ -348,11 +348,6 @@ def test_msl(test_env, shader, filename, optimize):
         test_env.log_failure(shader, optimize)
         return successes, failures
 
-    if not '.invalid.' in filename:
-        # logged for compatibility with SPIRV-Cross test script
-        test_env.log_command(
-            ['spirv-val', '--target-env', 'vulkan1.1', input_shader])
-
     # Check result.
     if output:
         result, reference = test_env.check_reference(output, shader, optimize)
@@ -361,15 +356,6 @@ def test_msl(test_env, shader, filename, optimize):
         else:
             failures.append((shader, optimize))
             test_env.log_failure(shader, optimize)
-        # logged for compatibility with SPIRV-Cross test script
-        test_env.log_command(['xcrun', '--sdk',
-                              'iphoneos' if '.ios.' in filename else 'macosx',
-                              'metal', '-x', 'metal',
-                              lookup(
-                                  msl_standards_ios if '.ios.' in filename else msl_standards_macos,
-                                  filename),
-                              '-Werror', '-Wno-unused-variable',
-                              reference])
     else:
         failures.append((shader, optimize))
         test_env.log_failure(shader, optimize)
@@ -387,6 +373,15 @@ def test_hlsl(test_env, shader, filename, optimize):
     """
     successes = []
     failures = []
+
+    # Files with .nocompat. in their name are known to not work.
+    if '.nocompat.' in filename:
+        return [], []
+
+    # Files with .invalid. in their name are known to not pass validation.
+    # TODO(787): This should not be needed once known_invalid list is in place.
+    if '.invalid.' in filename:
+        return [], []
 
     status, input_shader = test_env.compile_input_shader(
         shader, filename, optimize and ('.noopt.' not in filename))
@@ -406,15 +401,7 @@ def test_hlsl(test_env, shader, filename, optimize):
         test_env.log_failure(shader, optimize)
         return successes, failures
 
-    if not '.invalid.' in filename:
-        # logged for compatibility with SPIRV-Cross test script
-        test_env.log_command(
-            ['spirv-val', '--target-env', 'vulkan1.1', input_shader])
-
     if output:
-        # logged for compatibility with SPIRV-Cross test script
-        test_env.log_command([test_env.glslang, '-e', 'main',
-                              '-D', '--target-env', 'vulkan1.1', '-V', output])
         # TODO(bug 649): Log dxc run here
         result, _ = test_env.check_reference(output, shader, optimize)
         if result:
@@ -508,6 +495,12 @@ def main():
     else:
         pool = Pool(script_args.jobs)
     results = pool.map(work_function, tests)
+
+    # This can occur if -f is passed in with a pattern that doesn't match to
+    # anything, or only matches to tests that are skipped.
+    if not results:
+        print('Did not receive any results from workers...')
+        return False
 
     successes, failures = zip(*results)
     # Flattening lists of lists, and convert path markers if needed
