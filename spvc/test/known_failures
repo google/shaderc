@@ -1,4 +1,5 @@
 shaders-hlsl-no-opt/asm/frag/switch-block-case-fallthrough.asm.frag,False
+shaders-hlsl-no-opt/asm/frag/switch-block-case-fallthrough.asm.invalid.frag,False
 shaders-hlsl/asm/frag/line-directive.line.asm.frag,False
 shaders-hlsl/asm/frag/line-directive.line.asm.frag,True
 shaders-hlsl/comp/num-workgroups-alone.comp,False
@@ -12,6 +13,7 @@ shaders-hlsl/frag/separate-combined-fake-overload.sm30.frag,True
 shaders-hlsl/vert/basic.vert,False
 shaders-hlsl/vert/basic.vert,True
 shaders-msl-no-opt/asm/frag/switch-block-case-fallthrough.asm.frag,False
+shaders-msl-no-opt/asm/frag/switch-block-case-fallthrough.asm.invalid.frag,False
 shaders-msl-no-opt/asm/packing/load-packed-no-forwarding-3.asm.comp,False
 shaders-msl-no-opt/asm/packing/load-packed-no-forwarding-5.asm.comp,False
 shaders-msl-no-opt/asm/packing/load-packed-no-forwarding.asm.comp,False
@@ -37,6 +39,8 @@ shaders-msl/comp/basic.dispatchbase.msl11.comp,False
 shaders-msl/comp/basic.dispatchbase.msl11.comp,True
 shaders-msl/comp/basic.dynamic-buffer.msl2.comp,False
 shaders-msl/comp/basic.dynamic-buffer.msl2.comp,True
+shaders-msl/comp/basic.dynamic-buffer.msl2.invalid.comp,False
+shaders-msl/comp/basic.dynamic-buffer.msl2.invalid.comp,True
 shaders-msl/comp/int64.invalid.msl22.comp,False
 shaders-msl/comp/int64.invalid.msl22.comp,True
 shaders-msl/desktop-only/vert/basic.desktop.sso.vert,False
@@ -93,7 +97,6 @@ shaders-msl/vulkan/comp/struct-packing-scalar.nocompat.invalid.vk.comp,False
 shaders-msl/vulkan/comp/struct-packing-scalar.nocompat.invalid.vk.comp,True
 shaders-msl/vulkan/frag/basic.multiview.nocompat.vk.frag,False
 shaders-msl/vulkan/frag/basic.multiview.nocompat.vk.frag,True
-shaders-msl/vulkan/frag/demote-to-helper.vk.nocompat.msl21.invalid.frag,True
 shaders-msl/vulkan/frag/scalar-block-layout-ubo-std430.vk.nocompat.invalid.frag,False
 shaders-msl/vulkan/frag/scalar-block-layout-ubo-std430.vk.nocompat.invalid.frag,True
 shaders-msl/vulkan/vert/device-group.multiview.viewfromdev.nocompat.vk.vert,False
