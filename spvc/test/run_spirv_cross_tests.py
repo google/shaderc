@@ -61,6 +61,18 @@ class TestEnv:
             log_string += '\n'.join(failures)
         print(log_string)
 
+    def log_missing_failures(self, failures):
+        """Log list of known failing test cases that were not run."""
+        if not len(failures):
+            log_string = 'Encountered 0 missing failures'
+        else:
+            log_string = 'Encountered {} missing failures(s):\n'.format(
+                len(failures))
+            failures = ['\t{}'.format(failure) for failure in failures]
+            log_string += '\n'.join(failures)
+        print(log_string)
+
+
     def log_failure(self, shader, optimize):
         """Log a test case failure."""
         if self.verbose:
@@ -532,6 +544,7 @@ def main():
 
     unexpected_successes = []
     unexpected_failures = []
+    missing_failures = []
 
     for success in successes:
         if success in known_failures:
@@ -541,10 +554,15 @@ def main():
         if failure not in known_failures:
             unexpected_failures.append(failure)
 
+    for known_failure in known_failures:
+        if known_failure not in successes and known_failure not in failures:
+            missing_failures.append(known_failure)
+
     test_env.log_unexpected_successes(unexpected_successes)
     test_env.log_unexpected_failures(unexpected_failures)
+    test_env.log_missing_failures(missing_failures)
 
-    return len(unexpected_successes) != 0 or len(unexpected_failures) != 0
+    return len(unexpected_successes) != 0 or len(unexpected_failures) != 0 or len(missing_failures) != 0
 
 
 if __name__ == '__main__':
