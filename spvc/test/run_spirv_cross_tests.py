@@ -72,7 +72,6 @@ class TestEnv:
             log_string += '\n'.join(failures)
         print(log_string)
 
-
     def log_failure(self, shader, optimize):
         """Log a test case failure."""
         if self.verbose:
@@ -488,6 +487,7 @@ def main():
     test_regex = None
     if script_args.test_filter:
         print('Filtering tests using \'{}\''.format(script_args.test_filter))
+        print('Will not check for missing failures')
         test_regex = re.compile(script_args.test_filter)
 
     tests = []
@@ -544,7 +544,8 @@ def main():
 
     unexpected_successes = []
     unexpected_failures = []
-    missing_failures = []
+    if not script_args.test_filter:
+        missing_failures = []
 
     for success in successes:
         if success in known_failures:
@@ -554,15 +555,20 @@ def main():
         if failure not in known_failures:
             unexpected_failures.append(failure)
 
-    for known_failure in known_failures:
-        if known_failure not in successes and known_failure not in failures:
-            missing_failures.append(known_failure)
+    if not script_args.test_filter:
+        for known_failure in known_failures:
+            if known_failure not in successes and known_failure not in failures:
+                missing_failures.append(known_failure)
 
     test_env.log_unexpected_successes(unexpected_successes)
     test_env.log_unexpected_failures(unexpected_failures)
-    test_env.log_missing_failures(missing_failures)
+    if not script_args.test_filter:
+        test_env.log_missing_failures(missing_failures)
 
-    return len(unexpected_successes) != 0 or len(unexpected_failures) != 0 or len(missing_failures) != 0
+    if not script_args.test_filter:
+        return len(unexpected_successes) != 0 or len(unexpected_failures) != 0 or len(missing_failures) != 0
+    else:
+        return len(unexpected_successes) != 0 or len(unexpected_failures) != 0
 
 
 if __name__ == '__main__':
