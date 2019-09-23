@@ -452,18 +452,18 @@ def work_function(work_args):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
-                        help='Enable additional diagnoistic logging')
-    parser.add_argument('-n', '--dry-run', dest='dry_run', action='store_true',
-                        help='Do not execute commands')
+    parser.add_argument('-v', '--verbose', dest='verbose',
+                        action='store_true', help='Enable additional diagnostic logging')
+    parser.add_argument('-n', '--dry-run', dest='dry_run',
+                        action='store_true', help='Do not execute commands')
     parser.add_argument('-g', '--give-up', dest='give_up',
-                        action='store_true',
-                        help='Quit after first failure')
-    parser.add_argument('-f', '--test-filter', dest='test_filter',
-                        action='store', metavar='<test filter regex>',
-                        help='Only run tests that contain given regex string')
+                        action='store_true', help='Quit after first failure')
+    parser.add_argument('-f', '--test-filter', dest='test_filter', action='store',
+                        metavar='<test filter regex>', help='Only run tests that contain given regex string')
     parser.add_argument('-j', '--jobs', dest='jobs', type=int, default=0, action='store',
                         metavar='<number of processes to use>', help='Use as many processes as specified, 0 indicates let the script decide.')
+    parser.add_argument('--update_known_failures', dest='update_known_failures',
+                        action='store_true', help='Write out the failures to spvc/test/known_failures')
     parser.add_argument('spvc', metavar='<spvc executable>')
     parser.add_argument('spirv_as', metavar='<spirv-as executable>')
     parser.add_argument('spirv_opt', metavar='<spirv-opt executable>')
@@ -507,15 +507,23 @@ def main():
     successes = list(itertools.chain.from_iterable(successes))
     successes = list(
         map(lambda x: (x[0].replace(os.path.sep, '/'), x[1]), successes))
+
     failures = list(itertools.chain.from_iterable(failures))
     failures = list(
         map(lambda x: (x[0].replace(os.path.sep, '/'), x[1]), failures))
-
+    failures.sort()
     print('{} test cases'.format(len(successes) + len(failures)))
     print('{} passed'.format(len(successes)))
 
     fail_file = os.path.join(os.path.dirname(
         os.path.realpath(__file__)), 'known_failures')
+
+    if script_args.update_known_failures:
+        print('Updating {}'.format(fail_file))
+        with open(fail_file, 'w+') as f:
+            for failure in failures:
+                f. write('{},{}\n'.format(failure[0], failure[1]))
+
     with open(fail_file, 'r') as f:
         known_failures = f.read().splitlines()
 

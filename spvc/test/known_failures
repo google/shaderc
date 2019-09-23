@@ -1,5 +1,3 @@
-shaders-hlsl-no-opt/asm/frag/switch-block-case-fallthrough.asm.frag,False
-shaders-hlsl-no-opt/asm/frag/switch-block-case-fallthrough.asm.invalid.frag,False
 shaders-hlsl/asm/frag/line-directive.line.asm.frag,False
 shaders-hlsl/asm/frag/line-directive.line.asm.frag,True
 shaders-hlsl/comp/num-workgroups-alone.comp,False
@@ -10,8 +8,6 @@ shaders-hlsl/frag/separate-combined-fake-overload.sm30.frag,False
 shaders-hlsl/frag/separate-combined-fake-overload.sm30.frag,True
 shaders-hlsl/vert/basic.vert,False
 shaders-hlsl/vert/basic.vert,True
-shaders-msl-no-opt/asm/frag/switch-block-case-fallthrough.asm.frag,False
-shaders-msl-no-opt/asm/frag/switch-block-case-fallthrough.asm.invalid.frag,False
 shaders-msl-no-opt/asm/packing/load-packed-no-forwarding-3.asm.comp,False
 shaders-msl-no-opt/asm/packing/load-packed-no-forwarding-5.asm.comp,False
 shaders-msl-no-opt/asm/packing/load-packed-no-forwarding.asm.comp,False
@@ -34,8 +30,6 @@ shaders-msl/comp/basic.dispatchbase.comp,False
 shaders-msl/comp/basic.dispatchbase.comp,True
 shaders-msl/comp/basic.dispatchbase.msl11.comp,False
 shaders-msl/comp/basic.dispatchbase.msl11.comp,True
-shaders-msl/comp/basic.dynamic-buffer.msl2.comp,False
-shaders-msl/comp/basic.dynamic-buffer.msl2.comp,True
 shaders-msl/desktop-only/vert/basic.desktop.sso.vert,False
 shaders-msl/desktop-only/vert/basic.desktop.sso.vert,True
 shaders-msl/flatten/basic.flatten.vert,False
@@ -82,7 +76,6 @@ shaders-msl/vert/sign-int-types.vert,False
 shaders-msl/vert/sign-int-types.vert,True
 shaders-msl/vert/texture_buffer.texture-buffer-native.msl21.vert,False
 shaders-msl/vert/texture_buffer.texture-buffer-native.msl21.vert,True
-shaders-no-opt/asm/frag/switch-block-case-fallthrough.asm.frag,False
 shaders-reflection/asm/aliased-entry-point-names.asm.multi,False
 shaders-reflection/asm/op-source-glsl-ssbo-1.asm.comp,False
 shaders-reflection/asm/op-source-glsl-ssbo-2.asm.comp,False
@@ -107,10 +100,7 @@ shaders-reflection/vert/read-from-row-major-array.vert,False
 shaders-reflection/vert/texture_buffer.vert,False
 shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,False
 shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,True
-shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag.vk,False
-shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag.vk,True
 shaders/asm/frag/image-query-no-sampler.no-samplerless.vk.asm.frag,False
-shaders/asm/frag/image-query-no-sampler.no-samplerless.vk.asm.frag.vk,False
 shaders/asm/frag/line-directive.line.asm.frag,False
 shaders/asm/frag/line-directive.line.asm.frag,True
 shaders/desktop-only/vert/basic.desktop.sso.vert,False
