@@ -37,18 +37,18 @@ target_include_directories(shaderc_spvc_shared
   ${SPIRV-Cross_SOURCE_DIR}/..
   ${CMAKE_CURRENT_BINARY_DIR}/../third_party/spirv-tools/)
 
-if (SHADERC_ENABLE_SPVC_PARSER)
+if(SHADERC_ENABLE_SPVC_PARSER)
   target_compile_definitions(shaderc_spvc_shared
       PRIVATE SHADERC_IMPLEMENTATION
       PUBLIC SHADERC_SHAREDLIB
       PRIVATE ENABLE_SPVC_PARSER=1
   )
-else ()
+else()
   target_compile_definitions(shaderc_spvc_shared
     PRIVATE SHADERC_IMPLEMENTATION
     PUBLIC SHADERC_SHAREDLIB
   )
-endif (SHADERC_ENABLE_SPVC_PARSER)
+endif(SHADERC_ENABLE_SPVC_PARSER)
 
 if (DISABLE_EXCEPTIONS)
   target_compile_definitions(shaderc_spvc PRIVATE SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS)
