@@ -1,5 +1,6 @@
 project(libshaderc)
 
+set(SPIRV_TOOLS "SPIRV-Tools")
 # Even though shaderc.hpp is a headers-only library, adding
 # a dependency here will force clients of the library to rebuild
 # when it changes.
@@ -8,25 +9,33 @@ set(SPVC_SOURCES
   include/spvc/spvc.hpp
   src/spvc.cc
   src/spvc_private.cc
+  src/spvcir_pass.cpp
+  src/spvcir_pass.h
 )
 
 add_library(shaderc_spvc STATIC ${SPVC_SOURCES})
+add_dependencies(shaderc_spvc ${SPIRV_TOOLS})
 shaderc_default_compile_options(shaderc_spvc)
 target_include_directories(shaderc_spvc
   PUBLIC include
   ${shaderc_SOURCE_DIR}/libshaderc/include
   ${shaderc_SOURCE_DIR}/libshaderc_util/include
   ${spirv-tools_SOURCE_DIR}/include
-  ${SPIRV-Cross_SOURCE_DIR}/..)
+  ${spirv-tools_SOURCE_DIR}/
+  ${SPIRV-Cross_SOURCE_DIR}/..
+  ${CMAKE_CURRENT_BINARY_DIR}/../third_party/spirv-tools/)
 
 add_library(shaderc_spvc_shared SHARED ${SPVC_SOURCES})
+add_dependencies(shaderc_spvc_shared ${SPIRV_TOOLS}-shared)
 shaderc_default_compile_options(shaderc_spvc_shared)
 target_include_directories(shaderc_spvc_shared
   PUBLIC include
   ${shaderc_SOURCE_DIR}/libshaderc/include
   ${shaderc_SOURCE_DIR}/libshaderc_util/include
   ${spirv-tools_SOURCE_DIR}/include
-  ${SPIRV-Cross_SOURCE_DIR}/..)
+  ${spirv-tools_SOURCE_DIR}/
+  ${SPIRV-Cross_SOURCE_DIR}/..
+  ${CMAKE_CURRENT_BINARY_DIR}/../third_party/spirv-tools/)
 
 target_compile_definitions(shaderc_spvc_shared
     PRIVATE SHADERC_IMPLEMENTATION
