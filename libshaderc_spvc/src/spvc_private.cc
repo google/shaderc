@@ -294,7 +294,7 @@ shaderc_spvc_compilation_result_t generate_hlsl_shader(
 
   // spvc is under development, for now run spirv-cross compiler by default
   // TODO (sarahM0): change the default to spvc when it's done
-  if (false) {
+  #if ENABLE_SPVC_PARSER
     spvtools::Optimizer opt(options->source_env);
     opt.SetMessageConsumer(std::bind(
         consume_spirv_tools_message, result, std::placeholders::_1,
@@ -320,7 +320,7 @@ shaderc_spvc_compilation_result_t generate_hlsl_shader(
     result->status = shaderc_compilation_status_compilation_error;
     return result;
 
-  } else {
+  #else
     compiler.reset(new (std::nothrow)
                        spirv_cross::CompilerHLSL(source, source_len));
     if (!compiler) {
@@ -329,7 +329,7 @@ shaderc_spvc_compilation_result_t generate_hlsl_shader(
       result->status = shaderc_compilation_status_compilation_error;
       return result;
     }
-  }
+  #endif
 
   compiler->set_common_options(options->glsl);
   compiler->set_hlsl_options(options->hlsl);
