@@ -293,9 +293,9 @@ shaderc_spvc_compilation_result_t generate_hlsl_shader(
   std::unique_ptr<spirv_cross::CompilerHLSL> compiler;
 
 // spvc IR generation is under development, for now run spirv-cross
-// compiler(ENABLE_SPVC_PARSER is OFF by default)
+// compiler(SHADERC_ENABLE_SPVC_PARSER is OFF by default)
 // TODO (sarahM0): change the default to spvc IR generation when it's done
-#if ENABLE_SPVC_PARSER
+#if SHADERC_ENABLE_SPVC_PARSER
   spvtools::Optimizer opt(options->source_env);
   opt.SetMessageConsumer(std::bind(
       consume_spirv_tools_message, result, std::placeholders::_1,

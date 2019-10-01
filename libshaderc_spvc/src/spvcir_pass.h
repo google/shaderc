@@ -22,7 +22,7 @@
 
 namespace spvtools {
 namespace opt {
-
+ // this WIP pass generates spvc IR and does not throw exceptions
 class SpvcIrPass : public Pass {
  public:
   SpvcIrPass(spirv_cross::ParsedIR &ir){ ir = ir; }
