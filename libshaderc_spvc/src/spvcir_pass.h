@@ -12,27 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "spvc/spvc.h"
 #include <spirv_glsl.hpp>
 #include <spirv_hlsl.hpp>
 #include <spirv_msl.hpp>
 #include "spirv-tools/libspirv.hpp"
 #include "spirv-tools/source/opt/pass.h"
-
+#include "spvc/spvc.h"
 
 namespace spvtools {
 namespace opt {
- // this WIP pass generates spvc IR and does not throw exceptions
+// this WIP pass generates spvc IR and does not throw exceptions
 class SpvcIrPass : public Pass {
  public:
-  SpvcIrPass(spirv_cross::ParsedIR &ir){ ir = ir; }
+  SpvcIrPass(spirv_cross::ParsedIR& ir) { ir_ = ir; }
   const char* name() const override { return "spvc-IR-pass"; }
-  void doNothing();
   Status Process() override;
-  private:
-    spirv_cross::ParsedIR ir;
+
+  IRContext::Analysis GetPreservedAnalyses() override {
+    return IRContext::kAnalysisNone;
+  }
+
+ private:
+  spirv_cross::ParsedIR ir_;
 };
 
 }  // namespace opt
 }  // namespace spvtools
-
