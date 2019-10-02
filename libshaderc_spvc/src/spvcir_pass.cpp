@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "spvcir_pass.h"
+
 #include <fstream>
 
 namespace spvtools {

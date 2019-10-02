@@ -25,7 +25,7 @@ namespace opt {
 class SpvcIrPass : public Pass {
  public:
   SpvcIrPass(spirv_cross::ParsedIR& ir) { ir_ = ir; }
-  const char* name() const override { return "spvc-IR-pass"; }
+  const char* name() const override { return "spvc-if-pass"; }
   Status Process() override;
 
   IRContext::Analysis GetPreservedAnalyses() override {

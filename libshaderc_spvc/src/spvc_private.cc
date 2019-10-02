@@ -289,7 +289,6 @@ shaderc_spvc_compilation_result_t generate_hlsl_shader(
     const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result) {
-
   std::unique_ptr<spirv_cross::CompilerHLSL> compiler;
 
 // spvc IR generation is under development, for now run spirv-cross
@@ -314,7 +313,7 @@ shaderc_spvc_compilation_result_t generate_hlsl_shader(
         "Transformations between source and target "
         "execution environments failed.\n");
     result->status = shaderc_compilation_status_transformation_error;
-    compiler.reset(new (std::nothrow) spirv_cross::CompilerHLSL(ir));
+    compiler.reset(new spirv_cross::CompilerHLSL(ir));
   }
 
   result->messages.append(
@@ -326,13 +325,14 @@ shaderc_spvc_compilation_result_t generate_hlsl_shader(
 #else
   compiler.reset(new (std::nothrow)
                      spirv_cross::CompilerHLSL(source, source_len));
+#endif
+
   if (!compiler) {
     result->messages.append(
         "Unable to initialize SPIRV-Cross HLSL compiler.\n");
     result->status = shaderc_compilation_status_compilation_error;
     return result;
   }
-#endif
 
   compiler->set_common_options(options->glsl);
   compiler->set_hlsl_options(options->hlsl);
@@ -370,6 +370,6 @@ shaderc_spvc_compilation_result_t generate_msl_shader(
   }
 
   return result;
-}
+  }
 
 }  // namespace spvc_private
