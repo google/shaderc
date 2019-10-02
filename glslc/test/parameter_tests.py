@@ -167,7 +167,7 @@ Options:
                     For example, default for vulkan1.0 is spv1.0, and
                     the default for vulkan1.1 is spv1.3.
                     Values are:
-                        spv1.0, spv1.1, spv1.2, spv1.3, spv1.4
+                        spv1.0, spv1.1, spv1.2, spv1.3, spv1.4, spv1.5
   --version         Display compiler version information.
   -w                Suppresses all warning messages.
   -Werror           Treat all warnings as errors.
