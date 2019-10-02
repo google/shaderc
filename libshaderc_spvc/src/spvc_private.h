@@ -38,6 +38,7 @@ struct shaderc_spvc_compilation_result {
 
 struct shaderc_spvc_compile_options {
   bool validate = true;
+  bool optimize = true;
   bool remove_unused_variables = false;
   bool robust_buffer_access_pass = false;
   bool flatten_ubo = false;

@@ -178,6 +178,11 @@ void shaderc_spvc_compile_options_set_validate(
   options->validate = b;
 }
 
+void shaderc_spvc_compile_options_set_optimize(
+    shaderc_spvc_compile_options_t options, bool b) {
+  options->optimize = b;
+}
+
 size_t shaderc_spvc_compile_options_set_for_fuzzing(
     shaderc_spvc_compile_options_t options, const uint8_t* data, size_t size) {
   if (!data || size < sizeof(*options)) return 0;

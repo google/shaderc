@@ -39,26 +39,15 @@ class TestEnv:
         self.spirv_opt = script_args.spirv_opt
         self.glslang = script_args.glslang
 
-    def log_unexpected_successes(self, successes):
-        """Log list of unexpected test case successes."""
-        if not len(successes):
-            log_string = 'Encountered 0 unexpected successes'
+    def log_unexpected(self, test_list, test_result):
+        """Log list of test cases with unexpected outcome."""
+        if not len(test_list):
+            log_string = 'Encountered 0 unexpected ' + test_result
         else:
-            log_string = 'Encountered {} unexpected success(es):\n'.format(
-                len(successes))
-            successes = ['\t{}'.format(success) for success in successes]
-            log_string += '\n'.join(successes)
-        print(log_string)
-
-    def log_unexpected_failures(self, failures):
-        """Log list of unexpected test case failures."""
-        if not len(failures):
-            log_string = 'Encountered 0 unexpected failures'
-        else:
-            log_string = 'Encountered {} unexpected failures(s):\n'.format(
-                len(failures))
-            failures = ['\t{}'.format(failure) for failure in failures]
-            log_string += '\n'.join(failures)
+            log_string = 'Encountered ' + format(
+                len(test_list)) + ' unexpected ' + test_result + '(s):\n'
+            test_list = ['\t{}'.format(test) for test in test_list]
+            log_string += '\n'.join(test_list)
         print(log_string)
 
     def log_missing_failures(self, failures):
@@ -151,7 +140,7 @@ class TestEnv:
             reference = os.path.join('reference', 'opt', shader)
         else:
             reference = os.path.join('reference', shader)
-        self.log_command(['reference', reference])
+        self.log_command(['reference', reference, optimize])
         if self.dry_run or filecmp.cmp(
                 result, os.path.join(self.cross_dir, reference), False):
             return True, reference
@@ -434,7 +423,7 @@ def test_reflection(test_env, shader, filename, optimize):
     Returns a tuple indicating the passed in test has failed.
     """
     test_env.log_failure(shader, optimize)
-    return [], [(shader, optimize)]
+    return [], [(shader, optimize)], []
     # TODO(bug 650): Implement this test
 
 
@@ -455,7 +444,7 @@ test_case_dirs = (
 
 
 def work_function(work_args):
-    """"Unpacks the test case args and invokes the appropriate in test
+    """Unpacks the test case args and invokes the appropriate in test
     function."""
     (test_function, test_env, shader, filename, optimize) = work_args
     return test_function(test_env, shader, filename, optimize)
@@ -515,6 +504,10 @@ def main():
         return False
 
     successes, failures = zip(*results)
+    # TODO (sarahM0): update tests to run spvc a second time bypassing spirv-val
+    # if the result passed check_ref passed, add them to invalid list
+    invalids = []
+
     # Flattening lists of lists, and convert path markers if needed
     successes = list(itertools.chain.from_iterable(successes))
     successes = list(
@@ -523,9 +516,15 @@ def main():
     failures = list(itertools.chain.from_iterable(failures))
     failures = list(
         map(lambda x: (x[0].replace(os.path.sep, '/'), x[1]), failures))
+    invalids = list(itertools.chain.from_iterable(invalids))
+    invalids = list(
+        map(lambda x: (x[0].replace(os.path.sep, '/'), x[1]), invalids))
+
     failures.sort()
+
     print('{} test cases'.format(len(successes) + len(failures)))
-    print('{} passed'.format(len(successes)))
+    print('{} passed and'.format(len(successes)))
+    print('{} invalids'.format(len(invalids)))
 
     fail_file = os.path.join(os.path.dirname(
         os.path.realpath(__file__)), 'known_failures')
@@ -540,16 +539,31 @@ def main():
         known_failures = f.read().splitlines()
 
     known_failures = set(
-        map(lambda x: (x.split(',')[0], x.split(',')[1] == 'True'), known_failures))
+        map(lambda x: (x.split(',')[0], x.split(',')[1] == 'True'),
+            known_failures))
+
+    invalid_file = os.path.join(os.path.dirname(
+        os.path.realpath(__file__)), 'known_invalids')
+    with open(invalid_file, 'r') as f:
+        known_invalids = f.read().splitlines()
+
+    known_invalids = set(
+        map(lambda x: (x.split(',')[0], x.split(',')[1] == 'True'),
+            known_invalids))
 
     unexpected_successes = []
     unexpected_failures = []
+    unexpected_invalids = []
+    unexpected_valids = []
+
     if not script_args.test_filter:
         missing_failures = []
 
     for success in successes:
         if success in known_failures:
             unexpected_successes.append(success)
+        if success in known_invalids:
+            unexpected_valids.append(success)
 
     for failure in failures:
         if failure not in known_failures:
@@ -560,8 +574,15 @@ def main():
             if known_failure not in successes and known_failure not in failures:
                 missing_failures.append(known_failure)
 
-    test_env.log_unexpected_successes(unexpected_successes)
-    test_env.log_unexpected_failures(unexpected_failures)
+    for invalid in invalids:
+        if invalid not in known_invalids:
+            unexpected_invalids.append(invalid)
+
+    test_env.log_unexpected(unexpected_successes, 'success')
+    test_env.log_unexpected(unexpected_failures, 'failure')
+    test_env.log_unexpected(unexpected_invalids, 'invalid')
+    test_env.log_unexpected(unexpected_valids, 'valid')
+
     if not script_args.test_filter:
         test_env.log_missing_failures(missing_failures)
 

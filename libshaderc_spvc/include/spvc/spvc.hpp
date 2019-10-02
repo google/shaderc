@@ -253,6 +253,11 @@ class CompileOptions {
     shaderc_spvc_compile_options_set_validate(options_, b);
   }
 
+  // If true optimize input and intermediate source. Default is true.
+  void SetOptimize(bool b) {
+    shaderc_spvc_compile_options_set_optimize(options_, b);
+  }
+
   // Fill options with given data.  Return amount of data used, or zero
   // if not enough data was given.
   size_t SetForFuzzing(const uint8_t* data, size_t size) {

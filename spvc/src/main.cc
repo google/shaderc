@@ -43,6 +43,8 @@ Options:
   -o <output file>         '-' means standard output.
   --no-validate            Disable validating input and intermediate source.
                              Validation is by default enabled.
+  --no-optimize            Disable optimizing input and intermediate source.
+                             Optimization is by default enabled.
   --source-env=<env>       Execution environment of the input source.
                              <env> is vulkan1.0 (the default), vulkan1.1,
                              or webgpu0
@@ -182,6 +184,10 @@ int main(int argc, char** argv) {
       }
     } else if (arg == "--remove-unused-variables") {
       options.SetRemoveUnusedVariables(true);
+    } else if (arg == "--no-validate"){
+      options.SetValidate(false);
+    } else if (arg == "--no-optimize"){
+      options.SetOptimize(false);
     } else if (arg == "--robust-buffer-access-pass"){
       options.SetRobustBufferAccessPass(true);
     } else if (arg == "--vulkan-semantics") {

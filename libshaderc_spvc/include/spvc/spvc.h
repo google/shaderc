@@ -199,6 +199,10 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_set_flip_vert_y(
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_validate(
     shaderc_spvc_compile_options_t options, bool b);
 
+// Set if optimization should be performed. Default is true.
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_optimize(
+    shaderc_spvc_compile_options_t options, bool b);
+
 // Fill options with given data.  Return amount of data used, or zero
 // if not enough data was given.
 SHADERC_EXPORT size_t shaderc_spvc_compile_options_set_for_fuzzing(
