@@ -62,6 +62,7 @@ set(SPVC_LIBS
   spirv-cross-glsl
   spirv-cross-hlsl
   spirv-cross-msl
+  spirv-cross-reflect
 )
 
 target_link_libraries(shaderc_spvc PRIVATE ${SPVC_LIBS})
@@ -69,7 +70,7 @@ target_link_libraries(shaderc_spvc_shared PRIVATE ${SPVC_LIBS})
 
 shaderc_add_tests(
   TEST_PREFIX shaderc
-  LINK_LIBS shaderc_spvc
+  LINK_LIBS shaderc_spvc ${SPVC_LIBS}
   INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc/include ${SPIRV-Cross_SOURCE_DIR}/..
   TEST_NAMES
     spvc
@@ -79,7 +80,7 @@ shaderc_add_tests(
 
 shaderc_add_tests(
   TEST_PREFIX shaderc_shared
-  LINK_LIBS shaderc_spvc_shared SPIRV-Tools SPIRV-Tools-opt
+  LINK_LIBS shaderc_spvc_shared ${SPVC_LIBS} SPIRV-Tools SPIRV-Tools-opt
   INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc/include ${SPIRV-Cross_SOURCE_DIR}/..
   TEST_NAMES
     spvc
@@ -108,7 +109,7 @@ endif(SHADERC_ENABLE_INSTALL)
 
 shaderc_add_tests(
   TEST_PREFIX shaderc_spvc_combined
-  LINK_LIBS shaderc_spvc_combined ${CMAKE_THREAD_LIBS_INIT} shaderc_util
+  LINK_LIBS shaderc_spvc_combined ${SPVC_LIBS} ${CMAKE_THREAD_LIBS_INIT} shaderc_util
   INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc/include ${spirv-tools_SOURCE_DIR}/include
   TEST_NAMES
     spvc
