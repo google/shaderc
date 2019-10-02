@@ -311,17 +311,18 @@ shaderc_spvc_compilation_result_t generate_hlsl_shader(
   if (!opt.Run(source, source_len, &result->binary_output)) {
     result->messages.append(
         "Transformations between source and target "
-        "execution environments failed.\n");
+        "execution environments failed (spvc-ir-pass).\n");
     result->status = shaderc_compilation_status_transformation_error;
-    compiler.reset(new spirv_cross::CompilerHLSL(ir));
+    return result;
   }
-
+  // TODO (sarahM0): replace this error message with following when spvc IR
+  // generation is complete:
+  // compiler.reset(new spirv_cross::CompilerHLSL(ir));
   result->messages.append(
       "Expected failure due to incomplete spvc IR generation "
       "implementation.\n");
   result->status = shaderc_compilation_status_compilation_error;
   return result;
-
 #else
   compiler.reset(new (std::nothrow)
                      spirv_cross::CompilerHLSL(source, source_len));
