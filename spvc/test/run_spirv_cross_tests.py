@@ -560,7 +560,8 @@ def main():
 
     for failure in failures:
         if failure not in known_failures:
-            unexpected_failures.append(failure)
+            if failure not in known_invalids:
+                unexpected_failures.append(failure)
 
     if not script_args.test_filter:
         for known_failure in known_failures:
