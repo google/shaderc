@@ -37,7 +37,7 @@ class TestEnv:
         self.spirv_as = script_args.spirv_as
         self.spirv_opt = script_args.spirv_opt
         self.glslang = script_args.glslang
-        self.run_spvc_without_validation = False
+        self.run_spvc_with_validation = True
 
     def log_unexpected(self, test_list, test_result):
         """Log list of test cases with unexpected outcome."""
@@ -116,10 +116,6 @@ class TestEnv:
         """
         return self.check_output([self.glslang] + flags + ['-o', out, inp])
 
-    def set_validation(self, validation_flag):
-        self.run_spvc_without_validation = validation_flag
-        return
-
     def run_spvc(self, inp, out, flags):
         """Run spvc.
 
@@ -127,7 +123,7 @@ class TestEnv:
         fails and give_up flag is set.
         """
 
-        if self.run_spvc_without_validation:
+        if not self.run_spvc_with_validation:
             flags.append('--no-validate')
 
         status, output = self.check_output(
@@ -483,7 +479,7 @@ def main():
         pool = Pool(script_args.jobs)
 
     # run all test without --no-validate flag
-    test_env.set_validation(False)
+    test_env.run_spvc_with_validation = True
     results = pool.map(work_function, tests)
     # This can occur if -f is passed in with a pattern that doesn't match to
     # anything, or only matches to tests that are skipped.
@@ -493,10 +489,13 @@ def main():
     successes, failures = zip(*results)
 
     # run all tests with --no-validate flag
-    test_env.set_validation(True)
+    test_env.run_spvc_with_validation = False
     results = pool.map(work_function, tests)
+    # This can occur if -f is passed in with a pattern that doesn't match to
+    # anything, or only matches to tests that are skipped.
+    # This branch should be unreachable since the early check would have been activated
     if not results:
-        print('Did not receive any results from workers...')
+        print('Did not receive any results from workers (happened while --no-validate run)...')
         return False
     successes_without_validation, _ = zip(*results)
 
@@ -530,18 +529,14 @@ def main():
     with open(fail_file, 'r') as f:
         known_failures = f.read().splitlines()
 
-    known_failures = set(
-        map(lambda x: (x.split(',')[0], x.split(',')[1] == 'True'),
-            known_failures))
+    known_failures = set(map(lambda x: (x.split(',')[0], x.split(',')[1] == 'True'), known_failures))
 
     invalid_file = os.path.join(os.path.dirname(
         os.path.realpath(__file__)), 'known_invalids')
     with open(invalid_file, 'r') as f:
         known_invalids = f.read().splitlines()
 
-    known_invalids = set(
-        map(lambda x: (x.split(',')[0], x.split(',')[1] == 'True'),
-            known_invalids))
+    known_invalids = set(map(lambda x: (x.split(',')[0], x.split(',')[1] == 'True'), known_invalids))
 
     unexpected_successes = []
     unexpected_failures = []
