@@ -99,6 +99,10 @@ const uint32_t kWebGPUShaderBinary[] = {
     0x00000004, 0x000100FD, 0x00010038,
 };
 
+const char* kInvalidShader = "";
+
+const uint32_t kInvalidShaderBinary[] = {0x07230203};
+
 #ifdef __cplusplus
 }
 #endif  // __cplusplus

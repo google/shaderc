@@ -177,14 +177,15 @@ shaderc_spvc_compilation_result_t generate_glsl_shader(
     const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result) {
-  std::unique_ptr<spirv_cross::CompilerGLSL> compiler(
-      new (std::nothrow) spirv_cross::CompilerGLSL(source, source_len));
+  spirv_cross::CompilerGLSL* compiler =
+      new (std::nothrow) spirv_cross::CompilerGLSL(source, source_len);
   if (!compiler) {
     result->messages.append(
         "Unable to initialize SPIRV-Cross GLSL compiler.\n");
     result->status = shaderc_compilation_status_compilation_error;
     return result;
   }
+  result->compiler.reset(compiler);
 
   if (options->glsl.version == 0) {
     // no version requested, was one detected in source?
@@ -216,6 +217,7 @@ shaderc_spvc_compilation_result_t generate_glsl_shader(
 
     if (stage_count != 1) {
       result->status = shaderc_compilation_status_compilation_error;
+      result->compiler.reset();
       if (stage_count == 0) {
         result->messages.append("There is no entry point with name: " +
                                 options->entry_point);
@@ -275,10 +277,11 @@ shaderc_spvc_compilation_result_t generate_glsl_shader(
 
   compiler->set_common_options(options->glsl);
 
-  result = generate_shader(compiler.get(), result);
+  result = generate_shader(compiler, result);
   if (result->status != shaderc_compilation_status_success) {
     result->messages.append("Compilation failed.  Partial source:\n");
     result->messages.append(compiler->get_partial_source());
+    result->compiler.reset();
   }
 
   return result;
@@ -288,22 +291,24 @@ shaderc_spvc_compilation_result_t generate_hlsl_shader(
     const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result) {
-  std::unique_ptr<spirv_cross::CompilerHLSL> compiler(
-      new (std::nothrow) spirv_cross::CompilerHLSL(source, source_len));
+  spirv_cross::CompilerHLSL* compiler =
+      new (std::nothrow) spirv_cross::CompilerHLSL(source, source_len);
   if (!compiler) {
     result->messages.append(
         "Unable to initialize SPIRV-Cross HLSL compiler.\n");
     result->status = shaderc_compilation_status_compilation_error;
     return result;
   }
+  result->compiler.reset(compiler);
 
   compiler->set_common_options(options->glsl);
   compiler->set_hlsl_options(options->hlsl);
 
-  result = generate_shader(compiler.get(), result);
+  result = generate_shader(compiler, result);
   if (result->status != shaderc_compilation_status_success) {
     result->messages.append("Compilation failed.  Partial source:\n");
     result->messages.append(compiler->get_partial_source());
+    result->compiler.reset();
   }
 
   return result;
@@ -313,24 +318,44 @@ shaderc_spvc_compilation_result_t generate_msl_shader(
     const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result) {
-  std::unique_ptr<spirv_cross::CompilerMSL> compiler(
-      new (std::nothrow) spirv_cross::CompilerMSL(source, source_len));
+  spirv_cross::CompilerMSL* compiler =
+      new (std::nothrow) spirv_cross::CompilerMSL(source, source_len);
   if (!compiler) {
     result->messages.append("Unable to initialize SPIRV-Cross MSL compiler.\n");
     result->status = shaderc_compilation_status_compilation_error;
     return result;
   }
+  result->compiler.reset(compiler);
 
   compiler->set_common_options(options->glsl);
   compiler->set_msl_options(options->msl);
   for (auto i : options->msl_discrete_descriptor_sets)
     compiler->add_discrete_descriptor_set(i);
 
-  result = generate_shader(compiler.get(), result);
+  result = generate_shader(compiler, result);
   if (result->status != shaderc_compilation_status_success) {
     result->messages.append("Compilation failed.  Partial source:\n");
     result->messages.append(compiler->get_partial_source());
+    result->compiler.reset();
   }
+
+  return result;
+}
+
+shaderc_spvc_compilation_result_t generate_vulkan_shader(
+    const uint32_t* source, size_t source_len,
+    shaderc_spvc_compile_options_t options,
+    shaderc_spvc_compilation_result_t result) {
+  spirv_cross::CompilerReflection* compiler =
+      new (std::nothrow) spirv_cross::CompilerReflection(source, source_len);
+  if (!compiler) {
+    result->messages.append(
+        "Unable to initialize SPIRV-Cross reflection "
+        "compiler.\n");
+    result->status = shaderc_compilation_status_compilation_error;
+    return result;
+  }
+  result->compiler.reset(compiler);
 
   return result;
 }

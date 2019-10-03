@@ -13,14 +13,15 @@
 // limitations under the License.
 
 #include <cstdint>
-#include <string>
-#include <vector>
-
-#include "spvc/spvc.h"
 #include <spirv_glsl.hpp>
 #include <spirv_hlsl.hpp>
 #include <spirv_msl.hpp>
+#include <spirv_reflect.hpp>
+#include <string>
+#include <vector>
+
 #include "spirv-tools/libspirv.hpp"
+#include "spvc/spvc.h"
 
 // GLSL version produced when none specified nor detected from source.
 #define DEFAULT_GLSL_VERSION 450
@@ -34,6 +35,7 @@ struct shaderc_spvc_compilation_result {
   std::string messages;
   shaderc_compilation_status status =
       shaderc_compilation_status_null_result_object;
+  std::unique_ptr<spirv_cross::Compiler> compiler;
 };
 
 struct shaderc_spvc_compile_options {
@@ -114,6 +116,14 @@ shaderc_spvc_compilation_result_t generate_hlsl_shader(
 // Handles correctly setting up the SPIRV-Cross compiler based on the options
 // and then envoking it.
 shaderc_spvc_compilation_result_t generate_msl_shader(
+    const uint32_t* source, size_t source_len,
+    shaderc_spvc_compile_options_t options,
+    shaderc_spvc_compilation_result_t result);
+
+// Given a Vulkan SPIR-V shader and set of options, generate a Vulkan shader.
+// Is a No-op from the perspective of converting the shader, but setup a
+// SPIRV-Cross compiler to be used for reflection later.
+shaderc_spvc_compilation_result_t generate_vulkan_shader(
     const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result);
