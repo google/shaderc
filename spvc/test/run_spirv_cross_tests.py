@@ -519,30 +519,34 @@ def main():
 
     fail_file = os.path.join(os.path.dirname(
         os.path.realpath(__file__)), 'known_failures')
-
     if script_args.update_known_failures:
         print('Updating {}'.format(fail_file))
         with open(fail_file, 'w+') as f:
             for failure in failures:
                 f. write('{},{}\n'.format(failure[0], failure[1]))
-
     with open(fail_file, 'r') as f:
         known_failures = f.read().splitlines()
-
-    known_failures = set(map(lambda x: (x.split(',')[0], x.split(',')[1] == 'True'), known_failures))
+    known_failures = set(
+        map(lambda x: (x.split(',')[0], x.split(',')[1] == 'True'), known_failures))
 
     invalid_file = os.path.join(os.path.dirname(
         os.path.realpath(__file__)), 'known_invalids')
     with open(invalid_file, 'r') as f:
         known_invalids = f.read().splitlines()
+    known_invalids = set(
+        map(lambda x: (x.split(',')[0], x.split(',')[1] == 'True'),known_invalids))
 
-    known_invalids = set(map(lambda x: (x.split(',')[0], x.split(',')[1] == 'True'), known_invalids))
+    unconfirmed_invalid_file = os.path.join(os.path.dirname(
+        os.path.realpath(__file__)), 'unconfirmed_invalids')
+    with open(unconfirmed_invalid_file, 'r') as f:
+        unconfirmed_invalids = f.read().splitlines()
+    unconfirmed_invalids = set(
+        map(lambda x: (x.split(',')[0], x.split(',')[1] == 'True'),unconfirmed_invalids))
 
     unexpected_successes = []
     unexpected_failures = []
     unexpected_invalids = []
     unexpected_valids = []
-    invalids = []
 
     if not script_args.test_filter:
         missing_failures = []
@@ -565,8 +569,7 @@ def main():
 
     for invalid in successes_without_validation:
         if invalid not in successes:
-            invalids.append(invalid)
-            if invalid not in known_invalids:
+            if invalid not in unconfirmed_invalids:
                 unexpected_invalids.append(invalid)
 
     test_env.log_unexpected(unexpected_successes, 'success')
