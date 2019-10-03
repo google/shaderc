@@ -81,8 +81,6 @@ endif()
 if (SHADERC_ENABLE_SPVC)
   if (NOT TARGET spirv-cross-core)
     if (IS_DIRECTORY ${SHADERC_SPIRV_CROSS_DIR})
-      set(SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS ${DISABLE_EXCEPTIONS} CACHE BOOL "tell SPIRV-Cross not to throw" FORCE)
-
       # Add -fPIC to SPIRV-Cross build, if supported
       check_cxx_compiler_flag(-fPIC COMPILER_SUPPORTS_PIC)
       if (COMPILER_SUPPORTS_PIC)

@@ -35,6 +35,13 @@ include(cmake/setup_build.cmake)
 include(cmake/utils.cmake)
 include(CheckCXXCompilerFlag)
 
+set(SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS ${DISABLE_EXCEPTIONS} CACHE BOOL "Coupling SPIRV-Cross exception conversion to DISABLE_EXCEPTIONS" FORCE)
+if(DISABLE_EXCEPTIONS)
+  # Need to set additional values here, since some of the wrapped code occurs in
+  # .h/.hpp files, so maybe included outside of the library.
+ add_definitions(-DSPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS)
+endif()
+
 # These flags are not supported on Windows and some older version of GCC
 # that our bots use.
 # Warning about implicit fallthrough in switch blocks
