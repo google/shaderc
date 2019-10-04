@@ -375,6 +375,12 @@ TEST_F(CompilerTest, SpirvTargetVersion1_4Succeeds) {
   EXPECT_THAT(errors_, Eq(""));
 }
 
+TEST_F(CompilerTest, SpirvTargetVersion1_5Succeeds) {
+  compiler_.SetTargetSpirv(Compiler::SpirvVersion::v1_5);
+  EXPECT_TRUE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
+  EXPECT_THAT(errors_, Eq(""));
+}
+
 TEST_F(CompilerTest, SpirvTargetBadVersionFails) {
   compiler_.SetTargetSpirv(static_cast<Compiler::SpirvVersion>(0x090900));
   EXPECT_FALSE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));

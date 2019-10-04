@@ -712,6 +712,9 @@ GlslangClientInfo GetGlslangClientInfo(
       case Compiler::SpirvVersion::v1_4:
         result.target_language_version = glslang::EShTargetSpv_1_4;
         break;
+      case Compiler::SpirvVersion::v1_5:
+        result.target_language_version = glslang::EShTargetSpv_1_5;
+        break;
       default:
         errs << "error:" << error_tag << ": Unknown SPIR-V version " << std::hex
              << uint32_t(spv_version);
