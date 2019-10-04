@@ -18,10 +18,11 @@
 
 #include "common_shaders_for_test.h"
 #include "spvc/spvc.h"
+#include "spvc_private.h"
 
 namespace {
 
-TEST(Compile, Glsl) {
+TEST(Compile, ValidShaderIntoGlslPasses) {
   shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
   shaderc_spvc_compile_options_t options =
       shaderc_spvc_compile_options_initialize();
@@ -37,13 +38,14 @@ TEST(Compile, Glsl) {
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(shaderc_compilation_status_success,
             shaderc_spvc_result_get_status(result));
+  EXPECT_NE(result->compiler.get(), nullptr);
 
   shaderc_spvc_result_release(result);
   shaderc_spvc_compile_options_release(options);
   shaderc_spvc_compiler_release(compiler);
 }
 
-TEST(Compile, Hlsl) {
+TEST(Compile, ValidShaderIntoHlslPasses) {
   shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
   shaderc_spvc_compile_options_t options =
       shaderc_spvc_compile_options_initialize();
@@ -59,13 +61,14 @@ TEST(Compile, Hlsl) {
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(shaderc_compilation_status_success,
             shaderc_spvc_result_get_status(result));
+  EXPECT_NE(result->compiler.get(), nullptr);
 
   shaderc_spvc_result_release(result);
   shaderc_spvc_compile_options_release(options);
   shaderc_spvc_compiler_release(compiler);
 }
 
-TEST(Compile, Msl) {
+TEST(Compile, ValidShaderIntoMslPasses) {
   shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
   shaderc_spvc_compile_options_t options =
       shaderc_spvc_compile_options_initialize();
@@ -81,13 +84,14 @@ TEST(Compile, Msl) {
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(shaderc_compilation_status_success,
             shaderc_spvc_result_get_status(result));
+  EXPECT_NE(result->compiler.get(), nullptr);
 
   shaderc_spvc_result_release(result);
   shaderc_spvc_compile_options_release(options);
   shaderc_spvc_compiler_release(compiler);
 }
 
-TEST(Compile, Vulkan) {
+TEST(Compile, ValidShaderIntoVulkanPasses) {
   shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
   shaderc_spvc_compile_options_t options =
       shaderc_spvc_compile_options_initialize();
@@ -103,6 +107,7 @@ TEST(Compile, Vulkan) {
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(shaderc_compilation_status_success,
             shaderc_spvc_result_get_status(result));
+  EXPECT_NE(result->compiler.get(), nullptr);
 
   shaderc_spvc_result_release(result);
   shaderc_spvc_compile_options_release(options);
