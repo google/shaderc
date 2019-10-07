@@ -1,0 +1,3 @@
+shaders-no-opt/asm/frag/switch-block-case-fallthrough.asm.frag,False
+shaders-msl-no-opt/asm/frag/switch-block-case-fallthrough.asm.frag,False
+shaders-hlsl-no-opt/asm/frag/switch-block-case-fallthrough.asm.frag,False
