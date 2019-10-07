@@ -101,6 +101,7 @@ shaders-reflection/asm/op-source-none-uav-1.asm.comp,False
 shaders-reflection/asm/op-source-none-uav-2.asm.comp,False
 shaders-reflection/comp/struct-layout.comp,False
 shaders-reflection/comp/struct-packing.comp,False
+shaders-reflection/comp/workgroup-size-spec-constant.comp,False
 shaders-reflection/frag/combined-texture-sampler-shadow.vk.frag,False
 shaders-reflection/frag/combined-texture-sampler.vk.frag,False
 shaders-reflection/frag/image-load-store-uint-coord.asm.frag,False
