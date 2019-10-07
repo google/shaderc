@@ -16,6 +16,7 @@
 
 #include "libshaderc_util/exceptions.h"
 #include "spirv-tools/optimizer.hpp"
+#include "spvcir_pass.h"
 
 namespace spvc_private {
 
@@ -288,8 +289,45 @@ shaderc_spvc_compilation_result_t generate_hlsl_shader(
     const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result) {
-  std::unique_ptr<spirv_cross::CompilerHLSL> compiler(
-      new (std::nothrow) spirv_cross::CompilerHLSL(source, source_len));
+  std::unique_ptr<spirv_cross::CompilerHLSL> compiler;
+
+// spvc IR generation is under development, for now run spirv-cross
+// compiler(SHADERC_ENABLE_SPVC_PARSER is OFF by default)
+// TODO (sarahM0): change the default to spvc IR generation when it's done
+#if SHADERC_ENABLE_SPVC_PARSER
+  spvtools::Optimizer opt(options->source_env);
+  opt.SetMessageConsumer(std::bind(
+      consume_spirv_tools_message, result, std::placeholders::_1,
+      std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+
+  spirv_cross::ParsedIR ir;
+  ir.spirv = std::vector<uint32_t>(source, source + source_len);
+
+  opt.RegisterPass(
+      spvtools::Optimizer::PassToken(std::unique_ptr<spvtools::opt::Pass>(
+          reinterpret_cast<spvtools::opt::Pass*>(
+              new spvtools::opt::SpvcIrPass(ir)))));
+
+  if (!opt.Run(source, source_len, &result->binary_output)) {
+    result->messages.append(
+        "Transformations between source and target "
+        "execution environments failed (spvc-ir-pass).\n");
+    result->status = shaderc_compilation_status_transformation_error;
+    return result;
+  }
+  // TODO (sarahM0): replace this error message with following when spvc IR
+  // generation is complete:
+  // compiler.reset(new spirv_cross::CompilerHLSL(ir));
+  result->messages.append(
+      "Expected failure due to incomplete spvc IR generation "
+      "implementation.\n");
+  result->status = shaderc_compilation_status_compilation_error;
+  return result;
+#else
+  compiler.reset(new (std::nothrow)
+                     spirv_cross::CompilerHLSL(source, source_len));
+#endif
+
   if (!compiler) {
     result->messages.append(
         "Unable to initialize SPIRV-Cross HLSL compiler.\n");
@@ -333,6 +371,6 @@ shaderc_spvc_compilation_result_t generate_msl_shader(
   }
 
   return result;
-}
+  }
 
 }  // namespace spvc_private
