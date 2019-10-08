@@ -15,8 +15,9 @@
 #include <spirv_glsl.hpp>
 #include <spirv_hlsl.hpp>
 #include <spirv_msl.hpp>
+
+#include "source/opt/pass.h"  // Accessing a private spirv-tools header.
 #include "spirv-tools/libspirv.hpp"
-#include "spirv-tools/source/opt/pass.h"
 #include "spvc/spvc.h"
 
 namespace spvtools {

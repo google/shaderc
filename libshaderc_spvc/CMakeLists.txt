@@ -22,7 +22,6 @@ target_include_directories(shaderc_spvc
   ${shaderc_SOURCE_DIR}/libshaderc_util/include
   ${spirv-tools_SOURCE_DIR}/include
   ${spirv-tools_SOURCE_DIR}/
-  ${SPIRV-Cross_SOURCE_DIR}/..
   ${CMAKE_CURRENT_BINARY_DIR}/../third_party/spirv-tools/)
 
 if(SHADERC_ENABLE_SPVC_PARSER)
