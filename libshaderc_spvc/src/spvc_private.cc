@@ -16,7 +16,9 @@
 
 #include "libshaderc_util/exceptions.h"
 #include "spirv-tools/optimizer.hpp"
+#if SHADERC_ENABLE_SPVC_PARSER
 #include "spvcir_pass.h"
+#endif  // SHADERC_ENABLE_SPVC_PARSER
 
 namespace spvc_private {
 

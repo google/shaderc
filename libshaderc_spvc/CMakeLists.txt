@@ -9,9 +9,15 @@ set(SPVC_SOURCES
   include/spvc/spvc.hpp
   src/spvc.cc
   src/spvc_private.cc
-  src/spvcir_pass.cpp
-  src/spvcir_pass.h
 )
+
+if(SHADERC_ENABLE_SPVC_PARSER)
+  set(SPVC_SOURCES
+    ${SPVC_SOURCES}
+    src/spvcir_pass.cc
+    src/spvcir_pass.h
+  )
+endif()
 
 add_library(shaderc_spvc STATIC ${SPVC_SOURCES})
 add_dependencies(shaderc_spvc ${SPIRV_TOOLS})
