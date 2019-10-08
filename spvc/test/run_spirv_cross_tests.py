@@ -212,7 +212,7 @@ def test_glsl(test_env, shader, filename, optimize):
     # - Regular test on most files
     # - Vulkan-specific test on Vulkan test input
     flags = ['--entry=main', '--language=glsl']
-    if not '.noeliminate' in filename:
+    if '.noeliminate' not in filename:
         flags.append('--remove-unused-variables')
     if '.legacy.' in filename:
         flags.extend(['--glsl-version=100', '--es'])
