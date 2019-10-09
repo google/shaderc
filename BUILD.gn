@@ -14,6 +14,7 @@
 
 import("//build_overrides/build.gni")
 import("//build_overrides/shaderc.gni")
+import("shaderc_features.gni")
 
 glslang_dir = shaderc_glslang_dir
 spirv_tools_dir = shaderc_spirv_tools_dir
