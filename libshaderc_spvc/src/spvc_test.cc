@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "spvc/spvc.h"
+
 #include <gtest/gtest.h>
+
 #include <thread>
 
 #include "common_shaders_for_test.h"
-#include "spvc/spvc.h"
+#include "spvc_private.h"
 
 namespace {
 
@@ -51,7 +54,7 @@ TEST(Init, MultipleThreadsCalling) {
 }
 #endif
 
-TEST(Compile, Glsl) {
+TEST(Compile, ValidShaderIntoGlslPasses) {
   shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
   shaderc_spvc_compile_options_t options =
       shaderc_spvc_compile_options_initialize();
@@ -62,13 +65,32 @@ TEST(Compile, Glsl) {
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(shaderc_compilation_status_success,
             shaderc_spvc_result_get_status(result));
+  EXPECT_NE(result->compiler.get(), nullptr);
 
   shaderc_spvc_result_release(result);
   shaderc_spvc_compile_options_release(options);
   shaderc_spvc_compiler_release(compiler);
 }
 
-TEST(Compile, Hlsl) {
+TEST(Compile, InvalidShaderIntoGlslPasses) {
+  shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
+  shaderc_spvc_compile_options_t options =
+      shaderc_spvc_compile_options_initialize();
+
+  shaderc_spvc_compilation_result_t result = shaderc_spvc_compile_into_glsl(
+      compiler, kInvalidShaderBinary,
+      sizeof(kInvalidShaderBinary) / sizeof(uint32_t), options);
+  ASSERT_NE(nullptr, result);
+  EXPECT_NE(shaderc_compilation_status_success,
+            shaderc_spvc_result_get_status(result));
+  EXPECT_EQ(result->compiler.get(), nullptr);
+
+  shaderc_spvc_result_release(result);
+  shaderc_spvc_compile_options_release(options);
+  shaderc_spvc_compiler_release(compiler);
+}
+
+TEST(Compile, ValidShaderIntoHlslPasses) {
   shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
   shaderc_spvc_compile_options_t options =
       shaderc_spvc_compile_options_initialize();
@@ -79,13 +101,32 @@ TEST(Compile, Hlsl) {
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(shaderc_compilation_status_success,
             shaderc_spvc_result_get_status(result));
+  EXPECT_NE(result->compiler.get(), nullptr);
 
   shaderc_spvc_result_release(result);
   shaderc_spvc_compile_options_release(options);
   shaderc_spvc_compiler_release(compiler);
 }
 
-TEST(Compile, Msl) {
+TEST(Compile, InvalidShaderIntoHlslPasses) {
+  shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
+  shaderc_spvc_compile_options_t options =
+      shaderc_spvc_compile_options_initialize();
+
+  shaderc_spvc_compilation_result_t result = shaderc_spvc_compile_into_hlsl(
+      compiler, kInvalidShaderBinary,
+      sizeof(kInvalidShaderBinary) / sizeof(uint32_t), options);
+  ASSERT_NE(nullptr, result);
+  EXPECT_NE(shaderc_compilation_status_success,
+            shaderc_spvc_result_get_status(result));
+  EXPECT_EQ(result->compiler.get(), nullptr);
+
+  shaderc_spvc_result_release(result);
+  shaderc_spvc_compile_options_release(options);
+  shaderc_spvc_compiler_release(compiler);
+}
+
+TEST(Compile, ValidShaderIntoMslPasses) {
   shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
   shaderc_spvc_compile_options_t options =
       shaderc_spvc_compile_options_initialize();
@@ -96,13 +137,32 @@ TEST(Compile, Msl) {
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(shaderc_compilation_status_success,
             shaderc_spvc_result_get_status(result));
+  EXPECT_NE(result->compiler.get(), nullptr);
 
   shaderc_spvc_result_release(result);
   shaderc_spvc_compile_options_release(options);
   shaderc_spvc_compiler_release(compiler);
 }
 
-TEST(Compile, Vulkan) {
+TEST(Compile, InvalidShaderIntoMslPasses) {
+  shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
+  shaderc_spvc_compile_options_t options =
+      shaderc_spvc_compile_options_initialize();
+
+  shaderc_spvc_compilation_result_t result = shaderc_spvc_compile_into_msl(
+      compiler, kInvalidShaderBinary,
+      sizeof(kInvalidShaderBinary) / sizeof(uint32_t), options);
+  ASSERT_NE(nullptr, result);
+  EXPECT_NE(shaderc_compilation_status_success,
+            shaderc_spvc_result_get_status(result));
+  EXPECT_EQ(result->compiler.get(), nullptr);
+
+  shaderc_spvc_result_release(result);
+  shaderc_spvc_compile_options_release(options);
+  shaderc_spvc_compiler_release(compiler);
+}
+
+TEST(Compile, ValidShaderIntoVulkanPasses) {
   shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
   shaderc_spvc_compile_options_t options =
       shaderc_spvc_compile_options_initialize();
@@ -113,10 +173,29 @@ TEST(Compile, Vulkan) {
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(shaderc_compilation_status_success,
             shaderc_spvc_result_get_status(result));
+  EXPECT_NE(result->compiler.get(), nullptr);
 
   shaderc_spvc_result_release(result);
   shaderc_spvc_compile_options_release(options);
   shaderc_spvc_compiler_release(compiler);
 }
 
-}  // anonymous namespace
+TEST(Compile, InvalidShaderIntoVulkanPasses) {
+  shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
+  shaderc_spvc_compile_options_t options =
+      shaderc_spvc_compile_options_initialize();
+
+  shaderc_spvc_compilation_result_t result = shaderc_spvc_compile_into_vulkan(
+      compiler, kInvalidShaderBinary,
+      sizeof(kInvalidShaderBinary) / sizeof(uint32_t), options);
+  ASSERT_NE(nullptr, result);
+  EXPECT_NE(shaderc_compilation_status_success,
+            shaderc_spvc_result_get_status(result));
+  EXPECT_EQ(result->compiler.get(), nullptr);
+
+  shaderc_spvc_result_release(result);
+  shaderc_spvc_compile_options_release(options);
+  shaderc_spvc_compiler_release(compiler);
+}
+
+}  // namespace

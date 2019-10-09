@@ -136,7 +136,10 @@ component("libshaderc_spvc") {
     ":shaderc_util_public",
   ]
 
-  defines = [ "SHADERC_IMPLEMENTATION" ]
+  defines = [
+    "SHADERC_IMPLEMENTATION",
+    "SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS"
+  ]
   if (shaderc_enable_spvc_parser) {
     defines += [ "SHADERC_ENABLE_SPVC_PARSER=1" ]
   }
