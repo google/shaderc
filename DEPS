@@ -5,7 +5,7 @@ vars = {
   'khronos_git': 'https://github.com/KhronosGroup',
 
   'effcee_revision' : 'cd25ec17e9382f99a895b9ef53ff3c277464d07d',
-  'glslang_revision': '4b97a1108114107a8082a55e9e0721a40f9536d3',
+  'glslang_revision': 'a959deb00750826fb087171d663947df550a3339',
   'googletest_revision': 'cd17fa2abda2a2e4111cdabd62a87aea16835014',
   're2_revision': '266119da0a8328ecb18fbd31398100d2ec230619',
   'spirv_headers_revision': 'b252a50953ac4375cb1864e94f4b0234db9d215d',
