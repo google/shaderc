@@ -25,16 +25,31 @@ namespace opt {
 // this WIP pass generates spvc IR and does not throw exceptions
 class SpvcIrPass : public Pass {
  public:
-  SpvcIrPass(spirv_cross::ParsedIR& ir) { ir_ = ir; }
-  const char* name() const override { return "spvc-if-pass"; }
+  SpvcIrPass(spirv_cross::ParsedIR &ir);
+  const char *name() const override { return "spvc-if-pass"; }
   Status Process() override;
 
   IRContext::Analysis GetPreservedAnalyses() override {
     return IRContext::kAnalysisNone;
   }
 
+  void genSpirvCrossIR(Instruction *inst);
+
  private:
-  spirv_cross::ParsedIR ir_;
+  spirv_cross::ParsedIR *ir_;
+  spirv_cross::SPIRFunction *current_function_ = nullptr;
+  spirv_cross::SPIRBlock *current_block_ = nullptr;
+
+  // copied from spirv-cross (class Parser)
+  // TODO(sarahM0): explore whether it's better to replace with explicit set,
+  // se1, set2, ...
+  template <typename T, typename... P>
+  T &set(uint32_t id, P &&... args) {
+    ir_->add_typed_id(static_cast<spirv_cross::Types>(T::type), id);
+    auto &var = spirv_cross::variant_set<T>(ir_->ids[id], std::forward<P>(args)...);
+    var.self = id;
+    return var;
+  }
 };
 
 }  // namespace opt

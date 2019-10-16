@@ -320,14 +320,8 @@ shaderc_spvc_compilation_result_t generate_hlsl_shader(
     result->status = shaderc_compilation_status_transformation_error;
     return result;
   }
-  // TODO (sarahM0): replace this error message with following when spvc IR
-  // generation is complete:
-  // compiler = new (std::nothrow) spirv_cross::CompilerHLSL(ir);
-  result->messages.append(
-      "Expected failure due to incomplete spvc IR generation "
-      "implementation.\n");
-  result->status = shaderc_compilation_status_compilation_error;
-  return result;
+
+  compiler.reset(new spirv_cross::CompilerHLSL(ir));
 #else
   compiler = new (std::nothrow)
                      spirv_cross::CompilerHLSL(source, source_len);
@@ -380,7 +374,7 @@ shaderc_spvc_compilation_result_t generate_msl_shader(
   }
 
   return result;
-  }
+}
 
 shaderc_spvc_compilation_result_t generate_vulkan_shader(
     const uint32_t* source, size_t source_len,
