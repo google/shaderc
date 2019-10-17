@@ -453,7 +453,7 @@ def main():
     parser.add_argument('spirv_opt', metavar='<spirv-opt executable>')
     parser.add_argument('glslang', metavar='<glslangValidator executable>')
     parser.add_argument('cross_dir', metavar='<SPIRV-cross directory>')
-    parser.add_argument('spvc_test_dir', metavar='<SPVC test directory>')
+    parser.add_argument('spvc_test_dir', metavar='<spvc test directory>')
     script_args = parser.parse_args()
 
     test_env = TestEnv(script_args)
