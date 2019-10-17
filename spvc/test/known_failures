@@ -59,6 +59,8 @@ shaders-msl/frag/barycentric-nv.msl22.frag,False
 shaders-msl/frag/barycentric-nv.msl22.frag,True
 shaders-msl/frag/buffer-read-write.texture-buffer-native.msl21.frag,False
 shaders-msl/frag/buffer-read-write.texture-buffer-native.msl21.frag,True
+shaders-msl/frag/huge-argument-buffer.device-argument-buffer.argument.msl2.frag,False
+shaders-msl/frag/huge-argument-buffer.device-argument-buffer.argument.msl2.frag,True
 shaders-msl/frag/image-query-lod.msl22.frag,False
 shaders-msl/frag/image-query-lod.msl22.frag,True
 shaders-msl/frag/shadow-compare-global-alias.invalid.frag,False
@@ -89,6 +91,8 @@ shaders-msl/vert/sign-int-types.vert,False
 shaders-msl/vert/sign-int-types.vert,True
 shaders-msl/vert/texture_buffer.texture-buffer-native.msl21.vert,False
 shaders-msl/vert/texture_buffer.texture-buffer-native.msl21.vert,True
+shaders-no-opt/asm/frag/for-loop-dedicated-merge-block-inverted.asm.frag,False
+shaders-no-opt/asm/frag/for-loop-dedicated-merge-block-non-inverted.asm.frag,False
 shaders-no-opt/asm/frag/switch-block-case-fallthrough.asm.invalid.frag,False
 shaders-reflection/asm/aliased-entry-point-names.asm.multi,False
 shaders-reflection/asm/op-source-glsl-ssbo-1.asm.comp,False
