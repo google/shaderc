@@ -6,5 +6,6 @@ if(${SHADERC_ENABLE_TESTS})
     $<TARGET_FILE:spirv-as>
     $<TARGET_FILE:spirv-opt>
     $<TARGET_FILE:glslangValidator>
-    ${SHADERC_SPIRV_CROSS_DIR})
+    ${SHADERC_SPIRV_CROSS_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR})
 endif()

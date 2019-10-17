@@ -446,11 +446,14 @@ def main():
                         metavar='<number of processes to use>', help='Use as many processes as specified, 0 indicates let the script decide.')
     parser.add_argument('--update_known_failures', dest='update_known_failures',
                         action='store_true', help='Write out the failures to spvc/test/known_failures')
+    parser.add_argument('--run-spvc-tests', dest='run_spvc_tests',
+                        action='store_true', help='Run tests stored in spvc/test directory')
     parser.add_argument('spvc', metavar='<spvc executable>')
     parser.add_argument('spirv_as', metavar='<spirv-as executable>')
     parser.add_argument('spirv_opt', metavar='<spirv-opt executable>')
     parser.add_argument('glslang', metavar='<glslangValidator executable>')
     parser.add_argument('cross_dir', metavar='<SPIRV-cross directory>')
+    parser.add_argument('spvc_test_dir', metavar='<spvc test directory>')
     script_args = parser.parse_args()
 
     test_env = TestEnv(script_args)
@@ -472,6 +475,16 @@ def main():
                 if not test_regex or re.search(test_regex, shader):
                     tests.append((test_function, test_env,
                                   shader, filename, optimize))
+        if(script_args.run_spvc_tests):
+            walk_dir = os.path.join(script_args.spvc_test_dir, test_case_dir)
+            for dirpath, dirnames, filenames in os.walk(walk_dir):
+                dirnames.sort()
+                reldir = os.path.relpath(dirpath, script_args.spvc_test_dir)
+                for filename in sorted(filenames):
+                    shader = os.path.join(reldir, filename)
+                    if not test_regex or re.search(test_regex, shader):
+                        tests.append((test_function, test_env,
+                                      shader, filename, optimize))
 
     if not script_args.jobs:
         pool = Pool()
