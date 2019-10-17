@@ -43,7 +43,8 @@ spirv_tools_path="$1/third_party/spirv-tools/tools"
 spirv_as_path="$spirv_tools_path/spirv-as"
 spirv_opt_path="$spirv_tools_path/spirv-opt"
 cross_path="$2"
+spvc_test_dir="$script_path"
 
 shift 2
 
-python3 $script_path/run_spirv_cross_tests.py "$spvc_path" "$spirv_as_path" "$spirv_opt_path" "$glslang_path" "$cross_path" $@
+python3 $script_path/run_spirv_cross_tests.py "$spvc_path" "$spirv_as_path" "$spirv_opt_path" "$glslang_path" "$cross_path" "$spvc_test_dir" $@
