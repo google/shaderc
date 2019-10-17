@@ -11,7 +11,6 @@ message(STATUS "Shaderc: build type is \"${CMAKE_BUILD_TYPE}\".")
 
 option(SHADERC_ENABLE_SPVC "Enable libshaderc_spvc" OFF)
 option(SHADERC_ENABLE_SPVC_PARSER "Enable spvc parser \(WIP)" OFF)
-option(DISABLE_EXCEPTIONS "disable spirv-cross exceptions")
 
 option(SHADERC_SKIP_INSTALL "Skip installation" ${SHADERC_SKIP_INSTALL})
 if(NOT ${SHADERC_SKIP_INSTALL})

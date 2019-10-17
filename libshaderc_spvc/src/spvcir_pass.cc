@@ -19,19 +19,20 @@
 namespace spvtools {
 namespace opt {
 
-SpvcIrPass::SpvcIrPass(spirv_cross::ParsedIR &ir) {
-  ir_ = &ir;
+SpvcIrPass::SpvcIrPass(spirv_cross::ParsedIR *ir) {
+  ir_ = ir;
   current_function_ = nullptr;
   current_block_ = nullptr;
 
   auto s = ir_->spirv.data();
+  assert(ir_->spirv.size() > 3 && "spirv data is too small");
   uint32_t bound = s[3];
   ir_->set_id_bounds(bound);
 }
 
 Pass::Status SpvcIrPass::Process() {
   get_module()->ForEachInst(
-      [this](Instruction *inst) { genSpirvCrossIR(inst); });
+      [this](Instruction *inst) { GenerateSpirvCrossIR(inst); });
 
   assert(!current_function_ && "Function was not terminated.");
   assert(!current_block_ && "Block Was not terminated");
@@ -39,7 +40,8 @@ Pass::Status SpvcIrPass::Process() {
   return Status::SuccessWithoutChange;
 }
 
-void SpvcIrPass::genSpirvCrossIR(Instruction *inst) {
+void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
+
   switch (inst->opcode()) {
     case SpvOpSourceContinued:
     case SpvOpSourceExtension:
@@ -134,11 +136,12 @@ void SpvcIrPass::genSpirvCrossIR(Instruction *inst) {
 
     case SpvOpTypeFunction: {
       auto id = inst->result_id();
-      auto result = inst->type_id();
+      auto return_type = inst->GetSingleWordInOperand(0u);
 
-      // reading Parameter 0 Type, Parameter 1 Type, ...
-      auto &func = set<spirv_cross::SPIRFunctionPrototype>(id, result);
-      for (uint32_t i = 2; i < inst->NumInOperands(); ++i) {
+      // Reading Parameter 0 Type, Parameter 1 Type, ...
+      // Starting i at 1 to skip over the function return type parameter.
+      auto &func = set<spirv_cross::SPIRFunctionPrototype>(id, return_type);
+      for (uint32_t i = 1; i < inst->NumInOperands(); ++i) {
         func.parameter_types.push_back(inst->GetSingleWordInOperand(i));
       }
 
@@ -178,6 +181,10 @@ void SpvcIrPass::genSpirvCrossIR(Instruction *inst) {
 
     case SpvOpReturn: {
       assert(current_block_ && "Trying to end a non-existing block.");
+      // TODO (sarahM0): refactored into TerminateBlock( ... terminator type
+      // ...), which also resets current_block_ to nullptr. One having one more
+      // terminator case.
+
       current_block_->terminator = spirv_cross::SPIRBlock::Return;
       current_block_ = nullptr;
       break;

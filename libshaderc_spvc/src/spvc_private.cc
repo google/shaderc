@@ -305,8 +305,12 @@ shaderc_spvc_compilation_result_t generate_hlsl_shader(
       consume_spirv_tools_message, result, std::placeholders::_1,
       std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
-  spirv_cross::ParsedIR ir;
-  ir.spirv = std::vector<uint32_t>(source, source + source_len);
+  spirv_cross::ParsedIR* ir = new (std::nothrow) spirv_cross::ParsedIR();
+  if (!ir) {
+    result->messages.append("Unable to initialize SPIRV-Cross IR.\n");
+    return result;
+  }
+  ir->spirv = std::vector<uint32_t>(source, source + source_len);
 
   opt.RegisterPass(
       spvtools::Optimizer::PassToken(std::unique_ptr<spvtools::opt::Pass>(
@@ -321,10 +325,9 @@ shaderc_spvc_compilation_result_t generate_hlsl_shader(
     return result;
   }
 
-  compiler.reset(new spirv_cross::CompilerHLSL(ir));
+  compiler = new (std::nothrow) spirv_cross::CompilerHLSL(*ir);
 #else
-  compiler = new (std::nothrow)
-                     spirv_cross::CompilerHLSL(source, source_len);
+  compiler = new (std::nothrow) spirv_cross::CompilerHLSL(source, source_len);
 #endif
 
   if (!compiler) {
