@@ -181,8 +181,8 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
 
     case SpvOpReturn: {
       assert(current_block_ && "Trying to end a non-existing block.");
-      // TODO (sarahM0): refactored into TerminateBlock( ... terminator type
-      // ...), which also resets current_block_ to nullptr. One having one more
+      // TODO (sarahM0): refactor this into TerminateBlock( ... terminator type
+      // ...), which also resets current_block_ to nullptr. Once having one more
       // terminator case.
 
       current_block_->terminator = spirv_cross::SPIRBlock::Return;
