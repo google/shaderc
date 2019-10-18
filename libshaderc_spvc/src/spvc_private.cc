@@ -300,8 +300,9 @@ shaderc_spvc_compilation_result_t generate_hlsl_shader(
 // compiler(SHADERC_ENABLE_SPVC_PARSER is OFF by default)
 // TODO (sarahM0): change the default to spvc IR generation when it's done
 #if SHADERC_ENABLE_SPVC_PARSER
-  spirv_cross::ParsedIR ir;  // = new (std::nothrow) spirv_cross::ParsedIR();
+  spirv_cross::ParsedIR ir;
   {
+    std::vector<uint32_t> binary_output;
     spvtools::Optimizer opt(options->source_env);
     opt.SetMessageConsumer(std::bind(
         consume_spirv_tools_message, result, std::placeholders::_1,
@@ -313,7 +314,7 @@ shaderc_spvc_compilation_result_t generate_hlsl_shader(
             reinterpret_cast<spvtools::opt::Pass*>(
                 new spvtools::opt::SpvcIrPass(&ir)))));
 
-    if (!opt.Run(source, source_len, &result->binary_output)) {
+    if (!opt.Run(source, source_len, &binary_output)) {
       result->messages.append(
           "Transformations between source and target "
           "execution environments failed (spvc-ir-pass).\n");
