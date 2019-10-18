@@ -475,7 +475,7 @@ def main():
                 if not test_regex or re.search(test_regex, shader):
                     tests.append((test_function, test_env,
                                   shader, filename, optimize))
-        if(script_args.run_spvc_tests):
+        if script_args.run_spvc_tests:
             walk_dir = os.path.join(script_args.spvc_test_dir, test_case_dir)
             for dirpath, dirnames, filenames in os.walk(walk_dir):
                 dirnames.sort()
@@ -512,6 +512,31 @@ def main():
         return False
     successes_without_validation, _ = zip(*results)
 
+    # if --run-spvc-tests is TRUE
+    # run all tests using spvc parser and without --no-validate flag
+    spvc_successes = []
+    spvc_failures = []
+    if(script_args.run_spvc_tests):
+        tests = []
+        walk_dir = os.path.join(script_args.spvc_test_dir, test_case_dir)
+        for dirpath, dirnames, filenames in os.walk(walk_dir):
+            dirnames.sort()
+            reldir = os.path.relpath(dirpath, script_args.spvc_test_dir)
+            for filename in sorted(filenames):
+                shader = os.path.join(reldir, filename)
+                if not test_regex or re.search(test_regex, shader):
+                    tests.append((test_function, test_env, shader, filename, optimize))
+        test_env.run_spvc_with_validation = True
+        results = pool.map(work_function, tests)
+        # This can occur if -f is passed in with a pattern that doesn't match to
+        # anything, or only matches to tests that are skipped.
+        if not results:
+            print('Did not receive any results from workers (happened while --run-spvc-tests)...')
+            # return False
+        else:
+            spvc_successes, spvc_failures = zip(*results)
+
+
     # Flattening lists of lists, and convert path markers if needed
     successes = list(itertools.chain.from_iterable(successes))
     successes = list(
@@ -523,12 +548,22 @@ def main():
     successes_without_validation = list(itertools.chain.from_iterable(successes_without_validation))
     successes_without_validation = list(
         map(lambda x: (x[0].replace(os.path.sep, '/'), x[1]), successes_without_validation))
-
+    spvc_failures = list(itertools.chain.from_iterable(spvc_failures))
+    spvc_failures = list(
+        map(lambda x: (x[0].replace(os.path.sep, '/'), x[1]), spvc_failures))
+    spvc_failures = list(itertools.chain.from_iterable(spvc_failures))
+    spvc_failures = list(
+        map(lambda x: (x[0].replace(os.path.sep, '/'), x[1]), spvc_failures))
+    spvc_successes = list(itertools.chain.from_iterable(spvc_successes))
+    spvc_successes = list(
+        map(lambda x: (x[0].replace(os.path.sep, '/'), x[1]), spvc_successes))
     failures.sort()
 
     print('{} test cases'.format(len(successes) + len(failures)))
     print('{} passed and'.format(len(successes)))
     print('{} passed with --no-validation flag'.format(len(successes_without_validation)))
+    if(script_args.run_spvc_tests):
+        print('{} passed using spvc parser'.format(len(spvc_successes)))
 
     fail_file = os.path.join(os.path.dirname(
         os.path.realpath(__file__)), 'known_failures')
@@ -556,10 +591,18 @@ def main():
     unconfirmed_invalids = set(
         map(lambda x: (x.split(',')[0], x.split(',')[1] == 'True'),unconfirmed_invalids))
 
+    known_spvc_failures_file = os.path.join(os.path.dirname(
+        os.path.realpath(__file__)), 'known_spvc_failures')
+    with open(known_spvc_failures_file, 'r') as f:
+        known_spvc_failures = f.read().splitlines()
+    known_spvc_failures = set(
+        map(lambda x: (x.split(',')[0], x.split(',')[1] == 'True'),known_spvc_failures))
+
     unexpected_successes = []
     unexpected_failures = []
     unexpected_invalids = []
     unexpected_valids = []
+    unexpected_spvc_failures = []
 
     if not script_args.test_filter:
         missing_failures = []
@@ -585,10 +628,17 @@ def main():
             if invalid not in unconfirmed_invalids:
                 unexpected_invalids.append(invalid)
 
+    if script_args.run_spvc_tests:
+        for failure in spvc_failures:
+            if failure not in known_spvc_failures:
+                unexpected_spvc_failures.append(failure)
+
     test_env.log_unexpected(unexpected_successes, 'success')
     test_env.log_unexpected(unexpected_failures, 'failure')
     test_env.log_unexpected(unexpected_invalids, 'invalid')
     test_env.log_unexpected(unexpected_valids, 'valid')
+    if script_args.run_spvc_tests:
+        test_env.log_unexpected(unexpected_spvc_failures, 'spvc failure')
 
     if not script_args.test_filter:
         test_env.log_missing_failures(missing_failures)
