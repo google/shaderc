@@ -447,7 +447,7 @@ def main():
     parser.add_argument('--update_known_failures', dest='update_known_failures',
                         action='store_true', help='Write out the failures to spvc/test/known_failures')
     parser.add_argument('--run-spvc-tests', dest='run_spvc_tests',
-                        action='store_true', help='Run tests stored in spvc/test directory')
+                        action='store_true', help='Run tests stored in spvir-cross and spvc directory using spvc parser')
     parser.add_argument('spvc', metavar='<spvc executable>')
     parser.add_argument('spirv_as', metavar='<spirv-as executable>')
     parser.add_argument('spirv_opt', metavar='<spirv-opt executable>')
@@ -464,6 +464,9 @@ def main():
         print('Will not check for missing failures')
         test_regex = re.compile(script_args.test_filter)
 
+    # Adding tests:
+    # Walk SPIRV-Cross test directory and add files to tests list
+    # if --run_spvc_tests, also walk spvc test directory and add them to tests list
     tests = []
     for test_case_dir, test_function, optimize in test_case_dirs:
         walk_dir = os.path.join(script_args.cross_dir, test_case_dir)
@@ -475,7 +478,7 @@ def main():
                 if not test_regex or re.search(test_regex, shader):
                     tests.append((test_function, test_env,
                                   shader, filename, optimize))
-        if(script_args.run_spvc_tests):
+        if script_args.run_spvc_tests:
             walk_dir = os.path.join(script_args.spvc_test_dir, test_case_dir)
             for dirpath, dirnames, filenames in os.walk(walk_dir):
                 dirnames.sort()
@@ -512,6 +515,7 @@ def main():
         return False
     successes_without_validation, _ = zip(*results)
 
+
     # Flattening lists of lists, and convert path markers if needed
     successes = list(itertools.chain.from_iterable(successes))
     successes = list(
@@ -523,15 +527,23 @@ def main():
     successes_without_validation = list(itertools.chain.from_iterable(successes_without_validation))
     successes_without_validation = list(
         map(lambda x: (x[0].replace(os.path.sep, '/'), x[1]), successes_without_validation))
-
     failures.sort()
+
+    fail_file = ""
+    if script_args.run_spvc_tests:
+        fail_file = os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'known_spvc_failures')
+        print('Parser = spvc, Tests Directory = spirv-cross/ + spvc/ fail_file = known_spvc_failures')
+    else:
+        fail_file = os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'known_failures')
+        print('Parser = spirv-cross, Tests Directory = spirv-cross/ + fail_file = known_failures')
 
     print('{} test cases'.format(len(successes) + len(failures)))
     print('{} passed and'.format(len(successes)))
     print('{} passed with --no-validation flag'.format(len(successes_without_validation)))
 
-    fail_file = os.path.join(os.path.dirname(
-        os.path.realpath(__file__)), 'known_failures')
+
     if script_args.update_known_failures:
         print('Updating {}'.format(fail_file))
         with open(fail_file, 'w+') as f:
