@@ -440,6 +440,7 @@ shaderc_spvc_compilation_result_t generate_spvcir(
     spirv_cross::ParsedIR* ir, const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result) {
+#if SHADERC_ENABLE_SPVC_PARSER
   std::vector<uint32_t> binary_output;
   spvtools::Optimizer opt(options->source_env);
   opt.SetMessageConsumer(std::bind(
@@ -455,6 +456,7 @@ shaderc_spvc_compilation_result_t generate_spvcir(
   if (!opt.Run(source, source_len, &binary_output)) {
     result->status = shaderc_compilation_status_transformation_error;
   }
+#endif  // SHADERC_ENABLE_SPVC_PARSER
   return result;
 }
 
