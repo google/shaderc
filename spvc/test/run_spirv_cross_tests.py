@@ -594,7 +594,7 @@ def main():
 
     for invalid in successes_without_validation:
         if invalid not in successes:
-            if invalid not in unconfirmed_invalids:
+            if invalid not in unconfirmed_invalids and invalid not in known_invalids:
                 unexpected_invalids.append(invalid)
 
     test_env.log_unexpected(unexpected_successes, 'success')
