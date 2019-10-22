@@ -14,7 +14,22 @@ ALL_LIBS:=libglslang.a \
 	libSPIRV-Tools.a \
 	libSPIRV-Tools-opt.a
 
+SHADERC_HEADERS=shaderc.hpp shaderc.h env.h status.h visibility.h
+SHADERC_HEADERS_IN_OUT_DIR=$(foreach H,$(SHADERC_HEADERS),$(NDK_APP_LIBS_OUT)/../include/shaderc/$(H))
+
+define gen_libshaderc_header
+$(NDK_APP_LIBS_OUT)/../include/shaderc/$(1) : \
+		$(ROOT_SHADERC_PATH)/libshaderc/include/shaderc/$(1)
+	$(call host-mkdir,$(NDK_APP_LIBS_OUT)/../include/shaderc)
+	$(call host-cp,$(ROOT_SHADERC_PATH)/libshaderc/include/shaderc/$(1) \
+		,$(NDK_APP_LIBS_OUT)/../include/shaderc/$(1))
+
+endef
+
 define gen_libshaderc
+
+$(1)/libshaderc.a: $(SHADERC_HEADERS_IN_OUT_DIR)
+
 $(1)/combine.ar: $(addprefix $(1)/, $(ALL_LIBS))
 	@echo "create libshaderc_combined.a" > $(1)/combine.ar
 	$(foreach lib,$(ALL_LIBS),
@@ -36,24 +51,12 @@ $(NDK_APP_LIBS_OUT)/$(APP_STL)/$(TARGET_ARCH_ABI)/libshaderc.a: \
 
 ifndef HEADER_TARGET
 HEADER_TARGET=1
-$(NDK_APP_LIBS_OUT)/../include/shaderc/shaderc.hpp: \
-		$(ROOT_SHADERC_PATH)/libshaderc/include/shaderc/shaderc.hpp
-	$(call host-mkdir,$(NDK_APP_LIBS_OUT)/../include/shaderc)
-	$(call host-cp,$(ROOT_SHADERC_PATH)/libshaderc/include/shaderc/shaderc.hpp \
-		,$(NDK_APP_LIBS_OUT)/../include/shaderc/shaderc.hpp)
-
-$(NDK_APP_LIBS_OUT)/../include/shaderc/shaderc.h: \
-	$(ROOT_SHADERC_PATH)/libshaderc/include/shaderc/shaderc.h
-	$(call host-mkdir,$(NDK_APP_LIBS_OUT)/../include/shaderc)
-	$(call host-cp,$(ROOT_SHADERC_PATH)/libshaderc/include/shaderc/shaderc.h \
-		,$(NDK_APP_LIBS_OUT)/../include/shaderc/shaderc.h)
+$(eval $(foreach H,$(SHADERC_HEADERS),$(call gen_libshaderc_header,$(H))))
 endif
 
 libshaderc_combined: \
 	$(NDK_APP_LIBS_OUT)/$(APP_STL)/$(TARGET_ARCH_ABI)/libshaderc.a
 
 endef
-libshaderc_combined: $(NDK_APP_LIBS_OUT)/../include/shaderc/shaderc.hpp \
-	$(NDK_APP_LIBS_OUT)/../include/shaderc/shaderc.h
 
 $(eval $(call gen_libshaderc,$(TARGET_OUT),$(TOOLCHAIN_PREFIX)))
