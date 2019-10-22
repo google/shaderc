@@ -13,4 +13,5 @@ third_party/spirv-tools/
 third_party/spirv-headers/
 third_party/spirv-cross/
 android_test/libs
+android_test/include
 .DS_Store
