@@ -180,8 +180,26 @@ shaderc_spvc_compilation_result_t generate_glsl_shader(
     const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result) {
-  spirv_cross::CompilerGLSL* compiler =
-      new (std::nothrow) spirv_cross::CompilerGLSL(source, source_len);
+  spirv_cross::CompilerGLSL* compiler;
+
+// spvc IR generation is under development, for now run spirv-cross
+// compiler(SHADERC_ENABLE_SPVC_PARSER is OFF by default)
+// TODO (sarahM0): change the default to spvc IR generation when it's done
+#if SHADERC_ENABLE_SPVC_PARSER
+  spirv_cross::ParsedIR ir;
+  result = generate_spvcir(&ir, source, source_len, options, result);
+  if (result->status != shaderc_compilation_status_success) {
+    result->messages.append(
+        "Transformations between source and target "
+        "execution environments failed (spvc-ir-pass).\n");
+    return result;
+  } else {
+    compiler = new (std::nothrow) spirv_cross::CompilerGLSL(ir);
+  }
+#else
+  compiler = new (std::nothrow) spirv_cross::CompilerGLSL(source, source_len);
+#endif
+
   if (!compiler) {
     result->messages.append(
         "Unable to initialize SPIRV-Cross GLSL compiler.\n");
@@ -301,28 +319,15 @@ shaderc_spvc_compilation_result_t generate_hlsl_shader(
 // TODO (sarahM0): change the default to spvc IR generation when it's done
 #if SHADERC_ENABLE_SPVC_PARSER
   spirv_cross::ParsedIR ir;
-  {
-    std::vector<uint32_t> binary_output;
-    spvtools::Optimizer opt(options->source_env);
-    opt.SetMessageConsumer(std::bind(
-        consume_spirv_tools_message, result, std::placeholders::_1,
-        std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-    ir.spirv = std::vector<uint32_t>(source, source + source_len);
-
-    opt.RegisterPass(
-        spvtools::Optimizer::PassToken(std::unique_ptr<spvtools::opt::Pass>(
-            reinterpret_cast<spvtools::opt::Pass*>(
-                new spvtools::opt::SpvcIrPass(&ir)))));
-
-    if (!opt.Run(source, source_len, &binary_output)) {
-      result->messages.append(
-          "Transformations between source and target "
-          "execution environments failed (spvc-ir-pass).\n");
-      result->status = shaderc_compilation_status_transformation_error;
-      return result;
-    }
+  result = generate_spvcir(&ir, source, source_len, options, result);
+  if (result->status != shaderc_compilation_status_success) {
+    result->messages.append(
+        "Transformations between source and target "
+        "execution environments failed (spvc-ir-pass).\n");
+    return result;
+  } else {
+    compiler = new (std::nothrow) spirv_cross::CompilerHLSL(ir);
   }
-  compiler = new (std::nothrow) spirv_cross::CompilerHLSL(ir);
 #else
   compiler = new (std::nothrow) spirv_cross::CompilerHLSL(source, source_len);
 #endif
@@ -352,8 +357,26 @@ shaderc_spvc_compilation_result_t generate_msl_shader(
     const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result) {
-  spirv_cross::CompilerMSL* compiler =
-      new (std::nothrow) spirv_cross::CompilerMSL(source, source_len);
+  spirv_cross::CompilerMSL* compiler;
+
+// spvc IR generation is under development, for now run spirv-cross
+// compiler(SHADERC_ENABLE_SPVC_PARSER is OFF by default)
+// TODO (sarahM0): change the default to spvc IR generation when it's done
+#if SHADERC_ENABLE_SPVC_PARSER
+  spirv_cross::ParsedIR ir;
+  result = generate_spvcir(&ir, source, source_len, options, result);
+  if (result->status != shaderc_compilation_status_success) {
+    result->messages.append(
+        "Transformations between source and target "
+        "execution environments failed (spvc-ir-pass).\n");
+    return result;
+  } else {
+    compiler = new (std::nothrow) spirv_cross::CompilerMSL(ir);
+  }
+#else
+  compiler = new (std::nothrow) spirv_cross::CompilerMSL(source, source_len);
+#endif
+
   if (!compiler) {
     result->messages.append("Unable to initialize SPIRV-Cross MSL compiler.\n");
     result->status = shaderc_compilation_status_compilation_error;
@@ -374,14 +397,33 @@ shaderc_spvc_compilation_result_t generate_msl_shader(
   }
 
   return result;
-}
+}  // namespace spvc_private
 
 shaderc_spvc_compilation_result_t generate_vulkan_shader(
     const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result) {
-  spirv_cross::CompilerReflection* compiler =
+  spirv_cross::CompilerReflection* compiler;
+
+// spvc IR generation is under development, for now run spirv-cross
+// compiler(SHADERC_ENABLE_SPVC_PARSER is OFF by default)
+// TODO (sarahM0): change the default to spvc IR generation when it's done
+#if SHADERC_ENABLE_SPVC_PARSER
+  spirv_cross::ParsedIR ir;
+  result = generate_spvcir(&ir, source, source_len, options, result);
+  if (result->status != shaderc_compilation_status_success) {
+    result->messages.append(
+        "Transformations between source and target "
+        "execution environments failed (spvc-ir-pass).\n");
+    return result;
+  } else {
+    compiler = new (std::nothrow) spirv_cross::CompilerReflection(ir);
+  }
+#else
+  compiler =
       new (std::nothrow) spirv_cross::CompilerReflection(source, source_len);
+#endif
+
   if (!compiler) {
     result->messages.append(
         "Unable to initialize SPIRV-Cross reflection "
@@ -391,6 +433,30 @@ shaderc_spvc_compilation_result_t generate_vulkan_shader(
   }
   result->compiler.reset(compiler);
 
+  return result;
+}
+
+shaderc_spvc_compilation_result_t generate_spvcir(
+    spirv_cross::ParsedIR* ir, const uint32_t* source, size_t source_len,
+    shaderc_spvc_compile_options_t options,
+    shaderc_spvc_compilation_result_t result) {
+#if SHADERC_ENABLE_SPVC_PARSER
+  std::vector<uint32_t> binary_output;
+  spvtools::Optimizer opt(options->source_env);
+  opt.SetMessageConsumer(std::bind(
+      consume_spirv_tools_message, result, std::placeholders::_1,
+      std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+  ir->spirv = std::vector<uint32_t>(source, source + source_len);
+
+  opt.RegisterPass(
+      spvtools::Optimizer::PassToken(std::unique_ptr<spvtools::opt::Pass>(
+          reinterpret_cast<spvtools::opt::Pass*>(
+              new spvtools::opt::SpvcIrPass(ir)))));
+
+  if (!opt.Run(source, source_len, &binary_output)) {
+    result->status = shaderc_compilation_status_transformation_error;
+  }
+#endif  // SHADERC_ENABLE_SPVC_PARSER
   return result;
 }
 

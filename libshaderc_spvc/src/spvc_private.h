@@ -129,4 +129,12 @@ shaderc_spvc_compilation_result_t generate_vulkan_shader(
     shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result);
 
+// Given a pointer to an SPIRV-Cross IR (with initialized spirv field), Invokes
+// spirv-opt to generate a SPIRV-Cross IR (ie. populate empty fields of the
+// given spirv_cross::ParsedIR* ir).
+shaderc_spvc_compilation_result_t generate_spvcir(
+    spirv_cross::ParsedIR* ir, const uint32_t* source, size_t source_len,
+    shaderc_spvc_compile_options_t options,
+    shaderc_spvc_compilation_result_t result);
+
 }  // namespace spvc_private
