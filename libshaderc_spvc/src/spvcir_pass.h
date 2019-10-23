@@ -95,10 +95,14 @@ class SpvcIrPass : public Pass {
       return nullptr;
   }
 
-// copied from spirv-cross (class Parser)
-// returns true if the tow given SPIRTypes are equivalent. Used for aliasing.
+  // copied from spirv-cross (class Parser)
+  // returns true if the tow given SPIRTypes are equivalent. Used for aliasing.
   bool types_are_logically_equivalent(const spirv_cross::SPIRType &a,
                                       const spirv_cross::SPIRType &b) const;
+
+  // copied from spirv-cross (class Parser)
+  // TODO(sarahM0): add comment
+  void make_constant_null(uint32_t id, uint32_t type);
 };
 
 }  // namespace opt
