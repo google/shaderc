@@ -40,6 +40,8 @@ class SpvcIrPass : public Pass {
   spirv_cross::ParsedIR *ir_;
   spirv_cross::SPIRFunction *current_function_ = nullptr;
   spirv_cross::SPIRBlock *current_block_ = nullptr;
+  spirv_cross::SmallVector<uint32_t> global_struct_cache;
+  uint32_t offset_ = 5;
 
   // copied from spirv-cross (class Parser)
   // Adds an instruction to the SPIRV-Cross IR, for the given result Id and with
@@ -55,6 +57,48 @@ class SpvcIrPass : public Pass {
     var.self = id;
     return var;
   }
+
+  // copied from spirv-cross (class Parser)
+  // For a given result Id returns the previously constructed instruction.
+  template <typename T>
+  T &get(uint32_t id) {
+    return spirv_cross::variant_get<T>(ir_->ids[id]);
+  }
+
+  template <typename T>
+  const T &get(uint32_t id) const {
+    return spirv_cross::variant_get<T>(ir_->ids[id]);
+  }
+
+  // copied from spirv-cross (class Parser)
+  // For a given result Id returns the instruction if it was previously
+  // constructed and had the same result Type.
+  template <typename T>
+  T *maybe_get(uint32_t id) {
+    if (id >= ir_->ids.size())
+      return nullptr;
+    else if (ir_->ids[id].get_type() ==
+             static_cast<spirv_cross::Types>(T::type))
+      return &get<T>(id);
+    else
+      return nullptr;
+  }
+
+  template <typename T>
+  const T *maybe_get(uint32_t id) const {
+    if (id >= ir_->ids.size())
+      return nullptr;
+    else if (ir_->ids[id].get_type() ==
+             static_cast<spirv_cross::Types>(T::type))
+      return &get<T>(id);
+    else
+      return nullptr;
+  }
+
+// copied from spirv-cross (class Parser)
+// returns true if the tow given SPIRTypes are equivalent. Used for aliasing.
+  bool types_are_logically_equivalent(const spirv_cross::SPIRType &a,
+                                      const spirv_cross::SPIRType &b) const;
 };
 
 }  // namespace opt
