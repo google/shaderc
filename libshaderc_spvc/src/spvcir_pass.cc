@@ -660,20 +660,18 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       auto spec_op = static_cast<spv::Op>(inst->GetSingleWordInOperand(0u));
 
       if (inst->NumOperandWords() - 3 > 0) {
+        uint32_t *args = new uint32_t[inst->NumOperandWords() - 3];
+        for (uint32_t i = 0u; i < inst->NumOperandWords() - 3; i++) {
+          args[i] = inst->GetSingleWordInOperand(i + 1);
+        }
+        set<spirv_cross::SPIRConstantOp>(id, result_type, spec_op, args,
+                                         inst->NumOperandWords() - 3);
       }
-      uint32_t *args = new uint32_t[inst->NumOperandWords() - 3];
-      for (uint32_t i = 0u; i < inst->NumOperandWords() - 3; i++) {
-        args[i] = inst->GetSingleWordInOperand(i + 1);
-      }
-    }
-      set<spirv_cross::SPIRConstantOp>(id, result_type, spec_op, args,
-                                       inst->NumOperandWords() - 3);
       break;
-  }
+    }
 
-  // TODO(sarahM0): These opcodes are processed in the generator.
-  // Investigate if we need to rewrite those functions as well.
-  default: {
+    // TODO(sarahM0): These opcodes are processed in the generator.
+    // Investigate if we need to rewrite those functions as well.
     case SpvOpImageSampleImplicitLod:
     case SpvOpCompositeConstruct:
     case SpvOpFAdd:
@@ -713,10 +711,10 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       assert(false);
       break;
     }
-  }
 
-    offset_ += inst->NumOperandWords() + 1;
-}  // namespace opt
+      offset_ += inst->NumOperandWords() + 1;
+  }
+}
 
 bool SpvcIrPass::types_are_logically_equivalent(
     const spirv_cross::SPIRType &a, const spirv_cross::SPIRType &b) const {
