@@ -88,6 +88,8 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_set_remove_unused_variables(
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_robust_buffer_access_pass(
     shaderc_spvc_compile_options_t options, bool b);
 
+SHADERC_EXPORT  void shaderc_spvc_compile_options_set_emit_line_directives(
+    shaderc_spvc_compile_options_t options, bool b);
 // Sets the source shader environment, affecting which warnings or errors will
 // be issued during validation.
 // Default value for environment is Vulkan 1.0.

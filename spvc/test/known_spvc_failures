@@ -13,7 +13,6 @@ shaders-hlsl-no-opt/asm/frag/pixel-interlock-split-functions.sm51.fxconly.asm.fr
 shaders-hlsl-no-opt/asm/frag/switch-block-case-fallthrough.asm.invalid.frag,False
 shaders-hlsl-no-opt/asm/frag/unordered-compare.asm.frag,False
 shaders-hlsl-no-opt/asm/frag/vector-shuffle-undef-index.asm.frag,False
-shaders-hlsl-no-opt/asm/vert/empty-struct-composite.asm.vert,False
 shaders-hlsl-no-opt/comp/bitfield.comp,False
 shaders-hlsl-no-opt/comp/glsl.std450.fxconly.comp,False
 shaders-hlsl-no-opt/frag/pixel-interlock-simple-callstack.sm51.fxconly.frag,False
@@ -73,9 +72,6 @@ shaders-hlsl/asm/vert/extract-transposed-matrix-from-struct.asm.vert,False
 shaders-hlsl/asm/vert/extract-transposed-matrix-from-struct.asm.vert,True
 shaders-hlsl/asm/vert/spec-constant-op-composite.asm.vert,True
 shaders-hlsl/asm/vert/uint-vertex-id-instance-id.asm.vert,False
-shaders-hlsl/asm/vert/uint-vertex-id-instance-id.asm.vert,True
-shaders-hlsl/asm/vert/vertex-id-instance-id.asm.vert,False
-shaders-hlsl/asm/vert/vertex-id-instance-id.asm.vert,True
 shaders-hlsl/comp/access-chains.comp,False
 shaders-hlsl/comp/access-chains.comp,True
 shaders-hlsl/comp/atomic.comp,False
@@ -104,8 +100,6 @@ shaders-hlsl/comp/scalar-std450-distance-length-normalize.comp,False
 shaders-hlsl/comp/scalar-std450-distance-length-normalize.comp,True
 shaders-hlsl/comp/shared.comp,False
 shaders-hlsl/comp/shared.comp,True
-shaders-hlsl/comp/spec-constant-op-member-array.comp,False
-shaders-hlsl/comp/spec-constant-op-member-array.comp,True
 shaders-hlsl/comp/spec-constant-work-group-size.comp,False
 shaders-hlsl/comp/spec-constant-work-group-size.comp,True
 shaders-hlsl/comp/ssbo-array-length.comp,False
@@ -140,8 +134,6 @@ shaders-hlsl/frag/fp16-packing.frag,False
 shaders-hlsl/frag/fp16-packing.frag,True
 shaders-hlsl/frag/fp16.invalid.desktop.frag,False
 shaders-hlsl/frag/fp16.invalid.desktop.frag,True
-shaders-hlsl/frag/front-facing.frag,False
-shaders-hlsl/frag/front-facing.frag,True
 shaders-hlsl/frag/image-query-selective.frag,False
 shaders-hlsl/frag/image-query.frag,False
 shaders-hlsl/frag/input-attachment-ms.frag,False
@@ -175,8 +167,6 @@ shaders-hlsl/frag/scalar-refract-reflect.frag,False
 shaders-hlsl/frag/scalar-refract-reflect.frag,True
 shaders-hlsl/frag/separate-combined-fake-overload.sm30.frag,False
 shaders-hlsl/frag/separate-combined-fake-overload.sm30.frag,True
-shaders-hlsl/frag/switch-unsigned-case.frag,False
-shaders-hlsl/frag/switch-unsigned-case.frag,True
 shaders-hlsl/frag/swizzle-scalar.frag,False
 shaders-hlsl/frag/swizzle-scalar.frag,True
 shaders-hlsl/frag/tex-sampling-ms.frag,False
@@ -196,8 +186,6 @@ shaders-hlsl/frag/various-glsl-ops.frag,False
 shaders-hlsl/frag/various-glsl-ops.frag,True
 shaders-hlsl/vert/basic.vert,False
 shaders-hlsl/vert/basic.vert,True
-shaders-hlsl/vert/instancing.vert,False
-shaders-hlsl/vert/instancing.vert,True
 shaders-hlsl/vert/locations.vert,True
 shaders-hlsl/vert/matrix-attribute.vert,False
 shaders-hlsl/vert/matrix-attribute.vert,True
@@ -239,7 +227,6 @@ shaders-msl-no-opt/asm/packing/load-packed-no-forwarding-5.asm.comp,False
 shaders-msl-no-opt/asm/packing/load-packed-no-forwarding.asm.comp,False
 shaders-msl-no-opt/asm/packing/packed-vector-extract-insert.asm.comp,False
 shaders-msl-no-opt/asm/packing/row-major-split-access-chain.asm.comp,False
-shaders-msl-no-opt/asm/vert/empty-struct-composite.asm.vert,False
 shaders-msl-no-opt/asm/vert/op-load-forced-temporary-array.asm.frag,False
 shaders-msl-no-opt/comp/array-copy-threadgroup-memory.comp,False
 shaders-msl-no-opt/comp/bitfield.comp,False
@@ -298,8 +285,6 @@ shaders-msl/asm/comp/atomic-decrement.asm.comp,False
 shaders-msl/asm/comp/atomic-decrement.asm.comp,True
 shaders-msl/asm/comp/atomic-increment.asm.comp,False
 shaders-msl/asm/comp/atomic-increment.asm.comp,True
-shaders-msl/asm/comp/bitcast_iadd.asm.comp,False
-shaders-msl/asm/comp/bitcast_iadd.asm.comp,True
 shaders-msl/asm/comp/bitcast_icmp.asm.comp,False
 shaders-msl/asm/comp/bitcast_icmp.asm.comp,True
 shaders-msl/asm/comp/bitcast_sar.asm.comp,False
@@ -395,7 +380,6 @@ shaders-msl/asm/vert/invariant.msl21.asm.vert,False
 shaders-msl/asm/vert/packing-test.asm.vert,False
 shaders-msl/asm/vert/spec-constant-op-composite.asm.vert,True
 shaders-msl/asm/vert/uint-vertex-id-instance-id.asm.vert,False
-shaders-msl/asm/vert/uint-vertex-id-instance-id.asm.vert,True
 shaders-msl/comp/access-private-workgroup-in-function.comp,False
 shaders-msl/comp/argument-buffers-image-load-store.ios.msl2.argument.comp,False
 shaders-msl/comp/argument-buffers-image-load-store.ios.msl2.argument.comp,True
@@ -479,8 +463,6 @@ shaders-msl/comp/shared-array-of-arrays.comp,False
 shaders-msl/comp/shared-array-of-arrays.comp,True
 shaders-msl/comp/shared.comp,False
 shaders-msl/comp/shared.comp,True
-shaders-msl/comp/spec-constant-op-member-array.comp,False
-shaders-msl/comp/spec-constant-op-member-array.comp,True
 shaders-msl/comp/spec-constant-work-group-size.comp,False
 shaders-msl/comp/spec-constant-work-group-size.comp,True
 shaders-msl/comp/struct-layout.comp,False
@@ -570,8 +552,6 @@ shaders-msl/frag/fp16-packing.frag,False
 shaders-msl/frag/fp16-packing.frag,True
 shaders-msl/frag/fp16.desktop.invalid.frag,False
 shaders-msl/frag/fp16.desktop.invalid.frag,True
-shaders-msl/frag/front-facing.frag,False
-shaders-msl/frag/front-facing.frag,True
 shaders-msl/frag/gather-dref.frag,False
 shaders-msl/frag/gather-dref.frag,True
 shaders-msl/frag/gather-offset.frag,False
@@ -631,12 +611,8 @@ shaders-msl/frag/shader-arithmetic-8bit.frag,False
 shaders-msl/frag/shader-arithmetic-8bit.frag,True
 shaders-msl/frag/shadow-compare-global-alias.invalid.frag,False
 shaders-msl/frag/shadow-compare-global-alias.invalid.frag,True
-shaders-msl/frag/stencil-export.msl21.frag,False
-shaders-msl/frag/stencil-export.msl21.frag,True
 shaders-msl/frag/subgroup-builtins.msl22.frag,False
 shaders-msl/frag/subgroup-builtins.msl22.frag,True
-shaders-msl/frag/switch-unsigned-case.frag,False
-shaders-msl/frag/switch-unsigned-case.frag,True
 shaders-msl/frag/swizzle.frag,False
 shaders-msl/frag/swizzle.frag,True
 shaders-msl/frag/texel-fetch-offset.frag,False
@@ -744,7 +720,6 @@ shaders-no-opt/asm/frag/unordered-compare.asm.frag,False
 shaders-no-opt/asm/frag/vector-extract-dynamic-spec-constant.asm.frag,False
 shaders-no-opt/asm/frag/vector-shuffle-undef-index.asm.frag,False
 shaders-no-opt/asm/frag/while-loop-inverted-test.asm.frag,False
-shaders-no-opt/asm/vert/empty-struct-composite.asm.vert,False
 shaders-no-opt/asm/vert/semantic-decoration.asm.vert,False
 shaders-no-opt/comp/bitfield.comp,False
 shaders-no-opt/comp/glsl.std450.comp,False
@@ -792,8 +767,6 @@ shaders/asm/comp/atomic-decrement.asm.comp,False
 shaders/asm/comp/atomic-decrement.asm.comp,True
 shaders/asm/comp/atomic-increment.asm.comp,False
 shaders/asm/comp/atomic-increment.asm.comp,True
-shaders/asm/comp/bitcast_iadd.asm.comp,False
-shaders/asm/comp/bitcast_iadd.asm.comp,True
 shaders/asm/comp/bitcast_icmp.asm.comp,False
 shaders/asm/comp/bitcast_icmp.asm.comp,True
 shaders/asm/comp/bitcast_iequal.asm.comp,False
@@ -814,8 +787,6 @@ shaders/asm/comp/global-parameter-name-alias.asm.comp,False
 shaders/asm/comp/hlsl-functionality.asm.comp,False
 shaders/asm/comp/hlsl-functionality.asm.comp,True
 shaders/asm/comp/logical.asm.comp,False
-shaders/asm/comp/multiple-entry.asm.comp,False
-shaders/asm/comp/multiple-entry.asm.comp,True
 shaders/asm/comp/nmin-max-clamp.asm.comp,False
 shaders/asm/comp/nmin-max-clamp.asm.comp,True
 shaders/asm/comp/op-phi-swap.asm.comp,False
@@ -838,7 +809,6 @@ shaders/asm/frag/complex-name-workarounds.asm.frag,False
 shaders/asm/frag/complex-name-workarounds.asm.frag,True
 shaders/asm/frag/default-member-names.asm.frag,False
 shaders/asm/frag/default-member-names.asm.frag,True
-shaders/asm/frag/do-while-statement-fallback.asm.frag,False
 shaders/asm/frag/empty-struct.asm.frag,False
 shaders/asm/frag/for-loop-phi-only-continue.asm.frag,False
 shaders/asm/frag/for-loop-phi-only-continue.asm.frag,True
@@ -896,8 +866,6 @@ shaders/asm/frag/storage-class-output-initializer.asm.frag,False
 shaders/asm/frag/storage-class-output-initializer.asm.frag,True
 shaders/asm/frag/struct-composite-extract-swizzle.asm.frag,False
 shaders/asm/frag/struct-composite-extract-swizzle.asm.frag,True
-shaders/asm/frag/switch-label-shared-block.asm.frag,False
-shaders/asm/frag/switch-label-shared-block.asm.frag,True
 shaders/asm/frag/switch-merge-to-continue.asm.frag,False
 shaders/asm/frag/switch-merge-to-continue.asm.frag,True
 shaders/asm/frag/temporary-name-alias.asm.frag,False
@@ -932,7 +900,6 @@ shaders/asm/vert/invariant.asm.vert,False
 shaders/asm/vert/invariant.sso.asm.vert,False
 shaders/asm/vert/spec-constant-op-composite.asm.vk.vert,True
 shaders/asm/vert/uint-vertex-id-instance-id.asm.vert,False
-shaders/asm/vert/uint-vertex-id-instance-id.asm.vert,True
 shaders/comp/atomic.comp,False
 shaders/comp/atomic.comp,True
 shaders/comp/bake_gradient.comp,False
@@ -1079,8 +1046,6 @@ shaders/frag/for-loop-init.frag,False
 shaders/frag/for-loop-init.frag,True
 shaders/frag/frexp-modf.frag,False
 shaders/frag/frexp-modf.frag,True
-shaders/frag/front-facing.frag,False
-shaders/frag/front-facing.frag,True
 shaders/frag/gather-dref.frag,False
 shaders/frag/gather-dref.frag,True
 shaders/frag/ground.frag,False
@@ -1118,8 +1083,6 @@ shaders/frag/scalar-refract-reflect.frag,False
 shaders/frag/scalar-refract-reflect.frag,True
 shaders/frag/selection-block-dominator.frag,False
 shaders/frag/selection-block-dominator.frag,True
-shaders/frag/switch-unsigned-case.frag,False
-shaders/frag/switch-unsigned-case.frag,True
 shaders/frag/swizzle.frag,False
 shaders/frag/swizzle.frag,True
 shaders/frag/texel-fetch-offset.frag,False
@@ -1172,8 +1135,6 @@ shaders/vert/texture_buffer.vert,False
 shaders/vert/texture_buffer.vert,True
 shaders/vert/ubo.vert,False
 shaders/vert/ubo.vert,True
-shaders/vulkan/comp/spec-constant-op-member-array.vk.comp,False
-shaders/vulkan/comp/spec-constant-op-member-array.vk.comp,True
 shaders/vulkan/comp/spec-constant-work-group-size.vk.comp,False
 shaders/vulkan/comp/spec-constant-work-group-size.vk.comp,True
 shaders/vulkan/frag/combined-texture-sampler-shadow.vk.frag,False

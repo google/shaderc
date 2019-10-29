@@ -69,7 +69,7 @@ SpvcIrPass::SpvcIrPass(spirv_cross::ParsedIR *ir) {
 
 Pass::Status SpvcIrPass::Process() {
   get_module()->ForEachInst(
-      [this](Instruction *inst) { GenerateSpirvCrossIR(inst); });
+      [this](Instruction *inst) { GenerateSpirvCrossIR(inst); }, true);
 
   assert(!current_function_ && "Function was not terminated.");
   assert(!current_block_ && "Block Was not terminated");
@@ -120,6 +120,7 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
+    // opcode: 17
     case SpvOpCapability: {
       auto cap = inst->GetSingleWordInOperand(0u);
       assert(cap != spv::CapabilityKernel &&
@@ -332,6 +333,14 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
+    // opcode: 7
+    case SpvOpString: {
+      set<spirv_cross::SPIRString>(
+          inst->result_id(),
+          reinterpret_cast<const char *>(inst->GetInOperand(0u).words.data()));
+      break;
+    }
+
     // opcode: 23
     // spirv-cross comment:
     // Build composite types by "inheriting".
@@ -474,6 +483,28 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
+    case SpvOpPhi: {
+      assert(current_function_ && "No function currently in scope");
+      assert(current_block_ && "No block currently in scope");
+
+      uint32_t result_type = inst->type_id();
+      uint32_t id = inst->result_id();
+
+      // Instead of a temporary, create a new function-wide temporary with this
+      // ID instead.
+      auto &var = set<spirv_cross::SPIRVariable>(id, result_type,
+                                                 spv::StorageClassFunction);
+      var.phi_variable = true;
+
+      current_function_->add_local_variable(id);
+
+      for (uint32_t i = 0; i + 1 < inst->NumInOperands(); i += 2)
+        current_block_->phi_variables.push_back(
+            {inst->GetSingleWordInOperand(i),
+             inst->GetSingleWordInOperand(i + 1), id});
+      break;
+    }
+
     // Constant Cases
     // opcode: 50
     case SpvOpSpecConstant:
@@ -605,7 +636,7 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
-    // opcode: 55
+    // opcode: 56
     case SpvOpFunctionEnd: {
       // Very specific error message, but seems to come up quite often.
       assert(!current_block_ &&
@@ -650,6 +681,157 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
+    // opcode: 247
+    case SpvOpSelectionMerge: {
+      assert(current_block_ && "Trying to modify a non-existing block.");
+
+      current_block_->next_block = inst->GetSingleWordInOperand(0u);
+      current_block_->merge = spirv_cross::SPIRBlock::MergeSelection;
+      ir_->block_meta[current_block_->next_block] |=
+          spirv_cross::ParsedIR::BLOCK_META_SELECTION_MERGE_BIT;
+
+      // TODO(sarahM0): This condition is added mirroring what spirv-cross does.
+      // Investigate why since according to spec the second operand is not
+      // optional
+      if (inst->NumInOperands() >= 2) {
+        if (inst->GetSingleWordInOperand(1u) & spv::SelectionControlFlattenMask)
+          current_block_->hint = spirv_cross::SPIRBlock::HintFlatten;
+        else if (inst->GetSingleWordInOperand(1u) &
+                 spv::SelectionControlDontFlattenMask)
+          current_block_->hint = spirv_cross::SPIRBlock::HintDontFlatten;
+      }
+      break;
+    }
+
+    // Branch cases
+    // opcode: 249
+    case SpvOpBranch: {
+      assert(current_block_ && "Trying to end a non-existing block.");
+
+      uint32_t target = inst->GetSingleWordInOperand(0u);
+      current_block_->terminator = spirv_cross::SPIRBlock::Direct;
+      current_block_->next_block = target;
+      current_block_ = nullptr;
+      break;
+    }
+
+    // opcode: 250
+    case SpvOpBranchConditional: {
+      assert(current_block_ && "Trying to end a non-existing block.");
+
+      current_block_->condition = inst->GetSingleWordInOperand(0u);
+      current_block_->true_block = inst->GetSingleWordInOperand(1u);
+      current_block_->false_block = inst->GetSingleWordInOperand(2u);
+
+      current_block_->terminator = spirv_cross::SPIRBlock::Select;
+      current_block_ = nullptr;
+      // TODO(sarahM0): Looks like spirv-cross does not have mechanism to use
+      // branch weights. Ask if it matters to us.
+      break;
+    }
+
+    // opcode: 252
+    case SpvOpKill: {
+      assert(current_block_ && "Trying to end a non-existing block.");
+      current_block_->terminator = spirv_cross::SPIRBlock::Kill;
+      current_block_ = nullptr;
+      break;
+    }
+
+    // opcode: 8
+    // TODO(sarahM0):
+    case SpvOpLine: {
+      // spirv-cross comment:
+      // OpLine might come at global scope, but we don't care about those since
+      // they will not be declared in any meaningful correct order. Ignore all
+      // OpLine directives which live outside a function.
+      spirv_cross::Instruction instruction = {};
+      instruction.op = inst->opcode();
+      instruction.count = inst->NumOperandWords() + 1;
+      instruction.offset = offset_ + 1;
+      instruction.length = instruction.count - 1;
+
+      if (current_block_) current_block_->ops.push_back(instruction);
+      // spirv-cross comment:
+      // Line directives may arrive before first OpLabel.
+      // Treat this as the line of the function declaration,
+      // so warnings for arguments can propagate properly.
+      if (current_function_) {
+        // spirv-cross comment:
+        // Store the first one we find and emit it before creating the function
+        // prototype.
+        if (current_function_->entry_line.file_id == 0) {
+          current_function_->entry_line.file_id =
+              inst->GetSingleWordInOperand(0u);
+          current_function_->entry_line.line_literal =
+              inst->GetSingleWordInOperand(1u);
+        }
+      }
+      break;
+    }
+
+    // opcode: 251
+    case SpvOpSwitch: {
+      assert(current_block_ && "Trying to end a non-existing block.");
+
+      current_block_->terminator = spirv_cross::SPIRBlock::MultiSelect;
+
+      current_block_->condition = inst->GetSingleWordInOperand(0u);
+      current_block_->default_block = inst->GetSingleWordInOperand(1u);
+
+      for (uint32_t i = 2; i + 1 < inst->NumOperandWords(); i += 2)
+        current_block_->cases.push_back({inst->GetSingleWordInOperand(i),
+                                         inst->GetSingleWordInOperand(i + 1)});
+
+      // spirv-cross comment:
+      // If we jump to next block, make it break instead since we're inside a
+      // switch case block at that point.
+      ir_->block_meta[current_block_->next_block] |=
+          spirv_cross::ParsedIR::BLOCK_META_MULTISELECT_MERGE_BIT;
+
+      current_block_ = nullptr;
+      break;
+    }
+
+    // opcode: 246
+    case SpvOpLoopMerge: {
+      assert(current_block_ && "Trying to modify a non-existing block.");
+
+      current_block_->merge_block = inst->GetSingleWordInOperand(0u);
+      current_block_->continue_block = inst->GetSingleWordInOperand(1u);
+      current_block_->merge = spirv_cross::SPIRBlock::MergeLoop;
+
+      ir_->block_meta[current_block_->self] |=
+          spirv_cross::ParsedIR::BLOCK_META_LOOP_HEADER_BIT;
+      ir_->block_meta[current_block_->merge_block] |=
+          spirv_cross::ParsedIR::BLOCK_META_LOOP_MERGE_BIT;
+
+      ir_->continue_block_to_loop_header[current_block_->continue_block] =
+          spirv_cross::BlockID(current_block_->self);
+
+      // spirv-cross comment:
+      // Don't add loop headers to continue blocks,
+      // which would make it impossible branch into the loop header since
+      // they are treated as continues.
+      if (current_block_->continue_block !=
+          spirv_cross::BlockID(current_block_->self))
+        ir_->block_meta[current_block_->continue_block] |=
+            spirv_cross::ParsedIR::BLOCK_META_CONTINUE_BIT;
+
+      // TODO(sarahM0): according to spec there can be more than one literal
+      // Loop Control Parameters, spirv-cross is only consuming the first one,
+      // investigate.
+      if (inst->NumInOperands() >= 3) {
+        if (inst->GetSingleWordInOperand(2u) & spv::LoopControlUnrollMask)
+          current_block_->hint = spirv_cross::SPIRBlock::HintUnroll;
+        else if (inst->GetSingleWordInOperand(2u) &
+                 spv::LoopControlDontUnrollMask)
+          current_block_->hint = spirv_cross::SPIRBlock::HintDontUnroll;
+      }
+      break;
+    }
+
+    // Constant Cases
     // opcode: 52
     case SpvOpSpecConstantOp: {
       assert(inst->NumOperandWords() >= 3 &&
@@ -672,6 +854,8 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
 
     // TODO(sarahM0): These opcodes are processed in the generator.
     // Investigate if we need to rewrite those functions as well.
+    case SpvOpIAdd:
+    case SpvOpFOrdLessThan:
     case SpvOpImageSampleImplicitLod:
     case SpvOpCompositeConstruct:
     case SpvOpFAdd:

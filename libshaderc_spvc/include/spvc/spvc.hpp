@@ -137,6 +137,9 @@ class CompileOptions {
   void SetRobustBufferAccessPass(bool b){
     shaderc_spvc_compile_options_set_robust_buffer_access_pass(options_, b);
   }
+  void SetEmitLineDirectives(bool b){
+    shaderc_spvc_compile_options_set_emit_line_directives(options_, b);
+  }
   // If true, Vulkan GLSL features are used instead of GL-compatible features.
   void SetVulkanSemantics(bool b) {
     shaderc_spvc_compile_options_set_vulkan_semantics(options_, b);
