@@ -190,6 +190,7 @@ def remove_files(*filenames):
 
 def test_glsl(test_env, shader, filename, optimize):
     """Test spvc producing GLSL the same way SPIRV-Cross is tested.
+
     There are three steps: compile input, convert to GLSL, check result.
     Returns a list of successful tests and a list of failed tests.
     """
@@ -290,8 +291,10 @@ msl_standards_macos = (
     '',      '-std=macos-metal1.2',
 )
 
+
 def test_msl(test_env, shader, filename, optimize):
     """Test spvc producing MSL the same way SPIRV-Cross is tested.
+
     There are three steps: compile input, convert to HLSL, check result.
     Returns a list of successful tests and a list of failed tests.
     """
@@ -355,6 +358,7 @@ def test_msl(test_env, shader, filename, optimize):
 
 def test_hlsl(test_env, shader, filename, optimize):
     """Test spvc producing HLSL the same way SPIRV-Cross is tested.
+
     There are three steps: compile input, convert to HLSL, check result.
     Returns a list of successful tests and a list of failed tests.
     """
@@ -430,6 +434,20 @@ def work_function(work_args):
     function."""
     (test_function, test_env, shader, filename, optimize) = work_args
     return test_function(test_env, shader, filename, optimize)
+
+
+def read_expectation_file(filename):
+    """Reads in an expectation file.
+
+    Input file is expected to be formatted as '<file>,<optimized>' per line.
+    Returns an array of tuples of the parsed test cases.
+    """
+    with open(filename, 'r') as f:
+        expectations = f.read().splitlines()
+    if len(expectations):
+        return set(map(lambda x: (x.split(',')[0], x.split(',')[1] == 'True'), expectations))
+    else:
+        return []
 
 
 def main():
@@ -511,10 +529,10 @@ def main():
     # anything, or only matches to tests that are skipped.
     # This branch should be unreachable since the early check would have been activated
     if not results:
-        print('Did not receive any results from workers (happened while --no-validate run)...')
+        print(
+            'Did not receive any results from workers (happened while --no-validate run)...')
         return False
     successes_without_validation, _ = zip(*results)
-
 
     # Flattening lists of lists, and convert path markers if needed
     successes = list(itertools.chain.from_iterable(successes))
@@ -524,12 +542,13 @@ def main():
     failures = list(itertools.chain.from_iterable(failures))
     failures = list(
         map(lambda x: (x[0].replace(os.path.sep, '/'), x[1]), failures))
-    successes_without_validation = list(itertools.chain.from_iterable(successes_without_validation))
+    successes_without_validation = list(
+        itertools.chain.from_iterable(successes_without_validation))
     successes_without_validation = list(
         map(lambda x: (x[0].replace(os.path.sep, '/'), x[1]), successes_without_validation))
     failures.sort()
 
-    fail_file = ""
+    fail_file = ''
     if script_args.run_spvc_tests:
         fail_file = os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'known_spvc_failures')
@@ -543,38 +562,25 @@ def main():
     print('{} passed and'.format(len(successes)))
     print('{} passed with --no-validation flag'.format(len(successes_without_validation)))
 
-
     if script_args.update_known_failures:
         print('Updating {}'.format(fail_file))
         with open(fail_file, 'w+') as f:
             for failure in failures:
                 f. write('{},{}\n'.format(failure[0], failure[1]))
-    with open(fail_file, 'r') as f:
-        known_failures = f.read().splitlines()
-    known_failures = set(
-        map(lambda x: (x.split(',')[0], x.split(',')[1] == 'True'), known_failures))
+    known_failures = read_expectation_file(fail_file)
 
     invalid_file = os.path.join(os.path.dirname(
         os.path.realpath(__file__)), 'known_invalids')
-    with open(invalid_file, 'r') as f:
-        known_invalids = f.read().splitlines()
-    known_invalids = set(
-        map(lambda x: (x.split(',')[0], x.split(',')[1] == 'True'),known_invalids))
+    known_invalids = read_expectation_file(invalid_file)
 
     unconfirmed_invalid_file = os.path.join(os.path.dirname(
         os.path.realpath(__file__)), 'unconfirmed_invalids')
-    with open(unconfirmed_invalid_file, 'r') as f:
-        unconfirmed_invalids = f.read().splitlines()
-    unconfirmed_invalids = set(
-        map(lambda x: (x.split(',')[0], x.split(',')[1] == 'True'),unconfirmed_invalids))
+    unconfirmed_invalids = read_expectation_file(unconfirmed_invalid_file)
 
     unexpected_successes = []
     unexpected_failures = []
     unexpected_invalids = []
     unexpected_valids = []
-
-    if not script_args.test_filter:
-        missing_failures = []
 
     for success in successes:
         if success in known_failures:
@@ -587,11 +593,6 @@ def main():
             if failure not in known_invalids:
                 unexpected_failures.append(failure)
 
-    if not script_args.test_filter:
-        for known_failure in known_failures:
-            if known_failure not in successes and known_failure not in failures:
-                missing_failures.append(known_failure)
-
     for invalid in successes_without_validation:
         if invalid not in successes:
             if invalid not in unconfirmed_invalids and invalid not in known_invalids:
@@ -602,13 +603,14 @@ def main():
     test_env.log_unexpected(unexpected_invalids, 'invalid')
     test_env.log_unexpected(unexpected_valids, 'valid')
 
+    missing_failures = []
     if not script_args.test_filter:
+        for known_failure in known_failures:
+            if known_failure not in successes and known_failure not in failures:
+                missing_failures.append(known_failure)
         test_env.log_missing_failures(missing_failures)
 
-    if not script_args.test_filter:
-        return len(unexpected_successes) != 0 or len(unexpected_failures) != 0 or len(missing_failures) != 0
-    else:
-        return len(unexpected_successes) != 0 or len(unexpected_failures) != 0
+    return len(unexpected_successes) != 0 or len(unexpected_failures) != 0 or len(missing_failures) != 0
 
 
 if __name__ == '__main__':
