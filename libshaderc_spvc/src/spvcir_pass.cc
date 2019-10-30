@@ -708,7 +708,9 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
     default: {
       printf("Instruction %d not supported in spvc parser yet.\n",
              inst->opcode());
-      assert(false);
+      assert(false &&
+             "The input file contains an instruction that spvc parser does not "
+             "support.");
       break;
     }
   }
