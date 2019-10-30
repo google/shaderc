@@ -17,6 +17,7 @@ shaders-msl-no-opt/asm/packing/load-packed-no-forwarding-3.asm.comp,False
 shaders-msl-no-opt/asm/packing/load-packed-no-forwarding-5.asm.comp,False
 shaders-msl-no-opt/asm/packing/load-packed-no-forwarding.asm.comp,False
 shaders-msl-no-opt/asm/packing/packed-vector-extract-insert.asm.comp,False
+shaders-msl-no-opt/packing/array-of-vec3.comp,False
 shaders-msl-no-opt/packing/matrix-2x3-scalar.comp,False
 shaders-msl-no-opt/packing/matrix-3x2-scalar.comp,False
 shaders-msl-no-opt/packing/matrix-3x3-scalar.comp,False
@@ -69,6 +70,8 @@ shaders-msl/frag/shadow-compare-global-alias.invalid.frag,False
 shaders-msl/frag/shadow-compare-global-alias.invalid.frag,True
 shaders-msl/frag/subgroup-builtins.msl22.frag,False
 shaders-msl/frag/subgroup-builtins.msl22.frag,True
+shaders-msl/frag/texture-cube-array.ios.emulate-cube-array.frag,False
+shaders-msl/frag/texture-cube-array.ios.emulate-cube-array.frag,True
 shaders-msl/legacy/vert/transpose.legacy.vert,False
 shaders-msl/legacy/vert/transpose.legacy.vert,True
 shaders-msl/tesc/water_tess.tesc,False
@@ -81,6 +84,8 @@ shaders-msl/vert/copy.flatten.vert,False
 shaders-msl/vert/copy.flatten.vert,True
 shaders-msl/vert/dynamic.flatten.vert,False
 shaders-msl/vert/dynamic.flatten.vert,True
+shaders-msl/vert/float-math.invariant-float-math.vert,False
+shaders-msl/vert/float-math.invariant-float-math.vert,True
 shaders-msl/vert/functions.vert,False
 shaders-msl/vert/functions.vert,True
 shaders-msl/vert/leaf-function.capture.vert,False
@@ -121,6 +126,7 @@ shaders-reflection/vert/read-from-row-major-array.vert,False
 shaders-reflection/vert/texture_buffer.vert,False
 shaders/asm/extended-debug-extinst.invalid.asm.comp,False
 shaders/asm/extended-debug-extinst.invalid.asm.comp,True
+shaders/asm/frag/complex-name-workarounds.asm.frag,True
 shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,False
 shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,True
 shaders/asm/frag/image-query-no-sampler.no-samplerless.vk.asm.frag,False
