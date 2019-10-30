@@ -711,9 +711,8 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       assert(false);
       break;
     }
-
-      offset_ += inst->NumOperandWords() + 1;
   }
+  offset_ += inst->NumOperandWords() + 1;
 }
 
 bool SpvcIrPass::types_are_logically_equivalent(
