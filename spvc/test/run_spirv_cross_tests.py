@@ -224,7 +224,8 @@ def test_glsl(test_env, shader, filename, optimize):
         flags.append('--glsl-emit-push-constant-as-ubo')
     if '.sso.' in filename:
         flags.append('--separate-shader-objects')
-
+    if '.line' in filename:
+        flags.append('--emit-line-directives')
     output = input_shader + filename
     if '.vk.' in filename:
         status, _ = test_env.run_spvc(
@@ -328,6 +329,8 @@ def test_msl(test_env, shader, filename, optimize):
     if '.discrete.' in shader:
         flags.append('--msl-discrete-descriptor-set=2')
         flags.append('--msl-discrete-descriptor-set=3')
+    if '.line' in filename:
+        flags.append('--emit-line-directives')
 
     output = input_shader + filename
     status, _ = test_env.run_spvc(input_shader, output, flags)
@@ -373,10 +376,12 @@ def test_hlsl(test_env, shader, filename, optimize):
         test_env.log_failure(shader, optimize)
         return successes, failures
 
+    flags = ['--entry=main', '--language=hlsl']
+    if '.line' in filename:
+        flags.append('--emit-line-directives')
     # Run spvc to convert Vulkan to HLSL.
     output = input_shader + filename
-    status, _ = test_env.run_spvc(input_shader, output, ['--entry=main', '--language=hlsl',
-                                                         '--hlsl-enable-compat', '--shader-model=' + lookup(shader_models, filename)])
+    status, _ = test_env.run_spvc(input_shader, output, flags + ['--hlsl-enable-compat', '--shader-model=' + lookup(shader_models, filename)])
     if not status:
         remove_files(input_shader)
         failures.append((shader, optimize))
