@@ -394,7 +394,7 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
 
       ptrbase.parent_type = inst->GetSingleWordInOperand(1u);
 
-      // spirv-corss comment:
+      // spirv-cross comment:
       // Do NOT set ptrbase.self!
       break;
     }
@@ -672,6 +672,7 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
 
     // TODO(sarahM0): These opcodes are processed in the generator.
     // Investigate if we need to rewrite those functions as well.
+    // https://github.com/google/shaderc/issues/854
     case SpvOpImageSampleImplicitLod:
     case SpvOpCompositeConstruct:
     case SpvOpFAdd:
