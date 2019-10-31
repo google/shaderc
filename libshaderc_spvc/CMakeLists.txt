@@ -94,11 +94,14 @@ shaderc_add_tests(
   TEST_PREFIX shaderc
   LINK_LIBS shaderc_spvc ${SPVC_LIBS}
   INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc/include ${SPIRV-Cross_SOURCE_DIR}/..
+    ${SPIRV-Cross_SOURCE_DIR}/../effcee
+    ${SPIRV-Cross_SOURCE_DIR}/../re2
   TEST_NAMES
     spvc
     spvc_cpp
     spvc_webgpu
-    spvc_webgpu_cpp)
+    spvc_webgpu_cpp
+    spvcir)
 
 shaderc_add_tests(
   TEST_PREFIX shaderc_shared
