@@ -61,6 +61,17 @@ class TestEnv:
             log_string += '\n'.join(failures)
         print(log_string)
 
+    def log_missing_invalids(self, invalids):
+        """Log list of known invalid test cases that were not run."""
+        if not len(invalids):
+            log_string = 'Encountered 0 missing invalids'
+        else:
+            log_string = 'Encountered {} missing invalid(s):\n'.format(
+                len(invalids))
+            invalids = ['\t{}'.format(invalid) for invalid in invalids]
+            log_string += '\n'.join(invalids)
+        print(log_string)
+
     def log_failure(self, shader, optimize):
         """Log a test case failure."""
         if self.verbose:
@@ -439,8 +450,8 @@ def work_function(work_args):
 def read_expectation_file(filename):
     """Reads in an expectation file.
 
-    Input file is expected to be formatted as '<file>,<optimized>' per line.
-    Returns an array of tuples of the parsed test cases.
+    Input file is expected to be formatted as '<file>,<optimized>' per
+    line. Returns an array of tuples of the parsed test cases.
     """
     with open(filename, 'r') as f:
         expectations = f.read().splitlines()
@@ -464,6 +475,8 @@ def main():
                         metavar='<number of processes to use>', help='Use as many processes as specified, 0 indicates let the script decide.')
     parser.add_argument('--update_known_failures', dest='update_known_failures',
                         action='store_true', help='Write out the failures to spvc/test/known_failures')
+    parser.add_argument('--update_unconfirmed_invalids', dest='update_unconfirmed_invalids',
+                        action='store_true', help='Write out the non-known_invalids to spvc/test/unconfirmed_invalids')
     parser.add_argument('--run-spvc-tests', dest='run_spvc_tests',
                         action='store_true', help='Run tests stored in spvir-cross and spvc directory using spvc parser')
     parser.add_argument('spvc', metavar='<spvc executable>')
@@ -542,13 +555,27 @@ def main():
     failures = list(itertools.chain.from_iterable(failures))
     failures = list(
         map(lambda x: (x[0].replace(os.path.sep, '/'), x[1]), failures))
+
     successes_without_validation = list(
         itertools.chain.from_iterable(successes_without_validation))
     successes_without_validation = list(
         map(lambda x: (x[0].replace(os.path.sep, '/'), x[1]), successes_without_validation))
-    failures.sort()
 
-    fail_file = ''
+    # Splitting the failures into 'true' failures and cases that just don't pass
+    # validation. spirv-cross is more permissive then the spec, so there exists
+    # test cases that spirv-cross will process, but won't pass strict
+    # validation.
+    failures.sort()
+    invalids = []
+    for failure in failures:
+        if failure in successes_without_validation:
+            invalids.append(failure)
+    failures = list(filter(lambda x: x not in invalids, failures))
+
+    print('{} test cases'.format(len(successes) + len(failures) + len(invalids)))
+    print('{} passed and'.format(len(successes)))
+    print('{} passed with --no-validation flag'.format(len(successes_without_validation)))
+
     if script_args.run_spvc_tests:
         fail_file = os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'known_spvc_failures')
@@ -558,10 +585,6 @@ def main():
             os.path.realpath(__file__)), 'known_failures')
         print('Parser = spirv-cross, Tests Directory = spirv-cross/ + fail_file = known_failures')
 
-    print('{} test cases'.format(len(successes) + len(failures)))
-    print('{} passed and'.format(len(successes)))
-    print('{} passed with --no-validation flag'.format(len(successes_without_validation)))
-
     if script_args.update_known_failures:
         print('Updating {}'.format(fail_file))
         with open(fail_file, 'w+') as f:
@@ -569,12 +592,18 @@ def main():
                 f. write('{},{}\n'.format(failure[0], failure[1]))
     known_failures = read_expectation_file(fail_file)
 
-    invalid_file = os.path.join(os.path.dirname(
+    known_invalid_file = os.path.join(os.path.dirname(
         os.path.realpath(__file__)), 'known_invalids')
-    known_invalids = read_expectation_file(invalid_file)
+    known_invalids = read_expectation_file(known_invalid_file)
 
     unconfirmed_invalid_file = os.path.join(os.path.dirname(
         os.path.realpath(__file__)), 'unconfirmed_invalids')
+    if script_args.update_unconfirmed_invalids:
+        print('Updating {}'.format(unconfirmed_invalid_file))
+        with open(unconfirmed_invalid_file, 'w+') as f:
+            for invalid in invalids:
+                if invalid not in known_invalids:
+                    f. write('{},{}\n'.format(invalid[0], invalid[1]))
     unconfirmed_invalids = read_expectation_file(unconfirmed_invalid_file)
 
     unexpected_successes = []
@@ -585,32 +614,47 @@ def main():
     for success in successes:
         if success in known_failures:
             unexpected_successes.append(success)
-        if success in known_invalids:
+        if success in known_invalids or success in unconfirmed_invalids:
             unexpected_valids.append(success)
 
     for failure in failures:
         if failure not in known_failures:
-            if failure not in known_invalids:
-                unexpected_failures.append(failure)
+            unexpected_failures.append(failure)
 
-    for invalid in successes_without_validation:
-        if invalid not in successes:
-            if invalid not in unconfirmed_invalids and invalid not in known_invalids:
-                unexpected_invalids.append(invalid)
+    for invalid in invalids:
+        if invalid not in known_invalids and invalid not in unconfirmed_invalids:
+            unexpected_invalids.append(invalid)
 
     test_env.log_unexpected(unexpected_successes, 'success')
     test_env.log_unexpected(unexpected_failures, 'failure')
     test_env.log_unexpected(unexpected_invalids, 'invalid')
     test_env.log_unexpected(unexpected_valids, 'valid')
 
+    # Checking that there are no previously failed or invalid tests that just
+    # were not ran.
+    all_ran_cases = []
+    all_ran_cases += successes
+    all_ran_cases += failures
+    all_ran_cases += invalids
+
     missing_failures = []
     if not script_args.test_filter:
-        for known_failure in known_failures:
-            if known_failure not in successes and known_failure not in failures:
-                missing_failures.append(known_failure)
+        for failure in known_failures:
+            if failure not in all_ran_cases:
+                missing_failures.append(failure)
         test_env.log_missing_failures(missing_failures)
 
-    return len(unexpected_successes) != 0 or len(unexpected_failures) != 0 or len(missing_failures) != 0
+    missing_invalids = []
+    if not script_args.test_filter:
+        for invalid in known_invalids:
+            if invalid not in all_ran_cases:
+                missing_invalids.append(invalid)
+        for invalid in unconfirmed_invalids:
+            if invalid not in all_ran_cases:
+                missing_invalids.append(invalid)
+        test_env.log_missing_invalids(missing_invalids)
+
+    return len(unexpected_successes) + len(unexpected_failures) + len(unexpected_invalids) + len(unexpected_valids) + len(missing_failures) + len(missing_invalids)
 
 
 if __name__ == '__main__':
