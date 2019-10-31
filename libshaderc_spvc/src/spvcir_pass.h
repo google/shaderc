@@ -40,7 +40,11 @@ class SpvcIrPass : public Pass {
   spirv_cross::ParsedIR *ir_;
   spirv_cross::SPIRFunction *current_function_ = nullptr;
   spirv_cross::SPIRBlock *current_block_ = nullptr;
-  spirv_cross::SmallVector<uint32_t> global_struct_cache;
+
+  // A data structure to store type aliases.
+  // spirv-cross comment: This must be an ordered data structure so we always
+  // pick the same type aliases.
+  spirv_cross::SmallVector<uint32_t> global_struct_cache_;
   uint32_t offset_ = 5;
 
   // copied from spirv-cross (class Parser)

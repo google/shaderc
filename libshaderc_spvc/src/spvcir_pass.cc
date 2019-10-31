@@ -409,11 +409,10 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       }
 
       // TODO(sarahM0): ask about aliasing? figure out what is happening in this
-      // loop. Make sure everything works including "It is valid for the
-      // structure to have no members."
+      // loop.
       bool consider_aliasing = !ir_->get_name(type.self).empty();
       if (consider_aliasing) {
-        for (auto &other : global_struct_cache) {
+        for (auto &other : global_struct_cache_) {
           if (ir_->get_name(type.self) == ir_->get_name(other) &&
               types_are_logically_equivalent(
                   type, get<spirv_cross::SPIRType>(other))) {
@@ -423,7 +422,7 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
         }
 
         if (type.type_alias == spirv_cross::TypeID(0))
-          global_struct_cache.push_back(id);
+          global_struct_cache_.push_back(id);
       }
       break;
     }
