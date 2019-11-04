@@ -233,7 +233,7 @@ const char kVertexOnlyShaderWithInvalidPragma[] =
 const char* kMinimalShaderDisassemblySubstrings[] = {
     "; SPIR-V\n"
     "; Version: 1.0\n"
-    "; Generator: Google Shaderc over Glslang; 7\n"
+    "; Generator: Google Shaderc over Glslang; 8\n"
     "; Bound:",
 
     "               OpCapability Shader\n",
@@ -245,7 +245,7 @@ const char* kMinimalShaderDisassemblySubstrings[] = {
 const char* kMinimalShaderDebugInfoDisassemblySubstrings[] = {
     "; SPIR-V\n"
     "; Version: 1.0\n"
-    "; Generator: Google Shaderc over Glslang; 7\n"
+    "; Generator: Google Shaderc over Glslang; 8\n"
     "; Bound:",
 
     "               OpCapability Shader\n",
@@ -257,7 +257,7 @@ const char* kMinimalShaderDebugInfoDisassemblySubstrings[] = {
 const char kMinimalShaderAssembly[] = R"(
     ; SPIR-V
     ; Version: 1.0
-    ; Generator: Google Shaderc over Glslang; 7
+    ; Generator: Google Shaderc over Glslang; 8
     ; Bound: 6
     ; Schema: 0
 
