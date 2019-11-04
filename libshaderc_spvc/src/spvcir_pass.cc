@@ -32,7 +32,7 @@ SpvcIrPass::SpvcIrPass(spirv_cross::ParsedIR *ir) {
 
 Pass::Status SpvcIrPass::Process() {
   get_module()->ForEachInst(
-      [this](Instruction *inst) { GenerateSpirvCrossIR(inst); });
+      [this](Instruction *inst) { GenerateSpirvCrossIR(inst); }, true);
 
   assert(!current_function_ && "Function was not terminated.");
   assert(!current_block_ && "Block Was not terminated");

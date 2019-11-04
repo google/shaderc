@@ -61,6 +61,11 @@ void shaderc_spvc_compile_options_set_robust_buffer_access_pass(
   options->robust_buffer_access_pass = b;
 }
 
+void shaderc_spvc_compile_options_set_emit_line_directives(
+  shaderc_spvc_compile_options_t options, bool b){
+  options->glsl.emit_line_directives = b;
+}
+
 void shaderc_spvc_compile_options_set_vulkan_semantics(
     shaderc_spvc_compile_options_t options, bool b) {
   options->glsl.vulkan_semantics = b;
