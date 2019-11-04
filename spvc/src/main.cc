@@ -86,6 +86,7 @@ Options:
   --msl-domain-lower-left
   --msl-argument-buffers
   --msl-discrete-descriptor-set=<number>
+  --emit-line-directives
   --hlsl-enable-compat
   --shader-model=<model>
 )";
@@ -240,6 +241,8 @@ int main(int argc, char** argv) {
         return 1;
       }
       msl_discrete_descriptor.push_back(descriptor_num);
+    } else if (arg == "--emit-line-directives") {
+      options.SetEmitLineDirectives(true);
     } else if (arg.starts_with("--shader-model=")) {
       string_piece shader_model_str;
       shaderc_util::GetOptionArgument(argc, argv, &i,

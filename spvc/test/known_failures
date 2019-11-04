@@ -1,5 +1,3 @@
-shaders-hlsl/asm/frag/line-directive.line.asm.frag,False
-shaders-hlsl/asm/frag/line-directive.line.asm.frag,True
 shaders-hlsl/comp/num-workgroups-alone.comp,False
 shaders-hlsl/comp/num-workgroups-alone.comp,True
 shaders-hlsl/comp/num-workgroups-with-builtins.comp,False
@@ -10,8 +8,6 @@ shaders-hlsl/vert/basic.vert,False
 shaders-hlsl/vert/basic.vert,True
 shaders-msl/asm/comp/multiple-entry.asm.comp,False
 shaders-msl/asm/comp/multiple-entry.asm.comp,True
-shaders-msl/asm/frag/line-directive.line.asm.frag,False
-shaders-msl/asm/frag/line-directive.line.asm.frag,True
 shaders-msl/asm/frag/min-lod.msl22.asm.frag,False
 shaders-msl/asm/frag/min-lod.msl22.asm.frag,True
 shaders-msl/comp/basic.dispatchbase.comp,False
@@ -101,8 +97,6 @@ shaders/asm/frag/complex-name-workarounds.asm.frag,True
 shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,False
 shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,True
 shaders/asm/frag/image-query-no-sampler.no-samplerless.vk.asm.frag,False
-shaders/asm/frag/line-directive.line.asm.frag,False
-shaders/asm/frag/line-directive.line.asm.frag,True
 shaders/desktop-only/vert/basic.desktop.sso.vert,False
 shaders/desktop-only/vert/basic.desktop.sso.vert,True
 shaders/flatten/array.flatten.vert,False
