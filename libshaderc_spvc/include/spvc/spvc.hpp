@@ -42,7 +42,7 @@ class CompilationResult {
   explicit CompilationResult(shaderc_spvc_compilation_result_t result)
       : result_(result) {}
   CompilationResult() : result_(nullptr) {}
-  ~CompilationResult() { shaderc_spvc_result_release(result_); }
+  ~CompilationResult() { shaderc_spvc_result_destroy(result_); }
 
   CompilationResult(CompilationResult&& other) : result_(nullptr) {
     *this = std::move(other);
@@ -50,7 +50,7 @@ class CompilationResult {
 
   CompilationResult& operator=(CompilationResult&& other) {
     if (result_) {
-      shaderc_spvc_result_release(result_);
+      shaderc_spvc_result_destroy(result_);
     }
     result_ = other.result_;
     other.result_ = nullptr;
@@ -94,8 +94,8 @@ class CompilationResult {
 // Contains any options that can have default values for a compilation.
 class CompileOptions {
  public:
-  CompileOptions() { options_ = shaderc_spvc_compile_options_initialize(); }
-  ~CompileOptions() { shaderc_spvc_compile_options_release(options_); }
+  CompileOptions() { options_ = shaderc_spvc_compile_options_create(); }
+  ~CompileOptions() { shaderc_spvc_compile_options_destroy(options_); }
   CompileOptions(const CompileOptions& other) {
     options_ = shaderc_spvc_compile_options_clone(other.options_);
   }
@@ -271,16 +271,16 @@ class CompileOptions {
   CompileOptions& operator=(const CompileOptions& other) = delete;
   shaderc_spvc_compile_options_t options_;
 
-  friend class Compiler;
+  friend class Context;
 };
 
 // The compilation context for compiling SPIR-V.
-class Compiler {
+class Context {
  public:
-  Compiler() : state_(shaderc_spvc_state_initialize()) {}
-  ~Compiler() { shaderc_spvc_state_release(state_); }
+  Context() : state_(shaderc_spvc_context_create()) {}
+  ~Context() { shaderc_spvc_context_destroy(state_); }
 
-  Compiler(Compiler&& other) {
+  Context(Context&& other) {
     state_ = other.state_;
     other.state_ = nullptr;
   }
@@ -325,11 +325,15 @@ class Compiler {
   }
 
  private:
-  Compiler(const Compiler&) = delete;
-  Compiler& operator=(const Compiler& other) = delete;
+  Context(const Context&) = delete;
+  Context& operator=(const Context& other) = delete;
 
-  shaderc_spvc_state_t state_;
+  shaderc_spvc_context_t state_;
 };
+
+// DEPRECATED: Old version of Context.
+class Compiler : public Context {};
+
 }  // namespace shaderc_spvc
 
 #endif  // SHADERC_SPVC_HPP_

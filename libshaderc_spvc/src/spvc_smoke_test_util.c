@@ -20,7 +20,7 @@
 #include "spvc/spvc.h"
 
 typedef shaderc_spvc_compilation_result_t (*CompileInto)(
-    const shaderc_spvc_compiler_t, const uint32_t*, size_t,
+    const shaderc_spvc_context_t, const uint32_t*, size_t,
     shaderc_spvc_compile_options_t);
 
 shaderc_compilation_result_t assemble_shader(const char* shader) {
@@ -34,13 +34,13 @@ shaderc_compilation_result_t assemble_shader(const char* shader) {
   return res;
 }
 
-int test_exec(shaderc_spvc_compiler_t compiler,
+int test_exec(shaderc_spvc_context_t context,
               shaderc_spvc_compile_options_t options,
               shaderc_compilation_result_t assembled_shader,
               CompileInto compile_into, const char* target_lang) {
   shaderc_spvc_compilation_result_t result;
   result = compile_into(
-      compiler, (const uint32_t*)shaderc_result_get_bytes(assembled_shader),
+      context, (const uint32_t*)shaderc_result_get_bytes(assembled_shader),
       shaderc_result_get_length(assembled_shader) / sizeof(uint32_t), options);
   assert(result);
 
@@ -57,28 +57,28 @@ int test_exec(shaderc_spvc_compiler_t compiler,
     ret_val = 0;
   }
 
-  shaderc_spvc_result_release(result);
+  shaderc_spvc_result_destroy(result);
   return ret_val;
 }
 
-int run_glsl(shaderc_spvc_compiler_t compiler,
+int run_glsl(shaderc_spvc_context_t context,
              shaderc_spvc_compile_options_t options,
              shaderc_compilation_result_t assembled_shader) {
-  return test_exec(compiler, options, assembled_shader,
+  return test_exec(context, options, assembled_shader,
                    shaderc_spvc_compile_into_glsl, "glsl");
 }
 
-int run_hlsl(shaderc_spvc_compiler_t compiler,
+int run_hlsl(shaderc_spvc_context_t context,
              shaderc_spvc_compile_options_t options,
              shaderc_compilation_result_t assembled_shader) {
-  return test_exec(compiler, options, assembled_shader,
+  return test_exec(context, options, assembled_shader,
                    shaderc_spvc_compile_into_hlsl, "hlsl");
 }
 
-int run_msl(shaderc_spvc_compiler_t compiler,
+int run_msl(shaderc_spvc_context_t context,
             shaderc_spvc_compile_options_t options,
             shaderc_compilation_result_t assembled_shader) {
-  return test_exec(compiler, options, assembled_shader,
+  return test_exec(context, options, assembled_shader,
                    shaderc_spvc_compile_into_msl, "msl");
 }
 
@@ -90,9 +90,9 @@ int run_smoke_test(const char* shader, int transform_from_webgpu) {
   }
 
   int ret_code = 0;
-  shaderc_spvc_compiler_t compiler = shaderc_spvc_state_initialize();
+  shaderc_spvc_context_t context = shaderc_spvc_context_create();
   shaderc_spvc_compile_options_t options =
-      shaderc_spvc_compile_options_initialize();
+      shaderc_spvc_compile_options_create();
   if (transform_from_webgpu) {
     shaderc_spvc_compile_options_set_source_env(
         options, shaderc_target_env_webgpu, shaderc_env_version_webgpu);
@@ -100,12 +100,12 @@ int run_smoke_test(const char* shader, int transform_from_webgpu) {
         options, shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
   }
 
-  if (!run_glsl(compiler, options, assembled_shader)) ret_code = -1;
-  if (!run_hlsl(compiler, options, assembled_shader)) ret_code = -1;
-  if (!run_msl(compiler, options, assembled_shader)) ret_code = -1;
+  if (!run_glsl(context, options, assembled_shader)) ret_code = -1;
+  if (!run_hlsl(context, options, assembled_shader)) ret_code = -1;
+  if (!run_msl(context, options, assembled_shader)) ret_code = -1;
 
-  shaderc_spvc_compile_options_release(options);
-  shaderc_spvc_state_release(compiler);
+  shaderc_spvc_compile_options_destroy(options);
+  shaderc_spvc_context_destroy(context);
   shaderc_result_release(assembled_shader);
 
   return ret_code;

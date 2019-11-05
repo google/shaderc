@@ -121,7 +121,7 @@ bool ReadFile(const std::string& path, std::vector<uint32_t>* out) {
 }  // anonymous namespace
 
 int main(int argc, char** argv) {
-  shaderc_spvc::Compiler compiler;
+  shaderc_spvc::Context compiler;
   shaderc_spvc::CompileOptions options;
   std::vector<uint32_t> input;
   std::vector<uint32_t> msl_discrete_descriptor;

@@ -177,8 +177,8 @@ shaderc_spvc_compilation_result_t generate_shader(
 }
 
 shaderc_spvc_compilation_result_t generate_glsl_shader(
-    const shaderc_spvc_state_t state, const uint32_t* source, size_t source_len,
-    shaderc_spvc_compile_options_t options,
+    const shaderc_spvc_context_t state, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result) {
   spirv_cross::CompilerGLSL* cross_compiler;
 
@@ -311,8 +311,8 @@ shaderc_spvc_compilation_result_t generate_glsl_shader(
 }
 
 shaderc_spvc_compilation_result_t generate_hlsl_shader(
-    const shaderc_spvc_state_t state, const uint32_t* source, size_t source_len,
-    shaderc_spvc_compile_options_t options,
+    const shaderc_spvc_context_t state, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result) {
   spirv_cross::CompilerHLSL* cross_compiler;
 
@@ -357,8 +357,8 @@ shaderc_spvc_compilation_result_t generate_hlsl_shader(
 }
 
 shaderc_spvc_compilation_result_t generate_msl_shader(
-    const shaderc_spvc_state_t state, const uint32_t* source, size_t source_len,
-    shaderc_spvc_compile_options_t options,
+    const shaderc_spvc_context_t state, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result) {
   spirv_cross::CompilerMSL* cross_compiler;
 
@@ -404,8 +404,8 @@ shaderc_spvc_compilation_result_t generate_msl_shader(
 }  // namespace spvc_private
 
 shaderc_spvc_compilation_result_t generate_vulkan_shader(
-    const shaderc_spvc_state_t state, const uint32_t* source, size_t source_len,
-    shaderc_spvc_compile_options_t options,
+    const shaderc_spvc_context_t state, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result) {
   spirv_cross::CompilerReflection* cross_compiler;
 
