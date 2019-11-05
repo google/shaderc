@@ -24,10 +24,10 @@ using shaderc_spvc::Context;
 namespace {
 
 TEST(Compile, Glsl) {
-  Context compiler;
+  Context context;
   CompileOptions options;
 
-  CompilationResult result = compiler.CompileSpvToGlsl(
+  CompilationResult result = context.CompileSpvToGlsl(
       kSmokeShaderBinary, sizeof(kSmokeShaderBinary) / sizeof(uint32_t),
       options);
   EXPECT_EQ(shaderc_compilation_status_success, result.GetCompilationStatus());
@@ -36,10 +36,10 @@ TEST(Compile, Glsl) {
 }
 
 TEST(Compile, Hlsl) {
-  Context compiler;
+  Context context;
   CompileOptions options;
 
-  CompilationResult result = compiler.CompileSpvToHlsl(
+  CompilationResult result = context.CompileSpvToHlsl(
       kSmokeShaderBinary, sizeof(kSmokeShaderBinary) / sizeof(uint32_t),
       options);
   EXPECT_EQ(shaderc_compilation_status_success, result.GetCompilationStatus());
@@ -48,10 +48,10 @@ TEST(Compile, Hlsl) {
 }
 
 TEST(Compile, Msl) {
-  Context compiler;
+  Context context;
   CompileOptions options;
 
-  CompilationResult result = compiler.CompileSpvToMsl(
+  CompilationResult result = context.CompileSpvToMsl(
       kSmokeShaderBinary, sizeof(kSmokeShaderBinary) / sizeof(uint32_t),
       options);
   EXPECT_EQ(shaderc_compilation_status_success, result.GetCompilationStatus());
@@ -60,10 +60,10 @@ TEST(Compile, Msl) {
 }
 
 TEST(Compile, Vulkan) {
-  Context compiler;
+  Context context;
   CompileOptions options;
 
-  CompilationResult result = compiler.CompileSpvToVulkan(
+  CompilationResult result = context.CompileSpvToVulkan(
       kSmokeShaderBinary, sizeof(kSmokeShaderBinary) / sizeof(uint32_t),
       options);
   EXPECT_EQ(shaderc_compilation_status_success, result.GetCompilationStatus());

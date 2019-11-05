@@ -331,9 +331,6 @@ class Context {
   shaderc_spvc_context_t state_;
 };
 
-// DEPRECATED: Old version of Context.
-class Compiler : public Context {};
-
 }  // namespace shaderc_spvc
 
 #endif  // SHADERC_SPVC_HPP_
