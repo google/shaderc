@@ -33,20 +33,23 @@ typedef enum {
 } shaderc_spvc_msl_platform;
 
 // An opaque handle to an object that manages all compiler state.
-typedef struct shaderc_spvc_compiler* shaderc_spvc_compiler_t;
+typedef struct shaderc_spvc_state* shaderc_spvc_state_t;
 
-// Create a compiler.  A return of NULL indicates that there was an error.
-// Any function operating on a *_compiler_t must offer the basic
+// DEPRECATED: Old name for opaque state handle.
+typedef shaderc_spvc_state_t shaderc_spvc_compiler_t;
+
+// Create a spvc state handle.  A return of NULL indicates that there was an
+// error. Any function operating on a *_compiler_t must offer the basic
 // thread-safety guarantee.
 // [http://herbsutter.com/2014/01/13/gotw-95-solution-thread-safety-and-synchronization/]
 // That is: concurrent invocation of these functions on DIFFERENT objects needs
 // no synchronization; concurrent invocation of these functions on the SAME
 // object requires synchronization IF AND ONLY IF some of them take a non-const
 // argument.
-SHADERC_EXPORT shaderc_spvc_compiler_t shaderc_spvc_compiler_initialize(void);
+SHADERC_EXPORT shaderc_spvc_state_t shaderc_spvc_state_initialize(void);
 
 // Release resources.  After this the handle cannot be used.
-SHADERC_EXPORT void shaderc_spvc_compiler_release(shaderc_spvc_compiler_t);
+SHADERC_EXPORT void shaderc_spvc_state_release(shaderc_spvc_state_t state);
 
 // An opaque handle to an object that manages options to a single compilation
 // result.
@@ -218,25 +221,25 @@ typedef struct shaderc_spvc_compilation_result*
 // Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
 // GLSL.
 SHADERC_EXPORT shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_glsl(
-    const shaderc_spvc_compiler_t compiler, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options);
+    const shaderc_spvc_state_t state, const uint32_t* source, size_t source_len,
+    shaderc_spvc_compile_options_t options);
 
 // Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
 // HLSL.
 SHADERC_EXPORT shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_hlsl(
-    const shaderc_spvc_compiler_t compiler, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options);
+    const shaderc_spvc_state_t state, const uint32_t* source, size_t source_len,
+    shaderc_spvc_compile_options_t options);
 
 // Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
 // MSL.
 SHADERC_EXPORT shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_msl(
-    const shaderc_spvc_compiler_t compiler, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options);
+    const shaderc_spvc_state_t state, const uint32_t* source, size_t source_len,
+    shaderc_spvc_compile_options_t options);
 
 // Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
 // Vullkan specific SPIR-V.
 SHADERC_EXPORT shaderc_spvc_compilation_result_t
-shaderc_spvc_compile_into_vulkan(const shaderc_spvc_compiler_t compiler,
+shaderc_spvc_compile_into_vulkan(const shaderc_spvc_state_t state,
                                  const uint32_t* source, size_t source_len,
                                  shaderc_spvc_compile_options_t options);
 

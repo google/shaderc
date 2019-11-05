@@ -26,7 +26,9 @@
 // GLSL version produced when none specified nor detected from source.
 #define DEFAULT_GLSL_VERSION 450
 
-struct shaderc_spvc_compiler {};
+struct shaderc_spvc_state {
+  std::unique_ptr<spirv_cross::Compiler> cross_compiler;
+};
 
 // Described in spvc.h.
 struct shaderc_spvc_compilation_result {
@@ -35,7 +37,6 @@ struct shaderc_spvc_compilation_result {
   std::string messages;
   shaderc_compilation_status status =
       shaderc_compilation_status_null_result_object;
-  std::unique_ptr<spirv_cross::Compiler> compiler;
 };
 
 struct shaderc_spvc_compile_options {
@@ -101,7 +102,7 @@ shaderc_spvc_compilation_result_t generate_shader(
 // Handles correctly setting up the SPIRV-Cross compiler based on the options
 // and then envoking it.
 shaderc_spvc_compilation_result_t generate_glsl_shader(
-    const uint32_t* source, size_t source_len,
+    const shaderc_spvc_state_t state, const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result);
 
@@ -109,7 +110,7 @@ shaderc_spvc_compilation_result_t generate_glsl_shader(
 // Handles correctly setting up the SPIRV-Cross compiler based on the options
 // and then envoking it.
 shaderc_spvc_compilation_result_t generate_hlsl_shader(
-    const uint32_t* source, size_t source_len,
+    const shaderc_spvc_state_t state, const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result);
 
@@ -117,7 +118,7 @@ shaderc_spvc_compilation_result_t generate_hlsl_shader(
 // Handles correctly setting up the SPIRV-Cross compiler based on the options
 // and then envoking it.
 shaderc_spvc_compilation_result_t generate_msl_shader(
-    const uint32_t* source, size_t source_len,
+    const shaderc_spvc_state_t state, const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result);
 
@@ -125,7 +126,7 @@ shaderc_spvc_compilation_result_t generate_msl_shader(
 // Is a No-op from the perspective of converting the shader, but setup a
 // SPIRV-Cross compiler to be used for reflection later.
 shaderc_spvc_compilation_result_t generate_vulkan_shader(
-    const uint32_t* source, size_t source_len,
+    const shaderc_spvc_state_t state, const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result);
 

@@ -24,178 +24,175 @@
 namespace {
 
 TEST(Init, MultipleCalls) {
-  shaderc_spvc_compiler_t compiler1, compiler2, compiler3;
-  EXPECT_NE(nullptr, compiler1 = shaderc_spvc_compiler_initialize());
-  EXPECT_NE(nullptr, compiler2 = shaderc_spvc_compiler_initialize());
-  EXPECT_NE(nullptr, compiler3 = shaderc_spvc_compiler_initialize());
-  shaderc_spvc_compiler_release(compiler1);
-  shaderc_spvc_compiler_release(compiler2);
-  shaderc_spvc_compiler_release(compiler3);
+  shaderc_spvc_state_t state1, state2, state3;
+  EXPECT_NE(nullptr, state1 = shaderc_spvc_state_initialize());
+  EXPECT_NE(nullptr, state2 = shaderc_spvc_state_initialize());
+  EXPECT_NE(nullptr, state3 = shaderc_spvc_state_initialize());
+  shaderc_spvc_state_release(state1);
+  shaderc_spvc_state_release(state2);
+  shaderc_spvc_state_release(state3);
 }
 
 #ifndef SHADERC_DISABLE_THREADED_TESTS
 TEST(Init, MultipleThreadsCalling) {
-  shaderc_spvc_compiler_t compiler1, compiler2, compiler3;
-  std::thread t1(
-      [&compiler1]() { compiler1 = shaderc_spvc_compiler_initialize(); });
-  std::thread t2(
-      [&compiler2]() { compiler2 = shaderc_spvc_compiler_initialize(); });
-  std::thread t3(
-      [&compiler3]() { compiler3 = shaderc_spvc_compiler_initialize(); });
+  shaderc_spvc_state_t state1, state2, state3;
+  std::thread t1([&state1]() { state1 = shaderc_spvc_state_initialize(); });
+  std::thread t2([&state2]() { state2 = shaderc_spvc_state_initialize(); });
+  std::thread t3([&state3]() { state3 = shaderc_spvc_state_initialize(); });
   t1.join();
   t2.join();
   t3.join();
-  EXPECT_NE(nullptr, compiler1);
-  EXPECT_NE(nullptr, compiler2);
-  EXPECT_NE(nullptr, compiler3);
-  shaderc_spvc_compiler_release(compiler1);
-  shaderc_spvc_compiler_release(compiler2);
-  shaderc_spvc_compiler_release(compiler3);
+  EXPECT_NE(nullptr, state1);
+  EXPECT_NE(nullptr, state2);
+  EXPECT_NE(nullptr, state3);
+  shaderc_spvc_state_release(state1);
+  shaderc_spvc_state_release(state2);
+  shaderc_spvc_state_release(state3);
 }
 #endif
 
 TEST(Compile, ValidShaderIntoGlslPasses) {
-  shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
+  shaderc_spvc_state_t state = shaderc_spvc_state_initialize();
   shaderc_spvc_compile_options_t options =
       shaderc_spvc_compile_options_initialize();
 
   shaderc_spvc_compilation_result_t result = shaderc_spvc_compile_into_glsl(
-      compiler, kSmokeShaderBinary,
-      sizeof(kSmokeShaderBinary) / sizeof(uint32_t), options);
+      state, kSmokeShaderBinary, sizeof(kSmokeShaderBinary) / sizeof(uint32_t),
+      options);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(shaderc_compilation_status_success,
             shaderc_spvc_result_get_status(result));
-  EXPECT_NE(result->compiler.get(), nullptr);
+  EXPECT_NE(state->cross_compiler.get(), nullptr);
 
   shaderc_spvc_result_release(result);
   shaderc_spvc_compile_options_release(options);
-  shaderc_spvc_compiler_release(compiler);
+  shaderc_spvc_state_release(state);
 }
 
 TEST(Compile, InvalidShaderIntoGlslPasses) {
-  shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
+  shaderc_spvc_state_t state = shaderc_spvc_state_initialize();
   shaderc_spvc_compile_options_t options =
       shaderc_spvc_compile_options_initialize();
 
   shaderc_spvc_compilation_result_t result = shaderc_spvc_compile_into_glsl(
-      compiler, kInvalidShaderBinary,
+      state, kInvalidShaderBinary,
       sizeof(kInvalidShaderBinary) / sizeof(uint32_t), options);
   ASSERT_NE(nullptr, result);
   EXPECT_NE(shaderc_compilation_status_success,
             shaderc_spvc_result_get_status(result));
-  EXPECT_EQ(result->compiler.get(), nullptr);
+  EXPECT_EQ(state->cross_compiler.get(), nullptr);
 
   shaderc_spvc_result_release(result);
   shaderc_spvc_compile_options_release(options);
-  shaderc_spvc_compiler_release(compiler);
+  shaderc_spvc_state_release(state);
 }
 
 TEST(Compile, ValidShaderIntoHlslPasses) {
-  shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
+  shaderc_spvc_state_t state = shaderc_spvc_state_initialize();
   shaderc_spvc_compile_options_t options =
       shaderc_spvc_compile_options_initialize();
 
   shaderc_spvc_compilation_result_t result = shaderc_spvc_compile_into_hlsl(
-      compiler, kSmokeShaderBinary,
-      sizeof(kSmokeShaderBinary) / sizeof(uint32_t), options);
+      state, kSmokeShaderBinary, sizeof(kSmokeShaderBinary) / sizeof(uint32_t),
+      options);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(shaderc_compilation_status_success,
             shaderc_spvc_result_get_status(result));
-  EXPECT_NE(result->compiler.get(), nullptr);
+  EXPECT_NE(state->cross_compiler.get(), nullptr);
 
   shaderc_spvc_result_release(result);
   shaderc_spvc_compile_options_release(options);
-  shaderc_spvc_compiler_release(compiler);
+  shaderc_spvc_state_release(state);
 }
 
 TEST(Compile, InvalidShaderIntoHlslPasses) {
-  shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
+  shaderc_spvc_state_t state = shaderc_spvc_state_initialize();
   shaderc_spvc_compile_options_t options =
       shaderc_spvc_compile_options_initialize();
 
   shaderc_spvc_compilation_result_t result = shaderc_spvc_compile_into_hlsl(
-      compiler, kInvalidShaderBinary,
+      state, kInvalidShaderBinary,
       sizeof(kInvalidShaderBinary) / sizeof(uint32_t), options);
   ASSERT_NE(nullptr, result);
   EXPECT_NE(shaderc_compilation_status_success,
             shaderc_spvc_result_get_status(result));
-  EXPECT_EQ(result->compiler.get(), nullptr);
+  EXPECT_EQ(state->cross_compiler.get(), nullptr);
 
   shaderc_spvc_result_release(result);
   shaderc_spvc_compile_options_release(options);
-  shaderc_spvc_compiler_release(compiler);
+  shaderc_spvc_state_release(state);
 }
 
 TEST(Compile, ValidShaderIntoMslPasses) {
-  shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
+  shaderc_spvc_state_t state = shaderc_spvc_state_initialize();
   shaderc_spvc_compile_options_t options =
       shaderc_spvc_compile_options_initialize();
 
   shaderc_spvc_compilation_result_t result = shaderc_spvc_compile_into_msl(
-      compiler, kSmokeShaderBinary,
-      sizeof(kSmokeShaderBinary) / sizeof(uint32_t), options);
+      state, kSmokeShaderBinary, sizeof(kSmokeShaderBinary) / sizeof(uint32_t),
+      options);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(shaderc_compilation_status_success,
             shaderc_spvc_result_get_status(result));
-  EXPECT_NE(result->compiler.get(), nullptr);
+  EXPECT_NE(state->cross_compiler.get(), nullptr);
 
   shaderc_spvc_result_release(result);
   shaderc_spvc_compile_options_release(options);
-  shaderc_spvc_compiler_release(compiler);
+  shaderc_spvc_state_release(state);
 }
 
 TEST(Compile, InvalidShaderIntoMslPasses) {
-  shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
+  shaderc_spvc_state_t state = shaderc_spvc_state_initialize();
   shaderc_spvc_compile_options_t options =
       shaderc_spvc_compile_options_initialize();
 
   shaderc_spvc_compilation_result_t result = shaderc_spvc_compile_into_msl(
-      compiler, kInvalidShaderBinary,
+      state, kInvalidShaderBinary,
       sizeof(kInvalidShaderBinary) / sizeof(uint32_t), options);
   ASSERT_NE(nullptr, result);
   EXPECT_NE(shaderc_compilation_status_success,
             shaderc_spvc_result_get_status(result));
-  EXPECT_EQ(result->compiler.get(), nullptr);
+  EXPECT_EQ(state->cross_compiler.get(), nullptr);
 
   shaderc_spvc_result_release(result);
   shaderc_spvc_compile_options_release(options);
-  shaderc_spvc_compiler_release(compiler);
+  shaderc_spvc_state_release(state);
 }
 
 TEST(Compile, ValidShaderIntoVulkanPasses) {
-  shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
+  shaderc_spvc_state_t state = shaderc_spvc_state_initialize();
   shaderc_spvc_compile_options_t options =
       shaderc_spvc_compile_options_initialize();
 
   shaderc_spvc_compilation_result_t result = shaderc_spvc_compile_into_vulkan(
-      compiler, kSmokeShaderBinary,
-      sizeof(kSmokeShaderBinary) / sizeof(uint32_t), options);
+      state, kSmokeShaderBinary, sizeof(kSmokeShaderBinary) / sizeof(uint32_t),
+      options);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(shaderc_compilation_status_success,
             shaderc_spvc_result_get_status(result));
-  EXPECT_NE(result->compiler.get(), nullptr);
+  EXPECT_NE(state->cross_compiler.get(), nullptr);
 
   shaderc_spvc_result_release(result);
   shaderc_spvc_compile_options_release(options);
-  shaderc_spvc_compiler_release(compiler);
+  shaderc_spvc_state_release(state);
 }
 
 TEST(Compile, InvalidShaderIntoVulkanPasses) {
-  shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
+  shaderc_spvc_state_t state = shaderc_spvc_state_initialize();
   shaderc_spvc_compile_options_t options =
       shaderc_spvc_compile_options_initialize();
 
   shaderc_spvc_compilation_result_t result = shaderc_spvc_compile_into_vulkan(
-      compiler, kInvalidShaderBinary,
+      state, kInvalidShaderBinary,
       sizeof(kInvalidShaderBinary) / sizeof(uint32_t), options);
   ASSERT_NE(nullptr, result);
   EXPECT_NE(shaderc_compilation_status_success,
             shaderc_spvc_result_get_status(result));
-  EXPECT_EQ(result->compiler.get(), nullptr);
+  EXPECT_EQ(state->cross_compiler.get(), nullptr);
 
   shaderc_spvc_result_release(result);
   shaderc_spvc_compile_options_release(options);
-  shaderc_spvc_compiler_release(compiler);
+  shaderc_spvc_state_release(state);
 }
 
 }  // namespace

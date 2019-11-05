@@ -90,7 +90,7 @@ int run_smoke_test(const char* shader, int transform_from_webgpu) {
   }
 
   int ret_code = 0;
-  shaderc_spvc_compiler_t compiler = shaderc_spvc_compiler_initialize();
+  shaderc_spvc_compiler_t compiler = shaderc_spvc_state_initialize();
   shaderc_spvc_compile_options_t options =
       shaderc_spvc_compile_options_initialize();
   if (transform_from_webgpu) {
@@ -105,7 +105,7 @@ int run_smoke_test(const char* shader, int transform_from_webgpu) {
   if (!run_msl(compiler, options, assembled_shader)) ret_code = -1;
 
   shaderc_spvc_compile_options_release(options);
-  shaderc_spvc_compiler_release(compiler);
+  shaderc_spvc_state_release(compiler);
   shaderc_result_release(assembled_shader);
 
   return ret_code;
