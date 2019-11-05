@@ -89,6 +89,7 @@ TEST_F(SpvcIrParsingTest, OpCapabilityInstruction) {
       << " SinglePassRunAndDisassemble failed on input:\n "
       << std::get<0>(result);
 
+  ASSERT_EQ(ir_.declared_capabilities.size(), 2);
   EXPECT_EQ(ir_.declared_capabilities[0], spv::Capability::CapabilityShader);
   EXPECT_EQ(ir_.declared_capabilities[1],
             spv::Capability::CapabilityVulkanMemoryModelKHR);
@@ -101,6 +102,7 @@ TEST_F(SpvcIrParsingTest, OpExtensionInstruction) {
       << " SinglePassRunAndDisassemble failed on input:\n "
       << std::get<0>(result);
 
+  ASSERT_EQ(ir_.declared_extensions.size(), 1);
   EXPECT_EQ(ir_.declared_extensions[0], "SPV_KHR_vulkan_memory_model");
 }
 
