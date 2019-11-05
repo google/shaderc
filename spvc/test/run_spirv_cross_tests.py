@@ -37,6 +37,7 @@ class TestEnv:
         self.spirv_as = script_args.spirv_as
         self.spirv_opt = script_args.spirv_opt
         self.glslang = script_args.glslang
+        self.spvc_test_dir = script_args.spvc_test_dir
         self.run_spvc_with_validation = True
 
     def log_unexpected(self, test_list, test_result):
@@ -156,8 +157,13 @@ class TestEnv:
         else:
             reference = os.path.join('reference', shader)
         self.log_command(['reference', reference, optimize])
+        reference_dir = ''
+        if 'spvc' in shader:
+            reference_dir = self.spvc_test_dir
+        else:
+            reference_dir = self.cross_dir
         if self.dry_run or filecmp.cmp(
-                result, os.path.join(self.cross_dir, reference), False):
+                result, os.path.join(reference_dir, reference), False):
             return True, reference
         elif self.give_up:
             print('Bailing due to failure in check_reference with give_up set')
@@ -176,7 +182,10 @@ class TestEnv:
         was compiled to.
         """
         _, tmpfile = tempfile.mkstemp()
-        shader_path = os.path.join(self.cross_dir, shader)
+        if 'spvc' in filename:
+            shader_path = os.path.join(self.spvc_test_dir, shader)
+        else:
+            shader_path = os.path.join(self.cross_dir, shader)
         if '.asm.' in filename:
             flags = ['--target-env', 'vulkan1.1']
             if '.preserve.' in filename:
