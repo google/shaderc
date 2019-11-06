@@ -177,10 +177,10 @@ shaderc_spvc_compilation_result_t generate_shader(
 }
 
 shaderc_spvc_compilation_result_t generate_glsl_shader(
-    const uint32_t* source, size_t source_len,
-    shaderc_spvc_compile_options_t options,
+    const shaderc_spvc_context_t state, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result) {
-  spirv_cross::CompilerGLSL* compiler;
+  spirv_cross::CompilerGLSL* cross_compiler;
 
 // spvc IR generation is under development, for now run spirv-cross
 // compiler(SHADERC_ENABLE_SPVC_PARSER is OFF by default)
@@ -194,36 +194,37 @@ shaderc_spvc_compilation_result_t generate_glsl_shader(
         "execution environments failed (spvc-ir-pass).\n");
     return result;
   } else {
-    compiler = new (std::nothrow) spirv_cross::CompilerGLSL(ir);
+    cross_compiler = new (std::nothrow) spirv_cross::CompilerGLSL(ir);
   }
 #else
-  compiler = new (std::nothrow) spirv_cross::CompilerGLSL(source, source_len);
+  cross_compiler =
+      new (std::nothrow) spirv_cross::CompilerGLSL(source, source_len);
 #endif
 
-  if (!compiler) {
+  if (!cross_compiler) {
     result->messages.append(
         "Unable to initialize SPIRV-Cross GLSL compiler.\n");
     result->status = shaderc_compilation_status_compilation_error;
     return result;
   }
-  result->compiler.reset(compiler);
+  state->cross_compiler.reset(cross_compiler);
 
   if (options->glsl.version == 0) {
     // no version requested, was one detected in source?
-    options->glsl.version = compiler->get_common_options().version;
+    options->glsl.version = cross_compiler->get_common_options().version;
     if (options->glsl.version == 0) {
       // no version detected in source, use default
       options->glsl.version = DEFAULT_GLSL_VERSION;
     } else {
       // version detected implies ES also detected
-      options->glsl.es = compiler->get_common_options().es;
+      options->glsl.es = cross_compiler->get_common_options().es;
     }
   }
 
   // Override detected setting, if any.
   if (options->force_es) options->glsl.es = options->forced_es_setting;
 
-  auto entry_points = compiler->get_entry_points_and_stages();
+  auto entry_points = cross_compiler->get_entry_points_and_stages();
   spv::ExecutionModel model = spv::ExecutionModelMax;
   if (!options->entry_point.empty()) {
     // Make sure there is just one entry point with this name, or the stage is
@@ -238,7 +239,7 @@ shaderc_spvc_compilation_result_t generate_glsl_shader(
 
     if (stage_count != 1) {
       result->status = shaderc_compilation_status_compilation_error;
-      result->compiler.reset();
+      state->cross_compiler.reset();
       if (stage_count == 0) {
         result->messages.append("There is no entry point with name: " +
                                 options->entry_point);
@@ -252,67 +253,68 @@ shaderc_spvc_compilation_result_t generate_glsl_shader(
   }
 
   if (!options->entry_point.empty()) {
-    compiler->set_entry_point(options->entry_point, model);
+    cross_compiler->set_entry_point(options->entry_point, model);
   }
 
   if (!options->glsl.vulkan_semantics) {
-    uint32_t sampler = compiler->build_dummy_sampler_for_combined_images();
+    uint32_t sampler =
+        cross_compiler->build_dummy_sampler_for_combined_images();
     if (sampler) {
       // Set some defaults to make validation happy.
-      compiler->set_decoration(sampler, spv::DecorationDescriptorSet, 0);
-      compiler->set_decoration(sampler, spv::DecorationBinding, 0);
+      cross_compiler->set_decoration(sampler, spv::DecorationDescriptorSet, 0);
+      cross_compiler->set_decoration(sampler, spv::DecorationBinding, 0);
     }
   }
 
   spirv_cross::ShaderResources res;
   if (options->remove_unused_variables) {
-    auto active = compiler->get_active_interface_variables();
-    res = compiler->get_shader_resources(active);
-    compiler->set_enabled_interface_variables(move(active));
+    auto active = cross_compiler->get_active_interface_variables();
+    res = cross_compiler->get_shader_resources(active);
+    cross_compiler->set_enabled_interface_variables(move(active));
   } else {
-    res = compiler->get_shader_resources();
+    res = cross_compiler->get_shader_resources();
   }
 
   if (options->flatten_ubo) {
     for (auto& ubo : res.uniform_buffers)
-      compiler->flatten_buffer_block(ubo.id);
+      cross_compiler->flatten_buffer_block(ubo.id);
     for (auto& ubo : res.push_constant_buffers)
-      compiler->flatten_buffer_block(ubo.id);
+      cross_compiler->flatten_buffer_block(ubo.id);
   }
 
   if (!options->glsl.vulkan_semantics) {
-    compiler->build_combined_image_samplers();
+    cross_compiler->build_combined_image_samplers();
 
     // if (args.combined_samplers_inherit_bindings)
     //  spirv_cross_util::inherit_combined_sampler_bindings(*compiler);
 
     // Give the remapped combined samplers new names.
-    for (auto& remap : compiler->get_combined_image_samplers()) {
-      compiler->set_name(
+    for (auto& remap : cross_compiler->get_combined_image_samplers()) {
+      cross_compiler->set_name(
           remap.combined_id,
           spirv_cross::join("SPIRV_Cross_Combined",
-                            compiler->get_name(remap.image_id),
-                            compiler->get_name(remap.sampler_id)));
+                            cross_compiler->get_name(remap.image_id),
+                            cross_compiler->get_name(remap.sampler_id)));
     }
   }
 
-  compiler->set_common_options(options->glsl);
+  cross_compiler->set_common_options(options->glsl);
 
-  result = generate_shader(compiler, result);
+  result = generate_shader(cross_compiler, result);
   if (result->status != shaderc_compilation_status_success) {
     result->messages.append("Compilation failed.  Partial source:\n");
-    result->messages.append(compiler->get_partial_source());
-    result->compiler.reset();
+    result->messages.append(cross_compiler->get_partial_source());
+    state->cross_compiler.reset();
   }
 
   return result;
 }
 
 shaderc_spvc_compilation_result_t generate_hlsl_shader(
-    const uint32_t* source, size_t source_len,
-    shaderc_spvc_compile_options_t options,
+    const shaderc_spvc_context_t state, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result) {
-  spirv_cross::CompilerHLSL* compiler;
+  spirv_cross::CompilerHLSL* cross_compiler;
 
 // spvc IR generation is under development, for now run spirv-cross
 // compiler(SHADERC_ENABLE_SPVC_PARSER is OFF by default)
@@ -326,38 +328,39 @@ shaderc_spvc_compilation_result_t generate_hlsl_shader(
         "execution environments failed (spvc-ir-pass).\n");
     return result;
   } else {
-    compiler = new (std::nothrow) spirv_cross::CompilerHLSL(ir);
+    cross_compiler = new (std::nothrow) spirv_cross::CompilerHLSL(ir);
   }
 #else
-  compiler = new (std::nothrow) spirv_cross::CompilerHLSL(source, source_len);
+  cross_compiler =
+      new (std::nothrow) spirv_cross::CompilerHLSL(source, source_len);
 #endif
 
-  if (!compiler) {
+  if (!cross_compiler) {
     result->messages.append(
         "Unable to initialize SPIRV-Cross HLSL compiler.\n");
     result->status = shaderc_compilation_status_compilation_error;
     return result;
   }
-  result->compiler.reset(compiler);
+  state->cross_compiler.reset(cross_compiler);
 
-  compiler->set_common_options(options->glsl);
-  compiler->set_hlsl_options(options->hlsl);
+  cross_compiler->set_common_options(options->glsl);
+  cross_compiler->set_hlsl_options(options->hlsl);
 
-  result = generate_shader(compiler, result);
+  result = generate_shader(cross_compiler, result);
   if (result->status != shaderc_compilation_status_success) {
     result->messages.append("Compilation failed.  Partial source:\n");
-    result->messages.append(compiler->get_partial_source());
-    result->compiler.reset();
+    result->messages.append(cross_compiler->get_partial_source());
+    state->cross_compiler.reset();
   }
 
   return result;
 }
 
 shaderc_spvc_compilation_result_t generate_msl_shader(
-    const uint32_t* source, size_t source_len,
-    shaderc_spvc_compile_options_t options,
+    const shaderc_spvc_context_t state, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result) {
-  spirv_cross::CompilerMSL* compiler;
+  spirv_cross::CompilerMSL* cross_compiler;
 
 // spvc IR generation is under development, for now run spirv-cross
 // compiler(SHADERC_ENABLE_SPVC_PARSER is OFF by default)
@@ -371,39 +374,40 @@ shaderc_spvc_compilation_result_t generate_msl_shader(
         "execution environments failed (spvc-ir-pass).\n");
     return result;
   } else {
-    compiler = new (std::nothrow) spirv_cross::CompilerMSL(ir);
+    cross_compiler = new (std::nothrow) spirv_cross::CompilerMSL(ir);
   }
 #else
-  compiler = new (std::nothrow) spirv_cross::CompilerMSL(source, source_len);
+  cross_compiler =
+      new (std::nothrow) spirv_cross::CompilerMSL(source, source_len);
 #endif
 
-  if (!compiler) {
+  if (!cross_compiler) {
     result->messages.append("Unable to initialize SPIRV-Cross MSL compiler.\n");
     result->status = shaderc_compilation_status_compilation_error;
     return result;
   }
-  result->compiler.reset(compiler);
+  state->cross_compiler.reset(cross_compiler);
 
-  compiler->set_common_options(options->glsl);
-  compiler->set_msl_options(options->msl);
+  cross_compiler->set_common_options(options->glsl);
+  cross_compiler->set_msl_options(options->msl);
   for (auto i : options->msl_discrete_descriptor_sets)
-    compiler->add_discrete_descriptor_set(i);
+    cross_compiler->add_discrete_descriptor_set(i);
 
-  result = generate_shader(compiler, result);
+  result = generate_shader(cross_compiler, result);
   if (result->status != shaderc_compilation_status_success) {
     result->messages.append("Compilation failed.  Partial source:\n");
-    result->messages.append(compiler->get_partial_source());
-    result->compiler.reset();
+    result->messages.append(cross_compiler->get_partial_source());
+    state->cross_compiler.reset();
   }
 
   return result;
 }  // namespace spvc_private
 
 shaderc_spvc_compilation_result_t generate_vulkan_shader(
-    const uint32_t* source, size_t source_len,
-    shaderc_spvc_compile_options_t options,
+    const shaderc_spvc_context_t state, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result) {
-  spirv_cross::CompilerReflection* compiler;
+  spirv_cross::CompilerReflection* cross_compiler;
 
 // spvc IR generation is under development, for now run spirv-cross
 // compiler(SHADERC_ENABLE_SPVC_PARSER is OFF by default)
@@ -417,21 +421,21 @@ shaderc_spvc_compilation_result_t generate_vulkan_shader(
         "execution environments failed (spvc-ir-pass).\n");
     return result;
   } else {
-    compiler = new (std::nothrow) spirv_cross::CompilerReflection(ir);
+    cross_compiler = new (std::nothrow) spirv_cross::CompilerReflection(ir);
   }
 #else
-  compiler =
+  cross_compiler =
       new (std::nothrow) spirv_cross::CompilerReflection(source, source_len);
 #endif
 
-  if (!compiler) {
+  if (!cross_compiler) {
     result->messages.append(
         "Unable to initialize SPIRV-Cross reflection "
         "compiler.\n");
     result->status = shaderc_compilation_status_compilation_error;
     return result;
   }
-  result->compiler.reset(compiler);
+  state->cross_compiler.reset(cross_compiler);
 
   return result;
 }

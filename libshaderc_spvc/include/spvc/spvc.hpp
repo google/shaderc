@@ -42,7 +42,7 @@ class CompilationResult {
   explicit CompilationResult(shaderc_spvc_compilation_result_t result)
       : result_(result) {}
   CompilationResult() : result_(nullptr) {}
-  ~CompilationResult() { shaderc_spvc_result_release(result_); }
+  ~CompilationResult() { shaderc_spvc_result_destroy(result_); }
 
   CompilationResult(CompilationResult&& other) : result_(nullptr) {
     *this = std::move(other);
@@ -50,7 +50,7 @@ class CompilationResult {
 
   CompilationResult& operator=(CompilationResult&& other) {
     if (result_) {
-      shaderc_spvc_result_release(result_);
+      shaderc_spvc_result_destroy(result_);
     }
     result_ = other.result_;
     other.result_ = nullptr;
@@ -94,8 +94,8 @@ class CompilationResult {
 // Contains any options that can have default values for a compilation.
 class CompileOptions {
  public:
-  CompileOptions() { options_ = shaderc_spvc_compile_options_initialize(); }
-  ~CompileOptions() { shaderc_spvc_compile_options_release(options_); }
+  CompileOptions() { options_ = shaderc_spvc_compile_options_create(); }
+  ~CompileOptions() { shaderc_spvc_compile_options_destroy(options_); }
   CompileOptions(const CompileOptions& other) {
     options_ = shaderc_spvc_compile_options_clone(other.options_);
   }
@@ -271,27 +271,27 @@ class CompileOptions {
   CompileOptions& operator=(const CompileOptions& other) = delete;
   shaderc_spvc_compile_options_t options_;
 
-  friend class Compiler;
+  friend class Context;
 };
 
 // The compilation context for compiling SPIR-V.
-class Compiler {
+class Context {
  public:
-  Compiler() : compiler_(shaderc_spvc_compiler_initialize()) {}
-  ~Compiler() { shaderc_spvc_compiler_release(compiler_); }
+  Context() : state_(shaderc_spvc_context_create()) {}
+  ~Context() { shaderc_spvc_context_destroy(state_); }
 
-  Compiler(Compiler&& other) {
-    compiler_ = other.compiler_;
-    other.compiler_ = nullptr;
+  Context(Context&& other) {
+    state_ = other.state_;
+    other.state_ = nullptr;
   }
 
-  bool IsValid() const { return compiler_ != nullptr; }
+  bool IsValid() const { return state_ != nullptr; }
 
   // Compiles the given source SPIR-V to GLSL.
   CompilationResult CompileSpvToGlsl(const uint32_t* source, size_t source_len,
                                      const CompileOptions& options) const {
     shaderc_spvc_compilation_result_t compilation_result =
-        shaderc_spvc_compile_into_glsl(compiler_, source, source_len,
+        shaderc_spvc_compile_into_glsl(state_, source, source_len,
                                        options.options_);
     return CompilationResult(compilation_result);
   }
@@ -300,7 +300,7 @@ class Compiler {
   CompilationResult CompileSpvToHlsl(const uint32_t* source, size_t source_len,
                                      const CompileOptions& options) const {
     shaderc_spvc_compilation_result_t compilation_result =
-        shaderc_spvc_compile_into_hlsl(compiler_, source, source_len,
+        shaderc_spvc_compile_into_hlsl(state_, source, source_len,
                                        options.options_);
     return CompilationResult(compilation_result);
   }
@@ -309,7 +309,7 @@ class Compiler {
   CompilationResult CompileSpvToMsl(const uint32_t* source, size_t source_len,
                                     const CompileOptions& options) const {
     shaderc_spvc_compilation_result_t compilation_result =
-        shaderc_spvc_compile_into_msl(compiler_, source, source_len,
+        shaderc_spvc_compile_into_msl(state_, source, source_len,
                                       options.options_);
     return CompilationResult(compilation_result);
   }
@@ -319,17 +319,21 @@ class Compiler {
                                        size_t source_len,
                                        const CompileOptions& options) const {
     shaderc_spvc_compilation_result_t compilation_result =
-        shaderc_spvc_compile_into_vulkan(compiler_, source, source_len,
+        shaderc_spvc_compile_into_vulkan(state_, source, source_len,
                                          options.options_);
     return CompilationResult(compilation_result);
   }
 
  private:
-  Compiler(const Compiler&) = delete;
-  Compiler& operator=(const Compiler& other) = delete;
+  Context(const Context&) = delete;
+  Context& operator=(const Context& other) = delete;
 
-  shaderc_spvc_compiler_t compiler_;
+  shaderc_spvc_context_t state_;
 };
+
+// DEPRECATED: Old version of Context.
+class Compiler : public Context {};
+
 }  // namespace shaderc_spvc
 
 #endif  // SHADERC_SPVC_HPP_

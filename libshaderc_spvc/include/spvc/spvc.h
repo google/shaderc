@@ -33,29 +33,44 @@ typedef enum {
 } shaderc_spvc_msl_platform;
 
 // An opaque handle to an object that manages all compiler state.
-typedef struct shaderc_spvc_compiler* shaderc_spvc_compiler_t;
+typedef struct shaderc_spvc_context* shaderc_spvc_context_t;
 
-// Create a compiler.  A return of NULL indicates that there was an error.
-// Any function operating on a *_compiler_t must offer the basic
+// DEPRECATED: Old name for opaque state handle.
+typedef shaderc_spvc_context_t shaderc_spvc_compiler_t;
+
+// Create a spvc state handle.  A return of NULL indicates that there was an
+// error. Any function operating on a *_context_t must offer the basic
 // thread-safety guarantee.
 // [http://herbsutter.com/2014/01/13/gotw-95-solution-thread-safety-and-synchronization/]
 // That is: concurrent invocation of these functions on DIFFERENT objects needs
 // no synchronization; concurrent invocation of these functions on the SAME
 // object requires synchronization IF AND ONLY IF some of them take a non-const
 // argument.
+SHADERC_EXPORT shaderc_spvc_context_t shaderc_spvc_context_create(void);
+
+// DEPRECATED: Old function for creating state opaque handle.
 SHADERC_EXPORT shaderc_spvc_compiler_t shaderc_spvc_compiler_initialize(void);
 
 // Release resources.  After this the handle cannot be used.
-SHADERC_EXPORT void shaderc_spvc_compiler_release(shaderc_spvc_compiler_t);
+SHADERC_EXPORT void shaderc_spvc_context_destroy(
+    shaderc_spvc_context_t context);
+
+// DEPRECATED: Old function for destroying state opaque handle.
+SHADERC_EXPORT void shaderc_spvc_compiler_release(
+    shaderc_spvc_compiler_t compiler);
 
 // An opaque handle to an object that manages options to a single compilation
 // result.
 typedef struct shaderc_spvc_compile_options* shaderc_spvc_compile_options_t;
 
-// Returns default compiler options.
+// Creates default compiler options.
 // A return of NULL indicates that there was an error initializing the options.
 // Any function operating on shaderc_spvc_compile_options_t must offer the
 // basic thread-safety guarantee.
+SHADERC_EXPORT shaderc_spvc_compile_options_t
+shaderc_spvc_compile_options_create(void);
+
+// DEPRECATED: Old function for creating options opaque handle.
 SHADERC_EXPORT shaderc_spvc_compile_options_t
 shaderc_spvc_compile_options_initialize(void);
 
@@ -66,9 +81,13 @@ SHADERC_EXPORT shaderc_spvc_compile_options_t
 shaderc_spvc_compile_options_clone(
     const shaderc_spvc_compile_options_t options);
 
-// Releases the compilation options. It is invalid to use the given
+// Destroys the compilation options. It is invalid to use the given
 // option object in any future calls. It is safe to pass
 // NULL to this function, and doing such will have no effect.
+SHADERC_EXPORT void shaderc_spvc_compile_options_destroy(
+    shaderc_spvc_compile_options_t options);
+
+// DEPRECATED: Old function for destroying options opaque handle.
 SHADERC_EXPORT void shaderc_spvc_compile_options_release(
     shaderc_spvc_compile_options_t options);
 
@@ -218,33 +237,37 @@ typedef struct shaderc_spvc_compilation_result*
 // Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
 // GLSL.
 SHADERC_EXPORT shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_glsl(
-    const shaderc_spvc_compiler_t compiler, const uint32_t* source,
+    const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options);
 
 // Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
 // HLSL.
 SHADERC_EXPORT shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_hlsl(
-    const shaderc_spvc_compiler_t compiler, const uint32_t* source,
+    const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options);
 
 // Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
 // MSL.
 SHADERC_EXPORT shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_msl(
-    const shaderc_spvc_compiler_t compiler, const uint32_t* source,
+    const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options);
 
 // Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
 // Vullkan specific SPIR-V.
 SHADERC_EXPORT shaderc_spvc_compilation_result_t
-shaderc_spvc_compile_into_vulkan(const shaderc_spvc_compiler_t compiler,
+shaderc_spvc_compile_into_vulkan(const shaderc_spvc_context_t context,
                                  const uint32_t* source, size_t source_len,
                                  shaderc_spvc_compile_options_t options);
 
 // The following functions, operating on shaderc_spvc_compilation_result_t
 // objects, offer only the basic thread-safety guarantee.
 
-// Releases the resources held by the result object. It is invalid to use the
+// Destroys the resources held by the result object. It is invalid to use the
 // result object for any further operations.
+SHADERC_EXPORT void shaderc_spvc_result_destroy(
+    shaderc_spvc_compilation_result_t result);
+
+// DEPRECATED: Old function for destroying the result object.
 SHADERC_EXPORT void shaderc_spvc_result_release(
     shaderc_spvc_compilation_result_t result);
 

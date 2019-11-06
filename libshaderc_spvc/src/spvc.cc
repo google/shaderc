@@ -14,7 +14,7 @@
 
 #include "spvc_private.h"
 
-shaderc_spvc_compile_options_t shaderc_spvc_compile_options_initialize() {
+shaderc_spvc_compile_options_t shaderc_spvc_compile_options_create() {
   shaderc_spvc_compile_options_t options =
       new (std::nothrow) shaderc_spvc_compile_options;
   if (options) {
@@ -23,15 +23,24 @@ shaderc_spvc_compile_options_t shaderc_spvc_compile_options_initialize() {
   return options;
 }
 
+shaderc_spvc_compile_options_t shaderc_spvc_compile_options_initialize(void) {
+  return shaderc_spvc_compile_options_create();
+}
+
 shaderc_spvc_compile_options_t shaderc_spvc_compile_options_clone(
     shaderc_spvc_compile_options_t options) {
   if (options) return new (std::nothrow) shaderc_spvc_compile_options(*options);
-  return shaderc_spvc_compile_options_initialize();
+  return shaderc_spvc_compile_options_create();
+}
+
+void shaderc_spvc_compile_options_destroy(
+    shaderc_spvc_compile_options_t options) {
+  if (options) delete options;
 }
 
 void shaderc_spvc_compile_options_release(
     shaderc_spvc_compile_options_t options) {
-  delete options;
+  shaderc_spvc_compile_options_destroy(options);
 }
 
 void shaderc_spvc_compile_options_set_source_env(
@@ -196,17 +205,25 @@ size_t shaderc_spvc_compile_options_set_for_fuzzing(
   return sizeof(*options);
 }
 
-shaderc_spvc_compiler_t shaderc_spvc_compiler_initialize() {
-  return new (std::nothrow) shaderc_spvc_compiler;
+shaderc_spvc_context_t shaderc_spvc_context_create() {
+  return new (std::nothrow) shaderc_spvc_context;
+}
+
+shaderc_spvc_compiler_t shaderc_spvc_compiler_initialize(void) {
+  return shaderc_spvc_context_create();
+}
+
+void shaderc_spvc_context_destroy(shaderc_spvc_context_t context) {
+  if (context) delete context;
 }
 
 void shaderc_spvc_compiler_release(shaderc_spvc_compiler_t compiler) {
-  delete compiler;
+  shaderc_spvc_context_destroy(compiler);
 }
 
 shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_glsl(
-    const shaderc_spvc_compiler_t, const uint32_t* source, size_t source_len,
-    shaderc_spvc_compile_options_t options) {
+    const shaderc_spvc_context_t context, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options) {
   auto* result = new (std::nothrow) shaderc_spvc_compilation_result;
   if (!result) return nullptr;
   result->status = shaderc_compilation_status_success;
@@ -219,7 +236,8 @@ shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_glsl(
   }
 
   result = spvc_private::generate_glsl_shader(
-      intermediate_source.data(), intermediate_source.size(), options, result);
+      context, intermediate_source.data(), intermediate_source.size(), options,
+      result);
   if (result->status != shaderc_compilation_status_success) {
     result->messages.append(
         "Generation of GLSL from transformed source failed.\n");
@@ -229,8 +247,8 @@ shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_glsl(
 }
 
 shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_hlsl(
-    const shaderc_spvc_compiler_t, const uint32_t* source, size_t source_len,
-    shaderc_spvc_compile_options_t options) {
+    const shaderc_spvc_context_t context, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options) {
   auto* result = new (std::nothrow) shaderc_spvc_compilation_result;
   if (!result) return nullptr;
   result->status = shaderc_compilation_status_success;
@@ -243,7 +261,8 @@ shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_hlsl(
   }
 
   result = spvc_private::generate_hlsl_shader(
-      intermediate_source.data(), intermediate_source.size(), options, result);
+      context, intermediate_source.data(), intermediate_source.size(), options,
+      result);
   if (result->status != shaderc_compilation_status_success) {
     result->messages.append(
         "Generation of HLSL from transformed source failed.\n");
@@ -253,8 +272,8 @@ shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_hlsl(
 }
 
 shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_msl(
-    const shaderc_spvc_compiler_t, const uint32_t* source, size_t source_len,
-    shaderc_spvc_compile_options_t options) {
+    const shaderc_spvc_context_t context, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options) {
   auto* result = new (std::nothrow) shaderc_spvc_compilation_result;
   if (!result) return nullptr;
   result->status = shaderc_compilation_status_success;
@@ -267,7 +286,8 @@ shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_msl(
   }
 
   result = spvc_private::generate_msl_shader(
-      intermediate_source.data(), intermediate_source.size(), options, result);
+      context, intermediate_source.data(), intermediate_source.size(), options,
+      result);
   if (result->status != shaderc_compilation_status_success) {
     result->messages.append(
         "Generation of MSL from transformed source failed.\n");
@@ -277,7 +297,7 @@ shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_msl(
 }
 
 shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_vulkan(
-    const shaderc_spvc_compiler_t compiler, const uint32_t* source,
+    const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options) {
   auto* result = new (std::nothrow) shaderc_spvc_compilation_result;
   if (!result) return nullptr;
@@ -301,9 +321,9 @@ shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_vulkan(
 
   // No actual generation since output for this compile method is the binary
   // SPIR-V, but need to produce a compiler so that reflection can be performed
-  result = spvc_private::generate_vulkan_shader(result->binary_output.data(),
-                                                result->binary_output.size(),
-                                                options, result);
+  result = spvc_private::generate_vulkan_shader(
+      context, result->binary_output.data(), result->binary_output.size(),
+      options, result);
   if (result->status != shaderc_compilation_status_success) {
     result->messages.append(
         "Unable to generate compiler for reflection of Vulkan shader.\n");
@@ -337,6 +357,10 @@ shaderc_compilation_status shaderc_spvc_result_get_status(
   return result->status;
 }
 
+void shaderc_spvc_result_destroy(shaderc_spvc_compilation_result_t result) {
+  if (result) delete result;
+}
+
 void shaderc_spvc_result_release(shaderc_spvc_compilation_result_t result) {
-  delete result;
+  shaderc_spvc_result_destroy(result);
 }

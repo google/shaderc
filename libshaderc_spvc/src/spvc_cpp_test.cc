@@ -19,12 +19,12 @@
 
 using shaderc_spvc::CompilationResult;
 using shaderc_spvc::CompileOptions;
-using shaderc_spvc::Compiler;
+using shaderc_spvc::Context;
 
 namespace {
 
 TEST(Compile, Glsl) {
-  Compiler compiler;
+  Context compiler;
   CompileOptions options;
 
   CompilationResult result = compiler.CompileSpvToGlsl(
@@ -36,7 +36,7 @@ TEST(Compile, Glsl) {
 }
 
 TEST(Compile, Hlsl) {
-  Compiler compiler;
+  Context compiler;
   CompileOptions options;
 
   CompilationResult result = compiler.CompileSpvToHlsl(
@@ -48,7 +48,7 @@ TEST(Compile, Hlsl) {
 }
 
 TEST(Compile, Msl) {
-  Compiler compiler;
+  Context compiler;
   CompileOptions options;
 
   CompilationResult result = compiler.CompileSpvToMsl(
@@ -60,7 +60,7 @@ TEST(Compile, Msl) {
 }
 
 TEST(Compile, Vulkan) {
-  Compiler compiler;
+  Context compiler;
   CompileOptions options;
 
   CompilationResult result = compiler.CompileSpvToVulkan(
