@@ -35,20 +35,46 @@ using ::testing::MatchesRegex;
 
 // For a given result Id returns the previously constructed instruction.
 template <typename T>
-T& get(uint32_t id, spirv_cross::ParsedIR* ir_) {
-  return spirv_cross::variant_get<T>(ir_->ids[id]);
+T& get(uint32_t id, spirv_cross::ParsedIR* ir) {
+  return spirv_cross::variant_get<T>(ir->ids[id]);
 }
 
 // For a given result Id returns the instruction if it was previously
 // constructed and had the same result Type otherwise returns nullptr.
 template <typename T>
-T* maybe_get(uint32_t id, spirv_cross::ParsedIR* ir_) {
-  if (id >= ir_->ids.size())
+T* maybe_get(uint32_t id, spirv_cross::ParsedIR* ir) {
+  if (id >= ir->ids.size())
     return nullptr;
-  else if (ir_->ids[id].get_type() == static_cast<spirv_cross::Types>(T::type))
-    return &get<T>(id, ir_);
+  else if (ir->ids[id].get_type() == static_cast<spirv_cross::Types>(T::type))
+    return &get<T>(id, ir);
   else
     return nullptr;
+}
+
+std::string SelectiveJoin(const std::vector<const char*>& strings,
+                          const std::function<bool(const char*)>& skip_dictator,
+                          char delimiter = '\n') {
+  std::ostringstream oss;
+  for (const auto* str : strings) {
+    if (!skip_dictator(str)) oss << str << delimiter;
+  }
+  return oss.str();
+}
+
+std::string JoinAllInsts(const std::vector<const char*>& insts) {
+  return SelectiveJoin(insts, [](const char*) { return false; });
+}
+
+void createSpvcIr(spirv_cross::ParsedIR* ir, std::string text) {
+  std::vector<uint32_t> binary;
+  std::unique_ptr<IRContext> context =
+      BuildModule(SPV_ENV_UNIVERSAL_1_1, nullptr, text,
+                  SPV_TEXT_TO_BINARY_OPTION_PRESERVE_NUMERIC_IDS);
+  assert(context && "context");
+  context->module()->ToBinary(&binary, false);
+  ir->spirv =
+      std::vector<uint32_t>(binary.data(), binary.data() + binary.size());
+  return;
 }
 
 class SpvcIrParsingTest : public PassTest<::testing::Test> {
@@ -60,13 +86,25 @@ class SpvcIrParsingTest : public PassTest<::testing::Test> {
               OpExtension "SPV_KHR_vulkan_memory_model"
               OpMemoryModel Logical VulkanKHR
               OpEntryPoint Vertex %1 "shader"
-      %2 = OpTypeVoid
-      %3 = OpTypeFunction %2
-      %1 = OpFunction %2 None %3
-      %4 = OpLabel
+         %2 = OpTypeVoid
+         %3 = OpTypeFunction %2
+         %1 = OpFunction %2 None %3
+         %4 = OpLabel
               OpReturn
               OpFunctionEnd
     )";
+
+    before_ = {"OpCapability Shader", "OpCapability VulkanMemoryModelKHR",
+                  "OpExtension \"SPV_KHR_vulkan_memory_model\"",
+                  "OpMemoryModel Logical VulkanKHR"};
+
+    after_ = {"OpEntryPoint Vertex %1 \"shader\"",
+                   "%2 = OpTypeVoid",
+                   "%3 = OpTypeFunction %2",
+                   "%1 = OpFunction %2 None %3",
+                   "%4 = OpLabel",
+                   "OpReturn",
+                   "OpFunctionEnd"};
 
     SetAssembleOptions(SPV_TEXT_TO_BINARY_OPTION_PRESERVE_NUMERIC_IDS);
     std::vector<uint32_t> binary;
@@ -80,13 +118,15 @@ class SpvcIrParsingTest : public PassTest<::testing::Test> {
   }
   std::string input_;
   spirv_cross::ParsedIR ir_;
+  std::vector<const char*> before_;
+  std::vector<const char*> after_;
 };
 
 TEST_F(SpvcIrParsingTest, OpCapabilityInstruction) {
   auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
       input_, true, false, &ir_);
   ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
-      << " SinglePassRunAndDisassemble failed on input:\n "
+        << " SinglePassRunAndDisassemble failed on input:\n "
       << std::get<0>(result);
 
   ASSERT_EQ(ir_.declared_capabilities.size(), 2);
@@ -192,8 +232,7 @@ TEST_F(SpvcIrParsingTest, OpLabelInstruction) {
 }
 
 TEST_F(SpvcIrParsingTest, OpReturnInstruction) {
-  auto result = SinglePassRunAndDisassemble<SpvcIrPass,
-  spirv_cross::ParsedIR*>(
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
       input_, true, false, &ir_);
   ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
       << " SinglePassRunAndDisassemble failed on input:\n "
@@ -202,6 +241,26 @@ TEST_F(SpvcIrParsingTest, OpReturnInstruction) {
   auto block = maybe_get<spirv_cross::SPIRBlock>(4, &ir_);
   ASSERT_NE(block, nullptr);
   EXPECT_EQ(block->terminator, spirv_cross::SPIRBlock::Return);
+}
+
+TEST_F(SpvcIrParsingTest, SpvOpSourceInstruction) {
+
+  const std::vector<const char*> middle = {"OpSource HLSL 500"};
+  std::string spirv = JoinAllInsts(
+      Concat(Concat(before_, middle), after_));
+  spirv_cross::ParsedIR ir;
+  createSpvcIr(&ir, spirv);
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, false, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  EXPECT_FALSE(ir.source.es);
+  EXPECT_EQ(ir.source.version, 450);
+  EXPECT_TRUE(ir.source.known);
+  EXPECT_TRUE(ir.source.hlsl);
 }
 
 }  // namespace

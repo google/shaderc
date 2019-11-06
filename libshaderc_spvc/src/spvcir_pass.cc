@@ -51,18 +51,18 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
 
     case SpvOpSource: {
       auto lang =
-          static_cast<spv::SourceLanguage>(inst->GetSingleWordOperand(0u));
+          static_cast<spv::SourceLanguage>(inst->GetSingleWordInOperand(0u));
       switch (lang) {
         case spv::SourceLanguageESSL:
           ir_->source.es = true;
-          ir_->source.version = inst->GetSingleWordOperand(1u);
+          ir_->source.version = inst->GetSingleWordInOperand(1u);
           ir_->source.known = true;
           ir_->source.hlsl = false;
           break;
 
         case spv::SourceLanguageGLSL:
           ir_->source.es = false;
-          ir_->source.version = inst->GetSingleWordOperand(1u);
+          ir_->source.version = inst->GetSingleWordInOperand(1u);
           ir_->source.known = true;
           ir_->source.hlsl = false;
           break;
