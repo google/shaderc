@@ -59,6 +59,10 @@ SHADERC_EXPORT void shaderc_spvc_context_destroy(
 SHADERC_EXPORT void shaderc_spvc_compiler_release(
     shaderc_spvc_compiler_t compiler);
 
+// Get validation/compilation error or informational messages.
+SHADERC_EXPORT const char* shaderc_spvc_context_get_messages(
+    const shaderc_spvc_context_t context);
+
 // An opaque handle to an object that manages options to a single compilation
 // result.
 typedef struct shaderc_spvc_compile_options* shaderc_spvc_compile_options_t;
@@ -236,31 +240,41 @@ typedef struct shaderc_spvc_compilation_result*
 
 // Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
 // GLSL.
-SHADERC_EXPORT shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_glsl(
+SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_compile_into_glsl(
     const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options);
+    size_t source_len, shaderc_spvc_compile_options_t options,
+    shaderc_spvc_compilation_result_t result);
 
 // Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
 // HLSL.
-SHADERC_EXPORT shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_hlsl(
+SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_compile_into_hlsl(
     const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options);
+    size_t source_len, shaderc_spvc_compile_options_t options,
+    shaderc_spvc_compilation_result_t result);
 
 // Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
 // MSL.
-SHADERC_EXPORT shaderc_spvc_compilation_result_t shaderc_spvc_compile_into_msl(
+SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_compile_into_msl(
     const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options);
+    size_t source_len, shaderc_spvc_compile_options_t options,
+    shaderc_spvc_compilation_result_t result);
 
 // Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
 // Vullkan specific SPIR-V.
-SHADERC_EXPORT shaderc_spvc_compilation_result_t
-shaderc_spvc_compile_into_vulkan(const shaderc_spvc_context_t context,
-                                 const uint32_t* source, size_t source_len,
-                                 shaderc_spvc_compile_options_t options);
+SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_compile_into_vulkan(
+    const shaderc_spvc_context_t context, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options,
+    shaderc_spvc_compilation_result_t result);
 
 // The following functions, operating on shaderc_spvc_compilation_result_t
 // objects, offer only the basic thread-safety guarantee.
+
+// Creates an instant of compiliation result data structure.
+// A return of NULL indicates that there was an error creating the structure.
+// Any function operating on shaderc_spvc_compilation_result_t must offer the
+// basic thread-safety guarantee.
+SHADERC_EXPORT shaderc_spvc_compilation_result_t
+shaderc_spvc_result_create(void);
 
 // Destroys the resources held by the result object. It is invalid to use the
 // result object for any further operations.
@@ -271,13 +285,11 @@ SHADERC_EXPORT void shaderc_spvc_result_destroy(
 SHADERC_EXPORT void shaderc_spvc_result_release(
     shaderc_spvc_compilation_result_t result);
 
-// Returns the compilation status, indicating whether the compilation succeeded,
-// or failed due to some reasons, like invalid shader stage or compilation
-// errors.
+// DEPRECATED
 SHADERC_EXPORT shaderc_compilation_status
 shaderc_spvc_result_get_status(const shaderc_spvc_compilation_result_t);
 
-// Get validation/compilation error or informational messages.
+// DEPRECATED
 SHADERC_EXPORT const char* shaderc_spvc_result_get_messages(
     const shaderc_spvc_compilation_result_t result);
 

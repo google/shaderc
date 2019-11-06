@@ -19,9 +19,9 @@
 #include "shaderc/shaderc.h"
 #include "spvc/spvc.h"
 
-typedef shaderc_spvc_compilation_result_t (*CompileInto)(
+typedef shaderc_compilation_status (*CompileInto)(
     const shaderc_spvc_context_t, const uint32_t*, size_t,
-    shaderc_spvc_compile_options_t);
+    shaderc_spvc_compile_options_t, shaderc_spvc_compilation_result_t);
 
 shaderc_compilation_result_t assemble_shader(const char* shader) {
   shaderc_compiler_t shaderc;
@@ -38,15 +38,15 @@ int test_exec(shaderc_spvc_context_t context,
               shaderc_spvc_compile_options_t options,
               shaderc_compilation_result_t assembled_shader,
               CompileInto compile_into, const char* target_lang) {
-  shaderc_spvc_compilation_result_t result;
-  result = compile_into(
-      context, (const uint32_t*)shaderc_result_get_bytes(assembled_shader),
-      shaderc_result_get_length(assembled_shader) / sizeof(uint32_t), options);
+  shaderc_spvc_compilation_result_t result = shaderc_spvc_result_create();
   assert(result);
+  shaderc_compilation_status status = compile_into(
+      context, (const uint32_t*)shaderc_result_get_bytes(assembled_shader),
+      shaderc_result_get_length(assembled_shader) / sizeof(uint32_t), options,
+      result);
 
   int ret_val;
-  if (shaderc_spvc_result_get_status(result) ==
-      shaderc_compilation_status_success) {
+  if (status == shaderc_compilation_status_success) {
     printf(
         "success! %lu characters of %s\n",
         (unsigned long)(strlen(shaderc_spvc_result_get_string_output(result))),

@@ -23,52 +23,47 @@ using shaderc_spvc::Context;
 
 namespace {
 
-TEST(Compile, Glsl) {
-  Context compiler;
-  CompileOptions options;
+class CompileTest : public testing::Test {
+ public:
+  Context context_;
+  CompileOptions options_;
+  CompilationResult result_;
+};
 
-  CompilationResult result = compiler.CompileSpvToGlsl(
+TEST_F(CompileTest, Glsl) {
+  shaderc_compilation_status status = context_.CompileSpvToGlsl(
       kSmokeShaderBinary, sizeof(kSmokeShaderBinary) / sizeof(uint32_t),
-      options);
-  EXPECT_EQ(shaderc_compilation_status_success, result.GetCompilationStatus());
-  EXPECT_NE(0, result.GetStringOutput().size());
-  EXPECT_EQ(0, result.GetBinaryOutput().size());
+      options_, &result_);
+  EXPECT_EQ(shaderc_compilation_status_success, status);
+  EXPECT_NE(0, result_.GetStringOutput().size());
+  EXPECT_EQ(0, result_.GetBinaryOutput().size());
 }
 
-TEST(Compile, Hlsl) {
-  Context compiler;
-  CompileOptions options;
-
-  CompilationResult result = compiler.CompileSpvToHlsl(
+TEST_F(CompileTest, Hlsl) {
+  shaderc_compilation_status status = context_.CompileSpvToHlsl(
       kSmokeShaderBinary, sizeof(kSmokeShaderBinary) / sizeof(uint32_t),
-      options);
-  EXPECT_EQ(shaderc_compilation_status_success, result.GetCompilationStatus());
-  EXPECT_NE(0, result.GetStringOutput().size());
-  EXPECT_EQ(0, result.GetBinaryOutput().size());
+      options_, &result_);
+  EXPECT_EQ(shaderc_compilation_status_success, status);
+  EXPECT_NE(0, result_.GetStringOutput().size());
+  EXPECT_EQ(0, result_.GetBinaryOutput().size());
 }
 
-TEST(Compile, Msl) {
-  Context compiler;
-  CompileOptions options;
-
-  CompilationResult result = compiler.CompileSpvToMsl(
+TEST_F(CompileTest, Msl) {
+  shaderc_compilation_status status = context_.CompileSpvToMsl(
       kSmokeShaderBinary, sizeof(kSmokeShaderBinary) / sizeof(uint32_t),
-      options);
-  EXPECT_EQ(shaderc_compilation_status_success, result.GetCompilationStatus());
-  EXPECT_NE(0, result.GetStringOutput().size());
-  EXPECT_EQ(0, result.GetBinaryOutput().size());
+      options_, &result_);
+  EXPECT_EQ(shaderc_compilation_status_success, status);
+  EXPECT_NE(0, result_.GetStringOutput().size());
+  EXPECT_EQ(0, result_.GetBinaryOutput().size());
 }
 
-TEST(Compile, Vulkan) {
-  Context compiler;
-  CompileOptions options;
-
-  CompilationResult result = compiler.CompileSpvToVulkan(
+TEST_F(CompileTest, Vulkan) {
+  shaderc_compilation_status status = context_.CompileSpvToVulkan(
       kSmokeShaderBinary, sizeof(kSmokeShaderBinary) / sizeof(uint32_t),
-      options);
-  EXPECT_EQ(shaderc_compilation_status_success, result.GetCompilationStatus());
-  EXPECT_EQ(0, result.GetStringOutput().size());
-  EXPECT_NE(0, result.GetBinaryOutput().size());
+      options_, &result_);
+  EXPECT_EQ(shaderc_compilation_status_success, status);
+  EXPECT_EQ(0, result_.GetStringOutput().size());
+  EXPECT_NE(0, result_.GetBinaryOutput().size());
 }
 
 }  // anonymous namespace
