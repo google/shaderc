@@ -160,6 +160,63 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
+    // opcode: 21
+    case SpvOpTypeInt: {
+      uint32_t id = inst->result_id();
+      uint32_t width = inst->GetSingleWordInOperand(0u);
+      bool signedness = inst->GetSingleWordInOperand(1u) != 0;
+      auto &type = set<spirv_cross::SPIRType>(id);
+      type.basetype = signedness ? spirv_cross::to_signed_basetype(width)
+                                 : spirv_cross::to_unsigned_basetype(width);
+      type.width = width;
+      break;
+    }
+
+    // opcode: 43
+    case SpvOpConstant: {
+      uint32_t id = inst->result_id();
+      auto &type = get<spirv_cross::SPIRType>(inst->type_id());
+
+      // TODO(sarahM0): floating-point numbers of IEEE 754 are of length 16
+      // bits, 32 bits, 64 bits, and any multiple of 32 bits ≥128
+      // Ask whether we need to support longer than 64 bits
+      if (type.width > 32) {
+        uint64_t combined_words = inst->GetInOperand(0u).words[1];
+        combined_words = combined_words << 32;
+        combined_words |= inst->GetInOperand(0u).words[0];
+        set<spirv_cross::SPIRConstant>(id, inst->type_id(), combined_words,
+                                       inst->opcode() == SpvOpSpecConstant);
+      } else {
+        set<spirv_cross::SPIRConstant>(id, inst->type_id(),
+                                       inst->GetSingleWordInOperand(0u),
+                                       inst->opcode() == SpvOpSpecConstant);
+      }
+      break;
+    }
+
+    // opcode: 32
+    case SpvOpTypePointer: {
+      uint32_t id = inst->result_id();
+
+      auto &base = get<spirv_cross::SPIRType>(inst->GetSingleWordInOperand(1u));
+      auto &ptrbase = set<spirv_cross::SPIRType>(id);
+
+      ptrbase = base;
+      ptrbase.pointer = true;
+      ptrbase.pointer_depth++;
+      ptrbase.storage =
+          static_cast<spv::StorageClass>(inst->GetSingleWordInOperand(0u));
+
+      if (ptrbase.storage == spv::StorageClassAtomicCounter)
+        ptrbase.basetype = spirv_cross::SPIRType::AtomicCounter;
+
+      ptrbase.parent_type = inst->GetSingleWordInOperand(1u);
+
+      // spirv-cross comment:
+      // Do NOT set ptrbase.self!
+      break;
+    }
+
       // Blocks
     case SpvOpLabel: {
       // OpLabel always starts a block.

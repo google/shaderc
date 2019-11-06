@@ -95,16 +95,16 @@ class SpvcIrParsingTest : public PassTest<::testing::Test> {
     )";
 
     before_ = {"OpCapability Shader", "OpCapability VulkanMemoryModelKHR",
-                  "OpExtension \"SPV_KHR_vulkan_memory_model\"",
-                  "OpMemoryModel Logical VulkanKHR"};
+               "OpExtension \"SPV_KHR_vulkan_memory_model\"",
+               "OpMemoryModel Logical VulkanKHR"};
 
     after_ = {"OpEntryPoint Vertex %1 \"shader\"",
-                   "%2 = OpTypeVoid",
-                   "%3 = OpTypeFunction %2",
-                   "%1 = OpFunction %2 None %3",
-                   "%4 = OpLabel",
-                   "OpReturn",
-                   "OpFunctionEnd"};
+              "%2 = OpTypeVoid",
+              "%3 = OpTypeFunction %2",
+              "%1 = OpFunction %2 None %3",
+              "%4 = OpLabel",
+              "OpReturn",
+              "OpFunctionEnd"};
 
     SetAssembleOptions(SPV_TEXT_TO_BINARY_OPTION_PRESERVE_NUMERIC_IDS);
     std::vector<uint32_t> binary;
@@ -126,7 +126,7 @@ TEST_F(SpvcIrParsingTest, OpCapabilityInstruction) {
   auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
       input_, true, false, &ir_);
   ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
-        << " SinglePassRunAndDisassemble failed on input:\n "
+      << " SinglePassRunAndDisassemble failed on input:\n "
       << std::get<0>(result);
 
   ASSERT_EQ(ir_.declared_capabilities.size(), 2);
@@ -244,10 +244,8 @@ TEST_F(SpvcIrParsingTest, OpReturnInstruction) {
 }
 
 TEST_F(SpvcIrParsingTest, SpvOpSourceInstruction) {
-
   const std::vector<const char*> middle = {"OpSource HLSL 500"};
-  std::string spirv = JoinAllInsts(
-      Concat(Concat(before_, middle), after_));
+  std::string spirv = JoinAllInsts(Concat(Concat(before_, middle), after_));
   spirv_cross::ParsedIR ir;
   createSpvcIr(&ir, spirv);
 
@@ -261,6 +259,110 @@ TEST_F(SpvcIrParsingTest, SpvOpSourceInstruction) {
   EXPECT_EQ(ir.source.version, 450);
   EXPECT_TRUE(ir.source.known);
   EXPECT_TRUE(ir.source.hlsl);
+}
+
+TEST_F(SpvcIrParsingTest, SpvOpTypeIntInstruction) {
+  const std::vector<const char*> middle = {"%16 = OpTypeInt 32 1"};
+  std::string spirv = JoinAllInsts(Concat(Concat(before_, middle), after_));
+  spirv_cross::ParsedIR ir;
+  createSpvcIr(&ir, spirv);
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, false, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  auto int_type = maybe_get<spirv_cross::SPIRType>(16, &ir);
+  ASSERT_NE(int_type, nullptr);
+  EXPECT_EQ(int_type->width, 32);
+  EXPECT_EQ(int_type->basetype, spirv_cross::SPIRType::Int);
+  EXPECT_EQ(int_type->vecsize, 1);
+  EXPECT_EQ(int_type->columns, 1);
+  EXPECT_EQ(int_type->array.size(), 0);
+  EXPECT_EQ(int_type->type_alias, static_cast<spirv_cross::TypeID>(0));
+  EXPECT_EQ(int_type->parent_type, static_cast<spirv_cross::TypeID>(0));
+  EXPECT_TRUE(int_type->member_name_cache.empty());
+}
+
+TEST_F(SpvcIrParsingTest, SpvOpConstantInstruction) {
+  const std::vector<const char*> middle = {"%8 = OpTypeInt 32 1",
+                                           "%13 = OpConstant %8 100"};
+  std::string spirv = JoinAllInsts(Concat(Concat(before_, middle), after_));
+  spirv_cross::ParsedIR ir;
+  createSpvcIr(&ir, spirv);
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, false, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  auto spir_constant = maybe_get<spirv_cross::SPIRConstant>(13, &ir);
+  ASSERT_NE(spir_constant, nullptr);
+  EXPECT_EQ(spir_constant->constant_type, static_cast<spirv_cross::TypeID>(8));
+  ASSERT_EQ(spir_constant->m.columns, 1);
+  ASSERT_EQ(spir_constant->vector_size(), 1);
+  EXPECT_EQ(spir_constant->scalar(0, 0), 100);
+  EXPECT_FALSE(spir_constant->specialization);
+  EXPECT_FALSE(spir_constant->is_used_as_array_length);
+  EXPECT_FALSE(spir_constant->is_used_as_lut);
+  EXPECT_EQ(spir_constant->subconstants.size(), 0);
+  EXPECT_EQ(spir_constant->specialization_constant_macro_name, "");
+}
+
+TEST_F(SpvcIrParsingTest, SpvOpConstantInstruction64) {
+  const std::vector<const char*> middle = {"%8 = OpTypeInt 64 1",
+                                           "%13 = OpConstant %8 0xF1F2F3F4"};
+  std::string spirv = JoinAllInsts(Concat(Concat(before_, middle), after_));
+  spirv_cross::ParsedIR ir;
+  createSpvcIr(&ir, spirv);
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, false, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  auto spir_constant = maybe_get<spirv_cross::SPIRConstant>(13, &ir);
+  ASSERT_NE(spir_constant, nullptr);
+  EXPECT_EQ(spir_constant->constant_type, static_cast<spirv_cross::TypeID>(8));
+  ASSERT_EQ(spir_constant->m.columns, 1);
+  ASSERT_EQ(spir_constant->vector_size(), 1);
+  EXPECT_EQ(spir_constant->scalar_u64(0, 0), 0xF1F2F3F4);
+  EXPECT_FALSE(spir_constant->specialization);
+  EXPECT_FALSE(spir_constant->is_used_as_array_length);
+  EXPECT_FALSE(spir_constant->is_used_as_lut);
+  EXPECT_EQ(spir_constant->subconstants.size(), 0);
+  EXPECT_EQ(spir_constant->specialization_constant_macro_name, "");
+}
+
+TEST_F(SpvcIrParsingTest, SpvOpTypePointer) {
+  const std::vector<const char*> middle = {" %8 =  OpTypeInt 32 1",
+                                           "%16 =  OpTypePointer Output %8"};
+  std::string spirv = JoinAllInsts(Concat(Concat(before_, middle), after_));
+  spirv_cross::ParsedIR ir;
+  createSpvcIr(&ir, spirv);
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, false, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  auto spir_pointer = maybe_get<spirv_cross::SPIRType>(16, &ir);
+  ASSERT_NE(spir_pointer, nullptr);
+  EXPECT_TRUE(spir_pointer);
+  EXPECT_EQ(spir_pointer->pointer_depth, 1);
+  EXPECT_EQ(spir_pointer->storage, spv::StorageClass::StorageClassOutput);
+  EXPECT_EQ(spir_pointer->parent_type, static_cast<spirv_cross::TypeID>(8));
+  EXPECT_EQ(spir_pointer->width, 32);
+  EXPECT_EQ(spir_pointer->basetype, spirv_cross::SPIRType::Int);
+  EXPECT_EQ(spir_pointer->vecsize, 1);
+  EXPECT_EQ(spir_pointer->columns, 1);
+  EXPECT_EQ(spir_pointer->array.size(), 0);
+  EXPECT_EQ(spir_pointer->type_alias, static_cast<spirv_cross::TypeID>(0));
+  EXPECT_TRUE(spir_pointer->member_name_cache.empty());
 }
 
 }  // namespace
