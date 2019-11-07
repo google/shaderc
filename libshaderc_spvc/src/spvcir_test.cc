@@ -94,17 +94,26 @@ class SpvcIrParsingTest : public PassTest<::testing::Test> {
               OpFunctionEnd
     )";
 
-    before_ = {"OpCapability Shader", "OpCapability VulkanMemoryModelKHR",
-               "OpExtension \"SPV_KHR_vulkan_memory_model\"",
-               "OpMemoryModel Logical VulkanKHR"};
+    before_ = {
+        // clang-format off
+              "OpCapability Shader",
+              "OpCapability VulkanMemoryModelKHR",
+              "OpExtension \"SPV_KHR_vulkan_memory_model\"",
+              "OpMemoryModel Logical VulkanKHR"
+        // clang-format on
+    };
 
-    after_ = {"OpEntryPoint Vertex %1 \"shader\"",
-              "%2 = OpTypeVoid",
-              "%3 = OpTypeFunction %2",
-              "%1 = OpFunction %2 None %3",
-              "%4 = OpLabel",
-              "OpReturn",
-              "OpFunctionEnd"};
+    after_ = {
+        // clang-format off
+             "OpEntryPoint Vertex %1 \"shader\"",
+        "%2 = OpTypeVoid",
+        "%3 = OpTypeFunction %2",
+        "%1 = OpFunction %2 None %3",
+        "%4 = OpLabel",
+             "OpReturn",
+             "OpFunctionEnd"
+        // clang-format on
+    };
 
     SetAssembleOptions(SPV_TEXT_TO_BINARY_OPTION_PRESERVE_NUMERIC_IDS);
     std::vector<uint32_t> binary;
@@ -286,7 +295,7 @@ TEST_F(SpvcIrParsingTest, SpvOpTypeIntInstruction) {
 }
 
 TEST_F(SpvcIrParsingTest, SpvOpConstantInstruction) {
-  const std::vector<const char*> middle = {"%8 = OpTypeInt 32 1",
+  const std::vector<const char*> middle = {" %8 = OpTypeInt 32 1",
                                            "%13 = OpConstant %8 100"};
   std::string spirv = JoinAllInsts(Concat(Concat(before_, middle), after_));
   spirv_cross::ParsedIR ir;
@@ -312,7 +321,7 @@ TEST_F(SpvcIrParsingTest, SpvOpConstantInstruction) {
 }
 
 TEST_F(SpvcIrParsingTest, SpvOpConstantInstruction64) {
-  const std::vector<const char*> middle = {"%8 = OpTypeInt 64 1",
+  const std::vector<const char*> middle = {" %8 = OpTypeInt 64 1",
                                            "%13 = OpConstant %8 0xF1F2F3F4"};
   std::string spirv = JoinAllInsts(Concat(Concat(before_, middle), after_));
   spirv_cross::ParsedIR ir;
