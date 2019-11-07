@@ -82,6 +82,7 @@ class SpvcIrParsingTest : public PassTest<::testing::Test> {
   void SetUp() override {
     input_ = R"(
               OpCapability Shader
+         %5 = OpExtInstImport "GLSL.std.450"
               OpCapability VulkanMemoryModelKHR
               OpExtension "SPV_KHR_vulkan_memory_model"
               OpMemoryModel Logical VulkanKHR
@@ -132,21 +133,17 @@ class SpvcIrParsingTest : public PassTest<::testing::Test> {
 };
 
 TEST_F(SpvcIrParsingTest, OpExtInstImportInsruction) {
-  const std::vector<const char*> begin = {
-      " %8 =  OpTypeInt 32 1",
-      "%16 =  OpTypePointer Output %8",
-      "%17 =  OpVariable %16 Output",
-  };
-  std::string spirv = JoinAllInsts(Concat(Concat(before_, middle), after_));
-  spirv_cross::ParsedIR ir;
-  createSpvcIr(&ir, spirv);
-
   auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
-      spirv, true, false, &ir);
+      input_, true, false, &ir_);
   ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
       << " SinglePassRunAndDisassemble failed on input:\n "
       << std::get<0>(result);
+
+  auto spir_ext =  maybe_get<spirv_cross::SPIRExtension>(5, &ir_);
+  ASSERT_NE(spir_ext, nullptr);
+  EXPECT_EQ(spir_ext->ext, spirv_cross::SPIRExtension::GLSL);
 }
+
 TEST_F(SpvcIrParsingTest, OpCapabilityInstruction) {
   auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
       input_, true, false, &ir_);
