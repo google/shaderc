@@ -339,16 +339,6 @@ void shaderc_spvc_result_destroy(shaderc_spvc_compilation_result_t result) {
   if (result) delete result;
 }
 
-shaderc_compilation_status shaderc_spvc_result_get_status(
-    const shaderc_spvc_compilation_result_t) {
-  return shaderc_compilation_status_success;
-}
-
-const char* shaderc_spvc_result_get_messages(
-    const shaderc_spvc_compilation_result_t result) {
-  return "";
-}
-
 const char* shaderc_spvc_result_get_string_output(
     const shaderc_spvc_compilation_result_t result) {
   return result->string_output.c_str();
