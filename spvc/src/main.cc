@@ -121,7 +121,7 @@ bool ReadFile(const std::string& path, std::vector<uint32_t>* out) {
 }  // anonymous namespace
 
 int main(int argc, char** argv) {
-  shaderc_spvc::Context compiler;
+  shaderc_spvc::Context context;
   shaderc_spvc::CompileOptions options;
   std::vector<uint32_t> input;
   std::vector<uint32_t> msl_discrete_descriptor;
@@ -321,17 +321,17 @@ int main(int argc, char** argv) {
 
   shaderc_spvc::CompilationResult result;
   if (output_language == "glsl") {
-    result = compiler.CompileSpvToGlsl((const uint32_t*)input.data(),
-                                       input.size(), options);
-  } else if (output_language == "msl") {
-    result = compiler.CompileSpvToMsl((const uint32_t*)input.data(),
+    result = context.CompileSpvToGlsl((const uint32_t*)input.data(),
                                       input.size(), options);
+  } else if (output_language == "msl") {
+    result = context.CompileSpvToMsl((const uint32_t*)input.data(),
+                                     input.size(), options);
   } else if (output_language == "hlsl") {
-    result = compiler.CompileSpvToHlsl((const uint32_t*)input.data(),
-                                       input.size(), options);
+    result = context.CompileSpvToHlsl((const uint32_t*)input.data(),
+                                      input.size(), options);
   } else if (output_language == "vulkan") {
-    result = compiler.CompileSpvToVulkan((const uint32_t*)input.data(),
-                                         input.size(), options);
+    result = context.CompileSpvToVulkan((const uint32_t*)input.data(),
+                                        input.size(), options);
   }
 
   auto status = result.GetCompilationStatus();

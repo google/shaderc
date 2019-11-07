@@ -18,16 +18,8 @@ shaderc_spvc_context_t shaderc_spvc_context_create() {
   return new (std::nothrow) shaderc_spvc_context;
 }
 
-shaderc_spvc_compiler_t shaderc_spvc_compiler_initialize(void) {
-  return shaderc_spvc_context_create();
-}
-
 void shaderc_spvc_context_destroy(shaderc_spvc_context_t context) {
   if (context) delete context;
-}
-
-void shaderc_spvc_compiler_release(shaderc_spvc_compiler_t compiler) {
-  shaderc_spvc_context_destroy(compiler);
 }
 
 const char* shaderc_spvc_context_get_messages(
@@ -44,10 +36,6 @@ shaderc_spvc_compile_options_t shaderc_spvc_compile_options_create() {
   return options;
 }
 
-shaderc_spvc_compile_options_t shaderc_spvc_compile_options_initialize(void) {
-  return shaderc_spvc_compile_options_create();
-}
-
 shaderc_spvc_compile_options_t shaderc_spvc_compile_options_clone(
     shaderc_spvc_compile_options_t options) {
   if (options) return new (std::nothrow) shaderc_spvc_compile_options(*options);
@@ -57,11 +45,6 @@ shaderc_spvc_compile_options_t shaderc_spvc_compile_options_clone(
 void shaderc_spvc_compile_options_destroy(
     shaderc_spvc_compile_options_t options) {
   if (options) delete options;
-}
-
-void shaderc_spvc_compile_options_release(
-    shaderc_spvc_compile_options_t options) {
-  shaderc_spvc_compile_options_destroy(options);
 }
 
 void shaderc_spvc_compile_options_set_source_env(
@@ -354,10 +337,6 @@ shaderc_spvc_compilation_result_t shaderc_spvc_result_create() {
 
 void shaderc_spvc_result_destroy(shaderc_spvc_compilation_result_t result) {
   if (result) delete result;
-}
-
-void shaderc_spvc_result_release(shaderc_spvc_compilation_result_t result) {
-  shaderc_spvc_result_destroy(result);
 }
 
 shaderc_compilation_status shaderc_spvc_result_get_status(
