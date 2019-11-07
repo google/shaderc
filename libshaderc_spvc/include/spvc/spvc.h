@@ -35,9 +35,6 @@ typedef enum {
 // An opaque handle to an object that manages all compiler state.
 typedef struct shaderc_spvc_context* shaderc_spvc_context_t;
 
-// DEPRECATED: Old name for opaque state handle.
-typedef shaderc_spvc_context_t shaderc_spvc_compiler_t;
-
 // Create a spvc state handle.  A return of NULL indicates that there was an
 // error. Any function operating on a *_context_t must offer the basic
 // thread-safety guarantee.
@@ -48,16 +45,9 @@ typedef shaderc_spvc_context_t shaderc_spvc_compiler_t;
 // argument.
 SHADERC_EXPORT shaderc_spvc_context_t shaderc_spvc_context_create(void);
 
-// DEPRECATED: Old function for creating state opaque handle.
-SHADERC_EXPORT shaderc_spvc_compiler_t shaderc_spvc_compiler_initialize(void);
-
 // Release resources.  After this the handle cannot be used.
 SHADERC_EXPORT void shaderc_spvc_context_destroy(
     shaderc_spvc_context_t context);
-
-// DEPRECATED: Old function for destroying state opaque handle.
-SHADERC_EXPORT void shaderc_spvc_compiler_release(
-    shaderc_spvc_compiler_t compiler);
 
 // An opaque handle to an object that manages options to a single compilation
 // result.
@@ -70,10 +60,6 @@ typedef struct shaderc_spvc_compile_options* shaderc_spvc_compile_options_t;
 SHADERC_EXPORT shaderc_spvc_compile_options_t
 shaderc_spvc_compile_options_create(void);
 
-// DEPRECATED: Old function for creating options opaque handle.
-SHADERC_EXPORT shaderc_spvc_compile_options_t
-shaderc_spvc_compile_options_initialize(void);
-
 // Returns a copy of the given options.
 // If NULL is passed as the parameter the call is the same as
 // shaderc_spvc_compile_options_init.
@@ -85,10 +71,6 @@ shaderc_spvc_compile_options_clone(
 // option object in any future calls. It is safe to pass
 // NULL to this function, and doing such will have no effect.
 SHADERC_EXPORT void shaderc_spvc_compile_options_destroy(
-    shaderc_spvc_compile_options_t options);
-
-// DEPRECATED: Old function for destroying options opaque handle.
-SHADERC_EXPORT void shaderc_spvc_compile_options_release(
     shaderc_spvc_compile_options_t options);
 
 // Sets the entry point.
@@ -265,10 +247,6 @@ shaderc_spvc_compile_into_vulkan(const shaderc_spvc_context_t context,
 // Destroys the resources held by the result object. It is invalid to use the
 // result object for any further operations.
 SHADERC_EXPORT void shaderc_spvc_result_destroy(
-    shaderc_spvc_compilation_result_t result);
-
-// DEPRECATED: Old function for destroying the result object.
-SHADERC_EXPORT void shaderc_spvc_result_release(
     shaderc_spvc_compilation_result_t result);
 
 // Returns the compilation status, indicating whether the compilation succeeded,
