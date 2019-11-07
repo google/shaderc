@@ -97,6 +97,41 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
+    // opcode:11
+    case SpvOpExtInstImport: {
+      uint32_t id = inst->result_id();
+      std::string ext(
+          reinterpret_cast<const char *>(inst->GetInOperand(0u).words.data()));
+      if (ext == "GLSL.std.450")
+        set<spirv_cross::SPIRExtension>(id, spirv_cross::SPIRExtension::GLSL);
+      else if (ext == "DebugInfo")
+        set<spirv_cross::SPIRExtension>(
+            id, spirv_cross::SPIRExtension::SPV_debug_info);
+      else if (ext == "SPV_AMD_shader_ballot")
+        set<spirv_cross::SPIRExtension>(
+            id, spirv_cross::SPIRExtension::SPV_AMD_shader_ballot);
+      else if (ext == "SPV_AMD_shader_explicit_vertex_parameter")
+        set<spirv_cross::SPIRExtension>(
+            id, spirv_cross::SPIRExtension::
+                    SPV_AMD_shader_explicit_vertex_parameter);
+      else if (ext == "SPV_AMD_shader_trinary_minmax")
+        set<spirv_cross::SPIRExtension>(
+            id, spirv_cross::SPIRExtension::SPV_AMD_shader_trinary_minmax);
+      else if (ext == "SPV_AMD_gcn_shader")
+        set<spirv_cross::SPIRExtension>(
+            id, spirv_cross::SPIRExtension::SPV_AMD_gcn_shader);
+      else
+        set<spirv_cross::SPIRExtension>(
+            id, spirv_cross::SPIRExtension::Unsupported);
+      // spirv-cross comment:
+      // Other SPIR-V extensions which have ExtInstrs are currently not
+      // supported.
+      // TODO(sarahM0): figure out which ones are not supported and try to add
+      // them.
+
+      break;
+    }
+
     case SpvOpMemoryModel: {
       ir_->addressing_model =
           static_cast<spv::AddressingModel>(inst->GetSingleWordInOperand(0u));
@@ -124,6 +159,36 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       }
 
       if (!ir_->default_entry_point) ir_->default_entry_point = function_id;
+      break;
+    }
+
+    // opcode: 71
+    case SpvOpDecorate:
+    // opcode: 332
+    case SpvOpDecorateId: {
+      // spirv-cross comment:
+      // OpDecorateId technically supports an array of arguments, but our only
+      // supported decorations are single uint, so merge decorate and
+      // decorate-id here.
+      // TODO(sarahM0): investigate if this limitation is acceptable.
+      uint32_t id = inst->GetSingleWordInOperand(0u);
+
+      auto decoration =
+          static_cast<spv::Decoration>(inst->GetSingleWordInOperand(1u));
+      if (inst->NumInOperands() > 2) {
+        // instruction offset + length = offset_ + 1 + inst->NumOpreandWords()
+        assert(offset_ + 1 + inst->NumOperandWords() < ir_->spirv.size() &&
+               "Instruction out of spirv.data() bound");
+        // The extra operand of the decoration (Literal, Literal, …) are at
+        // instruction offset + 2 (skipping <id>Targe, Decoration)
+        ir_->meta[id].decoration_word_offset[decoration] =
+            uint32_t((&ir_->spirv[offset_ + 1] + 2 /*skip first tow ops*/) -
+                     ir_->spirv.data());
+        ir_->set_decoration(id, decoration, inst->GetSingleWordInOperand(2u));
+      } else {
+        ir_->set_decoration(id, decoration);
+      }
+
       break;
     }
 
@@ -157,6 +222,37 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
              "Must end a function before starting a new one!");
 
       current_function_ = &set<spirv_cross::SPIRFunction>(id, result, type);
+      break;
+    }
+
+    // Variable declaration
+    // opcode: 59
+    // spirv-cross comment:
+    // All variables are essentially pointers with a storage qualifier.
+    case SpvOpVariable: {
+      uint32_t type = inst->type_id();
+      uint32_t id = inst->result_id();
+      auto storage =
+          static_cast<spv::StorageClass>(inst->GetSingleWordInOperand(0u));
+      uint32_t initializer =
+          inst->NumInOperands() == 2 ? inst->GetSingleWordInOperand(1u) : 0;
+
+      if (storage == spv::StorageClassFunction) {
+        assert(current_function_ && "No function currently in scope");
+        current_function_->add_local_variable(id);
+      }
+
+      set<spirv_cross::SPIRVariable>(id, type, storage, initializer);
+
+      // spirv-cross comment:
+      // hlsl based shaders don't have those decorations. force them and then
+      // reset when reading/writing images
+      auto &ttype = get<spirv_cross::SPIRType>(type);
+      if (ttype.basetype == spirv_cross::SPIRType::BaseType::Image) {
+        ir_->set_decoration(id, spv::DecorationNonWritable);
+        ir_->set_decoration(id, spv::DecorationNonReadable);
+      }
+
       break;
     }
 
@@ -257,9 +353,30 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
-    default:
+    case SpvOpStore: {
+      assert(current_block_ && "Currently no block to insert opcode.");
+      spirv_cross::Instruction instr = {};
+      instr.op = inst->opcode();
+      instr.count = inst->NumOperandWords() + 1;
+      instr.offset = offset_ + 1;
+      instr.length = instr.count - 1;
+
+      assert(
+          instr.count != 0 &&
+          "SPIR-V instructions cannot consume 0 words. Invalid SPIR-V file.");
+      assert(offset_ <= ir_->spirv.size() &&
+             "SPIR-V instruction goes out of bounds.");
+      current_block_->ops.push_back(instr);
       break;
+    }
+
+    default: {
+      printf("Instruction not supported in spvcir parser: opcode(%d)\n",
+             inst->opcode());
+      break;
+    }
   }
+  offset_ += inst->NumOperandWords() + 1;
 }
 
 }  // namespace opt
