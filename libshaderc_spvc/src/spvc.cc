@@ -209,100 +209,91 @@ size_t shaderc_spvc_compile_options_set_for_fuzzing(
   return sizeof(*options);
 }
 
+shaderc_compilation_status shaderc_spvc_initialize_impl(
+    const shaderc_spvc_context_t context, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options,
+    shaderc_compilation_status (*generator)(const shaderc_spvc_context_t,
+                                            const uint32_t*, size_t,
+                                            shaderc_spvc_compile_options_t)) {
+  if (!context) return shaderc_compilation_status_configuration_error;
+  shaderc_compilation_status status =
+      spvc_private::validate_and_translate_spirv(
+          context, source, source_len, options, &context->intermediate_shader);
+  if (status != shaderc_compilation_status_success) return status;
+
+  status = generator(context, context->intermediate_shader.data(),
+                     context->intermediate_shader.size(), options);
+  if (status != shaderc_compilation_status_success) return status;
+
+  return shaderc_compilation_status_success;
+}
+
+shaderc_compilation_status shaderc_spvc_initialize_for_glsl(
+    const shaderc_spvc_context_t context, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options) {
+  context->target_lang = SPVC_TARGET_LANG_GLSL;
+  return shaderc_spvc_initialize_impl(context, source, source_len, options,
+                                      spvc_private::generate_glsl_compiler);
+}
+
 shaderc_compilation_status shaderc_spvc_compile_into_glsl(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result) {
-  if (!context) return shaderc_compilation_status_configuration_error;
-  if (!result) {
-    context->messages.append("NULL result provided");
-    return shaderc_compilation_status_null_result_object;
-  }
-
-  std::vector<uint32_t> intermediate_source;
   shaderc_compilation_status status =
-      spvc_private::validate_and_translate_spirv(context, source, source_len,
-                                                 options, &intermediate_source);
+      shaderc_spvc_initialize_for_glsl(context, source, source_len, options);
   if (status != shaderc_compilation_status_success) return status;
+  return shaderc_spvc_compile_shader(context, result);
+}
 
-  status = spvc_private::generate_glsl_shader(
-      context, intermediate_source.data(), intermediate_source.size(), options,
-      result);
-  if (status != shaderc_compilation_status_success) {
-    context->messages.append(
-        "Generation of GLSL from transformed source failed.\n");
-    return status;
-  }
-
-  return shaderc_compilation_status_success;
+shaderc_compilation_status shaderc_spvc_initialize_for_hlsl(
+    const shaderc_spvc_context_t context, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options) {
+  context->target_lang = SPVC_TARGET_LANG_HLSL;
+  return shaderc_spvc_initialize_impl(context, source, source_len, options,
+                                      spvc_private::generate_hlsl_compiler);
 }
 
 shaderc_compilation_status shaderc_spvc_compile_into_hlsl(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result) {
-  if (!context) return shaderc_compilation_status_configuration_error;
-  if (!result) {
-    context->messages.append("NULL result provided");
-    return shaderc_compilation_status_null_result_object;
-  }
-
-  std::vector<uint32_t> intermediate_source;
   shaderc_compilation_status status =
-      spvc_private::validate_and_translate_spirv(context, source, source_len,
-                                                 options, &intermediate_source);
+      shaderc_spvc_initialize_for_hlsl(context, source, source_len, options);
   if (status != shaderc_compilation_status_success) return status;
+  return shaderc_spvc_compile_shader(context, result);
+}
 
-  status = spvc_private::generate_hlsl_shader(
-      context, intermediate_source.data(), intermediate_source.size(), options,
-      result);
-  if (status != shaderc_compilation_status_success) {
-    context->messages.append(
-        "Generation of HLSL from transformed source failed.\n");
-    return status;
-  }
-
-  return shaderc_compilation_status_success;
+shaderc_compilation_status shaderc_spvc_initialize_for_msl(
+    const shaderc_spvc_context_t context, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options) {
+  context->target_lang = SPVC_TARGET_LANG_MSL;
+  return shaderc_spvc_initialize_impl(context, source, source_len, options,
+                                      spvc_private::generate_msl_compiler);
 }
 
 shaderc_compilation_status shaderc_spvc_compile_into_msl(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result) {
-  if (!context) return shaderc_compilation_status_configuration_error;
-  if (!result) {
-    context->messages.append("NULL result provided");
-    return shaderc_compilation_status_null_result_object;
-  }
-
-  std::vector<uint32_t> intermediate_source;
   shaderc_compilation_status status =
-      spvc_private::validate_and_translate_spirv(context, source, source_len,
-                                                 options, &intermediate_source);
+      shaderc_spvc_initialize_for_hlsl(context, source, source_len, options);
   if (status != shaderc_compilation_status_success) return status;
+  return shaderc_spvc_compile_shader(context, result);
+}
 
-  status = spvc_private::generate_msl_shader(
-      context, intermediate_source.data(), intermediate_source.size(), options,
-      result);
-  if (status != shaderc_compilation_status_success) {
-    context->messages.append(
-        "Generation of MSL from transformed source failed.\n");
-    return status;
-  }
-
-  return shaderc_compilation_status_success;
+shaderc_compilation_status shaderc_spvc_initialize_for_vulkan(
+    const shaderc_spvc_context_t context, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options) {
+  context->target_lang = SPVC_TARGET_LANG_VULKAN;
+  return shaderc_spvc_initialize_impl(context, source, source_len, options,
+                                      spvc_private::generate_vulkan_compiler);
 }
 
 shaderc_compilation_status shaderc_spvc_compile_into_vulkan(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result) {
-  if (!context) return shaderc_compilation_status_configuration_error;
-  if (!result) {
-    context->messages.append("NULL result provided");
-    return shaderc_compilation_status_null_result_object;
-  }
-
   if (options->target_env != SPV_ENV_VULKAN_1_1 &&
       options->target_env != SPV_ENV_VULKAN_1_0 &&
       options->target_env != SPV_ENV_VULKAN_1_1_SPIRV_1_4) {
@@ -313,22 +304,51 @@ shaderc_compilation_status shaderc_spvc_compile_into_vulkan(
   }
 
   shaderc_compilation_status status =
-      spvc_private::validate_and_translate_spirv(
-          context, source, source_len, options, &result->binary_output);
+      shaderc_spvc_initialize_for_vulkan(context, source, source_len, options);
   if (status != shaderc_compilation_status_success) return status;
+  return shaderc_spvc_compile_shader(context, result);
+}
 
-  // No actual generation since output for this compile method is the binary
-  // SPIR-V, but need to produce a compiler so that reflection can be performed
-  status = spvc_private::generate_vulkan_shader(
-      context, result->binary_output.data(), result->binary_output.size(),
-      options, result);
-  if (status != shaderc_compilation_status_success) {
-    context->messages.append(
-        "Unable to generate compiler for reflection of Vulkan shader.\n");
-    return status;
+shaderc_compilation_status shaderc_spvc_compile_shader(
+    const shaderc_spvc_context_t context,
+    shaderc_spvc_compilation_result_t result) {
+  if (!context->cross_compiler ||
+      context->target_lang == SPVC_TARGET_LANG_UNKNOWN) {
+    return shaderc_compilation_status_configuration_error;
   }
 
-  return shaderc_compilation_status_success;
+  if (context->target_lang == SPVC_TARGET_LANG_VULKAN) {
+    // No actual cross compilation is needed, since the intermediate shader is
+    // already in Vulkan SPIR->V.
+    result->binary_output = context->intermediate_shader;
+    return shaderc_compilation_status_success;
+  } else {
+    shaderc_compilation_status status =
+        spvc_private::generate_shader(context->cross_compiler.get(), result);
+    if (status != shaderc_compilation_status_success) {
+      context->messages.append("Compilation failed.  Partial source:\n");
+      if (context->target_lang == SPVC_TARGET_LANG_GLSL) {
+        spirv_cross::CompilerGLSL* cast_compiler =
+            reinterpret_cast<spirv_cross::CompilerGLSL*>(
+                context->cross_compiler.get());
+        context->messages.append(cast_compiler->get_partial_source());
+      } else if (context->target_lang == SPVC_TARGET_LANG_HLSL) {
+        spirv_cross::CompilerHLSL* cast_compiler =
+            reinterpret_cast<spirv_cross::CompilerHLSL*>(
+                context->cross_compiler.get());
+        context->messages.append(cast_compiler->get_partial_source());
+      } else if (context->target_lang == SPVC_TARGET_LANG_MSL) {
+        spirv_cross::CompilerMSL* cast_compiler =
+            reinterpret_cast<spirv_cross::CompilerMSL*>(
+                context->cross_compiler.get());
+        context->messages.append(cast_compiler->get_partial_source());
+      } else {
+        context->messages.append("Unexpected target language in context\n");
+      }
+      context->cross_compiler.reset();
+    }
+    return status;
+  }
 }
 
 shaderc_spvc_compilation_result_t shaderc_spvc_result_create() {

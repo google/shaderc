@@ -320,53 +320,67 @@ int main(int argc, char** argv) {
   options.SetMSLDiscreteDescriptorSets(msl_discrete_descriptor);
 
   shaderc_spvc::CompilationResult result;
-  shaderc_compilation_status status = shaderc_compilation_status_configuration_error;
+  shaderc_compilation_status status =
+      shaderc_compilation_status_configuration_error;
+
   if (output_language == "glsl") {
-    status = context.CompileSpvToGlsl((const uint32_t*)input.data(),
-                                      input.size(), options, &result);
+    status = context.InitializeForGlsl((const uint32_t*)input.data(),
+                                       input.size(), options);
   } else if (output_language == "msl") {
-    status = context.CompileSpvToMsl((const uint32_t*)input.data(),
-                                     input.size(), options, &result);
+    status = context.InitializeForMsl((const uint32_t*)input.data(),
+                                      input.size(), options);
   } else if (output_language == "hlsl") {
-    status = context.CompileSpvToHlsl((const uint32_t*)input.data(),
-                                      input.size(), options, &result);
+    status = context.InitializeForHlsl((const uint32_t*)input.data(),
+                                       input.size(), options);
   } else if (output_language == "vulkan") {
-    status = context.CompileSpvToVulkan((const uint32_t*)input.data(),
-                                        input.size(), options, &result);
-  }
-
-  if (status == shaderc_compilation_status_validation_error) {
-    std::cerr << "validation failed:\n" << context.GetMessages() << std::endl;
+    status = context.InitializeForVulkan((const uint32_t*)input.data(),
+                                         input.size(), options);
+  } else {
+    std::cerr << "Attempted to output to unknown language: " << output_language
+              << std::endl;
     return 1;
   }
-  if (status == shaderc_compilation_status_success) {
-    const char* path = output_path.data();
-    if (output_language != "vulkan") {
-      if (path && strcmp(path, "-")) {
-        std::basic_ofstream<char>(path) << result.GetStringOutput();
-      } else {
-        std::cout << result.GetStringOutput();
-      }
-    } else {
-      if (path && strcmp(path, "-")) {
-        std::ofstream out(path, std::ios::binary);
-        out.write((char*)result.GetBinaryOutput().data(),
-                  (sizeof(uint32_t) / sizeof(char)) *
-                      result.GetBinaryOutput().size());
-      } else {
-        std::cerr << "Cowardly refusing to output binary result to screen"
-                  << std::endl;
-        return 1;
-      }
+
+  if (status == shaderc_compilation_status_success)
+    status = context.CompileShader(&result);
+
+  switch (status) {
+    case shaderc_compilation_status_validation_error: {
+      std::cerr << "validation failed:\n" << context.GetMessages() << std::endl;
+      return 1;
     }
-    return 0;
-  }
 
-  if (status == shaderc_compilation_status_compilation_error) {
-    std::cerr << "compilation failed:\n" << context.GetMessages() << std::endl;
-    return 1;
-  }
+    case shaderc_compilation_status_success: {
+      const char* path = output_path.data();
+      if (output_language != "vulkan") {
+        if (path && strcmp(path, "-")) {
+          std::basic_ofstream<char>(path) << result.GetStringOutput();
+        } else {
+          std::cout << result.GetStringOutput();
+        }
+      } else {
+        if (path && strcmp(path, "-")) {
+          std::ofstream out(path, std::ios::binary);
+          out.write((char*)result.GetBinaryOutput().data(),
+                    (sizeof(uint32_t) / sizeof(char)) *
+                        result.GetBinaryOutput().size());
+        } else {
+          std::cerr << "Cowardly refusing to output binary result to screen"
+                    << std::endl;
+          return 1;
+        }
+      }
+      return 0;
+    }
 
-  std::cerr << "unexpected error " << status << std::endl;
-  return 1;
+    case shaderc_compilation_status_compilation_error: {
+      std::cerr << "compilation failed:\n"
+                << context.GetMessages() << std::endl;
+      return 1;
+    }
+
+    default:
+      std::cerr << "unexpected error " << status << std::endl;
+      return 1;
+  }
 }

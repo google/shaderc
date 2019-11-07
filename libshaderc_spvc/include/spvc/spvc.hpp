@@ -290,7 +290,15 @@ class Context {
     return shaderc_spvc_context_get_messages(context_.get());
   }
 
-  // Compiles the given source SPIR-V to GLSL.
+  // Initializes state for compiling SPIR-V to GLSL.
+  shaderc_compilation_status InitializeForGlsl(
+      const uint32_t* source, size_t source_len,
+      const CompileOptions& options) const {
+    return shaderc_spvc_initialize_for_glsl(context_.get(), source, source_len,
+                                            options.options_.get());
+  }
+
+  // DEPRECATED
   shaderc_compilation_status CompileSpvToGlsl(const uint32_t* source,
                                               size_t source_len,
                                               const CompileOptions& options,
@@ -300,7 +308,15 @@ class Context {
                                           result->result_.get());
   }
 
-  // Compiles the given source SPIR-V to HLSL.
+  // Initializes state for compiling SPIR-V to HLSL.
+  shaderc_compilation_status InitializeForHlsl(
+      const uint32_t* source, size_t source_len,
+      const CompileOptions& options) const {
+    return shaderc_spvc_initialize_for_hlsl(context_.get(), source, source_len,
+                                            options.options_.get());
+  }
+
+  // DEPRECATED
   shaderc_compilation_status CompileSpvToHlsl(const uint32_t* source,
                                               size_t source_len,
                                               const CompileOptions& options,
@@ -310,7 +326,15 @@ class Context {
                                           result->result_.get());
   }
 
-  // Compiles the given source SPIR-V to MSL.
+  // Initializes state for compiling SPIR-V to MSL.
+  shaderc_compilation_status InitializeForMsl(
+      const uint32_t* source, size_t source_len,
+      const CompileOptions& options) const {
+    return shaderc_spvc_initialize_for_msl(context_.get(), source, source_len,
+                                           options.options_.get());
+  }
+
+  // DEPRECATED
   shaderc_compilation_status CompileSpvToMsl(const uint32_t* source,
                                              size_t source_len,
                                              const CompileOptions& options,
@@ -320,13 +344,26 @@ class Context {
                                          result->result_.get());
   }
 
-  // Compiles the given source SPIR-V to Vulkan.
+  // Initializes state for compiling SPIR-V to Vulkan.
+  shaderc_compilation_status InitializeForVulkan(
+      const uint32_t* source, size_t source_len,
+      const CompileOptions& options) const {
+    return shaderc_spvc_initialize_for_vulkan(
+        context_.get(), source, source_len, options.options_.get());
+  }
+
+  // DEPRECATED
   shaderc_compilation_status CompileSpvToVulkan(
       const uint32_t* source, size_t source_len, const CompileOptions& options,
       CompilationResult* result) const {
     return shaderc_spvc_compile_into_vulkan(context_.get(), source, source_len,
                                             options.options_.get(),
                                             result->result_.get());
+  }
+
+  // After initialization compile the shader to desired language.
+  shaderc_compilation_status CompileShader(CompilationResult* result) {
+    return shaderc_spvc_compile_shader(context_.get(), result->result_.get());
   }
 
  private:

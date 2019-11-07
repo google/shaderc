@@ -19,9 +19,9 @@
 #include "shaderc/shaderc.h"
 #include "spvc/spvc.h"
 
-typedef shaderc_compilation_status (*CompileInto)(
-    const shaderc_spvc_context_t, const uint32_t*, size_t,
-    shaderc_spvc_compile_options_t, shaderc_spvc_compilation_result_t);
+typedef shaderc_compilation_status (*InitCmd)(const shaderc_spvc_context_t,
+                                              const uint32_t*, size_t,
+                                              shaderc_spvc_compile_options_t);
 
 shaderc_compilation_result_t assemble_shader(const char* shader) {
   shaderc_compiler_t shaderc;
@@ -36,24 +36,28 @@ shaderc_compilation_result_t assemble_shader(const char* shader) {
 
 int test_exec(shaderc_spvc_context_t context,
               shaderc_spvc_compile_options_t options,
-              shaderc_compilation_result_t assembled_shader,
-              CompileInto compile_into, const char* target_lang) {
+              shaderc_compilation_result_t assembled_shader, InitCmd init_cmd,
+              const char* target_lang) {
   shaderc_spvc_compilation_result_t result = shaderc_spvc_result_create();
   assert(result);
-  shaderc_compilation_status status = compile_into(
+  shaderc_compilation_status status = init_cmd(
       context, (const uint32_t*)shaderc_result_get_bytes(assembled_shader),
-      shaderc_result_get_length(assembled_shader) / sizeof(uint32_t), options,
-      result);
-
+      shaderc_result_get_length(assembled_shader) / sizeof(uint32_t), options);
   int ret_val;
   if (status == shaderc_compilation_status_success) {
-    printf(
-        "success! %lu characters of %s\n",
-        (unsigned long)(strlen(shaderc_spvc_result_get_string_output(result))),
-        target_lang);
-    ret_val = 1;
+    status = shaderc_spvc_compile_shader(context, result);
+    if (status == shaderc_compilation_status_success) {
+      printf("success! %lu characters of %s\n",
+             (unsigned long)(strlen(
+                 shaderc_spvc_result_get_string_output(result))),
+             target_lang);
+      ret_val = 1;
+    } else {
+      printf("failed to produce %s\n", target_lang);
+      ret_val = 0;
+    }
   } else {
-    printf("failed to produce %s\n", target_lang);
+    printf("failed to initialize %s\n", target_lang);
     ret_val = 0;
   }
 
@@ -65,21 +69,21 @@ int run_glsl(shaderc_spvc_context_t context,
              shaderc_spvc_compile_options_t options,
              shaderc_compilation_result_t assembled_shader) {
   return test_exec(context, options, assembled_shader,
-                   shaderc_spvc_compile_into_glsl, "glsl");
+                   shaderc_spvc_initialize_for_glsl, "glsl");
 }
 
 int run_hlsl(shaderc_spvc_context_t context,
              shaderc_spvc_compile_options_t options,
              shaderc_compilation_result_t assembled_shader) {
   return test_exec(context, options, assembled_shader,
-                   shaderc_spvc_compile_into_hlsl, "hlsl");
+                   shaderc_spvc_initialize_for_hlsl, "hlsl");
 }
 
 int run_msl(shaderc_spvc_context_t context,
             shaderc_spvc_compile_options_t options,
             shaderc_compilation_result_t assembled_shader) {
   return test_exec(context, options, assembled_shader,
-                   shaderc_spvc_compile_into_msl, "msl");
+                   shaderc_spvc_initialize_for_msl, "msl");
 }
 
 int run_smoke_test(const char* shader, int transform_from_webgpu) {

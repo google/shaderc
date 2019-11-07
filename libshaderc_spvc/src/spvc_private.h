@@ -26,9 +26,19 @@
 // GLSL version produced when none specified nor detected from source.
 #define DEFAULT_GLSL_VERSION 450
 
+typedef enum {
+  SPVC_TARGET_LANG_UNKNOWN,
+  SPVC_TARGET_LANG_GLSL,
+  SPVC_TARGET_LANG_HLSL,
+  SPVC_TARGET_LANG_MSL,
+  SPVC_TARGET_LANG_VULKAN,
+} spvc_target_lang;
+
 struct shaderc_spvc_context {
   std::unique_ptr<spirv_cross::Compiler> cross_compiler;
   std::string messages;
+  spvc_target_lang target_lang = SPVC_TARGET_LANG_UNKNOWN;
+  std::vector<uint32_t> intermediate_shader;
 };
 
 struct shaderc_spvc_compile_options {
@@ -95,37 +105,29 @@ shaderc_compilation_status validate_and_translate_spirv(
 shaderc_compilation_status generate_shader(
     spirv_cross::Compiler* compiler, shaderc_spvc_compilation_result_t result);
 
-// Given a Vulkan SPIR-V shader and set of options generate a GLSL shader.
-// Handles correctly setting up the SPIRV-Cross compiler based on the options
-// and then envoking it.
-shaderc_compilation_status generate_glsl_shader(
+// Given a Vulkan SPIR-V shader and set of options, create a compiler for
+// generating a GLSL shader and performing reflection.
+shaderc_compilation_status generate_glsl_compiler(
     const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options,
-    shaderc_spvc_compilation_result_t result);
+    size_t source_len, shaderc_spvc_compile_options_t options);
 
-// Given a Vulkan SPIR-V shader and set of options generate a HLSL shader.
-// Handles correctly setting up the SPIRV-Cross compiler based on the options
-// and then envoking it.
-shaderc_compilation_status generate_hlsl_shader(
+// Given a Vulkan SPIR-V shader and set of options, create a compiler for
+// generating a HLSL shader and performing reflection.
+shaderc_compilation_status generate_hlsl_compiler(
     const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options,
-    shaderc_spvc_compilation_result_t result);
+    size_t source_len, shaderc_spvc_compile_options_t options);
 
-// Given a Vulkan SPIR-V shader and set of options generate a MSL shader.
-// Handles correctly setting up the SPIRV-Cross compiler based on the options
-// and then envoking it.
-shaderc_compilation_status generate_msl_shader(
+// Given a Vulkan SPIR-V shader and set of options, create a compiler for
+// generating a MSL shader and performing reflection.
+shaderc_compilation_status generate_msl_compiler(
     const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options,
-    shaderc_spvc_compilation_result_t result);
+    size_t source_len, shaderc_spvc_compile_options_t options);
 
-// Given a Vulkan SPIR-V shader and set of options, generate a Vulkan shader.
-// Is a No-op from the perspective of converting the shader, but setup a
-// SPIRV-Cross compiler to be used for reflection later.
-shaderc_compilation_status generate_vulkan_shader(
+// Given a Vulkan SPIR-V shader and set of options, create a compiler for
+// generating performing reflection.
+shaderc_compilation_status generate_vulkan_compiler(
     const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options,
-    shaderc_spvc_compilation_result_t result);
+    size_t source_len, shaderc_spvc_compile_options_t options);
 
 // Given a pointer to an SPIRV-Cross IR (with initialized spirv field), Invokes
 // spirv-opt to generate a SPIRV-Cross IR (ie. populate empty fields of the

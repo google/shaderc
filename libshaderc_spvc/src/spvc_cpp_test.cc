@@ -31,36 +31,48 @@ class CompileTest : public testing::Test {
 };
 
 TEST_F(CompileTest, Glsl) {
-  shaderc_compilation_status status = context_.CompileSpvToGlsl(
+  shaderc_compilation_status status = context_.InitializeForGlsl(
       kSmokeShaderBinary, sizeof(kSmokeShaderBinary) / sizeof(uint32_t),
-      options_, &result_);
+      options_);
+  EXPECT_EQ(shaderc_compilation_status_success, status);
+
+  status = context_.CompileShader(&result_);
   EXPECT_EQ(shaderc_compilation_status_success, status);
   EXPECT_NE(0, result_.GetStringOutput().size());
   EXPECT_EQ(0, result_.GetBinaryOutput().size());
 }
 
 TEST_F(CompileTest, Hlsl) {
-  shaderc_compilation_status status = context_.CompileSpvToHlsl(
+  shaderc_compilation_status status = context_.InitializeForHlsl(
       kSmokeShaderBinary, sizeof(kSmokeShaderBinary) / sizeof(uint32_t),
-      options_, &result_);
+      options_);
+  EXPECT_EQ(shaderc_compilation_status_success, status);
+
+  status = context_.CompileShader(&result_);
   EXPECT_EQ(shaderc_compilation_status_success, status);
   EXPECT_NE(0, result_.GetStringOutput().size());
   EXPECT_EQ(0, result_.GetBinaryOutput().size());
 }
 
 TEST_F(CompileTest, Msl) {
-  shaderc_compilation_status status = context_.CompileSpvToMsl(
+  shaderc_compilation_status status = context_.InitializeForMsl(
       kSmokeShaderBinary, sizeof(kSmokeShaderBinary) / sizeof(uint32_t),
-      options_, &result_);
+      options_);
+  EXPECT_EQ(shaderc_compilation_status_success, status);
+
+  status = context_.CompileShader(&result_);
   EXPECT_EQ(shaderc_compilation_status_success, status);
   EXPECT_NE(0, result_.GetStringOutput().size());
   EXPECT_EQ(0, result_.GetBinaryOutput().size());
 }
 
 TEST_F(CompileTest, Vulkan) {
-  shaderc_compilation_status status = context_.CompileSpvToVulkan(
+  shaderc_compilation_status status = context_.InitializeForVulkan(
       kSmokeShaderBinary, sizeof(kSmokeShaderBinary) / sizeof(uint32_t),
-      options_, &result_);
+      options_);
+  EXPECT_EQ(shaderc_compilation_status_success, status);
+
+  status = context_.CompileShader(&result_);
   EXPECT_EQ(shaderc_compilation_status_success, status);
   EXPECT_EQ(0, result_.GetStringOutput().size());
   EXPECT_NE(0, result_.GetBinaryOutput().size());

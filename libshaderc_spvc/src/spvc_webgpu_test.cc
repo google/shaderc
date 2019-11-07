@@ -28,6 +28,11 @@ class CompileTest : public testing::Test {
     context_ = shaderc_spvc_context_create();
     options_ = shaderc_spvc_compile_options_create();
     result_ = shaderc_spvc_result_create();
+
+    shaderc_spvc_compile_options_set_source_env(
+        options_, shaderc_target_env_webgpu, shaderc_env_version_webgpu);
+    shaderc_spvc_compile_options_set_target_env(
+        options_, shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
   }
 
   void TearDown() override {
@@ -42,55 +47,47 @@ class CompileTest : public testing::Test {
 };
 
 TEST_F(CompileTest, ValidShaderIntoGlslPasses) {
-  shaderc_spvc_compile_options_set_source_env(
-      options_, shaderc_target_env_webgpu, shaderc_env_version_webgpu);
-  shaderc_spvc_compile_options_set_target_env(
-      options_, shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
-
-  shaderc_compilation_status status = shaderc_spvc_compile_into_glsl(
+  shaderc_compilation_status status = shaderc_spvc_initialize_for_glsl(
       context_, kWebGPUShaderBinary,
-      sizeof(kWebGPUShaderBinary) / sizeof(uint32_t), options_, result_);
+      sizeof(kWebGPUShaderBinary) / sizeof(uint32_t), options_);
   EXPECT_EQ(shaderc_compilation_status_success, status);
   EXPECT_NE(context_->cross_compiler.get(), nullptr);
+
+  status = shaderc_spvc_compile_shader(context_, result_);
+  EXPECT_EQ(shaderc_compilation_status_success, status);
 }
 
 TEST_F(CompileTest, ValidShaderIntoHlslPasses) {
-  shaderc_spvc_compile_options_set_source_env(
-      options_, shaderc_target_env_webgpu, shaderc_env_version_webgpu);
-  shaderc_spvc_compile_options_set_target_env(
-      options_, shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
-
-  shaderc_compilation_status status = shaderc_spvc_compile_into_hlsl(
+  shaderc_compilation_status status = shaderc_spvc_initialize_for_hlsl(
       context_, kWebGPUShaderBinary,
-      sizeof(kWebGPUShaderBinary) / sizeof(uint32_t), options_, result_);
+      sizeof(kWebGPUShaderBinary) / sizeof(uint32_t), options_);
   EXPECT_EQ(shaderc_compilation_status_success, status);
   EXPECT_NE(context_->cross_compiler.get(), nullptr);
+
+  status = shaderc_spvc_compile_shader(context_, result_);
+  EXPECT_EQ(shaderc_compilation_status_success, status);
 }
 
 TEST_F(CompileTest, ValidShaderIntoMslPasses) {
-  shaderc_spvc_compile_options_set_source_env(
-      options_, shaderc_target_env_webgpu, shaderc_env_version_webgpu);
-  shaderc_spvc_compile_options_set_target_env(
-      options_, shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
-
-  shaderc_compilation_status status = shaderc_spvc_compile_into_msl(
+  shaderc_compilation_status status = shaderc_spvc_initialize_for_msl(
       context_, kWebGPUShaderBinary,
-      sizeof(kWebGPUShaderBinary) / sizeof(uint32_t), options_, result_);
+      sizeof(kWebGPUShaderBinary) / sizeof(uint32_t), options_);
   EXPECT_EQ(shaderc_compilation_status_success, status);
   EXPECT_NE(context_->cross_compiler.get(), nullptr);
+
+  status = shaderc_spvc_compile_shader(context_, result_);
+  EXPECT_EQ(shaderc_compilation_status_success, status);
 }
 
 TEST_F(CompileTest, ValidShaderIntoVulkanPasses) {
-  shaderc_spvc_compile_options_set_source_env(
-      options_, shaderc_target_env_webgpu, shaderc_env_version_webgpu);
-  shaderc_spvc_compile_options_set_target_env(
-      options_, shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
-
-  shaderc_compilation_status status = shaderc_spvc_compile_into_vulkan(
+  shaderc_compilation_status status = shaderc_spvc_initialize_for_vulkan(
       context_, kWebGPUShaderBinary,
-      sizeof(kWebGPUShaderBinary) / sizeof(uint32_t), options_, result_);
+      sizeof(kWebGPUShaderBinary) / sizeof(uint32_t), options_);
   EXPECT_EQ(shaderc_compilation_status_success, status);
   EXPECT_NE(context_->cross_compiler.get(), nullptr);
+
+  status = shaderc_spvc_compile_shader(context_, result_);
+  EXPECT_EQ(shaderc_compilation_status_success, status);
 }
 
 }  // anonymous namespace
