@@ -23,25 +23,46 @@ SpvcIrPass::SpvcIrPass(spirv_cross::ParsedIR *ir) {
   ir_ = ir;
   current_function_ = nullptr;
   current_block_ = nullptr;
+  status_ = Status::SuccessWithoutChange;
 
   auto s = ir_->spirv.data();
-  assert(ir_->spirv.size() > 3 && "spirv data is too small");
+  CheckAndSetErrorMessage(ir_->spirv.size() > 3,
+                          "SpvcIrPass: spirv data is too small");
   uint32_t bound = s[3];
   ir_->set_id_bounds(bound);
 }
 
+void SpvcIrPass::CheckAndSetErrorMessage(bool condition, std::string message) {
+  if (!condition) {
+    status_ = Status::Failure;
+    if (consumer()) {
+      consumer()(SPV_MSG_ERROR, 0, {0, 0, 0}, message.c_str());
+    } else {
+      assert(condition && message.c_str());
+    }
+  }
+}
+
 Pass::Status SpvcIrPass::Process() {
   get_module()->ForEachInst(
-      [this](Instruction *inst) { GenerateSpirvCrossIR(inst); }, true);
+      [this](Instruction *inst) {
+        if (status_ != Status::SuccessWithoutChange) return;
+        GenerateSpirvCrossIR(inst);
+      },
+      true);
 
-  assert(!current_function_ && "Function was not terminated.");
-  assert(!current_block_ && "Block Was not terminated");
+  CheckAndSetErrorMessage(
+      !current_block_,
+      "SpvcIrPass: Error at the end of parsing, block was not terminated.");
 
-  return Status::SuccessWithoutChange;
+  CheckAndSetErrorMessage(
+      !current_function_,
+      "SpvcIrPass: Error at the end of parsing, function was not terminated.");
+
+  return status_;
 }
 
 void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
-
   switch (inst->opcode()) {
     case SpvOpSourceContinued:
     case SpvOpSourceExtension:
@@ -84,8 +105,10 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
 
     case SpvOpCapability: {
       auto cap = inst->GetSingleWordOperand(0u);
-      assert(cap != spv::CapabilityKernel &&
-             "Kernel capability not supported.");
+
+      CheckAndSetErrorMessage(cap != spv::CapabilityKernel,
+                              "SpvcIrPass: Error while parsing OpCapability, "
+                              "kernel capability not supported.");
       ir_->declared_capabilities.push_back(static_cast<spv::Capability>(cap));
       break;
     }
@@ -120,15 +143,17 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       else if (ext == "SPV_AMD_gcn_shader")
         set<spirv_cross::SPIRExtension>(
             id, spirv_cross::SPIRExtension::SPV_AMD_gcn_shader);
-      else
-        set<spirv_cross::SPIRExtension>(
-            id, spirv_cross::SPIRExtension::Unsupported);
-      // spirv-cross comment:
-      // Other SPIR-V extensions which have ExtInstrs are currently not
-      // supported.
-      // TODO(sarahM0): figure out which ones are not supported and try to add
-      // them.
-
+      else {
+        // spirv-cross comment:
+        // Other SPIR-V extensions which have ExtInstrs are currently not
+        // supported.
+        // TODO(sarahM0): figure out which ones are not supported and try to add
+        // them.
+        CheckAndSetErrorMessage(
+            false,
+            "SpvcIrPass: Error while parsing OpExtInstImport, SPIRV extension "
+            "not supported");
+      }
       break;
     }
 
@@ -177,13 +202,14 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
           static_cast<spv::Decoration>(inst->GetSingleWordInOperand(1u));
       if (inst->NumInOperands() > 2) {
         // instruction offset + length = offset_ + 1 + inst->NumOpreandWords()
-        assert(offset_ + 1 + inst->NumOperandWords() < ir_->spirv.size() &&
-               "Instruction out of spirv.data() bound");
+        CheckAndSetErrorMessage(
+            offset_ + 1 + inst->NumOperandWords() < ir_->spirv.size(),
+            "SpvcIrPass: Error while parsing OpDecorate/OpDecorateId, "
+            "reading out of spirv.data() bound");
         // The extra operand of the decoration (Literal, Literal, …) are at
         // instruction offset + 2 (skipping <id>Targe, Decoration)
         ir_->meta[id].decoration_word_offset[decoration] =
-            uint32_t((&ir_->spirv[offset_ + 1] + 2 /*skip first tow ops*/) -
-                     ir_->spirv.data());
+            uint32_t((&ir_->spirv[offset_ + 1] + 2) - ir_->spirv.data());
         ir_->set_decoration(id, decoration, inst->GetSingleWordInOperand(2u));
       } else {
         ir_->set_decoration(id, decoration);
@@ -218,8 +244,10 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       auto id = inst->result_id();
       auto type = inst->GetSingleWordInOperand(1u);
 
-      assert(!current_function_ &&
-             "Must end a function before starting a new one!");
+      CheckAndSetErrorMessage(
+          !current_function_,
+          "SpvcIrPass: Error while parsing OpFunction, must end a function "
+          "before starting a new one!");
 
       current_function_ = &set<spirv_cross::SPIRFunction>(id, result, type);
       break;
@@ -238,7 +266,9 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
           inst->NumInOperands() == 2 ? inst->GetSingleWordInOperand(1u) : 0;
 
       if (storage == spv::StorageClassFunction) {
-        assert(current_function_ && "No function currently in scope");
+        CheckAndSetErrorMessage(current_function_,
+                                "SpvcIrPass: Error while parsing OpVariable, "
+                                "no function currently in scope");
         current_function_->add_local_variable(id);
       }
 
@@ -316,7 +346,9 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       // Blocks
     case SpvOpLabel: {
       // OpLabel always starts a block.
-      assert(current_function_ && "Blocks cannot exist outside functions!");
+      CheckAndSetErrorMessage(current_function_,
+                              "SpvcIrPass: Error while parsing OpLable, blocks "
+                              "cannot exist outside functions!");
 
       uint32_t id = inst->result_id();
 
@@ -325,18 +357,22 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       if (!current_function_->entry_block) {
         current_function_->entry_block = id;
       }
-      assert(!current_block_ &&
-             "Cannot start a block before ending the current block.");
+      CheckAndSetErrorMessage(!current_block_,
+                              "SpvcIrPass: Error while parsing OpLable, cannot "
+                              "start a block before ending the current block.");
 
       current_block_ = &set<spirv_cross::SPIRBlock>(id);
       break;
     }
 
     case SpvOpReturn: {
-      assert(current_block_ && "Trying to end a non-existing block.");
-      // TODO (sarahM0): refactor this into TerminateBlock( ... terminator type
-      // ...), which also resets current_block_ to nullptr. Once having one more
-      // terminator case.
+      CheckAndSetErrorMessage(current_block_,
+                              "SpvcIrPass: Error while parsing OpReturn, "
+                              "trying to end a non-existing block.");
+      // TODO (sarahM0): refactor this into TerminateBlock( ... terminator
+      // type
+      // ...), which also resets current_block_ to nullptr. Once having one
+      // more terminator case.
 
       current_block_->terminator = spirv_cross::SPIRBlock::Return;
       current_block_ = nullptr;
@@ -345,34 +381,40 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
 
     case SpvOpFunctionEnd: {
       // Very specific error message, but seems to come up quite often.
-      assert(!current_block_ &&
-             "Cannot end a function before ending the current block.\n"
-             "Likely cause: If this SPIR-V was created from glslang HLSL, "
-             "make sure the entry point is valid.");
+      CheckAndSetErrorMessage(
+          !current_block_,
+          "SpvcIrPass: Error while parsing OpFunctionEnd, cannot end a "
+          "function before ending the current block.\n"
+          "Likely cause: If this SPIR-V was created from glslang HLSL, "
+          "make sure the entry point is valid.");
       current_function_ = nullptr;
       break;
     }
 
     case SpvOpStore: {
-      assert(current_block_ && "Currently no block to insert opcode.");
+      CheckAndSetErrorMessage(
+          current_block_, "SpvcIrPass: Currently no block to insert opcode.");
       spirv_cross::Instruction instr = {};
       instr.op = inst->opcode();
       instr.count = inst->NumOperandWords() + 1;
       instr.offset = offset_ + 1;
       instr.length = instr.count - 1;
 
-      assert(
-          instr.count != 0 &&
-          "SPIR-V instructions cannot consume 0 words. Invalid SPIR-V file.");
-      assert(offset_ <= ir_->spirv.size() &&
-             "SPIR-V instruction goes out of bounds.");
+      CheckAndSetErrorMessage(instr.count != 0,
+                              "SpvcIrPass: SPIR-V instructions cannot consume "
+                              "0 words. Invalid SPIR-V file.");
+      CheckAndSetErrorMessage(
+          offset_ <= ir_->spirv.size(),
+          "SpvcIrPass: SPIR-V instruction goes out of bounds.");
       current_block_->ops.push_back(instr);
       break;
     }
 
     default: {
-      printf("Instruction not supported in spvcir parser: opcode(%d)\n",
-             inst->opcode());
+      CheckAndSetErrorMessage(
+          false,
+          "SpvcIrPass: Instruction not supported in spvcir parser: opcode " +
+              std::to_string(inst->opcode()));
       break;
     }
   }
