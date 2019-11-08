@@ -28,7 +28,7 @@ import re
 import sys
 
 COPYRIGHTRE = re.compile(
-    r'Copyright \d+ The Shaderc Authors. All rights reserved.', re.UNICODE)
+    r'Copyright \d+ The Shaderc Authors. All rights reserved.')
 COPYRIGHT = 'Copyright 2016 The Shaderc Authors. All rights reserved.'
 LICENSED = """
 Licensed under the Apache License, Version 2.0 (the "License");
