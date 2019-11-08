@@ -23,68 +23,67 @@ using shaderc_spvc::Context;
 
 namespace {
 
-TEST(Compile, Glsl) {
-  Context context;
-  CompileOptions options;
-  options.SetSourceEnvironment(shaderc_target_env_webgpu,
-                               shaderc_env_version_webgpu);
-  options.SetTargetEnvironment(shaderc_target_env_vulkan,
-                               shaderc_env_version_vulkan_1_1);
+class CompileTest : public testing::Test {
+ public:
+  Context context_;
+  CompileOptions options_;
+  CompilationResult result_;
+};
 
-  CompilationResult result = context.CompileSpvToGlsl(
+TEST_F(CompileTest, Glsl) {
+  options_.SetSourceEnvironment(shaderc_target_env_webgpu,
+                                shaderc_env_version_webgpu);
+  options_.SetTargetEnvironment(shaderc_target_env_vulkan,
+                                shaderc_env_version_vulkan_1_1);
+
+  shaderc_compilation_status status = context_.CompileSpvToGlsl(
       kWebGPUShaderBinary, sizeof(kWebGPUShaderBinary) / sizeof(uint32_t),
-      options);
-  EXPECT_EQ(shaderc_compilation_status_success, result.GetCompilationStatus());
-  EXPECT_NE(0, result.GetStringOutput().size());
-  EXPECT_EQ(0, result.GetBinaryOutput().size());
+      options_, &result_);
+  EXPECT_EQ(shaderc_compilation_status_success, status);
+  EXPECT_NE(0, result_.GetStringOutput().size());
+  EXPECT_EQ(0, result_.GetBinaryOutput().size());
 }
 
-TEST(Compile, Hlsl) {
-  Context context;
-  CompileOptions options;
-  options.SetSourceEnvironment(shaderc_target_env_webgpu,
-                               shaderc_env_version_webgpu);
-  options.SetTargetEnvironment(shaderc_target_env_vulkan,
-                               shaderc_env_version_vulkan_1_1);
+TEST_F(CompileTest, Hlsl) {
+  options_.SetSourceEnvironment(shaderc_target_env_webgpu,
+                                shaderc_env_version_webgpu);
+  options_.SetTargetEnvironment(shaderc_target_env_vulkan,
+                                shaderc_env_version_vulkan_1_1);
 
-  CompilationResult result = context.CompileSpvToHlsl(
+  shaderc_compilation_status status = context_.CompileSpvToHlsl(
       kWebGPUShaderBinary, sizeof(kWebGPUShaderBinary) / sizeof(uint32_t),
-      options);
-  EXPECT_EQ(shaderc_compilation_status_success, result.GetCompilationStatus());
-  EXPECT_NE(0, result.GetStringOutput().size());
-  EXPECT_EQ(0, result.GetBinaryOutput().size());
+      options_, &result_);
+  EXPECT_EQ(shaderc_compilation_status_success, status);
+  EXPECT_NE(0, result_.GetStringOutput().size());
+  EXPECT_EQ(0, result_.GetBinaryOutput().size());
 }
 
-TEST(Compile, Msl) {
-  Context context;
-  CompileOptions options;
-  options.SetSourceEnvironment(shaderc_target_env_webgpu,
-                               shaderc_env_version_webgpu);
-  options.SetTargetEnvironment(shaderc_target_env_vulkan,
-                               shaderc_env_version_vulkan_1_1);
+TEST_F(CompileTest, Msl) {
+  options_.SetSourceEnvironment(shaderc_target_env_webgpu,
+                                shaderc_env_version_webgpu);
+  options_.SetTargetEnvironment(shaderc_target_env_vulkan,
+                                shaderc_env_version_vulkan_1_1);
 
-  CompilationResult result = context.CompileSpvToMsl(
+  shaderc_compilation_status status = context_.CompileSpvToMsl(
       kWebGPUShaderBinary, sizeof(kWebGPUShaderBinary) / sizeof(uint32_t),
-      options);
-  EXPECT_EQ(shaderc_compilation_status_success, result.GetCompilationStatus());
-  EXPECT_NE(0, result.GetStringOutput().size());
-  EXPECT_EQ(0, result.GetBinaryOutput().size());
+      options_, &result_);
+  EXPECT_EQ(shaderc_compilation_status_success, status);
+  EXPECT_NE(0, result_.GetStringOutput().size());
+  EXPECT_EQ(0, result_.GetBinaryOutput().size());
 }
 
-TEST(Compile, Vulkan) {
-  Context context;
-  CompileOptions options;
-  options.SetSourceEnvironment(shaderc_target_env_webgpu,
-                               shaderc_env_version_webgpu);
-  options.SetTargetEnvironment(shaderc_target_env_vulkan,
-                               shaderc_env_version_vulkan_1_1);
+TEST_F(CompileTest, Vulkan) {
+  options_.SetSourceEnvironment(shaderc_target_env_webgpu,
+                                shaderc_env_version_webgpu);
+  options_.SetTargetEnvironment(shaderc_target_env_vulkan,
+                                shaderc_env_version_vulkan_1_1);
 
-  CompilationResult result = context.CompileSpvToVulkan(
+  shaderc_compilation_status status = context_.CompileSpvToVulkan(
       kWebGPUShaderBinary, sizeof(kWebGPUShaderBinary) / sizeof(uint32_t),
-      options);
-  EXPECT_EQ(shaderc_compilation_status_success, result.GetCompilationStatus());
-  EXPECT_EQ(0, result.GetStringOutput().size());
-  EXPECT_NE(0, result.GetBinaryOutput().size());
+      options_, &result_);
+  EXPECT_EQ(shaderc_compilation_status_success, status);
+  EXPECT_EQ(0, result_.GetStringOutput().size());
+  EXPECT_NE(0, result_.GetBinaryOutput().size());
 }
 
 }  // anonymous namespace
