@@ -56,13 +56,16 @@ Pass::Status SpvcIrPass::Process() {
       },
       true);
 
-  CheckConditionAndSetErrorMessage(
-      !current_block_,
-      "SpvcIrPass: Error at the end of parsing, block was not terminated.");
+  if (!CheckConditionAndSetErrorMessage(
+          !current_block_,
+          "SpvcIrPass: Error at the end of parsing, block was not terminated."))
+    return status_;
 
-  CheckConditionAndSetErrorMessage(
-      !current_function_,
-      "SpvcIrPass: Error at the end of parsing, function was not terminated.");
+  if (!CheckConditionAndSetErrorMessage(
+          !current_function_,
+          "SpvcIrPass: Error at the end of parsing, function was not "
+          "terminated."))
+    return status_;
 
   return status_;
 }
@@ -156,11 +159,13 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
         // supported.
         // TODO(sarahM0): figure out which ones are not supported and try to add
         // them.
-        CheckConditionAndSetErrorMessage(false,
-                                         "SpvcIrPass: Error while parsing "
-                                         "OpExtInstImport, SPIRV extension "
-                                         "not supported: " +
-                                             ext);
+        if (!CheckConditionAndSetErrorMessage(
+                false,
+                "SpvcIrPass: Error while parsing "
+                "OpExtInstImport, SPIRV extension "
+                "not supported: " +
+                    ext))
+          return;
       }
       break;
     }
