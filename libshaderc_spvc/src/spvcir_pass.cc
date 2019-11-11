@@ -35,10 +35,8 @@ bool SpvcIrPass::CheckConditionAndSetErrorMessage(bool condition,
     } else {
       assert(condition && message.c_str());
     }
-    return false;
-  } else {
-    return true;
   }
+  return condition;
 }
 
 Pass::Status SpvcIrPass::Process() {
