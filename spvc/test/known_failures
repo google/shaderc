@@ -6,9 +6,8 @@ shaders-hlsl/frag/separate-combined-fake-overload.sm30.frag,False
 shaders-hlsl/frag/separate-combined-fake-overload.sm30.frag,True
 shaders-hlsl/vert/basic.vert,False
 shaders-hlsl/vert/basic.vert,True
-shaders-msl-no-opt/comp/loop.comp,False
-shaders-msl-no-opt/comp/return.comp,False
-shaders-msl-no-opt/vert/functions_nested.vert,False
+shaders-msl-no-opt/comp/basic.dynamic-buffer.msl2.invalid.comp,False
+shaders-msl-no-opt/comp/int64.invalid.msl22.comp,False
 shaders-msl/asm/comp/multiple-entry.asm.comp,False
 shaders-msl/asm/comp/multiple-entry.asm.comp,True
 shaders-msl/asm/frag/min-lod.msl22.asm.frag,False
@@ -17,10 +16,6 @@ shaders-msl/comp/basic.dispatchbase.comp,False
 shaders-msl/comp/basic.dispatchbase.comp,True
 shaders-msl/comp/basic.dispatchbase.msl11.comp,False
 shaders-msl/comp/basic.dispatchbase.msl11.comp,True
-shaders-msl/comp/basic.dynamic-buffer.msl2.invalid.comp,False
-shaders-msl/comp/basic.dynamic-buffer.msl2.invalid.comp,True
-shaders-msl/comp/int64.invalid.msl22.comp,False
-shaders-msl/comp/int64.invalid.msl22.comp,True
 shaders-msl/desktop-only/vert/basic.desktop.sso.vert,False
 shaders-msl/desktop-only/vert/basic.desktop.sso.vert,True
 shaders-msl/flatten/basic.flatten.vert,False
@@ -67,15 +62,12 @@ shaders-msl/vert/leaf-function.capture.vert,False
 shaders-msl/vert/leaf-function.capture.vert,True
 shaders-msl/vert/out_block.vert,False
 shaders-msl/vert/out_block.vert,True
-shaders-msl/vert/packed_matrix.vert,False
 shaders-msl/vert/pointsize.vert,False
 shaders-msl/vert/pointsize.vert,True
 shaders-msl/vert/sign-int-types.vert,False
 shaders-msl/vert/sign-int-types.vert,True
 shaders-msl/vert/texture_buffer.texture-buffer-native.msl21.vert,False
 shaders-msl/vert/texture_buffer.texture-buffer-native.msl21.vert,True
-shaders-no-opt/comp/loop.comp,False
-shaders-no-opt/comp/return.comp,False
 shaders-reflection/asm/aliased-entry-point-names.asm.multi,False
 shaders-reflection/asm/op-source-glsl-ssbo-1.asm.comp,False
 shaders-reflection/asm/op-source-glsl-ssbo-2.asm.comp,False
@@ -99,7 +91,6 @@ shaders-reflection/frag/spec-constant.vk.frag,False
 shaders-reflection/rgen/acceleration_structure.vk.rgen,False
 shaders-reflection/vert/read-from-row-major-array.vert,False
 shaders-reflection/vert/texture_buffer.vert,False
-shaders/asm/frag/complex-name-workarounds.asm.frag,True
 shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,False
 shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,True
 shaders/asm/frag/image-query-no-sampler.no-samplerless.vk.asm.frag,False
