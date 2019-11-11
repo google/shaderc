@@ -1,0 +1,2 @@
+shaders-no-opt/asm/frag/for-loop-dedicated-merge-block-inverted.asm.invalid.frag,False
+shaders-no-opt/asm/frag/for-loop-dedicated-merge-block-non-inverted.asm.invalid.frag,False
