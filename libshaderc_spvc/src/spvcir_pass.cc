@@ -178,7 +178,7 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       auto &type = get<spirv_cross::SPIRType>(inst->type_id());
 
       // TODO(sarahM0): floating-point numbers of IEEE 754 are of length 16
-      // bits, 32 bits, 64 bits, and any multiple of 32 bits ≥128
+      // bits, 32 bits, 64 bits, and any multiple of 32 bits >=128
       // Ask whether we need to support longer than 64 bits
       if (type.width > 32) {
         uint64_t combined_words = inst->GetInOperand(0u).words[1];
