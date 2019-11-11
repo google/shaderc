@@ -320,23 +320,23 @@ int main(int argc, char** argv) {
   options.SetMSLDiscreteDescriptorSets(msl_discrete_descriptor);
 
   shaderc_spvc::CompilationResult result;
+  shaderc_compilation_status status = shaderc_compilation_status_configuration_error;
   if (output_language == "glsl") {
-    result = context.CompileSpvToGlsl((const uint32_t*)input.data(),
-                                      input.size(), options);
+    status = context.CompileSpvToGlsl((const uint32_t*)input.data(),
+                                      input.size(), options, &result);
   } else if (output_language == "msl") {
-    result = context.CompileSpvToMsl((const uint32_t*)input.data(),
-                                     input.size(), options);
+    status = context.CompileSpvToMsl((const uint32_t*)input.data(),
+                                     input.size(), options, &result);
   } else if (output_language == "hlsl") {
-    result = context.CompileSpvToHlsl((const uint32_t*)input.data(),
-                                      input.size(), options);
+    status = context.CompileSpvToHlsl((const uint32_t*)input.data(),
+                                      input.size(), options, &result);
   } else if (output_language == "vulkan") {
-    result = context.CompileSpvToVulkan((const uint32_t*)input.data(),
-                                        input.size(), options);
+    status = context.CompileSpvToVulkan((const uint32_t*)input.data(),
+                                        input.size(), options, &result);
   }
 
-  auto status = result.GetCompilationStatus();
   if (status == shaderc_compilation_status_validation_error) {
-    std::cerr << "validation failed:\n" << result.GetMessages() << std::endl;
+    std::cerr << "validation failed:\n" << context.GetMessages() << std::endl;
     return 1;
   }
   if (status == shaderc_compilation_status_success) {
@@ -363,7 +363,7 @@ int main(int argc, char** argv) {
   }
 
   if (status == shaderc_compilation_status_compilation_error) {
-    std::cerr << "compilation failed:\n" << result.GetMessages() << std::endl;
+    std::cerr << "compilation failed:\n" << context.GetMessages() << std::endl;
     return 1;
   }
 

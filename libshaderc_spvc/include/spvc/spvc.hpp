@@ -53,14 +53,6 @@ class CompilationResult {
     return *this;
   }
 
-  // DEPRECATED
-  shaderc_compilation_status GetCompilationStatus() const {
-    if (!result_) {
-      return shaderc_compilation_status_null_result_object;
-    }
-    return shaderc_spvc_result_get_status(result_.get());
-  }
-
   const std::string GetStringOutput() const {
     return shaderc_spvc_result_get_string_output(result_.get());
   }
@@ -73,11 +65,6 @@ class CompilationResult {
     if (!binary_output || !binary_length) return {};
 
     return std::vector<uint32_t>(binary_output, binary_output + binary_length);
-  }
-
-  // DEPRECATED
-  const std::string GetMessages() const {
-    return shaderc_spvc_result_get_messages(result_.get());
   }
 
  private:
@@ -313,14 +300,6 @@ class Context {
                                           result->result_.get());
   }
 
-  // DEPRECATED
-  CompilationResult CompileSpvToGlsl(const uint32_t* source, size_t source_len,
-                                     const CompileOptions& options) const {
-    CompilationResult result;
-    CompileSpvToGlsl(source, source_len, options, &result);
-    return result;
-  }
-
   // Compiles the given source SPIR-V to HLSL.
   shaderc_compilation_status CompileSpvToHlsl(const uint32_t* source,
                                               size_t source_len,
@@ -329,14 +308,6 @@ class Context {
     return shaderc_spvc_compile_into_hlsl(context_.get(), source, source_len,
                                           options.options_.get(),
                                           result->result_.get());
-  }
-
-  // DEPRECATED
-  CompilationResult CompileSpvToHlsl(const uint32_t* source, size_t source_len,
-                                     const CompileOptions& options) const {
-    CompilationResult result;
-    CompileSpvToHlsl(source, source_len, options, &result);
-    return result;
   }
 
   // Compiles the given source SPIR-V to MSL.
@@ -349,14 +320,6 @@ class Context {
                                          result->result_.get());
   }
 
-  // DEPRECATED
-  CompilationResult CompileSpvToMsl(const uint32_t* source, size_t source_len,
-                                    const CompileOptions& options) const {
-    CompilationResult result;
-    CompileSpvToMsl(source, source_len, options, &result);
-    return result;
-  }
-
   // Compiles the given source SPIR-V to Vulkan.
   shaderc_compilation_status CompileSpvToVulkan(
       const uint32_t* source, size_t source_len, const CompileOptions& options,
@@ -364,15 +327,6 @@ class Context {
     return shaderc_spvc_compile_into_vulkan(context_.get(), source, source_len,
                                             options.options_.get(),
                                             result->result_.get());
-  }
-
-  // DEPRECATED
-  CompilationResult CompileSpvToVulkan(const uint32_t* source,
-                                       size_t source_len,
-                                       const CompileOptions& options) const {
-    CompilationResult result;
-    CompileSpvToMsl(source, source_len, options, &result);
-    return result;
   }
 
  private:
