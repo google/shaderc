@@ -40,6 +40,7 @@ class SpvcIrPass : public Pass {
   spirv_cross::ParsedIR *ir_;
   spirv_cross::SPIRFunction *current_function_ = nullptr;
   spirv_cross::SPIRBlock *current_block_ = nullptr;
+  Pass::Status status_;
   // used to save our offset into the input spirv string
   uint32_t offset_ = 5;
 
@@ -93,6 +94,10 @@ class SpvcIrPass : public Pass {
     else
       return nullptr;
   }
+
+  // Check boolean condition. If false record the error message, and set pass
+  // status to failure to stop processing.
+  bool CheckConditionAndSetErrorMessage(bool condition, std::string message);
 };
 
 }  // namespace opt
