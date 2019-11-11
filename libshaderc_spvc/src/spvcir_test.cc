@@ -139,7 +139,7 @@ TEST_F(SpvcIrParsingTest, OpExtInstImportInsruction) {
       << " SinglePassRunAndDisassemble failed on input:\n "
       << std::get<0>(result);
 
-  auto spir_ext =  maybe_get<spirv_cross::SPIRExtension>(5, &ir_);
+  auto spir_ext = maybe_get<spirv_cross::SPIRExtension>(5, &ir_);
   ASSERT_NE(spir_ext, nullptr);
   EXPECT_EQ(spir_ext->ext, spirv_cross::SPIRExtension::GLSL);
 }
@@ -435,7 +435,7 @@ TEST_F(SpvcIrParsingTest, SpvOpVariableInstruction) {
   EXPECT_EQ(spir_variable->basevariable, static_cast<spirv_cross::TypeID>(0));
 }
 
-TEST_F(SpvcIrParsingTest, OpDecrateInstruction) {
+TEST_F(SpvcIrParsingTest, OpDecorateInstruction) {
   const std::vector<const char*> middle = {
       // clang-format off
              "OpDecorate %17  Location 0",
@@ -463,7 +463,7 @@ TEST_F(SpvcIrParsingTest, OpDecrateInstruction) {
   EXPECT_EQ(work_offset, 28);
 }
 
-TEST_F(SpvcIrParsingTest, OpDecrateInstruction2) {
+TEST_F(SpvcIrParsingTest, OpDecorateInstruction2) {
   const std::vector<const char*> middle = {
       // clang-format off
              "OpDecorate %17  Location 0",

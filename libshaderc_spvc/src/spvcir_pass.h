@@ -95,7 +95,9 @@ class SpvcIrPass : public Pass {
       return nullptr;
   }
 
-  void CheckAndSetErrorMessage(bool condition, std::string message);
+  // Check boolean condition. If false record the error message, and set pass
+  // status to failure to stop processing.
+  bool CheckConditionAndSetErrorMessage(bool condition, std::string message);
 };
 
 }  // namespace opt
