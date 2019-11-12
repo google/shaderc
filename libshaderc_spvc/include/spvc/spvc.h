@@ -53,6 +53,15 @@ SHADERC_EXPORT void shaderc_spvc_context_destroy(
 SHADERC_EXPORT const char* shaderc_spvc_context_get_messages(
     const shaderc_spvc_context_t context);
 
+// EXPERIMENTAL
+// Get spirv_cross compiler reference, does NOT transfer ownership.
+// Return type is actually spirv_cross::Compiler*, but cannot have that in the
+// C API.
+// This is being exposed temporarily to ease integration of spvc into Dawn, but
+// this is will be removed in the future without warning.
+SHADERC_EXPORT void* shaderc_spvc_context_get_compiler(
+    const shaderc_spvc_context_t context);
+
 // An opaque handle to an object that manages options to a single compilation
 // result.
 typedef struct shaderc_spvc_compile_options* shaderc_spvc_compile_options_t;
