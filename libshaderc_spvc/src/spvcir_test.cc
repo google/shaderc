@@ -65,16 +65,16 @@ std::string JoinAllInsts(const std::vector<const char*>& insts) {
   return SelectiveJoin(insts, [](const char*) { return false; });
 }
 
-void createSpvcIr(spirv_cross::ParsedIR* ir, std::string text) {
+bool createSpvcIr(spirv_cross::ParsedIR* ir, std::string text) {
   std::vector<uint32_t> binary;
   std::unique_ptr<IRContext> context =
       BuildModule(SPV_ENV_UNIVERSAL_1_1, nullptr, text,
                   SPV_TEXT_TO_BINARY_OPTION_PRESERVE_NUMERIC_IDS);
-  assert(context && "context");
+  if (!context) return false;
   context->module()->ToBinary(&binary, false);
   ir->spirv =
       std::vector<uint32_t>(binary.data(), binary.data() + binary.size());
-  return;
+  return true;
 }
 
 class SpvcIrParsingTest : public PassTest<::testing::Test> {
@@ -495,6 +495,64 @@ TEST_F(SpvcIrParsingTest, OpDecorateInstruction2) {
   EXPECT_NE(itr, end(work_offsets));
   auto& work_offset = itr->second;
   EXPECT_EQ(work_offset, 40);
+}
+
+TEST_F(SpvcIrParsingTest, OpNameInstruction) {
+  const std::vector<const char*> middle = {
+      // clang-format off
+             "OpDecorate %17  Location 0",
+             "OpName %17 \"var\""
+      " %8 =  OpTypeInt 32 1",
+      "%16 =  OpTypePointer Output %8",
+      "%17 =  OpVariable %16 Output",
+      // clang-format on
+  };
+  std::string spirv = JoinAllInsts(Concat(Concat(before_, middle), after_));
+  spirv_cross::ParsedIR ir;
+  ASSERT_EQ(createSpvcIr(&ir, spirv), true)
+      << "Could not create IRContext for input:\n" + spirv + "\n";
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, true, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  const auto var_name = ir.get_name(17);
+  EXPECT_EQ(var_name, "var");
+}
+
+TEST_F(SpvcIrParsingTest, OpStructInstruction) {
+  const std::vector<const char*> middle = {
+      // clang-format off
+      " %8 =  OpTypeInt 32 1",
+      "%16 =  OpTypePointer Output %8",
+      "%22 =  OpTypeStruct %8 %8 %8 %8",
+      "%20 =  OpTypeStruct %8 %8 %16",
+      "%21 =  OpTypeStruct %8 %8 %16"
+      // clang-format on
+  };
+  std::string spirv = JoinAllInsts(Concat(Concat(before_, middle), after_));
+  spirv_cross::ParsedIR ir;
+  ASSERT_EQ(createSpvcIr(&ir, spirv), true)
+      << "Could not create IRContext for input:\n" + spirv + "\n";
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, true, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  auto spir_struct = maybe_get<spirv_cross::SPIRType>(20, &ir);
+  ASSERT_NE(spir_struct, nullptr);
+  EXPECT_EQ(spir_struct->basetype, spirv_cross::SPIRType::Struct);
+  ASSERT_EQ(spir_struct->member_types.size(), 3);
+  EXPECT_EQ(spir_struct->member_types.data()[0],
+            static_cast<spirv_cross::TypeID>(8));
+  EXPECT_EQ(spir_struct->member_types.data()[1],
+            static_cast<spirv_cross::TypeID>(8));
+  EXPECT_EQ(spir_struct->member_types.data()[2],
+            static_cast<spirv_cross::TypeID>(16));
 }
 
 }  // namespace

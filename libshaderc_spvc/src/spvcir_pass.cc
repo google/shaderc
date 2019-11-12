@@ -19,6 +19,44 @@
 namespace spvtools {
 namespace opt {
 
+bool SpvcIrPass::types_are_logically_equivalent(
+    const spirv_cross::SPIRType &a, const spirv_cross::SPIRType &b) const {
+  if (a.basetype != b.basetype) return false;
+  if (a.width != b.width) return false;
+  if (a.vecsize != b.vecsize) return false;
+  if (a.columns != b.columns) return false;
+  if (a.array.size() != b.array.size()) return false;
+
+  size_t array_count = a.array.size();
+  if (array_count && memcmp(a.array.data(), b.array.data(),
+                            array_count * sizeof(uint32_t)) != 0)
+    return false;
+
+  if (a.basetype == spirv_cross::SPIRType::Image ||
+      a.basetype == spirv_cross::SPIRType::SampledImage) {
+    if (memcmp(&a.image, &b.image, sizeof(spirv_cross::SPIRType::Image)) != 0)
+      return false;
+  }
+
+  if (a.member_types.size() != b.member_types.size()) return false;
+
+  size_t member_types = a.member_types.size();
+  for (size_t i = 0; i < member_types; i++) {
+    if (!types_are_logically_equivalent(
+            get<spirv_cross::SPIRType>(a.member_types[i]),
+            get<spirv_cross::SPIRType>(b.member_types[i])))
+      return false;
+  }
+
+  return true;
+}
+
+// Returns the string representation of the data starting at the index of the
+// given instruction, assuming data is null terminated.
+inline std::string GetWordsAsString(uint32_t index, Instruction *inst) {
+  return reinterpret_cast<const char *>(inst->GetInOperand(index).words.data());
+}
+
 SpvcIrPass::SpvcIrPass(spirv_cross::ParsedIR *ir) {
   ir_ = ir;
   current_function_ = nullptr;
@@ -122,9 +160,23 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
     }
 
     case SpvOpExtension: {
-      const std::string extension_name =
-          reinterpret_cast<const char *>(inst->GetInOperand(0u).words.data());
+      const std::string extension_name = GetWordsAsString(0u, inst);
       ir_->declared_extensions.push_back(std::move(extension_name));
+      break;
+    }
+
+    // opcode: 5
+    case SpvOpName: {
+      uint32_t id = inst->GetSingleWordInOperand(0u);
+      ir_->set_name(id, GetWordsAsString(1u, inst));
+      break;
+    }
+
+    // opcode:6
+    case SpvOpMemberName: {
+      uint32_t id = inst->GetSingleWordInOperand(0u);
+      uint32_t member = inst->GetSingleWordInOperand(1u);
+      ir_->set_member_name(id, member, GetWordsAsString(2u, inst));
       break;
     }
 
@@ -256,10 +308,10 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       auto id = inst->result_id();
       auto type = inst->GetSingleWordInOperand(1u);
 
-      if (!CheckConditionAndSetErrorMessage(
-              !current_function_,
-              "SpvcIrPass: Error while parsing OpFunction, must end a function "
-              "before starting a new one!"))
+      if (!CheckConditionAndSetErrorMessage(!current_function_,
+                                            "SpvcIrPass: Error while parsing "
+                                            "OpFunction, must end a function "
+                                            "before starting a new one!"))
         return;
 
       current_function_ = &set<spirv_cross::SPIRFunction>(id, result, type);
@@ -313,13 +365,41 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
+      // opcode: 30
+    case SpvOpTypeStruct: {
+      uint32_t id = inst->result_id();
+      auto &type = set<spirv_cross::SPIRType>(id);
+      type.basetype = spirv_cross::SPIRType::Struct;
+      for (uint32_t i = 0; i < inst->NumInOperands(); i++) {
+        type.member_types.push_back(inst->GetSingleWordInOperand(i));
+      }
+
+      // TODO(sarahM0): ask about aliasing? figure out what is happening in this
+      // loop.
+      bool consider_aliasing = !ir_->get_name(type.self).empty();
+      if (consider_aliasing) {
+        for (auto &other : global_struct_cache_) {
+          if (ir_->get_name(type.self) == ir_->get_name(other) &&
+              types_are_logically_equivalent(
+                  type, get<spirv_cross::SPIRType>(other))) {
+            type.type_alias = other;
+            break;
+          }
+        }
+
+        if (type.type_alias == spirv_cross::TypeID(0))
+          global_struct_cache_.push_back(id);
+      }
+      break;
+    }
+
     // opcode: 43
     case SpvOpConstant: {
       uint32_t id = inst->result_id();
       auto &type = get<spirv_cross::SPIRType>(inst->type_id());
 
       // TODO(sarahM0): floating-point numbers of IEEE 754 are of length 16
-      // bits, 32 bits, 64 bits, and any multiple of 32 bits >=128
+      // bits, 32 bits, 64 bits, and any multiple of 32 bits up to 128 bits
       // Ask whether we need to support longer than 64 bits
       if (type.width > 32) {
         uint64_t combined_words = inst->GetInOperand(0u).words[1];

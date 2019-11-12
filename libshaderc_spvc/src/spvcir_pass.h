@@ -41,6 +41,10 @@ class SpvcIrPass : public Pass {
   spirv_cross::SPIRFunction *current_function_ = nullptr;
   spirv_cross::SPIRBlock *current_block_ = nullptr;
   Pass::Status status_;
+  // A data structure to store type aliases.
+  // spirv-cross comment: This must be an ordered data structure so we always
+  // pick the same type aliases.
+  spirv_cross::SmallVector<uint32_t> global_struct_cache_;
   // used to save our offset into the input spirv string
   uint32_t offset_ = 5;
 
@@ -98,6 +102,10 @@ class SpvcIrPass : public Pass {
   // Check boolean condition. If false record the error message, and set pass
   // status to failure to stop processing.
   bool CheckConditionAndSetErrorMessage(bool condition, std::string message);
+
+  // Returns true only if to the given spirv-cross types are equivalent
+  bool types_are_logically_equivalent(
+      const spirv_cross::SPIRType &a, const spirv_cross::SPIRType &b) const;
 };
 
 }  // namespace opt
