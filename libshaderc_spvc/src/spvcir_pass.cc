@@ -148,7 +148,7 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
     }
 
     case SpvOpCapability: {
-      auto cap = inst->GetSingleWordOperand(0u);
+      auto cap = inst->GetSingleWordInOperand(0u);
 
       if (!CheckConditionAndSetErrorMessage(
               cap != spv::CapabilityKernel,
@@ -207,8 +207,8 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
         // spirv-cross comment:
         // Other SPIR-V extensions which have ExtInstrs are currently not
         // supported.
-        // TODO(sarahM0): figure out which ones are not supported and try to add
-        // them.
+        // TODO(sarahM0): figure out which ones are not supported and try to
+        // add them.
         if (!CheckConditionAndSetErrorMessage(
                 false,
                 "SpvcIrPass: Error while parsing "
@@ -255,8 +255,8 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
     // opcode: 332
     case SpvOpDecorateId: {
       // spirv-cross comment:
-      // OpDecorateId technically supports an array of arguments, but our only
-      // supported decorations are single uint, so merge decorate and
+      // OpDecorateId technically supports an array of arguments, but our
+      // only supported decorations are single uint, so merge decorate and
       // decorate-id here.
       // TODO(sarahM0): investigate if this limitation is acceptable.
       uint32_t id = inst->GetSingleWordInOperand(0u);
@@ -264,7 +264,8 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       auto decoration =
           static_cast<spv::Decoration>(inst->GetSingleWordInOperand(1u));
       if (inst->NumInOperands() > 2) {
-        // instruction offset + length = offset_ + 1 + inst->NumOpreandWords()
+        // instruction offset + length = offset_ + 1 +
+        // inst->NumOpreandWords()
         if (!CheckConditionAndSetErrorMessage(
                 offset_ + 1 + inst->NumOperandWords() < ir_->spirv.size(),
                 "SpvcIrPass: Error while parsing OpDecorate/OpDecorateId, "
@@ -324,7 +325,9 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       else if (width == 16)
         type.basetype = spirv_cross::SPIRType::Half;
       else
-        assert("Unrecognized bit-width of floating point type.");
+        CheckConditionAndSetErrorMessage(
+            false, "Unrecognized bit-width of floating point type.");
+
       type.width = width;
       break;
     }
@@ -450,8 +453,8 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       set<spirv_cross::SPIRVariable>(id, type, storage, initializer);
 
       // spirv-cross comment:
-      // hlsl based shaders don't have those decorations. force them and then
-      // reset when reading/writing images
+      // hlsl based shaders don't have those decorations. force them and
+      // then reset when reading/writing images
       auto &ttype = get<spirv_cross::SPIRType>(type);
       if (ttype.basetype == spirv_cross::SPIRType::BaseType::Image) {
         ir_->set_decoration(id, spv::DecorationNonWritable);
@@ -470,8 +473,8 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
         type.member_types.push_back(inst->GetSingleWordInOperand(i));
       }
 
-      // TODO(sarahM0): ask about aliasing? figure out what is happening in this
-      // loop.
+      // TODO(sarahM0): ask about aliasing? figure out what is happening in
+      // this loop.
       bool consider_aliasing = !ir_->get_name(type.self).empty();
       if (consider_aliasing) {
         for (auto &other : global_struct_cache_) {
