@@ -226,23 +226,11 @@ SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_initialize_for_glsl(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options);
 
-// DEPRECATED
-SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_compile_into_glsl(
-    const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options,
-    shaderc_spvc_compilation_result_t result);
-
 // Takes SPIR-V as a sequence of 32-bit words, validates it, then creates the
 // internal compiler for translating to HLSL and performing reflection.
 SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_initialize_for_hlsl(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options);
-
-// DEPRECATED
-SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_compile_into_hlsl(
-    const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options,
-    shaderc_spvc_compilation_result_t result);
 
 // Takes SPIR-V as a sequence of 32-bit words, validates it, then creates the
 // internal compiler for translating to MSL and performing reflection.
@@ -250,23 +238,11 @@ SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_initialize_for_msl(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options);
 
-// DEPRECATED
-SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_compile_into_msl(
-    const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options,
-    shaderc_spvc_compilation_result_t result);
-
 // Takes SPIR-V as a sequence of 32-bit words, validates it, then creates the
 // internal compiler for translating to Vulkan and performing reflection.
 SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_initialize_for_vulkan(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options);
-
-// DEPRECATED
-SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_compile_into_vulkan(
-    const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options,
-    shaderc_spvc_compilation_result_t result);
 
 // Given an initialized compiler, generates a shader of the appropriate
 // language.

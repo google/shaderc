@@ -236,32 +236,12 @@ shaderc_compilation_status shaderc_spvc_initialize_for_glsl(
                                       spvc_private::generate_glsl_compiler);
 }
 
-shaderc_compilation_status shaderc_spvc_compile_into_glsl(
-    const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options,
-    shaderc_spvc_compilation_result_t result) {
-  shaderc_compilation_status status =
-      shaderc_spvc_initialize_for_glsl(context, source, source_len, options);
-  if (status != shaderc_compilation_status_success) return status;
-  return shaderc_spvc_compile_shader(context, result);
-}
-
 shaderc_compilation_status shaderc_spvc_initialize_for_hlsl(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options) {
   context->target_lang = SPVC_TARGET_LANG_HLSL;
   return shaderc_spvc_initialize_impl(context, source, source_len, options,
                                       spvc_private::generate_hlsl_compiler);
-}
-
-shaderc_compilation_status shaderc_spvc_compile_into_hlsl(
-    const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options,
-    shaderc_spvc_compilation_result_t result) {
-  shaderc_compilation_status status =
-      shaderc_spvc_initialize_for_hlsl(context, source, source_len, options);
-  if (status != shaderc_compilation_status_success) return status;
-  return shaderc_spvc_compile_shader(context, result);
 }
 
 shaderc_compilation_status shaderc_spvc_initialize_for_msl(
@@ -272,41 +252,12 @@ shaderc_compilation_status shaderc_spvc_initialize_for_msl(
                                       spvc_private::generate_msl_compiler);
 }
 
-shaderc_compilation_status shaderc_spvc_compile_into_msl(
-    const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options,
-    shaderc_spvc_compilation_result_t result) {
-  shaderc_compilation_status status =
-      shaderc_spvc_initialize_for_hlsl(context, source, source_len, options);
-  if (status != shaderc_compilation_status_success) return status;
-  return shaderc_spvc_compile_shader(context, result);
-}
-
 shaderc_compilation_status shaderc_spvc_initialize_for_vulkan(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options) {
   context->target_lang = SPVC_TARGET_LANG_VULKAN;
   return shaderc_spvc_initialize_impl(context, source, source_len, options,
                                       spvc_private::generate_vulkan_compiler);
-}
-
-shaderc_compilation_status shaderc_spvc_compile_into_vulkan(
-    const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options,
-    shaderc_spvc_compilation_result_t result) {
-  if (options->target_env != SPV_ENV_VULKAN_1_1 &&
-      options->target_env != SPV_ENV_VULKAN_1_0 &&
-      options->target_env != SPV_ENV_VULKAN_1_1_SPIRV_1_4) {
-    context->messages.append(
-        "Attempted to compile to Vulkan, but specified non-Vulkan target "
-        "environment.\n");
-    return shaderc_compilation_status_configuration_error;
-  }
-
-  shaderc_compilation_status status =
-      shaderc_spvc_initialize_for_vulkan(context, source, source_len, options);
-  if (status != shaderc_compilation_status_success) return status;
-  return shaderc_spvc_compile_shader(context, result);
 }
 
 shaderc_compilation_status shaderc_spvc_compile_shader(
