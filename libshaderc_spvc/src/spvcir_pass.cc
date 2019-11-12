@@ -353,6 +353,60 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
+    // opcode: 24
+    case SpvOpTypeMatrix: {
+      uint32_t id = inst->result_id();
+      uint32_t colcount = inst->GetSingleWordInOperand(1u);
+
+      auto &base = get<spirv_cross::SPIRType>(inst->GetSingleWordInOperand(0u));
+      auto &matrixbase = set<spirv_cross::SPIRType>(id);
+
+      matrixbase = base;
+      matrixbase.columns = colcount;
+      matrixbase.self = id;
+      matrixbase.parent_type = inst->GetSingleWordInOperand(0u);
+      break;
+    }
+
+    // opcode: 25
+    case SpvOpTypeImage: {
+      uint32_t id = inst->result_id();
+      auto &type = set<spirv_cross::SPIRType>(id);
+      type.basetype = spirv_cross::SPIRType::Image;
+      type.image.type = inst->GetSingleWordInOperand(0u);
+      type.image.dim = static_cast<spv::Dim>(inst->GetSingleWordInOperand(1u));
+      type.image.depth = inst->GetSingleWordInOperand(2u) == 1;
+      type.image.arrayed = inst->GetSingleWordInOperand(3u) != 0;
+      type.image.ms = inst->GetSingleWordInOperand(4u) != 0;
+      type.image.sampled = inst->GetSingleWordInOperand(5u);
+      type.image.format =
+          static_cast<spv::ImageFormat>(inst->GetSingleWordInOperand(6u));
+      type.image.access = (inst->NumInOperands() > 7)
+                              ? static_cast<spv::AccessQualifier>(
+                                    inst->GetSingleWordInOperand(7u))
+                              : spv::AccessQualifierMax;
+      break;
+    }
+
+    // opcode: 26
+    case SpvOpTypeSampler: {
+      uint32_t id = inst->result_id();
+      auto &type = set<spirv_cross::SPIRType>(id);
+      type.basetype = spirv_cross::SPIRType::Sampler;
+      break;
+    }
+
+    // opcode: 27
+    case SpvOpTypeSampledImage: {
+      uint32_t id = inst->result_id();
+      uint32_t imagetype = inst->GetSingleWordInOperand(0u);
+      auto &type = set<spirv_cross::SPIRType>(id);
+      type = get<spirv_cross::SPIRType>(imagetype);
+      type.basetype = spirv_cross::SPIRType::SampledImage;
+      type.self = id;
+      break;
+    }
+
     // opcode: 28
     case SpvOpTypeArray: {
       uint32_t id = inst->result_id();
@@ -373,6 +427,19 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       arraybase.array.push_back(literal ? c->scalar() : cid);
       // spirv-cross comment:
       // Do NOT set arraybase.self!
+      break;
+    }
+
+    // opcode: 29
+    case SpvOpTypeRuntimeArray: {
+      auto id = inst->result_id();
+      auto tid = inst->GetSingleWordInOperand(0u);
+      auto &base = get<spirv_cross::SPIRType>(tid);
+      auto &arraybase = set<spirv_cross::SPIRType>(id);
+      arraybase = base;
+      arraybase.array.push_back(0);
+      arraybase.array_size_literal.push_back(true);
+      arraybase.parent_type = tid;
       break;
     }
 
