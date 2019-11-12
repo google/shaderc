@@ -216,37 +216,63 @@ SHADERC_EXPORT size_t shaderc_spvc_compile_options_set_for_fuzzing(
     shaderc_spvc_compile_options_t options, const uint8_t* data, size_t size);
 
 // An opaque handle to the results of a call to any
-// shaderc_spvc_compile_into_*() function.
+// shaderc_spvc_*_compile_*() function.
 typedef struct shaderc_spvc_compilation_result*
     shaderc_spvc_compilation_result_t;
 
-// Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
-// GLSL.
+// Takes SPIR-V as a sequence of 32-bit words, validates it, then creates the
+// internal compiler for translating to GLSL and performing reflection.
+SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_initialize_for_glsl(
+    const shaderc_spvc_context_t context, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options);
+
+// DEPRECATED
 SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_compile_into_glsl(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result);
 
-// Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
-// HLSL.
+// Takes SPIR-V as a sequence of 32-bit words, validates it, then creates the
+// internal compiler for translating to HLSL and performing reflection.
+SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_initialize_for_hlsl(
+    const shaderc_spvc_context_t context, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options);
+
+// DEPRECATED
 SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_compile_into_hlsl(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result);
 
-// Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
-// MSL.
+// Takes SPIR-V as a sequence of 32-bit words, validates it, then creates the
+// internal compiler for translating to MSL and performing reflection.
+SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_initialize_for_msl(
+    const shaderc_spvc_context_t context, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options);
+
+// DEPRECATED
 SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_compile_into_msl(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result);
 
-// Takes SPIR-V as a sequence of 32-bit words, validates it, then compiles to
-// Vullkan specific SPIR-V.
+// Takes SPIR-V as a sequence of 32-bit words, validates it, then creates the
+// internal compiler for translating to Vulkan and performing reflection.
+SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_initialize_for_vulkan(
+    const shaderc_spvc_context_t context, const uint32_t* source,
+    size_t source_len, shaderc_spvc_compile_options_t options);
+
+// DEPRECATED
 SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_compile_into_vulkan(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options,
     shaderc_spvc_compilation_result_t result);
+
+// Given an initialized compiler, generates a shader of the appropriate
+// language.
+SHADERC_EXPORT shaderc_compilation_status
+shaderc_spvc_compile_shader(const shaderc_spvc_context_t context,
+                            shaderc_spvc_compilation_result_t result);
 
 // The following functions, operating on shaderc_spvc_compilation_result_t
 // objects, offer only the basic thread-safety guarantee.

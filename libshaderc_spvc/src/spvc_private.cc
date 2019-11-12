@@ -172,16 +172,15 @@ shaderc_compilation_status generate_shader(
   }
 }
 
-shaderc_compilation_status generate_glsl_shader(
+shaderc_compilation_status generate_glsl_compiler(
     const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options,
-    shaderc_spvc_compilation_result_t result) {
+    size_t source_len, shaderc_spvc_compile_options_t options) {
   spirv_cross::CompilerGLSL* cross_compiler;
-  shaderc_compilation_status status;
 // spvc IR generation is under development, for now run spirv-cross
 // compiler(SHADERC_ENABLE_SPVC_PARSER is OFF by default)
 // TODO (sarahM0): change the default to spvc IR generation when it's done
 #if SHADERC_ENABLE_SPVC_PARSER
+  shaderc_compilation_status status;
   spirv_cross::ParsedIR ir;
   status = generate_spvcir(context, &ir, source, source_len, options);
   if (status != shaderc_compilation_status_success) {
@@ -294,27 +293,18 @@ shaderc_compilation_status generate_glsl_shader(
 
   cross_compiler->set_common_options(options->glsl);
 
-  status = generate_shader(cross_compiler, result);
-  if (status != shaderc_compilation_status_success) {
-    context->messages.append("Compilation failed.  Partial source:\n");
-    context->messages.append(cross_compiler->get_partial_source());
-    context->cross_compiler.reset();
-    return status;
-  }
-
   return shaderc_compilation_status_success;
 }
 
-shaderc_compilation_status generate_hlsl_shader(
+shaderc_compilation_status generate_hlsl_compiler(
     const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options,
-    shaderc_spvc_compilation_result_t result) {
+    size_t source_len, shaderc_spvc_compile_options_t options) {
   spirv_cross::CompilerHLSL* cross_compiler;
-  shaderc_compilation_status status;
 // spvc IR generation is under development, for now run spirv-cross
 // compiler(SHADERC_ENABLE_SPVC_PARSER is OFF by default)
 // TODO (sarahM0): change the default to spvc IR generation when it's done
 #if SHADERC_ENABLE_SPVC_PARSER
+  shaderc_compilation_status status;
   spirv_cross::ParsedIR ir;
   status = generate_spvcir(context, &ir, source, source_len, options);
   if (status != shaderc_compilation_status_success) {
@@ -340,28 +330,18 @@ shaderc_compilation_status generate_hlsl_shader(
   cross_compiler->set_common_options(options->glsl);
   cross_compiler->set_hlsl_options(options->hlsl);
 
-  status = generate_shader(cross_compiler, result);
-  if (status != shaderc_compilation_status_success) {
-    context->messages.append("Compilation failed.  Partial source:\n");
-    context->messages.append(cross_compiler->get_partial_source());
-    context->cross_compiler.reset();
-    return status;
-  }
-
   return shaderc_compilation_status_success;
 }
 
-shaderc_compilation_status generate_msl_shader(
+shaderc_compilation_status generate_msl_compiler(
     const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options,
-    shaderc_spvc_compilation_result_t result) {
+    size_t source_len, shaderc_spvc_compile_options_t options) {
   spirv_cross::CompilerMSL* cross_compiler;
-  shaderc_compilation_status status;
-
 // spvc IR generation is under development, for now run spirv-cross
 // compiler(SHADERC_ENABLE_SPVC_PARSER is OFF by default)
 // TODO (sarahM0): change the default to spvc IR generation when it's done
 #if SHADERC_ENABLE_SPVC_PARSER
+  shaderc_compilation_status status;
   spirv_cross::ParsedIR ir;
   status = generate_spvcir(context, &ir, source, source_len, options);
   if (status != shaderc_compilation_status_success) {
@@ -389,21 +369,12 @@ shaderc_compilation_status generate_msl_shader(
   for (auto i : options->msl_discrete_descriptor_sets)
     cross_compiler->add_discrete_descriptor_set(i);
 
-  status = generate_shader(cross_compiler, result);
-  if (status != shaderc_compilation_status_success) {
-    context->messages.append("Compilation failed.  Partial source:\n");
-    context->messages.append(cross_compiler->get_partial_source());
-    context->cross_compiler.reset();
-    return status;
-  }
-
   return shaderc_compilation_status_success;
 }
 
-shaderc_compilation_status generate_vulkan_shader(
+shaderc_compilation_status generate_vulkan_compiler(
     const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options,
-    shaderc_spvc_compilation_result_t result) {
+    size_t source_len, shaderc_spvc_compile_options_t options) {
   spirv_cross::CompilerReflection* cross_compiler;
 
 // spvc IR generation is under development, for now run spirv-cross
