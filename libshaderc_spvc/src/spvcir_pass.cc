@@ -19,6 +19,47 @@
 namespace spvtools {
 namespace opt {
 
+void SpvcIrPass::make_constant_null(uint32_t id, uint32_t type) {
+  auto &constant_type = get<spirv_cross::SPIRType>(type);
+
+  if (constant_type.pointer) {
+    auto &constant = set<spirv_cross::SPIRConstant>(id, type);
+    constant.make_null(constant_type);
+  } else if (!constant_type.array.empty()) {
+    if (!CheckConditionAndSetErrorMessage(
+            constant_type.parent_type,
+            "constant type parent shouldn't be empty"))
+      return;
+    uint32_t parent_id = ir_->increase_bound_by(1);
+    make_constant_null(parent_id, constant_type.parent_type);
+
+    if (!CheckConditionAndSetErrorMessage(
+            constant_type.array_size_literal.back(),
+            "Array size of OpConstantNull must be a literal."))
+      return;
+
+    spirv_cross::SmallVector<uint32_t> elements(constant_type.array.back());
+    for (uint32_t i = 0; i < constant_type.array.back(); i++)
+      elements[i] = parent_id;
+    set<spirv_cross::SPIRConstant>(id, type, elements.data(),
+                                   uint32_t(elements.size()), false);
+  } else if (!constant_type.member_types.empty()) {
+    uint32_t member_ids =
+        ir_->increase_bound_by(uint32_t(constant_type.member_types.size()));
+    spirv_cross::SmallVector<uint32_t> elements(
+        constant_type.member_types.size());
+    for (uint32_t i = 0; i < constant_type.member_types.size(); i++) {
+      make_constant_null(member_ids + i, constant_type.member_types[i]);
+      elements[i] = member_ids + i;
+    }
+    set<spirv_cross::SPIRConstant>(id, type, elements.data(),
+                                   uint32_t(elements.size()), false);
+  } else {
+    auto &constant = set<spirv_cross::SPIRConstant>(id, type);
+    constant.make_null(constant_type);
+  }
+}
+
 bool SpvcIrPass::types_are_logically_equivalent(
     const spirv_cross::SPIRType &a, const spirv_cross::SPIRType &b) const {
   if (a.basetype != b.basetype) return false;
@@ -559,7 +600,7 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
-  // Constant Cases
+    // Constant Cases
     // opcode: 50
     case SpvOpSpecConstant:
     // opcode: 43
@@ -581,6 +622,113 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
                                        inst->GetSingleWordInOperand(0u),
                                        inst->opcode() == SpvOpSpecConstant);
       }
+      break;
+    }
+
+      // opcode: 49
+    case SpvOpSpecConstantFalse:
+    // opcode: 42
+    case SpvOpConstantFalse: {
+      uint32_t id = inst->result_id();
+      set<spirv_cross::SPIRConstant>(id, inst->type_id(), 0u,
+                                     inst->opcode() == SpvOpSpecConstantFalse);
+      break;
+    }
+
+    // opcode: 48
+    case SpvOpSpecConstantTrue:
+    // opcode: 41
+    case SpvOpConstantTrue: {
+      uint32_t id = inst->result_id();
+      set<spirv_cross::SPIRConstant>(id, inst->type_id(), 1u,
+                                     inst->opcode() == SpvOpSpecConstantTrue);
+      break;
+    }
+
+    // opcode: 46
+    case SpvOpConstantNull: {
+      uint32_t id = inst->result_id();
+      uint32_t type = inst->type_id();
+      make_constant_null(id, type);
+      break;
+    }
+
+    // opcode: 51
+    case SpvOpSpecConstantComposite:
+    // opcode: 44
+    case SpvOpConstantComposite: {
+      uint32_t id = inst->result_id();
+      uint32_t type = inst->type_id();
+
+      auto &ctype = get<spirv_cross::SPIRType>(type);
+
+      // spirv-cross comment:
+      // We can have constants which are structs and arrays.
+      // In this case, our SPIRConstant will be a list of other
+      // SPIRConstant ids which we can refer to.
+      if (ctype.basetype == spirv_cross::SPIRType::Struct ||
+          !ctype.array.empty()) {
+        set<spirv_cross::SPIRConstant>(
+            id, type, (&ir_->spirv[offset_ + 1u] + 2u), inst->NumInOperands(),
+            inst->opcode() == SpvOpSpecConstantComposite);
+      } else {
+        if (!CheckConditionAndSetErrorMessage(
+                inst->NumInOperands() < 5,
+                "OpConstantComposite only supports 1, 2, 3 and 4 elements."))
+          return;
+
+        spirv_cross::SPIRConstant remapped_constant_ops[4];
+        const spirv_cross::SPIRConstant *c[4];
+        for (uint32_t i = 0; i < inst->NumInOperands(); i++) {
+          // spirv-cross comment:
+          // Specialization constants operations can also be part of this.
+          // We do not know their value, so any attempt to query
+          // SPIRConstant later will fail. We can only propagate the ID of the
+          // expression and use to_expression on it.
+          auto *constant_op = maybe_get<spirv_cross::SPIRConstantOp>(
+              inst->GetSingleWordInOperand(i));
+          auto *undef_op = maybe_get<spirv_cross::SPIRUndef>(
+              inst->GetSingleWordInOperand(i));
+          if (constant_op) {
+            if (!CheckConditionAndSetErrorMessage(
+                    inst->opcode() != SpvOpConstantComposite,
+                    "Specialization constant operation used in "
+                    "OpConstantComposite."))
+              return;
+
+            remapped_constant_ops[i].make_null(
+                get<spirv_cross::SPIRType>(constant_op->basetype));
+            remapped_constant_ops[i].self = constant_op->self;
+            remapped_constant_ops[i].constant_type = constant_op->basetype;
+            remapped_constant_ops[i].specialization = true;
+            c[i] = &remapped_constant_ops[i];
+          } else if (undef_op) {
+            // spirv-cross comment:
+            // Undefined, just pick 0.
+            remapped_constant_ops[i].make_null(
+                get<spirv_cross::SPIRType>(undef_op->basetype));
+            remapped_constant_ops[i].constant_type = undef_op->basetype;
+            c[i] = &remapped_constant_ops[i];
+          } else {
+            c[i] = &get<spirv_cross::SPIRConstant>(
+                inst->GetSingleWordInOperand(i));
+          }
+        }
+        set<spirv_cross::SPIRConstant>(
+            id, type, c, inst->NumInOperands(),
+            inst->opcode() == SpvOpSpecConstantComposite);
+      }
+      break;
+    }
+
+    case SpvOpSpecConstantOp: {
+      uint32_t result_type = inst->type_id();
+      uint32_t id = inst->result_id();
+      auto spec_op = static_cast<spv::Op>(inst->GetSingleWordInOperand(0u));
+
+      set<spirv_cross::SPIRConstantOp>(id, result_type, spec_op,
+                          (&ir_->spirv[offset_ + 1u] + 3u),
+                          inst->NumInOperands() - 1);
       break;
     }
 

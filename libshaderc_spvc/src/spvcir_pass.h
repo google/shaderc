@@ -104,8 +104,11 @@ class SpvcIrPass : public Pass {
   bool CheckConditionAndSetErrorMessage(bool condition, std::string message);
 
   // Returns true only if to the given spirv-cross types are equivalent
-  bool types_are_logically_equivalent(
-      const spirv_cross::SPIRType &a, const spirv_cross::SPIRType &b) const;
+  bool types_are_logically_equivalent(const spirv_cross::SPIRType &a,
+                                      const spirv_cross::SPIRType &b) const;
+
+  // Given an id and its type, sets all of its entries and sub-entries to null
+  void make_constant_null(uint32_t id, uint32_t type);
 };
 
 }  // namespace opt
