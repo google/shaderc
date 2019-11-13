@@ -148,7 +148,7 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
     }
 
     case SpvOpCapability: {
-      auto cap = inst->GetSingleWordOperand(0u);
+      auto cap = inst->GetSingleWordInOperand(0u);
 
       if (!CheckConditionAndSetErrorMessage(
               cap != spv::CapabilityKernel,
@@ -207,8 +207,8 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
         // spirv-cross comment:
         // Other SPIR-V extensions which have ExtInstrs are currently not
         // supported.
-        // TODO(sarahM0): figure out which ones are not supported and try to add
-        // them.
+        // TODO(sarahM0): figure out which ones are not supported and try to
+        // add them.
         if (!CheckConditionAndSetErrorMessage(
                 false,
                 "SpvcIrPass: Error while parsing "
@@ -255,8 +255,8 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
     // opcode: 332
     case SpvOpDecorateId: {
       // spirv-cross comment:
-      // OpDecorateId technically supports an array of arguments, but our only
-      // supported decorations are single uint, so merge decorate and
+      // OpDecorateId technically supports an array of arguments, but our
+      // only supported decorations are single uint, so merge decorate and
       // decorate-id here.
       // TODO(sarahM0): investigate if this limitation is acceptable.
       uint32_t id = inst->GetSingleWordInOperand(0u);
@@ -264,7 +264,8 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       auto decoration =
           static_cast<spv::Decoration>(inst->GetSingleWordInOperand(1u));
       if (inst->NumInOperands() > 2) {
-        // instruction offset + length = offset_ + 1 + inst->NumOpreandWords()
+        // instruction offset + length = offset_ + 1 +
+        // inst->NumOpreandWords()
         if (!CheckConditionAndSetErrorMessage(
                 offset_ + 1 + inst->NumOperandWords() < ir_->spirv.size(),
                 "SpvcIrPass: Error while parsing OpDecorate/OpDecorateId, "
@@ -282,6 +283,8 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
+      // Basic type cases
+      // opcode: 19
     case SpvOpTypeVoid: {
       auto id = inst->result_id();
       auto &type = set<spirv_cross::SPIRType>(id);
@@ -289,6 +292,114 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
+    // opcode: 20
+    case SpvOpTypeBool: {
+      uint32_t id = inst->result_id();
+      auto &type = set<spirv_cross::SPIRType>(id);
+      type.basetype = spirv_cross::SPIRType::Boolean;
+      type.width = 1;
+      break;
+    }
+
+    // opcode: 21
+    case SpvOpTypeInt: {
+      uint32_t id = inst->result_id();
+      uint32_t width = inst->GetSingleWordInOperand(0u);
+      bool signedness = inst->GetSingleWordInOperand(1u) != 0;
+      auto &type = set<spirv_cross::SPIRType>(id);
+      type.basetype = signedness ? spirv_cross::to_signed_basetype(width)
+                                 : spirv_cross::to_unsigned_basetype(width);
+      type.width = width;
+      break;
+    }
+
+    // opcode: 22
+    case SpvOpTypeFloat: {
+      uint32_t id = inst->result_id();
+      auto &type = set<spirv_cross::SPIRType>(id);
+      uint32_t width = inst->GetSingleWordInOperand(0u);
+      if (width == 64)
+        type.basetype = spirv_cross::SPIRType::Double;
+      else if (width == 32)
+        type.basetype = spirv_cross::SPIRType::Float;
+      else if (width == 16)
+        type.basetype = spirv_cross::SPIRType::Half;
+      else
+        CheckConditionAndSetErrorMessage(
+            false, "Unrecognized bit-width of floating point type.");
+
+      type.width = width;
+      break;
+    }
+
+    // opcode: 23
+    // spirv-cross comment:
+    // Build composite types by "inheriting".
+    // NOTE: The self member is also copied! For pointers and array modifiers
+    // this is a good thing since we can refer to decorations on pointee classes
+    // which is needed for UBO/SSBO, I/O blocks in geometry/tess etc.
+    case SpvOpTypeVector: {
+      uint32_t id = inst->result_id();
+      // TODO(sarahM0): ask if Column Count, in operand one, can be double-word.
+      uint32_t vecsize = inst->GetSingleWordInOperand(1u);
+
+      auto &base = get<spirv_cross::SPIRType>(inst->GetSingleWordInOperand(0u));
+      auto &vecbase = set<spirv_cross::SPIRType>(id);
+
+      vecbase = base;
+      vecbase.vecsize = vecsize;
+      vecbase.self = id;
+      vecbase.parent_type = inst->GetSingleWordInOperand(0u);
+      break;
+    }
+
+    // opcode: 28
+    case SpvOpTypeArray: {
+      uint32_t id = inst->result_id();
+      auto &arraybase = set<spirv_cross::SPIRType>(id);
+
+      uint32_t tid = inst->GetSingleWordInOperand(0u);
+      auto &base = get<spirv_cross::SPIRType>(tid);
+
+      arraybase = base;
+      arraybase.parent_type = tid;
+
+      uint32_t cid = inst->GetSingleWordInOperand(1u);
+      ir_->mark_used_as_array_length(cid);
+      auto *c = maybe_get<spirv_cross::SPIRConstant>(cid);
+      bool literal = c && !c->specialization;
+
+      arraybase.array_size_literal.push_back(literal);
+      arraybase.array.push_back(literal ? c->scalar() : cid);
+      // spirv-cross comment:
+      // Do NOT set arraybase.self!
+      break;
+    }
+
+    // opcode: 32
+    case SpvOpTypePointer: {
+      uint32_t id = inst->result_id();
+
+      auto &base = get<spirv_cross::SPIRType>(inst->GetSingleWordInOperand(1u));
+      auto &ptrbase = set<spirv_cross::SPIRType>(id);
+
+      ptrbase = base;
+      ptrbase.pointer = true;
+      ptrbase.pointer_depth++;
+      ptrbase.storage =
+          static_cast<spv::StorageClass>(inst->GetSingleWordInOperand(0u));
+
+      if (ptrbase.storage == spv::StorageClassAtomicCounter)
+        ptrbase.basetype = spirv_cross::SPIRType::AtomicCounter;
+
+      ptrbase.parent_type = inst->GetSingleWordInOperand(1u);
+
+      // spirv-cross comment:
+      // Do NOT set ptrbase.self!
+      break;
+    }
+
+    // opcode: 33
     case SpvOpTypeFunction: {
       auto id = inst->result_id();
       auto return_type = inst->GetSingleWordInOperand(0u);
@@ -342,26 +453,14 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       set<spirv_cross::SPIRVariable>(id, type, storage, initializer);
 
       // spirv-cross comment:
-      // hlsl based shaders don't have those decorations. force them and then
-      // reset when reading/writing images
+      // hlsl based shaders don't have those decorations. force them and
+      // then reset when reading/writing images
       auto &ttype = get<spirv_cross::SPIRType>(type);
       if (ttype.basetype == spirv_cross::SPIRType::BaseType::Image) {
         ir_->set_decoration(id, spv::DecorationNonWritable);
         ir_->set_decoration(id, spv::DecorationNonReadable);
       }
 
-      break;
-    }
-
-    // opcode: 21
-    case SpvOpTypeInt: {
-      uint32_t id = inst->result_id();
-      uint32_t width = inst->GetSingleWordInOperand(0u);
-      bool signedness = inst->GetSingleWordInOperand(1u) != 0;
-      auto &type = set<spirv_cross::SPIRType>(id);
-      type.basetype = signedness ? spirv_cross::to_signed_basetype(width)
-                                 : spirv_cross::to_unsigned_basetype(width);
-      type.width = width;
       break;
     }
 
@@ -374,8 +473,8 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
         type.member_types.push_back(inst->GetSingleWordInOperand(i));
       }
 
-      // TODO(sarahM0): ask about aliasing? figure out what is happening in this
-      // loop.
+      // TODO(sarahM0): ask about aliasing? figure out what is happening in
+      // this loop.
       bool consider_aliasing = !ir_->get_name(type.self).empty();
       if (consider_aliasing) {
         for (auto &other : global_struct_cache_) {
@@ -393,6 +492,9 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
+  // Constant Cases
+    // opcode: 50
+    case SpvOpSpecConstant:
     // opcode: 43
     case SpvOpConstant: {
       uint32_t id = inst->result_id();
@@ -412,29 +514,6 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
                                        inst->GetSingleWordInOperand(0u),
                                        inst->opcode() == SpvOpSpecConstant);
       }
-      break;
-    }
-
-    // opcode: 32
-    case SpvOpTypePointer: {
-      uint32_t id = inst->result_id();
-
-      auto &base = get<spirv_cross::SPIRType>(inst->GetSingleWordInOperand(1u));
-      auto &ptrbase = set<spirv_cross::SPIRType>(id);
-
-      ptrbase = base;
-      ptrbase.pointer = true;
-      ptrbase.pointer_depth++;
-      ptrbase.storage =
-          static_cast<spv::StorageClass>(inst->GetSingleWordInOperand(0u));
-
-      if (ptrbase.storage == spv::StorageClassAtomicCounter)
-        ptrbase.basetype = spirv_cross::SPIRType::AtomicCounter;
-
-      ptrbase.parent_type = inst->GetSingleWordInOperand(1u);
-
-      // spirv-cross comment:
-      // Do NOT set ptrbase.self!
       break;
     }
 
