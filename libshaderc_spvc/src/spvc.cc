@@ -27,6 +27,10 @@ const char* shaderc_spvc_context_get_messages(
   return context->messages.c_str();
 }
 
+void* shaderc_spvc_context_get_compiler(const shaderc_spvc_context_t context) {
+  return context->cross_compiler.get();
+}
+
 shaderc_spvc_compile_options_t shaderc_spvc_compile_options_create() {
   shaderc_spvc_compile_options_t options =
       new (std::nothrow) shaderc_spvc_compile_options;

@@ -290,6 +290,15 @@ class Context {
     return shaderc_spvc_context_get_messages(context_.get());
   }
 
+  // EXPERIMENTAL
+  // Returns the internal spirv_cross compiler reference, does NOT transfer
+  // ownership.
+  // This is being exposed temporarily to ease integration of spvc into Dawn,
+  // but this is will be removed in the future without warning.
+  void* GetCompiler() const {
+    return shaderc_spvc_context_get_compiler(context_.get());
+  }
+
   // Initializes state for compiling SPIR-V to GLSL.
   shaderc_compilation_status InitializeForGlsl(
       const uint32_t* source, size_t source_len,
