@@ -13,7 +13,7 @@ ifeq ($(SPVTOOLS_LOCAL_PATH),)
 endif
 ifeq ($(SPVHEADERS_LOCAL_PATH),)
    # Use the third party dir if it exists.
-   ifneq ($(wildcard $(THIRD_PARTY_PATH)/spirv-headers/include/spirv/spirv.xml),)
+   ifneq ($(wildcard $(THIRD_PARTY_PATH)/spirv-headers/include/spirv/spir-v.xml),)
      SPVHEADERS_LOCAL_PATH:=$(THIRD_PARTY_PATH)/spirv-headers
    else
      # Let SPIRV-Tools find its own headers and hope for the best.
