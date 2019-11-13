@@ -261,6 +261,21 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
+    // opcode: 12
+    case SpvOpExtInst: {
+      // spirv_cross comment:
+      // The SPIR-V debug information extended instructions might come at global
+      // scope.
+      spirv_cross::Instruction instruction = {};
+      instruction.op = inst->opcode();
+      instruction.count = inst->NumOperandWords() + 1;
+      instruction.offset = offset_ + 1;
+      instruction.length = instruction.count - 1;
+      if (current_block_) current_block_->ops.push_back(instruction);
+      break;
+    }
+
+    // opcode: 14
     case SpvOpMemoryModel: {
       ir_->addressing_model =
           static_cast<spv::AddressingModel>(inst->GetSingleWordInOperand(0u));
@@ -269,6 +284,7 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
+    // opcode:15
     case SpvOpEntryPoint: {
       auto function_id = inst->GetSingleWordInOperand(1u);
       auto execution_mode =
@@ -288,6 +304,48 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       }
 
       if (!ir_->default_entry_point) ir_->default_entry_point = function_id;
+      break;
+    }
+
+    // opcode: 16
+    case SpvOpExecutionMode: {
+      auto &execution = ir_->entry_points[inst->GetSingleWordInOperand(0u)];
+      auto mode =
+          static_cast<SpvExecutionMode>(inst->GetSingleWordInOperand(1u));
+      execution.flags.set(mode);
+
+      switch (mode) {
+        case SpvExecutionModeInvocations: {
+          execution.invocations = inst->GetSingleWordInOperand(2u);
+          break;
+        }
+
+        case SpvExecutionModeLocalSize: {
+          execution.workgroup_size.x = inst->GetSingleWordInOperand(2u);
+          execution.workgroup_size.y = inst->GetSingleWordInOperand(3u);
+          execution.workgroup_size.z = inst->GetSingleWordInOperand(4u);
+          break;
+        }
+
+        case SpvExecutionModeOutputVertices: {
+          execution.output_vertices = inst->GetSingleWordInOperand(2u);
+          break;
+        }
+
+        default: {
+          // TODO(sarahM0): Figure out what other modes we need to support for
+          // WebGPU shaders. eg. what is happening to these:
+          // "OpExecutionMode %1 OriginUpperLeft",
+          // "OpExecutionMode %1 PixelInterlockOrderedEXT"
+          if (!CheckConditionAndSetErrorMessage(
+                  false,
+                  "SpvcIrPass: At least one literal parameter at the end of "
+                  "SpvOpExecutionMode; meaning there is an unhandled execution "
+                  "mode."))
+            return;
+          break;
+        }
+      }
       break;
     }
 
@@ -522,21 +580,6 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
-    case SpvOpFunction: {
-      auto result = inst->type_id();
-      auto id = inst->result_id();
-      auto type = inst->GetSingleWordInOperand(1u);
-
-      if (!CheckConditionAndSetErrorMessage(!current_function_,
-                                            "SpvcIrPass: Error while parsing "
-                                            "OpFunction, must end a function "
-                                            "before starting a new one!"))
-        return;
-
-      current_function_ = &set<spirv_cross::SPIRFunction>(id, result, type);
-      break;
-    }
-
     // Variable declaration
     // opcode: 59
     // spirv-cross comment:
@@ -727,8 +770,8 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       auto spec_op = static_cast<spv::Op>(inst->GetSingleWordInOperand(0u));
 
       set<spirv_cross::SPIRConstantOp>(id, result_type, spec_op,
-                          (&ir_->spirv[offset_ + 1u] + 3u),
-                          inst->NumInOperands() - 1);
+                                       (&ir_->spirv[offset_ + 1u] + 3u),
+                                       inst->NumInOperands() - 1);
       break;
     }
 
@@ -774,6 +817,38 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
+    // Function cases:
+    // opcode: 54
+    case SpvOpFunction: {
+      auto result = inst->type_id();
+      auto id = inst->result_id();
+      auto type = inst->GetSingleWordInOperand(1u);
+
+      if (!CheckConditionAndSetErrorMessage(!current_function_,
+                                            "SpvcIrPass: Error while parsing "
+                                            "OpFunction, must end a function "
+                                            "before starting a new one!"))
+        return;
+
+      current_function_ = &set<spirv_cross::SPIRFunction>(id, result, type);
+      break;
+    }
+
+    // opcode: 55
+    case SpvOpFunctionParameter: {
+      auto type = inst->type_id();
+      auto id = inst->result_id();
+
+      if (!CheckConditionAndSetErrorMessage(
+              current_function_,
+              "SpvcIrPass: OpFunctionParameter must be in a function!"))
+        return;
+      current_function_->add_parameter(type, id);
+      set<spirv_cross::SPIRVariable>(id, type, spv::StorageClassFunction);
+      break;
+    }
+
+    // opcode: 56
     case SpvOpFunctionEnd: {
       // Very specific error message, but seems to come up quite often.
       if (!CheckConditionAndSetErrorMessage(
@@ -787,6 +862,7 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
+    case SpvOpFAdd:
     case SpvOpStore: {
       if (!CheckConditionAndSetErrorMessage(
               current_block_,
