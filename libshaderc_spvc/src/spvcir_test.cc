@@ -306,10 +306,114 @@ TEST_F(SpvcIrParsingTest, OpTypeVectorInstruction) {
   EXPECT_EQ(vector_type->parent_type, static_cast<spirv_cross::TypeID>(6));
 }
 
+TEST_F(SpvcIrParsingTest, OpTypeMatrixInstruction) {
+  const std::vector<const char*> middle = {"%6 = OpTypeFloat 32",
+                                           "%8 = OpTypeVector %6 4",
+                                           "%7 = OpTypeMatrix %8 4"};
+  std::string spirv = JoinAllInsts(Concat(Concat(before_, middle), after_));
+  spirv_cross::ParsedIR ir;
+  createSpvcIr(&ir, spirv);
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, true, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  auto matrix_type = maybe_get<spirv_cross::SPIRType>(7, &ir);
+  ASSERT_NE(matrix_type, nullptr);
+  EXPECT_EQ(matrix_type->columns, 4);
+  EXPECT_EQ(matrix_type->self, static_cast<spirv_cross::TypeID>(7));
+  EXPECT_EQ(matrix_type->parent_type, static_cast<spirv_cross::TypeID>(8));
+}
+
+TEST_F(SpvcIrParsingTest, OpTypeImageInstruction) {
+  const std::vector<const char*> cap = {"OpCapability SampledBuffer"};
+  const std::vector<const char*> middle = {
+      // clang-format off
+     "%5 = OpTypeInt 32 0",
+     "%6 = OpTypeImage %5 Buffer 0 0 0 2 R32ui"
+      // clang format on
+  };
+  std::string spirv = JoinAllInsts(Concat(cap,(Concat(Concat(before_, middle), after_))));
+  spirv_cross::ParsedIR ir;
+  createSpvcIr(&ir, spirv);
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, true, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  auto image_type = maybe_get<spirv_cross::SPIRType>(6, &ir);
+  ASSERT_NE(image_type, nullptr);
+  EXPECT_EQ(image_type->image.type, static_cast<spirv_cross::TypeID>(5));
+  EXPECT_EQ(image_type->image.dim, spv::Dim::DimBuffer);
+  EXPECT_EQ(image_type->image.depth, 0);
+  EXPECT_EQ(image_type->image.arrayed, 0);
+  EXPECT_EQ(image_type->image.ms, 0);
+  EXPECT_EQ(image_type->image.sampled, 2);
+  EXPECT_EQ(image_type->image.format, spv::ImageFormat::ImageFormatR32ui);
+
+}
+
+TEST_F(SpvcIrParsingTest, OpTypeSampledImageInstruction) {
+  const std::vector<const char*> cap = {"OpCapability SampledBuffer"};
+  const std::vector<const char*> middle = {
+      // clang-format off
+     "%5 = OpTypeInt 32 0",
+     "%6 = OpTypeImage %5 Buffer 0 0 0 2 R32ui",
+     "%18 = OpTypeSampledImage %6",
+      // clang-format on
+  };
+  std::string spirv =
+      JoinAllInsts(Concat(cap, (Concat(Concat(before_, middle), after_))));
+  spirv_cross::ParsedIR ir;
+  createSpvcIr(&ir, spirv);
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, true, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  auto sampledImage_type = maybe_get<spirv_cross::SPIRType>(18, &ir);
+  ASSERT_NE(sampledImage_type, nullptr);
+  EXPECT_EQ(sampledImage_type->basetype, spirv_cross::SPIRType::SampledImage);
+  EXPECT_EQ(sampledImage_type->self, static_cast<spirv_cross::TypeID>(18));
+}
+
+TEST_F(SpvcIrParsingTest, OpTypeSamplerInstruction) {
+  const std::vector<const char*> cap = {"OpCapability SampledBuffer"};
+  const std::vector<const char*> middle = {
+      // clang-format off
+     "%12 = OpTypeSampler",
+      // clang-format on
+  };
+  std::string spirv =
+      JoinAllInsts(Concat(cap, (Concat(Concat(before_, middle), after_))));
+  spirv_cross::ParsedIR ir;
+  createSpvcIr(&ir, spirv);
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, true, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  auto sampledImage_type = maybe_get<spirv_cross::SPIRType>(12, &ir);
+  ASSERT_NE(sampledImage_type, nullptr);
+}
+
 TEST_F(SpvcIrParsingTest, OpTypeArrayInstruction) {
   const std::vector<const char*> middle = {
-      "%13 = OpTypeInt 32 0", "%14 = OpConstant %13 70",
-      " %7 = OpTypeVector %13 4", "%15 = OpTypeArray %7 %14"};
+      // clang-format off
+      "%13 = OpTypeInt 32 0",
+      "%14 = OpConstant %13 70",
+      " %7 = OpTypeVector %13 4",
+      "%15 = OpTypeArray %7 %14"
+      // clang-format on
+  };
   std::string spirv = JoinAllInsts(Concat(Concat(before_, middle), after_));
   spirv_cross::ParsedIR ir;
   createSpvcIr(&ir, spirv);
@@ -333,9 +437,14 @@ TEST_F(SpvcIrParsingTest, OpTypeArrayInstruction) {
 
 TEST_F(SpvcIrParsingTest, OpTypeArrayInstructionSpec) {
   const std::vector<const char*> middle = {
-      "%12 = OpTypeInt 32 0", "%13 = OpTypeFloat 32",
-      "%14 = OpSpecConstant %12 3", " %7 = OpTypeVector %13 4",
-      "%15 = OpTypeArray %7 %14"};
+      // clang-format off
+      "%12 = OpTypeInt 32 0",
+       "%13 = OpTypeFloat 32",
+      "%14 = OpSpecConstant %12 3",
+       " %7 = OpTypeVector %13 4",
+      "%15 = OpTypeArray %7 %14"
+      // clang-format on
+  };
   std::string spirv = JoinAllInsts(Concat(Concat(before_, middle), after_));
   spirv_cross::ParsedIR ir;
   createSpvcIr(&ir, spirv);
@@ -355,6 +464,31 @@ TEST_F(SpvcIrParsingTest, OpTypeArrayInstructionSpec) {
 
   auto constant_type = maybe_get<spirv_cross::SPIRConstant>(14, &ir);
   EXPECT_TRUE(constant_type->is_used_as_array_length);
+}
+TEST_F(SpvcIrParsingTest, OpTypeRuntimeArrayInstruction) {
+  const std::vector<const char*> middle = {
+      // clang-format off
+      "%15 = OpTypeFloat 32",
+      "%17 = OpTypeRuntimeArray %15",
+      // clang-format on
+  };
+  std::string spirv = JoinAllInsts(Concat(Concat(before_, middle), after_));
+  spirv_cross::ParsedIR ir;
+  createSpvcIr(&ir, spirv);
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, true, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  auto run_type = maybe_get<spirv_cross::SPIRType>(17, &ir);
+  ASSERT_NE(run_type, nullptr);
+  ASSERT_EQ(run_type->array.size(), 1);
+  EXPECT_EQ(run_type->array[0], 0);
+  ASSERT_EQ(run_type->array_size_literal.size(), 1);
+  EXPECT_TRUE(run_type->array_size_literal[0]);
+  EXPECT_EQ(run_type->parent_type, static_cast<spirv_cross::TypeID>(15));
 }
 
 TEST_F(SpvcIrParsingTest, OpTypeFunctionInstruction) {
@@ -696,7 +830,7 @@ TEST_F(SpvcIrParsingTest, OpNameInstruction) {
   EXPECT_EQ(var_name, "var");
 }
 
-TEST_F(SpvcIrParsingTest, OpStructInstruction) {
+TEST_F(SpvcIrParsingTest, OpTypeStructInstruction) {
   const std::vector<const char*> middle = {
       // clang-format off
       " %8 =  OpTypeInt 32 1",
