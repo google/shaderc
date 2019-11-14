@@ -188,6 +188,16 @@ shaderc_spvc_compile_options_set_msl_discrete_descriptor_sets(
     shaderc_spvc_compile_options_t options, const uint32_t* descriptors,
     size_t num_descriptors);
 
+// Set whether or not PointSize builtin is used for MSL shaders
+SHADERC_EXPORT void
+shaderc_spvc_compile_options_set_msl_enable_point_size_builtin(
+    shaderc_spvc_compile_options_t options, bool b);
+
+// Set the index in the buffer size in the buffer for MSL
+SHADERC_EXPORT void
+shaderc_spvc_compile_options_set_msl_buffer_size_buffer_index(
+    shaderc_spvc_compile_options_t options, uint32_t index);
+
 // Set HLSL shader model.  Default is 30.
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_hlsl_shader_model(
     shaderc_spvc_compile_options_t options, uint32_t model);

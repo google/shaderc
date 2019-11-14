@@ -219,6 +219,18 @@ class CompileOptions {
         options_.get(), descriptors.data(), descriptors.size());
   }
 
+  // Set whether or not PointSize builtin is used for MSL shaders
+  void SetMSLEnablePointSizeBuiltIn(bool b) {
+    shaderc_spvc_compile_options_set_msl_enable_point_size_builtin(
+        options_.get(), b);
+  }
+
+  // Set the index in the buffer size in the buffer for MSL
+  void SetMSLBufferSizeBufferIndex(uint32_t index) {
+    shaderc_spvc_compile_options_set_msl_buffer_size_buffer_index(
+        options_.get(), index);
+  }
+
   // Which HLSL shader model should be used.  Default is 30.
   void SetHLSLShaderModel(uint32_t model) {
     shaderc_spvc_compile_options_set_hlsl_shader_model(options_.get(), model);

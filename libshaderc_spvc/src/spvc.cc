@@ -170,6 +170,16 @@ void shaderc_spvc_compile_options_set_msl_discrete_descriptor_sets(
               options->msl_discrete_descriptor_sets.begin());
 }
 
+void shaderc_spvc_compile_options_set_msl_enable_point_size_builtin(
+    shaderc_spvc_compile_options_t options, bool b) {
+  options->msl.enable_point_size_builtin = b;
+}
+
+void shaderc_spvc_compile_options_set_msl_buffer_size_buffer_index(
+    shaderc_spvc_compile_options_t options, uint32_t index) {
+  options->msl.buffer_size_buffer_index = index;
+}
+
 void shaderc_spvc_compile_options_set_hlsl_shader_model(
     shaderc_spvc_compile_options_t options, uint32_t model) {
   options->hlsl.shader_model = model;
