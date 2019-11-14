@@ -20,6 +20,7 @@ namespace spvtools {
 namespace opt {
 
 void SpvcIrPass::make_constant_null(uint32_t id, uint32_t type) {
+  // TODO(sarahM0): Add more tests
   auto &constant_type = get<spirv_cross::SPIRType>(type);
 
   if (constant_type.pointer) {
@@ -262,6 +263,7 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
     }
 
     // opcode: 12
+    // TODO(sarahM0): Figure out how to test this.
     case SpvOpExtInst: {
       // spirv_cross comment:
       // The SPIR-V debug information extended instructions might come at global
@@ -775,7 +777,8 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
-      // Blocks
+    // Control Flow cases
+    // opcode: 248
     case SpvOpLabel: {
       // OpLabel always starts a block.
       if (!CheckConditionAndSetErrorMessage(
@@ -801,18 +804,38 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
+    // opcode: 252
+    case SpvOpKill: {
+      if (!CheckConditionAndSetErrorMessage(
+              current_block_,
+              "SpvcIrPass: Trying to end a non-existing block."))
+        ;
+      return;
+      current_block_->terminator = spirv_cross::SPIRBlock::Kill;
+      current_block_ = nullptr;
+      break;
+    }
+
+    // opcode: 253
     case SpvOpReturn: {
       if (!CheckConditionAndSetErrorMessage(
               current_block_,
               "SpvcIrPass: Error while parsing OpReturn, "
               "trying to end a non-existing block."))
         return;
-      // TODO (sarahM0): refactor this into TerminateBlock( ... terminator
-      // type
-      // ...), which also resets current_block_ to nullptr. Once having one
-      // more terminator case.
-
       current_block_->terminator = spirv_cross::SPIRBlock::Return;
+      current_block_ = nullptr;
+      break;
+    }
+
+      // opcode: 255
+    case SpvOpUnreachable: {
+      if (!CheckConditionAndSetErrorMessage(
+              current_block_,
+              "SpvcIrPass: Trying to end a non-existing block. Opcode: " +
+                  std::to_string(inst->opcode())))
+        return;
+      current_block_->terminator = spirv_cross::SPIRBlock::Unreachable;
       current_block_ = nullptr;
       break;
     }
@@ -824,10 +847,11 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       auto id = inst->result_id();
       auto type = inst->GetSingleWordInOperand(1u);
 
-      if (!CheckConditionAndSetErrorMessage(!current_function_,
-                                            "SpvcIrPass: Error while parsing "
-                                            "OpFunction, must end a function "
-                                            "before starting a new one!"))
+      if (!CheckConditionAndSetErrorMessage(
+              !current_function_,
+              "SpvcIrPass: Must end a function "
+              "before starting a new one. Opcode: " +
+                  std::to_string(inst->opcode())))
         return;
 
       current_function_ = &set<spirv_cross::SPIRFunction>(id, result, type);
