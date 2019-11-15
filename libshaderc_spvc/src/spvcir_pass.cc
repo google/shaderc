@@ -777,7 +777,102 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
-    // Control Flow cases
+      // Control Flow cases
+
+    // opcode: 245
+    // spirv-cross comment:
+    // OpPhi is a fairly magical opcode.
+    // It selects temporary variables based on which parent block we *came
+    // from*. In high-level languages we can "de-SSA" by creating a function
+    // local, and flush out temporaries to this function-local variable to
+    // emulate SSA Phi.
+    case SpvOpPhi: {
+      if (!CheckConditionAndSetErrorMessage(
+              current_function_,
+              "SpvcIrPass: Trying to end a non-existing block."))
+        return;
+
+      if (!CheckConditionAndSetErrorMessage(
+              current_block_, "SpvcIrPass: No block currently in scope"))
+        return;
+
+      uint32_t result_type = inst->type_id();
+      uint32_t id = inst->result_id();
+
+      // spirv-cross comment:
+      // Instead of a temporary, create a new function-wide temporary with this
+      // ID instead.
+      auto &var = set<spirv_cross::SPIRVariable>(id, result_type,
+                                                 spv::StorageClassFunction);
+      var.phi_variable = true;
+
+      current_function_->add_local_variable(id);
+
+      for (uint32_t i = 0; i + 1 < inst->NumInOperands(); i += 2)
+        current_block_->phi_variables.push_back(
+            {inst->GetSingleWordInOperand(i),
+             inst->GetSingleWordInOperand(i + 1), id});
+      break;
+    }
+
+      // opcode: 246
+    case SpvOpLoopMerge: {
+      if (!CheckConditionAndSetErrorMessage(
+              current_block_,
+              "SpvcIrPass: Trying to end a non-existing block."))
+        return;
+
+      current_block_->merge_block = inst->GetSingleWordInOperand(0u);
+      current_block_->continue_block = inst->GetSingleWordInOperand(1u);
+      current_block_->merge = spirv_cross::SPIRBlock::MergeLoop;
+
+      ir_->block_meta[current_block_->self] |=
+          spirv_cross::ParsedIR::BLOCK_META_LOOP_HEADER_BIT;
+      ir_->block_meta[current_block_->merge_block] |=
+          spirv_cross::ParsedIR::BLOCK_META_LOOP_MERGE_BIT;
+
+      ir_->continue_block_to_loop_header[current_block_->continue_block] =
+          spirv_cross::BlockID(current_block_->self);
+      // spirv-cross comment:
+      // Don't add loop headers to continue blocks,
+      // which would make it impossible branch into the loop header since
+      // they are treated as continues.
+      if (current_block_->continue_block !=
+          spirv_cross::BlockID(current_block_->self))
+        ir_->block_meta[current_block_->continue_block] |=
+            spirv_cross::ParsedIR::BLOCK_META_CONTINUE_BIT;
+
+      if (inst->NumInOperands() > 3) {
+        if (inst->GetSingleWordInOperand(2u) & spv::LoopControlUnrollMask)
+          current_block_->hint = spirv_cross::SPIRBlock::HintUnroll;
+        else if (inst->GetSingleWordInOperand(2u) &
+                 spv::LoopControlDontUnrollMask)
+          current_block_->hint = spirv_cross::SPIRBlock::HintDontUnroll;
+      }
+      break;
+    }
+
+    // opcode 247
+    case SpvOpSelectionMerge: {
+      if (!CheckConditionAndSetErrorMessage(
+              current_block_,
+              "SpvcIrPass: Trying to end a non-existing block."))
+        return;
+      current_block_->next_block = inst->GetSingleWordInOperand(0u);
+      current_block_->merge = spirv_cross::SPIRBlock::MergeSelection;
+      ir_->block_meta[current_block_->next_block] |=
+          spirv_cross::ParsedIR::BLOCK_META_SELECTION_MERGE_BIT;
+
+      if (inst->NumInOperands() - 1 >= 2) {
+        if (inst->GetSingleWordInOperand(1u) & spv::SelectionControlFlattenMask)
+          current_block_->hint = spirv_cross::SPIRBlock::HintFlatten;
+        else if (inst->GetSingleWordInOperand(1u) &
+                 spv::SelectionControlDontFlattenMask)
+          current_block_->hint = spirv_cross::SPIRBlock::HintDontFlatten;
+      }
+      break;
+    }
+
     // opcode: 248
     case SpvOpLabel: {
       // OpLabel always starts a block.
@@ -804,13 +899,66 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
+      // opcode: 249
+    case SpvOpBranch: {
+      if (!CheckConditionAndSetErrorMessage(
+              current_block_,
+              "SpvcIrPass: Trying to end a non-existing block."))
+        return;
+
+      uint32_t target = inst->GetSingleWordInOperand(0u);
+      current_block_->terminator = spirv_cross::SPIRBlock::Direct;
+      current_block_->next_block = target;
+      current_block_ = nullptr;
+      break;
+    }
+
+    // opcode: 250
+    case SpvOpBranchConditional: {
+      if (!CheckConditionAndSetErrorMessage(
+              current_block_,
+              "SpvcIrPass: Trying to end a non-existing block."))
+        return;
+
+      current_block_->condition = inst->GetSingleWordInOperand(0u);
+      current_block_->true_block = inst->GetSingleWordInOperand(1u);
+      current_block_->false_block = inst->GetSingleWordInOperand(2u);
+
+      current_block_->terminator = spirv_cross::SPIRBlock::Select;
+      current_block_ = nullptr;
+      break;
+    }
+
+    // opcode: 251
+    case SpvOpSwitch: {
+      if (!CheckConditionAndSetErrorMessage(
+              current_block_,
+              "SpvcIrPass: Trying to end a non-existing block."))
+        return;
+      current_block_->terminator = spirv_cross::SPIRBlock::MultiSelect;
+
+      current_block_->condition = inst->GetSingleWordInOperand(0u);
+      current_block_->default_block = inst->GetSingleWordInOperand(1u);
+
+      for (uint32_t i = 2; i + 1 < inst->NumInOperands(); i += 2)
+        current_block_->cases.push_back({inst->GetSingleWordInOperand(i),
+                                         inst->GetSingleWordInOperand(i + 1)});
+      // spirv-cross comment:
+      // If we jump to next block, make it break instead since we're inside a
+      // switch case block at that point.
+      ir_->block_meta[current_block_->next_block] |=
+          spirv_cross::ParsedIR::BLOCK_META_MULTISELECT_MERGE_BIT;
+
+      current_block_ = nullptr;
+      break;
+    }
+
     // opcode: 252
     case SpvOpKill: {
       if (!CheckConditionAndSetErrorMessage(
               current_block_,
               "SpvcIrPass: Trying to end a non-existing block."))
-        ;
-      return;
+        return;
       current_block_->terminator = spirv_cross::SPIRBlock::Kill;
       current_block_ = nullptr;
       break;
@@ -824,6 +972,18 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
               "trying to end a non-existing block."))
         return;
       current_block_->terminator = spirv_cross::SPIRBlock::Return;
+      current_block_ = nullptr;
+      break;
+    }
+
+    // opcode: 254
+    case SpvOpReturnValue: {
+      if (!CheckConditionAndSetErrorMessage(
+              current_block_,
+              "SpvcIrPass: Trying to end a non-existing block."))
+        return;
+      current_block_->terminator = spirv_cross::SPIRBlock::Return;
+      current_block_->return_value = inst->GetSingleWordInOperand(0u);
       current_block_ = nullptr;
       break;
     }
@@ -886,8 +1046,10 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
+    case SpvOpCopyObject:
     case SpvOpFAdd:
     case SpvOpStore: {
+      // default: {
       if (!CheckConditionAndSetErrorMessage(
               current_block_,
               "SpvcIrPass: Currently no block to insert opcode."))
