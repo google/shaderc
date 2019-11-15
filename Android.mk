@@ -28,8 +28,6 @@ endef
 
 define gen_libshaderc
 
-$(1)/libshaderc.a: $(SHADERC_HEADERS_IN_OUT_DIR)
-
 $(1)/combine.ar: $(addprefix $(1)/, $(ALL_LIBS))
 	@echo "create libshaderc_combined.a" > $(1)/combine.ar
 	$(foreach lib,$(ALL_LIBS),
@@ -58,5 +56,7 @@ libshaderc_combined: \
 	$(NDK_APP_LIBS_OUT)/$(APP_STL)/$(TARGET_ARCH_ABI)/libshaderc.a
 
 endef
+
+libshaderc_combined: $(SHADERC_HEADERS_IN_OUT_DIR)
 
 $(eval $(call gen_libshaderc,$(TARGET_OUT),$(TOOLCHAIN_PREFIX)))
