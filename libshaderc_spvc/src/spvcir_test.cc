@@ -100,13 +100,13 @@ class SpvcIrParsingTest : public PassTest<::testing::Test> {
               "OpCapability Shader",
               "OpCapability VulkanMemoryModelKHR",
               "OpExtension \"SPV_KHR_vulkan_memory_model\"",
-              "OpMemoryModel Logical VulkanKHR"
+              "OpMemoryModel Logical VulkanKHR",
+              "OpEntryPoint Vertex %1 \"shader\"",
         // clang-format on
     };
 
     after_ = {
         // clang-format off
-             "OpEntryPoint Vertex %1 \"shader\"",
         "%2 = OpTypeVoid",
         "%3 = OpTypeFunction %2",
         "%1 = OpFunction %2 None %3",
@@ -589,18 +589,6 @@ TEST_F(SpvcIrParsingTest, OpLabelInstruction) {
   EXPECT_EQ(func->blocks.size(), static_cast<size_t>(1));
   EXPECT_EQ(func->blocks.data()[0], static_cast<spirv_cross::TypeID>(4));
   EXPECT_EQ(func->entry_block, static_cast<spirv_cross::TypeID>(4));
-}
-
-TEST_F(SpvcIrParsingTest, OpReturnInstruction) {
-  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
-      input_, true, false, &ir_);
-  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
-      << " SinglePassRunAndDisassemble failed on input:\n "
-      << std::get<0>(result);
-
-  auto block = maybe_get<spirv_cross::SPIRBlock>(4, &ir_);
-  ASSERT_NE(block, nullptr);
-  EXPECT_EQ(block->terminator, spirv_cross::SPIRBlock::Return);
 }
 
 TEST_F(SpvcIrParsingTest, SpvOpSourceInstruction) {
@@ -1242,6 +1230,60 @@ TEST_F(SpvcIrParsingTest, OpTypeStructInstruction) {
             static_cast<spirv_cross::TypeID>(8));
   EXPECT_EQ(spir_struct->member_types.data()[2],
             static_cast<spirv_cross::TypeID>(16));
+}
+
+TEST_F(SpvcIrParsingTest, OpPhiInstruction) {
+  const std::vector<const char*> middle = {
+      // clang-format off
+          "%2 = OpTypeVoid",
+          "%3 = OpTypeFunction %2",
+         "%10 = OpTypeBool",
+         "%11 = OpConstantFalse %10",
+          "%1 = OpFunction %2 None %3",
+          "%5 = OpLabel",
+               "OpBranch %6",
+          "%6 = OpLabel",
+               "OpLoopMerge %8 %9 None",
+               "OpBranchConditional %11 %9 %7",
+          "%7 = OpLabel",
+         "%21 = OpCopyObject %10 %11",
+               "OpBranchConditional %11 %9 %9",
+          "%9 = OpLabel",
+         "%20 = OpPhi %10 %21 %7 %11 %6",
+               "OpBranchConditional %11 %6 %8",
+          "%8 = OpLabel",
+               "OpReturn",
+               "OpFunctionEnd",
+      // clang-format on
+  };
+  std::string spirv = JoinAllInsts(Concat(before_, middle));
+  spirv_cross::ParsedIR ir;
+  ASSERT_EQ(createSpvcIr(&ir, spirv), true)
+      << "Could not create IRContext for input:\n" + spirv + "\n";
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, true, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  auto spir_var = maybe_get<spirv_cross::SPIRVariable>(20, &ir);
+  ASSERT_NE(spir_var, nullptr);
+  EXPECT_EQ(spir_var->basetype, static_cast<spirv_cross::TypeID>(10));
+  EXPECT_EQ(spir_var->storage, spv::StorageClass::StorageClassFunction);
+  EXPECT_TRUE(spir_var->phi_variable);
+}
+
+TEST_F(SpvcIrParsingTest, OpReturnInstruction) {
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      input_, true, false, &ir_);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  auto block = maybe_get<spirv_cross::SPIRBlock>(4, &ir_);
+  ASSERT_NE(block, nullptr);
+  EXPECT_EQ(block->terminator, spirv_cross::SPIRBlock::Return);
 }
 
 }  // namespace
