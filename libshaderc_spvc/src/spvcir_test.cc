@@ -197,6 +197,81 @@ TEST_F(SpvcIrParsingTest, OpEntryPointInstruction) {
   EXPECT_EQ(ir_.meta[functionId].decoration.alias, "shader");
 }
 
+TEST_F(SpvcIrParsingTest, SpvOpUndefInstruction) {
+  const std::vector<const char*> middle = {"%10 = OpTypeFloat 32",
+                                           "%11 = OpUndef %10"};
+  std::string spirv = JoinAllInsts(Concat(Concat(before_, middle), after_));
+  spirv_cross::ParsedIR ir;
+  createSpvcIr(&ir, spirv);
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, false, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  auto spir_undef = maybe_get<spirv_cross::SPIRUndef>(11, &ir);
+  ASSERT_NE(spir_undef, nullptr);
+  EXPECT_EQ(spir_undef->basetype, static_cast<spirv_cross::TypeID>(10));
+}
+
+TEST_F(SpvcIrParsingTest, SpvOpMemberDecorateInstruction) {
+  const std::vector<const char*> middle = {
+      // clang-format off
+                             "OpMemberDecorate %15 0 Offset 8",
+                             "OpMemberDecorate %15 0 NonWritable",
+                    "%float = OpTypeFloat 32",
+                  "%v4float = OpTypeVector %float 4",
+      "%_runtimearr_v4float = OpTypeRuntimeArray %v4float",
+                       "%15 = OpTypeStruct %_runtimearr_v4float",
+      // clang-format on
+  };
+  std::string spirv = JoinAllInsts(Concat(Concat(before_, middle), after_));
+  spirv_cross::ParsedIR ir;
+  createSpvcIr(&ir, spirv);
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, false, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  auto offset =
+      ir.get_member_decoration(15, 0, spv::Decoration::DecorationOffset);
+  auto writable =
+      ir.get_member_decoration(15, 0, spv::Decoration::DecorationNonWritable);
+  EXPECT_EQ(offset, 8);
+  EXPECT_EQ(writable, 1);
+}
+
+TEST_F(SpvcIrParsingTest, OpMemberNameInstruction) {
+  const std::vector<const char*> middle = {
+      // clang-format off
+               "OpMemberName %16 0 \"u\"",
+               "OpMemberName %16 1 \"i\"",
+        "%int = OpTypeInt 32 1",
+      "%ivec4 = OpTypeVector %int 4",
+       "%uint = OpTypeInt 32 0",
+      "%uvec4 = OpTypeVector %uint 4",
+         "%16 = OpTypeStruct %uvec4 %ivec4",
+      // clang-format on
+  };
+  std::string spirv = JoinAllInsts(Concat(Concat(before_, middle), after_));
+  spirv_cross::ParsedIR ir;
+  createSpvcIr(&ir, spirv);
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, false, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  auto i = ir.get_member_name(16, 0);
+  auto u = ir.get_member_name(16, 1);
+  EXPECT_EQ(i, "u");
+  EXPECT_EQ(u, "i");
+}
+
 TEST_F(SpvcIrParsingTest, SpvOpExecutionModeInstruction) {
   const std::vector<const char*> middle = {
       "OpExecutionMode %1 LocalSize 4 3 5",
@@ -231,6 +306,23 @@ TEST_F(SpvcIrParsingTest, OpTypeVoidInstruction) {
   auto func_type = maybe_get<spirv_cross::SPIRType>(2, &ir_);
   ASSERT_NE(func_type, nullptr);
   EXPECT_EQ(func_type->basetype, spirv_cross::SPIRType::Void);
+}
+
+TEST_F(SpvcIrParsingTest, OpStringInstruction) {
+  const std::vector<const char*> middle = {"%10 = OpString \"main\""};
+  std::string spirv = JoinAllInsts(Concat(Concat(before_, middle), after_));
+  spirv_cross::ParsedIR ir;
+  createSpvcIr(&ir, spirv);
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, false, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  auto spir_str = maybe_get<spirv_cross::SPIRString>(10, &ir);
+  ASSERT_NE(spir_str, nullptr);
+  EXPECT_EQ(spir_str->str, "main");
 }
 
 TEST_F(SpvcIrParsingTest, OpTypeBoolInstruction) {

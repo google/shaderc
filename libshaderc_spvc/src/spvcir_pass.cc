@@ -156,6 +156,24 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
     case SpvOpModuleProcessed:
       break;
 
+    // opcode: 1
+    case SpvOpUndef: {
+      uint32_t result_type = inst->type_id();
+      uint32_t id = inst->result_id();
+      set<spirv_cross::SPIRUndef>(id, result_type);
+
+      if (current_block_) {
+        spirv_cross::Instruction instr = {};
+        instr.op = inst->opcode();
+        instr.count = inst->NumOperandWords() + 1;
+        instr.offset = offset_ + 1;
+        instr.length = instr.count - 1;
+
+        current_block_->ops.push_back(instr);
+      }
+      break;
+    }
+
     case SpvOpSource: {
       auto lang =
           static_cast<spv::SourceLanguage>(inst->GetSingleWordInOperand(0u));
@@ -222,6 +240,13 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
+    // opcode: 7
+    case SpvOpString: {
+      set<spirv_cross::SPIRString>(inst->result_id(),
+                                   GetWordsAsString(0u, inst));
+      break;
+    }
+
     // opcode:11
     case SpvOpExtInstImport: {
       uint32_t id = inst->result_id();
@@ -266,8 +291,8 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
     // TODO(sarahM0): Figure out how to test this.
     case SpvOpExtInst: {
       // spirv_cross comment:
-      // The SPIR-V debug information extended instructions might come at global
-      // scope.
+      // The SPIR-V debug information extended instructions might come at
+      // global scope.
       spirv_cross::Instruction instruction = {};
       instruction.op = inst->opcode();
       instruction.count = inst->NumOperandWords() + 1;
@@ -335,17 +360,9 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
         }
 
         default: {
-          // TODO(sarahM0): Figure out what other modes we need to support for
-          // WebGPU shaders. eg. what is happening to these:
-          // "OpExecutionMode %1 OriginUpperLeft",
-          // "OpExecutionMode %1 PixelInterlockOrderedEXT"
-          if (!CheckConditionAndSetErrorMessage(
-                  false,
-                  "SpvcIrPass: At least one literal parameter at the end of "
-                  "SpvOpExecutionMode; meaning there is an unhandled execution "
-                  "mode."))
-            return;
           break;
+          // Other executions modes are set as part of "Bitset flags" member
+          // of struct SPIREntryPoint in the compiler
         }
       }
       break;
@@ -381,6 +398,29 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
         ir_->set_decoration(id, decoration);
       }
 
+      break;
+    }
+
+    // opcode: 72
+    case SpvOpMemberDecorate: {
+      uint32_t id = inst->GetSingleWordInOperand(0u);
+      uint32_t member = inst->GetSingleWordInOperand(1u);
+      auto decoration =
+          static_cast<spv::Decoration>(inst->GetSingleWordInOperand(2u));
+      if (inst->NumInOperands() >= 4)
+        ir_->set_member_decoration(id, member, decoration,
+                                   inst->GetSingleWordInOperand(3u));
+      else
+        ir_->set_member_decoration(id, member, decoration);
+      break;
+    }
+
+    // opcode: 73
+    case SpvOpDecorationGroup: {
+      // spirv-cross comment:
+      // Noop, this simply means an ID should be a collector of decorations.
+      // The meta array is already a flat array of decorations which will
+      // contain the relevant decorations.
       break;
     }
 
@@ -437,11 +477,12 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
     // spirv-cross comment:
     // Build composite types by "inheriting".
     // NOTE: The self member is also copied! For pointers and array modifiers
-    // this is a good thing since we can refer to decorations on pointee classes
-    // which is needed for UBO/SSBO, I/O blocks in geometry/tess etc.
+    // this is a good thing since we can refer to decorations on pointee
+    // classes which is needed for UBO/SSBO, I/O blocks in geometry/tess etc.
     case SpvOpTypeVector: {
       uint32_t id = inst->result_id();
-      // TODO(sarahM0): ask if Column Count, in operand one, can be double-word.
+      // TODO(sarahM0): ask if Column Count, in operand one, can be
+      // double-word.
       uint32_t vecsize = inst->GetSingleWordInOperand(1u);
 
       auto &base = get<spirv_cross::SPIRType>(inst->GetSingleWordInOperand(0u));
@@ -800,8 +841,8 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       uint32_t id = inst->result_id();
 
       // spirv-cross comment:
-      // Instead of a temporary, create a new function-wide temporary with this
-      // ID instead.
+      // Instead of a temporary, create a new function-wide temporary with
+      // this ID instead.
       auto &var = set<spirv_cross::SPIRVariable>(id, result_type,
                                                  spv::StorageClassFunction);
       var.phi_variable = true;
@@ -1046,10 +1087,52 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
+    // opcode: 8
+    case SpvOpLine: {
+      // OpLine might come at global scope, but we don't care about those since
+      // they will not be declared in any meaningful correct order. Ignore all
+      // OpLine directives which live outside a function.
+      if (current_block_) {
+        spirv_cross::Instruction instr = {};
+        instr.op = inst->opcode();
+        instr.count = inst->NumOperandWords() + 1;
+        instr.offset = offset_ + 1;
+        instr.length = instr.count - 1;
+        current_block_->ops.push_back(instr);
+      }
+      // Line directives may arrive before first OpLabel.
+      // Treat this as the line of the function declaration,
+      // so warnings for arguments can propagate properly.
+      if (current_function_) {
+        // Store the first one we find and emit it before creating the function
+        // prototype.
+        if (current_function_->entry_line.file_id == 0) {
+          current_function_->entry_line.file_id =
+              inst->GetSingleWordInOperand(0u);
+          current_function_->entry_line.line_literal =
+              inst->GetSingleWordInOperand(1u);
+        }
+      }
+      break;
+    }
+
+    // opcode: 317
+    case SpvOpNoLine: {
+      // spirv_cross comment: OpNoLine might come at global scope.
+      if (current_block_) {
+        spirv_cross::Instruction instr = {};
+        instr.op = inst->opcode();
+        instr.count = inst->NumOperandWords() + 1;
+        instr.offset = offset_ + 1;
+        instr.length = instr.count - 1;
+        current_block_->ops.push_back(instr);
+      }
+      break;
+    }
+
     case SpvOpCopyObject:
     case SpvOpFAdd:
     case SpvOpStore: {
-      // default: {
       if (!CheckConditionAndSetErrorMessage(
               current_block_,
               "SpvcIrPass: Currently no block to insert opcode."))
