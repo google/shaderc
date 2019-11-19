@@ -69,18 +69,6 @@ function(shaderc_add_asciidoc TARGET FILE)
   endif(ASCIIDOCTOR_EXE)
 endfunction()
 
-# Run nosetests on file ${PREFIX}_nosetest.py. Nosetests will look for classes
-# and functions whose names start with "nosetest". The test name will be
-# ${PREFIX}_nosetests.
-function(shaderc_add_nosetests PREFIX)
-  if("${SHADERC_ENABLE_TESTS}" AND NOSETESTS_EXE)
-    add_test(
-      NAME ${PREFIX}_nosetests
-      COMMAND ${NOSETESTS_EXE} -m "^[Nn]ose[Tt]est" -v
-        ${CMAKE_CURRENT_SOURCE_DIR}/${PREFIX}_nosetest.py)
-  endif()
-endfunction()
-
 # Adds a set of tests.
 # This function accepts the following parameters:
 # TEST_PREFIX:  a prefix for each test target name

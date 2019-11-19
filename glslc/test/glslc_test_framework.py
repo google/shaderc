@@ -72,7 +72,7 @@ def get_all_methods(instance):
 
 
 def get_all_superclasses(cls):
-    """Returns all superclasses of a given class.
+    """Returns all superclasses of a given class. Omits root 'object' superclass.
 
     Returns:
       A list of superclasses of the given class. The order guarantees that
@@ -85,10 +85,10 @@ def get_all_superclasses(cls):
     classes = []
     for superclass in cls.__bases__:
         for c in get_all_superclasses(superclass):
-            if c not in classes:
+            if c is not object and c not in classes:
                 classes.append(c)
     for superclass in cls.__bases__:
-        if superclass not in classes:
+        if superclass is not object and superclass not in classes:
             classes.append(superclass)
     return classes
 
@@ -333,8 +333,8 @@ def main():
         manager.leave_output = True
     for root, _, filenames in os.walk(root_dir):
         for filename in fnmatch.filter(filenames, '*.py'):
-            if filename.endswith('nosetest.py'):
-                # Skip nose tests, which are for testing functions of
+            if filename.endswith('unittest.py'):
+                # Skip unit tests, which are for testing functions of
                 # the test framework.
                 continue
             sys.path = default_path

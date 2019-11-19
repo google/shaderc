@@ -1,6 +1,3 @@
-# Find nosetests; see shaderc_add_nosetests() from utils.cmake for opting in to
-# nosetests in a specific directory.
-
 if(NOT COMMAND find_host_package)
   macro(find_host_package)
     find_package(${ARGN})
@@ -10,11 +7,6 @@ if(NOT COMMAND find_host_program)
   macro(find_host_program)
     find_program(${ARGN})
   endmacro()
-endif()
-
-find_program(NOSETESTS_EXE NAMES nosetests PATHS $ENV{PYTHON_PACKAGE_PATH})
-if (NOT NOSETESTS_EXE)
-  message(STATUS "nosetests was not found - python code will not be tested")
 endif()
 
 # Find asciidoctor; see shaderc_add_asciidoc() from utils.cmake for
