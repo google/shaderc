@@ -23,8 +23,24 @@ import functools
 import os
 import re
 import subprocess
+import sys
 from glslc_test_framework import GlslCTest
 from builtins import bytes
+
+def convert_to_string(input):
+    if type(input) is not str:
+        if sys.version_info[0] is 2:
+            return input.decode('utf-8')
+        elif sys.version_info[0] is 3:
+            return str(input,
+                              encoding='utf-8',
+                              errors='ignore') if input is not None else input
+        else:
+            raise Exception(
+                'Unable to determine if running Python 2 or 3 from {}'.format(
+                    sys.version_info))
+    else:
+        return input
 
 
 def convert_to_unix_line_endings(source):
@@ -476,7 +492,7 @@ class ErrorMessage(GlslCTest):
                            'signal ' + str(status.returncode))
         if not status.stderr:
             return False, 'Expected error message, but no output on stderr'
-        if self.expected_error != convert_to_unix_line_endings(status.stderr.decode('utf8')):
+        if self.expected_error != convert_to_unix_line_endings(convert_to_string(status.stderr)):
             return False, ('Incorrect stderr output:\n{act}\n'
                            'Expected:\n{exp}'.format(
                                act=status.stderr, exp=self.expected_error))
@@ -505,7 +521,7 @@ class ErrorMessageSubstr(GlslCTest):
                            'signal ' + str(status.returncode))
         if not status.stderr:
             return False, 'Expected error message, but no output on stderr'
-        if self.expected_error_substr not in convert_to_unix_line_endings(status.stderr.decode('utf8')):
+        if self.expected_error_substr not in convert_to_unix_line_endings(convert_to_string(status.stderr)):
             return False, ('Incorrect stderr output:\n{act}\n'
                            'Expected substring not found in stderr:\n{exp}'.format(
                                act=status.stderr, exp=self.expected_error_substr))
@@ -525,7 +541,7 @@ class WarningMessage(GlslCTest):
                            ' glslc')
         if not status.stderr:
             return False, 'Expected warning message, but no output on stderr'
-        if self.expected_warning != convert_to_unix_line_endings(status.stderr.decode('utf8')):
+        if self.expected_warning != convert_to_unix_line_endings(convert_to_string(status.stderr)):
             return False, ('Incorrect stderr output:\n{act}\n'
                            'Expected:\n{exp}'.format(
                                act=status.stderr, exp=self.expected_warning))
@@ -584,16 +600,16 @@ class StdoutMatch(GlslCTest):
                 return False, 'Expected something on stdout'
         elif type(self.expected_stdout) == str:
             if self.expected_stdout != convert_to_unix_line_endings(
-                status.stdout.decode('utf8')):
+                    convert_to_string(status.stdout)):
                 return False, ('Incorrect stdout output:\n{ac}\n'
                                'Expected:\n{ex}'.format(
                                    ac=status.stdout, ex=self.expected_stdout))
         else:
             if not self.expected_stdout.search(convert_to_unix_line_endings(
-                status.stdout.decode('utf8'))):
+                    convert_to_string(status.stdout))):
                 return False, ('Incorrect stdout output:\n{ac}\n'
                                'Expected to match regex:\n{ex}'.format(
-                                   ac=status.stdout.decode('utf8'),
+                                   ac=convert_to_string(status.stdout),
                                    ex=self.expected_stdout.pattern))
         return True, ''
 
@@ -617,7 +633,7 @@ class StderrMatch(GlslCTest):
                 return False, 'Expected something on stderr'
         else:
             if self.expected_stderr != convert_to_unix_line_endings(
-                status.stderr.decode('utf8')):
+                    convert_to_string(status.stderr)):
                 return False, ('Incorrect stderr output:\n{ac}\n'
                                'Expected:\n{ex}'.format(
                                    ac=status.stderr, ex=self.expected_stderr))

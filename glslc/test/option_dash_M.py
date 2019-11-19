@@ -14,6 +14,7 @@
 
 import expect
 import os.path
+import sys
 from environment import File, Directory
 from glslc_test_framework import inside_glslc_testsuite
 from placeholder import FileShader
@@ -100,7 +101,12 @@ class DependencyInfoStdoutMatch(GlslCTest):
         if not status.stdout:
             return False, 'Expect dependency rules on stdout'
 
-        rules = parse_text_rules(status.stdout.decode('utf-8').split('\n'))
+        if sys.version_info[0] is 2:
+            rules = parse_text_rules(status.stdout.decode('utf-8').split('\n'))
+        elif sys.version_info[0] is 3:
+            rules = parse_text_rules(str(status.stdout,
+                                         encoding='utf-8',
+                                         errors='ignore').split('\n'))
 
         process_test_specified_dependency_info_rules(
             self.dependency_rules_expected)
