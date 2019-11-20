@@ -19,9 +19,7 @@ import("shaderc_features.gni")
 glslang_dir = shaderc_glslang_dir
 spirv_tools_dir = shaderc_spirv_tools_dir
 spirv_cross_dir = shaderc_spirv_cross_dir
-if (shaderc_enable_spvc_parser) {
-  spirv_headers_dir = shaderc_spirv_headers_dir
-}
+spirv_headers_dir = shaderc_spirv_headers_dir
 
 config("shaderc_util_public") {
   include_dirs = [ "libshaderc_util/include" ]
@@ -109,21 +107,15 @@ config("shaderc_spvc_public") {
   include_dirs = [
     "libshaderc/include",
     "libshaderc_spvc/include",
+    "${spirv_headers_dir}/include",
+    # Accessing a private spirv-tools headers.
+    "${spirv_tools_dir}",
   ]
 
-  if (shaderc_enable_spvc_parser) {
-    include_dirs += [
-      "${spirv_headers_dir}/include",
-      # Accessing a private spirv-tools headers.
-      "${spirv_tools_dir}",
-    ]
-
-    if (build_with_chromium) {
-      include_dirs += [ "${target_gen_dir}/../../SPIRV-Tools/src", ]
-    } else {
-      include_dirs += [ "${target_gen_dir}/../SPIRV-Tools", ]
-    }
-
+  if (build_with_chromium) {
+    include_dirs += [ "${target_gen_dir}/../../SPIRV-Tools/src", ]
+  } else {
+    include_dirs += [ "${target_gen_dir}/../SPIRV-Tools", ]
   }
   
   if (is_component_build) {
@@ -141,9 +133,6 @@ component("libshaderc_spvc") {
     "SHADERC_IMPLEMENTATION",
     "SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS"
   ]
-  if (shaderc_enable_spvc_parser) {
-    defines += [ "SHADERC_ENABLE_SPVC_PARSER=1" ]
-  }
 
   sources = [
     "libshaderc/include/shaderc/env.h",
@@ -154,26 +143,18 @@ component("libshaderc_spvc") {
     "libshaderc_spvc/src/spvc.cc",
     "libshaderc_spvc/src/spvc_private.cc",
     "libshaderc_spvc/src/spvc_private.h",
+    "libshaderc_spvc/src/spvcir_pass.cc",
+    "libshaderc_spvc/src/spvcir_pass.h",
   ]
-
-  if (shaderc_enable_spvc_parser) {
-    sources += [
-      "libshaderc_spvc/src/spvcir_pass.cc",
-      "libshaderc_spvc/src/spvcir_pass.h",
-    ]
-  }
 
   deps = [
     ":shaderc_util_sources",
-    "${spirv_tools_dir}:spvtools",
-    "${spirv_tools_dir}:spvtools_val",
-    "${spirv_tools_dir}:spvtools_opt",
     "${spirv_cross_dir}:spirv_cross_full_for_fuzzers",
+    "${spirv_tools_dir}:spvtools",
+    "${spirv_tools_dir}:spvtools_core_enums_unified1",
+    "${spirv_tools_dir}:spvtools_opt",
+    "${spirv_tools_dir}:spvtools_val",
   ]
-
-  if (shaderc_enable_spvc_parser) {
-     deps += [ "${spirv_tools_dir}:spvtools_core_enums_unified1" ]
-  }
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]

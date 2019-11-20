@@ -18,15 +18,9 @@ set(SPVC_SOURCES
   include/spvc/spvc.hpp
   src/spvc.cc
   src/spvc_private.cc
+  src/spvcir_pass.cc
+  src/spvcir_pass.h
 )
-
-if(SHADERC_ENABLE_SPVC_PARSER)
-  set(SPVC_SOURCES
-    ${SPVC_SOURCES}
-    src/spvcir_pass.cc
-    src/spvcir_pass.h
-  )
-endif()
 
 add_library(shaderc_spvc STATIC ${SPVC_SOURCES})
 add_dependencies(shaderc_spvc ${SPIRV_TOOLS})
@@ -39,12 +33,6 @@ target_include_directories(shaderc_spvc
   ${spirv-tools_SOURCE_DIR}/
   ${CMAKE_CURRENT_BINARY_DIR}/../third_party/spirv-tools/)
 target_link_libraries(shaderc_spvc PRIVATE ${SPVC_LIBS})
-
-if(SHADERC_ENABLE_SPVC_PARSER)
-  target_compile_definitions(shaderc_spvc
-      PRIVATE SHADERC_ENABLE_SPVC_PARSER=1
-  )
-endif()
 
 add_library(shaderc_spvc_shared SHARED ${SPVC_SOURCES})
 add_dependencies(shaderc_spvc_shared ${SPIRV_TOOLS}-shared)
@@ -63,18 +51,10 @@ target_compile_definitions(shaderc_spvc_shared
     PUBLIC SHADERC_SHAREDLIB
 )
 
-if(SHADERC_ENABLE_SPVC_PARSER)
-  target_compile_definitions(shaderc_spvc_shared
-      PRIVATE SHADERC_IMPLEMENTATION
-      PUBLIC SHADERC_SHAREDLIB
-      PRIVATE SHADERC_ENABLE_SPVC_PARSER=1
-  )
-else()
-  target_compile_definitions(shaderc_spvc_shared
-      PRIVATE SHADERC_IMPLEMENTATION
-      PUBLIC SHADERC_SHAREDLIB
-  )
-endif()
+target_compile_definitions(shaderc_spvc_shared
+    PRIVATE SHADERC_IMPLEMENTATION
+    PUBLIC SHADERC_SHAREDLIB
+)
 
 if(SHADERC_ENABLE_INSTALL)
   install(
@@ -90,7 +70,6 @@ if(SHADERC_ENABLE_INSTALL)
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif(SHADERC_ENABLE_INSTALL)
 
-if(SHADERC_ENABLE_SPVC_PARSER)
 shaderc_add_tests(
   TEST_PREFIX shaderc
   LINK_LIBS shaderc_spvc ${SPVC_LIBS}
@@ -103,17 +82,6 @@ shaderc_add_tests(
     spvc_webgpu
     spvc_webgpu_cpp
     spvcir)
-else()
-shaderc_add_tests(
-  TEST_PREFIX shaderc_shared
-  LINK_LIBS shaderc_spvc_shared ${SPVC_LIBS} SPIRV-Tools SPIRV-Tools-opt
-  INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc/include ${SPIRV-Cross_SOURCE_DIR}/..
-  TEST_NAMES
-    spvc
-    spvc_cpp
-    spvc_webgpu
-    spvc_webgpu_cpp)
-endif(SHADERC_ENABLE_SPVC_PARSER)
 
 
 shaderc_combine_static_lib(shaderc_spvc_combined shaderc_spvc)

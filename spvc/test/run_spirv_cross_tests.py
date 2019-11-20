@@ -39,6 +39,7 @@ class TestEnv:
         self.glslang = script_args.glslang
         self.spvc_test_dir = script_args.spvc_test_dir
         self.run_spvc_with_validation = True
+        self.use_spvc_parser = script_args.run_spvc_parser_tests
 
     def log_unexpected(self, test_list, test_result):
         """Log list of test cases with unexpected outcome."""
@@ -134,9 +135,11 @@ class TestEnv:
         Returns status of spvc, output of spvc. Exits entirely if spvc
         fails and give_up flag is set.
         """
-
         if not self.run_spvc_with_validation:
             flags.append('--no-validate')
+
+        if self.use_spvc_parser:
+            flags.append('--use-spvc-parser')
 
         status, output = self.check_output(
             [self.spvc] + flags + ['-o', out, '--source-env=vulkan1.1', '--target-env=vulkan1.1', inp])
@@ -491,7 +494,7 @@ def main():
                         action='store_true', help='Write out the failures to spvc/test/known_failures')
     parser.add_argument('--update_unconfirmed_invalids', dest='update_unconfirmed_invalids',
                         action='store_true', help='Write out the non-known_invalids to spvc/test/unconfirmed_invalids')
-    parser.add_argument('--run-spvc-tests', dest='run_spvc_tests',
+    parser.add_argument('--run_spvc_parser_tests', dest='run_spvc_parser_tests',
                         action='store_true', help='Run tests stored in spvir-cross and spvc directory using spvc parser')
     parser.add_argument('spvc', metavar='<spvc executable>')
     parser.add_argument('spirv_as', metavar='<spirv-as executable>')
@@ -511,7 +514,7 @@ def main():
 
     # Adding tests:
     # Walk SPIRV-Cross test directory and add files to tests list
-    # if --run_spvc_tests, also walk spvc test directory and add them to tests list
+    # if --run_spvc_parser_tests, also walk spvc test directory and add them to tests list
     tests = []
     for test_case_dir, test_function, optimize in test_case_dirs:
         walk_dir = os.path.join(script_args.cross_dir, test_case_dir)
@@ -523,7 +526,7 @@ def main():
                 if not test_regex or re.search(test_regex, shader):
                     tests.append((test_function, test_env,
                                   shader, filename, optimize))
-        if script_args.run_spvc_tests:
+        if script_args.run_spvc_parser_tests:
             walk_dir = os.path.join(script_args.spvc_test_dir, test_case_dir)
             for dirpath, dirnames, filenames in os.walk(walk_dir):
                 dirnames.sort()
@@ -590,7 +593,7 @@ def main():
     print('{} passed and'.format(len(successes)))
     print('{} passed with --no-validation flag'.format(len(successes_without_validation)))
 
-    if script_args.run_spvc_tests:
+    if script_args.run_spvc_parser_tests:
         fail_file = os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'known_spvc_failures')
         print('Parser = spvc, Tests Directory = spirv-cross/ + spvc/ fail_file = known_spvc_failures')

@@ -31,6 +31,11 @@ void* shaderc_spvc_context_get_compiler(const shaderc_spvc_context_t context) {
   return context->cross_compiler.get();
 }
 
+void shaderc_spvc_context_set_use_spvc_parser(shaderc_spvc_context_t context,
+                                              bool b) {
+  context->use_spvc_parser = b;
+}
+
 shaderc_spvc_compile_options_t shaderc_spvc_compile_options_create() {
   shaderc_spvc_compile_options_t options =
       new (std::nothrow) shaderc_spvc_compile_options;
