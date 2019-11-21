@@ -39,6 +39,7 @@ struct shaderc_spvc_context {
   std::string messages;
   spvc_target_lang target_lang = SPVC_TARGET_LANG_UNKNOWN;
   std::vector<uint32_t> intermediate_shader;
+  bool use_spvc_parser = false;
 };
 
 struct shaderc_spvc_compile_options {

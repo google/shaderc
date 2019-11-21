@@ -67,6 +67,8 @@ Options:
                            Defined transforms:
                              webgpu0 -> vulkan1.1
                              vulkan1.1 -> webgpu0
+   --use-spvc-parser       Use the built in parser for generating spirv-cross IR
+                           instead of spirv-cross.
 
 
   The following flags behave as in spirv-cross:
@@ -291,6 +293,8 @@ int main(int argc, char** argv) {
                   << "' in --target-env=" << std::endl;
         return 1;
       }
+    } else if (arg == "--use-spvc-parser") {
+      context.SetUseSpvcParser(true);
     } else {
       if (!ReadFile(arg.str(), &input)) {
         std::cerr << "spvc: error: could not read file" << std::endl;

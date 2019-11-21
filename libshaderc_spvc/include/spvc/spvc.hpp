@@ -311,6 +311,10 @@ class Context {
     return shaderc_spvc_context_get_compiler(context_.get());
   }
 
+  void SetUseSpvcParser(bool b) {
+     shaderc_spvc_context_set_use_spvc_parser(context_.get(), b);
+  }
+
   // Initializes state for compiling SPIR-V to GLSL.
   shaderc_compilation_status InitializeForGlsl(
       const uint32_t* source, size_t source_len,

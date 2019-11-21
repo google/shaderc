@@ -62,6 +62,11 @@ SHADERC_EXPORT const char* shaderc_spvc_context_get_messages(
 SHADERC_EXPORT void* shaderc_spvc_context_get_compiler(
     const shaderc_spvc_context_t context);
 
+// If true, use spvc built in parser to generate IR for spirv-cross, otherwise
+// use spirv-cross's implementation.
+SHADERC_EXPORT void shaderc_spvc_context_set_use_spvc_parser(
+    shaderc_spvc_context_t context, bool b);
+
 // An opaque handle to an object that manages options to a single compilation
 // result.
 typedef struct shaderc_spvc_compile_options* shaderc_spvc_compile_options_t;
