@@ -620,6 +620,28 @@ TEST_F(SpvcIrParsingTest, OpTypeFunctionInstruction) {
   EXPECT_TRUE(func->parameter_types.empty());
 }
 
+TEST_F(SpvcIrParsingTest, OpTypeAccelerationStructureNVInstruction) {
+  const std::vector<const char*> middle = {
+      // clang-format off
+      "%10 = OpTypeAccelerationStructureNV"
+      // clang-format on
+  };
+  std::string spirv = JoinAllInsts(Concat(Concat(before_, middle), after_));
+  spirv_cross::ParsedIR ir;
+  createSpvcIr(&ir, spirv);
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, false, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  auto spir_var = maybe_get<spirv_cross::SPIRType>(10, &ir);
+  ASSERT_NE(spir_var, nullptr);
+  EXPECT_EQ(spir_var->basetype, spirv_cross::SPIRType::AccelerationStructureNV);
+}
+
+
 TEST_F(SpvcIrParsingTest, SpvOpSFunctionParameterInstruction) {
   const std::vector<const char*> middle = {
       // clang-format off
@@ -1353,10 +1375,10 @@ TEST_F(SpvcIrParsingTest, OpMemberDecorateStringInstruction) {
       << " SinglePassRunAndDisassemble failed on input:\n "
       << std::get<0>(result);
 
-  EXPECT_EQ(ir.get_member_decoration_string(30, 3, spv::DecorationHlslSemanticGOOGLE),
-            "blah");
+  EXPECT_EQ(
+      ir.get_member_decoration_string(30, 3, spv::DecorationHlslSemanticGOOGLE),
+      "blah");
 }
-
 
 TEST_F(SpvcIrParsingTest, OpDecorateStringInstruction) {
   const std::vector<const char*> middle = {
@@ -1389,6 +1411,47 @@ TEST_F(SpvcIrParsingTest, OpDecorateStringInstruction) {
 
   EXPECT_EQ(ir.get_decoration_string(10, spv::DecorationHlslSemanticGOOGLE),
             "blah");
+}
+
+TEST_F(SpvcIrParsingTest, OpTypeForwardPointerInstruction) {
+  const std::vector<const char*> middle = {
+      // clang-format off
+               "OpCapability Shader",
+               "OpCapability VulkanMemoryModelKHR",
+               "OpCapability PhysicalStorageBufferAddressesEXT",
+               "OpExtension \"SPV_EXT_physical_storage_buffer\"",
+               "OpExtension \"SPV_KHR_vulkan_memory_model\"",
+               "OpMemoryModel Logical VulkanKHR",
+               "OpEntryPoint Vertex %1 \"shader\"",
+               "OpTypeForwardPointer %10 PhysicalStorageBuffer",
+        "%int = OpTypeInt 32 1",
+  "%bufStruct = OpTypeStruct %int %int",
+         "%10 = OpTypePointer PhysicalStorageBuffer %bufStruct",
+          "%2 = OpTypeVoid",
+          "%3 = OpTypeFunction %2",
+          "%1 = OpFunction %2 None %3",
+          "%4 = OpLabel",
+               "OpReturn",
+               "OpFunctionEnd",
+      // clang-format on
+  };
+  std::string spirv = JoinAllInsts(middle);
+  spirv_cross::ParsedIR ir;
+  ASSERT_EQ(createSpvcIr(&ir, spirv), true)
+      << "Could not create IRContext for input:\n" + spirv + "\n";
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, true, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  const auto ptrbase = maybe_get<spirv_cross::SPIRType>(10, &ir);
+  ASSERT_NE(ptrbase, nullptr);
+  EXPECT_TRUE(ptrbase->pointer);
+  EXPECT_EQ(ptrbase->pointer_depth, 1);
+  EXPECT_EQ(ptrbase->storage,
+            spv::StorageClass::StorageClassPhysicalStorageBuffer);
 }
 
 

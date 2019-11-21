@@ -709,6 +709,29 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
+    // opcode: 39
+    case SpvOpTypeForwardPointer: {
+      uint32_t id = inst->GetSingleWordInOperand(0u);
+      auto &ptrbase = set<spirv_cross::SPIRType>(id);
+      ptrbase.pointer = true;
+      ptrbase.pointer_depth++;
+      ptrbase.storage =
+          static_cast<spv::StorageClass>(inst->GetSingleWordInOperand(1u));
+
+      if (ptrbase.storage == spv::StorageClassAtomicCounter)
+        ptrbase.basetype = spirv_cross::SPIRType::AtomicCounter;
+
+      break;
+    }
+
+      // opcode: 5341
+    case SpvOpTypeAccelerationStructureNV: {
+      uint32_t id = inst->result_id();
+      auto &type = set<spirv_cross::SPIRType>(id);
+      type.basetype = spirv_cross::SPIRType::AccelerationStructureNV;
+      break;
+    }
+
     // Variable declaration
     // opcode: 59
     // spirv-cross comment:
