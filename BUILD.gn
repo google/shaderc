@@ -149,7 +149,7 @@ component("libshaderc_spvc") {
 
   deps = [
     ":shaderc_util_sources",
-    "${spirv_cross_dir}:spirv_cross",
+    "${spirv_cross_dir}:spirv_cross_full_for_fuzzers",
     "${spirv_tools_dir}:spvtools",
     "${spirv_tools_dir}:spvtools_core_enums_unified1",
     "${spirv_tools_dir}:spvtools_opt",
