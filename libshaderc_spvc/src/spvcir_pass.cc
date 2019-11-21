@@ -717,7 +717,7 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       ptrbase.pointer_depth++;
       ptrbase.storage =
           static_cast<spv::StorageClass>(inst->GetSingleWordInOperand(1u));
-
+      // TODO(sarahM0): add test for with AtomicCounter storage class
       if (ptrbase.storage == spv::StorageClassAtomicCounter)
         ptrbase.basetype = spirv_cross::SPIRType::AtomicCounter;
 
@@ -1239,10 +1239,7 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       break;
     }
 
-    case SpvOpCopyObject:
-    case SpvOpFAdd:
-    case SpvOpStore:
-    case SpvOpLoad:{
+    default: {
       if (!CheckConditionAndSetErrorMessage(
               current_block_,
               "SpvcIrPass: Currently no block to insert opcode."))
@@ -1263,16 +1260,6 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
               "SpvcIrPass: SPIR-V instruction goes out of bounds."))
         return;
       current_block_->ops.push_back(instr);
-      break;
-    }
-
-    default: {
-      if (!CheckConditionAndSetErrorMessage(
-              false,
-              "SpvcIrPass: Instruction not supported in spvcir parser: "
-              "opcode " +
-                  std::to_string(inst->opcode())))
-        return;
       break;
     }
   }
