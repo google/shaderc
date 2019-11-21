@@ -1266,6 +1266,132 @@ TEST_F(SpvcIrParsingTest, OpDecorateInstruction2) {
   EXPECT_EQ(work_offset, 40);
 }
 
+TEST_F(SpvcIrParsingTest, OpGroupDecorateInstruction) {
+  const std::vector<const char*> middle = {
+      // clang-format off
+               "OpDecorate %11 Offset 3",
+               "OpDecorate %11 Restrict",
+         "%11 = OpDecorationGroup",
+               "OpGroupDecorate %11 %_struct_1 %_struct_2 %30",
+      "%float = OpTypeFloat 32",
+"%_runtimearr = OpTypeRuntimeArray %float",
+  "%_struct_1 = OpTypeStruct %float %float %float %_runtimearr",
+  "%_struct_2 = OpTypeStruct %float %float %float %_runtimearr",
+         "%30 = OpTypeStruct %float %float %float %_runtimearr"
+      // clang-format on
+  };
+  std::string spirv = JoinAllInsts(Concat(Concat(before_, middle), after_));
+  spirv_cross::ParsedIR ir;
+  createSpvcIr(&ir, spirv);
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, true, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  EXPECT_EQ(ir.get_decoration(30, spv::DecorationRestrict), 1);
+  EXPECT_EQ(ir.get_decoration(30, spv::DecorationOffset), 3);
+}
+
+TEST_F(SpvcIrParsingTest, OpGroupMemberDecorateInstruction) {
+  const std::vector<const char*> middle = {
+      // clang-format off
+               "OpDecorate %11 Offset 3",
+               "OpDecorate %11 Restrict",
+         "%11 = OpDecorationGroup",
+               "OpGroupMemberDecorate %11 %_struct_1 3 %_struct_2 3 %30 3",
+      "%float = OpTypeFloat 32",
+"%_runtimearr = OpTypeRuntimeArray %float",
+  "%_struct_1 = OpTypeStruct %float %float %float %_runtimearr",
+  "%_struct_2 = OpTypeStruct %float %float %float %_runtimearr",
+         "%30 = OpTypeStruct %float %float %float %_runtimearr"
+      // clang-format on
+  };
+  std::string spirv = JoinAllInsts(Concat(Concat(before_, middle), after_));
+  spirv_cross::ParsedIR ir;
+  createSpvcIr(&ir, spirv);
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, true, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  EXPECT_EQ(ir.get_member_decoration(30, 3, spv::DecorationRestrict), 1);
+  EXPECT_EQ(ir.get_member_decoration(30, 3, spv::DecorationOffset), 3);
+}
+
+TEST_F(SpvcIrParsingTest, OpMemberDecorateStringInstruction) {
+  const std::vector<const char*> middle = {
+      // clang-format off
+                 "OpCapability Shader",
+                 "OpCapability VulkanMemoryModelKHR",
+                 "OpExtension \"SPV_KHR_vulkan_memory_model\"",
+                 "OpExtension \"SPV_GOOGLE_hlsl_functionality1\"",
+                 "OpMemoryModel Logical VulkanKHR",
+                 "OpEntryPoint Vertex %1 \"shader\"",
+                 "OpMemberDecorateStringGOOGLE %30 3 HlslSemanticGOOGLE \"blah\"",
+        "%float = OpTypeFloat 32",
+  "%_runtimearr = OpTypeRuntimeArray %float",
+           "%30 = OpTypeStruct %float %float %float %_runtimearr",
+            "%2 = OpTypeVoid",
+            "%3 = OpTypeFunction %2",
+            "%1 = OpFunction %2 None %3",
+            "%4 = OpLabel",
+                 "OpReturn",
+                 "OpFunctionEnd",
+      // clang-format on
+  };
+  std::string spirv = JoinAllInsts(middle);
+  spirv_cross::ParsedIR ir;
+  createSpvcIr(&ir, spirv);
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, true, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  EXPECT_EQ(ir.get_member_decoration_string(30, 3, spv::DecorationHlslSemanticGOOGLE),
+            "blah");
+}
+
+
+TEST_F(SpvcIrParsingTest, OpDecorateStringInstruction) {
+  const std::vector<const char*> middle = {
+      // clang-format off
+          "OpCapability Shader",
+          "OpCapability VulkanMemoryModelKHR",
+          "OpExtension \"SPV_KHR_vulkan_memory_model\"",
+          "OpExtension \"SPV_GOOGLE_hlsl_functionality1\"",
+          "OpMemoryModel Logical VulkanKHR",
+          "OpEntryPoint Vertex %1 \"shader\"",
+          "OpDecorateStringGOOGLE %10 HlslSemanticGOOGLE \"blah\"",
+    "%10 = OpTypeFloat 32",
+     "%2 = OpTypeVoid",
+     "%3 = OpTypeFunction %2",
+     "%1 = OpFunction %2 None %3",
+     "%4 = OpLabel",
+          "OpReturn",
+          "OpFunctionEnd",
+      // clang-format on
+  };
+  std::string spirv = JoinAllInsts(middle);
+  spirv_cross::ParsedIR ir;
+  createSpvcIr(&ir, spirv);
+
+  auto result = SinglePassRunAndDisassemble<SpvcIrPass, spirv_cross::ParsedIR*>(
+      spirv, true, true, &ir);
+  ASSERT_EQ(Pass::Status::SuccessWithoutChange, std::get<1>(result))
+      << " SinglePassRunAndDisassemble failed on input:\n "
+      << std::get<0>(result);
+
+  EXPECT_EQ(ir.get_decoration_string(10, spv::DecorationHlslSemanticGOOGLE),
+            "blah");
+}
+
+
 TEST_F(SpvcIrParsingTest, OpNameInstruction) {
   const std::vector<const char*> middle = {
       // clang-format off

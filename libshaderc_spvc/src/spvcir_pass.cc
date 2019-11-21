@@ -19,6 +19,16 @@
 namespace spvtools {
 namespace opt {
 
+static bool decoration_is_string(spv::Decoration decoration) {
+  switch (decoration) {
+    case spv::DecorationHlslSemanticGOOGLE:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
 void SpvcIrPass::make_constant_null(uint32_t id, uint32_t type) {
   // TODO(sarahM0): Add more tests
   auto &constant_type = get<spirv_cross::SPIRType>(type);
@@ -421,6 +431,82 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
       // Noop, this simply means an ID should be a collector of decorations.
       // The meta array is already a flat array of decorations which will
       // contain the relevant decorations.
+      break;
+    }
+
+    // opcode: 74
+    case SpvOpGroupDecorate: {
+      uint32_t group_id = inst->GetSingleWordInOperand(0u);
+      auto &decorations = ir_->meta[group_id].decoration;
+      auto &flags = decorations.decoration_flags;
+
+      // Copies decorations from one ID to another. Only copy decorations which
+      // are set in the group, i.e., we cannot just copy the meta structure
+      // directly.
+      for (uint32_t i = 1; i < inst->NumInOperands(); i++) {
+        uint32_t target = inst->GetSingleWordInOperand(i);
+        flags.for_each_bit([&](uint32_t bit) {
+          auto decoration = static_cast<spv::Decoration>(bit);
+
+          if (decoration_is_string(decoration)) {
+            ir_->set_decoration_string(
+                target, decoration,
+                ir_->get_decoration_string(group_id, decoration));
+          } else {
+            ir_->meta[target].decoration_word_offset[decoration] =
+                ir_->meta[group_id].decoration_word_offset[decoration];
+            ir_->set_decoration(target, decoration,
+                                ir_->get_decoration(group_id, decoration));
+          }
+        });
+      }
+      break;
+    }
+
+    // opcode: 75
+    case SpvOpGroupMemberDecorate: {
+      uint32_t group_id = inst->GetSingleWordInOperand(0u);
+      auto &flags = ir_->meta[group_id].decoration.decoration_flags;
+
+      // Copies decorations from one ID to another. Only copy decorations which
+      // are set in the group, i.e., we cannot just copy the meta structure
+      // directly.
+      for (uint32_t i = 1; i + 1 < inst->NumInOperands(); i += 2) {
+        uint32_t target = inst->GetSingleWordInOperand(i + 0u);
+        uint32_t index = inst->GetSingleWordInOperand(i + 1u);
+        flags.for_each_bit([&](uint32_t bit) {
+          auto decoration = static_cast<spv::Decoration>(bit);
+
+          if (decoration_is_string(decoration))
+            ir_->set_member_decoration_string(
+                target, index, decoration,
+                ir_->get_decoration_string(group_id, decoration));
+          else
+            ir_->set_member_decoration(
+                target, index, decoration,
+                ir_->get_decoration(group_id, decoration));
+        });
+      }
+      break;
+    }
+
+    // opcode: 5632
+    case SpvOpDecorateStringGOOGLE: {
+      uint32_t id = inst->GetSingleWordInOperand(0u);
+      auto decoration =
+          static_cast<spv::Decoration>(inst->GetSingleWordInOperand(1u));
+      ir_->set_decoration_string(id, decoration, GetWordsAsString(2u, inst));
+      break;
+    }
+
+    // opcode: 5633
+    case SpvOpMemberDecorateStringGOOGLE: {
+      uint32_t id = inst->GetSingleWordInOperand(0u);
+      uint32_t member = inst->GetSingleWordInOperand(1u);
+      auto decoration =
+          static_cast<spv::Decoration>(inst->GetSingleWordInOperand(2u));
+      ir_->set_member_decoration_string(id, member, decoration,
+                                        GetWordsAsString(3u, inst));
       break;
     }
 
@@ -1132,7 +1218,8 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
 
     case SpvOpCopyObject:
     case SpvOpFAdd:
-    case SpvOpStore: {
+    case SpvOpStore:
+    case SpvOpLoad:{
       if (!CheckConditionAndSetErrorMessage(
               current_block_,
               "SpvcIrPass: Currently no block to insert opcode."))
