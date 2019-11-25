@@ -122,6 +122,9 @@ shaders-reflection/frag/spec-constant.vk.frag,False
 shaders-reflection/rgen/acceleration_structure.vk.rgen,False
 shaders-reflection/vert/read-from-row-major-array.vert,False
 shaders-reflection/vert/texture_buffer.vert,False
+shaders-ue4/asm/frag/subpass-input.ios.framebuffer-fetch.asm.frag,False
+shaders-ue4/asm/frag/subpass-input.ios.framebuffer-fetch.asm.frag,True
+shaders-ue4/asm/frag/texture-atomics.asm.graphics-robust-access.frag,True
 shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,False
 shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,True
 shaders/asm/frag/image-query-no-sampler.no-samplerless.vk.asm.frag,False

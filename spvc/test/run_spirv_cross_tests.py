@@ -198,7 +198,10 @@ class TestEnv:
             result, _ = self.run_glslang_compile(shader_path, tmpfile, [
                 '--target-env', 'vulkan1.1', '-V'])
         if optimize:
-            result, _ = self.run_spirv_opt(tmpfile, tmpfile, [])
+            if '.graphics-robust-access.' in shader:
+                result, _ = self.run_spirv_opt(tmpfile, tmpfile, ['--graphics-robust-access'])
+            else:
+                result, _ = self.run_spirv_opt(tmpfile, tmpfile, [])
         return result, tmpfile
 
 
@@ -453,6 +456,8 @@ test_case_dirs = (
     ('shaders-hlsl',        test_hlsl,       False),
     ('shaders-hlsl',        test_hlsl,       True),
     ('shaders-hlsl-no-opt', test_hlsl,       False),
+    ('shaders-ue4',         test_msl,        False),
+    ('shaders-ue4',         test_msl,        True),
     ('shaders-reflection',  test_reflection, False),
 )
 
