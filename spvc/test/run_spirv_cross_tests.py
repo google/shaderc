@@ -596,11 +596,11 @@ def main():
     if script_args.run_spvc_parser_tests:
         fail_file = os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'known_spvc_failures')
-        print('Parser = spvc, Tests Directory = spirv-cross/ + spvc/ fail_file = known_spvc_failures')
+        print('Parser = spvc, Tests Directory = spirv-cross/ + spvc/, Failures File = known_spvc_failures')
     else:
         fail_file = os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'known_failures')
-        print('Parser = spirv-cross, Tests Directory = spirv-cross/ + fail_file = known_failures')
+        print('Parser = spirv-cross, Tests Directory = spirv-cross/,  Failures File = known_failures')
 
     if script_args.update_known_failures:
         print('Updating {}'.format(fail_file))
