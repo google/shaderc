@@ -18,7 +18,6 @@ import("shaderc_features.gni")
 
 glslang_dir = shaderc_glslang_dir
 spirv_tools_dir = shaderc_spirv_tools_dir
-# spirv_cross_dir = shaderc_spirv_cross_dir
 spirv_headers_dir = shaderc_spirv_headers_dir
 
 config("shaderc_util_public") {
@@ -122,42 +121,3 @@ config("shaderc_spvc_public") {
     defines = [ "SHADERC_SHAREDLIB" ]
   }
 }
-
-# component("libshaderc_spvc") {
-#   public_configs = [
-#     ":shaderc_spvc_public",
-#     ":shaderc_util_public",
-#   ]
-#
-#   defines = [
-#     "SHADERC_IMPLEMENTATION",
-#     "SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS"
-#   ]
-#
-#   sources = [
-#     "libshaderc/include/shaderc/env.h",
-#     "libshaderc/include/shaderc/status.h",
-#     "libshaderc/include/shaderc/visibility.h",
-#     "libshaderc_spvc/include/spvc/spvc.h",
-#     "libshaderc_spvc/include/spvc/spvc.hpp",
-#     "libshaderc_spvc/src/spvc.cc",
-#     "libshaderc_spvc/src/spvc_private.cc",
-#     "libshaderc_spvc/src/spvc_private.h",
-#     "libshaderc_spvc/src/spvcir_pass.cc",
-#     "libshaderc_spvc/src/spvcir_pass.h",
-#   ]
-#
-#   deps = [
-#     ":shaderc_util_sources",
-#     "${spirv_cross_dir}:spirv_cross_full_for_fuzzers",
-#     "${spirv_tools_dir}:spvtools",
-#     "${spirv_tools_dir}:spvtools_core_enums_unified1",
-#     "${spirv_tools_dir}:spvtools_opt",
-#     "${spirv_tools_dir}:spvtools_val",
-#   ]
-#
-#   if (build_with_chromium) {
-#     configs -= [ "//build/config/compiler:chromium_code" ]
-#     configs += [ "//build/config/compiler:no_chromium_code" ]
-#   }
-# }
