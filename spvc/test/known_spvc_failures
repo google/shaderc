@@ -148,8 +148,6 @@ shaders/flatten/struct.flatten.vert,False
 shaders/flatten/struct.flatten.vert,True
 shaders/legacy/vert/transpose.legacy.vert,False
 shaders/legacy/vert/transpose.legacy.vert,True
-shaders/mix-constant-and-spec-constant-size.vert,False
-shaders/mix-constant-and-spec-constant-size.vert,True
 shaders/tesc/water_tess.tesc,False
 shaders/tesc/water_tess.tesc,True
 shaders/vert/basic.vert,False
