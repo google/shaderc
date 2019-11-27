@@ -178,7 +178,6 @@ config("shaderc_spvc_public") {
 component("libshaderc_spvc") {
   public_configs = [
     ":shaderc_spvc_public",
-    ":shaderc_util_public",
   ]
 
   include_dirs = [
@@ -205,7 +204,6 @@ component("libshaderc_spvc") {
   ]
 
   deps = [
-    ":shaderc_util_sources",
     ":spirv_cross",
     "${spirv_tools_dir}:spvtools",
     "${spirv_tools_dir}:spvtools_core_enums_unified1",
