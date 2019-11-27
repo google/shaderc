@@ -181,11 +181,6 @@ component("libshaderc_spvc") {
     ":shaderc_util_public",
   ]
 
-  include_dirs = [
-    "${spirv_cross_dir}",
-    "${spirv_cross_dir}/..",
-  ]
-
   defines = [
     "SHADERC_IMPLEMENTATION",
     "SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS"
@@ -203,6 +198,8 @@ component("libshaderc_spvc") {
     "libshaderc_spvc/src/spvcir_pass.cc",
     "libshaderc_spvc/src/spvcir_pass.h",
   ]
+
+  public_deps = [ ":spirv_cross" ]
 
   deps = [
     ":shaderc_util_sources",
