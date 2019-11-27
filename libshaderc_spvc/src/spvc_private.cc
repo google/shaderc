@@ -14,9 +14,19 @@
 
 #include "spvc_private.h"
 
-#include "libshaderc_util/exceptions.h"
 #include "spirv-tools/optimizer.hpp"
 #include "spvcir_pass.h"
+
+// Originally from libshaderc_utils/exceptions.h, copied here to avoid
+// needing to depend on libshaderc_utils and pull in its dependency on
+// glslang.
+#if (defined(_MSC_VER) && !defined(_CPPUNWIND)) || !defined(__EXCEPTIONS)
+#define TRY_IF_EXCEPTIONS_ENABLED
+#define CATCH_IF_EXCEPTIONS_ENABLED(X) if (0)
+#else
+#define TRY_IF_EXCEPTIONS_ENABLED try
+#define CATCH_IF_EXCEPTIONS_ENABLED(X) catch (X)
+#endif
 
 namespace spvc_private {
 

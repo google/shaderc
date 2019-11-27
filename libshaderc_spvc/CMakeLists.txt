@@ -28,7 +28,6 @@ shaderc_default_compile_options(shaderc_spvc)
 target_include_directories(shaderc_spvc
   PUBLIC include
   ${shaderc_SOURCE_DIR}/libshaderc/include
-  ${shaderc_SOURCE_DIR}/libshaderc_util/include
   ${spirv-tools_SOURCE_DIR}/include
   ${spirv-tools_SOURCE_DIR}/
   ${CMAKE_CURRENT_BINARY_DIR}/../third_party/spirv-tools/)
@@ -40,7 +39,6 @@ shaderc_default_compile_options(shaderc_spvc_shared)
 target_include_directories(shaderc_spvc_shared
   PUBLIC include
   ${shaderc_SOURCE_DIR}/libshaderc/include
-  ${shaderc_SOURCE_DIR}/libshaderc_util/include
   ${spirv-tools_SOURCE_DIR}/include
   ${spirv-tools_SOURCE_DIR}/
   ${CMAKE_CURRENT_BINARY_DIR}/../third_party/spirv-tools/)
@@ -105,7 +103,7 @@ endif(SHADERC_ENABLE_INSTALL)
 
 shaderc_add_tests(
   TEST_PREFIX shaderc_spvc_combined
-  LINK_LIBS shaderc_spvc_combined ${SPVC_LIBS} ${CMAKE_THREAD_LIBS_INIT} shaderc_util
+  LINK_LIBS shaderc_spvc_combined ${SPVC_LIBS} ${CMAKE_THREAD_LIBS_INIT}
   INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc/include ${spirv-tools_SOURCE_DIR}/include
   TEST_NAMES
     spvc
