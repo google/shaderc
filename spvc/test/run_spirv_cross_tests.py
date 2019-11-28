@@ -196,7 +196,7 @@ class TestEnv:
             result, _ = self.run_spirv_as(shader_path, tmpfile, flags)
         else:
             result, _ = self.run_glslang_compile(shader_path, tmpfile, [
-                '--target-env', 'vulkan1.1', '-V'])
+                '--amb', '--target-env', 'vulkan1.1', '-V'])
         if optimize:
             if '.graphics-robust-access.' in shader:
                 result, _ = self.run_spirv_opt(tmpfile, tmpfile, ['--graphics-robust-access'])
