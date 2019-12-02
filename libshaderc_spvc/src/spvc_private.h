@@ -80,16 +80,16 @@ void consume_spirv_tools_message(shaderc_spvc_context* context,
 
 // Test whether or not the given SPIR-V binary is valid for the specific
 // environment. Invoke spirv-val to perform this operation.
-shaderc_compilation_status validate_spirv(shaderc_spvc_context* context,
-                                          spv_target_env env,
-                                          const uint32_t* source,
-                                          size_t source_len);
+shaderc_spvc_initialization_status validate_spirv(shaderc_spvc_context* context,
+                                                  spv_target_env env,
+                                                  const uint32_t* source,
+                                                  size_t source_len);
 
 // Convert SPIR-V from one environment to another, if there is a known
 // conversion. If the origin and destination environments are the same, then
 // the binary is just copied to the output buffer. Invokes spirv-opt to perform
 // the actual translation.
-shaderc_compilation_status translate_spirv(
+shaderc_spvc_initialization_status translate_spirv(
     shaderc_spvc_context* context, spv_target_env source_env,
     spv_target_env target_env, const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options, std::vector<uint32_t>* target);
@@ -97,43 +97,43 @@ shaderc_compilation_status translate_spirv(
 // Execute the validation and translate steps. Specifically validates the input,
 // transforms it, then validates the transformed input. All of these steps are
 // only done if needed.
-shaderc_compilation_status validate_and_translate_spirv(
+shaderc_spvc_initialization_status validate_and_translate_spirv(
     shaderc_spvc_context* context, const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options, std::vector<uint32_t>* target);
 
 // Given a configured compiler run it to generate a shader. Does all of the
 // required trapping to handle if the compile fails.
-shaderc_compilation_status generate_shader(
+shaderc_spvc_compilation_status generate_shader(
     spirv_cross::Compiler* compiler, shaderc_spvc_compilation_result_t result);
 
 // Given a Vulkan SPIR-V shader and set of options, create a compiler for
 // generating a GLSL shader and performing reflection.
-shaderc_compilation_status generate_glsl_compiler(
+shaderc_spvc_compilation_status generate_glsl_compiler(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options);
 
 // Given a Vulkan SPIR-V shader and set of options, create a compiler for
 // generating a HLSL shader and performing reflection.
-shaderc_compilation_status generate_hlsl_compiler(
+shaderc_spvc_compilation_status generate_hlsl_compiler(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options);
 
 // Given a Vulkan SPIR-V shader and set of options, create a compiler for
 // generating a MSL shader and performing reflection.
-shaderc_compilation_status generate_msl_compiler(
+shaderc_spvc_compilation_status generate_msl_compiler(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options);
 
 // Given a Vulkan SPIR-V shader and set of options, create a compiler for
 // generating performing reflection.
-shaderc_compilation_status generate_vulkan_compiler(
+shaderc_spvc_compilation_status generate_vulkan_compiler(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options);
 
 // Given a pointer to an SPIRV-Cross IR (with initialized spirv field), Invokes
 // spirv-opt to generate a SPIRV-Cross IR (ie. populate empty fields of the
 // given spirv_cross::ParsedIR* ir).
-shaderc_compilation_status generate_spvcir(
+shaderc_spvc_initialization_status generate_spvcir(
     const shaderc_spvc_context_t context, spirv_cross::ParsedIR* ir,
     const uint32_t* source, size_t source_len,
     shaderc_spvc_compile_options_t options);

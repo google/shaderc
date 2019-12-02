@@ -32,6 +32,32 @@ typedef enum {
   shaderc_spvc_msl_platform_macos,
 } shaderc_spvc_msl_platform;
 
+// TODO(rharrison): Convert these to real enums instead of weird proxies around
+// the existing enum, once Dawn is using the new names.
+typedef shaderc_compilation_status shaderc_spvc_compilation_status;
+typedef shaderc_compilation_status shaderc_spvc_initialization_status;
+
+// These are temporary defines that will be removed once the above typedefs are
+// converted to enums.
+#define shaderc_spvc_initialization_status_success \
+  shaderc_compilation_status_success
+#define shaderc_spvc_initialization_status_configuration_error \
+  shaderc_compilation_status_configuration_error
+#define shaderc_spvc_initialization_status_internal_error \
+  shaderc_compilation_status_internal_error
+#define shaderc_spvc_initialization_status_validation_error \
+  shaderc_compilation_status_validation_error
+#define shaderc_spvc_initialization_status_transformation_error \
+  shaderc_compilation_status_transformation_error
+#define shaderc_spvc_initialization_status_compilation_error \
+  shaderc_compilation_status_compilation_error
+#define shaderc_spvc_compilation_status_success \
+  shaderc_compilation_status_success
+#define shaderc_spvc_compilation_status_configuration_error \
+  shaderc_compilation_status_configuration_error
+#define shaderc_spvc_compilation_status_compilation_error \
+  shaderc_compilation_status_compilation_error
+
 // An opaque handle to an object that manages all compiler state.
 typedef struct shaderc_spvc_context* shaderc_spvc_context_t;
 
@@ -246,31 +272,35 @@ typedef struct shaderc_spvc_compilation_result*
 
 // Takes SPIR-V as a sequence of 32-bit words, validates it, then creates the
 // internal compiler for translating to GLSL and performing reflection.
-SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_initialize_for_glsl(
-    const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options);
+SHADERC_EXPORT shaderc_spvc_initialization_status
+shaderc_spvc_initialize_for_glsl(const shaderc_spvc_context_t context,
+                                 const uint32_t* source, size_t source_len,
+                                 shaderc_spvc_compile_options_t options);
 
 // Takes SPIR-V as a sequence of 32-bit words, validates it, then creates the
 // internal compiler for translating to HLSL and performing reflection.
-SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_initialize_for_hlsl(
-    const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options);
+SHADERC_EXPORT shaderc_spvc_initialization_status
+shaderc_spvc_initialize_for_hlsl(const shaderc_spvc_context_t context,
+                                 const uint32_t* source, size_t source_len,
+                                 shaderc_spvc_compile_options_t options);
 
 // Takes SPIR-V as a sequence of 32-bit words, validates it, then creates the
 // internal compiler for translating to MSL and performing reflection.
-SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_initialize_for_msl(
-    const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options);
+SHADERC_EXPORT shaderc_spvc_initialization_status
+shaderc_spvc_initialize_for_msl(const shaderc_spvc_context_t context,
+                                const uint32_t* source, size_t source_len,
+                                shaderc_spvc_compile_options_t options);
 
 // Takes SPIR-V as a sequence of 32-bit words, validates it, then creates the
 // internal compiler for translating to Vulkan and performing reflection.
-SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_initialize_for_vulkan(
-    const shaderc_spvc_context_t context, const uint32_t* source,
-    size_t source_len, shaderc_spvc_compile_options_t options);
+SHADERC_EXPORT shaderc_spvc_initialization_status
+shaderc_spvc_initialize_for_vulkan(const shaderc_spvc_context_t context,
+                                   const uint32_t* source, size_t source_len,
+                                   shaderc_spvc_compile_options_t options);
 
 // Given an initialized compiler, generates a shader of the appropriate
 // language.
-SHADERC_EXPORT shaderc_compilation_status
+SHADERC_EXPORT shaderc_spvc_compilation_status
 shaderc_spvc_compile_shader(const shaderc_spvc_context_t context,
                             shaderc_spvc_compilation_result_t result);
 

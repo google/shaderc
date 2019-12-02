@@ -47,47 +47,66 @@ class CompileTest : public testing::Test {
 };
 
 TEST_F(CompileTest, ValidShaderIntoGlslPasses) {
-  shaderc_compilation_status status = shaderc_spvc_initialize_for_glsl(
-      context_, kWebGPUShaderBinary,
-      sizeof(kWebGPUShaderBinary) / sizeof(uint32_t), options_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
-  EXPECT_NE(context_->cross_compiler.get(), nullptr);
-
-  status = shaderc_spvc_compile_shader(context_, result_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
+  {
+    shaderc_spvc_initialization_status status =
+        shaderc_spvc_initialize_for_glsl(
+            context_, kWebGPUShaderBinary,
+            sizeof(kWebGPUShaderBinary) / sizeof(uint32_t), options_);
+    EXPECT_EQ(shaderc_spvc_initialization_status_success, status);
+    EXPECT_NE(context_->cross_compiler.get(), nullptr);
+  }
+  {
+    shaderd_spvc_compilation_status status =
+        shaderc_spvc_compile_shader(context_, result_);
+    EXPECT_EQ(shaderc_spvc_compilation_status_success, status);
+  }
 }
 
 TEST_F(CompileTest, ValidShaderIntoHlslPasses) {
-  shaderc_compilation_status status = shaderc_spvc_initialize_for_hlsl(
-      context_, kWebGPUShaderBinary,
-      sizeof(kWebGPUShaderBinary) / sizeof(uint32_t), options_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
-  EXPECT_NE(context_->cross_compiler.get(), nullptr);
-
-  status = shaderc_spvc_compile_shader(context_, result_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
+  {
+    shaderc_spvc_initialization_status status =
+        shaderc_spvc_initialize_for_hlsl(
+            context_, kWebGPUShaderBinary,
+            sizeof(kWebGPUShaderBinary) / sizeof(uint32_t), options_);
+    EXPECT_EQ(shaderc_spvc_initialization_status_success, status);
+    EXPECT_NE(context_->cross_compiler.get(), nullptr);
+  }
+  {
+    shaderd_spvc_compilation_status status =
+        shaderc_spvc_compile_shader(context_, result_);
+    EXPECT_EQ(shaderc_spvc_compilation_status_success, status);
+  }
 }
 
 TEST_F(CompileTest, ValidShaderIntoMslPasses) {
-  shaderc_compilation_status status = shaderc_spvc_initialize_for_msl(
-      context_, kWebGPUShaderBinary,
-      sizeof(kWebGPUShaderBinary) / sizeof(uint32_t), options_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
-  EXPECT_NE(context_->cross_compiler.get(), nullptr);
-
-  status = shaderc_spvc_compile_shader(context_, result_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
+  {
+    shaderc_spvc_initialization_status status = shaderc_spvc_initialize_for_msl(
+        context_, kWebGPUShaderBinary,
+        sizeof(kWebGPUShaderBinary) / sizeof(uint32_t), options_);
+    EXPECT_EQ(shaderc_spvc_initialization_status_success, status);
+    EXPECT_NE(context_->cross_compiler.get(), nullptr);
+  }
+  {
+    shaderd_spvc_compilation_status status =
+        shaderc_spvc_compile_shader(context_, result_);
+    EXPECT_EQ(shaderc_spvc_compilation_status_success, status);
+  }
 }
 
 TEST_F(CompileTest, ValidShaderIntoVulkanPasses) {
-  shaderc_compilation_status status = shaderc_spvc_initialize_for_vulkan(
-      context_, kWebGPUShaderBinary,
-      sizeof(kWebGPUShaderBinary) / sizeof(uint32_t), options_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
-  EXPECT_NE(context_->cross_compiler.get(), nullptr);
-
-  status = shaderc_spvc_compile_shader(context_, result_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
+  {
+    shaderc_spvc_initialization_status status =
+        shaderc_spvc_initialize_for_vulkan(
+            context_, kWebGPUShaderBinary,
+            sizeof(kWebGPUShaderBinary) / sizeof(uint32_t), options_);
+    EXPECT_EQ(shaderc_spvc_initialization_status_success, status);
+    EXPECT_NE(context_->cross_compiler.get(), nullptr);
+  }
+  {
+    shaderd_spvc_compilation_status status =
+        shaderc_spvc_compile_shader(context_, result_);
+    EXPECT_EQ(shaderc_spvc_compilation_status_success, status);
+  }
 }
 
 }  // anonymous namespace
