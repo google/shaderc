@@ -32,15 +32,15 @@ class CompileTest : public testing::Test {
 
 TEST_F(CompileTest, Glsl) {
   {
-    shaderc_spvc_initialization_status status = context_.InitializeForGlsl(
+    shaderc_spvc_status status = context_.InitializeForGlsl(
         kSmokeShaderBinary, sizeof(kSmokeShaderBinary) / sizeof(uint32_t),
         options_);
-    EXPECT_EQ(shaderc_spvc_initialization_status_success, status);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
   }
 
   {
-    shaderc_spvc_compilation_status status = context_.CompileShader(&result_);
-    EXPECT_EQ(shaderc_spvc_compilation_status_success, status);
+    shaderc_spvc_status status = context_.CompileShader(&result_);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
     EXPECT_NE(0, result_.GetStringOutput().size());
     EXPECT_EQ(0, result_.GetBinaryOutput().size());
   }
@@ -48,14 +48,14 @@ TEST_F(CompileTest, Glsl) {
 
 TEST_F(CompileTest, Hlsl) {
   {
-    shaderc_spvc_initialization_status status = context_.InitializeForHlsl(
+    shaderc_spvc_status status = context_.InitializeForHlsl(
         kSmokeShaderBinary, sizeof(kSmokeShaderBinary) / sizeof(uint32_t),
         options_);
-    EXPECT_EQ(shaderc_spvc_initialization_status_success, status);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
   }
   {
-    shaderc_spvc_compilation_status status = context_.CompileShader(&result_);
-    EXPECT_EQ(shaderc_spvc_compilation_status_success, status);
+    shaderc_spvc_status status = context_.CompileShader(&result_);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
     EXPECT_NE(0, result_.GetStringOutput().size());
     EXPECT_EQ(0, result_.GetBinaryOutput().size());
   }
@@ -63,15 +63,15 @@ TEST_F(CompileTest, Hlsl) {
 
 TEST_F(CompileTest, Msl) {
   {
-    shaderc_spvc_initialization_status status = context_.InitializeForMsl(
+    shaderc_spvc_status status = context_.InitializeForMsl(
         kSmokeShaderBinary, sizeof(kSmokeShaderBinary) / sizeof(uint32_t),
         options_);
-    EXPECT_EQ(shaderc_spvc_initialization_status_success, status);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
   }
 
   {
-    shaderc_spvc_compilation_status status = context_.CompileShader(&result_);
-    EXPECT_EQ(shaderc_spvc_compilation_status_success, status);
+    shaderc_spvc_status status = context_.CompileShader(&result_);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
     EXPECT_NE(0, result_.GetStringOutput().size());
     EXPECT_EQ(0, result_.GetBinaryOutput().size());
   }
@@ -79,14 +79,14 @@ TEST_F(CompileTest, Msl) {
 
 TEST_F(CompileTest, Vulkan) {
   {
-    shaderc_spvc_initialization_status status = context_.InitializeForVulkan(
+    shaderc_spvc_status status = context_.InitializeForVulkan(
         kSmokeShaderBinary, sizeof(kSmokeShaderBinary) / sizeof(uint32_t),
         options_);
-    EXPECT_EQ(shaderc_spvc_initialization_status_success, status);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
   }
   {
-    shaderc_spvc_compilation_status status = context_.CompileShader(&result_);
-    EXPECT_EQ(shaderc_spvc_compilation_status_success, status);
+    shaderc_spvc_status status = context_.CompileShader(&result_);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
     EXPECT_EQ(0, result_.GetStringOutput().size());
     EXPECT_NE(0, result_.GetBinaryOutput().size());
   }
