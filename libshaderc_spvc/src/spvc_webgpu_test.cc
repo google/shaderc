@@ -55,7 +55,7 @@ TEST_F(CompileTest, ValidShaderIntoGlslPasses) {
     EXPECT_NE(context_->cross_compiler.get(), nullptr);
   }
   {
-    shaderd_spvc_compilation_status status =
+    shaderc_spvc_status status =
         shaderc_spvc_compile_shader(context_, result_);
     EXPECT_EQ(shaderc_spvc_status_success, status);
   }
@@ -70,7 +70,7 @@ TEST_F(CompileTest, ValidShaderIntoHlslPasses) {
     EXPECT_NE(context_->cross_compiler.get(), nullptr);
   }
   {
-    shaderd_spvc_compilation_status status =
+    shaderc_spvc_status status =
         shaderc_spvc_compile_shader(context_, result_);
     EXPECT_EQ(shaderc_spvc_status_success, status);
   }
@@ -85,7 +85,7 @@ TEST_F(CompileTest, ValidShaderIntoMslPasses) {
     EXPECT_NE(context_->cross_compiler.get(), nullptr);
   }
   {
-    shaderd_spvc_compilation_status status =
+    shaderc_spvc_status status =
         shaderc_spvc_compile_shader(context_, result_);
     EXPECT_EQ(shaderc_spvc_status_success, status);
   }
@@ -100,7 +100,7 @@ TEST_F(CompileTest, ValidShaderIntoVulkanPasses) {
     EXPECT_NE(context_->cross_compiler.get(), nullptr);
   }
   {
-    shaderd_spvc_compilation_status status =
+    shaderc_spvc_status status =
         shaderc_spvc_compile_shader(context_, result_);
     EXPECT_EQ(shaderc_spvc_status_success, status);
   }
