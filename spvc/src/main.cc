@@ -324,8 +324,7 @@ int main(int argc, char** argv) {
   options.SetMSLDiscreteDescriptorSets(msl_discrete_descriptor);
 
   shaderc_spvc::CompilationResult result;
-  shaderc_compilation_status status =
-      shaderc_compilation_status_configuration_error;
+  shaderc_spvc_status status = shaderc_spvc_status_configuration_error;
 
   if (output_language == "glsl") {
     status = context.InitializeForGlsl((const uint32_t*)input.data(),
@@ -345,16 +344,16 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  if (status == shaderc_compilation_status_success)
+  if (status == shaderc_spvc_status_success)
     status = context.CompileShader(&result);
 
   switch (status) {
-    case shaderc_compilation_status_validation_error: {
+    case shaderc_spvc_status_validation_error: {
       std::cerr << "validation failed:\n" << context.GetMessages() << std::endl;
       return 1;
     }
 
-    case shaderc_compilation_status_success: {
+    case shaderc_spvc_status_success: {
       const char* path = output_path.data();
       if (output_language != "vulkan") {
         if (path && strcmp(path, "-")) {
@@ -377,7 +376,7 @@ int main(int argc, char** argv) {
       return 0;
     }
 
-    case shaderc_compilation_status_compilation_error: {
+    case shaderc_spvc_status_compilation_error: {
       std::cerr << "compilation failed:\n"
                 << context.GetMessages() << std::endl;
       return 1;
