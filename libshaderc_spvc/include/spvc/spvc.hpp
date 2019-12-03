@@ -352,7 +352,12 @@ class Context {
     return shaderc_spvc_compile_shader(context_.get(), result->result_.get());
   }
 
-  void set_decoration(uint32_t id, uint32_t decoration, uint32_t argument){
+  // Set spirv_cross decoration (added for HLSL support in Dawn)
+  // Given an id, decoration and argument, the decoration flag on the id is set,
+  // assuming id is valid.
+  shaderc_compilation_status SetDecoration(
+      const shaderc_spvc_context_t context, uint32_t id,
+      shaderc_spvc_decoration decoration, uint32_t argument){
     return shaderc_spvc_set_decoration(context_.get(), id, decoration, argument);
   }
 
