@@ -361,6 +361,15 @@ class Context {
     return shaderc_spvc_set_decoration(context_.get(), id, decoration, argument);
   }
 
+  // Get spirv_cross decoration (added for GLSL support in Dawn)
+  // Given an id and a decoration, result is sent out through |argument|
+  // if |id| does not exist, returns an error message
+  shaderc_compilation_status shaderc_spvc_get_decoration(
+      const shaderc_spvc_context_t context, uint32_t id,
+      shaderc_spvc_decoration decoration, uint32_t* argument){
+    return shaderc_spvc_get_decoration(context_.get(), id, decoration, argument);
+  }
+
  private:
   Context(const Context&) = delete;
   Context& operator=(const Context& other) = delete;
