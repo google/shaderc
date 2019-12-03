@@ -32,23 +32,16 @@ typedef enum {
   shaderc_spvc_msl_platform_macos,
 } shaderc_spvc_msl_platform;
 
-// TODO(rharrison): Convert this to a real enum instead of a weird proxy around
-// the existing enum, once Dawn is using the new names.
-typedef shaderc_compilation_status shaderc_spvc_status;
-
-// These are temporary defines that will be removed once the above typedef is
-// converted to an enum.
-#define shaderc_spvc_status_success shaderc_compilation_status_success
-#define shaderc_spvc_status_compilation_error \
-  shaderc_compilation_status_compilation_error
-#define shaderc_spvc_status_internal_error \
-  shaderc_compilation_status_internal_error
-#define shaderc_spvc_status_validation_error \
-  shaderc_compilation_status_validation_error
-#define shaderc_spvc_status_transformation_error \
-  shaderc_compilation_status_transformation_error
-#define shaderc_spvc_status_configuration_error \
-  shaderc_compilation_status_configuration_error
+// Return code for spvc API calls. shaderc_spvc_status_success indicates success
+// completion of the operation, all others indicate some sort of failure.
+typedef enum {
+  shaderc_spvc_status_success,
+  shaderc_spvc_status_compilation_error,
+  shaderc_spvc_status_internal_error,
+  shaderc_spvc_status_validation_error,
+  shaderc_spvc_status_transformation_error,
+  shaderc_spvc_status_configuration_error,
+} shaderc_spvc_status;
 
 // An opaque handle to an object that manages all compiler state.
 typedef struct shaderc_spvc_context* shaderc_spvc_context_t;
