@@ -38,51 +38,63 @@ class CompileTest : public testing::Test {
 };
 
 TEST_F(CompileTest, Glsl) {
-  shaderc_compilation_status status = context_.InitializeForGlsl(
-      kWebGPUShaderBinary, sizeof(kWebGPUShaderBinary) / sizeof(uint32_t),
-      options_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
-
-  status = context_.CompileShader(&result_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
-  EXPECT_NE(0, result_.GetStringOutput().size());
-  EXPECT_EQ(0, result_.GetBinaryOutput().size());
+  {
+    shaderc_spvc_status status = context_.InitializeForGlsl(
+        kWebGPUShaderBinary, sizeof(kWebGPUShaderBinary) / sizeof(uint32_t),
+        options_);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
+  }
+  {
+    shaderc_spvc_status status = context_.CompileShader(&result_);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
+    EXPECT_NE(0, result_.GetStringOutput().size());
+    EXPECT_EQ(0, result_.GetBinaryOutput().size());
+  }
 }
 
 TEST_F(CompileTest, Hlsl) {
-  shaderc_compilation_status status = context_.InitializeForHlsl(
-      kWebGPUShaderBinary, sizeof(kWebGPUShaderBinary) / sizeof(uint32_t),
-      options_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
-
-  status = context_.CompileShader(&result_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
-  EXPECT_NE(0, result_.GetStringOutput().size());
-  EXPECT_EQ(0, result_.GetBinaryOutput().size());
+  {
+    shaderc_spvc_status status = context_.InitializeForHlsl(
+        kWebGPUShaderBinary, sizeof(kWebGPUShaderBinary) / sizeof(uint32_t),
+        options_);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
+  }
+  {
+    shaderc_spvc_status status = context_.CompileShader(&result_);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
+    EXPECT_NE(0, result_.GetStringOutput().size());
+    EXPECT_EQ(0, result_.GetBinaryOutput().size());
+  }
 }
 
 TEST_F(CompileTest, Msl) {
-  shaderc_compilation_status status = context_.InitializeForMsl(
-      kWebGPUShaderBinary, sizeof(kWebGPUShaderBinary) / sizeof(uint32_t),
-      options_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
-
-  status = context_.CompileShader(&result_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
-  EXPECT_NE(0, result_.GetStringOutput().size());
-  EXPECT_EQ(0, result_.GetBinaryOutput().size());
+  {
+    shaderc_spvc_status status = context_.InitializeForMsl(
+        kWebGPUShaderBinary, sizeof(kWebGPUShaderBinary) / sizeof(uint32_t),
+        options_);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
+  }
+  {
+    shaderc_spvc_status status = context_.CompileShader(&result_);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
+    EXPECT_NE(0, result_.GetStringOutput().size());
+    EXPECT_EQ(0, result_.GetBinaryOutput().size());
+  }
 }
 
 TEST_F(CompileTest, Vulkan) {
-  shaderc_compilation_status status = context_.InitializeForVulkan(
-      kWebGPUShaderBinary, sizeof(kWebGPUShaderBinary) / sizeof(uint32_t),
-      options_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
-
-  status = context_.CompileShader(&result_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
-  EXPECT_EQ(0, result_.GetStringOutput().size());
-  EXPECT_NE(0, result_.GetBinaryOutput().size());
+  {
+    shaderc_spvc_status status = context_.InitializeForVulkan(
+        kWebGPUShaderBinary, sizeof(kWebGPUShaderBinary) / sizeof(uint32_t),
+        options_);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
+  }
+  {
+    shaderc_spvc_status status = context_.CompileShader(&result_);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
+    EXPECT_EQ(0, result_.GetStringOutput().size());
+    EXPECT_NE(0, result_.GetBinaryOutput().size());
+  }
 }
 
 }  // anonymous namespace

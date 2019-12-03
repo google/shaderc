@@ -228,26 +228,25 @@ size_t shaderc_spvc_compile_options_set_for_fuzzing(
   return sizeof(*options);
 }
 
-shaderc_compilation_status shaderc_spvc_initialize_impl(
+shaderc_spvc_status shaderc_spvc_initialize_impl(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options,
-    shaderc_compilation_status (*generator)(const shaderc_spvc_context_t,
-                                            const uint32_t*, size_t,
-                                            shaderc_spvc_compile_options_t)) {
-  if (!context) return shaderc_compilation_status_configuration_error;
-  shaderc_compilation_status status =
-      spvc_private::validate_and_translate_spirv(
-          context, source, source_len, options, &context->intermediate_shader);
-  if (status != shaderc_compilation_status_success) return status;
+    shaderc_spvc_status (*generator)(const shaderc_spvc_context_t,
+                                     const uint32_t*, size_t,
+                                     shaderc_spvc_compile_options_t)) {
+  if (!context) return shaderc_spvc_status_configuration_error;
+  shaderc_spvc_status status = spvc_private::validate_and_translate_spirv(
+      context, source, source_len, options, &context->intermediate_shader);
+  if (status != shaderc_spvc_status_success) return status;
 
   status = generator(context, context->intermediate_shader.data(),
                      context->intermediate_shader.size(), options);
-  if (status != shaderc_compilation_status_success) return status;
+  if (status != shaderc_spvc_status_success) return status;
 
-  return shaderc_compilation_status_success;
+  return shaderc_spvc_status_success;
 }
 
-shaderc_compilation_status shaderc_spvc_initialize_for_glsl(
+shaderc_spvc_status shaderc_spvc_initialize_for_glsl(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options) {
   context->target_lang = SPVC_TARGET_LANG_GLSL;
@@ -255,7 +254,7 @@ shaderc_compilation_status shaderc_spvc_initialize_for_glsl(
                                       spvc_private::generate_glsl_compiler);
 }
 
-shaderc_compilation_status shaderc_spvc_initialize_for_hlsl(
+shaderc_spvc_status shaderc_spvc_initialize_for_hlsl(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options) {
   context->target_lang = SPVC_TARGET_LANG_HLSL;
@@ -263,7 +262,7 @@ shaderc_compilation_status shaderc_spvc_initialize_for_hlsl(
                                       spvc_private::generate_hlsl_compiler);
 }
 
-shaderc_compilation_status shaderc_spvc_initialize_for_msl(
+shaderc_spvc_status shaderc_spvc_initialize_for_msl(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options) {
   context->target_lang = SPVC_TARGET_LANG_MSL;
@@ -271,7 +270,7 @@ shaderc_compilation_status shaderc_spvc_initialize_for_msl(
                                       spvc_private::generate_msl_compiler);
 }
 
-shaderc_compilation_status shaderc_spvc_initialize_for_vulkan(
+shaderc_spvc_status shaderc_spvc_initialize_for_vulkan(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options) {
   context->target_lang = SPVC_TARGET_LANG_VULKAN;
@@ -279,23 +278,23 @@ shaderc_compilation_status shaderc_spvc_initialize_for_vulkan(
                                       spvc_private::generate_vulkan_compiler);
 }
 
-shaderc_compilation_status shaderc_spvc_compile_shader(
+shaderc_spvc_status shaderc_spvc_compile_shader(
     const shaderc_spvc_context_t context,
     shaderc_spvc_compilation_result_t result) {
   if (!context->cross_compiler ||
       context->target_lang == SPVC_TARGET_LANG_UNKNOWN) {
-    return shaderc_compilation_status_configuration_error;
+    return shaderc_spvc_status_configuration_error;
   }
 
   if (context->target_lang == SPVC_TARGET_LANG_VULKAN) {
     // No actual cross compilation is needed, since the intermediate shader is
     // already in Vulkan SPIR->V.
     result->binary_output = context->intermediate_shader;
-    return shaderc_compilation_status_success;
+    return shaderc_spvc_status_success;
   } else {
-    shaderc_compilation_status status =
+    shaderc_spvc_status status =
         spvc_private::generate_shader(context->cross_compiler.get(), result);
-    if (status != shaderc_compilation_status_success) {
+    if (status != shaderc_spvc_status_success) {
       context->messages.append("Compilation failed.  Partial source:\n");
       if (context->target_lang == SPVC_TARGET_LANG_GLSL) {
         spirv_cross::CompilerGLSL* cast_compiler =

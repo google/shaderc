@@ -71,78 +71,90 @@ TEST(Init, MultipleThreadsCalling) {
 #endif
 
 TEST_F(CompileTest, ValidShaderIntoGlslPasses) {
-  shaderc_compilation_status status = shaderc_spvc_initialize_for_glsl(
-      context_, kSmokeShaderBinary,
-      sizeof(kSmokeShaderBinary) / sizeof(uint32_t), options_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
-  EXPECT_NE(context_->cross_compiler.get(), nullptr);
-
-  status = shaderc_spvc_compile_shader(context_, result_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
+  {
+    shaderc_spvc_status status = shaderc_spvc_initialize_for_glsl(
+        context_, kSmokeShaderBinary,
+        sizeof(kSmokeShaderBinary) / sizeof(uint32_t), options_);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
+    EXPECT_NE(context_->cross_compiler.get(), nullptr);
+  }
+  {
+    shaderc_spvc_status status = shaderc_spvc_compile_shader(context_, result_);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
+  }
 }
 
 TEST_F(CompileTest, InvalidShaderIntoGlslPasses) {
-  shaderc_compilation_status status = shaderc_spvc_initialize_for_glsl(
+  shaderc_spvc_status status = shaderc_spvc_initialize_for_glsl(
       context_, kInvalidShaderBinary,
       sizeof(kInvalidShaderBinary) / sizeof(uint32_t), options_);
-  EXPECT_NE(shaderc_compilation_status_success, status);
+  EXPECT_NE(shaderc_spvc_status_success, status);
   EXPECT_EQ(context_->cross_compiler.get(), nullptr);
 }
 
 TEST_F(CompileTest, ValidShaderIntoHlslPasses) {
-  shaderc_compilation_status status = shaderc_spvc_initialize_for_hlsl(
-      context_, kSmokeShaderBinary,
-      sizeof(kSmokeShaderBinary) / sizeof(uint32_t), options_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
-  EXPECT_NE(context_->cross_compiler.get(), nullptr);
-
-  status = shaderc_spvc_compile_shader(context_, result_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
+  {
+    shaderc_spvc_status status = shaderc_spvc_initialize_for_hlsl(
+        context_, kSmokeShaderBinary,
+        sizeof(kSmokeShaderBinary) / sizeof(uint32_t), options_);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
+    EXPECT_NE(context_->cross_compiler.get(), nullptr);
+  }
+  {
+    shaderc_spvc_status status = shaderc_spvc_compile_shader(context_, result_);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
+  }
 }
 
 TEST_F(CompileTest, InvalidShaderIntoHlslPasses) {
-  shaderc_compilation_status status = shaderc_spvc_initialize_for_hlsl(
+  shaderc_spvc_status status = shaderc_spvc_initialize_for_hlsl(
       context_, kInvalidShaderBinary,
       sizeof(kInvalidShaderBinary) / sizeof(uint32_t), options_);
-  EXPECT_NE(shaderc_compilation_status_success, status);
+  EXPECT_NE(shaderc_spvc_status_success, status);
   EXPECT_EQ(context_->cross_compiler.get(), nullptr);
 }
 
 TEST_F(CompileTest, ValidShaderIntoMslPasses) {
-  shaderc_compilation_status status = shaderc_spvc_initialize_for_msl(
-      context_, kSmokeShaderBinary,
-      sizeof(kSmokeShaderBinary) / sizeof(uint32_t), options_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
-  EXPECT_NE(context_->cross_compiler.get(), nullptr);
-
-  status = shaderc_spvc_compile_shader(context_, result_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
+  {
+    shaderc_spvc_status status = shaderc_spvc_initialize_for_msl(
+        context_, kSmokeShaderBinary,
+        sizeof(kSmokeShaderBinary) / sizeof(uint32_t), options_);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
+    EXPECT_NE(context_->cross_compiler.get(), nullptr);
+  }
+  {
+    shaderc_spvc_status status = shaderc_spvc_compile_shader(context_, result_);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
+  }
 }
 
 TEST_F(CompileTest, InvalidShaderIntoMslPasses) {
-  shaderc_compilation_status status = shaderc_spvc_initialize_for_msl(
+  shaderc_spvc_status status = shaderc_spvc_initialize_for_msl(
       context_, kInvalidShaderBinary,
       sizeof(kInvalidShaderBinary) / sizeof(uint32_t), options_);
-  EXPECT_NE(shaderc_compilation_status_success, status);
+  EXPECT_NE(shaderc_spvc_status_success, status);
   EXPECT_EQ(context_->cross_compiler.get(), nullptr);
 }
 
 TEST_F(CompileTest, ValidShaderIntoVulkanPasses) {
-  shaderc_compilation_status status = shaderc_spvc_initialize_for_vulkan(
-      context_, kSmokeShaderBinary,
-      sizeof(kSmokeShaderBinary) / sizeof(uint32_t), options_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
-  EXPECT_NE(context_->cross_compiler.get(), nullptr);
-
-  status = shaderc_spvc_compile_shader(context_, result_);
-  EXPECT_EQ(shaderc_compilation_status_success, status);
+  {
+    shaderc_spvc_status status = shaderc_spvc_initialize_for_vulkan(
+        context_, kSmokeShaderBinary,
+        sizeof(kSmokeShaderBinary) / sizeof(uint32_t), options_);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
+    EXPECT_NE(context_->cross_compiler.get(), nullptr);
+  }
+  {
+    shaderc_spvc_status status = shaderc_spvc_compile_shader(context_, result_);
+    EXPECT_EQ(shaderc_spvc_status_success, status);
+  }
 }
 
 TEST_F(CompileTest, InvalidShaderIntoVulkanPasses) {
-  shaderc_compilation_status status = shaderc_spvc_initialize_for_vulkan(
+  shaderc_spvc_status status = shaderc_spvc_initialize_for_vulkan(
       context_, kInvalidShaderBinary,
       sizeof(kInvalidShaderBinary) / sizeof(uint32_t), options_);
-  EXPECT_NE(shaderc_compilation_status_success, status);
+  EXPECT_NE(shaderc_spvc_status_success, status);
   EXPECT_EQ(context_->cross_compiler.get(), nullptr);
 }
 

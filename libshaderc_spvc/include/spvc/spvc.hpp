@@ -316,39 +316,39 @@ class Context {
   }
 
   // Initializes state for compiling SPIR-V to GLSL.
-  shaderc_compilation_status InitializeForGlsl(
-      const uint32_t* source, size_t source_len,
-      const CompileOptions& options) const {
+  shaderc_spvc_status InitializeForGlsl(const uint32_t* source,
+                                        size_t source_len,
+                                        const CompileOptions& options) const {
     return shaderc_spvc_initialize_for_glsl(context_.get(), source, source_len,
                                             options.options_.get());
   }
 
   // Initializes state for compiling SPIR-V to HLSL.
-  shaderc_compilation_status InitializeForHlsl(
-      const uint32_t* source, size_t source_len,
-      const CompileOptions& options) const {
+  shaderc_spvc_status InitializeForHlsl(const uint32_t* source,
+                                        size_t source_len,
+                                        const CompileOptions& options) const {
     return shaderc_spvc_initialize_for_hlsl(context_.get(), source, source_len,
                                             options.options_.get());
   }
 
   // Initializes state for compiling SPIR-V to MSL.
-  shaderc_compilation_status InitializeForMsl(
-      const uint32_t* source, size_t source_len,
-      const CompileOptions& options) const {
+  shaderc_spvc_status InitializeForMsl(const uint32_t* source,
+                                       size_t source_len,
+                                       const CompileOptions& options) const {
     return shaderc_spvc_initialize_for_msl(context_.get(), source, source_len,
                                            options.options_.get());
   }
 
   // Initializes state for compiling SPIR-V to Vulkan.
-  shaderc_compilation_status InitializeForVulkan(
-      const uint32_t* source, size_t source_len,
-      const CompileOptions& options) const {
+  shaderc_spvc_status InitializeForVulkan(const uint32_t* source,
+                                          size_t source_len,
+                                          const CompileOptions& options) const {
     return shaderc_spvc_initialize_for_vulkan(
         context_.get(), source, source_len, options.options_.get());
   }
 
   // After initialization compile the shader to desired language.
-  shaderc_compilation_status CompileShader(CompilationResult* result) {
+  shaderc_spvc_status CompileShader(CompilationResult* result) {
     return shaderc_spvc_compile_shader(context_.get(), result->result_.get());
   }
 
