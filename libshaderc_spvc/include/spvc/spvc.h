@@ -107,7 +107,7 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_set_remove_unused_variables(
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_robust_buffer_access_pass(
     shaderc_spvc_compile_options_t options, bool b);
 
-SHADERC_EXPORT  void shaderc_spvc_compile_options_set_emit_line_directives(
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_emit_line_directives(
     shaderc_spvc_compile_options_t options, bool b);
 // Sets the source shader environment, affecting which warnings or errors will
 // be issued during validation.
@@ -273,6 +273,10 @@ SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_initialize_for_vulkan(
 SHADERC_EXPORT shaderc_compilation_status
 shaderc_spvc_compile_shader(const shaderc_spvc_context_t context,
                             shaderc_spvc_compilation_result_t result);
+
+SHADERC_EXPORT void shaderc_spvc_set_decoration(
+    const shaderc_spvc_context_t context, uint32_t id,
+    uint32_t decoration, uint32_t argument);
 
 // The following functions, operating on shaderc_spvc_compilation_result_t
 // objects, offer only the basic thread-safety guarantee.

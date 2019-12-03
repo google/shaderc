@@ -352,6 +352,10 @@ class Context {
     return shaderc_spvc_compile_shader(context_.get(), result->result_.get());
   }
 
+  void set_decoration(uint32_t id, uint32_t decoration, uint32_t argument){
+    return shaderc_spvc_set_decoration(context_.get(), id, decoration, argument);
+  }
+
  private:
   Context(const Context&) = delete;
   Context& operator=(const Context& other) = delete;

@@ -140,10 +140,10 @@ void shaderc_spvc_compile_options_set_msl_platform(
   switch (platform) {
     case shaderc_spvc_msl_platform_ios:
       options->msl.platform = spirv_cross::CompilerMSL::Options::iOS;
-    break;
+      break;
     case shaderc_spvc_msl_platform_macos:
       options->msl.platform = spirv_cross::CompilerMSL::Options::macOS;
-    break;
+      break;
   }
 }
 
@@ -319,6 +319,14 @@ shaderc_compilation_status shaderc_spvc_compile_shader(
     }
     return status;
   }
+}
+
+void shaderc_spvc_set_decoration(const shaderc_spvc_context_t context,
+                                 uint32_t id, uint32_t decoration,
+                                 uint32_t argument) {
+  return context->cross_compiler->set_decoration(
+      static_cast<spirv_cross::ID>(id),
+      static_cast<spv::Decoration>(decoration), argument);
 }
 
 shaderc_spvc_compilation_result_t shaderc_spvc_result_create() {
