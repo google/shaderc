@@ -332,7 +332,30 @@ shaderc_spvc_status shaderc_spvc_set_decoration(
                                             spirv_cross_decoration, argument);
   } else {
     context->messages.append(
-        "Decoration Conversion failed.  shaderc_spvc_decoration not "
+        "Decoration conversion failed.  shaderc_spvc_decoration not "
+        "supported.\n ");
+  }
+  return status;
+}
+
+shaderc_compilation_status shaderc_spvc_get_decoration(
+    const shaderc_spvc_context_t context, uint32_t id,
+    shaderc_spvc_decoration decoration, uint32_t* argument_ptr) {
+  uint32_t& argument = *argument_ptr;
+  spv::Decoration spirv_cross_decoration;
+  shaderc_compilation_status status =
+      spvc_private::shaderc_spvc_decoration_to_spirv_cross_decoration(
+          decoration, &spirv_cross_decoration);
+  if (status == shaderc_compilation_status_success) {
+    argument = context->cross_compiler->get_decoration(
+        static_cast<spirv_cross::ID>(id), spirv_cross_decoration);
+    if (argument == 0) {
+      status = shaderc_compilation_status_internal_error;
+      context->messages.append("Getting decoration failed. id not found. \n ");
+    }
+  } else {
+    context->messages.append(
+        "Decoration conversion failed.  shaderc_spvc_decoration not "
         "supported.\n ");
   }
   return status;
