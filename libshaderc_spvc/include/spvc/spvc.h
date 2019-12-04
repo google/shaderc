@@ -71,6 +71,16 @@ typedef enum {
 // An opaque handle to an object that manages all compiler state.
 typedef struct shaderc_spvc_context* shaderc_spvc_context_t;
 
+// A mirror of spirv_cross::CombinedImageSampler
+struct shaderc_spvc_combined_image_sampler {
+  // The ID of the sampler2D variable.
+  uint32_t combined_id;
+  // The ID of the texture2D variable.
+  uint32_t image_id;
+  // The ID of the sampler variable.
+  uint32_t sampler_id;
+};
+
 // Create a spvc state handle.  A return of NULL indicates that there was an
 // error. Any function operating on a *_context_t must offer the basic
 // thread-safety guarantee.
@@ -97,6 +107,13 @@ SHADERC_EXPORT const char* shaderc_spvc_context_get_messages(
 // this is will be removed in the future without warning.
 SHADERC_EXPORT void* shaderc_spvc_context_get_compiler(
     const shaderc_spvc_context_t context);
+
+// Stores a remapping for the combined image samplers in |combined_image_samplers|.
+// |combined_image_samplers| is actually of type
+// shaderc_spvc_combined_image_sampler_vector_t aka
+// std::vector<shaderc_spvc_combined_image_sampler_t>&
+SHADERC_EXPORT void shaderc_spvc_get_combined_image_samplers(
+    const shaderc_spvc_context_t context, const void* combined_image_samplers);
 
 // If true, use spvc built in parser to generate IR for spirv-cross, otherwise
 // use spirv-cross's implementation.

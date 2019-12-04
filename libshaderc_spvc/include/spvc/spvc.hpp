@@ -359,6 +359,7 @@ class Context {
   shaderc_spvc_status SetDecoration(uint32_t id,
                                     shaderc_spvc_decoration decoration,
                                     uint32_t argument) {
+
     return shaderc_spvc_set_decoration(context_.get(), id, decoration, argument);
   }
 
@@ -396,9 +397,14 @@ class Context {
 
   // set |name| on a given |id| (added for GLSL support in Dawn)
   // Assuming id is valid.
-  void SetName(
-    const shaderc_spvc_context_t context, uint32_t id, const std::string &name){
+  void SetName(uint32_t id, const std::string &name){
     shaderc_spvc_set_name(context_.get(), id, name.c_str());
+    return;
+  }
+
+  // Stores a remapping for the combined image samplers in |sampler|.
+  void GetCombinedImageSamplers(const std::vector<shaderc_spvc_combined_image_sampler> &sampler){
+    shaderc_spvc_get_combined_image_samplers(context_.get(), sampler.data());
     return;
   }
 
