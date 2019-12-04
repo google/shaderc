@@ -338,29 +338,6 @@ shaderc_spvc_status shaderc_spvc_set_decoration(
   return status;
 }
 
-shaderc_compilation_status shaderc_spvc_get_decoration(
-    const shaderc_spvc_context_t context, uint32_t id,
-    shaderc_spvc_decoration decoration, uint32_t* argument_ptr) {
-  uint32_t& argument = *argument_ptr;
-  spv::Decoration spirv_cross_decoration;
-  shaderc_compilation_status status =
-      spvc_private::shaderc_spvc_decoration_to_spirv_cross_decoration(
-          decoration, &spirv_cross_decoration);
-  if (status == shaderc_compilation_status_success) {
-    argument = context->cross_compiler->get_decoration(
-        static_cast<spirv_cross::ID>(id), spirv_cross_decoration);
-    if (argument == 0) {
-      status = shaderc_compilation_status_internal_error;
-      context->messages.append("Getting decoration failed. id not found. \n ");
-    }
-  } else {
-    context->messages.append(
-        "Decoration conversion failed.  shaderc_spvc_decoration not "
-        "supported.\n ");
-  }
-  return status;
-}
-
 shaderc_spvc_status shaderc_spvc_get_decoration(
     const shaderc_spvc_context_t context, uint32_t id,
     shaderc_spvc_decoration decoration, uint32_t* argument_ptr) {
@@ -402,12 +379,6 @@ shaderc_spvc_status shaderc_spvc_unset_decoration(
   return status;
 }
 
-void shaderc_spvc_set_name(const shaderc_spvc_context_t context, uint32_t id,
-                           const char* name) {
-  context->cross_compiler->set_name(static_cast<spirv_cross::ID>(id), name);
-  return;
-}
-
 inline void ForEachSampler(
     std::function<void(uint32_t*, uint32_t*, uint32_t*)>& f,
     const shaderc_spvc_context_t context) {
@@ -423,10 +394,11 @@ inline void ForEachSampler(
 inline void shaderc_spvc_for_each_combined_image_sampler(
     const shaderc_spvc_context_t context, const void* f) {
   const auto func =
-      reinterpret_cast<std::function<void(uint32_t*, uint32_t*, uint32_t*)>&>(f);
+      reinterpret_cast<std::function<void(uint32_t*, uint32_t*, uint32_t*)>&>(
+          f);
   ForEachSampler(
       [&func](uint32_t combined_sampler_id, uint32_t combined_image_id,
-                      uint32_t combined_combined_id) {
+              uint32_t combined_combined_id) {
         func(combined_sampler_id, combined_image_id, combined_combined_id);
       },
       context);
@@ -435,6 +407,11 @@ inline void shaderc_spvc_for_each_combined_image_sampler(
 void shaderc_spvc_build_combined_image_samplers(
     const shaderc_spvc_context_t context) {
   context->cross_compiler->build_combined_image_samplers();
+  return;
+}
+
+void shaderc_spvc_set_name(const shaderc_spvc_context_t context) {
+  context->cross_compiler->set_name(id, name);
   return;
 }
 
