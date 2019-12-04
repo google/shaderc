@@ -139,4 +139,14 @@ shaderc_spvc_status generate_spvcir(const shaderc_spvc_context_t context,
                                     const uint32_t* source, size_t source_len,
                                     shaderc_spvc_compile_options_t options);
 
+// Converts a shaderc spvc decoration value to the equivalent spirv-cross
+// decoration value and sends the result out through |spirv_cross_decoration|.
+// If the conversion fails, returns an error result.
+// Only WebGPU decorations are supported. More cases can be added if necessary.
+// PS. Added because spirv_cross forks Vulkan spirv headers instead of having
+// it as a dependency.
+shaderc_compilation_status shaderc_spvc_decoration_to_spirv_cross_decoration(
+    const shaderc_spvc_decoration decoration,
+    spv::Decoration* spirv_cross_decoration);
+
 }  // namespace spvc_private

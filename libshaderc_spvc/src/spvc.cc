@@ -84,7 +84,7 @@ void shaderc_spvc_compile_options_set_robust_buffer_access_pass(
 }
 
 void shaderc_spvc_compile_options_set_emit_line_directives(
-  shaderc_spvc_compile_options_t options, bool b){
+    shaderc_spvc_compile_options_t options, bool b) {
   options->glsl.emit_line_directives = b;
 }
 
@@ -140,10 +140,10 @@ void shaderc_spvc_compile_options_set_msl_platform(
   switch (platform) {
     case shaderc_spvc_msl_platform_ios:
       options->msl.platform = spirv_cross::CompilerMSL::Options::iOS;
-    break;
+      break;
     case shaderc_spvc_msl_platform_macos:
       options->msl.platform = spirv_cross::CompilerMSL::Options::macOS;
-    break;
+      break;
   }
 }
 
@@ -318,6 +318,24 @@ shaderc_spvc_status shaderc_spvc_compile_shader(
     }
     return status;
   }
+}
+
+shaderc_compilation_status shaderc_spvc_set_decoration(
+    const shaderc_spvc_context_t context, uint32_t id,
+    shaderc_spvc_decoration decoration, uint32_t argument) {
+  spv::Decoration spirv_cross_decoration;
+  shaderc_compilation_status status =
+      spvc_private::shaderc_spvc_decoration_to_spirv_cross_decoration(
+          decoration, &spirv_cross_decoration);
+  if (status == shaderc_compilation_status_success) {
+    context->cross_compiler->set_decoration(static_cast<spirv_cross::ID>(id),
+                                            spirv_cross_decoration, argument);
+  } else {
+    context->messages.append(
+        "Decoration Conversion failed.  shaderc_spvc_decoration not "
+        "supported.\n ");
+  }
+  return status;
 }
 
 shaderc_spvc_compilation_result_t shaderc_spvc_result_create() {

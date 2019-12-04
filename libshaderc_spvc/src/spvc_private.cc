@@ -440,4 +440,110 @@ shaderc_spvc_status generate_spvcir(const shaderc_spvc_context_t context,
   return shaderc_spvc_status_success;
 }
 
+shaderc_compilation_status shaderc_spvc_decoration_to_spirv_cross_decoration(
+    const shaderc_spvc_decoration decoration,
+    spv::Decoration* spirv_cross_decoration_ptr) {
+  if (!spirv_cross_decoration_ptr)
+    return shaderc_compilation_status_internal_error;
+
+  spv::Decoration& spirv_cross_decoration = *spirv_cross_decoration_ptr;
+  shaderc_compilation_status status;
+
+  switch (decoration) {
+    case SHADERC_SPVC_DECORATION_SPECID:
+      spirv_cross_decoration = spv::DecorationSpecId;
+      status = shaderc_compilation_status_success;
+      break;
+    case SHADERC_SPVC_DECORATION_BLOCK:
+      spirv_cross_decoration = spv::DecorationBlock;
+      status = shaderc_compilation_status_success;
+      break;
+    case SHADERC_SPVC_DECORATION_ROWMAJOR:
+      spirv_cross_decoration = spv::DecorationRowMajor;
+      status = shaderc_compilation_status_success;
+      break;
+    case SHADERC_SPVC_DECORATION_COLMAJOR:
+      spirv_cross_decoration = spv::DecorationColMajor;
+      status = shaderc_compilation_status_success;
+      break;
+    case SHADERC_SPVC_DECORATION_ARRAYSTRIDE:
+      spirv_cross_decoration = spv::DecorationArrayStride;
+      status = shaderc_compilation_status_success;
+      break;
+    case SHADERC_SPVC_DECORATION_MATRIXSTRIDE:
+      spirv_cross_decoration = spv::DecorationMatrixStride;
+      status = shaderc_compilation_status_success;
+      break;
+    case SHADERC_SPVC_DECORATION_BUILTIN:
+      spirv_cross_decoration = spv::DecorationBuiltIn;
+      status = shaderc_compilation_status_success;
+      break;
+    case SHADERC_SPVC_DECORATION_NOPERSPECTIVE:
+      spirv_cross_decoration = spv::DecorationNoPerspective;
+      status = shaderc_compilation_status_success;
+      break;
+    case SHADERC_SPVC_DECORATION_FLAT:
+      spirv_cross_decoration = spv::DecorationFlat;
+      status = shaderc_compilation_status_success;
+      break;
+    case SHADERC_SPVC_DECORATION_CENTROID:
+      spirv_cross_decoration = spv::DecorationCentroid;
+      status = shaderc_compilation_status_success;
+      break;
+    case SHADERC_SPVC_DECORATION_RESTRICT:
+      spirv_cross_decoration = spv::DecorationRestrict;
+      status = shaderc_compilation_status_success;
+      break;
+    case SHADERC_SPVC_DECORATION_ALIASED:
+      spirv_cross_decoration = spv::DecorationAliased;
+      status = shaderc_compilation_status_success;
+      break;
+    case SHADERC_SPVC_DECORATION_NONWRITABLE:
+      spirv_cross_decoration = spv::DecorationNonWritable;
+      status = shaderc_compilation_status_success;
+      break;
+    case SHADERC_SPVC_DECORATION_NONREADABLE:
+      spirv_cross_decoration = spv::DecorationNonReadable;
+      status = shaderc_compilation_status_success;
+      break;
+    case SHADERC_SPVC_DECORATION_UNIFORM:
+      spirv_cross_decoration = spv::DecorationUniform;
+      status = shaderc_compilation_status_success;
+      break;
+    case SHADERC_SPVC_DECORATION_LOCATION:
+      spirv_cross_decoration = spv::DecorationLocation;
+      status = shaderc_compilation_status_success;
+      break;
+    case SHADERC_SPVC_DECORATION_COMPONENT:
+      spirv_cross_decoration = spv::DecorationComponent;
+      status = shaderc_compilation_status_success;
+      break;
+    case SHADERC_SPVC_DECORATION_INDEX:
+      spirv_cross_decoration = spv::DecorationIndex;
+      status = shaderc_compilation_status_success;
+      break;
+    case SHADERC_SPVC_DECORATION_BINDING:
+      spirv_cross_decoration = spv::DecorationBinding;
+      status = shaderc_compilation_status_success;
+      break;
+    case SHADERC_SPVC_DECORATION_DESCRIPTORSET:
+      spirv_cross_decoration = spv::DecorationDescriptorSet;
+      status = shaderc_compilation_status_success;
+      break;
+    case SHADERC_SPVC_DECORATION_OFFSET:
+      spirv_cross_decoration = spv::DecorationOffset;
+      status = shaderc_compilation_status_success;
+      break;
+    case SHADERC_SPVC_DECORATION_NOCONTRACTION:
+      spirv_cross_decoration = spv::DecorationNoContraction;
+      status = shaderc_compilation_status_success;
+      break;
+    default:
+      spirv_cross_decoration = spv::DecorationMax;
+      status = shaderc_compilation_status_internal_error;
+      break;
+  }
+  return status;
+}
+
 }  // namespace spvc_private

@@ -28,6 +28,31 @@ extern "C" {
 #include "shaderc/visibility.h"
 
 typedef enum {
+  SHADERC_SPVC_DECORATION_SPECID,
+  SHADERC_SPVC_DECORATION_BLOCK,
+  SHADERC_SPVC_DECORATION_ROWMAJOR,
+  SHADERC_SPVC_DECORATION_COLMAJOR,
+  SHADERC_SPVC_DECORATION_ARRAYSTRIDE,
+  SHADERC_SPVC_DECORATION_MATRIXSTRIDE,
+  SHADERC_SPVC_DECORATION_BUILTIN,
+  SHADERC_SPVC_DECORATION_NOPERSPECTIVE,
+  SHADERC_SPVC_DECORATION_FLAT,
+  SHADERC_SPVC_DECORATION_CENTROID,
+  SHADERC_SPVC_DECORATION_RESTRICT,
+  SHADERC_SPVC_DECORATION_ALIASED,
+  SHADERC_SPVC_DECORATION_NONWRITABLE,
+  SHADERC_SPVC_DECORATION_NONREADABLE,
+  SHADERC_SPVC_DECORATION_UNIFORM,
+  SHADERC_SPVC_DECORATION_LOCATION,
+  SHADERC_SPVC_DECORATION_COMPONENT,
+  SHADERC_SPVC_DECORATION_INDEX,
+  SHADERC_SPVC_DECORATION_BINDING,
+  SHADERC_SPVC_DECORATION_DESCRIPTORSET,
+  SHADERC_SPVC_DECORATION_OFFSET,
+  SHADERC_SPVC_DECORATION_NOCONTRACTION,
+} shaderc_spvc_decoration;
+
+typedef enum {
   shaderc_spvc_msl_platform_ios,
   shaderc_spvc_msl_platform_macos,
 } shaderc_spvc_msl_platform;
@@ -118,7 +143,7 @@ SHADERC_EXPORT void shaderc_spvc_compile_options_set_remove_unused_variables(
 SHADERC_EXPORT void shaderc_spvc_compile_options_set_robust_buffer_access_pass(
     shaderc_spvc_compile_options_t options, bool b);
 
-SHADERC_EXPORT  void shaderc_spvc_compile_options_set_emit_line_directives(
+SHADERC_EXPORT void shaderc_spvc_compile_options_set_emit_line_directives(
     shaderc_spvc_compile_options_t options, bool b);
 // Sets the source shader environment, affecting which warnings or errors will
 // be issued during validation.
@@ -284,6 +309,13 @@ SHADERC_EXPORT shaderc_spvc_status shaderc_spvc_initialize_for_vulkan(
 SHADERC_EXPORT shaderc_spvc_status
 shaderc_spvc_compile_shader(const shaderc_spvc_context_t context,
                             shaderc_spvc_compilation_result_t result);
+
+// Set spirv_cross decoration (added for HLSL support in Dawn)
+// Given an id, decoration and argument, the decoration flag on the id is set
+// Assuming id is valid.
+SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_set_decoration(
+    const shaderc_spvc_context_t context, uint32_t id,
+    shaderc_spvc_decoration decoration, uint32_t argument);
 
 // The following functions, operating on shaderc_spvc_compilation_result_t
 // objects, offer only the basic thread-safety guarantee.
