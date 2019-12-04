@@ -355,8 +355,7 @@ class Context {
   // Set spirv_cross decoration (added for HLSL support in Dawn)
   // Given an |id|, |decoration| and |argument|, the decoration flag on the id is
   // set Assuming |id| is valid.
-  shaderc_compilation_status SetDecoration(
-      const shaderc_spvc_context_t context, uint32_t id,
+  shaderc_compilation_status SetDecoration( uint32_t id,
       shaderc_spvc_decoration decoration, uint32_t argument){
     return shaderc_spvc_set_decoration(context_.get(), id, decoration, argument);
   }
@@ -365,25 +364,28 @@ class Context {
   // Get spirv_cross decoration (added for GLSL API support in Dawn)
   // Given an id and a decoration, result is sent out through |argument|
   // if |id| does not exist, returns an error message.
-  shaderc_compilation_status GetDecoration(
-      const shaderc_spvc_context_t context, uint32_t id,
+  shaderc_compilation_status GetDecoration( uint32_t id,
       shaderc_spvc_decoration decoration, uint32_t* argument){
     return shaderc_spvc_get_decoration(context_.get(), id, decoration, argument);
   }
 
   // Unset spirv_cross decoration (added for GLSL API support in Dawn)
   // Given an id and a decoration. Assuming id is valid.
-  shaderc_compilation_status UnSetDecoration(
-      const shaderc_spvc_context_t context, uint32_t id,
+  shaderc_compilation_status UnSetDecoration(uint32_t id,
       shaderc_spvc_decoration decoration){
     return shaderc_spvc_unset_decoration(context_.get(), id, decoration);
   }
 
   // set |name| on a given |id| (added for GLSL support in Dawn)
   // Assuming id is valid.
-  void SetName(
-    const shaderc_spvc_context_t context, uint32_t id, const std::string &name){
+  void SetName(uint32_t id, const std::string &name){
     shaderc_spvc_set_name(context_.get(), id, name.c_str());
+    return;
+  }
+
+  // Stores a remapping for the combined image samplers in |sampler|.
+  void GetCombinedImageSamplers(const std::vector<shaderc_spvc_combined_image_sampler> &sampler){
+    shaderc_spvc_get_combined_image_samplers(context_.get(), sampler.data());
     return;
   }
 

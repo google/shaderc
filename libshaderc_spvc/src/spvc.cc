@@ -381,7 +381,16 @@ shaderc_compilation_status shaderc_spvc_unset_decoration(
 
 void shaderc_spvc_set_name(const shaderc_spvc_context_t context, uint32_t id,
                            const char* name) {
-  context->cross_compiler->set_name(id, name);
+  context->cross_compiler->set_name(static_cast<spirv_cross::ID>(id), name);
+  return;
+}
+
+void shaderc_spvc_get_combined_image_samplers(
+    const shaderc_spvc_context_t context, const void* combined_image_samplers) {
+  auto spirv_cross_samplers =
+      context->cross_compiler->get_combined_image_samplers();
+  spvc_private::spirv_cross_combined_image_samplers_to_shaderc_spvc(
+      spirv_cross_samplers, combined_image_samplers);
   return;
 }
 
