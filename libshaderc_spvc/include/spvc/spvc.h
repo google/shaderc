@@ -311,8 +311,8 @@ shaderc_spvc_compile_shader(const shaderc_spvc_context_t context,
                             shaderc_spvc_compilation_result_t result);
 
 // Set spirv_cross decoration (added for HLSL support in Dawn)
-// Given an id, decoration and argument, the decoration flag on the id is set
-// Assuming id is valid.
+// Given an |id|, |decoration| and |argument|, the decoration flag on the id is
+// set. Assuming |id| is valid.
 SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_set_decoration(
     const shaderc_spvc_context_t context, uint32_t id,
     shaderc_spvc_decoration decoration, uint32_t argument);
@@ -330,7 +330,7 @@ SHADERC_EXPORT shaderc_compilation_status
 shaderc_spvc_unset_decoration(const shaderc_spvc_context_t context, uint32_t id,
                               shaderc_spvc_decoration decoration);
 
-// set |name| on a given |id| (added for GLSL support in Dawn)
+// set |name| on a given |id| (added for GLSL API support in Dawn)
 // Assuming |id| is valid.
 SHADERC_EXPORT void shaderc_spvc_set_name(const shaderc_spvc_context_t context,
                                           uint32_t id, const char* name);
