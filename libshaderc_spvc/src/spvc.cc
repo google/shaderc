@@ -415,6 +415,11 @@ void shaderc_spvc_set_name(const shaderc_spvc_context_t context) {
   return;
 }
 
+void shaderc_spvc_build_combined_image_samplers(
+    const shaderc_spvc_context_t context){
+  context->cross_compiler->build_combined_image_samplers();
+  return;}
+
 shaderc_spvc_compilation_result_t shaderc_spvc_result_create() {
   return new (std::nothrow) shaderc_spvc_compilation_result;
 }

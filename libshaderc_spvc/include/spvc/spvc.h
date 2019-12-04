@@ -108,12 +108,17 @@ SHADERC_EXPORT const char* shaderc_spvc_context_get_messages(
 SHADERC_EXPORT void* shaderc_spvc_context_get_compiler(
     const shaderc_spvc_context_t context);
 
-// Stores a remapping for the combined image samplers in |combined_image_samplers|.
-// |combined_image_samplers| is actually of type
+// Stores a remapping for the combined image samplers in
+// |combined_image_samplers|. |combined_image_samplers| is actually of type
 // shaderc_spvc_combined_image_sampler_vector_t aka
 // std::vector<shaderc_spvc_combined_image_sampler_t>&
 SHADERC_EXPORT void shaderc_spvc_get_combined_image_samplers(
     const shaderc_spvc_context_t context, const void* combined_image_samplers);
+
+// Analyzes all separate image and samplers used from the currently selected
+// entry point, and re-routes them all to a combined image sampler instead.
+SHADERC_EXPORT void shaderc_spvc_build_combined_image_samplers(
+    const shaderc_spvc_context_t context);
 
 // If true, use spvc built in parser to generate IR for spirv-cross, otherwise
 // use spirv-cross's implementation.
