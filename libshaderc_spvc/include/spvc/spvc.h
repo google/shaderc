@@ -317,12 +317,23 @@ SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_set_decoration(
     const shaderc_spvc_context_t context, uint32_t id,
     shaderc_spvc_decoration decoration, uint32_t argument);
 
-// Get spirv_cross decoration (added for GLSL support in Dawn)
+// Get spirv_cross decoration (added for GLSL API support in Dawn)
 // Given an id and a decoration, result is sent out through |argument|
-// if |id| does not exist, returns an error message
+// if |id| does not exist, returns an error message.
 SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_get_decoration(
     const shaderc_spvc_context_t context, uint32_t id,
     shaderc_spvc_decoration decoration, uint32_t* argument);
+
+// Unset spirv_cross decoration (added for GLSL API support in Dawn)
+// Given an id and a decoration. Assuming |id| is valid.
+SHADERC_EXPORT shaderc_compilation_status
+shaderc_spvc_unset_decoration(const shaderc_spvc_context_t context, uint32_t id,
+                              shaderc_spvc_decoration decoration);
+
+// set |name| on a given |id| (added for GLSL support in Dawn)
+// Assuming |id| is valid.
+SHADERC_EXPORT void shaderc_spvc_set_name(const shaderc_spvc_context_t context,
+                                          uint32_t id, const char* name);
 
 // The following functions, operating on shaderc_spvc_compilation_result_t
 // objects, offer only the basic thread-safety guarantee.

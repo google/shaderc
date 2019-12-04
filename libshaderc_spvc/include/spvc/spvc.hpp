@@ -352,22 +352,39 @@ class Context {
     return shaderc_spvc_compile_shader(context_.get(), result->result_.get());
   }
 
-  // Set spirv_cross decoration (added for HLSL support in Dawn)
-  // Given an id, decoration and argument, the decoration flag on the id is set,
-  // assuming id is valid.
-  shaderc_compilation_status SetDecoration(
+  // Get spirv_cross decoration (added for GLSL support in Dawn)
+  // Given an id and a decoration, result is sent out through |argument|
+  // if |id| does not exist, returns an error message.
+ shaderc_compilation_status SetDecoration(
       const shaderc_spvc_context_t context, uint32_t id,
       shaderc_spvc_decoration decoration, uint32_t argument){
     return shaderc_spvc_set_decoration(context_.get(), id, decoration, argument);
   }
 
-  // Get spirv_cross decoration (added for GLSL support in Dawn)
+
+  // Get spirv_cross decoration (added for GLSL API support in Dawn)
   // Given an id and a decoration, result is sent out through |argument|
-  // if |id| does not exist, returns an error message
-  shaderc_compilation_status shaderc_spvc_get_decoration(
+  // if |id| does not exist, returns an error message.
+  shaderc_compilation_status GetDecoration(
       const shaderc_spvc_context_t context, uint32_t id,
       shaderc_spvc_decoration decoration, uint32_t* argument){
     return shaderc_spvc_get_decoration(context_.get(), id, decoration, argument);
+  }
+
+  // Unset spirv_cross decoration (added for GLSL API support in Dawn)
+  // Given an id and a decoration. Assuming id is valid.
+  shaderc_compilation_status UnSetDecoration(
+      const shaderc_spvc_context_t context, uint32_t id,
+      shaderc_spvc_decoration decoration){
+    return shaderc_spvc_unset_decoration(context_.get(), id, decoration);
+  }
+
+  // set |name| on a given |id| (added for GLSL support in Dawn)
+  // Assuming id is valid.
+  void SetName(
+    const shaderc_spvc_context_t context, uint32_t id, const std::string &name){
+    shaderc_spvc_set_name(context_.get(), id, name.c_str());
+    return;
   }
 
  private:

@@ -361,6 +361,30 @@ shaderc_compilation_status shaderc_spvc_get_decoration(
   return status;
 }
 
+shaderc_compilation_status shaderc_spvc_unset_decoration(
+    const shaderc_spvc_context_t context, uint32_t id,
+    shaderc_spvc_decoration decoration) {
+  spv::Decoration spirv_cross_decoration;
+  shaderc_compilation_status status =
+      spvc_private::shaderc_spvc_decoration_to_spirv_cross_decoration(
+          decoration, &spirv_cross_decoration);
+  if (status == shaderc_compilation_status_success) {
+    context->cross_compiler->unset_decoration(static_cast<spirv_cross::ID>(id),
+                                              spirv_cross_decoration);
+  } else {
+    context->messages.append(
+        "Decoration conversion failed.  shaderc_spvc_decoration not "
+        "supported.\n ");
+  }
+  return status;
+}
+
+void shaderc_spvc_set_name(const shaderc_spvc_context_t context, uint32_t id,
+                           const char* name) {
+  context->cross_compiler->set_name(id, name);
+  return;
+}
+
 shaderc_spvc_compilation_result_t shaderc_spvc_result_create() {
   return new (std::nothrow) shaderc_spvc_compilation_result;
 }
