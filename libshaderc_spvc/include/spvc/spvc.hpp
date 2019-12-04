@@ -353,9 +353,9 @@ class Context {
     return shaderc_spvc_compile_shader(context_.get(), result->result_.get());
   }
 
-  // Get spirv_cross decoration (added for GLSL support in Dawn)
-  // Given an id and a decoration, result is sent out through |argument|
-  // if |id| does not exist, returns an error message.
+  // Set spirv_cross decoration (added for HLSL support in Dawn)
+  // Given an |id|, |decoration| and |argument|, the decoration flag on the id is
+  // set Assuming |id| is valid.
   shaderc_spvc_status SetDecoration(uint32_t id,
                                     shaderc_spvc_decoration decoration,
                                     uint32_t argument) {
