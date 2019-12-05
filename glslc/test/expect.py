@@ -29,9 +29,9 @@ from builtins import bytes
 
 def convert_to_string(input):
     if type(input) is not str:
-        if sys.version_info[0] is 2:
+        if sys.version_info[0] == 2:
             return input.decode('utf-8')
-        elif sys.version_info[0] is 3:
+        elif sys.version_info[0] == 3:
             return str(input,
                               encoding='utf-8',
                               errors='ignore') if input is not None else input
