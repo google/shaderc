@@ -145,7 +145,7 @@ shaderc_spvc_status generate_spvcir(const shaderc_spvc_context_t context,
 // Only WebGPU decorations are supported. More cases can be added if necessary.
 // PS. Added because spirv_cross forks Vulkan spirv headers instead of having
 // it as a dependency.
-shaderc_compilation_status shaderc_spvc_decoration_to_spirv_cross_decoration(
+shaderc_spvc_status shaderc_spvc_decoration_to_spirv_cross_decoration(
     const shaderc_spvc_decoration decoration,
     spv::Decoration* spirv_cross_decoration);
 
