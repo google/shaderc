@@ -231,7 +231,7 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
 
     case SpvOpExtension: {
       const std::string extension_name = GetWordsAsString(0u, inst);
-      ir_->declared_extensions.push_back(std::move(extension_name));
+      ir_->declared_extensions.push_back(extension_name);
       break;
     }
 
@@ -1264,7 +1264,6 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
     }
   }
   offset_ += inst->NumOperandWords() + 1;
-  return;
 }
 
 }  // namespace opt
