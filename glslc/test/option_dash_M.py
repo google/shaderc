@@ -101,9 +101,9 @@ class DependencyInfoStdoutMatch(GlslCTest):
         if not status.stdout:
             return False, 'Expect dependency rules on stdout'
 
-        if sys.version_info[0] is 2:
+        if sys.version_info[0] == 2:
             rules = parse_text_rules(status.stdout.decode('utf-8').split('\n'))
-        elif sys.version_info[0] is 3:
+        elif sys.version_info[0] == 3:
             rules = parse_text_rules(str(status.stdout,
                                          encoding='utf-8',
                                          errors='ignore').split('\n'))
