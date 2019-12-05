@@ -161,7 +161,7 @@ shaderc_spvc_status shaderc_spvc_decoration_to_spirv_cross_decoration(
 // result out through |shaderc_spvc_sampler|.
 // |shaderc_spvc_samper| is actually of type
 // std::vector<shaderc_spvc_combined_image_sampler> &
-shaderc_compilation_status spirv_cross_combined_image_samplers_to_shaderc_spvc(
+void spirv_cross_combined_image_samplers_to_shaderc_spvc(
     const spirv_cross::SmallVector<spirv_cross::CombinedImageSampler>&
         spirv_cross_samplers,
     const void* shaderc_spvc_samplers);

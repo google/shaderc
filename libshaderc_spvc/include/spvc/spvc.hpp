@@ -353,7 +353,7 @@ class Context {
     return shaderc_spvc_compile_shader(context_.get(), result->result_.get());
   }
 
-  // Set spirv_cross decoration (added for HLSL support in Dawn)
+  // Set spirv_cross decoration (added for HLSL support in Dawn).
   // Given an |id|, |decoration| and |argument|, the decoration flag on the id is
   // set Assuming |id| is valid.
   shaderc_spvc_status SetDecoration(uint32_t id,
@@ -378,7 +378,6 @@ class Context {
     return shaderc_spvc_unset_decoration(context_.get(), id, decoration);
   }
 
-  // set |name| on a given |id| (added for GLSL support in Dawn).
   // Assuming id is valid.
   void SetName(uint32_t id, const std::string &name){
     shaderc_spvc_set_name(context_.get(), id, name.c_str());
@@ -395,16 +394,27 @@ class Context {
   void BuildCombinedImageSamplers(void){
     shaderc_spvc_build_combined_image_samplers(context_.get());
 
-  // set |name| on a given |id| (added for GLSL support in Dawn)
+  // set |name| on a given |id| (added for GLSL support in Dawn).
   // Assuming id is valid.
   void SetName(uint32_t id, const std::string &name){
     shaderc_spvc_set_name(context_.get(), id, name.c_str());
     return;
   }
 
-  // Stores a remapping for the combined image samplers in |sampler|.
-  void GetCombinedImageSamplers(const std::vector<shaderc_spvc_combined_image_sampler> &sampler){
+  // Stores a remapping for the combined image samplers in |sampler| (added for
+  // GLSL API support in Dawn).
+  void GetCombinedImageSamplers(
+      const std::vector<shaderc_spvc_combined_image_sampler> &sampler){
     shaderc_spvc_get_combined_image_samplers(context_.get(), sampler.data());
+    return;
+  }
+
+  // spirv-cross comment:
+  // Analyzes all separate image and samplers used from the currently selected
+  // entry point, and re-routes them all to a combined image sampler instead.
+  // (added for GLSL API support in Dawn)
+  void BuildCombinedImageSamplers(void){
+    shaderc_spvc_build_combined_image_samplers(context_.get());
     return;
   }
 

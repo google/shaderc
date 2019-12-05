@@ -522,13 +522,10 @@ shaderc_spvc_status shaderc_spvc_decoration_to_spirv_cross_decoration(
   return status;
 }
 
-shaderc_compilation_status spirv_cross_combined_image_samplers_to_shaderc_spvc(
+void spirv_cross_combined_image_samplers_to_shaderc_spvc(
     const spirv_cross::SmallVector<spirv_cross::CombinedImageSampler>&
         spirv_cross_samplers,
     const void* shaderc_spvc_samplers) {
-
-  shaderc_compilation_status status = shaderc_compilation_status_success;
-
   auto shaderc_spvc_samplers_cast =
       reinterpret_cast<shaderc_spvc_combined_image_sampler_vector_t>(
           shaderc_spvc_samplers);
@@ -539,7 +536,7 @@ shaderc_compilation_status spirv_cross_combined_image_samplers_to_shaderc_spvc(
     sv.sampler_id = s.sampler_id;
     shaderc_spvc_samplers_cast.push_back(sv);
   }
-  return status;
+  return;
 }
 
 }  // namespace spvc_private

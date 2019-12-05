@@ -108,18 +108,6 @@ SHADERC_EXPORT const char* shaderc_spvc_context_get_messages(
 SHADERC_EXPORT void* shaderc_spvc_context_get_compiler(
     const shaderc_spvc_context_t context);
 
-// Stores a remapping for the combined image samplers in
-// |combined_image_samplers|. |combined_image_samplers| is actually of type
-// shaderc_spvc_combined_image_sampler_vector_t aka
-// std::vector<shaderc_spvc_combined_image_sampler_t>&
-SHADERC_EXPORT void shaderc_spvc_get_combined_image_samplers(
-    const shaderc_spvc_context_t context, const void* combined_image_samplers);
-
-// Analyzes all separate image and samplers used from the currently selected
-// entry point, and re-routes them all to a combined image sampler instead.
-SHADERC_EXPORT void shaderc_spvc_build_combined_image_samplers(
-    const shaderc_spvc_context_t context);
-
 // If true, use spvc built in parser to generate IR for spirv-cross, otherwise
 // use spirv-cross's implementation.
 SHADERC_EXPORT void shaderc_spvc_context_set_use_spvc_parser(
@@ -333,8 +321,8 @@ shaderc_spvc_compile_shader(const shaderc_spvc_context_t context,
                             shaderc_spvc_compilation_result_t result);
 
 // Set spirv_cross decoration (added for HLSL support in Dawn)
-// Given an id, decoration and argument, the decoration flag on the id is set
-// Assuming id is valid.
+// Given an |id|, |decoration| and |argument|, the decoration flag on the id
+// is set. Assuming |id| is valid.
 SHADERC_EXPORT shaderc_spvc_status shaderc_spvc_set_decoration(
     const shaderc_spvc_context_t context, uint32_t id,
     shaderc_spvc_decoration decoration, uint32_t argument);
@@ -357,15 +345,6 @@ shaderc_spvc_unset_decoration(const shaderc_spvc_context_t context, uint32_t id,
 SHADERC_EXPORT void shaderc_spvc_set_name(const shaderc_spvc_context_t context,
                                           uint32_t id, const char* name);
 
-// Stores a remapping for the combined image samplers in
-// |combined_image_samplers|. |combined_image_samplers| is actually of type
-// shaderc_spvc_combined_image_sampler_vector_t aka
-// std::vector<shaderc_spvc_combined_image_sampler_t>&
-// (added for GLSL API support in Dawn)
-// SHADERC_EXPORT void shaderc_spvc_get_combined_image_samplers(
-//     const shaderc_spvc_context_t context, const void*
-//     combined_image_samplers);
-
 // spirv-cross comment:
 // Analyzes all separate image and samplers used from the currently selected
 // entry point, and re-routes them all to a combined image sampler instead.
@@ -373,6 +352,12 @@ SHADERC_EXPORT void shaderc_spvc_set_name(const shaderc_spvc_context_t context,
 SHADERC_EXPORT void shaderc_spvc_build_combined_image_samplers(
     const shaderc_spvc_context_t context);
 
+// TODO fix comment
+// Stores a remapping for the combined image samplers in
+// |combined_image_samplers|. |combined_image_samplers| is actually of type
+// shaderc_spvc_combined_image_sampler_vector_t aka
+// std::vector<shaderc_spvc_combined_image_sampler_t>&
+// (added for GLSL API support in Dawn)
 SHADERC_EXPORT void shaderc_spvc_for_each_combined_image_sampler(
     const shaderc_spvc_context_t context, const void* f);
 
