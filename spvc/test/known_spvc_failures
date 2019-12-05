@@ -57,9 +57,14 @@ shaders-msl/vert/float-math.invariant-float-math.vert,True
 shaders-msl/vert/texture_buffer.texture-buffer-native.msl21.vert,False
 shaders-msl/vert/texture_buffer.texture-buffer-native.msl21.vert,True
 shaders-no-opt/asm/comp/extended-debug-extinst.invalid.asm.comp,False
+shaders-no-opt/asm/comp/phi-temporary-copy-loop-variable.asm.invalid.comp,False
+shaders-no-opt/asm/frag/do-while-continue-phi.asm.invalid.frag,False
 shaders-no-opt/asm/frag/for-loop-dedicated-merge-block-inverted.asm.invalid.frag,False
 shaders-no-opt/asm/frag/for-loop-dedicated-merge-block-non-inverted.asm.invalid.frag,False
+shaders-no-opt/asm/frag/loop-merge-to-continue.asm.invalid.frag,False
+shaders-no-opt/asm/frag/selection-merge-to-continue.asm.invalid.frag,False
 shaders-no-opt/asm/frag/switch-block-case-fallthrough.asm.invalid.frag,False
+shaders-no-opt/asm/frag/switch-merge-to-continue.asm.invalid.frag,False
 shaders-no-opt/frag/16bit-constants.invalid.frag,False
 shaders-no-opt/frag/fp16.invalid.desktop.frag,False
 shaders-no-opt/frag/multi-dimensional.desktop.invalid.flatten_dim.frag,False
