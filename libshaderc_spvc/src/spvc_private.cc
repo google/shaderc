@@ -443,8 +443,7 @@ shaderc_spvc_status generate_spvcir(const shaderc_spvc_context_t context,
 shaderc_spvc_status shaderc_spvc_decoration_to_spirv_cross_decoration(
     const shaderc_spvc_decoration decoration,
     spv::Decoration* spirv_cross_decoration_ptr) {
-  if (!spirv_cross_decoration_ptr)
-    return shaderc_spvc_status_internal_error;
+  if (!spirv_cross_decoration_ptr) return shaderc_spvc_status_internal_error;
 
   shaderc_spvc_status status = shaderc_spvc_status_success;
 

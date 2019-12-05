@@ -313,7 +313,7 @@ shaderc_spvc_compile_shader(const shaderc_spvc_context_t context,
 // Set spirv_cross decoration (added for HLSL support in Dawn)
 // Given an id, decoration and argument, the decoration flag on the id is set
 // Assuming id is valid.
-SHADERC_EXPORT shaderc_compilation_status shaderc_spvc_set_decoration(
+SHADERC_EXPORT shaderc_spvc_status shaderc_spvc_set_decoration(
     const shaderc_spvc_context_t context, uint32_t id,
     shaderc_spvc_decoration decoration, uint32_t argument);
 
