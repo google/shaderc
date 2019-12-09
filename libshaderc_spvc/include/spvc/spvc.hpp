@@ -363,10 +363,12 @@ class Context {
     return shaderc_spvc_set_decoration(context_.get(), id, decoration, argument);
   }
 
+
   // Get spirv_cross decoration (added for GLSL API support in Dawn).
   // Given an id and a decoration, result is sent out through |argument|
   // if |id| does not exist, returns an error message.
   shaderc_spvc_status GetDecoration( uint32_t id,
+
       shaderc_spvc_decoration decoration, uint32_t* argument){
     return shaderc_spvc_get_decoration(context_.get(), id, decoration, argument);
   }
@@ -376,11 +378,6 @@ class Context {
   shaderc_spvc_status UnSetDecoration(uint32_t id,
       shaderc_spvc_decoration decoration){
     return shaderc_spvc_unset_decoration(context_.get(), id, decoration);
-  }
-
-  // Assuming id is valid.
-  void SetName(uint32_t id, const std::string &name){
-    shaderc_spvc_set_name(context_.get(), id, name.c_str());
   }
 
   void ForEachCombinedImageSamplers(const std::function<void(uint32_t*, uint32_t*, uint32_t*)> &f){
@@ -393,6 +390,7 @@ class Context {
   // (added for GLSL API support in Dawn)
   void BuildCombinedImageSamplers(void){
     shaderc_spvc_build_combined_image_samplers(context_.get());
+  }
 
   // set |name| on a given |id| (added for GLSL support in Dawn).
   // Assuming id is valid.
@@ -401,10 +399,11 @@ class Context {
     return;
   }
 
+
   // Stores a remapping for the combined image samplers in |sampler| (added for
   // GLSL API support in Dawn).
   void GetCombinedImageSamplers(
-      const std::vector<shaderc_spvc_combined_image_sampler> &sampler){
+      const std::vector<shaderc_spvc_combined_image_sampler> &sampler)
     shaderc_spvc_get_combined_image_samplers(context_.get(), sampler.data());
     return;
   }

@@ -156,14 +156,4 @@ shaderc_spvc_status shaderc_spvc_decoration_to_spirv_cross_decoration(
     const shaderc_spvc_decoration decoration,
     spv::Decoration* spirv_cross_decoration);
 
-// Converts a spirv_cross::SmallVector of spirv_cross::CombinedImageSampler to a
-// std::vector of struct shaderc_spvc_combined_image_sampler and sends the
-// result out through |shaderc_spvc_sampler|.
-// |shaderc_spvc_samper| is actually of type
-// std::vector<shaderc_spvc_combined_image_sampler> &
-void spirv_cross_combined_image_samplers_to_shaderc_spvc(
-    const spirv_cross::SmallVector<spirv_cross::CombinedImageSampler>&
-        spirv_cross_samplers,
-    const void* shaderc_spvc_samplers);
-
 }  // namespace spvc_private
