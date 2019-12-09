@@ -18,6 +18,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <functional>
 
 #include "spvc.h"
 
@@ -359,6 +360,47 @@ class Context {
                                     shaderc_spvc_decoration decoration,
                                     uint32_t argument) {
     return shaderc_spvc_set_decoration(context_.get(), id, decoration, argument);
+  }
+
+  // Get spirv_cross decoration (added for GLSL API support in Dawn).
+  // Given an id and a decoration, result is sent out through |argument|
+  // if |id| does not exist, returns an error message.
+  shaderc_spvc_status GetDecoration( uint32_t id,
+      shaderc_spvc_decoration decoration, uint32_t* argument){
+    return shaderc_spvc_get_decoration(context_.get(), id, decoration, argument);
+  }
+
+  // Unset spirv_cross decoration (added for GLSL API support in Dawn).
+  // Given an id and a decoration. Assuming id is valid.
+  shaderc_spvc_status UnSetDecoration(uint32_t id,
+      shaderc_spvc_decoration decoration){
+    return shaderc_spvc_unset_decoration(context_.get(), id, decoration);
+  }
+
+  // set |name| on a given |id| (added for GLSL support in Dawn).
+  // Assuming id is valid.
+  void SetName(uint32_t id, const std::string &name){
+    shaderc_spvc_set_name(context_.get(), id, name.c_str());
+  }
+
+  // // Stores a remapping for the combined image samplers in |sampler| (added for
+  // // GLSL API support in Dawn).
+  // void GetCombinedImageSamplers(
+  //     const std::vector<ImageSampler> &sampler){
+  //   shaderc_spvc_get_combined_image_samplers(context_.get(), sampler.data());
+  // }
+
+  void ForEachCombinedImageSamplers(const std::function<void(uint32_t*, uint32_t*, uint32_t*)> &f){
+    shaderc_spvc_for_each_combined_image_sampler(context_.get(), static_cast<void*>(f));
+  }
+
+  // spirv-cross comment:
+  // Analyzes all separate image and samplers used from the currently selected
+  // entry point, and re-routes them all to a combined image sampler instead.
+  // (added for GLSL API support in Dawn)
+  void BuildCombinedImageSamplers(void){
+    shaderc_spvc_build_combined_image_samplers(context_.get());
+    return;
   }
 
  private:

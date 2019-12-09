@@ -19,6 +19,7 @@
 #include <spirv_reflect.hpp>
 #include <string>
 #include <vector>
+#include <functional>
 
 #include "spirv-tools/libspirv.hpp"
 #include "spvc/spvc.h"
