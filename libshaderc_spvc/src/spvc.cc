@@ -341,15 +341,14 @@ shaderc_spvc_status shaderc_spvc_set_decoration(
 shaderc_spvc_status shaderc_spvc_get_decoration(
     const shaderc_spvc_context_t context, uint32_t id,
     shaderc_spvc_decoration decoration, uint32_t* argument_ptr) {
-  uint32_t& argument = *argument_ptr;
   spv::Decoration spirv_cross_decoration;
   shaderc_spvc_status status =
       spvc_private::shaderc_spvc_decoration_to_spirv_cross_decoration(
           decoration, &spirv_cross_decoration);
-  if (status == shaderc_spvc_status_success) {
-    argument = context->cross_compiler->get_decoration(
+  if (argument_ptr && status == shaderc_spvc_status_success) {
+    *argument_ptr = context->cross_compiler->get_decoration(
         static_cast<spirv_cross::ID>(id), spirv_cross_decoration);
-    if (argument == 0) {
+    if (*argument_ptr == 0) {
       status = shaderc_spvc_status_compilation_error;
       context->messages.append("Getting decoration failed. id not found. \n ");
     }
@@ -381,13 +380,13 @@ shaderc_spvc_status shaderc_spvc_unset_decoration(
 
 inline void shaderc_spvc_for_each_combined_image_sampler(
     const shaderc_spvc_context_t context,
-    void (*f)(uint32_t*, uint32_t*, uint32_t*)) {
+    void (*f)(uint32_t, uint32_t, uint32_t)) {
   for (const auto& combined :
        context->cross_compiler->get_combined_image_samplers()) {
     uint32_t x = combined.sampler_id;
     uint32_t y = combined.image_id;
     uint32_t z = combined.combined_id;
-    f(&x, &y, &z);
+    f(x, y, z);
   }
 }
 
