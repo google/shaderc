@@ -383,10 +383,7 @@ inline void shaderc_spvc_for_each_combined_image_sampler(
     void (*f)(uint32_t, uint32_t, uint32_t)) {
   for (const auto& combined :
        context->cross_compiler->get_combined_image_samplers()) {
-    uint32_t x = combined.sampler_id;
-    uint32_t y = combined.image_id;
-    uint32_t z = combined.combined_id;
-    f(x, y, z);
+    f(combined.sampler_id, combined.image_id, combined.combined_id);
   }
 }
 
