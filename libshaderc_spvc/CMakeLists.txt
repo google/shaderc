@@ -29,8 +29,8 @@ target_include_directories(shaderc_spvc
   PUBLIC include
   ${shaderc_SOURCE_DIR}/libshaderc/include
   ${spirv-tools_SOURCE_DIR}/include
-  ${spirv-tools_SOURCE_DIR}/
-  ${CMAKE_CURRENT_BINARY_DIR}/../third_party/spirv-tools/)
+  ${spirv-tools_SOURCE_DIR}
+  ${spirv-tools_BINARY_DIR})
 target_link_libraries(shaderc_spvc PRIVATE ${SPVC_LIBS})
 
 add_library(shaderc_spvc_shared SHARED ${SPVC_SOURCES})
@@ -40,8 +40,8 @@ target_include_directories(shaderc_spvc_shared
   PUBLIC include
   ${shaderc_SOURCE_DIR}/libshaderc/include
   ${spirv-tools_SOURCE_DIR}/include
-  ${spirv-tools_SOURCE_DIR}/
-  ${CMAKE_CURRENT_BINARY_DIR}/../third_party/spirv-tools/)
+  ${spirv-tools_SOURCE_DIR}
+  ${spirv-tools_BINARY_DIR})
 target_link_libraries(shaderc_spvc_shared PRIVATE ${SPVC_LIBS})
 set_target_properties(shaderc_spvc_shared PROPERTIES SOVERSION 1)
 target_compile_definitions(shaderc_spvc_shared
@@ -72,8 +72,8 @@ shaderc_add_tests(
   TEST_PREFIX shaderc
   LINK_LIBS shaderc_spvc ${SPVC_LIBS}
   INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc/include ${SPIRV-Cross_SOURCE_DIR}/..
-    ${SPIRV-Cross_SOURCE_DIR}/../effcee
-    ${SPIRV-Cross_SOURCE_DIR}/../re2
+    ${effcee_SOURCE_DIR}
+    ${RE2_SOURCE_DIR}
   TEST_NAMES
     spvc
     spvc_cpp
