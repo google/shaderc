@@ -310,6 +310,38 @@ SHADERC_EXPORT shaderc_spvc_status
 shaderc_spvc_compile_shader(const shaderc_spvc_context_t context,
                             shaderc_spvc_compilation_result_t result);
 
+// Get spirv_cross decoration (added for GLSL API support in Dawn)
+// Given an id and a decoration, result is sent out through |argument|
+// if |id| does not exist, returns an error.
+SHADERC_EXPORT shaderc_spvc_status shaderc_spvc_get_decoration(
+    const shaderc_spvc_context_t context, uint32_t id,
+    shaderc_spvc_decoration decoration, uint32_t* argument);
+
+// Unset spirv_cross decoration (added for GLSL API support in Dawn)
+// Given an id and a decoration. Assuming |id| is valid.
+SHADERC_EXPORT shaderc_spvc_status
+shaderc_spvc_unset_decoration(const shaderc_spvc_context_t context, uint32_t id,
+                              shaderc_spvc_decoration decoration);
+
+// Set |name| on a given |id| (added for GLSL API support in Dawn)
+// Assuming |id| is valid.
+SHADERC_EXPORT void shaderc_spvc_set_name(const shaderc_spvc_context_t context,
+                                          uint32_t id, const char* name);
+
+// spirv-cross comment:
+// Analyzes all separate image and samplers used from the currently selected
+// entry point, and re-routes them all to a combined image sampler instead.
+// (added for GLSL API support in Dawn)
+SHADERC_EXPORT void shaderc_spvc_build_combined_image_samplers(
+    const shaderc_spvc_context_t context);
+
+// For each combined_image_sampler, calls the provided callback function |f|,
+// passing in three arguments read from the combined_image_sampler.
+// (added for GLSL API support in Dawn)
+SHADERC_EXPORT void shaderc_spvc_for_each_combined_image_sampler(
+    const shaderc_spvc_context_t context,
+    void (*f)(uint32_t, uint32_t, uint32_t));
+
 // Set spirv_cross decoration (added for HLSL support in Dawn)
 // Given an id, decoration and argument, the decoration flag on the id is set
 // Assuming id is valid.
