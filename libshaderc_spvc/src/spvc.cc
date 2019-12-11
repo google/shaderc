@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <spvc/spvc.hpp>
+
 #include "spvc_private.h"
 
 shaderc_spvc_context_t shaderc_spvc_context_create() {
@@ -378,7 +380,7 @@ shaderc_spvc_status shaderc_spvc_unset_decoration(
   return status;
 }
 
-inline void shaderc_spvc_for_each_combined_image_sampler(
+void shaderc_spvc_for_each_combined_image_sampler(
     const shaderc_spvc_context_t context,
     void (*f)(uint32_t, uint32_t, uint32_t)) {
   for (const auto& combined :
@@ -421,3 +423,15 @@ uint32_t shaderc_spvc_result_get_binary_length(
     const shaderc_spvc_compilation_result_t result) {
   return result->binary_output.size();
 }
+
+namespace shaderc_spvc {
+
+void Context::ForEachCombinedImageSamplers(
+    std::function<void(uint32_t, uint32_t, uint32_t)> f) {
+  for (const auto& combined :
+       context_->cross_compiler->get_combined_image_samplers()) {
+    f(combined.sampler_id, combined.image_id, combined.combined_id);
+  }
+}
+
+}  // namespace shaderc_spvc
