@@ -15,6 +15,7 @@
 #ifndef SHADERC_SPVC_HPP_
 #define SHADERC_SPVC_HPP_
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -22,6 +23,7 @@
 #include "spvc.h"
 
 namespace shaderc_spvc {
+
 // A CompilationResult contains the compiler output, compilation status,
 // and messages.
 //
@@ -383,6 +385,12 @@ class Context {
   void ForEachCombinedImageSamplers(void (*f)(uint32_t, uint32_t, uint32_t)) {
     shaderc_spvc_for_each_combined_image_sampler(context_.get(), f);
   }
+
+  // Same behaviour as above, but supports std::function instead a function
+  // pointer. Implemented in spvc.cc, since it needed to access internal bits of
+  // the library.
+  void ForEachCombinedImageSamplers(
+      std::function<void(uint32_t, uint32_t, uint32_t)> f);
 
   // spirv-cross comment:
   // Analyzes all separate image and samplers used from the currently selected
