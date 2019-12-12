@@ -71,6 +71,12 @@ typedef enum {
 // An opaque handle to an object that manages all compiler state.
 typedef struct shaderc_spvc_context* shaderc_spvc_context_t;
 
+typedef struct {
+  uint32_t combined_id;
+  uint32_t image_id;
+  uint32_t sampler_id;
+} shaderc_spvc_combined_image_sampler;
+
 // Create a spvc state handle.  A return of NULL indicates that there was an
 // error. Any function operating on a *_context_t must offer the basic
 // thread-safety guarantee.
@@ -335,12 +341,13 @@ SHADERC_EXPORT void shaderc_spvc_set_name(const shaderc_spvc_context_t context,
 SHADERC_EXPORT void shaderc_spvc_build_combined_image_samplers(
     const shaderc_spvc_context_t context);
 
-// For each combined_image_sampler, calls the provided callback function |f|,
-// passing in three arguments read from the combined_image_sampler.
-// (added for GLSL API support in Dawn)
-SHADERC_EXPORT void shaderc_spvc_for_each_combined_image_sampler(
+// Returns the combined image samplers.
+// If |samples| is NULL, then num_samplers is set, and no data is copied.
+// The caller responsible for |samplers| being larger enough to contain all of
+// the data.
+SHADERC_EXPORT void shaderc_spvc_get_combined_image_samplers(
     const shaderc_spvc_context_t context,
-    void (*f)(uint32_t, uint32_t, uint32_t));
+    shaderc_spvc_combined_image_sampler* samplers, size_t* num_samplers);
 
 // Set spirv_cross decoration (added for HLSL support in Dawn)
 // Given an id, decoration and argument, the decoration flag on the id is set

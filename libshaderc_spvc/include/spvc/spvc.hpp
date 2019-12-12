@@ -379,25 +379,23 @@ class Context {
     return shaderc_spvc_unset_decoration(context_.get(), id, decoration);
   }
 
-  // For each combined_image_sampler, calls the provided callback function |f|,
-  // passing in three arguments read from the combined_image_sampler.
-  // (added for GLSL API support in Dawn)
-  void ForEachCombinedImageSamplers(void (*f)(uint32_t, uint32_t, uint32_t)) {
-    shaderc_spvc_for_each_combined_image_sampler(context_.get(), f);
-  }
-
-  // Same behaviour as above, but supports std::function instead a function
-  // pointer. Implemented in spvc.cc, since it needed to access internal bits of
-  // the library.
-  void ForEachCombinedImageSamplers(
-      std::function<void(uint32_t, uint32_t, uint32_t)> f);
-
   // spirv-cross comment:
   // Analyzes all separate image and samplers used from the currently selected
   // entry point, and re-routes them all to a combined image sampler instead.
   // (added for GLSL API support in Dawn)
   void BuildCombinedImageSamplers(void) {
     shaderc_spvc_build_combined_image_samplers(context_.get());
+  }
+
+  // After call to BuildCombinedImageSamplers, fetch the ids associated with the
+  // combined image samplers.
+  void GetCombinedImageSamplers(
+      std::vector<shaderc_spvc_combined_image_sampler>* samplers) {
+    size_t count;
+    shaderc_spvc_get_combined_image_samplers(context_.get(), nullptr, &count);
+    samplers->resize(count);
+    shaderc_spvc_get_combined_image_samplers(context_.get(), samplers->data(),
+                                             &count);
   }
 
   // set |name| on a given |id| (added for GLSL support in Dawn).
