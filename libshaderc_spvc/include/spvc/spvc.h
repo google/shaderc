@@ -27,30 +27,36 @@ extern "C" {
 #include "shaderc/status.h"
 #include "shaderc/visibility.h"
 
+// SPIR-V decorations supported by spvc. This is not an exhaustive list of all
+// of the values in the spec, but more can be added if needed.
 typedef enum {
-  SHADERC_SPVC_DECORATION_SPECID,
-  SHADERC_SPVC_DECORATION_BLOCK,
-  SHADERC_SPVC_DECORATION_ROWMAJOR,
-  SHADERC_SPVC_DECORATION_COLMAJOR,
-  SHADERC_SPVC_DECORATION_ARRAYSTRIDE,
-  SHADERC_SPVC_DECORATION_MATRIXSTRIDE,
-  SHADERC_SPVC_DECORATION_BUILTIN,
-  SHADERC_SPVC_DECORATION_NOPERSPECTIVE,
-  SHADERC_SPVC_DECORATION_FLAT,
-  SHADERC_SPVC_DECORATION_CENTROID,
-  SHADERC_SPVC_DECORATION_RESTRICT,
-  SHADERC_SPVC_DECORATION_ALIASED,
-  SHADERC_SPVC_DECORATION_NONWRITABLE,
-  SHADERC_SPVC_DECORATION_NONREADABLE,
-  SHADERC_SPVC_DECORATION_UNIFORM,
-  SHADERC_SPVC_DECORATION_LOCATION,
-  SHADERC_SPVC_DECORATION_COMPONENT,
-  SHADERC_SPVC_DECORATION_INDEX,
-  SHADERC_SPVC_DECORATION_BINDING,
-  SHADERC_SPVC_DECORATION_DESCRIPTORSET,
-  SHADERC_SPVC_DECORATION_OFFSET,
-  SHADERC_SPVC_DECORATION_NOCONTRACTION,
+  shaderc_spvc_decoration_specid,
+  shaderc_spvc_decoration_block,
+  shaderc_spvc_decoration_rowmajor,
+  shaderc_spvc_decoration_colmajor,
+  shaderc_spvc_decoration_arraystride,
+  shaderc_spvc_decoration_matrixstride,
+  shaderc_spvc_decoration_builtin,
+  shaderc_spvc_decoration_noperspective,
+  shaderc_spvc_decoration_flat,
+  shaderc_spvc_decoration_centroid,
+  shaderc_spvc_decoration_restrict,
+  shaderc_spvc_decoration_aliased,
+  shaderc_spvc_decoration_nonwritable,
+  shaderc_spvc_decoration_nonreadable,
+  shaderc_spvc_decoration_uniform,
+  shaderc_spvc_decoration_location,
+  shaderc_spvc_decoration_component,
+  shaderc_spvc_decoration_index,
+  shaderc_spvc_decoration_binding,
+  shaderc_spvc_decoration_descriptorset,
+  shaderc_spvc_decoration_offset,
+  shaderc_spvc_decoration_nocontraction,
 } shaderc_spvc_decoration;
+
+// Backwards compatiblity enum for Dawn. This will be removed once Dawn no
+// longer depends on it.
+#define SHADERC_SPVC_DECORATION_BINDING shaderc_spvc_decoration_binding
 
 typedef enum {
   shaderc_spvc_msl_platform_ios,

@@ -448,70 +448,70 @@ shaderc_spvc_status shaderc_spvc_decoration_to_spirv_cross_decoration(
   shaderc_spvc_status status = shaderc_spvc_status_success;
 
   switch (decoration) {
-    case SHADERC_SPVC_DECORATION_SPECID:
+    case shaderc_spvc_decoration_specid:
       *spirv_cross_decoration_ptr = spv::DecorationSpecId;
       break;
-    case SHADERC_SPVC_DECORATION_BLOCK:
+    case shaderc_spvc_decoration_block:
       *spirv_cross_decoration_ptr = spv::DecorationBlock;
       break;
-    case SHADERC_SPVC_DECORATION_ROWMAJOR:
+    case shaderc_spvc_decoration_rowmajor:
       *spirv_cross_decoration_ptr = spv::DecorationRowMajor;
       break;
-    case SHADERC_SPVC_DECORATION_COLMAJOR:
+    case shaderc_spvc_decoration_colmajor:
       *spirv_cross_decoration_ptr = spv::DecorationColMajor;
       break;
-    case SHADERC_SPVC_DECORATION_ARRAYSTRIDE:
+    case shaderc_spvc_decoration_arraystride:
       *spirv_cross_decoration_ptr = spv::DecorationArrayStride;
       break;
-    case SHADERC_SPVC_DECORATION_MATRIXSTRIDE:
+    case shaderc_spvc_decoration_matrixstride:
       *spirv_cross_decoration_ptr = spv::DecorationMatrixStride;
       break;
-    case SHADERC_SPVC_DECORATION_BUILTIN:
+    case shaderc_spvc_decoration_builtin:
       *spirv_cross_decoration_ptr = spv::DecorationBuiltIn;
       break;
-    case SHADERC_SPVC_DECORATION_NOPERSPECTIVE:
+    case shaderc_spvc_decoration_noperspective:
       *spirv_cross_decoration_ptr = spv::DecorationNoPerspective;
       break;
-    case SHADERC_SPVC_DECORATION_FLAT:
+    case shaderc_spvc_decoration_flat:
       *spirv_cross_decoration_ptr = spv::DecorationFlat;
       break;
-    case SHADERC_SPVC_DECORATION_CENTROID:
+    case shaderc_spvc_decoration_centroid:
       *spirv_cross_decoration_ptr = spv::DecorationCentroid;
       break;
-    case SHADERC_SPVC_DECORATION_RESTRICT:
+    case shaderc_spvc_decoration_restrict:
       *spirv_cross_decoration_ptr = spv::DecorationRestrict;
       break;
-    case SHADERC_SPVC_DECORATION_ALIASED:
+    case shaderc_spvc_decoration_aliased:
       *spirv_cross_decoration_ptr = spv::DecorationAliased;
       break;
-    case SHADERC_SPVC_DECORATION_NONWRITABLE:
+    case shaderc_spvc_decoration_nonwritable:
       *spirv_cross_decoration_ptr = spv::DecorationNonWritable;
       break;
-    case SHADERC_SPVC_DECORATION_NONREADABLE:
+    case shaderc_spvc_decoration_nonreadable:
       *spirv_cross_decoration_ptr = spv::DecorationNonReadable;
       break;
-    case SHADERC_SPVC_DECORATION_UNIFORM:
+    case shaderc_spvc_decoration_uniform:
       *spirv_cross_decoration_ptr = spv::DecorationUniform;
       break;
-    case SHADERC_SPVC_DECORATION_LOCATION:
+    case shaderc_spvc_decoration_location:
       *spirv_cross_decoration_ptr = spv::DecorationLocation;
       break;
-    case SHADERC_SPVC_DECORATION_COMPONENT:
+    case shaderc_spvc_decoration_component:
       *spirv_cross_decoration_ptr = spv::DecorationComponent;
       break;
-    case SHADERC_SPVC_DECORATION_INDEX:
+    case shaderc_spvc_decoration_index:
       *spirv_cross_decoration_ptr = spv::DecorationIndex;
       break;
-    case SHADERC_SPVC_DECORATION_BINDING:
+    case shaderc_spvc_decoration_binding:
       *spirv_cross_decoration_ptr = spv::DecorationBinding;
       break;
-    case SHADERC_SPVC_DECORATION_DESCRIPTORSET:
+    case shaderc_spvc_decoration_descriptorset:
       *spirv_cross_decoration_ptr = spv::DecorationDescriptorSet;
       break;
-    case SHADERC_SPVC_DECORATION_OFFSET:
+    case shaderc_spvc_decoration_offset:
       *spirv_cross_decoration_ptr = spv::DecorationOffset;
       break;
-    case SHADERC_SPVC_DECORATION_NOCONTRACTION:
+    case shaderc_spvc_decoration_nocontraction:
       *spirv_cross_decoration_ptr = spv::DecorationNoContraction;
       break;
     default:
