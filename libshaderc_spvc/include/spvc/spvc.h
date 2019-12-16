@@ -348,9 +348,10 @@ SHADERC_EXPORT void shaderc_spvc_build_combined_image_samplers(
     const shaderc_spvc_context_t context);
 
 // Returns the combined image samplers.
+
 // If |samples| is NULL, then num_samplers is set, and no data is copied.
-// The caller responsible for |samplers| being larger enough to contain all of
-// the data.
+// The caller is responsible for |samplers| being large enough to
+// contain all of the data.
 SHADERC_EXPORT void shaderc_spvc_get_combined_image_samplers(
     const shaderc_spvc_context_t context,
     shaderc_spvc_combined_image_sampler* samplers, size_t* num_samplers);
