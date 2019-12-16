@@ -380,12 +380,21 @@ shaderc_spvc_status shaderc_spvc_unset_decoration(
   return status;
 }
 
-void shaderc_spvc_for_each_combined_image_sampler(
+void shaderc_spvc_get_combined_image_samplers(
     const shaderc_spvc_context_t context,
-    void (*f)(uint32_t, uint32_t, uint32_t)) {
+    shaderc_spvc_combined_image_sampler* samplers, size_t* num_samplers) {
+  assert(num_samplers);
+  if (!num_samplers) return;
+
+  *num_samplers = context->cross_compiler->get_combined_image_samplers().size();
+  if (!samplers) return;
+
   for (const auto& combined :
        context->cross_compiler->get_combined_image_samplers()) {
-    f(combined.sampler_id, combined.image_id, combined.combined_id);
+    samplers->combined_id = combined.combined_id;
+    samplers->image_id = combined.image_id;
+    samplers->sampler_id = combined.sampler_id;
+    samplers++;
   }
 }
 
@@ -423,15 +432,3 @@ uint32_t shaderc_spvc_result_get_binary_length(
     const shaderc_spvc_compilation_result_t result) {
   return result->binary_output.size();
 }
-
-namespace shaderc_spvc {
-
-void Context::ForEachCombinedImageSamplers(
-    std::function<void(uint32_t, uint32_t, uint32_t)> f) {
-  for (const auto& combined :
-       context_->cross_compiler->get_combined_image_samplers()) {
-    f(combined.sampler_id, combined.image_id, combined.combined_id);
-  }
-}
-
-}  // namespace shaderc_spvc
