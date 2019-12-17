@@ -405,6 +405,28 @@ class Context {
     return;
   }
 
+  // Adds a binding to indicate the MSL buffer, texture or sampler index to use
+  // for a particular SPIR-V description set and binding.
+  shaderc_spvc_status AddMSLResourceBinding(
+      const shaderc_spvc_msl_resource_binding binding) {
+    return shaderc_spvc_add_msl_resource_binding(context_.get(), binding);
+  }
+
+  // Gets workgroup size for an entry point defined by a given execution model
+  // and function name.
+  shaderc_spvc_status GetWorkgroupSize(
+      const std::string& function_name,
+      shaderc_spvc_execution_model execution_model,
+      shaderc_spcv_workgroup_size* workgroup_size) {
+    return shaderc_spvc_get_workgroup_size(
+        context_.get(), function_name.c_str(), execution_model, workgroup_size);
+  }
+
+  // Gets whether or not the shader needes a buffer of buffer sizes.
+  shaderc_spvc_status NeedsBufferSizeBuffer(bool* b) {
+    return shaderc_spvc_needs_buffer_size_buffer(context_.get(), b);
+  }
+
  private:
   Context(const Context&) = delete;
   Context& operator=(const Context& other) = delete;

@@ -16,6 +16,24 @@
 
 #include "spvc_private.h"
 
+namespace {
+
+spv::ExecutionModel spvc_model_to_spv_model(
+    shaderc_spvc_execution_model model) {
+  switch (model) {
+    case shaderc_spvc_execution_model_vertex:
+      return spv::ExecutionModel::ExecutionModelVertex;
+    case shaderc_spvc_execution_model_fragment:
+      return spv::ExecutionModel::ExecutionModelFragment;
+    case shaderc_spvc_execution_model_glcompute:
+      return spv::ExecutionModel::ExecutionModelGLCompute;
+  }
+
+  return spv::ExecutionModel::ExecutionModelMax;
+}
+
+}  // namespace
+
 shaderc_spvc_context_t shaderc_spvc_context_create() {
   return new (std::nothrow) shaderc_spvc_context;
 }
@@ -402,6 +420,96 @@ void shaderc_spvc_set_name(const shaderc_spvc_context_t context, uint32_t id,
                            const char* name) {
   context->cross_compiler->set_name(id, name);
   return;
+}
+
+shaderc_spvc_status shaderc_spvc_add_msl_resource_binding(
+    const shaderc_spvc_context_t context,
+    const shaderc_spvc_msl_resource_binding binding) {
+  if (!context) return shaderc_spvc_status_missing_context_error;
+
+  if (!context->cross_compiler) {
+    context->messages.append(
+        "Invoked add_msl_resource_binding without an initialized compiler\n");
+    return shaderc_spvc_status_uninitialized_compiler_error;
+  }
+
+  if (context->target_lang == SPVC_TARGET_LANG_MSL) {
+    context->messages.append(
+        "Invoked add_msl_resource_binding when target language was not MSL\n");
+    return shaderc_spvc_status_configuration_error;
+  }
+
+  spirv_cross::MSLResourceBinding cross_binding;
+  cross_binding.stage = spvc_model_to_spv_model(binding.stage);
+  cross_binding.binding = binding.binding;
+  cross_binding.desc_set = binding.desc_set;
+  cross_binding.msl_buffer = binding.msl_buffer;
+  cross_binding.msl_texture = binding.msl_texture;
+  cross_binding.msl_sampler = binding.msl_sampler;
+  reinterpret_cast<spirv_cross::CompilerMSL*>(context->cross_compiler.get())
+      ->add_msl_resource_binding(cross_binding);
+
+  return shaderc_spvc_status_success;
+}
+
+shaderc_spvc_status shaderc_spvc_get_workgroup_size(
+    const shaderc_spvc_context_t context, const char* function_name,
+    shaderc_spvc_execution_model execution_model,
+    shaderc_spcv_workgroup_size* workgroup_size) {
+  if (!context) return shaderc_spvc_status_missing_context_error;
+
+  if (!context->cross_compiler) {
+    context->messages.append(
+        "Invoked get_workgroup_size without an initialized compiler\n");
+    return shaderc_spvc_status_uninitialized_compiler_error;
+  }
+
+  if (!workgroup_size) {
+    context->messages.append(
+        "Invoked get_workgroup_size without a valid out param\n");
+    return shaderc_spvc_status_uninitialized_compiler_error;
+  }
+
+  const auto& cross_size =
+      context->cross_compiler
+          ->get_entry_point(function_name,
+                            spvc_model_to_spv_model(execution_model))
+          .workgroup_size;
+  workgroup_size->x = cross_size.x;
+  workgroup_size->y = cross_size.y;
+  workgroup_size->z = cross_size.z;
+  workgroup_size->constant = cross_size.constant;
+
+  return shaderc_spvc_status_success;
+}
+
+shaderc_spvc_status shaderc_spvc_needs_buffer_size_buffer(
+    const shaderc_spvc_context_t context, bool* b) {
+  if (!context) return shaderc_spvc_status_missing_context_error;
+
+  if (!context->cross_compiler) {
+    context->messages.append(
+        "Invoked needs_buffer_size_buffer without an initialized compiler\n");
+    return shaderc_spvc_status_uninitialized_compiler_error;
+  }
+
+  if (context->target_lang == SPVC_TARGET_LANG_MSL) {
+    context->messages.append(
+        "Invoked needs_buffer_size_buffer when target language was not MSL\n");
+    return shaderc_spvc_status_configuration_error;
+  }
+
+  if (!b) {
+    context->messages.append(
+        "Invoked needs_buffer_size_buffer without a valid out param\n");
+    return shaderc_spvc_status_uninitialized_compiler_error;
+  }
+
+  *b =
+      reinterpret_cast<spirv_cross::CompilerMSL*>(context->cross_compiler.get())
+          ->needs_output_buffer();
+
+  return shaderc_spvc_status_success;
 }
 
 void shaderc_spvc_build_combined_image_samplers(
