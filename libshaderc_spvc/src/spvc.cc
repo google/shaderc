@@ -467,7 +467,7 @@ shaderc_spvc_status shaderc_spvc_get_workgroup_size(
   if (!workgroup_size) {
     context->messages.append(
         "Invoked get_workgroup_size without a valid out param\n");
-    return shaderc_spvc_status_uninitialized_compiler_error;
+    return shaderc_spvc_status_invalid_out_param;
   }
 
   const auto& cross_size =
@@ -502,7 +502,7 @@ shaderc_spvc_status shaderc_spvc_needs_buffer_size_buffer(
   if (!b) {
     context->messages.append(
         "Invoked needs_buffer_size_buffer without a valid out param\n");
-    return shaderc_spvc_status_uninitialized_compiler_error;
+    return shaderc_spvc_status_invalid_out_param;
   }
 
   *b =
