@@ -74,6 +74,7 @@ typedef enum {
   shaderc_spvc_status_configuration_error,
   shaderc_spvc_status_uninitialized_compiler_error,
   shaderc_spvc_status_missing_context_error,
+  shaderc_spvc_status_invalid_out_param,
 } shaderc_spvc_status;
 
 typedef enum {
