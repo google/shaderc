@@ -417,7 +417,7 @@ class Context {
   shaderc_spvc_status GetWorkgroupSize(
       const std::string& function_name,
       shaderc_spvc_execution_model execution_model,
-      shaderc_spcv_workgroup_size* workgroup_size) {
+      shaderc_spvc_workgroup_size* workgroup_size) {
     return shaderc_spvc_get_workgroup_size(
         context_.get(), function_name.c_str(), execution_model, workgroup_size);
   }
@@ -425,6 +425,94 @@ class Context {
   // Gets whether or not the shader needes a buffer of buffer sizes.
   shaderc_spvc_status NeedsBufferSizeBuffer(bool* b) {
     return shaderc_spvc_needs_buffer_size_buffer(context_.get(), b);
+  }
+
+  // Gets the execution model for the shader.
+  shaderc_spvc_status GetExecutionModel(shaderc_spvc_execution_model* model) {
+    return shaderc_spvc_get_execution_model(context_.get(), model);
+  }
+
+  // Gets the number of push constant buffers used by the shader.
+  shaderc_spvc_status GetPushConstantBufferCount(size_t* count) {
+    return shaderc_spvc_get_push_constant_buffer_count(context_.get(), count);
+  }
+
+  // Gets all of the binding info for a given shader resource.
+  shaderc_spvc_status GetBindingInfo(
+      shaderc_spvc_shader_resource resource,
+      shaderc_spvc_binding_type binding_type,
+      std::vector<shaderc_spvc_binding_info>* bindings) {
+    if (!bindings) {
+      return shaderc_spvc_status_invalid_out_param;
+    }
+
+    size_t binding_count;
+    shaderc_spvc_status status = shaderc_spvc_get_binding_info(
+        context_.get(), resource, binding_type, nullptr, &binding_count);
+    if (status != shaderc_spvc_status_success) {
+      return status;
+    }
+
+    bindings->resize(binding_count);
+    return shaderc_spvc_get_binding_info(context_.get(), resource, binding_type,
+                                         bindings->data(), &binding_count);
+  }
+
+  // Gets the Location decoration information for the stage inputs.
+  shaderc_spvc_status GetInputStageLocationInfo(
+      std::vector<shaderc_spvc_resource_location_info>* locations) {
+    if (!locations) {
+      return shaderc_spvc_status_invalid_out_param;
+    }
+
+    size_t location_count;
+    shaderc_spvc_status status = shaderc_spvc_get_input_stage_location_info(
+        context_.get(), nullptr, &location_count);
+    if (status != shaderc_spvc_status_success) {
+      return status;
+    }
+
+    locations->resize(location_count);
+    return shaderc_spvc_get_input_stage_location_info(
+        context_.get(), locations->data(), &location_count);
+  }
+
+  // Gets the Location decoration information for the stage output.
+  shaderc_spvc_status GetOutputStageLocationInfo(
+      std::vector<shaderc_spvc_resource_location_info>* locations) {
+    if (!locations) {
+      return shaderc_spvc_status_invalid_out_param;
+    }
+
+    size_t location_count;
+    shaderc_spvc_status status = shaderc_spvc_get_output_stage_location_info(
+        context_.get(), nullptr, &location_count);
+    if (status != shaderc_spvc_status_success) {
+      return status;
+    }
+
+    locations->resize(location_count);
+    return shaderc_spvc_get_output_stage_location_info(
+        context_.get(), locations->data(), &location_count);
+  }
+
+  // Gets the type information for the stage output.
+  shaderc_spvc_status GetOutputStageTypeInfo(
+      std::vector<shaderc_spvc_resource_type_info>* types) {
+    if (!types) {
+      return shaderc_spvc_status_invalid_out_param;
+    }
+
+    size_t type_count;
+    shaderc_spvc_status status = shaderc_spvc_get_output_stage_type_info(
+        context_.get(), nullptr, &type_count);
+    if (status != shaderc_spvc_status_success) {
+      return status;
+    }
+
+    types->resize(type_count);
+    return shaderc_spvc_get_output_stage_type_info(context_.get(),
+                                                   types->data(), &type_count);
   }
 
  private:
