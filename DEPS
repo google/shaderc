@@ -5,12 +5,12 @@ vars = {
   'khronos_git': 'https://github.com/KhronosGroup',
 
   'effcee_revision' : '98980e2b785403b5f43c23ed5a81e1a22e7297e8',
-  'glslang_revision': 'ebf634bcaa3e46ca8a912ed05b87281c731b2391',
-  'googletest_revision': '5b162a79d49d044690f3eb7d87ecc3b98a3f2e25',
-  're2_revision': '7470f4d027530ad7decab55e8e2d92ad49754e64',
+  'glslang_revision': '40801e31ed0cd8501c5daa0fe56e4e825165cc9e',
+  'googletest_revision': '306f3754a71d6d1ac644681d3544d06744914228',
+  're2_revision': '00af5b44d36d4f26af30bf1d19707c651a1edf51',
   'spirv_headers_revision': '204cd131c42b90d129073719f2766293ce35c081',
-  'spirv_tools_revision': '96354f5047bf35765af49657304357e00264e5f9',
-  'spirv_cross_revision': 'f912c32898dbf558635c9d5a2d50ff887c1402ae',
+  'spirv_tools_revision': 'c8bf14393cf6e8e05e854e095352088a62818b5c',
+  'spirv_cross_revision': '961b9014af8664d01b5f9a7e2375c1bac287ef64',
 }
 
 deps = {
