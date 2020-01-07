@@ -97,3 +97,6 @@ shaders-ue4/asm/frag/texture-atomics.asm.graphics-robust-access.frag,True
 shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,False
 shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,True
 shaders/asm/frag/image-query-no-sampler.no-samplerless.vk.asm.frag,False
+shaders-msl-no-opt/asm/comp/copy-logical-2.spv14.asm.comp,False
+shaders-msl-no-opt/asm/comp/copy-logical.spv14.asm.comp,False
+shaders-no-opt/asm/comp/copy-logical.spv14.asm.comp,False
