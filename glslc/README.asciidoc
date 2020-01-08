@@ -136,8 +136,8 @@ multiple files generated. A filename of `-` represents standard output.
 
 === Language and Mode Selection Options
 
-[[option-finverty]]
-==== `-finverty`
+[[option-finvert-y]]
+==== `-finvert-y`
 
 Inverts position.Y output in a vertex shader.
 
