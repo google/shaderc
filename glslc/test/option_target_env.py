@@ -120,6 +120,15 @@ class TestTargetEnvEqVulkan1_1WithVulkan1_1ShaderSucceeds(expect.ValidObjectFile
     shader = FileShader(vulkan_compute_subgroup_shader(), '.comp')
     glslc_args = ['--target-env=vulkan1.1', '-c', shader]
 
+@inside_glslc_testsuite('OptionTargetEnv')
+class TestTargetEnvEqVulkan1_2WithVulkan1_0ShaderSucceeds(expect.ValidObjectFile1_5):
+    shader = FileShader(vulkan_vertex_shader(), '.vert')
+    glslc_args = ['--target-env=vulkan1.2', '-c', shader]
+
+@inside_glslc_testsuite('OptionTargetEnv')
+class TestTargetEnvEqVulkan1_2WithVulkan1_1ShaderSucceeds(expect.ValidObjectFile1_5):
+    shader = FileShader(vulkan_compute_subgroup_shader(), '.comp')
+    glslc_args = ['--target-env=vulkan1.2', '-c', shader]
 
 @inside_glslc_testsuite('OptionTargetEnv')
 class TestTargetEnvEqOpenGL4_5WithOpenGLShaderSucceeds(expect.ValidObjectFile):

@@ -165,7 +165,7 @@ void main() { o = clamp(i, vec4(0.5), vec4(1.0)); }
 std::string Disassemble(const std::vector<uint32_t> binary) {
   std::string result;
   shaderc_util::SpirvToolsDisassemble(Compiler::TargetEnv::Vulkan,
-                                      Compiler::TargetEnvVersion::Vulkan_1_1,
+                                      Compiler::TargetEnvVersion::Vulkan_1_2,
                                       binary, &result);
   return result;
 }
