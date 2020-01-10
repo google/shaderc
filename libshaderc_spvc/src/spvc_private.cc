@@ -65,8 +65,7 @@ void consume_spirv_tools_message(shaderc_spvc_context* context,
                                  spv_message_level_t level, const char* src,
                                  const spv_position_t& pos,
                                  const char* message) {
-  context->messages.append(message);
-  context->messages.append("\n");
+  context->messages.push_back(message);
 }
 
 shaderc_spvc_status validate_spirv(shaderc_spvc_context* context,
@@ -74,7 +73,7 @@ shaderc_spvc_status validate_spirv(shaderc_spvc_context* context,
                                    size_t source_len) {
   spvtools::SpirvTools tools(env);
   if (!tools.IsValid()) {
-    context->messages.append("Could not initialize SPIRV-Tools.\n");
+    context->messages.push_back("Could not initialize SPIRV-Tools.");
     return shaderc_spvc_status_internal_error;
   }
 
@@ -83,7 +82,7 @@ shaderc_spvc_status validate_spirv(shaderc_spvc_context* context,
       std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
   if (!tools.Validate(source, source_len, spvtools::ValidatorOptions())) {
-    context->messages.append("Validation of shader failed.\n");
+    context->messages.push_back("Validation of shader failed.");
     return shaderc_spvc_status_validation_error;
   }
 
@@ -97,7 +96,7 @@ shaderc_spvc_status translate_spirv(shaderc_spvc_context* context,
                                     shaderc_spvc_compile_options_t options,
                                     std::vector<uint32_t>* target) {
   if (!target) {
-    context->messages.append("null provided for translation destination.\n");
+    context->messages.push_back("null provided for translation destination.");
     return shaderc_spvc_status_transformation_error;
   }
 
@@ -118,9 +117,9 @@ shaderc_spvc_status translate_spirv(shaderc_spvc_context* context,
              target_env == SPV_ENV_WEBGPU_0) {
     opt.RegisterVulkanToWebGPUPasses();
   } else {
-    context->messages.append(
+    context->messages.push_back(
         "No defined transformation between source and "
-        "target execution environments.\n");
+        "target execution environments.");
     return shaderc_spvc_status_transformation_error;
   }
 
@@ -129,9 +128,9 @@ shaderc_spvc_status translate_spirv(shaderc_spvc_context* context,
   }
 
   if (!opt.Run(source, source_len, target)) {
-    context->messages.append(
+    context->messages.push_back(
         "Transformations between source and target "
-        "execution environments failed.\n");
+        "execution environments failed.");
     return shaderc_spvc_status_transformation_error;
   }
 
@@ -145,7 +144,7 @@ shaderc_spvc_status validate_and_translate_spirv(
   if (options->validate) {
     status = validate_spirv(context, options->source_env, source, source_len);
     if (status != shaderc_spvc_status_success) {
-      context->messages.append("Validation of input source failed.\n");
+      context->messages.push_back("Validation of input source failed.");
       return status;
     }
   }
@@ -159,7 +158,7 @@ shaderc_spvc_status validate_and_translate_spirv(
     status = validate_spirv(context, options->target_env, target->data(),
                             target->size());
     if (status != shaderc_spvc_status_success) {
-      context->messages.append("Validation of transformed source failed.\n");
+      context->messages.push_back("Validation of transformed source failed.");
       return status;
     }
   }
@@ -193,9 +192,9 @@ shaderc_spvc_status generate_glsl_compiler(
     spirv_cross::ParsedIR ir;
     status = generate_spvcir(context, &ir, source, source_len, options);
     if (status != shaderc_spvc_status_success) {
-      context->messages.append(
+      context->messages.push_back(
           "Transformations between source and target "
-          "execution environments failed (spvc-ir-pass).\n");
+          "execution environments failed (spvc-ir-pass).");
       return status;
     } else {
       cross_compiler = new (std::nothrow) spirv_cross::CompilerGLSL(ir);
@@ -206,8 +205,8 @@ shaderc_spvc_status generate_glsl_compiler(
   }
 
   if (!cross_compiler) {
-    context->messages.append(
-        "Unable to initialize SPIRV-Cross GLSL compiler.\n");
+    context->messages.push_back(
+        "Unable to initialize SPIRV-Cross GLSL compiler.");
     return shaderc_spvc_status_compilation_error;
   }
   context->cross_compiler.reset(cross_compiler);
@@ -243,10 +242,10 @@ shaderc_spvc_status generate_glsl_compiler(
     if (stage_count != 1) {
       context->cross_compiler.reset();
       if (stage_count == 0) {
-        context->messages.append("There is no entry point with name: " +
-                                 options->entry_point);
+        context->messages.push_back("There is no entry point with name: " +
+                                    options->entry_point);
       } else {
-        context->messages.append(
+        context->messages.push_back(
             "There is more than one entry point with name: " +
             options->entry_point + ". Use --stage.");
       }
@@ -317,9 +316,9 @@ shaderc_spvc_status generate_hlsl_compiler(
     spirv_cross::ParsedIR ir;
     status = generate_spvcir(context, &ir, source, source_len, options);
     if (status != shaderc_spvc_status_success) {
-      context->messages.append(
+      context->messages.push_back(
           "Transformations between source and target "
-          "execution environments failed (spvc-ir-pass).\n");
+          "execution environments failed (spvc-ir-pass).");
       return status;
     } else {
       cross_compiler = new (std::nothrow) spirv_cross::CompilerHLSL(ir);
@@ -329,8 +328,8 @@ shaderc_spvc_status generate_hlsl_compiler(
         new (std::nothrow) spirv_cross::CompilerHLSL(source, source_len);
   }
   if (!cross_compiler) {
-    context->messages.append(
-        "Unable to initialize SPIRV-Cross HLSL compiler.\n");
+    context->messages.push_back(
+        "Unable to initialize SPIRV-Cross HLSL compiler.");
     return shaderc_spvc_status_compilation_error;
   }
   context->cross_compiler.reset(cross_compiler);
@@ -353,9 +352,9 @@ shaderc_spvc_status generate_msl_compiler(
     spirv_cross::ParsedIR ir;
     status = generate_spvcir(context, &ir, source, source_len, options);
     if (status != shaderc_spvc_status_success) {
-      context->messages.append(
+      context->messages.push_back(
           "Transformations between source and target "
-          "execution environments failed (spvc-ir-pass).\n");
+          "execution environments failed (spvc-ir-pass).");
       return status;
     } else {
       cross_compiler = new (std::nothrow) spirv_cross::CompilerMSL(ir);
@@ -366,8 +365,8 @@ shaderc_spvc_status generate_msl_compiler(
   }
 
   if (!cross_compiler) {
-    context->messages.append(
-        "Unable to initialize SPIRV-Cross MSL compiler.\n");
+    context->messages.push_back(
+        "Unable to initialize SPIRV-Cross MSL compiler.");
     return shaderc_spvc_status_compilation_error;
   }
   context->cross_compiler.reset(cross_compiler);
@@ -393,9 +392,9 @@ shaderc_spvc_status generate_vulkan_compiler(
     shaderc_spvc_status status =
         generate_spvcir(context, &ir, source, source_len, options);
     if (status != shaderc_spvc_status_success) {
-      context->messages.append(
+      context->messages.push_back(
           "Transformations between source and target "
-          "execution environments failed (spvc-ir-pass).\n");
+          "execution environments failed (spvc-ir-pass).");
       return status;
     } else {
       cross_compiler = new (std::nothrow) spirv_cross::CompilerReflection(ir);
@@ -406,9 +405,9 @@ shaderc_spvc_status generate_vulkan_compiler(
   }
 
   if (!cross_compiler) {
-    context->messages.append(
+    context->messages.push_back(
         "Unable to initialize SPIRV-Cross reflection "
-        "compiler.\n");
+        "compiler.");
     return shaderc_spvc_status_compilation_error;
   }
   context->cross_compiler.reset(cross_compiler);
