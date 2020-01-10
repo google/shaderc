@@ -691,7 +691,7 @@ shaderc_spvc_status shaderc_spvc_get_binding_info(
 
   if (!binding_count) {
     context->messages.append(
-        "Invoked needs_buffer_size_buffer without a valid binding_count "
+        "Invoked get_binding_info without a valid binding_count "
         "param\n");
     return shaderc_spvc_status_invalid_out_param;
   }
@@ -769,14 +769,16 @@ shaderc_spvc_status shaderc_spvc_get_input_stage_location_info(
 
   if (!context->cross_compiler) {
     context->messages.append(
-        "Invoked get_input_locations without an initialized compiler\n");
+        "Invoked get_input_stage_location_info without an initialized "
+        "compiler\n");
     return shaderc_spvc_status_uninitialized_compiler_error;
   }
   auto* compiler = context->cross_compiler.get();
 
   if (!location_count) {
     context->messages.append(
-        "Invoked get_input_locations without a valid location_count param\n");
+        "Invoked get_input_stage_location_info without a valid location_count "
+        "param\n");
     return shaderc_spvc_status_invalid_out_param;
   }
 
@@ -798,14 +800,16 @@ shaderc_spvc_status shaderc_spvc_get_output_stage_location_info(
 
   if (!context->cross_compiler) {
     context->messages.append(
-        "Invoked get_output_locations without an initialized compiler\n");
+        "Invoked get_output_stage_location_info without an initialized "
+        "compiler\n");
     return shaderc_spvc_status_uninitialized_compiler_error;
   }
   auto* compiler = context->cross_compiler.get();
 
   if (!location_count) {
     context->messages.append(
-        "Invoked get_output_locations without a valid location_count param\n");
+        "Invoked get_output_stage_location_info without a valid location_count "
+        "param\n");
     return shaderc_spvc_status_invalid_out_param;
   }
 
@@ -827,14 +831,15 @@ shaderc_spvc_status shaderc_spvc_get_output_stage_type_info(
 
   if (!context->cross_compiler) {
     context->messages.append(
-        "Invoked get_output_type_info without an initialized compiler\n");
+        "Invoked get_output_stage_type_info without an initialized compiler\n");
     return shaderc_spvc_status_uninitialized_compiler_error;
   }
   auto* compiler = context->cross_compiler.get();
 
   if (!type_count) {
     context->messages.append(
-        "Invoked get_output_type_info without a valid location_count param\n");
+        "Invoked get_output_stage_type_info without a valid location_count "
+        "param\n");
     return shaderc_spvc_status_invalid_out_param;
   }
   const auto& resources = compiler->get_shader_resources().stage_outputs;
