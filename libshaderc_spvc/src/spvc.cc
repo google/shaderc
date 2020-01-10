@@ -30,6 +30,11 @@ spv::ExecutionModel spvc_model_to_spv_model(
     case shaderc_spvc_execution_model_invalid:
       return spv::ExecutionModel::ExecutionModelMax;
   }
+
+  // Older gcc doesn't recognize that all of the possible cases are covered
+  // above.
+  assert(false);
+  return spv::ExecutionModel::ExecutionModelMax;
 }
 
 shaderc_spvc_execution_model spv_model_to_spvc_model(
@@ -59,6 +64,11 @@ const spirv_cross::SmallVector<spirv_cross::Resource>& get_shader_resources(
     case shaderc_spvc_shader_resource_storage_buffers:
       return resources.storage_buffers;
   }
+
+  // Older gcc doesn't recognize that all of the possible cases are covered
+  // above.
+  assert(false);
+  return std::move(spirv_cross::SmallVector<spirv_cross::Resource>());
 }
 
 shaderc_spvc_texture_view_dimension spirv_dim_to_texture_view_dimension(
