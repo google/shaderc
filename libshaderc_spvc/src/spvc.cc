@@ -51,24 +51,24 @@ shaderc_spvc_execution_model spv_model_to_spvc_model(
   }
 }
 
-const spirv_cross::SmallVector<spirv_cross::Resource>& get_shader_resources(
+const spirv_cross::SmallVector<spirv_cross::Resource>* get_shader_resources(
     const spirv_cross::ShaderResources& resources,
     shaderc_spvc_shader_resource resource) {
   switch (resource) {
     case shaderc_spvc_shader_resource_uniform_buffers:
-      return resources.uniform_buffers;
+      return &(resources.uniform_buffers);
     case shaderc_spvc_shader_resource_separate_images:
-      return resources.separate_images;
+      return &(resources.separate_images);
     case shaderc_spvc_shader_resource_separate_samplers:
-      return resources.separate_samplers;
+      return &(resources.separate_samplers);
     case shaderc_spvc_shader_resource_storage_buffers:
-      return resources.storage_buffers;
+      return &(resources.storage_buffers);
   }
 
   // Older gcc doesn't recognize that all of the possible cases are covered
   // above.
   assert(false);
-  return std::move(spirv_cross::SmallVector<spirv_cross::Resource>());
+  return nullptr;
 }
 
 shaderc_spvc_texture_view_dimension spirv_dim_to_texture_view_dimension(
@@ -707,11 +707,11 @@ shaderc_spvc_status shaderc_spvc_get_binding_info(
   }
 
   const auto& resources = compiler->get_shader_resources();
-  const auto& shader_resources = get_shader_resources(resources, resource);
-  *binding_count = shader_resources.size();
+  const auto* shader_resources = get_shader_resources(resources, resource);
+  *binding_count = shader_resources->size();
   if (!bindings) return shaderc_spvc_status_success;
 
-  for (const auto& shader_resource : shader_resources) {
+  for (const auto& shader_resource : *shader_resources) {
     bindings->texture_dimension = shaderc_spvc_texture_view_dimension_undefined;
     bindings->texture_component_type = shaderc_spvc_texture_format_type_float;
 
