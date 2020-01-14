@@ -147,7 +147,12 @@ void shaderc_spvc_context_destroy(shaderc_spvc_context_t context) {
 
 const char* shaderc_spvc_context_get_messages(
     const shaderc_spvc_context_t context) {
-  return context->messages.c_str();
+  for (const auto& message : context->messages) {
+    context->messages_string += message;
+    context->messages_string += "\n";
+  }
+  context->messages.clear();
+  return context->messages_string.c_str();
 }
 
 void* shaderc_spvc_context_get_compiler(const shaderc_spvc_context_t context) {
@@ -418,24 +423,24 @@ shaderc_spvc_status shaderc_spvc_compile_shader(
     shaderc_spvc_status status =
         spvc_private::generate_shader(context->cross_compiler.get(), result);
     if (status != shaderc_spvc_status_success) {
-      context->messages.append("Compilation failed.  Partial source:\n");
+      context->messages.push_back("Compilation failed.  Partial source:");
       if (context->target_lang == SPVC_TARGET_LANG_GLSL) {
         spirv_cross::CompilerGLSL* cast_compiler =
             reinterpret_cast<spirv_cross::CompilerGLSL*>(
                 context->cross_compiler.get());
-        context->messages.append(cast_compiler->get_partial_source());
+        context->messages.push_back(cast_compiler->get_partial_source());
       } else if (context->target_lang == SPVC_TARGET_LANG_HLSL) {
         spirv_cross::CompilerHLSL* cast_compiler =
             reinterpret_cast<spirv_cross::CompilerHLSL*>(
                 context->cross_compiler.get());
-        context->messages.append(cast_compiler->get_partial_source());
+        context->messages.push_back(cast_compiler->get_partial_source());
       } else if (context->target_lang == SPVC_TARGET_LANG_MSL) {
         spirv_cross::CompilerMSL* cast_compiler =
             reinterpret_cast<spirv_cross::CompilerMSL*>(
                 context->cross_compiler.get());
-        context->messages.append(cast_compiler->get_partial_source());
+        context->messages.push_back(cast_compiler->get_partial_source());
       } else {
-        context->messages.append("Unexpected target language in context\n");
+        context->messages.push_back("Unexpected target language in context");
       }
       context->cross_compiler.reset();
     }
@@ -454,9 +459,9 @@ shaderc_spvc_status shaderc_spvc_set_decoration(
     context->cross_compiler->set_decoration(static_cast<spirv_cross::ID>(id),
                                             spirv_cross_decoration, argument);
   } else {
-    context->messages.append(
+    context->messages.push_back(
         "Decoration Conversion failed.  shaderc_spvc_decoration not "
-        "supported.\n ");
+        "supported.");
   }
   return status;
 }
@@ -467,14 +472,14 @@ shaderc_spvc_status shaderc_spvc_get_decoration(
   if (!context) return shaderc_spvc_status_missing_context_error;
 
   if (!context->cross_compiler) {
-    context->messages.append(
-        "Invoked get_decoration without an initialized compiler\n");
+    context->messages.push_back(
+        "Invoked get_decoration without an initialized compiler");
     return shaderc_spvc_status_uninitialized_compiler_error;
   }
 
   if (!value) {
-    context->messages.append(
-        "Invoked get_decoration without a valid out param\n");
+    context->messages.push_back(
+        "Invoked get_decoration without a valid out param");
     return shaderc_spvc_status_invalid_out_param;
   }
 
@@ -483,9 +488,9 @@ shaderc_spvc_status shaderc_spvc_get_decoration(
       spvc_private::shaderc_spvc_decoration_to_spirv_cross_decoration(
           decoration, &spirv_cross_decoration);
   if (status != shaderc_spvc_status_success) {
-    context->messages.append(
+    context->messages.push_back(
         "Decoration conversion failed.  shaderc_spvc_decoration not "
-        "supported.\n ");
+        "supported.");
 
     return status;
   }
@@ -493,7 +498,7 @@ shaderc_spvc_status shaderc_spvc_get_decoration(
   *value = context->cross_compiler->get_decoration(
       static_cast<spirv_cross::ID>(id), spirv_cross_decoration);
   if (*value == 0) {
-    context->messages.append("Getting decoration failed. id not found. \n ");
+    context->messages.push_back("Getting decoration failed. id not found.  ");
     return shaderc_spvc_status_compilation_error;
   }
 
@@ -511,9 +516,9 @@ shaderc_spvc_status shaderc_spvc_unset_decoration(
     context->cross_compiler->unset_decoration(static_cast<spirv_cross::ID>(id),
                                               spirv_cross_decoration);
   } else {
-    context->messages.append(
+    context->messages.push_back(
         "Decoration conversion failed.  shaderc_spvc_decoration not "
-        "supported.\n ");
+        "supported.");
   }
   return status;
 }
@@ -548,14 +553,14 @@ shaderc_spvc_status shaderc_spvc_add_msl_resource_binding(
   if (!context) return shaderc_spvc_status_missing_context_error;
 
   if (!context->cross_compiler) {
-    context->messages.append(
-        "Invoked add_msl_resource_binding without an initialized compiler\n");
+    context->messages.push_back(
+        "Invoked add_msl_resource_binding without an initialized compiler");
     return shaderc_spvc_status_uninitialized_compiler_error;
   }
 
   if (context->target_lang == SPVC_TARGET_LANG_MSL) {
-    context->messages.append(
-        "Invoked add_msl_resource_binding when target language was not MSL\n");
+    context->messages.push_back(
+        "Invoked add_msl_resource_binding when target language was not MSL");
     return shaderc_spvc_status_configuration_error;
   }
 
@@ -579,14 +584,14 @@ shaderc_spvc_status shaderc_spvc_get_workgroup_size(
   if (!context) return shaderc_spvc_status_missing_context_error;
 
   if (!context->cross_compiler) {
-    context->messages.append(
-        "Invoked get_workgroup_size without an initialized compiler\n");
+    context->messages.push_back(
+        "Invoked get_workgroup_size without an initialized compiler");
     return shaderc_spvc_status_uninitialized_compiler_error;
   }
 
   if (!workgroup_size) {
-    context->messages.append(
-        "Invoked get_workgroup_size without a valid out param\n");
+    context->messages.push_back(
+        "Invoked get_workgroup_size without a valid out param");
     return shaderc_spvc_status_invalid_out_param;
   }
 
@@ -608,20 +613,20 @@ shaderc_spvc_status shaderc_spvc_needs_buffer_size_buffer(
   if (!context) return shaderc_spvc_status_missing_context_error;
 
   if (!context->cross_compiler) {
-    context->messages.append(
-        "Invoked needs_buffer_size_buffer without an initialized compiler\n");
+    context->messages.push_back(
+        "Invoked needs_buffer_size_buffer without an initialized compiler");
     return shaderc_spvc_status_uninitialized_compiler_error;
   }
 
   if (context->target_lang == SPVC_TARGET_LANG_MSL) {
-    context->messages.append(
-        "Invoked needs_buffer_size_buffer when target language was not MSL\n");
+    context->messages.push_back(
+        "Invoked needs_buffer_size_buffer when target language was not MSL");
     return shaderc_spvc_status_configuration_error;
   }
 
   if (!b) {
-    context->messages.append(
-        "Invoked needs_buffer_size_buffer without a valid out param\n");
+    context->messages.push_back(
+        "Invoked needs_buffer_size_buffer without a valid out param");
     return shaderc_spvc_status_invalid_out_param;
   }
 
@@ -643,22 +648,22 @@ shaderc_spvc_status shaderc_spvc_get_execution_model(
   if (!context) return shaderc_spvc_status_missing_context_error;
 
   if (!context->cross_compiler) {
-    context->messages.append(
-        "Invoked get_execution_model without an initialized compiler\n");
+    context->messages.push_back(
+        "Invoked get_execution_model without an initialized compiler");
     return shaderc_spvc_status_uninitialized_compiler_error;
   }
 
   if (!execution_model) {
-    context->messages.append(
-        "Invoked get_execution_model without a valid out param\n");
+    context->messages.push_back(
+        "Invoked get_execution_model without a valid out param");
     return shaderc_spvc_status_invalid_out_param;
   }
 
   auto spirv_model = context->cross_compiler->get_execution_model();
   *execution_model = spv_model_to_spvc_model(spirv_model);
   if (*execution_model == shaderc_spvc_execution_model_invalid) {
-    context->messages.append(
-        "Shader execution model appears to be of an unsupported type\n");
+    context->messages.push_back(
+        "Shader execution model appears to be of an unsupported type");
     return shaderc_spvc_status_internal_error;
   }
 
@@ -670,14 +675,14 @@ shaderc_spvc_status shaderc_spvc_get_push_constant_buffer_count(
   if (!context) return shaderc_spvc_status_missing_context_error;
 
   if (!context->cross_compiler) {
-    context->messages.append(
-        "Invoked push_constant_buffer_count without an initialized compiler\n");
+    context->messages.push_back(
+        "Invoked push_constant_buffer_count without an initialized compiler");
     return shaderc_spvc_status_uninitialized_compiler_error;
   }
 
   if (!count) {
-    context->messages.append(
-        "Invoked push_constant_buffer_count without a valid out param\n");
+    context->messages.push_back(
+        "Invoked push_constant_buffer_count without a valid out param");
     return shaderc_spvc_status_invalid_out_param;
   }
 
@@ -693,16 +698,16 @@ shaderc_spvc_status shaderc_spvc_get_binding_info(
   if (!context) return shaderc_spvc_status_missing_context_error;
 
   if (!context->cross_compiler) {
-    context->messages.append(
-        "Invoked get_binding_info without an initialized compiler\n");
+    context->messages.push_back(
+        "Invoked get_binding_info without an initialized compiler");
     return shaderc_spvc_status_uninitialized_compiler_error;
   }
   auto* compiler = context->cross_compiler.get();
 
   if (!binding_count) {
-    context->messages.append(
+    context->messages.push_back(
         "Invoked get_binding_info without a valid binding_count "
-        "param\n");
+        "param");
     return shaderc_spvc_status_invalid_out_param;
   }
 
@@ -717,8 +722,8 @@ shaderc_spvc_status shaderc_spvc_get_binding_info(
 
     if (!compiler->get_decoration_bitset(shader_resource.id)
              .get(spv::DecorationBinding)) {
-      context->messages.append(
-          "Unable to get binding decoration for shader resource\n");
+      context->messages.push_back(
+          "Unable to get binding decoration for shader resource");
       return shaderc_spvc_status_internal_error;
     }
     uint32_t binding_decoration =
@@ -727,8 +732,8 @@ shaderc_spvc_status shaderc_spvc_get_binding_info(
 
     if (!compiler->get_decoration_bitset(shader_resource.id)
              .get(spv::DecorationDescriptorSet)) {
-      context->messages.append(
-          "Unable to get descriptor set decoration for shader resource\n");
+      context->messages.push_back(
+          "Unable to get descriptor set decoration for shader resource");
       return shaderc_spvc_status_internal_error;
     }
     uint32_t descriptor_set_decoration = compiler->get_decoration(
@@ -778,17 +783,17 @@ shaderc_spvc_status shaderc_spvc_get_input_stage_location_info(
   if (!context) return shaderc_spvc_status_missing_context_error;
 
   if (!context->cross_compiler) {
-    context->messages.append(
+    context->messages.push_back(
         "Invoked get_input_stage_location_info without an initialized "
-        "compiler\n");
+        "compiler");
     return shaderc_spvc_status_uninitialized_compiler_error;
   }
   auto* compiler = context->cross_compiler.get();
 
   if (!location_count) {
-    context->messages.append(
+    context->messages.push_back(
         "Invoked get_input_stage_location_info without a valid location_count "
-        "param\n");
+        "param");
     return shaderc_spvc_status_invalid_out_param;
   }
 
@@ -796,8 +801,8 @@ shaderc_spvc_status shaderc_spvc_get_input_stage_location_info(
       compiler, compiler->get_shader_resources().stage_inputs, locations,
       location_count);
   if (status != shaderc_spvc_status_success) {
-    context->messages.append(
-        "Unable to get location decoration for stage input\n");
+    context->messages.push_back(
+        "Unable to get location decoration for stage input");
   }
 
   return status;
@@ -809,17 +814,17 @@ shaderc_spvc_status shaderc_spvc_get_output_stage_location_info(
   if (!context) return shaderc_spvc_status_missing_context_error;
 
   if (!context->cross_compiler) {
-    context->messages.append(
+    context->messages.push_back(
         "Invoked get_output_stage_location_info without an initialized "
-        "compiler\n");
+        "compiler");
     return shaderc_spvc_status_uninitialized_compiler_error;
   }
   auto* compiler = context->cross_compiler.get();
 
   if (!location_count) {
-    context->messages.append(
+    context->messages.push_back(
         "Invoked get_output_stage_location_info without a valid location_count "
-        "param\n");
+        "param");
     return shaderc_spvc_status_invalid_out_param;
   }
 
@@ -827,8 +832,8 @@ shaderc_spvc_status shaderc_spvc_get_output_stage_location_info(
       compiler, compiler->get_shader_resources().stage_outputs, locations,
       location_count);
   if (status != shaderc_spvc_status_success) {
-    context->messages.append(
-        "Unable to get location decoration for stage output\n");
+    context->messages.push_back(
+        "Unable to get location decoration for stage output");
   }
 
   return status;
@@ -840,16 +845,16 @@ shaderc_spvc_status shaderc_spvc_get_output_stage_type_info(
   if (!context) return shaderc_spvc_status_missing_context_error;
 
   if (!context->cross_compiler) {
-    context->messages.append(
-        "Invoked get_output_stage_type_info without an initialized compiler\n");
+    context->messages.push_back(
+        "Invoked get_output_stage_type_info without an initialized compiler");
     return shaderc_spvc_status_uninitialized_compiler_error;
   }
   auto* compiler = context->cross_compiler.get();
 
   if (!type_count) {
-    context->messages.append(
+    context->messages.push_back(
         "Invoked get_output_stage_type_info without a valid location_count "
-        "param\n");
+        "param");
     return shaderc_spvc_status_invalid_out_param;
   }
   const auto& resources = compiler->get_shader_resources().stage_outputs;
@@ -860,8 +865,8 @@ shaderc_spvc_status shaderc_spvc_get_output_stage_type_info(
   for (const auto& resource : resources) {
     if (!compiler->get_decoration_bitset(resource.id)
              .get(spv::DecorationLocation)) {
-      context->messages.append(
-          "Unable to get location decoration for stage output\n");
+      context->messages.push_back(
+          "Unable to get location decoration for stage output");
       return shaderc_spvc_status_internal_error;
     }
 

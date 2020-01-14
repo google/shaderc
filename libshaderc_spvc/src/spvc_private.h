@@ -36,7 +36,8 @@ typedef enum {
 
 struct shaderc_spvc_context {
   std::unique_ptr<spirv_cross::Compiler> cross_compiler;
-  std::string messages;
+  std::vector<std::string> messages;
+  std::string messages_string;
   spvc_target_lang target_lang = SPVC_TARGET_LANG_UNKNOWN;
   std::vector<uint32_t> intermediate_shader;
   bool use_spvc_parser = false;
