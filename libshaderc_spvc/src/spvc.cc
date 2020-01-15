@@ -558,7 +558,7 @@ shaderc_spvc_status shaderc_spvc_add_msl_resource_binding(
     return shaderc_spvc_status_uninitialized_compiler_error;
   }
 
-  if (context->target_lang == SPVC_TARGET_LANG_MSL) {
+  if (context->target_lang != SPVC_TARGET_LANG_MSL) {
     context->messages.push_back(
         "Invoked add_msl_resource_binding when target language was not MSL");
     return shaderc_spvc_status_configuration_error;
@@ -618,7 +618,7 @@ shaderc_spvc_status shaderc_spvc_needs_buffer_size_buffer(
     return shaderc_spvc_status_uninitialized_compiler_error;
   }
 
-  if (context->target_lang == SPVC_TARGET_LANG_MSL) {
+  if (context->target_lang != SPVC_TARGET_LANG_MSL) {
     context->messages.push_back(
         "Invoked needs_buffer_size_buffer when target language was not MSL");
     return shaderc_spvc_status_configuration_error;
