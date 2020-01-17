@@ -632,7 +632,7 @@ shaderc_spvc_status shaderc_spvc_needs_buffer_size_buffer(
 
   *b =
       reinterpret_cast<spirv_cross::CompilerMSL*>(context->cross_compiler.get())
-          ->needs_output_buffer();
+          ->needs_buffer_size_buffer();
 
   return shaderc_spvc_status_success;
 }
