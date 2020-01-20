@@ -4,8 +4,11 @@ shaders-hlsl/comp/num-workgroups-with-builtins.comp,False
 shaders-hlsl/comp/num-workgroups-with-builtins.comp,True
 shaders-hlsl/frag/separate-combined-fake-overload.sm30.frag,False
 shaders-hlsl/frag/separate-combined-fake-overload.sm30.frag,True
+shaders-msl-no-opt/asm/comp/copy-logical-2.spv14.asm.comp,False
+shaders-msl-no-opt/asm/comp/copy-logical.spv14.asm.comp,False
 shaders-msl-no-opt/comp/basic.dynamic-buffer.msl2.invalid.comp,False
 shaders-msl-no-opt/comp/int64.invalid.msl22.comp,False
+shaders-msl-no-opt/frag/force-active-resources.msl2.argument..force-active.discrete.frag,False
 shaders-msl/asm/comp/multiple-entry.asm.comp,False
 shaders-msl/asm/comp/multiple-entry.asm.comp,True
 shaders-msl/asm/frag/min-lod.msl22.asm.frag,False
@@ -32,6 +35,7 @@ shaders-msl/vert/float-math.invariant-float-math.vert,False
 shaders-msl/vert/float-math.invariant-float-math.vert,True
 shaders-msl/vert/texture_buffer.texture-buffer-native.msl21.vert,False
 shaders-msl/vert/texture_buffer.texture-buffer-native.msl21.vert,True
+shaders-no-opt/asm/comp/copy-logical.spv14.asm.comp,False
 shaders-reflection/asm/aliased-entry-point-names.asm.multi,False
 shaders-reflection/asm/op-source-glsl-ssbo-1.asm.comp,False
 shaders-reflection/asm/op-source-glsl-ssbo-2.asm.comp,False
@@ -53,7 +57,9 @@ shaders-reflection/frag/push-constant.vk.frag,False
 shaders-reflection/frag/separate-sampler-texture-array.vk.frag,False
 shaders-reflection/frag/spec-constant.vk.frag,False
 shaders-reflection/rgen/acceleration_structure.vk.rgen,False
+shaders-reflection/vert/array-size-reflection.vert,False
 shaders-reflection/vert/read-from-row-major-array.vert,False
+shaders-reflection/vert/stride-reflection.vert,False
 shaders-reflection/vert/texture_buffer.vert,False
 shaders-ue4/asm/frag/subpass-input.ios.framebuffer-fetch.asm.frag,False
 shaders-ue4/asm/frag/subpass-input.ios.framebuffer-fetch.asm.frag,True
@@ -61,6 +67,3 @@ shaders-ue4/asm/frag/texture-atomics.asm.graphics-robust-access.frag,True
 shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,False
 shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,True
 shaders/asm/frag/image-query-no-sampler.no-samplerless.vk.asm.frag,False
-shaders-msl-no-opt/asm/comp/copy-logical-2.spv14.asm.comp,False
-shaders-msl-no-opt/asm/comp/copy-logical.spv14.asm.comp,False
-shaders-no-opt/asm/comp/copy-logical.spv14.asm.comp,False
