@@ -55,18 +55,50 @@ class CompilationResult {
     return *this;
   }
 
+  // DEPRECATED
   const std::string GetStringOutput() const {
-    return shaderc_spvc_result_get_string_output(result_.get());
+    std::string str;
+    GetStringOutput(&str);
+    return str;
   }
 
-  const std::vector<uint32_t> GetBinaryOutput() const {
-    const uint32_t* binary_output =
-        shaderc_spvc_result_get_binary_output(result_.get());
-    uint32_t binary_length =
-        shaderc_spvc_result_get_binary_length(result_.get());
-    if (!binary_output || !binary_length) return {};
+  shaderc_spvc_status GetStringOutput(std::string* str) const {
+    if (!str) return shaderc_spvc_status_invalid_out_param;
+    const char* inner_str;
+    shaderc_spvc_status status =
+        shaderc_spvc_result_get_string_output(result_.get(), &inner_str);
+    if (status != shaderc_spvc_status_success) {
+      return status;
+    }
+    *str = std::string(inner_str);
+    return shaderc_spvc_status_success;
+  }
 
-    return std::vector<uint32_t>(binary_output, binary_output + binary_length);
+  // DEPRECATED
+  const std::vector<uint32_t> GetBinaryOutput() const {
+    std::vector<uint32_t> result;
+    GetBinaryOutput(&result);
+    return result;
+  }
+
+  shaderc_spvc_status GetBinaryOutput(std::vector<uint32_t>* data) const {
+    if (!data) return shaderc_spvc_status_invalid_out_param;
+    const uint32_t* binary_output;
+    shaderc_spvc_status status =
+        shaderc_spvc_result_get_binary_output(result_.get(), &binary_output);
+    if (status != shaderc_spvc_status_success) {
+      return status;
+    }
+    uint32_t binary_length;
+    status =
+        shaderc_spvc_result_get_binary_length(result_.get(), &binary_length);
+    if (!binary_output || !binary_length) {
+      *data = std::vector<uint32_t>();
+    } else {
+      *data =
+          std::vector<uint32_t>(binary_output, binary_output + binary_length);
+    }
+    return shaderc_spvc_status_success;
   }
 
  private:
@@ -97,29 +129,32 @@ class CompileOptions {
   }
 
   // Set the environment for the input SPIR-V.  Default is Vulkan 1.0.
-  void SetSourceEnvironment(shaderc_target_env env,
-                            shaderc_env_version version) {
-    shaderc_spvc_compile_options_set_source_env(options_.get(), env, version);
+  shaderc_spvc_status SetSourceEnvironment(shaderc_target_env env,
+                                           shaderc_env_version version) {
+    return shaderc_spvc_compile_options_set_source_env(options_.get(), env,
+                                                       version);
   }
 
   // Set the target environment for the SPIR-V to be cross-compiled. If this is
   // different then the source a transformation will need to be applied.
   // Currently only Vulkan 1.1 <-> WebGPU transforms are defined. Default is
   // Vulkan 1.0.
-  void SetTargetEnvironment(shaderc_target_env env,
-                            shaderc_env_version version) {
-    shaderc_spvc_compile_options_set_target_env(options_.get(), env, version);
+  shaderc_spvc_status SetTargetEnvironment(shaderc_target_env env,
+                                           shaderc_env_version version) {
+    return shaderc_spvc_compile_options_set_target_env(options_.get(), env,
+                                                       version);
   }
 
   // Set the entry point.
-  void SetEntryPoint(const std::string& entry_point) {
-    shaderc_spvc_compile_options_set_entry_point(options_.get(),
-                                                 entry_point.c_str());
+  shaderc_spvc_status SetEntryPoint(const std::string& entry_point) {
+    return shaderc_spvc_compile_options_set_entry_point(options_.get(),
+                                                        entry_point.c_str());
   }
 
   // If true, unused variables will not appear in the output.
-  void SetRemoveUnusedVariables(bool b) {
-    shaderc_spvc_compile_options_set_remove_unused_variables(options_.get(), b);
+  shaderc_spvc_status SetRemoveUnusedVariables(bool b) {
+    return shaderc_spvc_compile_options_set_remove_unused_variables(
+        options_.get(), b);
   }
 
   // If true, enable robust buffer access pass in the spirv-opt, meaning:
@@ -127,148 +162,161 @@ class CompileOptions {
   // arrays, providing guarantees satisfying Vulkan's robustBufferAccess rules.
   // This is useful when an implementation does not support robust-buffer access
   // as a driver option.
-  void SetRobustBufferAccessPass(bool b){
-    shaderc_spvc_compile_options_set_robust_buffer_access_pass(options_.get(),
-                                                               b);
+
+  shaderc_spvc_status SetRobustBufferAccessPass(bool b) {
+    return shaderc_spvc_compile_options_set_robust_buffer_access_pass(
+        options_.get(), b);
   }
 
-  void SetEmitLineDirectives(bool b){
-    shaderc_spvc_compile_options_set_emit_line_directives(options_.get(), b);
+  shaderc_spvc_status SetEmitLineDirectives(bool b) {
+    return shaderc_spvc_compile_options_set_emit_line_directives(options_.get(),
+                                                                 b);
   }
   // If true, Vulkan GLSL features are used instead of GL-compatible features.
-  void SetVulkanSemantics(bool b) {
-    shaderc_spvc_compile_options_set_vulkan_semantics(options_.get(), b);
+  shaderc_spvc_status SetVulkanSemantics(bool b) {
+    return shaderc_spvc_compile_options_set_vulkan_semantics(options_.get(), b);
   }
 
   // If true, gl_PerVertex is explicitly redeclared in vertex, geometry and
   // tessellation shaders. The members of gl_PerVertex is determined by which
   // built-ins are declared by the shader.
-  void SetSeparateShaderObjects(bool b) {
-    shaderc_spvc_compile_options_set_separate_shader_objects(options_.get(), b);
+  shaderc_spvc_status SetSeparateShaderObjects(bool b) {
+    return shaderc_spvc_compile_options_set_separate_shader_objects(
+        options_.get(), b);
   }
 
   // Flatten uniform or push constant variable into (i|u)vec4 array.
-  void SetFlattenUbo(bool b) {
-    shaderc_spvc_compile_options_set_flatten_ubo(options_.get(), b);
+  shaderc_spvc_status SetFlattenUbo(bool b) {
+    return shaderc_spvc_compile_options_set_flatten_ubo(options_.get(), b);
   }
 
   // Which GLSL version should be produced.  Default is 450 (i.e. 4.5).
-  void SetGLSLLanguageVersion(uint32_t version) {
-    shaderc_spvc_compile_options_set_glsl_language_version(options_.get(),
-                                                           version);
+  shaderc_spvc_status SetGLSLLanguageVersion(uint32_t version) {
+    return shaderc_spvc_compile_options_set_glsl_language_version(
+        options_.get(), version);
   }
 
   // If true, flatten multidimensional arrays, e.g. foo[a][b][c] -> foo[a*b*c].
   // Default is false.
-  void SetFlattenMultidimensionalArrays(bool b) {
-    shaderc_spvc_compile_options_set_flatten_multidimensional_arrays(
+  shaderc_spvc_status SetFlattenMultidimensionalArrays(bool b) {
+    return shaderc_spvc_compile_options_set_flatten_multidimensional_arrays(
         options_.get(), b);
   }
 
   // Force interpretion as ES, or not.  Default is to detect from source.
-  void SetES(bool b) { shaderc_spvc_compile_options_set_es(options_.get(), b); }
+  shaderc_spvc_status SetES(bool b) {
+    return shaderc_spvc_compile_options_set_es(options_.get(), b);
+  }
 
   // If true, emit push constants as uniform buffer objects.  Default is false.
-  void SetGLSLEmitPushConstantAsUBO(bool b) {
-    shaderc_spvc_compile_options_set_glsl_emit_push_constant_as_ubo(
+  shaderc_spvc_status SetGLSLEmitPushConstantAsUBO(bool b) {
+    return shaderc_spvc_compile_options_set_glsl_emit_push_constant_as_ubo(
         options_.get(), b);
   }
 
   // Which MSL version should be produced.  Default is 10200 (i.e. 1.2).
-  void SetMSLLanguageVersion(uint32_t version) {
-    shaderc_spvc_compile_options_set_msl_language_version(options_.get(),
-                                                          version);
+  shaderc_spvc_status SetMSLLanguageVersion(uint32_t version) {
+    return shaderc_spvc_compile_options_set_msl_language_version(options_.get(),
+                                                                 version);
   }
 
   // If true, swizzle MSL texture samples.  Default is false.
-  void SetMSLSwizzleTextureSamples(bool b) {
-    shaderc_spvc_compile_options_set_msl_swizzle_texture_samples(options_.get(),
-                                                                 b);
+  shaderc_spvc_status SetMSLSwizzleTextureSamples(bool b) {
+    return shaderc_spvc_compile_options_set_msl_swizzle_texture_samples(
+        options_.get(), b);
   }
 
   // Choose MSL platform.  Default is MacOS.
-  void SetMSLPlatform(shaderc_spvc_msl_platform platform) {
-    shaderc_spvc_compile_options_set_msl_platform(options_.get(), platform);
+  shaderc_spvc_status SetMSLPlatform(shaderc_spvc_msl_platform platform) {
+    return shaderc_spvc_compile_options_set_msl_platform(options_.get(),
+                                                         platform);
   }
 
   // If true, pad MSL fragment output.  Default is false.
-  void SetMSLPadFragmentOutput(bool b) {
-    shaderc_spvc_compile_options_set_msl_pad_fragment_output(options_.get(), b);
+  shaderc_spvc_status SetMSLPadFragmentOutput(bool b) {
+    return shaderc_spvc_compile_options_set_msl_pad_fragment_output(
+        options_.get(), b);
   }
 
   // If true, capture MSL output to buffer.  Default is false.
-  void SetMSLCapture(bool b) {
-    shaderc_spvc_compile_options_set_msl_capture(options_.get(), b);
+  shaderc_spvc_status SetMSLCapture(bool b) {
+    return shaderc_spvc_compile_options_set_msl_capture(options_.get(), b);
   }
 
   // If true, flip the Y-coord of the built-in "TessCoord."  Default is top
   // left.
-  void SetMSLDomainLowerLeft(bool b) {
-    shaderc_spvc_compile_options_set_msl_domain_lower_left(options_.get(), b);
+  shaderc_spvc_status SetMSLDomainLowerLeft(bool b) {
+    return shaderc_spvc_compile_options_set_msl_domain_lower_left(
+        options_.get(), b);
   }
 
   // Enable use of MSL 2.0 indirect argument buffers.  Default is not to use
   // them.
-  void SetMSLArgumentBuffers(bool b) {
-    shaderc_spvc_compile_options_set_msl_argument_buffers(options_.get(), b);
+  shaderc_spvc_status SetMSLArgumentBuffers(bool b) {
+    return shaderc_spvc_compile_options_set_msl_argument_buffers(options_.get(),
+                                                                 b);
   }
 
   // When using MSL argument buffers, force "classic" MSL 1.0 binding for the
   // given descriptor sets. This corresponds to VK_KHR_push_descriptor in
   // Vulkan.
-  void SetMSLDiscreteDescriptorSets(const std::vector<uint32_t> descriptors) {
-    shaderc_spvc_compile_options_set_msl_discrete_descriptor_sets(
+  shaderc_spvc_status SetMSLDiscreteDescriptorSets(
+      const std::vector<uint32_t> descriptors) {
+    return shaderc_spvc_compile_options_set_msl_discrete_descriptor_sets(
         options_.get(), descriptors.data(), descriptors.size());
   }
 
   // Set whether or not PointSize builtin is used for MSL shaders
-  void SetMSLEnablePointSizeBuiltIn(bool b) {
-    shaderc_spvc_compile_options_set_msl_enable_point_size_builtin(
+  shaderc_spvc_status SetMSLEnablePointSizeBuiltIn(bool b) {
+    return shaderc_spvc_compile_options_set_msl_enable_point_size_builtin(
         options_.get(), b);
   }
 
   // Set the index in the buffer size in the buffer for MSL
-  void SetMSLBufferSizeBufferIndex(uint32_t index) {
-    shaderc_spvc_compile_options_set_msl_buffer_size_buffer_index(
+  shaderc_spvc_status SetMSLBufferSizeBufferIndex(uint32_t index) {
+    return shaderc_spvc_compile_options_set_msl_buffer_size_buffer_index(
         options_.get(), index);
   }
 
   // Which HLSL shader model should be used.  Default is 30.
-  void SetHLSLShaderModel(uint32_t model) {
-    shaderc_spvc_compile_options_set_hlsl_shader_model(options_.get(), model);
+  shaderc_spvc_status SetHLSLShaderModel(uint32_t model) {
+    return shaderc_spvc_compile_options_set_hlsl_shader_model(options_.get(),
+                                                              model);
   }
 
   // If true, ignore PointSize.  Default is false.
-  void SetHLSLPointSizeCompat(bool b) {
-    shaderc_spvc_compile_options_set_hlsl_point_size_compat(options_.get(), b);
+  shaderc_spvc_status SetHLSLPointSizeCompat(bool b) {
+    return shaderc_spvc_compile_options_set_hlsl_point_size_compat(
+        options_.get(), b);
   }
 
   // If true, ignore PointCoord.  Default is false.
-  void SetHLSLPointCoordCompat(bool b) {
-    shaderc_spvc_compile_options_set_hlsl_point_coord_compat(options_.get(), b);
+  shaderc_spvc_status SetHLSLPointCoordCompat(bool b) {
+    return shaderc_spvc_compile_options_set_hlsl_point_coord_compat(
+        options_.get(), b);
   }
 
   // If true (default is false):
   //   GLSL: map depth from Vulkan/D3D style to GL style, i.e. [ 0,w] -> [-w,w]
   //   MSL : map depth from GL style to Vulkan/D3D style, i.e. [-w,w] -> [ 0,w]
   //   HLSL: map depth from GL style to Vulkan/D3D style, i.e. [-w,w] -> [ 0,w]
-  void SetFixupClipspace(bool b) {
-    shaderc_spvc_compile_options_set_fixup_clipspace(options_.get(), b);
+  shaderc_spvc_status SetFixupClipspace(bool b) {
+    return shaderc_spvc_compile_options_set_fixup_clipspace(options_.get(), b);
   }
 
   // If true invert gl_Position.y or equivalent.  Default is false.
-  void SetFlipVertY(bool b) {
-    shaderc_spvc_compile_options_set_flip_vert_y(options_.get(), b);
+  shaderc_spvc_status SetFlipVertY(bool b) {
+    return shaderc_spvc_compile_options_set_flip_vert_y(options_.get(), b);
   }
 
   // If true validate input and intermediate source. Default is true.
-  void SetValidate(bool b) {
-    shaderc_spvc_compile_options_set_validate(options_.get(), b);
+  shaderc_spvc_status SetValidate(bool b) {
+    return shaderc_spvc_compile_options_set_validate(options_.get(), b);
   }
 
   // If true optimize input and intermediate source. Default is true.
-  void SetOptimize(bool b) {
-    shaderc_spvc_compile_options_set_optimize(options_.get(), b);
+  shaderc_spvc_status SetOptimize(bool b) {
+    return shaderc_spvc_compile_options_set_optimize(options_.get(), b);
   }
 
   // Fill options with given data.  Return amount of data used, or zero
@@ -304,17 +352,24 @@ class Context {
     return shaderc_spvc_context_get_messages(context_.get());
   }
 
+  // DEPRECATED
+  void* GetCompiler() const {
+    void* compiler;
+    shaderc_spvc_context_get_compiler(context_.get(), &compiler);
+    return compiler;
+  }
+
   // EXPERIMENTAL
   // Returns the internal spirv_cross compiler reference, does NOT transfer
   // ownership.
   // This is being exposed temporarily to ease integration of spvc into Dawn,
   // but this is will be removed in the future without warning.
-  void* GetCompiler() const {
-    return shaderc_spvc_context_get_compiler(context_.get());
+  shaderc_spvc_status GetCompiler(void** compiler) {
+    return shaderc_spvc_context_get_compiler(context_.get(), compiler);
   }
 
-  void SetUseSpvcParser(bool b) {
-     shaderc_spvc_context_set_use_spvc_parser(context_.get(), b);
+  shaderc_spvc_status SetUseSpvcParser(bool b) {
+    return shaderc_spvc_context_set_use_spvc_parser(context_.get(), b);
   }
 
   // Initializes state for compiling SPIR-V to GLSL.
@@ -383,26 +438,27 @@ class Context {
   // Analyzes all separate image and samplers used from the currently selected
   // entry point, and re-routes them all to a combined image sampler instead.
   // (added for GLSL API support in Dawn)
-  void BuildCombinedImageSamplers(void) {
-    shaderc_spvc_build_combined_image_samplers(context_.get());
+  shaderc_spvc_status BuildCombinedImageSamplers(void) {
+    return shaderc_spvc_build_combined_image_samplers(context_.get());
   }
 
   // After call to BuildCombinedImageSamplers, fetch the ids associated with the
   // combined image samplers.
-  void GetCombinedImageSamplers(
+  shaderc_spvc_status GetCombinedImageSamplers(
       std::vector<shaderc_spvc_combined_image_sampler>* samplers) {
     size_t count;
-    shaderc_spvc_get_combined_image_samplers(context_.get(), nullptr, &count);
+    shaderc_spvc_status status = shaderc_spvc_get_combined_image_samplers(
+        context_.get(), nullptr, &count);
+    if (status != shaderc_spvc_status_success) return status;
     samplers->resize(count);
-    shaderc_spvc_get_combined_image_samplers(context_.get(), samplers->data(),
-                                             &count);
+    return shaderc_spvc_get_combined_image_samplers(context_.get(),
+                                                    samplers->data(), &count);
   }
 
   // set |name| on a given |id| (added for GLSL support in Dawn).
   // Assuming id is valid.
-  void SetName(uint32_t id, const std::string& name) {
-    shaderc_spvc_set_name(context_.get(), id, name.c_str());
-    return;
+  shaderc_spvc_status SetName(uint32_t id, const std::string& name) {
+    return shaderc_spvc_set_name(context_.get(), id, name.c_str());
   }
 
   // Adds a binding to indicate the MSL buffer, texture or sampler index to use
