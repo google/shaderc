@@ -1,5 +1,8 @@
 Revision history for Shaderc
 
+v2020.0-dev 2020-01-22
+ - Start v2020.0-dev
+
 v2019.1 2020-01-22
  - glslc, libshaderc:
    - Add -fnan-clamp: Generate code for max and min builtins so that,
