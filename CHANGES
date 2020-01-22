@@ -1,12 +1,16 @@
 Revision history for Shaderc
 
-v2019.1-dev 2019-06-04
+v2019.12 2020-01-22
  - glslc, libshaderc:
    - Add -fnan-clamp: Generate code for max and min builtins so that,
      given a NaN operand, will return the other operand. Similarly, the
      clamp builtin favours non-NaN operands, as if clamp was implemented
      as the composition of max and min.
    - Add -finvert-y
+   - Using SetBeforeHlslLegalization for more relaxed validation rules
+   - Added support for SPIR-V 1.5
+   - Add --emit-line-directive option
+   - Added support for Vulkan 1.2
  - spvc:
    - Add many options:
 	--flatten-multidimensional-arrays
@@ -22,11 +26,44 @@ v2019.1-dev 2019-06-04
 	--msl-discrete-descriptor-set=<number>
 	--hlsl-enable-compat
    - Reintroduce shaderc_spvc_compile_options_set_shader_model
- - Infrastructure
+   - Added option to inject robust buffer access code
+   - Added support for emitting ToVulkan shaders
+   - Added spirv-opt based IR generation as alternative to built in spirv_cross IR gen
+   - Added API for specifying source and target execution environments
+   - Added option & reflection API methods neede by Dawn
+   - Substantial internal refactoring and code cleanup
+   - Large number of breaking changes to the API
+      -  Replaced shaderc_spvc_compile_options_set_shader_model with
+         shaderc_spvc_compile_options_set_hlsl_shader_model
+      - Compiler initialization and shader generation moved into seperate calls
+      - Seperated return codes from shaderc ones
+      - Many small API changes
+   - Improvements to testing
+      - Refactoring and clean up of run_spirv_cross_tests.py
+      - Seperation of expectations into known failures, known invalids, and cases
+        that need investigation
+      - Tweaks and fixes to substantially increase passing cases
+      - Added support for running tests using spvc IR generation
+   - Infrastructure
    - Update DEPS with cross-verified commits from associated repos.
    - Add utils/roll-deps
+ - Infrastructure:
+   - Removed Appveyor artifacts link
+   - Improvements and clean up of DEPS rolling scripts
+   - Enabled warnings about implicit fallthrough
+   - Enabled improper semicolon warnings
+   - Restricted -fPIC to platforms that support it
+   - Converted remaining scripts to use Python 3
+   - Replaced nosetest with unittest
+   - Removed assumptions aabout location of spirv-tools, effcee, and RE2
+   - Migrated BUILD.gn spirv_cross dependency to local repo
  - Fixes:
    - Fix duplicate install paths when using VisualStudio
+   - Fixed BUILD.gn for Chromium, Dawn & Fuchsia
+   - Explicitly enabled HLSL support in glslang
+   - Added installing necessary headers in Android.mk
+   - Removed unsupported Unicode characters
+   - Fixed detection of spirv-headers directory
    #666: Update Docker file to use Python3
 
 v2019.0 2019-06-04
