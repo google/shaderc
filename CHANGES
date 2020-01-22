@@ -9,7 +9,7 @@ v2019.12 2020-01-22
    - Add -finvert-y
    - Using SetBeforeHlslLegalization for more relaxed validation rules
    - Added support for SPIR-V 1.5
-   - Add --emit-line-derective option
+   - Add --emit-line-directive option
    - Added support for Vulkan 1.2
  - spvc:
    - Add many options:
@@ -59,12 +59,12 @@ v2019.12 2020-01-22
    - Migrated BUILD.gn spirv_cross dependency to local repo
  - Fixes:
    - Fix duplicate install paths when using VisualStudio
-   #666: Update Docker file to use Python3
    - Fixed BUILD.gn for Chromium, Dawn & Fuchsia
    - Explicitly enabled HLSL support in glslang
    - Added installing necessary headers in Android.mk
    - Removed unsupported Unicode characters
    - Fixed detection of spirv-headers directory
+   #666: Update Docker file to use Python3
 
 v2019.0 2019-06-04
  - Add optional spvc, libshaderc_spvc as wrapper around SPIRV-Cross:
