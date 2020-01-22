@@ -1,6 +1,6 @@
 Revision history for Shaderc
 
-v2019.12 2020-01-22
+v2019.1 2020-01-22
  - glslc, libshaderc:
    - Add -fnan-clamp: Generate code for max and min builtins so that,
      given a NaN operand, will return the other operand. Similarly, the
