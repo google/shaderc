@@ -48,9 +48,10 @@ int test_exec(shaderc_spvc_context_t context,
     shaderc_spvc_status compile_status =
         shaderc_spvc_compile_shader(context, result);
     if (compile_status == shaderc_spvc_status_success) {
+      const char* result_str;
+      shaderc_spvc_result_get_string_output(result, &result_str);
       printf("success! %lu characters of %s\n",
-             (unsigned long)(strlen(
-                 shaderc_spvc_result_get_string_output(result))),
+             (unsigned long)(strlen(result_str)),
              target_lang);
       ret_val = 1;
     } else {
