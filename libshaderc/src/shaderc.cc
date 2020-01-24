@@ -779,6 +779,7 @@ bool shaderc_parse_version_profile(const char* str, int* version,
       *profile = shaderc_profile_none;
       return true;
     case EBadProfile:
+    case EProfileCount:
       return false;
   }
 
