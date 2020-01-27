@@ -356,17 +356,21 @@ int main(int argc, char** argv) {
     case shaderc_spvc_status_success: {
       const char* path = output_path.data();
       if (output_language != "vulkan") {
+        std::string string_output;
+        result.GetStringOutput(&string_output);
         if (path && strcmp(path, "-")) {
-          std::basic_ofstream<char>(path) << result.GetStringOutput();
+          std::basic_ofstream<char>(path) << string_output;
         } else {
-          std::cout << result.GetStringOutput();
+          std::cout << string_output;
         }
       } else {
         if (path && strcmp(path, "-")) {
+          std::vector<uint32_t> binary_output;
+          result.GetBinaryOutput(&binary_output);
           std::ofstream out(path, std::ios::binary);
-          out.write((char*)result.GetBinaryOutput().data(),
+          out.write((char*)binary_output.data(),
                     (sizeof(uint32_t) / sizeof(char)) *
-                        result.GetBinaryOutput().size());
+                        binary_output.size());
         } else {
           std::cerr << "Cowardly refusing to output binary result to screen"
                     << std::endl;
