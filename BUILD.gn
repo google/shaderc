@@ -176,6 +176,10 @@ config("shaderc_spvc_public") {
 }
 
 component("libshaderc_spvc") {
+  public_deps = [ ":libshaderc_spvc_sources" ]
+}
+
+source_set("libshaderc_spvc_sources") {
   public_configs = [
     ":shaderc_spvc_public",
   ]
