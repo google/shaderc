@@ -145,7 +145,7 @@ Options:
   -std=<value>      Version and profile for GLSL input files. Possible values
                     are concatenations of version and profile, e.g. 310es,
                     450core, etc.  Ignored for HLSL files.
-  -S                Only run preprocess and compilation steps.
+  -S                Emit SPIR-V assembly instead of binary.
   --show-limits     Display available limit names and their default values.
   --target-env=<environment>
                     Set the target client environment, and the semantics
