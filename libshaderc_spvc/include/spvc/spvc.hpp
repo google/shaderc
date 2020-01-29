@@ -55,6 +55,13 @@ class CompilationResult {
     return *this;
   }
 
+  // DEPRECATED
+  const std::string GetStringOutput() const {
+    std::string str;
+    GetStringOutput(&str);
+    return str;
+  }
+
   shaderc_spvc_status GetStringOutput(std::string* str) const {
     if (!str) return shaderc_spvc_status_invalid_out_param;
     const char* inner_str;
@@ -65,6 +72,13 @@ class CompilationResult {
     }
     *str = std::string(inner_str);
     return shaderc_spvc_status_success;
+  }
+
+  // DEPRECATED
+  const std::vector<uint32_t> GetBinaryOutput() const {
+    std::vector<uint32_t> result;
+    GetBinaryOutput(&result);
+    return result;
   }
 
   shaderc_spvc_status GetBinaryOutput(std::vector<uint32_t>* data) const {
@@ -336,6 +350,13 @@ class Context {
   // Returns logged messages from operations
   const std::string GetMessages() const {
     return shaderc_spvc_context_get_messages(context_.get());
+  }
+
+  // DEPRECATED
+  void* GetCompiler() const {
+    void* compiler;
+    shaderc_spvc_context_get_compiler(context_.get(), &compiler);
+    return compiler;
   }
 
   // EXPERIMENTAL
