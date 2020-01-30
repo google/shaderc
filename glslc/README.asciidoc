@@ -231,12 +231,14 @@ the following:
 * `vulkan`: create SPIR-V under Vulkan 1.0 semantics.
 * `vulkan1.0`: create SPIR-V under Vulkan 1.0 semantics.
 * `vulkan1.1`: create SPIR-V under Vulkan 1.1 semantics.
+* `vulkan1.2`: create SPIR-V under Vulkan 1.2 semantics.
 * `opengl`: create SPIR-V under OpenGL 4.5 semantics.
 * `opengl4.5`: create SPIR-V under OpenGL 4.5 semantics.
 * `opengl_compat`: create SPIR-V under OpenGL semantics, including compatibility
   profile functions.
 
-Generated code uses SPIR-V 1.0, except that code compiled for Vulkan 1.1 uses SPIR-V 1.3.
+Generated code uses SPIR-V 1.0, except for code compiled for Vulkan 1.1, which uses
+SPIR-V 1.3, and code compiled for Vulkan 1.5, which uses SPIR-V 1.5.
 
 If this option is not specified, a default of `vulkan1.0` is used.
 
@@ -244,8 +246,9 @@ If this option is not specified, a default of `vulkan1.0` is used.
 
 `--target-spv=<value>` lets you specify the SPIR-V version to be used by the generated
 module.  The default is to use the highest version of SPIR-V required to be supported
-by the target environment.  For example, the default is SPIR-V 1.0 for Vulkan 1.0, and
-and SPIR-V 1.3 for Vulkan 1.1.
+by the target environment.  The defaults for specific Vulkan target environments are
+as follows: SPIR-V 1.0 for Vulkan 1.0, SPIR-V 1.3 for Vulkan 1.1, and SPIR-V 1.5 for
+Vulkan 1.2.
 
 The ``<value>`` can be one of the following:
 
@@ -254,6 +257,7 @@ The ``<value>`` can be one of the following:
 * `spv1.2`
 * `spv1.3`
 * `spv1.4`
+* `spv1.5`
 
 ==== `-x`
 
