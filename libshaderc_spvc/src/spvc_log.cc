@@ -99,9 +99,7 @@ LogMessage ErrorLog(shaderc_spvc_context_t context) {
 
 LogMessage DebugLog(shaderc_spvc_context_t context, const char* file,
                     const char* function, int line) {
-  LogMessage message = DebugLog(context);
-  message << file << ":" << line << "(" << function << ")";
-  return message;
+  return std::move(DebugLog(context) << file << ":" << line << "(" << function << ")");
 }
 
 }  // namespace shaderc_spvc
