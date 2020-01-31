@@ -189,6 +189,14 @@ source_set("libshaderc_spvc_sources") {
     "SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS"
   ]
 
+  if (shaderc_spvc_direct_logging) {
+    defines += [ "SHADERC_SPVC_DIRECT_LOGGING", ]
+  }
+
+  if (shaderc_spvc_context_logging) {
+    defines += [ "SHADERC_SPVC_CONTEXT_LOGGING", ]
+  }
+
   sources = [
     "libshaderc/include/shaderc/env.h",
     "libshaderc/include/shaderc/status.h",
@@ -196,6 +204,8 @@ source_set("libshaderc_spvc_sources") {
     "libshaderc_spvc/include/spvc/spvc.h",
     "libshaderc_spvc/include/spvc/spvc.hpp",
     "libshaderc_spvc/src/spvc.cc",
+    "libshaderc_spvc/src/spvc_log.cc",
+    "libshaderc_spvc/src/spvc_log.h",
     "libshaderc_spvc/src/spvc_private.cc",
     "libshaderc_spvc/src/spvc_private.h",
     "libshaderc_spvc/src/spvcir_pass.cc",

@@ -20,6 +20,9 @@
 #include "spirv-tools/libspirv.hpp"
 #include "spvc/spvc.h"
 
+#ifndef LIBSHADERC_SPVC_SRC_SPVCIR_PASS_H_
+#define LIBSHADERC_SPVC_SRC_SPVCIR_PASS_H_
+
 namespace spvtools {
 namespace opt {
 // this WIP pass generates spvc IR and does not throw exceptions
@@ -113,3 +116,5 @@ class SpvcIrPass : public Pass {
 
 }  // namespace opt
 }  // namespace spvtools
+
+#endif  // LIBSHADERC_SPVC_SRC_SPVCIR_PASS_H_

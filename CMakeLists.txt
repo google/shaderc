@@ -26,6 +26,16 @@ else()
   message(STATUS "Configuring Shaderc to avoid building tests.")
 endif()
 
+option(SHADERC_SPVC_DIRECT_LOGGING "Send logging messages from spvc directly to stdout/err" OFF)
+if (${SHADERC_SPVC_DIRECT_LOGGING})
+  add_definitions(-DSHADERC_SPVC_DIRECT_LOGGING)
+endif()
+
+option(SHADERC_SPVC_CONTEXT_LOGGING "Send logging messages from spvc to context object" ON)
+if (${SHADERC_SPVC_CONTEXT_LOGGING})
+  add_definitions(-DSHADERC_SPVC_CONTEXT_LOGGING)
+endif()
+
 set (CMAKE_CXX_STANDARD 11)
 
 option(SHADERC_ENABLE_NV_EXTENSIONS "Enables support of Nvidia-specific extensions" ON)

@@ -23,6 +23,9 @@
 #include "spirv-tools/libspirv.hpp"
 #include "spvc/spvc.h"
 
+#ifndef LIBSHADERC_SPVC_SRC_SPVC_PRIVATE_H_
+#define LIBSHADERC_SPVC_SRC_SPVC_PRIVATE_H_
+
 // GLSL version produced when none specified nor detected from source.
 #define DEFAULT_GLSL_VERSION 450
 
@@ -151,3 +154,5 @@ shaderc_spvc_status shaderc_spvc_decoration_to_spirv_cross_decoration(
     spv::Decoration* spirv_cross_decoration);
 
 }  // namespace spvc_private
+
+#endif  // LIBSHADERC_SPVC_SRC_SPVC_PRIVATE_H_
