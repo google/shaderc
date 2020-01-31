@@ -72,14 +72,6 @@ LogMessage InfoLog(shaderc_spvc_context_t context);
 LogMessage WarningLog(shaderc_spvc_context_t context);
 LogMessage ErrorLog(shaderc_spvc_context_t context);
 
-// SPVC_DEBUG is a helper macro that creates a DebugLog and outputs
-// file/line/function information
-LogMessage DebugLog(shaderc_spvc_context_t context, const char* file,
-                    const char* function, int line);
-#define SPVC_DEBUG(context)                                                    \
-  ::shaderc_spvc::DebugLog(shaderc_spvc_context_t context, __FILE__, __func__, \
-                           __LINE__)
-
 }  // namespace shaderc_spvc
 
 #endif  // LIBSHADERC_SPVC_SRC_SPVC_LOG_H_

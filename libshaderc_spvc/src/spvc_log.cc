@@ -22,7 +22,7 @@ namespace shaderc_spvc {
 
 namespace {
 
-const char* SeverityName(LogSeverity severity) {
+const char* ToString(LogSeverity severity) {
   switch (severity) {
     case LogSeverity::Debug:
       return "Debug";
@@ -45,36 +45,33 @@ LogMessage::LogMessage(shaderc_spvc_context_t context, LogSeverity severity)
 LogMessage::~LogMessage() {
 #if defined(SHADERC_SPVC_DIRECT_LOGGING) || \
     defined(SHADERC_SPVC_CONTEXT_LOGGING)
-  std::string fullMessage = stream_.str();
+  std::string message = stream_.str();
 
   // If this message has been moved, its stream is empty.
-  if (fullMessage.empty()) {
+  if (message.empty()) {
     return;
   }
 
-  const char* severityName = SeverityName(severity_);
+  const char* severity_name = ToString(severity_);
 
   FILE* outputStream = stdout;
   if (severity_ == LogSeverity::Warning || severity_ == LogSeverity::Error) {
     outputStream = stderr;
   }
 
-  std::unique_ptr<char> message;
-  int count =
-      snprintf(message.get(), 0, "%s: %s\n", severityName, fullMessage.c_str());
-  message.reset(
-      static_cast<char*>(malloc((count + 1) * sizeof(char))));  // + 1 for \0
-  snprintf(message.get(), count, "%s: %s\n", severityName, fullMessage.c_str());
+  stream_.clear();
+  stream_ << severity_name << ": " << message.c_str() << std::endl;
+  const char* full_message = stream_.str().c_str();
 
 #if defined(SHADERC_SPVC_DIRECT_LOGGING)
   // Note: we use fprintf because <iostream> includes static initializers.
-  fprintf(outputStream, "%s", message.get());
+  fprintf(outputStream, "%s", full_message);
   fflush(outputStream);
 #endif  // defined(SHADERC_SPVC_DIRECT_LOGGING)
 
 #if defined(SHADERC_SPVC_CONTEXT_LOGGING)
   if (context_) {
-    context_->messages.push_back(message.get());
+    context_->messages.push_back(full_message);
   }
 #endif  // defined(SHADERC_SPVC_CONTEXT_LOGGING)
 #endif  // defined(SHADERC_SPVC_DIRECT_LOGGING) ||
@@ -95,11 +92,6 @@ LogMessage WarningLog(shaderc_spvc_context_t context) {
 
 LogMessage ErrorLog(shaderc_spvc_context_t context) {
   return {context, LogSeverity::Error};
-}
-
-LogMessage DebugLog(shaderc_spvc_context_t context, const char* file,
-                    const char* function, int line) {
-  return std::move(DebugLog(context) << file << ":" << line << "(" << function << ")");
 }
 
 }  // namespace shaderc_spvc
