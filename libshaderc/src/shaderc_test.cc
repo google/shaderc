@@ -18,7 +18,7 @@
 #include <thread>
 #include <unordered_map>
 
-#include "SPIRV/spirv.hpp"
+#include "glslang/SPIRV/spirv.hpp"
 
 #include "common_shaders_for_test.h"
 #include "shaderc/shaderc.h"

@@ -20,7 +20,7 @@
 #include <sstream>
 #include <vector>
 
-#include "SPIRV/spirv.hpp"
+#include "glslang/SPIRV/spirv.hpp"
 
 #include "libshaderc_util/compiler.h"
 #include "libshaderc_util/counting_includer.h"
