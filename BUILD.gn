@@ -20,6 +20,8 @@ glslang_dir = shaderc_glslang_dir
 spirv_tools_dir = shaderc_spirv_tools_dir
 spirv_cross_dir = shaderc_spirv_cross_dir
 spirv_headers_dir = shaderc_spirv_headers_dir
+use_direct_logging = shaderc_spvc_direct_logging
+use_context_logging = shaderc_spvc_context_logging
 
 is_msvc = is_win && !is_clang
 
@@ -189,14 +191,14 @@ source_set("libshaderc_spvc_sources") {
     "SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS"
   ]
 
-  if (shaderc_spvc_direct_logging) {
+  if (use_direct_logging) {
     defines += [ "SHADERC_SPVC_DIRECT_LOGGING", ]
   }
 
-  if (shaderc_spvc_context_logging) {
+  if (use_context_logging) {
     defines += [ "SHADERC_SPVC_CONTEXT_LOGGING", ]
   }
-
+  
   sources = [
     "libshaderc/include/shaderc/env.h",
     "libshaderc/include/shaderc/status.h",

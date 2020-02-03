@@ -61,7 +61,11 @@ class LogMessage {
   LogMessage(const LogMessage& other) = delete;
   LogMessage& operator=(const LogMessage& other) = delete;
 
+#if !defined(SHADERC_SPVC_CONTEXT_LOGGING)
+  shaderc_spvc_context_t context_ __attribute__((unused));
+#else
   shaderc_spvc_context_t context_;
+#endif  // defined(SHADERC_SPVC_CONTEXT_LOGGING)
   LogSeverity severity_;
   std::ostringstream stream_;
 };
