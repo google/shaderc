@@ -100,9 +100,13 @@ shaders-reflection/vert/array-size-reflection.vert,False
 shaders-reflection/vert/read-from-row-major-array.vert,False
 shaders-reflection/vert/stride-reflection.vert,False
 shaders-reflection/vert/texture_buffer.vert,False
+shaders-ue4/asm/frag/global-constant-arrays.asm.frag,True
+shaders-ue4/asm/frag/padded-float-array-member-defef.asm.frag,True
+shaders-ue4/asm/frag/sample-mask-not-array.asm.frag,True
 shaders-ue4/asm/frag/subpass-input.ios.framebuffer-fetch.asm.frag,False
 shaders-ue4/asm/frag/subpass-input.ios.framebuffer-fetch.asm.frag,True
 shaders-ue4/asm/frag/texture-atomics.asm.graphics-robust-access.frag,True
+shaders-ue4/asm/vert/array-missing-copies.asm.vert,True
 shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,False
 shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,True
 shaders/asm/frag/image-query-no-sampler.no-samplerless.vk.asm.frag,False
