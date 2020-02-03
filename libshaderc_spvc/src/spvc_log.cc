@@ -61,17 +61,17 @@ LogMessage::~LogMessage() {
 
   stream_.clear();
   stream_ << severity_name << ": " << message.c_str() << std::endl;
-  const char* full_message = stream_.str().c_str();
+  std::string full_message = stream_.str();
 
 #if defined(SHADERC_SPVC_DIRECT_LOGGING)
   // Note: we use fprintf because <iostream> includes static initializers.
-  fprintf(outputStream, "%s", full_message);
+  fprintf(outputStream, "%s", full_message.c_str());
   fflush(outputStream);
 #endif  // defined(SHADERC_SPVC_DIRECT_LOGGING)
 
 #if defined(SHADERC_SPVC_CONTEXT_LOGGING)
   if (context_) {
-    context_->messages.push_back(full_message);
+    context_->messages.push_back(full_message.c_str());
   }
 #endif  // defined(SHADERC_SPVC_CONTEXT_LOGGING)
 #endif  // defined(SHADERC_SPVC_DIRECT_LOGGING) ||
