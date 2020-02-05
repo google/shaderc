@@ -68,22 +68,22 @@ void consume_spirv_tools_message(shaderc_spvc_context* context,
                                  const char* message) {
   switch (level) {
     case SPV_MSG_FATAL:
-      shaderc_spvc::ErrorLog(context) << "spirv-tools: " << message;
+      shaderc_spvc::ErrorLog(context) << message;
       break;
     case SPV_MSG_INTERNAL_ERROR:
-      shaderc_spvc::ErrorLog(context) << "spirv-tools: " << message;
+      shaderc_spvc::ErrorLog(context) << message;
       break;
     case SPV_MSG_ERROR:
-      shaderc_spvc::ErrorLog(context) << "spirv-tools: " << message;
+      shaderc_spvc::ErrorLog(context) << message;
       break;
     case SPV_MSG_WARNING:
-      shaderc_spvc::WarningLog(context) << "spirv-tools: " << message;
+      shaderc_spvc::WarningLog(context) << message;
       break;
     case SPV_MSG_INFO:
-      shaderc_spvc::InfoLog(context) << "spirv-tools: " << message;
+      shaderc_spvc::InfoLog(context) << message;
       break;
     case SPV_MSG_DEBUG:
-      shaderc_spvc::DebugLog(context) << "spirv-tools: " << message;
+      shaderc_spvc::DebugLog(context) << message;
       break;
   }
 }

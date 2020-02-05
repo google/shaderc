@@ -20,31 +20,27 @@
 
 namespace shaderc_spvc {
 
-namespace {
-
-const char* ToString(LogSeverity severity) {
+LogMessage::LogMessage(shaderc_spvc_context_t context, LogSeverity severity)
+    : context_(context) {
   switch (severity) {
     case LogSeverity::Debug:
-      return "Debug";
+      stream_ << "Debug: ";
+      break;
     case LogSeverity::Info:
-      return "Info";
+      stream_ << "Info: ";
+      break;
     case LogSeverity::Warning:
-      return "Warning";
+      stream_ << "Warning: ";
+      break;
     case LogSeverity::Error:
-      return "Error";
-    default:
-      return "";
+      stream_ << "Error: ";
+      break;
   }
 }
 
-}  // anonymous namespace
-
-LogMessage::LogMessage(shaderc_spvc_context_t context, LogSeverity severity)
-    : context_(context), severity_(severity) {}
-
 LogMessage::~LogMessage() {
-#if defined(SHADERC_SPVC_DIRECT_LOGGING) || \
-    defined(SHADERC_SPVC_CONTEXT_LOGGING)
+#if defined(SHADERC_SPVC_ENABLE_DIRECT_LOGGING) || \
+    !defined(SHADERC_SPVC_DISABLE_CONTEXT_LOGGING)
   std::string message = stream_.str();
 
   // If this message has been moved, its stream is empty.
@@ -52,30 +48,24 @@ LogMessage::~LogMessage() {
     return;
   }
 
-  const char* severity_name = ToString(severity_);
-
+#if defined(SHADERC_SPVC_ENABLE_DIRECT_LOGGING)
   FILE* outputStream = stdout;
   if (severity_ == LogSeverity::Warning || severity_ == LogSeverity::Error) {
     outputStream = stderr;
   }
 
-  stream_.clear();
-  stream_ << severity_name << ": " << message.c_str() << std::endl;
-  std::string full_message = stream_.str();
-
-#if defined(SHADERC_SPVC_DIRECT_LOGGING)
   // Note: we use fprintf because <iostream> includes static initializers.
-  fprintf(outputStream, "%s", full_message.c_str());
+  fprintf(outputStream, "%s", stream_.str().c_str());
   fflush(outputStream);
-#endif  // defined(SHADERC_SPVC_DIRECT_LOGGING)
+#endif  // defined(SHADERC_SPVC_ENABLE_DIRECT_LOGGING)
 
-#if defined(SHADERC_SPVC_CONTEXT_LOGGING)
+#if !defined(SHADERC_SPVC_DISABLE_CONTEXT_LOGGING)
   if (context_) {
-    context_->messages.push_back(full_message.c_str());
+    context_->messages.push_back(stream_.str());
   }
-#endif  // defined(SHADERC_SPVC_CONTEXT_LOGGING)
-#endif  // defined(SHADERC_SPVC_DIRECT_LOGGING) ||
-        // defined(SHADERC_SPVC_CONTEXT_LOGGING)
+#endif  // !defined(SHADERC_SPVC_DISABLE_CONTEXT_LOGGING)
+#endif  // defined(SHADERC_SPVC_ENABLE_DIRECT_LOGGING) ||
+        // !defined(SHADERC_SPVC_DISABLE_CONTEXT_LOGGING)
 }
 
 LogMessage DebugLog(shaderc_spvc_context_t context) {

@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef LIBSHADERC_SPVC_SRC_SPVCIR_PASS_H_
+#define LIBSHADERC_SPVC_SRC_SPVCIR_PASS_H_
+
 #include <spirv_glsl.hpp>
 #include <spirv_hlsl.hpp>
 #include <spirv_msl.hpp>
@@ -19,9 +22,6 @@
 #include "source/opt/pass.h"  // Accessing a private spirv-tools header.
 #include "spirv-tools/libspirv.hpp"
 #include "spvc/spvc.h"
-
-#ifndef LIBSHADERC_SPVC_SRC_SPVCIR_PASS_H_
-#define LIBSHADERC_SPVC_SRC_SPVCIR_PASS_H_
 
 namespace spvtools {
 namespace opt {

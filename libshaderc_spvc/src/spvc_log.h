@@ -24,12 +24,12 @@
 // destructor called immediately which outputs the stored ostringstream in the
 // right place.
 
+#ifndef LIBSHADERC_SPVC_SRC_SPVC_LOG_H_
+#define LIBSHADERC_SPVC_SRC_SPVC_LOG_H_
+
 #include <sstream>
 
 #include "spvc/spvc.h"
-
-#ifndef LIBSHADERC_SPVC_SRC_SPVC_LOG_H_
-#define LIBSHADERC_SPVC_SRC_SPVC_LOG_H_
 
 namespace shaderc_spvc {
 
@@ -61,12 +61,11 @@ class LogMessage {
   LogMessage(const LogMessage& other) = delete;
   LogMessage& operator=(const LogMessage& other) = delete;
 
-#if !defined(SHADERC_SPVC_CONTEXT_LOGGING)
+#if defined(SHADERC_SPVC_DISABLE_CONTEXT_LOGGING)
   shaderc_spvc_context_t context_ __attribute__((unused));
 #else
   shaderc_spvc_context_t context_;
-#endif  // defined(SHADERC_SPVC_CONTEXT_LOGGING)
-  LogSeverity severity_;
+#endif  // defined(SHADERC_SPVC_DISABLE_CONTEXT_LOGGING)
   std::ostringstream stream_;
 };
 

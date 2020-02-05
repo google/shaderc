@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef LIBSHADERC_SPVC_SRC_SPVC_PRIVATE_H_
+#define LIBSHADERC_SPVC_SRC_SPVC_PRIVATE_H_
+
 #include <cstdint>
 #include <spirv_glsl.hpp>
 #include <spirv_hlsl.hpp>
@@ -22,9 +25,6 @@
 
 #include "spirv-tools/libspirv.hpp"
 #include "spvc/spvc.h"
-
-#ifndef LIBSHADERC_SPVC_SRC_SPVC_PRIVATE_H_
-#define LIBSHADERC_SPVC_SRC_SPVC_PRIVATE_H_
 
 // GLSL version produced when none specified nor detected from source.
 #define DEFAULT_GLSL_VERSION 450
