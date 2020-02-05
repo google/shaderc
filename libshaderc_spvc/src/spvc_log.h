@@ -48,9 +48,6 @@ class LogMessage {
   LogMessage(shaderc_spvc_context_t context, LogSeverity severity);
   ~LogMessage();
 
-  LogMessage(LogMessage&& other) = default;
-  LogMessage& operator=(LogMessage&& other) = default;
-
   template <typename T>
   LogMessage& operator<<(T&& value) {
     stream_ << value;
@@ -58,6 +55,7 @@ class LogMessage {
   }
 
  private:
+  // Disallow copy and assign
   LogMessage(const LogMessage& other) = delete;
   LogMessage& operator=(const LogMessage& other) = delete;
 
