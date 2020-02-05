@@ -65,6 +65,7 @@ class LogMessage {
   shaderc_spvc_context_t context_;
 #endif  // defined(SHADERC_SPVC_DISABLE_CONTEXT_LOGGING)
   std::ostringstream stream_;
+  LogSeverity severity_;
 };
 
 // Short-hands to create a LogMessage with the respective severity.

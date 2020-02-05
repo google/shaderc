@@ -21,8 +21,9 @@
 namespace shaderc_spvc {
 
 LogMessage::LogMessage(shaderc_spvc_context_t context, LogSeverity severity)
-    : context_(context) {
-  switch (severity) {
+    : context_(context),
+      severity_(severity) {
+  switch (severity_) {
     case LogSeverity::Debug:
       stream_ << "Debug: ";
       break;
