@@ -17,6 +17,7 @@ set(SPVC_SOURCES
   include/spvc/spvc.h
   include/spvc/spvc.hpp
   src/spvc.cc
+  src/spvc_log.cc
   src/spvc_private.cc
   src/spvcir_pass.cc
   src/spvcir_pass.h

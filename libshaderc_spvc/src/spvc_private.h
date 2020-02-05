@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef LIBSHADERC_SPVC_SRC_SPVC_PRIVATE_H_
+#define LIBSHADERC_SPVC_SRC_SPVC_PRIVATE_H_
+
 #include <cstdint>
 #include <spirv_glsl.hpp>
 #include <spirv_hlsl.hpp>
@@ -151,3 +154,5 @@ shaderc_spvc_status shaderc_spvc_decoration_to_spirv_cross_decoration(
     spv::Decoration* spirv_cross_decoration);
 
 }  // namespace spvc_private
+
+#endif  // LIBSHADERC_SPVC_SRC_SPVC_PRIVATE_H_
