@@ -17,6 +17,11 @@
 #include "spvc_log.h"
 #include "spvc_private.h"
 
+// MSVC 2013 doesn't define __func__
+#ifndef __func__
+#define __func__ __FUNCTION__
+#endif
+
 #define CHECK_CONTEXT(context)                                            \
   do {                                                                    \
     if (!context) {                                                       \
