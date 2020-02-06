@@ -17,6 +17,68 @@
 #include "spvc_log.h"
 #include "spvc_private.h"
 
+// MSVC 2013 doesn't define __func__
+#ifndef __func__
+#define __func__ __FUNCTION__
+#endif
+
+#define CHECK_CONTEXT(context)                                            \
+  do {                                                                    \
+    if (!context) {                                                       \
+      shaderc_spvc::ErrorLog(nullptr)                                     \
+          << "Invoked " << __func__ << " without an initialized context"; \
+      return shaderc_spvc_status_missing_context_error;                   \
+    }                                                                     \
+  } while (0)
+
+#define CHECK_CROSS_COMPILER(context, cross_compiler)          \
+  do {                                                         \
+    if (!cross_compiler) {                                     \
+      shaderc_spvc::ErrorLog(context)                          \
+          << "Invoked " << __func__                            \
+          << " without an initialized cross compiler";         \
+      return shaderc_spvc_status_uninitialized_compiler_error; \
+    }                                                          \
+  } while (0)
+
+#define CHECK_OPTIONS(context, options)                                   \
+  do {                                                                    \
+    if (!options) {                                                       \
+      shaderc_spvc::ErrorLog(context)                                     \
+          << "Invoked " << __func__ << " without an initialized options"; \
+      return shaderc_spvc_status_missing_options_error;                   \
+    }                                                                     \
+  } while (0)
+
+#define CHECK_RESULT(context, result)                                    \
+  do {                                                                   \
+    if (!result) {                                                       \
+      shaderc_spvc::ErrorLog(context)                                    \
+          << "Invoked " << __func__ << " without an initialized result"; \
+      return shaderc_spvc_status_missing_result_error;                   \
+    }                                                                    \
+  } while (0)
+
+#define CHECK_OUT_PARAM(context, param, param_str)                 \
+  do {                                                             \
+    if (!param) {                                                  \
+      shaderc_spvc::ErrorLog(context)                              \
+          << "Invoked " << __func__ << " with invalid out param, " \
+          << param_str;                                            \
+      return shaderc_spvc_status_invalid_out_param;                \
+    }                                                              \
+  } while (0)
+
+#define CHECK_IN_PARAM(context, param, param_str)                 \
+  do {                                                            \
+    if (!param) {                                                 \
+      shaderc_spvc::ErrorLog(context)                             \
+          << "Invoked " << __func__ << " with invalid in param, " \
+          << param_str;                                           \
+      return shaderc_spvc_status_invalid_in_param;                \
+    }                                                             \
+  } while (0)
+
 namespace {
 
 spv::ExecutionModel spvc_model_to_spv_model(
@@ -157,17 +219,9 @@ const char* shaderc_spvc_context_get_messages(
 
 shaderc_spvc_status shaderc_spvc_context_get_compiler(
     const shaderc_spvc_context_t context, void** compiler) {
-  if (!context) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked get_compiler without an initialized context";
-    return shaderc_spvc_status_missing_context_error;
-  }
-
-  if (!context->cross_compiler) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked get_compiler without an initialized compiler";
-    return shaderc_spvc_status_uninitialized_compiler_error;
-  }
+  CHECK_CONTEXT(context);
+  CHECK_CROSS_COMPILER(context, context->cross_compiler);
+  CHECK_OUT_PARAM(context, compiler, "compiler");
 
   *compiler = context->cross_compiler.get();
   return shaderc_spvc_status_success;
@@ -175,11 +229,7 @@ shaderc_spvc_status shaderc_spvc_context_get_compiler(
 
 shaderc_spvc_status shaderc_spvc_context_set_use_spvc_parser(
     shaderc_spvc_context_t context, bool b) {
-  if (!context) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_use_spvc_parser without an initialized context";
-    return shaderc_spvc_status_missing_context_error;
-  }
+  CHECK_CONTEXT(context);
 
   context->use_spvc_parser = b;
   return shaderc_spvc_status_success;
@@ -208,11 +258,7 @@ void shaderc_spvc_compile_options_destroy(
 shaderc_spvc_status shaderc_spvc_compile_options_set_source_env(
     shaderc_spvc_compile_options_t options, shaderc_target_env env,
     shaderc_env_version version) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_source_env without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->source_env = spvc_private::get_spv_target_env(env, version);
   return shaderc_spvc_status_success;
@@ -221,11 +267,7 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_source_env(
 shaderc_spvc_status shaderc_spvc_compile_options_set_target_env(
     shaderc_spvc_compile_options_t options, shaderc_target_env env,
     shaderc_env_version version) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_target_env without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->target_env = spvc_private::get_spv_target_env(env, version);
   return shaderc_spvc_status_success;
@@ -233,17 +275,8 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_target_env(
 
 shaderc_spvc_status shaderc_spvc_compile_options_set_entry_point(
     shaderc_spvc_compile_options_t options, const char* entry_point) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_entry_point without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
-
-  if (!entry_point) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_entry_point without an initialized entry_point";
-    return shaderc_spvc_status_invalid_in_param;
-  }
+  CHECK_OPTIONS(nullptr, options);
+  CHECK_IN_PARAM(nullptr, entry_point, "entry_point");
 
   options->entry_point = entry_point;
   return shaderc_spvc_status_success;
@@ -251,11 +284,7 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_entry_point(
 
 shaderc_spvc_status shaderc_spvc_compile_options_set_remove_unused_variables(
     shaderc_spvc_compile_options_t options, bool b) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_remove_unused_variables without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->remove_unused_variables = b;
   return shaderc_spvc_status_success;
@@ -263,11 +292,7 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_remove_unused_variables(
 
 shaderc_spvc_status shaderc_spvc_compile_options_set_robust_buffer_access_pass(
     shaderc_spvc_compile_options_t options, bool b) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr) << "Invoked set_robust_buffer_access_pass "
-                                       "without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->robust_buffer_access_pass = b;
   return shaderc_spvc_status_success;
@@ -275,11 +300,7 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_robust_buffer_access_pass(
 
 shaderc_spvc_status shaderc_spvc_compile_options_set_emit_line_directives(
     shaderc_spvc_compile_options_t options, bool b) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_emit_line_directives without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->glsl.emit_line_directives = b;
   return shaderc_spvc_status_success;
@@ -287,11 +308,7 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_emit_line_directives(
 
 shaderc_spvc_status shaderc_spvc_compile_options_set_vulkan_semantics(
     shaderc_spvc_compile_options_t options, bool b) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_vulkan_semantics without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->glsl.vulkan_semantics = b;
   return shaderc_spvc_status_success;
@@ -299,11 +316,7 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_vulkan_semantics(
 
 shaderc_spvc_status shaderc_spvc_compile_options_set_separate_shader_objects(
     shaderc_spvc_compile_options_t options, bool b) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_separate_shader_objects without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->glsl.separate_shader_objects = b;
   return shaderc_spvc_status_success;
@@ -311,11 +324,7 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_separate_shader_objects(
 
 shaderc_spvc_status shaderc_spvc_compile_options_set_flatten_ubo(
     shaderc_spvc_compile_options_t options, bool b) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_flatten_ubo without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->flatten_ubo = b;
   return shaderc_spvc_status_success;
@@ -323,11 +332,7 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_flatten_ubo(
 
 shaderc_spvc_status shaderc_spvc_compile_options_set_glsl_language_version(
     shaderc_spvc_compile_options_t options, uint32_t version) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_glsl_language_version without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->glsl.version = version;
   return shaderc_spvc_status_success;
@@ -336,12 +341,7 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_glsl_language_version(
 shaderc_spvc_status
 shaderc_spvc_compile_options_set_flatten_multidimensional_arrays(
     shaderc_spvc_compile_options_t options, bool b) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_flatten_multidimensional_arrays without an initialized "
-           "options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->glsl.flatten_multidimensional_arrays = b;
   return shaderc_spvc_status_success;
@@ -349,11 +349,7 @@ shaderc_spvc_compile_options_set_flatten_multidimensional_arrays(
 
 shaderc_spvc_status shaderc_spvc_compile_options_set_es(
     shaderc_spvc_compile_options_t options, bool b) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_es without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->forced_es_setting = b;
   options->force_es = true;
@@ -363,12 +359,7 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_es(
 shaderc_spvc_status
 shaderc_spvc_compile_options_set_glsl_emit_push_constant_as_ubo(
     shaderc_spvc_compile_options_t options, bool b) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_glsl_emit_push_constant_as_ubo without an initialized "
-           "options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->glsl.emit_push_constant_as_uniform_buffer = b;
   return shaderc_spvc_status_success;
@@ -376,11 +367,7 @@ shaderc_spvc_compile_options_set_glsl_emit_push_constant_as_ubo(
 
 shaderc_spvc_status shaderc_spvc_compile_options_set_msl_language_version(
     shaderc_spvc_compile_options_t options, uint32_t version) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_msl_language_version without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->msl.msl_version = version;
   return shaderc_spvc_status_success;
@@ -389,12 +376,7 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_msl_language_version(
 shaderc_spvc_status
 shaderc_spvc_compile_options_set_msl_swizzle_texture_samples(
     shaderc_spvc_compile_options_t options, bool b) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_msl_swizzle_texture_samples without an initialized "
-           "options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->msl.swizzle_texture_samples = b;
   return shaderc_spvc_status_success;
@@ -403,11 +385,7 @@ shaderc_spvc_compile_options_set_msl_swizzle_texture_samples(
 shaderc_spvc_status shaderc_spvc_compile_options_set_msl_platform(
     shaderc_spvc_compile_options_t options,
     shaderc_spvc_msl_platform platform) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_msl_platform without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   switch (platform) {
     case shaderc_spvc_msl_platform_ios:
@@ -422,11 +400,7 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_msl_platform(
 
 shaderc_spvc_status shaderc_spvc_compile_options_set_msl_pad_fragment_output(
     shaderc_spvc_compile_options_t options, bool b) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_msl_pad_fragment_output without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->msl.pad_fragment_output_components = b;
   return shaderc_spvc_status_success;
@@ -434,11 +408,7 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_msl_pad_fragment_output(
 
 shaderc_spvc_status shaderc_spvc_compile_options_set_msl_capture(
     shaderc_spvc_compile_options_t options, bool b) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_msl_capture without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->msl.capture_output_to_buffer = b;
   return shaderc_spvc_status_success;
@@ -446,11 +416,7 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_msl_capture(
 
 shaderc_spvc_status shaderc_spvc_compile_options_set_msl_domain_lower_left(
     shaderc_spvc_compile_options_t options, bool b) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_msl_domain_lower_left without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->msl.tess_domain_origin_lower_left = b;
   return shaderc_spvc_status_success;
@@ -458,11 +424,7 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_msl_domain_lower_left(
 
 shaderc_spvc_status shaderc_spvc_compile_options_set_msl_argument_buffers(
     shaderc_spvc_compile_options_t options, bool b) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_msl_argument_buffers without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->msl.argument_buffers = b;
   return shaderc_spvc_status_success;
@@ -472,12 +434,7 @@ shaderc_spvc_status
 shaderc_spvc_compile_options_set_msl_discrete_descriptor_sets(
     shaderc_spvc_compile_options_t options, const uint32_t* descriptors,
     size_t num_descriptors) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_msl_discrete_descriptor_sets without an initialized "
-           "options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->msl_discrete_descriptor_sets.resize(num_descriptors);
   std::copy_n(descriptors, num_descriptors,
@@ -488,12 +445,7 @@ shaderc_spvc_compile_options_set_msl_discrete_descriptor_sets(
 shaderc_spvc_status
 shaderc_spvc_compile_options_set_msl_enable_point_size_builtin(
     shaderc_spvc_compile_options_t options, bool b) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_msl_enable_point_size_builtin without an initialized "
-           "options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->msl.enable_point_size_builtin = b;
   return shaderc_spvc_status_success;
@@ -502,12 +454,7 @@ shaderc_spvc_compile_options_set_msl_enable_point_size_builtin(
 shaderc_spvc_status
 shaderc_spvc_compile_options_set_msl_buffer_size_buffer_index(
     shaderc_spvc_compile_options_t options, uint32_t index) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_msl_buffer_size_buffer_index without an initialized "
-           "options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->msl.buffer_size_buffer_index = index;
   return shaderc_spvc_status_success;
@@ -515,11 +462,7 @@ shaderc_spvc_compile_options_set_msl_buffer_size_buffer_index(
 
 shaderc_spvc_status shaderc_spvc_compile_options_set_hlsl_shader_model(
     shaderc_spvc_compile_options_t options, uint32_t model) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_hlsl_shader_model without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->hlsl.shader_model = model;
   return shaderc_spvc_status_success;
@@ -527,11 +470,7 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_hlsl_shader_model(
 
 shaderc_spvc_status shaderc_spvc_compile_options_set_hlsl_point_size_compat(
     shaderc_spvc_compile_options_t options, bool b) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_hlsl_point_size_compat without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->hlsl.point_size_compat = b;
   return shaderc_spvc_status_success;
@@ -539,11 +478,7 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_hlsl_point_size_compat(
 
 shaderc_spvc_status shaderc_spvc_compile_options_set_hlsl_point_coord_compat(
     shaderc_spvc_compile_options_t options, bool b) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_hlsl_point_coord_compat without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->hlsl.point_coord_compat = b;
   return shaderc_spvc_status_success;
@@ -551,11 +486,7 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_hlsl_point_coord_compat(
 
 shaderc_spvc_status shaderc_spvc_compile_options_set_fixup_clipspace(
     shaderc_spvc_compile_options_t options, bool b) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_fixup_clipspace without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->glsl.vertex.fixup_clipspace = b;
   return shaderc_spvc_status_success;
@@ -563,11 +494,7 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_fixup_clipspace(
 
 shaderc_spvc_status shaderc_spvc_compile_options_set_flip_vert_y(
     shaderc_spvc_compile_options_t options, bool b) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_flip_vert_y without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->glsl.vertex.flip_vert_y = b;
   return shaderc_spvc_status_success;
@@ -575,11 +502,7 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_flip_vert_y(
 
 shaderc_spvc_status shaderc_spvc_compile_options_set_validate(
     shaderc_spvc_compile_options_t options, bool b) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_validate without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->validate = b;
   return shaderc_spvc_status_success;
@@ -587,11 +510,7 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_validate(
 
 shaderc_spvc_status shaderc_spvc_compile_options_set_optimize(
     shaderc_spvc_compile_options_t options, bool b) {
-  if (!options) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_optimize without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
+  CHECK_OPTIONS(nullptr, options);
 
   options->optimize = b;
   return shaderc_spvc_status_success;
@@ -625,21 +544,9 @@ shaderc_spvc_status shaderc_spvc_initialize_impl(
 shaderc_spvc_status shaderc_spvc_initialize_for_glsl(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options) {
-  if (!context) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked initialize_for_glsl without an initialized context";
-    return shaderc_spvc_status_missing_context_error;
-  }
-  if (!options) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked initialize_for_glsl without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
-  if (!source) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked initialize_for_glsl without an initialized source";
-    return shaderc_spvc_status_invalid_in_param;
-  }
+  CHECK_CONTEXT(context);
+  CHECK_OPTIONS(context, options);
+  CHECK_IN_PARAM(context, source, "source");
 
   context->target_lang = SPVC_TARGET_LANG_GLSL;
   return shaderc_spvc_initialize_impl(context, source, source_len, options,
@@ -649,21 +556,9 @@ shaderc_spvc_status shaderc_spvc_initialize_for_glsl(
 shaderc_spvc_status shaderc_spvc_initialize_for_hlsl(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options) {
-  if (!context) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked initialize_for_hlsl without an initialized context";
-    return shaderc_spvc_status_missing_context_error;
-  }
-  if (!options) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked initialize_for_hlsl without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
-  if (!source) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked initialize_for_hlsl without an initialized source";
-    return shaderc_spvc_status_invalid_in_param;
-  }
+  CHECK_CONTEXT(context);
+  CHECK_OPTIONS(context, options);
+  CHECK_IN_PARAM(context, source, "source");
 
   context->target_lang = SPVC_TARGET_LANG_HLSL;
   return shaderc_spvc_initialize_impl(context, source, source_len, options,
@@ -673,21 +568,9 @@ shaderc_spvc_status shaderc_spvc_initialize_for_hlsl(
 shaderc_spvc_status shaderc_spvc_initialize_for_msl(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options) {
-  if (!context) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked initialize_for_msl without an initialized context";
-    return shaderc_spvc_status_missing_context_error;
-  }
-  if (!options) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked initialize_for_msl without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
-  if (!source) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked initialize_for_msl without an initialized source";
-    return shaderc_spvc_status_invalid_in_param;
-  }
+  CHECK_CONTEXT(context);
+  CHECK_OPTIONS(context, options);
+  CHECK_IN_PARAM(context, source, "source");
 
   context->target_lang = SPVC_TARGET_LANG_MSL;
   return shaderc_spvc_initialize_impl(context, source, source_len, options,
@@ -697,21 +580,9 @@ shaderc_spvc_status shaderc_spvc_initialize_for_msl(
 shaderc_spvc_status shaderc_spvc_initialize_for_vulkan(
     const shaderc_spvc_context_t context, const uint32_t* source,
     size_t source_len, shaderc_spvc_compile_options_t options) {
-  if (!context) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked initialize_for_vulkan without an initialized context";
-    return shaderc_spvc_status_missing_context_error;
-  }
-  if (!options) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked initialize_for_vulkan without an initialized options";
-    return shaderc_spvc_status_missing_options_error;
-  }
-  if (!source) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked initialize_for_vulkan without an initialized source";
-    return shaderc_spvc_status_invalid_in_param;
-  }
+  CHECK_CONTEXT(context);
+  CHECK_OPTIONS(context, options);
+  CHECK_IN_PARAM(context, source, "source");
 
   context->target_lang = SPVC_TARGET_LANG_VULKAN;
   return shaderc_spvc_initialize_impl(context, source, source_len, options,
@@ -721,16 +592,9 @@ shaderc_spvc_status shaderc_spvc_initialize_for_vulkan(
 shaderc_spvc_status shaderc_spvc_compile_shader(
     const shaderc_spvc_context_t context,
     shaderc_spvc_compilation_result_t result) {
-  if (!context) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked compile_shader without an initialized context";
-    return shaderc_spvc_status_missing_context_error;
-  }
-  if (!context->cross_compiler) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked compile_shader without an initialized compiler";
-    return shaderc_spvc_status_uninitialized_compiler_error;
-  }
+  CHECK_CONTEXT(context);
+  CHECK_CROSS_COMPILER(context, context->cross_compiler);
+
   if (context->target_lang == SPVC_TARGET_LANG_UNKNOWN) {
     shaderc_spvc::ErrorLog(context)
         << "Invoked compile_shader with unknown language";
@@ -775,16 +639,8 @@ shaderc_spvc_status shaderc_spvc_compile_shader(
 shaderc_spvc_status shaderc_spvc_set_decoration(
     const shaderc_spvc_context_t context, uint32_t id,
     shaderc_spvc_decoration decoration, uint32_t argument) {
-  if (!context) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_decoration without an initialized context";
-    return shaderc_spvc_status_missing_context_error;
-  }
-  if (!context->cross_compiler) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked set_decoration without an initialized compiler";
-    return shaderc_spvc_status_uninitialized_compiler_error;
-  }
+  CHECK_CONTEXT(context);
+  CHECK_CROSS_COMPILER(context, context->cross_compiler);
 
   spv::Decoration spirv_cross_decoration;
   shaderc_spvc_status status =
@@ -803,21 +659,9 @@ shaderc_spvc_status shaderc_spvc_set_decoration(
 shaderc_spvc_status shaderc_spvc_get_decoration(
     const shaderc_spvc_context_t context, uint32_t id,
     shaderc_spvc_decoration decoration, uint32_t* value) {
-  if (!context) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked get_decoration without an initialized context";
-    return shaderc_spvc_status_missing_context_error;
-  }
-  if (!context->cross_compiler) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked get_decoration without an initialized compiler";
-    return shaderc_spvc_status_uninitialized_compiler_error;
-  }
-  if (!value) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked get_decoration without a valid out param";
-    return shaderc_spvc_status_invalid_out_param;
-  }
+  CHECK_CONTEXT(context);
+  CHECK_CROSS_COMPILER(context, context->cross_compiler);
+  CHECK_OUT_PARAM(context, value, "value");
 
   spv::Decoration spirv_cross_decoration;
   shaderc_spvc_status status =
@@ -844,16 +688,8 @@ shaderc_spvc_status shaderc_spvc_get_decoration(
 shaderc_spvc_status shaderc_spvc_unset_decoration(
     const shaderc_spvc_context_t context, uint32_t id,
     shaderc_spvc_decoration decoration) {
-  if (!context) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked unset_decoration without an initialized context";
-    return shaderc_spvc_status_missing_context_error;
-  }
-  if (!context->cross_compiler) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked unset_decoration without an initialized compiler";
-    return shaderc_spvc_status_uninitialized_compiler_error;
-  }
+  CHECK_CONTEXT(context);
+  CHECK_CROSS_COMPILER(context, context->cross_compiler);
 
   spv::Decoration spirv_cross_decoration;
   shaderc_spvc_status status =
@@ -873,21 +709,9 @@ shaderc_spvc_status shaderc_spvc_unset_decoration(
 shaderc_spvc_status shaderc_spvc_get_combined_image_samplers(
     const shaderc_spvc_context_t context,
     shaderc_spvc_combined_image_sampler* samplers, size_t* num_samplers) {
-  if (!context) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked get_combined_image_samplers without an initialized context";
-    return shaderc_spvc_status_missing_context_error;
-  }
-  if (!context->cross_compiler) {
-    shaderc_spvc::ErrorLog(context) << "Invoked get_combined_image_samplers "
-                                       "without an initialized compiler";
-    return shaderc_spvc_status_uninitialized_compiler_error;
-  }
-  if (!num_samplers) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked get_combined_image_samplers with an invalid out param";
-    return shaderc_spvc_status_invalid_out_param;
-  }
+  CHECK_CONTEXT(context);
+  CHECK_CROSS_COMPILER(context, context->cross_compiler);
+  CHECK_OUT_PARAM(context, num_samplers, "num_samplers");
 
   *num_samplers = context->cross_compiler->get_combined_image_samplers().size();
   if (!samplers) return shaderc_spvc_status_success;
@@ -904,21 +728,9 @@ shaderc_spvc_status shaderc_spvc_get_combined_image_samplers(
 
 shaderc_spvc_status shaderc_spvc_set_name(const shaderc_spvc_context_t context,
                                           uint32_t id, const char* name) {
-  if (!context) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked set_name without an initialized context";
-    return shaderc_spvc_status_missing_context_error;
-  }
-  if (!context->cross_compiler) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked set_name without an initialized compiler";
-    return shaderc_spvc_status_uninitialized_compiler_error;
-  }
-  if (!name) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked set_name with an invalid in param";
-    return shaderc_spvc_status_invalid_in_param;
-  }
+  CHECK_CONTEXT(context);
+  CHECK_CROSS_COMPILER(context, context->cross_compiler);
+  CHECK_IN_PARAM(context, name, "name");
 
   context->cross_compiler->set_name(id, name);
   return shaderc_spvc_status_success;
@@ -927,16 +739,8 @@ shaderc_spvc_status shaderc_spvc_set_name(const shaderc_spvc_context_t context,
 shaderc_spvc_status shaderc_spvc_add_msl_resource_binding(
     const shaderc_spvc_context_t context,
     const shaderc_spvc_msl_resource_binding binding) {
-  if (!context) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked add_msl_resource_binding without an initialized context";
-    return shaderc_spvc_status_missing_context_error;
-  }
-  if (!context->cross_compiler) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked add_msl_resource_binding without an initialized compiler";
-    return shaderc_spvc_status_uninitialized_compiler_error;
-  }
+  CHECK_CONTEXT(context);
+  CHECK_CROSS_COMPILER(context, context->cross_compiler);
   if (context->target_lang != SPVC_TARGET_LANG_MSL) {
     shaderc_spvc::ErrorLog(context)
         << "Invoked add_msl_resource_binding when target language was not MSL";
@@ -960,26 +764,10 @@ shaderc_spvc_status shaderc_spvc_get_workgroup_size(
     const shaderc_spvc_context_t context, const char* function_name,
     shaderc_spvc_execution_model execution_model,
     shaderc_spvc_workgroup_size* workgroup_size) {
-  if (!context) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked get_workgroup_size without an initialized context";
-    return shaderc_spvc_status_missing_context_error;
-  }
-  if (!context->cross_compiler) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked get_workgroup_size without an initialized compiler";
-    return shaderc_spvc_status_uninitialized_compiler_error;
-  }
-  if (!function_name) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked get_workgroup_size with an invalid in param";
-    return shaderc_spvc_status_invalid_in_param;
-  }
-  if (!workgroup_size) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked get_workgroup_size without a valid out param";
-    return shaderc_spvc_status_invalid_out_param;
-  }
+  CHECK_CONTEXT(context);
+  CHECK_CROSS_COMPILER(context, context->cross_compiler);
+  CHECK_IN_PARAM(context, function_name, "function_name");
+  CHECK_OUT_PARAM(context, workgroup_size, "workgroup_size");
 
   const auto& cross_size =
       context->cross_compiler
@@ -996,25 +784,13 @@ shaderc_spvc_status shaderc_spvc_get_workgroup_size(
 
 shaderc_spvc_status shaderc_spvc_needs_buffer_size_buffer(
     const shaderc_spvc_context_t context, bool* b) {
-  if (!context) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked needs_buffer_size_buffer without an initialized context";
-    return shaderc_spvc_status_missing_context_error;
-  }
-  if (!context->cross_compiler) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked needs_buffer_size_buffer without an initialized compiler";
-    return shaderc_spvc_status_uninitialized_compiler_error;
-  }
+  CHECK_CONTEXT(context);
+  CHECK_CROSS_COMPILER(context, context->cross_compiler);
+  CHECK_OUT_PARAM(context, b, "b");
   if (context->target_lang != SPVC_TARGET_LANG_MSL) {
     shaderc_spvc::ErrorLog(context)
         << "Invoked needs_buffer_size_buffer when target language was not MSL";
     return shaderc_spvc_status_configuration_error;
-  }
-  if (!b) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked needs_buffer_size_buffer without a valid out param";
-    return shaderc_spvc_status_invalid_out_param;
   }
 
   *b =
@@ -1025,16 +801,8 @@ shaderc_spvc_status shaderc_spvc_needs_buffer_size_buffer(
 
 shaderc_spvc_status shaderc_spvc_build_combined_image_samplers(
     const shaderc_spvc_context_t context) {
-  if (!context) {
-    shaderc_spvc::ErrorLog(nullptr) << "Invoked build_combined_image_samplers "
-                                       "without an initialized context";
-    return shaderc_spvc_status_missing_context_error;
-  }
-  if (!context->cross_compiler) {
-    shaderc_spvc::ErrorLog(context) << "Invoked build_combined_image_samplers "
-                                       "without an initialized compiler";
-    return shaderc_spvc_status_uninitialized_compiler_error;
-  }
+  CHECK_CONTEXT(context);
+  CHECK_CROSS_COMPILER(context, context->cross_compiler);
 
   context->cross_compiler->build_combined_image_samplers();
   return shaderc_spvc_status_success;
@@ -1043,21 +811,9 @@ shaderc_spvc_status shaderc_spvc_build_combined_image_samplers(
 shaderc_spvc_status shaderc_spvc_get_execution_model(
     const shaderc_spvc_context_t context,
     shaderc_spvc_execution_model* execution_model) {
-  if (!context) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked get_execution_model without an initialized context";
-    return shaderc_spvc_status_missing_context_error;
-  }
-  if (!context->cross_compiler) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked get_execution_model without an initialized compiler";
-    return shaderc_spvc_status_uninitialized_compiler_error;
-  }
-  if (!execution_model) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked get_execution_model without a valid out param";
-    return shaderc_spvc_status_invalid_out_param;
-  }
+  CHECK_CONTEXT(context);
+  CHECK_CROSS_COMPILER(context, context->cross_compiler);
+  CHECK_OUT_PARAM(context, execution_model, "execution_model");
 
   auto spirv_model = context->cross_compiler->get_execution_model();
   *execution_model = spv_model_to_spvc_model(spirv_model);
@@ -1072,21 +828,9 @@ shaderc_spvc_status shaderc_spvc_get_execution_model(
 
 shaderc_spvc_status shaderc_spvc_get_push_constant_buffer_count(
     const shaderc_spvc_context_t context, size_t* count) {
-  if (!context) {
-    shaderc_spvc::ErrorLog(nullptr) << "Invoked get_push_constant_buffer_count "
-                                       "without an initialized context";
-    return shaderc_spvc_status_missing_context_error;
-  }
-  if (!context->cross_compiler) {
-    shaderc_spvc::ErrorLog(context) << "Invoked get_push_constant_buffer_count "
-                                       "without an initialized compiler";
-    return shaderc_spvc_status_uninitialized_compiler_error;
-  }
-  if (!count) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked push_constant_buffer_count without a valid out param";
-    return shaderc_spvc_status_invalid_out_param;
-  }
+  CHECK_CONTEXT(context);
+  CHECK_CROSS_COMPILER(context, context->cross_compiler);
+  CHECK_OUT_PARAM(context, count, "count");
 
   *count = context->cross_compiler->get_shader_resources()
                .push_constant_buffers.size();
@@ -1097,21 +841,9 @@ shaderc_spvc_status shaderc_spvc_get_binding_info(
     const shaderc_spvc_context_t context, shaderc_spvc_shader_resource resource,
     shaderc_spvc_binding_type binding_type, shaderc_spvc_binding_info* bindings,
     size_t* binding_count) {
-  if (!context) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked get_binding_info without an initialized context";
-    return shaderc_spvc_status_missing_context_error;
-  }
-  if (!context->cross_compiler) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked get_binding_info without an initialized compiler";
-    return shaderc_spvc_status_uninitialized_compiler_error;
-  }
-  if (!binding_count) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked get_binding_info without a valid binding_count param";
-    return shaderc_spvc_status_invalid_out_param;
-  }
+  CHECK_CONTEXT(context);
+  CHECK_CROSS_COMPILER(context, context->cross_compiler);
+  CHECK_OUT_PARAM(context, binding_count, "binding_count");
 
   auto* compiler = context->cross_compiler.get();
   const auto& resources = compiler->get_shader_resources();
@@ -1183,21 +915,9 @@ shaderc_spvc_status shaderc_spvc_get_binding_info(
 shaderc_spvc_status shaderc_spvc_get_input_stage_location_info(
     const shaderc_spvc_context_t context,
     shaderc_spvc_resource_location_info* locations, size_t* location_count) {
-  if (!context) {
-    shaderc_spvc::ErrorLog(nullptr) << "Invoked get_input_stage_location_info "
-                                       "without an initialized context";
-    return shaderc_spvc_status_missing_context_error;
-  }
-  if (!context->cross_compiler) {
-    shaderc_spvc::ErrorLog(context) << "Invoked get_input_stage_location_info "
-                                       "without an initialized compiler";
-    return shaderc_spvc_status_uninitialized_compiler_error;
-  }
-  if (!location_count) {
-    shaderc_spvc::ErrorLog(context) << "Invoked get_input_stage_location_info "
-                                       "without a valid location_count param";
-    return shaderc_spvc_status_invalid_out_param;
-  }
+  CHECK_CONTEXT(context);
+  CHECK_CROSS_COMPILER(context, context->cross_compiler);
+  CHECK_OUT_PARAM(context, location_count, "location_count");
 
   auto* compiler = context->cross_compiler.get();
   shaderc_spvc_status status = get_location_info_impl(
@@ -1214,21 +934,9 @@ shaderc_spvc_status shaderc_spvc_get_input_stage_location_info(
 shaderc_spvc_status shaderc_spvc_get_output_stage_location_info(
     const shaderc_spvc_context_t context,
     shaderc_spvc_resource_location_info* locations, size_t* location_count) {
-  if (!context) {
-    shaderc_spvc::ErrorLog(nullptr) << "Invoked get_output_stage_location_info "
-                                       "without an initialized context";
-    return shaderc_spvc_status_missing_context_error;
-  }
-  if (!context->cross_compiler) {
-    shaderc_spvc::ErrorLog(context) << "Invoked get_output_stage_location_info "
-                                       "without an initialized compiler";
-    return shaderc_spvc_status_uninitialized_compiler_error;
-  }
-  if (!location_count) {
-    shaderc_spvc::ErrorLog(context) << "Invoked get_output_stage_location_info "
-                                       "without a valid location_count param";
-    return shaderc_spvc_status_invalid_out_param;
-  }
+  CHECK_CONTEXT(context);
+  CHECK_CROSS_COMPILER(context, context->cross_compiler);
+  CHECK_OUT_PARAM(context, location_count, "location_count");
 
   auto* compiler = context->cross_compiler.get();
   shaderc_spvc_status status = get_location_info_impl(
@@ -1245,21 +953,9 @@ shaderc_spvc_status shaderc_spvc_get_output_stage_location_info(
 shaderc_spvc_status shaderc_spvc_get_output_stage_type_info(
     const shaderc_spvc_context_t context,
     shaderc_spvc_resource_type_info* types, size_t* type_count) {
-  if (!context) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked get_output_stage_type_info without an initialized context";
-    return shaderc_spvc_status_missing_context_error;
-  }
-  if (!context->cross_compiler) {
-    shaderc_spvc::ErrorLog(context)
-        << "Invoked get_output_stage_type_info without an initialized compiler";
-    return shaderc_spvc_status_uninitialized_compiler_error;
-  }
-  if (!type_count) {
-    shaderc_spvc::ErrorLog(context) << "Invoked get_output_stage_type_info "
-                                       "without a valid location_count param";
-    return shaderc_spvc_status_invalid_out_param;
-  }
+  CHECK_CONTEXT(context);
+  CHECK_CROSS_COMPILER(context, context->cross_compiler);
+  CHECK_OUT_PARAM(context, type_count, "type_count");
 
   auto* compiler = context->cross_compiler.get();
   const auto& resources = compiler->get_shader_resources().stage_outputs;
@@ -1296,16 +992,8 @@ void shaderc_spvc_result_destroy(shaderc_spvc_compilation_result_t result) {
 
 shaderc_spvc_status shaderc_spvc_result_get_string_output(
     const shaderc_spvc_compilation_result_t result, const char** str) {
-  if (!result) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked get_string_output without an initialized context";
-    return shaderc_spvc_status_missing_result_error;
-  }
-  if (!str) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked get_string_output without a valid str param";
-    return shaderc_spvc_status_invalid_out_param;
-  }
+  CHECK_RESULT(nullptr, result);
+  CHECK_OUT_PARAM(nullptr, str, "str");
 
   *str = result->string_output.c_str();
   return shaderc_spvc_status_success;
@@ -1314,16 +1002,8 @@ shaderc_spvc_status shaderc_spvc_result_get_string_output(
 shaderc_spvc_status shaderc_spvc_result_get_binary_output(
     const shaderc_spvc_compilation_result_t result,
     const uint32_t** binary_output) {
-  if (!result) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked get_binary_output without an initialized context";
-    return shaderc_spvc_status_missing_result_error;
-  }
-  if (!binary_output) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked get_binary_output without a valid binary_output param";
-    return shaderc_spvc_status_invalid_out_param;
-  }
+  CHECK_RESULT(nullptr, result);
+  CHECK_OUT_PARAM(nullptr, binary_output, "binary_output");
 
   *binary_output = result->binary_output.data();
   return shaderc_spvc_status_success;
@@ -1331,16 +1011,8 @@ shaderc_spvc_status shaderc_spvc_result_get_binary_output(
 
 shaderc_spvc_status shaderc_spvc_result_get_binary_length(
     const shaderc_spvc_compilation_result_t result, uint32_t* len) {
-  if (!result) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked get_binary_length without an initialized context";
-    return shaderc_spvc_status_missing_result_error;
-  }
-  if (!len) {
-    shaderc_spvc::ErrorLog(nullptr)
-        << "Invoked get_binary_length without a valid len param";
-    return shaderc_spvc_status_invalid_out_param;
-  }
+  CHECK_RESULT(nullptr, result);
+  CHECK_OUT_PARAM(nullptr, len, "len");
 
   *len = result->binary_output.size();
   return shaderc_spvc_status_success;
