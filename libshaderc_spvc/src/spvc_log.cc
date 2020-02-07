@@ -56,7 +56,7 @@ LogMessage::~LogMessage() {
   }
 
   // Note: we use fprintf because <iostream> includes static initializers.
-  fprintf(outputStream, "%s", stream_.str().c_str());
+  fprintf(outputStream, "%s\n", stream_.str().c_str());
   fflush(outputStream);
 #endif  // defined(SHADERC_SPVC_ENABLE_DIRECT_LOGGING)
 
