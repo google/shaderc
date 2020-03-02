@@ -20,7 +20,6 @@ shaders-msl-no-opt/packing/matrix-multiply-unpacked-row-major-2.comp,False
 shaders-msl-no-opt/packing/struct-packing-array-of-scalar.comp,False
 shaders-msl-no-opt/packing/struct-packing-recursive.comp,False
 shaders-msl-no-opt/packing/struct-packing.comp,False
-shaders-no-opt/asm/comp/extended-debug-extinst.invalid.asm.comp,False
 shaders-no-opt/asm/comp/phi-temporary-copy-loop-variable.asm.invalid.comp,False
 shaders-no-opt/asm/frag/do-while-continue-phi.asm.invalid.frag,False
 shaders-no-opt/asm/frag/loop-merge-to-continue.asm.invalid.frag,False

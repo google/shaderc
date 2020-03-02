@@ -33,6 +33,7 @@ shaders-msl-no-opt/packing/matrix-multiply-unpacked-row-major-2.comp,False
 shaders-msl-no-opt/packing/struct-packing-array-of-scalar.comp,False
 shaders-msl-no-opt/packing/struct-packing-recursive.comp,False
 shaders-msl-no-opt/packing/struct-packing.comp,False
+shaders-msl-no-opt/vert/pass-array-by-value.force-native-array.vert,False
 shaders-msl/asm/comp/multiple-entry.asm.comp,False
 shaders-msl/asm/comp/multiple-entry.asm.comp,True
 shaders-msl/asm/frag/min-lod.msl22.asm.frag,False
@@ -43,6 +44,9 @@ shaders-msl/comp/basic.dispatchbase.msl11.comp,False
 shaders-msl/comp/basic.dispatchbase.msl11.comp,True
 shaders-msl/comp/basic.inline-block.msl2.comp,False
 shaders-msl/comp/basic.inline-block.msl2.comp,True
+shaders-msl/comp/composite-array-initialization.force-native-array.comp,False
+shaders-msl/comp/composite-array-initialization.force-native-array.comp,True
+shaders-msl/comp/copy-array-of-arrays.force-native-array.comp,False
 shaders-msl/frag/barycentric-nv-nopersp.msl22.frag,False
 shaders-msl/frag/barycentric-nv-nopersp.msl22.frag,True
 shaders-msl/frag/barycentric-nv.msl22.frag,False
@@ -59,10 +63,10 @@ shaders-msl/frag/texture-cube-array.ios.emulate-cube-array.frag,False
 shaders-msl/frag/texture-cube-array.ios.emulate-cube-array.frag,True
 shaders-msl/vert/float-math.invariant-float-math.vert,False
 shaders-msl/vert/float-math.invariant-float-math.vert,True
+shaders-msl/vert/return-array.force-native-array.vert,False
 shaders-msl/vert/texture_buffer.texture-buffer-native.msl21.vert,False
 shaders-msl/vert/texture_buffer.texture-buffer-native.msl21.vert,True
 shaders-no-opt/asm/comp/copy-logical.spv14.asm.comp,False
-shaders-no-opt/asm/comp/extended-debug-extinst.invalid.asm.comp,False
 shaders-no-opt/asm/comp/phi-temporary-copy-loop-variable.asm.invalid.comp,False
 shaders-no-opt/asm/frag/do-while-continue-phi.asm.invalid.frag,False
 shaders-no-opt/asm/frag/for-loop-dedicated-merge-block-inverted.asm.invalid.frag,False
