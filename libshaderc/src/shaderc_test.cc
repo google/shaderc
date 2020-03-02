@@ -12,16 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "shaderc/shaderc.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
 #include <memory>
 #include <thread>
 #include <unordered_map>
 
-#include "SPIRV/spirv.hpp"
-
 #include "common_shaders_for_test.h"
-#include "shaderc/shaderc.h"
+#include "spirv/unified1/spirv.hpp"
 
 namespace {
 

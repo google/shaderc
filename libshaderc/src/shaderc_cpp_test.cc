@@ -14,15 +14,15 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
 #include <memory>
 #include <thread>
 #include <unordered_map>
 
-#include "SPIRV/spirv.hpp"
-#include "spirv-tools/libspirv.hpp"
-
 #include "common_shaders_for_test.h"
 #include "shaderc/shaderc.hpp"
+#include "spirv-tools/libspirv.hpp"
+#include "spirv/unified1/spirv.hpp"
 
 namespace {
 
