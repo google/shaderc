@@ -12,21 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "shaderc_private.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <sstream>
 #include <vector>
 
-#include "SPIRV/spirv.hpp"
-
 #include "libshaderc_util/compiler.h"
 #include "libshaderc_util/counting_includer.h"
 #include "libshaderc_util/resources.h"
 #include "libshaderc_util/spirv_tools_wrapper.h"
 #include "libshaderc_util/version_profile.h"
+#include "shaderc_private.h"
+#include "spirv/unified1/spirv.hpp"
 
 #if (defined(_MSC_VER) && !defined(_CPPUNWIND)) || !defined(__EXCEPTIONS)
 #define TRY_IF_EXCEPTIONS_ENABLED
