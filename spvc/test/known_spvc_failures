@@ -3,10 +3,14 @@ shaders-hlsl-no-opt/frag/constant-buffer-array.invalid.sm51.frag,False
 shaders-hlsl-no-opt/frag/fp16.invalid.desktop.frag,False
 shaders-hlsl/asm/comp/control-flow-hints.asm.comp,False
 shaders-hlsl/asm/comp/control-flow-hints.asm.comp,True
+shaders-hlsl/comp/access-chains.force-uav.comp,False
+shaders-hlsl/comp/access-chains.force-uav.comp,True
 shaders-hlsl/comp/num-workgroups-alone.comp,False
 shaders-hlsl/comp/num-workgroups-alone.comp,True
 shaders-hlsl/comp/num-workgroups-with-builtins.comp,False
 shaders-hlsl/comp/num-workgroups-with-builtins.comp,True
+shaders-hlsl/frag/readonly-coherent-ssbo.force-uav.frag,False
+shaders-hlsl/frag/readonly-coherent-ssbo.force-uav.frag,True
 shaders-hlsl/frag/separate-combined-fake-overload.sm30.frag,False
 shaders-hlsl/frag/separate-combined-fake-overload.sm30.frag,True
 shaders-msl-no-opt/asm/comp/copy-logical-2.spv14.asm.comp,False
@@ -109,3 +113,5 @@ shaders-ue4/asm/frag/texture-atomics.asm.graphics-robust-access.frag,True
 shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,False
 shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,True
 shaders/asm/frag/image-query-no-sampler.no-samplerless.vk.asm.frag,False
+shaders/desktop-only/frag/image-size.no-qualifier-deduction.frag,False
+shaders/desktop-only/frag/image-size.no-qualifier-deduction.frag,True
