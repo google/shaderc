@@ -94,6 +94,8 @@ typedef enum {
   shaderc_spvc_binding_type_sampler = 0x00000003,
   shaderc_spvc_binding_type_sampled_texture = 0x00000004,
   shaderc_spvc_binding_type_storage_texture = 0x00000005,
+  shaderc_spvc_binding_type_readonly_storage_texture = 0x00000006,
+  shaderc_spvc_binding_type_writeonly_storage_texture = 0x00000007,
 } shaderc_spvc_binding_type;
 
 typedef enum {
@@ -118,6 +120,7 @@ typedef enum {
   shaderc_spvc_shader_resource_separate_images,
   shaderc_spvc_shader_resource_separate_samplers,
   shaderc_spvc_shader_resource_storage_buffers,
+  shaderc_spvc_shader_resource_storage_images,
 } shaderc_spvc_shader_resource;
 
 // An opaque handle to an object that manages all compiler state.
