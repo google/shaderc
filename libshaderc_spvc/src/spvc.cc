@@ -126,6 +126,8 @@ const spirv_cross::SmallVector<spirv_cross::Resource>* get_shader_resources(
       return &(resources.separate_samplers);
     case shaderc_spvc_shader_resource_storage_buffers:
       return &(resources.storage_buffers);
+    case shaderc_spvc_shader_resource_storage_images:
+      return &(resources.storage_images);
   }
 
   // Older gcc doesn't recognize that all of the possible cases are covered
@@ -901,6 +903,16 @@ shaderc_spvc_status shaderc_spvc_get_binding_info(
               shaderc_spvc_binding_type_readonly_storage_buffer;
         } else {
           bindings->binding_type = shaderc_spvc_binding_type_storage_buffer;
+        }
+      } break;
+      case shaderc_spvc_binding_type_storage_texture: {
+        spirv_cross::Bitset flags = compiler->get_decoration_bitset(shader_resource.id);
+        if (flags.get(spv::DecorationNonReadable)) {
+          bindings->binding_type = shaderc_spvc_binding_type_writeonly_storage_texture;
+        } else if (flags.get(spv::DecorationNonWritable)) {
+            bindings->binding_type = shaderc_spvc_binding_type_readonly_storage_texture;
+        } else {
+            bindings->binding_type = shaderc_spvc_binding_type_storage_texture;
         }
       } break;
       default:
