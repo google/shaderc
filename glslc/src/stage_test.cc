@@ -49,7 +49,6 @@ TEST(DeduceDefaultShaderKindFromFileName, ValidStage) {
   EXPECT_EQ(shaderc_glsl_default_compute_shader,
             glslc::DeduceDefaultShaderKindFromFileName("a.comp"));
 
-#ifdef NV_EXTENSIONS
   EXPECT_EQ(shaderc_glsl_default_raygen_shader,
             glslc::DeduceDefaultShaderKindFromFileName("a.rgen"));
 
@@ -73,7 +72,6 @@ TEST(DeduceDefaultShaderKindFromFileName, ValidStage) {
 
   EXPECT_EQ(shaderc_glsl_default_mesh_shader,
             glslc::DeduceDefaultShaderKindFromFileName("a.mesh"));
-#endif
 }
 
 TEST(DeduceDefaultShaderKindFromFileName, InvalidStage) {

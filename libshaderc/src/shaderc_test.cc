@@ -1217,7 +1217,6 @@ TEST_F(CompileStringWithOptionsTest,
                                  shaderc_glsl_compute_shader, options_.get()));
 }
 
-#ifdef NV_EXTENSIONS
 // task shader
 TEST_F(CompileStringWithOptionsTest,
        TargetEnvRespectedWhenCompilingVulkan1_0TaskShaderToVulkan1_0Succeeds) {
@@ -1291,7 +1290,6 @@ TEST_F(CompileStringWithOptionsTest,
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kGlslShaderMeshSubgroupBarrier,
                                  shaderc_glsl_mesh_shader, options_.get()));
 }
-#endif
 
 TEST_F(CompileStringWithOptionsTest,
        DISABLED_TargetEnvIgnoredWhenPreprocessing) {

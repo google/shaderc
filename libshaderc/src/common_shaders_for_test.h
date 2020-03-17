@@ -316,7 +316,6 @@ const char kGlslShaderComputeSubgroupBarrier[] =
        #extension GL_KHR_shader_subgroup_basic : enable
        void main() { subgroupBarrier(); })";
 
-#ifdef NV_EXTENSIONS
 // A GLSL task shader using a regular barrier.
 const char kGlslShaderTaskBarrier[] =
     R"(#version 450
@@ -352,7 +351,6 @@ const char kGlslShaderMeshSubgroupBarrier[] =
        layout(max_primitives=32) out;
        layout(triangles) out;
        void main() { subgroupBarrier(); })";
-#endif
 
 const char kGlslMultipleFnShader[] =
     R"(#version 450

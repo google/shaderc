@@ -34,7 +34,6 @@ EShLanguage MapStageNameToLanguage(const string_piece& stage_name) {
       {"tesseval", EShLangTessEvaluation},
       {"geometry", EShLangGeometry},
       {"compute", EShLangCompute},
-#ifdef NV_EXTENSIONS
       {"raygen", EShLangRayGenNV},
       {"intersect", EShLangIntersectNV},
       {"anyhit", EShLangAnyHitNV},
@@ -43,7 +42,6 @@ EShLanguage MapStageNameToLanguage(const string_piece& stage_name) {
       {"callable", EShLangCallableNV},
       {"task", EShLangTaskNV},
       {"mesh", EShLangMeshNV},
-#endif
   };
 
   for (const auto& entry : string_to_stage) {
