@@ -111,7 +111,6 @@ inline shaderc_util::Compiler::Stage shaderc_convert_specific_stage(
       return shaderc_util::Compiler::Stage::Geometry;
     case shaderc_compute_shader:
       return shaderc_util::Compiler::Stage::Compute;
-#if NV_EXTENSIONS
     case shaderc_raygen_shader:
       return shaderc_util::Compiler::Stage::RayGenNV;
     case shaderc_intersection_shader:
@@ -128,7 +127,6 @@ inline shaderc_util::Compiler::Stage shaderc_convert_specific_stage(
       return shaderc_util::Compiler::Stage::TaskNV;
     case shaderc_mesh_shader:
       return shaderc_util::Compiler::Stage::MeshNV;
-#endif
     default:
       // We don't care about the other kinds.
       break;

@@ -38,8 +38,6 @@ endif()
 
 set (CMAKE_CXX_STANDARD 11)
 
-option(SHADERC_ENABLE_NV_EXTENSIONS "Enables support of Nvidia-specific extensions" ON)
-
 include(GNUInstallDirs)
 include(cmake/setup_build.cmake)
 include(cmake/utils.cmake)
@@ -65,10 +63,6 @@ check_cxx_compiler_flag(-Wextra-semi COMPILER_SUPPORTS_EXTRA_SEMI_WARNING)
 if (COMPILER_SUPPORTS_EXTRA_SEMI_WARNING)
     add_compile_options("-Wextra-semi")
 endif()
-
-if(SHADERC_ENABLE_NV_EXTENSIONS)
-    add_definitions(-DNV_EXTENSIONS)
-endif(SHADERC_ENABLE_NV_EXTENSIONS)
 
 find_host_package(PythonInterp 3 REQUIRED)
 

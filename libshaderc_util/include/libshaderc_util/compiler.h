@@ -182,7 +182,6 @@ class Compiler {
     Geometry,
     Fragment,
     Compute,
-#ifdef NV_EXTENSIONS
     RayGenNV,
     IntersectNV,
     AnyHitNV,
@@ -191,7 +190,6 @@ class Compiler {
     CallableNV,
     TaskNV,
     MeshNV,
-#endif
     StageEnd,
   };
   enum { kNumStages = int(Stage::StageEnd) };
@@ -205,7 +203,6 @@ class Compiler {
         Stage::Geometry,
         Stage::Fragment,
         Stage::Compute,
-#ifdef NV_EXTENSIONS
         Stage::RayGenNV,
         Stage::IntersectNV,
         Stage::AnyHitNV,
@@ -214,7 +211,6 @@ class Compiler {
         Stage::CallableNV,
         Stage::TaskNV,
         Stage::MeshNV,
-#endif
     }};
     return values;
   }
@@ -588,7 +584,6 @@ inline Compiler::Stage ConvertToStage(EShLanguage stage) {
       return Compiler::Stage::Fragment;
     case EShLangCompute:
       return Compiler::Stage::Compute;
-#ifdef NV_EXTENSIONS
     case EShLangRayGenNV:
       return Compiler::Stage::RayGenNV;
     case EShLangIntersectNV:
@@ -605,7 +600,6 @@ inline Compiler::Stage ConvertToStage(EShLanguage stage) {
       return Compiler::Stage::TaskNV;
     case EShLangMeshNV:
       return Compiler::Stage::MeshNV;
-#endif
     default:
       break;
   }
