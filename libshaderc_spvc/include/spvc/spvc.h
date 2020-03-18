@@ -123,6 +123,62 @@ typedef enum {
   shaderc_spvc_shader_resource_storage_images,
 } shaderc_spvc_shader_resource;
 
+typedef enum {
+  shaderc_spvc_storage_texture_format_undefined = 0x00000000,
+  shaderc_spvc_storage_texture_format_r8unorm = 0x00000001,
+  shaderc_spvc_storage_texture_format_r8snorm = 0x00000002,
+  shaderc_spvc_storage_texture_format_r8uint = 0x00000003,
+  shaderc_spvc_storage_texture_format_r8sint = 0x00000004,
+  shaderc_spvc_storage_texture_format_r16uint = 0x00000005,
+  shaderc_spvc_storage_texture_format_r16sint = 0x00000006,
+  shaderc_spvc_storage_texture_format_r16float = 0x00000007,
+  shaderc_spvc_storage_texture_format_rg8unorm = 0x00000008,
+  shaderc_spvc_storage_texture_format_rg8snorm = 0x00000009,
+  shaderc_spvc_storage_texture_format_rg8uint = 0x0000000a,
+  shaderc_spvc_storage_texture_format_rg8sint = 0x0000000b,
+  shaderc_spvc_storage_texture_format_r32float = 0x0000000c,
+  shaderc_spvc_storage_texture_format_r32uint = 0x0000000d,
+  shaderc_spvc_storage_texture_format_r32sint = 0x0000000e,
+  shaderc_spvc_storage_texture_format_rg16uint = 0x0000000f,
+  shaderc_spvc_storage_texture_format_rg16sint = 0x00000010,
+  shaderc_spvc_storage_texture_format_rg16float = 0x00000011,
+  shaderc_spvc_storage_texture_format_rgba8unorm = 0x00000012,
+  shaderc_spvc_storage_texture_format_rgba8unormsrgb = 0x00000013,
+  shaderc_spvc_storage_texture_format_rgba8snorm = 0x00000014,
+  shaderc_spvc_storage_texture_format_rgba8uint = 0x00000015,
+  shaderc_spvc_storage_texture_format_rgba8sint = 0x00000016,
+  shaderc_spvc_storage_texture_format_bgra8unorm = 0x00000017,
+  shaderc_spvc_storage_texture_format_bgra8unormsrgb = 0x00000018,
+  shaderc_spvc_storage_texture_format_rgb10a2unorm = 0x00000019,
+  shaderc_spvc_storage_texture_format_rg11b10float = 0x0000001A,
+  shaderc_spvc_storage_texture_format_rg32float = 0x0000001B,
+  shaderc_spvc_storage_texture_format_rg32uint = 0x0000001C,
+  shaderc_spvc_storage_texture_format_rg32sint = 0x0000001D,
+  shaderc_spvc_storage_texture_format_rgba16uint = 0x0000001E,
+  shaderc_spvc_storage_texture_format_rgba16sint = 0x0000001F,
+  shaderc_spvc_storage_texture_format_rgba16float = 0x00000020,
+  shaderc_spvc_storage_texture_format_rgba32float = 0x00000021,
+  shaderc_spvc_storage_texture_format_rgba32uint = 0x00000022,
+  shaderc_spvc_storage_texture_format_rgba32sint = 0x00000023,
+  shaderc_spvc_storage_texture_format_depth32float = 0x00000024,
+  shaderc_spvc_storage_texture_format_depth24plus = 0x00000025,
+  shaderc_spvc_storage_texture_format_depth24plusstencil8 = 0x00000026,
+  shaderc_spvc_storage_texture_format_bc1rgbaunorm = 0x00000027,
+  shaderc_spvc_storage_texture_format_bc1rgbaunormsrgb = 0x00000028,
+  shaderc_spvc_storage_texture_format_bc2rgbaunorm = 0x00000029,
+  shaderc_spvc_storage_texture_format_bc2rgbaunormsrgb = 0x0000002A,
+  shaderc_spvc_storage_texture_format_bc3rgbaunorm = 0x0000002B,
+  shaderc_spvc_storage_texture_format_bc3rgbaunormsrgb = 0x0000002C,
+  shaderc_spvc_storage_texture_format_bc4runorm = 0x0000002D,
+  shaderc_spvc_storage_texture_format_bc4rsnorm = 0x0000002E,
+  shaderc_spvc_storage_texture_format_bc5rgunorm = 0x0000002F,
+  shaderc_spvc_storage_texture_format_bc5rgsnorm = 0x00000030,
+  shaderc_spvc_storage_texture_format_bc6hrgbufloat = 0x00000031,
+  shaderc_spvc_storage_texture_format_bc6hrgbsfloat = 0x00000032,
+  shaderc_spvc_storage_texture_format_bc7rgbaunorm = 0x00000033,
+  shaderc_spvc_storage_texture_format_bc7rgbaunormsrgb = 0x00000034,
+} shaderc_spvc_storage_texture_format;
+
 // An opaque handle to an object that manages all compiler state.
 typedef struct shaderc_spvc_context* shaderc_spvc_context_t;
 
@@ -157,6 +213,7 @@ typedef struct {
   shaderc_spvc_texture_view_dimension texture_dimension;
   shaderc_spvc_texture_format_type texture_component_type;
   bool multisampled;
+  shaderc_spvc_storage_texture_format storage_texture_format;
 } shaderc_spvc_binding_info;
 
 typedef struct {
