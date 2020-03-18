@@ -174,6 +174,78 @@ shaderc_spvc_texture_format_type spirv_cross_base_type_to_texture_format_type(
   }
 }
 
+shaderc_spvc_storage_texture_format spv_image_format_to_storage_texture_format(
+    spv::ImageFormat format) {
+  switch (format) {
+    case spv::ImageFormatR8:
+      return shaderc_spvc_storage_texture_format_r8unorm;
+    case spv::ImageFormatR8Snorm:
+      return shaderc_spvc_storage_texture_format_r8snorm;
+    case spv::ImageFormatR8ui:
+      return shaderc_spvc_storage_texture_format_r8uint;
+    case spv::ImageFormatR8i:
+      return shaderc_spvc_storage_texture_format_r8sint;
+    case spv::ImageFormatR16ui:
+      return shaderc_spvc_storage_texture_format_r16uint;
+    case spv::ImageFormatR16i:
+      return shaderc_spvc_storage_texture_format_r16sint;
+    case spv::ImageFormatR16f:
+      return shaderc_spvc_storage_texture_format_r16float;
+    case spv::ImageFormatRg8:
+      return shaderc_spvc_storage_texture_format_rg8unorm;
+    case spv::ImageFormatRg8Snorm:
+      return shaderc_spvc_storage_texture_format_rg8snorm;
+    case spv::ImageFormatRg8ui:
+      return shaderc_spvc_storage_texture_format_rg8uint;
+    case spv::ImageFormatRg8i:
+      return shaderc_spvc_storage_texture_format_rg8sint;
+    case spv::ImageFormatR32f:
+      return shaderc_spvc_storage_texture_format_r32float;
+    case spv::ImageFormatR32ui:
+      return shaderc_spvc_storage_texture_format_r32uint;
+    case spv::ImageFormatR32i:
+      return shaderc_spvc_storage_texture_format_r32sint;
+    case spv::ImageFormatRg16ui:
+      return shaderc_spvc_storage_texture_format_rg16uint;
+    case spv::ImageFormatRg16i:
+      return shaderc_spvc_storage_texture_format_rg16sint;
+    case spv::ImageFormatRg16f:
+      return shaderc_spvc_storage_texture_format_rg16float;
+    case spv::ImageFormatRgba8:
+      return shaderc_spvc_storage_texture_format_rgba8unorm;
+    case spv::ImageFormatRgba8Snorm:
+      return shaderc_spvc_storage_texture_format_rgba8snorm;
+    case spv::ImageFormatRgba8ui:
+      return shaderc_spvc_storage_texture_format_rgba8uint;
+    case spv::ImageFormatRgba8i:
+      return shaderc_spvc_storage_texture_format_rgba8sint;
+    case spv::ImageFormatRgb10A2:
+      return shaderc_spvc_storage_texture_format_rgb10a2unorm;
+    case spv::ImageFormatR11fG11fB10f:
+      return shaderc_spvc_storage_texture_format_rg11b10float;
+    case spv::ImageFormatRg32f:
+      return shaderc_spvc_storage_texture_format_rg32float;
+    case spv::ImageFormatRg32ui:
+      return shaderc_spvc_storage_texture_format_rg32uint;
+    case spv::ImageFormatRg32i:
+      return shaderc_spvc_storage_texture_format_rg32sint;
+    case spv::ImageFormatRgba16ui:
+      return shaderc_spvc_storage_texture_format_rgba16uint;
+    case spv::ImageFormatRgba16i:
+      return shaderc_spvc_storage_texture_format_rgba16sint;
+    case spv::ImageFormatRgba16f:
+      return shaderc_spvc_storage_texture_format_rgba16float;
+    case spv::ImageFormatRgba32f:
+      return shaderc_spvc_storage_texture_format_rgba32float;
+    case spv::ImageFormatRgba32ui:
+      return shaderc_spvc_storage_texture_format_rgba32uint;
+    case spv::ImageFormatRgba32i:
+      return shaderc_spvc_storage_texture_format_rgba32sint;
+    default:
+      return shaderc_spvc_storage_texture_format_undefined;
+  }
+}
+
 shaderc_spvc_status get_location_info_impl(
     spirv_cross::Compiler* compiler,
     const spirv_cross::SmallVector<spirv_cross::Resource>& resources,
@@ -914,6 +986,9 @@ shaderc_spvc_status shaderc_spvc_get_binding_info(
         } else {
             bindings->binding_type = shaderc_spvc_binding_type_storage_texture;
         }
+        bindings->storage_texture_format =
+            spv_image_format_to_storage_texture_format(
+                compiler->get_type(bindings->base_type_id).image.format);
       } break;
       default:
         bindings->binding_type = binding_type;
