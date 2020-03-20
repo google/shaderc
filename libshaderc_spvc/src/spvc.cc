@@ -986,9 +986,12 @@ shaderc_spvc_status shaderc_spvc_get_binding_info(
         } else {
             bindings->binding_type = shaderc_spvc_binding_type_storage_texture;
         }
+        spirv_cross::SPIRType::ImageType imageType =
+            compiler->get_type(bindings->base_type_id).image;
         bindings->storage_texture_format =
-            spv_image_format_to_storage_texture_format(
-                compiler->get_type(bindings->base_type_id).image.format);
+            spv_image_format_to_storage_texture_format(imageType.format);
+        bindings->texture_dimension = spirv_dim_to_texture_view_dimension(
+            imageType.dim, imageType.arrayed);
       } break;
       default:
         bindings->binding_type = binding_type;
