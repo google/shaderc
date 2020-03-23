@@ -1,6 +1,9 @@
 # Downloads
 Download the latest builds.
 
+**Note: These binaries are just the artifacts of the builders and have not
+  undergone any QA, thus they should be considered unsupported.**
+
 ## Release
 | Windows | Linux | MacOS |
 | --- | --- | --- |
