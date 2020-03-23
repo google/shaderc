@@ -992,6 +992,7 @@ shaderc_spvc_status shaderc_spvc_get_binding_info(
             spv_image_format_to_storage_texture_format(imageType.format);
         bindings->texture_dimension = spirv_dim_to_texture_view_dimension(
             imageType.dim, imageType.arrayed);
+        bindings->multisampled = imageType.ms;
       } break;
       default:
         bindings->binding_type = binding_type;
