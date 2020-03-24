@@ -71,6 +71,7 @@ shaders-msl/vert/return-array.force-native-array.vert,False
 shaders-msl/vert/texture_buffer.texture-buffer-native.msl21.vert,False
 shaders-msl/vert/texture_buffer.texture-buffer-native.msl21.vert,True
 shaders-no-opt/asm/comp/copy-logical.spv14.asm.comp,False
+shaders-no-opt/asm/comp/extended-debug-extinst.invalid.asm.comp,False
 shaders-no-opt/asm/comp/phi-temporary-copy-loop-variable.asm.invalid.comp,False
 shaders-no-opt/asm/frag/do-while-continue-phi.asm.invalid.frag,False
 shaders-no-opt/asm/frag/for-loop-dedicated-merge-block-inverted.asm.invalid.frag,False
