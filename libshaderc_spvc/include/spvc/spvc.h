@@ -179,6 +179,33 @@ typedef enum {
   shaderc_spvc_storage_texture_format_bc7rgbaunormsrgb = 0x00000034,
 } shaderc_spvc_storage_texture_format;
 
+typedef enum {
+  shaderc_spvc_spv_env_universal_1_0,
+  shaderc_spvc_spv_env_vulkan_1_0,
+  shaderc_spvc_spv_env_universal_1_1,
+  shaderc_spvc_spv_env_opencl_2_1,
+  shaderc_spvc_spv_env_opencl_2_2,
+  shaderc_spvc_spv_env_opengl_4_0,
+  shaderc_spvc_spv_env_opengl_4_1,
+  shaderc_spvc_spv_env_opengl_4_2,
+  shaderc_spvc_spv_env_opengl_4_3,
+  shaderc_spvc_spv_env_opengl_4_5,
+  shaderc_spvc_spv_env_universal_1_2,
+  shaderc_spvc_spv_env_opencl_1_2,
+  shaderc_spvc_spv_env_opencl_embedded_1_2,
+  shaderc_spvc_spv_env_opencl_2_0,
+  shaderc_spvc_spv_env_opencl_embedded_2_0,
+  shaderc_spvc_spv_env_opencl_embedded_2_1,
+  shaderc_spvc_spv_env_opencl_embedded_2_2,
+  shaderc_spvc_spv_env_universal_1_3,
+  shaderc_spvc_spv_env_vulkan_1_1,
+  shaderc_spvc_spv_env_webgpu_0,
+  shaderc_spvc_spv_env_universal_1_4,
+  shaderc_spvc_spv_env_vulkan_1_1_spirv_1_4,
+  shaderc_spvc_spv_env_universal_1_5,
+  shaderc_spvc_spv_env_vulkan_1_2,
+} shaderc_spvc_spv_env;
+
 // An opaque handle to an object that manages all compiler state.
 typedef struct shaderc_spvc_context* shaderc_spvc_context_t;
 
@@ -268,11 +295,10 @@ typedef struct shaderc_spvc_compile_options* shaderc_spvc_compile_options_t;
 // Any function operating on shaderc_spvc_compile_options_t must offer the
 // basic thread-safety guarantee.
 SHADERC_EXPORT shaderc_spvc_compile_options_t
-shaderc_spvc_compile_options_create(void);
+shaderc_spvc_compile_options_create(shaderc_spvc_spv_env source_env,
+                                    shaderc_spvc_spv_env target_env);
 
 // Returns a copy of the given options.
-// If NULL is passed as the parameter the call is the same as
-// shaderc_spvc_compile_options_init.
 SHADERC_EXPORT shaderc_spvc_compile_options_t
 shaderc_spvc_compile_options_clone(
     const shaderc_spvc_compile_options_t options);
@@ -283,6 +309,7 @@ shaderc_spvc_compile_options_clone(
 SHADERC_EXPORT void shaderc_spvc_compile_options_destroy(
     shaderc_spvc_compile_options_t options);
 
+// DEPRECATED
 // Sets the source shader environment, affecting which warnings or errors will
 // be issued during validation.
 // Default value for environment is Vulkan 1.0.
@@ -290,6 +317,7 @@ SHADERC_EXPORT shaderc_spvc_status shaderc_spvc_compile_options_set_source_env(
     shaderc_spvc_compile_options_t options, shaderc_target_env env,
     shaderc_env_version version);
 
+// DEPRECATED
 // Sets the target shader environment, if this is different from the source
 // environment, then a transform between the environments will be performed if
 // possible. Currently only WebGPU <-> Vulkan 1.1 are defined.

@@ -26,13 +26,9 @@ class CompileTest : public testing::Test {
  public:
   void SetUp() override {
     context_ = shaderc_spvc_context_create();
-    options_ = shaderc_spvc_compile_options_create();
+    options_ = shaderc_spvc_compile_options_create(
+        shaderc_spvc_spv_env_webgpu_0, shaderc_spvc_spv_env_vulkan_1_1);
     result_ = shaderc_spvc_result_create();
-
-    shaderc_spvc_compile_options_set_source_env(
-        options_, shaderc_target_env_webgpu, shaderc_env_version_webgpu);
-    shaderc_spvc_compile_options_set_target_env(
-        options_, shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
   }
 
   void TearDown() override {
