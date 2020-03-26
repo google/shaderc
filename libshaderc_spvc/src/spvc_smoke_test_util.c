@@ -97,13 +97,13 @@ int run_smoke_test(const char* shader, int transform_from_webgpu) {
 
   int ret_code = 0;
   shaderc_spvc_context_t context = shaderc_spvc_context_create();
-  shaderc_spvc_compile_options_t options =
-      shaderc_spvc_compile_options_create();
+  shaderc_spvc_compile_options_t options;
   if (transform_from_webgpu) {
-    shaderc_spvc_compile_options_set_source_env(
-        options, shaderc_target_env_webgpu, shaderc_env_version_webgpu);
-    shaderc_spvc_compile_options_set_target_env(
-        options, shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
+    options = shaderc_spvc_compile_options_create(
+        shaderc_spvc_spv_env_webgpu_0, shaderc_spvc_spv_env_vulkan_1_1);
+  } else {
+    options = shaderc_spvc_compile_options_create(
+        shaderc_spvc_spv_env_vulkan_1_0, shaderc_spvc_spv_env_vulkan_1_0);
   }
 
   if (!run_glsl(context, options, assembled_shader)) ret_code = -1;

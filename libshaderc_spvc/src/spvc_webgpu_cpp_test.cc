@@ -25,12 +25,9 @@ namespace {
 
 class CompileTest : public testing::Test {
  public:
-  void SetUp() override {
-    options_.SetSourceEnvironment(shaderc_target_env_webgpu,
-                                  shaderc_env_version_webgpu);
-    options_.SetTargetEnvironment(shaderc_target_env_vulkan,
-                                  shaderc_env_version_vulkan_1_1);
-  }
+  CompileTest()
+      : options_(shaderc_spvc_spv_env_webgpu_0,
+                 shaderc_spvc_spv_env_vulkan_1_1) {}
 
   Context context_;
   CompileOptions options_;

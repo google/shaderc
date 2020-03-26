@@ -101,9 +101,14 @@ class CompilationResult {
 // Contains any options that can have default values for a compilation.
 class CompileOptions {
  public:
-  CompileOptions()
-      : options_(shaderc_spvc_compile_options_create(),
+  CompileOptions(shaderc_spvc_spv_env source_env,
+                 shaderc_spvc_spv_env target_env)
+      : options_(shaderc_spvc_compile_options_create(source_env, target_env),
                  shaderc_spvc_compile_options_destroy) {}
+  // DEPRECATED
+  CompileOptions()
+      : CompileOptions(shaderc_spvc_spv_env_universal_1_0,
+                       shaderc_spvc_spv_env_universal_1_0) {}
   CompileOptions(const CompileOptions& other)
       : options_(nullptr, shaderc_spvc_compile_options_destroy) {
     options_.reset(shaderc_spvc_compile_options_clone(other.options_.get()));
@@ -114,6 +119,7 @@ class CompileOptions {
     options_.reset(other.options_.release());
   }
 
+  // DEPRECATED
   // Set the environment for the input SPIR-V.  Default is Vulkan 1.0.
   shaderc_spvc_status SetSourceEnvironment(shaderc_target_env env,
                                            shaderc_env_version version) {
@@ -121,6 +127,7 @@ class CompileOptions {
                                                        version);
   }
 
+  // DEPRECATED
   // Set the target environment for the SPIR-V to be cross-compiled. If this is
   // different then the source a transformation will need to be applied.
   // Currently only Vulkan 1.1 <-> WebGPU transforms are defined. Default is
@@ -148,7 +155,6 @@ class CompileOptions {
   // arrays, providing guarantees satisfying Vulkan's robustBufferAccess rules.
   // This is useful when an implementation does not support robust-buffer access
   // as a driver option.
-
   shaderc_spvc_status SetRobustBufferAccessPass(bool b) {
     return shaderc_spvc_compile_options_set_robust_buffer_access_pass(
         options_.get(), b);
