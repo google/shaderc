@@ -46,6 +46,7 @@ enum class PassId {
   kLegalizationPasses,
   kPerformancePasses,
   kSizePasses,
+  kVulkanToWebGPUPasses,
 
   // SPIRV-Tools specific passes
   kNullPass,
