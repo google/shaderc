@@ -1,6 +1,9 @@
+shaders-hlsl-no-opt/asm/frag/phi.zero-initialize.asm.frag,False
 shaders-hlsl-no-opt/asm/frag/switch-block-case-fallthrough.asm.invalid.frag,False
+shaders-hlsl-no-opt/asm/temporary.zero-initialize.asm.frag,False
 shaders-hlsl-no-opt/frag/constant-buffer-array.invalid.sm51.frag,False
 shaders-hlsl-no-opt/frag/fp16.invalid.desktop.frag,False
+shaders-hlsl-no-opt/frag/variables.zero-initialize.frag,False
 shaders-hlsl/asm/comp/control-flow-hints.asm.comp,False
 shaders-hlsl/asm/comp/control-flow-hints.asm.comp,True
 shaders-hlsl/comp/access-chains.force-uav.comp,False
@@ -15,11 +18,13 @@ shaders-hlsl/frag/separate-combined-fake-overload.sm30.frag,False
 shaders-hlsl/frag/separate-combined-fake-overload.sm30.frag,True
 shaders-msl-no-opt/asm/comp/copy-logical-2.spv14.asm.comp,False
 shaders-msl-no-opt/asm/comp/copy-logical.spv14.asm.comp,False
+shaders-msl-no-opt/asm/frag/phi.zero-initialize.asm.frag,False
 shaders-msl-no-opt/asm/frag/switch-block-case-fallthrough.asm.invalid.frag,False
 shaders-msl-no-opt/asm/packing/load-packed-no-forwarding-3.asm.comp,False
 shaders-msl-no-opt/asm/packing/load-packed-no-forwarding-5.asm.comp,False
 shaders-msl-no-opt/asm/packing/load-packed-no-forwarding.asm.comp,False
 shaders-msl-no-opt/asm/packing/packed-vector-extract-insert.asm.comp,False
+shaders-msl-no-opt/asm/temporary.zero-initialize.asm.frag,False
 shaders-msl-no-opt/comp/basic.dynamic-buffer.msl2.invalid.comp,False
 shaders-msl-no-opt/comp/int64.invalid.msl22.comp,False
 shaders-msl-no-opt/frag/16bit-constants.invalid.frag,False
@@ -27,6 +32,7 @@ shaders-msl-no-opt/frag/force-active-resources.msl2.argument..force-active.discr
 shaders-msl-no-opt/frag/fp16.desktop.invalid.frag,False
 shaders-msl-no-opt/frag/min-max-clamp.invalid.asm.frag,False
 shaders-msl-no-opt/frag/shadow-compare-global-alias.invalid.frag,False
+shaders-msl-no-opt/frag/variables.zero-initialize.frag,False
 shaders-msl-no-opt/packing/array-of-vec3.comp,False
 shaders-msl-no-opt/packing/load-store-col-rows.comp,False
 shaders-msl-no-opt/packing/matrix-2x3-scalar.comp,False
@@ -77,12 +83,15 @@ shaders-no-opt/asm/frag/do-while-continue-phi.asm.invalid.frag,False
 shaders-no-opt/asm/frag/for-loop-dedicated-merge-block-inverted.asm.invalid.frag,False
 shaders-no-opt/asm/frag/for-loop-dedicated-merge-block-non-inverted.asm.invalid.frag,False
 shaders-no-opt/asm/frag/loop-merge-to-continue.asm.invalid.frag,False
+shaders-no-opt/asm/frag/phi.zero-initialize.asm.frag,False
 shaders-no-opt/asm/frag/selection-merge-to-continue.asm.invalid.frag,False
 shaders-no-opt/asm/frag/switch-block-case-fallthrough.asm.invalid.frag,False
 shaders-no-opt/asm/frag/switch-merge-to-continue.asm.invalid.frag,False
+shaders-no-opt/asm/temporary.zero-initialize.asm.frag,False
 shaders-no-opt/frag/16bit-constants.invalid.frag,False
 shaders-no-opt/frag/fp16.invalid.desktop.frag,False
 shaders-no-opt/frag/multi-dimensional.desktop.invalid.flatten_dim.frag,False
+shaders-no-opt/frag/variables.zero-initialize.frag,False
 shaders-reflection/asm/aliased-entry-point-names.asm.multi,False
 shaders-reflection/asm/op-source-glsl-ssbo-1.asm.comp,False
 shaders-reflection/asm/op-source-glsl-ssbo-2.asm.comp,False
