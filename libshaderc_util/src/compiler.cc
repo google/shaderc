@@ -144,8 +144,8 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   std::vector<uint32_t>& compilation_output_data = std::get<1>(result_tuple);
   size_t& compilation_output_data_size_in_bytes = std::get<2>(result_tuple);
 
-  // glslang doesn't currently support WebGPU, so we need fake it by having it
-  // generate Vulkan1.1 and then use spirv-opt later to convert to WebGPU.
+  // glslang doesn't currently support WebGPU, so we need to fake it by having
+  // it generate Vulkan1.1 and then use spirv-opt later to convert to WebGPU.
   bool is_webgpu = target_env_ == Compiler::TargetEnv::WebGPU;
   TargetEnv internal_target_env =
       !is_webgpu ? target_env_ : Compiler::TargetEnv::Vulkan;
@@ -326,7 +326,7 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
 
   if (output_type == OutputType::SpirvAssemblyText) {
     std::string text_or_error;
-    // spirv-tools does know about WebGPU, so don't need to pun to Vulkan1.1
+    // spirv-tools does know about WebGPU, so don't need to punt to Vulkan1.1
     // here.
     if (!SpirvToolsDisassemble(target_env_, target_env_version_, spirv,
                                &text_or_error)) {
@@ -425,8 +425,8 @@ void Compiler::SetSuppressWarnings() { suppress_warnings_ = true; }
 std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
     const std::string& error_tag, const string_piece& shader_source,
     const string_piece& shader_preamble, CountingIncluder& includer) const {
-  // glslang doesn't currently support WebGPU, so we need fake it by having it
-  // generate Vulkan1.1 and then use spirv-opt later to convert to WebGPU.
+  // glslang doesn't currently support WebGPU, so we need to fake it by having
+  // it generate Vulkan1.1 and then use spirv-opt later to convert to WebGPU.
   bool is_webgpu = target_env_ == Compiler::TargetEnv::WebGPU;
   TargetEnv internal_target_env =
       !is_webgpu ? target_env_ : Compiler::TargetEnv::Vulkan;
