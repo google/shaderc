@@ -195,6 +195,13 @@ class CompileOptions {
         options_.get(), b);
   }
 
+  // If true, initialize new variables from cross-compile to 0 if possible.
+  // Default is true.
+  shaderc_spvc_status SetForceZeroInitializedVariables(bool b) {
+    return shaderc_spvc_compile_options_set_force_zero_initialized_variables(
+        options_.get(), b);
+  }
+
   // Force interpretion as ES, or not.  Default is to detect from source.
   shaderc_spvc_status SetES(bool b) {
     return shaderc_spvc_compile_options_set_es(options_.get(), b);

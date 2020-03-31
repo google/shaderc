@@ -375,6 +375,7 @@ shaderc_spvc_compile_options_t shaderc_spvc_compile_options_create(
     options->glsl.version = 0;
     options->source_env = shaderc_spvc_spv_env_to_spv_target_env(source_env);
     options->target_env = shaderc_spvc_spv_env_to_spv_target_env(target_env);
+    options->glsl.force_zero_initialized_variables = true;
   }
   return options;
 }
@@ -481,6 +482,15 @@ shaderc_spvc_compile_options_set_flatten_multidimensional_arrays(
   CHECK_OPTIONS(nullptr, options);
 
   options->glsl.flatten_multidimensional_arrays = b;
+  return shaderc_spvc_status_success;
+}
+
+shaderc_spvc_status
+shaderc_spvc_compile_options_set_force_zero_initialized_variables(
+    shaderc_spvc_compile_options_t options, bool b) {
+  CHECK_OPTIONS(nullptr, options);
+
+  options->glsl.force_zero_initialized_variables = b;
   return shaderc_spvc_status_success;
 }
 
