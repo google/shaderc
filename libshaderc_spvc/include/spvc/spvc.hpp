@@ -196,7 +196,7 @@ class CompileOptions {
   }
 
   // If true, initialize new variables from cross-compile to 0 if possible.
-  // Default is true.
+  // Default is false.
   shaderc_spvc_status SetForceZeroInitializedVariables(bool b) {
     return shaderc_spvc_compile_options_set_force_zero_initialized_variables(
         options_.get(), b);

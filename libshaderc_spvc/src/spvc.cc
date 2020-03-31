@@ -375,7 +375,6 @@ shaderc_spvc_compile_options_t shaderc_spvc_compile_options_create(
     options->glsl.version = 0;
     options->source_env = shaderc_spvc_spv_env_to_spv_target_env(source_env);
     options->target_env = shaderc_spvc_spv_env_to_spv_target_env(target_env);
-    options->glsl.force_zero_initialized_variables = true;
   }
   return options;
 }

@@ -376,7 +376,7 @@ shaderc_spvc_compile_options_set_flatten_multidimensional_arrays(
     shaderc_spvc_compile_options_t options, bool b);
 
 // If true, initialize new variables from cross-compile to 0 if possible.
-// Default is true.
+// Default is false.
 SHADERC_EXPORT shaderc_spvc_status
 shaderc_spvc_compile_options_set_force_zero_initialized_variables(
     shaderc_spvc_compile_options_t options, bool b);
