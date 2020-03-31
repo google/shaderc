@@ -484,6 +484,15 @@ shaderc_spvc_compile_options_set_flatten_multidimensional_arrays(
   return shaderc_spvc_status_success;
 }
 
+shaderc_spvc_status
+shaderc_spvc_compile_options_set_force_zero_initialized_variables(
+    shaderc_spvc_compile_options_t options, bool b) {
+  CHECK_OPTIONS(nullptr, options);
+
+  options->glsl.force_zero_initialized_variables = b;
+  return shaderc_spvc_status_success;
+}
+
 shaderc_spvc_status shaderc_spvc_compile_options_set_es(
     shaderc_spvc_compile_options_t options, bool b) {
   CHECK_OPTIONS(nullptr, options);
