@@ -1,6 +1,6 @@
 Revision history for Shaderc
 
-v2020.0-dev 2020-03-02
+v2020.0 2020-03-06
  - General:
    - Getting spirv.hpp from SPIRV-Headers instead of not glslang (#992)
    - Added clarification about status of artifacts in downloads.md (#1012)
