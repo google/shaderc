@@ -8,6 +8,8 @@ shaders-hlsl/asm/comp/control-flow-hints.asm.comp,False
 shaders-hlsl/asm/comp/control-flow-hints.asm.comp,True
 shaders-hlsl/comp/access-chains.force-uav.comp,False
 shaders-hlsl/comp/access-chains.force-uav.comp,True
+shaders-hlsl/comp/image.nonwritable-uav-texture.comp,False
+shaders-hlsl/comp/image.nonwritable-uav-texture.comp,True
 shaders-hlsl/comp/num-workgroups-alone.comp,False
 shaders-hlsl/comp/num-workgroups-alone.comp,True
 shaders-hlsl/comp/num-workgroups-with-builtins.comp,False
