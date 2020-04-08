@@ -92,10 +92,11 @@ typedef enum {
   shaderc_spvc_binding_type_storage_buffer = 0x00000001,
   shaderc_spvc_binding_type_readonly_storage_buffer = 0x00000002,
   shaderc_spvc_binding_type_sampler = 0x00000003,
-  shaderc_spvc_binding_type_sampled_texture = 0x00000004,
-  shaderc_spvc_binding_type_storage_texture = 0x00000005,
-  shaderc_spvc_binding_type_readonly_storage_texture = 0x00000006,
-  shaderc_spvc_binding_type_writeonly_storage_texture = 0x00000007,
+  shaderc_spvc_binding_type_comparison_sampler = 0x00000004,
+  shaderc_spvc_binding_type_sampled_texture = 0x00000005,
+  shaderc_spvc_binding_type_storage_texture = 0x00000006,
+  shaderc_spvc_binding_type_readonly_storage_texture = 0x00000007,
+  shaderc_spvc_binding_type_writeonly_storage_texture = 0x00000008,
 } shaderc_spvc_binding_type;
 
 typedef enum {
