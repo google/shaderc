@@ -1068,11 +1068,11 @@ shaderc_spvc_status shaderc_spvc_get_binding_info(
       } break;
       case shaderc_spvc_binding_type_sampler: {
         // The inheritance hierarchy here is odd, it goes
-        // Compiler->CompilerGLSL->Compiler*. CompilerGLSL is an intermediate
-        // super class for all of the other leaf classes. The method we need is
-        // defined on CompilerGLSL, not Compiler.
-        // This cast is safe, since we only should ever have a CompilerGLSL or
-        // Compiler* in |cross_compiler|.
+        // Compiler->CompilerGLSL->CompilerHLSL/MSL/Reflection.
+        // CompilerGLSL is an intermediate super class for all of the other leaf
+        // classes. The method we need is defined on CompilerGLSL, not Compiler.
+        // This cast is safe, since we only should ever have a
+        // CompilerGLSL/HLSL/MSL/Reflection in |cross_compiler|.
         auto* glsl_compiler = reinterpret_cast<spirv_cross::CompilerGLSL*>(
             context->cross_compiler.get());
         if (glsl_compiler->variable_is_depth_or_compare(shader_resource.id)) {
