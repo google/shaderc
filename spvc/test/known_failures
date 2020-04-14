@@ -41,6 +41,8 @@ shaders-msl/frag/barycentric-nv.msl22.frag,False
 shaders-msl/frag/barycentric-nv.msl22.frag,True
 shaders-msl/frag/buffer-read-write.texture-buffer-native.msl21.frag,False
 shaders-msl/frag/buffer-read-write.texture-buffer-native.msl21.frag,True
+shaders-msl/frag/disable-frag-output.frag-output.frag,False
+shaders-msl/frag/disable-frag-output.frag-output.frag,True
 shaders-msl/frag/huge-argument-buffer.device-argument-buffer.argument.msl2.frag,False
 shaders-msl/frag/huge-argument-buffer.device-argument-buffer.argument.msl2.frag,True
 shaders-msl/frag/image-query-lod.msl22.frag,False
