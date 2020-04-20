@@ -4,13 +4,13 @@ vars = {
   'google_git':  'https://github.com/google',
   'khronos_git': 'https://github.com/KhronosGroup',
 
-  'effcee_revision' : '98980e2b785403b5f43c23ed5a81e1a22e7297e8',
-  'glslang_revision': '4d2298bfd78a82f77f2325c4ade096ccdab1f00d',
-  'googletest_revision': 'e3f0319d89f4cbf32993de595d984183b1a9fc57',
-  're2_revision': 'ac65d4531798ffc9bf807d1f7c09efb0eec70480',
+  'effcee_revision' : '5af957bbfc7da4e9f7aa8cac11379fa36dd79b84',
+  'glslang_revision': '3f4e5c4563068f277141f5fb3d96ec02afc7ac95',
+  'googletest_revision': 'dcc92d0ab6c4ce022162a23566d44f673251eee4',
+  're2_revision': 'a5c78ae3ea906cdbd759d83511509a985b4b3c8f',
   'spirv_headers_revision': '2ad0492fb00919d99500f1da74abf5ad3c870e4e',
-  'spirv_tools_revision': 'ca5751590ed751fba8abaae9b345663002878865',
-  'spirv_cross_revision': '54658d62559a364319cb222afe826d0d68c55ad0',
+  'spirv_tools_revision': '61b7de3c39f01a0eeb717f444c86990547752e26',
+  'spirv_cross_revision': 'f38cbeb814c73510b85697adbe5e894f9eac978f',
 }
 
 deps = {

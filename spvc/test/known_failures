@@ -13,6 +13,7 @@ shaders-hlsl/frag/readonly-coherent-ssbo.force-uav.frag,False
 shaders-hlsl/frag/readonly-coherent-ssbo.force-uav.frag,True
 shaders-hlsl/frag/separate-combined-fake-overload.sm30.frag,False
 shaders-hlsl/frag/separate-combined-fake-overload.sm30.frag,True
+shaders-hlsl/frag/tex-sampling.frag,True
 shaders-msl-no-opt/asm/comp/copy-logical-2.spv14.asm.comp,False
 shaders-msl-no-opt/asm/comp/copy-logical.spv14.asm.comp,False
 shaders-msl-no-opt/asm/frag/phi.zero-initialize.asm.frag,False
@@ -24,8 +25,12 @@ shaders-msl-no-opt/frag/variables.zero-initialize.frag,False
 shaders-msl-no-opt/vert/pass-array-by-value.force-native-array.vert,False
 shaders-msl/asm/comp/multiple-entry.asm.comp,False
 shaders-msl/asm/comp/multiple-entry.asm.comp,True
+shaders-msl/asm/frag/disable-renamed-output.frag-output.asm.frag,False
+shaders-msl/asm/frag/disable-renamed-output.frag-output.asm.frag,True
 shaders-msl/asm/frag/min-lod.msl22.asm.frag,False
 shaders-msl/asm/frag/min-lod.msl22.asm.frag,True
+shaders-msl/asm/vert/clip-distance-plain-variable.no-user-varying.asm.vert,False
+shaders-msl/asm/vert/clip-distance-plain-variable.no-user-varying.asm.vert,True
 shaders-msl/comp/basic.dispatchbase.comp,False
 shaders-msl/comp/basic.dispatchbase.comp,True
 shaders-msl/comp/basic.dispatchbase.msl11.comp,False
@@ -35,6 +40,9 @@ shaders-msl/comp/basic.inline-block.msl2.comp,True
 shaders-msl/comp/composite-array-initialization.force-native-array.comp,False
 shaders-msl/comp/composite-array-initialization.force-native-array.comp,True
 shaders-msl/comp/copy-array-of-arrays.force-native-array.comp,False
+shaders-msl/desktop-only/vert/clip-cull-distance..no-user-varying.desktop.vert,False
+shaders-msl/desktop-only/vert/clip-cull-distance..no-user-varying.desktop.vert,True
+shaders-msl/frag/array-of-texture-swizzle.msl2.argument.discrete.swizzle.frag,True
 shaders-msl/frag/barycentric-nv-nopersp.msl22.frag,False
 shaders-msl/frag/barycentric-nv-nopersp.msl22.frag,True
 shaders-msl/frag/barycentric-nv.msl22.frag,False
@@ -49,8 +57,11 @@ shaders-msl/frag/image-query-lod.msl22.frag,False
 shaders-msl/frag/image-query-lod.msl22.frag,True
 shaders-msl/frag/subgroup-builtins.msl22.frag,False
 shaders-msl/frag/subgroup-builtins.msl22.frag,True
+shaders-msl/frag/swizzle.frag,True
 shaders-msl/frag/texture-cube-array.ios.emulate-cube-array.frag,False
 shaders-msl/frag/texture-cube-array.ios.emulate-cube-array.frag,True
+shaders-msl/vert/clip-distance-block.no-user-varying.vert,False
+shaders-msl/vert/clip-distance-block.no-user-varying.vert,True
 shaders-msl/vert/float-math.invariant-float-math.vert,False
 shaders-msl/vert/float-math.invariant-float-math.vert,True
 shaders-msl/vert/return-array.force-native-array.vert,False
@@ -93,3 +104,4 @@ shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,True
 shaders/asm/frag/image-query-no-sampler.no-samplerless.vk.asm.frag,False
 shaders/desktop-only/frag/image-size.no-qualifier-deduction.frag,False
 shaders/desktop-only/frag/image-size.no-qualifier-deduction.frag,True
+shaders/frag/swizzle.frag,True
