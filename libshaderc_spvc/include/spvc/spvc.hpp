@@ -295,6 +295,13 @@ class CompileOptions {
         options_.get(), b);
   }
 
+  // If true, set non-writable storage images to be SRV, see spirv_hlsl.hpp in
+  // SPIRV-Cross for more details.
+  shaderc_spvc_status SetHLSLNonWritableUAVTextureAsSRV(bool b) {
+    return shaderc_spvc_compile_options_set_hlsl_nonwritable_uav_texture_as_srv(
+        options_.get(), b);
+  }
+
   // If true (default is false):
   //   GLSL: map depth from Vulkan/D3D style to GL style, i.e. [ 0,w] -> [-w,w]
   //   MSL : map depth from GL style to Vulkan/D3D style, i.e. [-w,w] -> [ 0,w]
