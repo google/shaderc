@@ -725,10 +725,10 @@ void SpvcIrPass::GenerateSpirvCrossIR(Instruction *inst) {
     }
 
       // opcode: 5341
-    case SpvOpTypeAccelerationStructureNV: {
+    case SpvOpTypeAccelerationStructureKHR: {
       uint32_t id = inst->result_id();
       auto &type = set<spirv_cross::SPIRType>(id);
-      type.basetype = spirv_cross::SPIRType::AccelerationStructureNV;
+      type.basetype = spirv_cross::SPIRType::AccelerationStructure;
       break;
     }
 
