@@ -29,3 +29,10 @@ shaders-no-opt/asm/frag/switch-merge-to-continue.asm.invalid.frag,False
 shaders-no-opt/frag/16bit-constants.invalid.frag,False
 shaders-no-opt/frag/fp16.invalid.desktop.frag,False
 shaders-no-opt/frag/multi-dimensional.desktop.invalid.flatten_dim.frag,False
+shaders-msl-no-opt/asm/packing/scalar-array-float2.asm.frag,False
+shaders-msl-no-opt/asm/packing/scalar-array-float3-one-element.asm.frag,False
+shaders-msl-no-opt/asm/packing/scalar-array-float3.asm.frag,False
+shaders-msl-no-opt/asm/packing/scalar-float2x2-col-major.invalid.asm.frag,False
+shaders-msl-no-opt/asm/packing/scalar-float2x3-col-major.invalid.asm.frag,False
+shaders-msl-no-opt/asm/packing/scalar-float3x2-col-major.invalid.asm.frag,False
+shaders-msl-no-opt/asm/packing/scalar-float3x3-col-major.invalid.asm.frag,False

@@ -623,7 +623,7 @@ TEST_F(SpvcIrParsingTest, OpTypeFunctionInstruction) {
 TEST_F(SpvcIrParsingTest, OpTypeAccelerationStructureNVInstruction) {
   const std::vector<const char*> middle = {
       // clang-format off
-      "%10 = OpTypeAccelerationStructureNV"
+      "%10 = OpTypeAccelerationStructureKHR"
       // clang-format on
   };
   std::string spirv = JoinAllInsts(Concat(Concat(before_, middle), after_));
@@ -638,7 +638,7 @@ TEST_F(SpvcIrParsingTest, OpTypeAccelerationStructureNVInstruction) {
 
   auto spir_var = maybe_get<spirv_cross::SPIRType>(10, &ir);
   ASSERT_NE(spir_var, nullptr);
-  EXPECT_EQ(spir_var->basetype, spirv_cross::SPIRType::AccelerationStructureNV);
+  EXPECT_EQ(spir_var->basetype, spirv_cross::SPIRType::AccelerationStructure);
 }
 
 
