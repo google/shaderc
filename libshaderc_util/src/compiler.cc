@@ -131,8 +131,7 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
                                     const string_piece& error_tag)>&
         stage_callback,
     CountingIncluder& includer, OutputType output_type,
-    std::ostream* error_stream, size_t* total_warnings, size_t* total_errors,
-    GlslangInitializer* initializer) const {
+    std::ostream* error_stream, size_t* total_warnings, size_t* total_errors) const {
   // Compilation results to be returned:
   // Initialize the result tuple as a failed compilation. In error cases, we
   // should return result_tuple directly without setting its members.
@@ -163,7 +162,6 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
     return result_tuple;
   }
 
-  auto token = initializer->Acquire();
   EShLanguage used_shader_stage = forced_shader_stage;
   const std::string macro_definitions =
       shaderc_util::format(predefined_macros_, "#define ", " ", "\n");

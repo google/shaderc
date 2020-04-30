@@ -90,7 +90,7 @@ class GlslangInitializer;
 }
 
 struct shaderc_compiler {
-  shaderc_util::GlslangInitializer* initializer;
+  std::unique_ptr<shaderc_util::GlslangInitializer> initializer;
 };
 
 // Converts a shader stage from shaderc_shader_kind into a shaderc_util::Compiler::Stage.
