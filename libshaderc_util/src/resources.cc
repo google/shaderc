@@ -125,7 +125,7 @@ const TBuiltInResource kDefaultTBuiltInResource = {
     /* .maxTaskWorkGroupSizeY_NV = */ 1,
     /* .maxTaskWorkGroupSizeZ_NV = */ 1,
     /* .maxMeshViewCountNV = */ 4,
-
+    /* .maxDualSourceDrawBuffersEXT = */ 1,
     // This is the glslang TLimits structure.
     // It defines whether or not the following features are enabled.
     // We want them to all be enabled.
