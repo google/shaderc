@@ -17,6 +17,7 @@
 #include <cstdint>
 #include <iomanip>
 #include <sstream>
+#include <thread>
 #include <tuple>
 
 #include "SPIRV/GlslangToSpv.h"
@@ -101,6 +102,29 @@ EShMessages GetMessageRules(shaderc_util::Compiler::TargetEnv env,
 }  // anonymous namespace
 
 namespace shaderc_util {
+
+unsigned int GlslangInitializer::initialize_count_ = 0;
+std::mutex GlslangInitializer::mutex_;
+
+GlslangInitializer::GlslangInitializer() {
+  const std::lock_guard<std::mutex> lock(mutex_);
+
+  if (initialize_count_ == 0) {
+    glslang::InitializeProcess();
+  }
+
+  initialize_count_++;
+}
+
+GlslangInitializer::~GlslangInitializer() {
+  const std::lock_guard<std::mutex> lock(mutex_);
+
+  initialize_count_--;
+
+  if (initialize_count_ == 0) {
+    glslang::FinalizeProcess();
+  }
+}
 
 void Compiler::SetLimit(Compiler::Limit limit, int value) {
   switch (limit) {

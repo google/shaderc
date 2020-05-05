@@ -18,6 +18,7 @@
 #include <array>
 #include <cassert>
 #include <functional>
+#include <mutex>
 #include <ostream>
 #include <string>
 #include <unordered_map>
@@ -40,14 +41,18 @@ namespace shaderc_util {
 // spirv_tools_wrapper.h, so cannot include spirv_tools_wrapper.h here.
 enum class PassId;
 
-// Initializes glslang on creation, and destroys it on completion. Used to tie
-// gslang process operations to object lifetimes.
-
+// Initializes glslang on creation, and destroys it on completion.
+// Used to tie gslang process operations to object lifetimes.
+// Additionally initialization/finalization of glslang is not thread safe, so
+// synchronizes these operations.
 class GlslangInitializer {
  public:
-  GlslangInitializer() { glslang::InitializeProcess(); }
+  GlslangInitializer();
+  ~GlslangInitializer();
 
-  ~GlslangInitializer() { glslang::FinalizeProcess(); }
+ private:
+  static unsigned int initialize_count_;
+  static std::mutex mutex_;
 };
 
 // Maps macro names to their definitions.  Stores string_pieces, so the
