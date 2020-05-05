@@ -270,6 +270,7 @@ older versions of Shaderc and its dependencies.
 * **Python:** [pyshaderc][pyshaderc]
 * **Rust:** [shaderc-rs][shaderc-rs]
 * **Go:** [gshaderc][gshaderc]
+* **.NET:** [shaderc.net][shadercdotnet]
 
 [khr-glslang]: https://github.com/KhronosGroup/glslang
 [spirv-tools]: https://github.com/KhronosGroup/SPIRV-Tools
@@ -279,3 +280,4 @@ older versions of Shaderc and its dependencies.
 [appveyor]: https://ci.appveyor.com/project/dneto0/shaderc
 [dawn]: https://dawn.googlesource.com/dawn
 [gshaderc]: https://github.com/celer/gshaderc
+[shadercdotnet]: https://github.com/jpbruyere/shaderc.net
