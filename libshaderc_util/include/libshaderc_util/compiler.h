@@ -18,6 +18,7 @@
 #include <array>
 #include <cassert>
 #include <functional>
+#include <mutex>
 #include <ostream>
 #include <string>
 #include <unordered_map>
@@ -41,54 +42,20 @@ namespace shaderc_util {
 enum class PassId;
 
 // Initializes glslang on creation, and destroys it on completion.
-// This object is expected to be a singleton, so that internal
-// glslang state can be correctly handled.
-// TODO(awoloszyn): Once glslang no longer has static global mutable state
-//                  remove this class.
+// Used to tie gslang process operations to object lifetimes.
+// Additionally initialization/finalization of glslang is not thread safe, so
+// synchronizes these operations.
 class GlslangInitializer {
  public:
-  GlslangInitializer() { glslang::InitializeProcess(); }
-
-  ~GlslangInitializer() { glslang::FinalizeProcess(); }
-
-  // Calls release on GlslangInitializer used to intialize this object
-  // when it is destroyed.
-  class InitializationToken {
-   public:
-    ~InitializationToken() {
-      if (initializer_) {
-        initializer_->Release();
-      }
-    }
-
-    InitializationToken(InitializationToken&& other)
-        : initializer_(other.initializer_) {
-      other.initializer_ = nullptr;
-    }
-
-    InitializationToken(const InitializationToken&) = delete;
-
-   private:
-    InitializationToken(GlslangInitializer* initializer)
-        : initializer_(initializer) {}
-
-    friend class GlslangInitializer;
-    GlslangInitializer* initializer_;
-  };
-
-  // Obtains exclusive access to the glslang state. The state remains
-  // exclusive until the Initialization Token has been destroyed.
-  InitializationToken Acquire() {
-    state_lock_.lock();
-    return InitializationToken(this);
-  }
+  GlslangInitializer();
+  ~GlslangInitializer();
 
  private:
-  void Release() { state_lock_.unlock(); }
+  static unsigned int initialize_count_;
 
-  friend class InitializationToken;
-
-  mutex state_lock_;
+  // Using a bare pointer here to avoid any global class construction at the
+  // beginning of the execution.
+  static std::mutex* glslang_mutex_;
 };
 
 // Maps macro names to their definitions.  Stores string_pieces, so the
@@ -402,8 +369,7 @@ class Compiler {
                                       const string_piece& error_tag)>&
           stage_callback,
       CountingIncluder& includer, OutputType output_type,
-      std::ostream* error_stream, size_t* total_warnings, size_t* total_errors,
-      GlslangInitializer* initializer) const;
+      std::ostream* error_stream, size_t* total_warnings, size_t* total_errors) const;
 
   static EShMessages GetDefaultRules() {
     return static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules |

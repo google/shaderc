@@ -192,16 +192,16 @@ class CompilerTest : public testing::Test {
   // shader stage.
   bool SimpleCompilationSucceedsForOutputType(
       std::string source, EShLanguage stage, Compiler::OutputType output_type) {
+    shaderc_util::GlslangInitializer initializer;
     std::stringstream errors;
     size_t total_warnings = 0;
     size_t total_errors = 0;
-    shaderc_util::GlslangInitializer initializer;
     bool result = false;
     DummyCountingIncluder dummy_includer;
     std::tie(result, std::ignore, std::ignore) = compiler_.Compile(
         source, stage, "shader", "main", dummy_stage_callback_, dummy_includer,
         Compiler::OutputType::SpirvBinary, &errors, &total_warnings,
-        &total_errors, &initializer);
+        &total_errors);
     errors_ = errors.str();
     return result;
   }
@@ -216,17 +216,17 @@ class CompilerTest : public testing::Test {
   // Returns the SPIR-V binary for a successful compilation of a shader.
   std::vector<uint32_t> SimpleCompilationBinary(std::string source,
                                                 EShLanguage stage) {
+    shaderc_util::GlslangInitializer initializer;
     std::stringstream errors;
     size_t total_warnings = 0;
     size_t total_errors = 0;
-    shaderc_util::GlslangInitializer initializer;
     bool result = false;
     DummyCountingIncluder dummy_includer;
     std::vector<uint32_t> words;
     std::tie(result, words, std::ignore) = compiler_.Compile(
         source, stage, "shader", "main", dummy_stage_callback_, dummy_includer,
         Compiler::OutputType::SpirvBinary, &errors, &total_warnings,
-        &total_errors, &initializer);
+        &total_errors);
     errors_ = errors.str();
     EXPECT_TRUE(result) << errors_;
     return words;
@@ -482,7 +482,7 @@ TEST_F(CompilerTest, EntryPointParameterTakesEffectForHLSL) {
       compiler_.Compile(kHlslVertexShader, EShLangVertex, "shader",
                         "EntryPoint", dummy_stage_callback_, dummy_includer,
                         Compiler::OutputType::SpirvAssemblyText, &errors,
-                        &total_warnings, &total_errors, &initializer);
+                        &total_warnings, &total_errors);
   EXPECT_TRUE(result);
   std::string assembly(reinterpret_cast<char*>(words.data()));
   EXPECT_THAT(assembly,
@@ -722,7 +722,7 @@ TEST_F(CompilerTest, EmitMessageTextOnlyOnce) {
   std::tie(result, std::ignore, std::ignore) = c.Compile(
       "#version 150\nvoid MyEntryPoint(){}", EShLangVertex, "shader", "",
       dummy_stage_callback_, dummy_includer, Compiler::OutputType::SpirvBinary,
-      &errors, &total_warnings, &total_errors, &initializer);
+      &errors, &total_warnings, &total_errors);
   const std::string errs = errors.str();
   EXPECT_THAT(errs, Eq("shader: error: Linking vertex stage: Missing entry "
                        "point: Each stage requires one entry point\n"))
