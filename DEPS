@@ -6,11 +6,11 @@ vars = {
 
   'effcee_revision' : '5af957bbfc7da4e9f7aa8cac11379fa36dd79b84',
   'glslang_revision': 'b5f003d7a3ece37db45578a8a3140b370036fc64',
-  'googletest_revision': '0eea2e9fc63461761dea5f2f517bd6af2ca024fa',
-  're2_revision': '8aef3d19dba9feae76881c30fb8e88c420c140c5',
+  'googletest_revision': 'a09ea700d32bab83325aff9ff34d0582e50e3997',
+  're2_revision': '887c8072fbbc52017e768484e339cab2c8091ee5',
   'spirv_headers_revision': 'c0df742ec0b8178ad58c68cff3437ad4b6a06e26',
-  'spirv_tools_revision': '2e1d208ed9deab9048a00e60bb891d5e12a8332e',
-  'spirv_cross_revision': '92f7d36c72bc3cdbcc4aeff3534d096866013c0c',
+  'spirv_tools_revision': 'c8590c18bd0c70dcd1caa7d43c5f2d020439b012',
+  'spirv_cross_revision': 'd638d2df9c8c4a862e0af829cf49cc6dcbb235a2',
 }
 
 deps = {
