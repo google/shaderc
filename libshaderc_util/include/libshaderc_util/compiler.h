@@ -52,10 +52,13 @@ class GlslangInitializer {
 
  private:
   static unsigned int initialize_count_;
+  static std::once_flag initialize_lock_flag_;
 
   // Using a bare pointer here to avoid any global class construction at the
   // beginning of the execution.
   static std::mutex* glslang_mutex_;
+
+  void InitializeLock();
 };
 
 // Maps macro names to their definitions.  Stores string_pieces, so the

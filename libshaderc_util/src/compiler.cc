@@ -105,18 +105,13 @@ namespace shaderc_util {
 
 unsigned int GlslangInitializer::initialize_count_ = 0;
 std::mutex* GlslangInitializer::glslang_mutex_ = nullptr;
+std::once_flag GlslangInitializer::initialize_lock_flag_;
 
 GlslangInitializer::GlslangInitializer() {
-  static std::mutex first_call_mutex;
-
-  // If this is the first call, glslang_mutex_ needs to be created, but in
-  // thread safe manner.
-  {
-    const std::lock_guard<std::mutex> first_call_lock(first_call_mutex);
-    if (glslang_mutex_ == nullptr) {
-      glslang_mutex_ = new std::mutex();
-    }
-  }
+  // This is substanially faster then using a function static mutex and
+  // checking the existence of the other mutex.
+  std::call_once(initialize_lock_flag_, &GlslangInitializer::InitializeLock,
+                 this);
 
   const std::lock_guard<std::mutex> glslang_lock(*glslang_mutex_);
 
@@ -142,6 +137,8 @@ GlslangInitializer::~GlslangInitializer() {
     // and constructing until we are sure we need to.
   }
 }
+
+void GlslangInitializer::InitializeLock() { glslang_mutex_ = new std::mutex(); }
 
 void Compiler::SetLimit(Compiler::Limit limit, int value) {
   switch (limit) {
