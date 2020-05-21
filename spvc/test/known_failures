@@ -1,6 +1,7 @@
 shaders-hlsl-no-opt/asm/frag/phi.zero-initialize.asm.frag,False
 shaders-hlsl-no-opt/asm/temporary.zero-initialize.asm.frag,False
 shaders-hlsl-no-opt/frag/variables.zero-initialize.frag,False
+shaders-hlsl/asm/comp/control-flow-hints.asm.comp,True
 shaders-hlsl/comp/access-chains.force-uav.comp,False
 shaders-hlsl/comp/access-chains.force-uav.comp,True
 shaders-hlsl/comp/image.nonwritable-uav-texture.comp,False
@@ -9,6 +10,7 @@ shaders-hlsl/comp/num-workgroups-alone.comp,False
 shaders-hlsl/comp/num-workgroups-alone.comp,True
 shaders-hlsl/comp/num-workgroups-with-builtins.comp,False
 shaders-hlsl/comp/num-workgroups-with-builtins.comp,True
+shaders-hlsl/frag/image-query-uav.nonwritable-uav-texture.frag,False
 shaders-hlsl/frag/readonly-coherent-ssbo.force-uav.frag,False
 shaders-hlsl/frag/readonly-coherent-ssbo.force-uav.frag,True
 shaders-hlsl/frag/separate-combined-fake-overload.sm30.frag,False
@@ -94,9 +96,13 @@ shaders-reflection/vert/array-size-reflection.vert,False
 shaders-reflection/vert/read-from-row-major-array.vert,False
 shaders-reflection/vert/stride-reflection.vert,False
 shaders-reflection/vert/texture_buffer.vert,False
+shaders-ue4/asm/frag/global-constant-arrays.asm.frag,True
+shaders-ue4/asm/frag/padded-float-array-member-defef.asm.frag,True
 shaders-ue4/asm/frag/subpass-input.ios.framebuffer-fetch.asm.frag,False
 shaders-ue4/asm/frag/subpass-input.ios.framebuffer-fetch.asm.frag,True
+shaders-ue4/asm/frag/texture-atomics.asm.frag,True
 shaders-ue4/asm/frag/texture-atomics.asm.graphics-robust-access.frag,True
+shaders-ue4/asm/vert/array-missing-copies.asm.vert,True
 shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,False
 shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,True
 shaders/asm/frag/image-query-no-sampler.no-samplerless.vk.asm.frag,False
