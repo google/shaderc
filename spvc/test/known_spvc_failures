@@ -114,6 +114,7 @@ shaders-no-opt/frag/fp16.invalid.desktop.frag,False
 shaders-no-opt/frag/multi-dimensional.desktop.invalid.flatten_dim.frag,False
 shaders-no-opt/frag/variables.zero-initialize.frag,False
 shaders-reflection/asm/aliased-entry-point-names.asm.multi,False
+shaders-reflection/asm/comp/pointer-to-array-of-physical-pointer.asm.comp,False
 shaders-reflection/asm/op-source-glsl-ssbo-1.asm.comp,False
 shaders-reflection/asm/op-source-glsl-ssbo-2.asm.comp,False
 shaders-reflection/asm/op-source-hlsl-uav-1.asm.comp,False
@@ -122,6 +123,8 @@ shaders-reflection/asm/op-source-none-ssbo-1.asm.comp,False
 shaders-reflection/asm/op-source-none-ssbo-2.asm.comp,False
 shaders-reflection/asm/op-source-none-uav-1.asm.comp,False
 shaders-reflection/asm/op-source-none-uav-2.asm.comp,False
+shaders-reflection/comp/array-of-physical-pointer.comp,False
+shaders-reflection/comp/physical-pointer.comp,False
 shaders-reflection/comp/struct-layout.comp,False
 shaders-reflection/comp/struct-packing.comp,False
 shaders-reflection/comp/workgroup-size-spec-constant.comp,False
@@ -138,13 +141,9 @@ shaders-reflection/vert/array-size-reflection.vert,False
 shaders-reflection/vert/read-from-row-major-array.vert,False
 shaders-reflection/vert/stride-reflection.vert,False
 shaders-reflection/vert/texture_buffer.vert,False
-shaders-ue4/asm/frag/global-constant-arrays.asm.frag,True
-shaders-ue4/asm/frag/padded-float-array-member-defef.asm.frag,True
 shaders-ue4/asm/frag/subpass-input.ios.framebuffer-fetch.asm.frag,False
 shaders-ue4/asm/frag/subpass-input.ios.framebuffer-fetch.asm.frag,True
-shaders-ue4/asm/frag/texture-atomics.asm.frag,True
 shaders-ue4/asm/frag/texture-atomics.asm.graphics-robust-access.frag,True
-shaders-ue4/asm/vert/array-missing-copies.asm.vert,True
 shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,False
 shaders/asm/frag/image-fetch-no-sampler.no-samplerless.asm.vk.frag,True
 shaders/asm/frag/image-query-no-sampler.no-samplerless.vk.asm.frag,False
