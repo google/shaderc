@@ -570,6 +570,12 @@ class Context {
                                                    types->data(), &type_count);
   }
 
+  // Set storage buffers to be always declared as UAV, even if the read-only 
+  // declaration is used, see spirv_hlsl.hpp in SPIRV-Cross for more details.
+  shaderc_spvc_status SetHLSLForceStorageBufferAsUAV(uint32_t desc_set, uint32_t binding) {
+    return shaderc_spvc_set_hlsl_force_storage_buffer_as_uav(context_.get(), desc_set, binding);
+  }
+
  private:
   Context(const Context&) = delete;
   Context& operator=(const Context& other) = delete;

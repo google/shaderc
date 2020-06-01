@@ -639,6 +639,17 @@ shaderc_spvc_compile_options_set_hlsl_nonwritable_uav_texture_as_srv(
   return shaderc_spvc_status_success;
 }
 
+shaderc_spvc_status shaderc_spvc_set_hlsl_force_storage_buffer_as_uav(
+    const shaderc_spvc_context_t context, uint32_t desc_set, uint32_t binding) {
+  CHECK_CONTEXT(context);
+  CHECK_CROSS_COMPILER(context, context->cross_compiler);
+
+  auto* hlsl_compiler = reinterpret_cast<spirv_cross::CompilerHLSL*>(
+      context->cross_compiler.get());
+  hlsl_compiler->set_hlsl_force_storage_buffer_as_uav(desc_set, binding);
+  return shaderc_spvc_status_success;
+}
+
 shaderc_spvc_status shaderc_spvc_compile_options_set_fixup_clipspace(
     shaderc_spvc_compile_options_t options, bool b) {
   CHECK_OPTIONS(nullptr, options);

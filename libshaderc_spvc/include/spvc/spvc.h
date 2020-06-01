@@ -463,6 +463,12 @@ SHADERC_EXPORT shaderc_spvc_status
 shaderc_spvc_compile_options_set_hlsl_nonwritable_uav_texture_as_srv(
     shaderc_spvc_compile_options_t options, bool b);
 
+// Set storage buffers to be always declared as UAV, even if the read-only
+// declaration is used, see spirv_hlsl.hpp in SPIRV-Cross for more details.
+SHADERC_EXPORT shaderc_spvc_status
+shaderc_spvc_set_hlsl_force_storage_buffer_as_uav(
+    const shaderc_spvc_context_t context, uint32_t desc_set, uint32_t binding);
+
 // If true (default is false):
 //   GLSL: map depth from Vulkan/D3D style to GL style, i.e. [ 0,w] -> [-w,w]
 //   MSL : map depth from GL style to Vulkan/D3D style, i.e. [-w,w] -> [ 0,w]
