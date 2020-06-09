@@ -3,6 +3,7 @@ shaders-hlsl-no-opt/asm/frag/switch-block-case-fallthrough.asm.invalid.frag,Fals
 shaders-hlsl-no-opt/asm/temporary.zero-initialize.asm.frag,False
 shaders-hlsl-no-opt/frag/constant-buffer-array.invalid.sm51.frag,False
 shaders-hlsl-no-opt/frag/fp16.invalid.desktop.frag,False
+shaders-hlsl-no-opt/frag/native-16bit-types.fxconly.nofxc.sm62.native-16bit.frag,False
 shaders-hlsl-no-opt/frag/variables.zero-initialize.frag,False
 shaders-hlsl/asm/comp/control-flow-hints.asm.comp,False
 shaders-hlsl/asm/comp/control-flow-hints.asm.comp,True
