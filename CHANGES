@@ -1,7 +1,20 @@
 Revision history for Shaderc
 
-v2020.1-dev 2020-03-06
- - Start v2020.1-dev
+v2020.1 2020-06-09
+ This is the last version that officially supports VS2013.
+
+ - General:
+   - Added warning signs about unsupported downloads (#1041)
+   - Added .NET bindings to README.md (#1060)
+   - Only add -fPIC if supported by the compiler. (#1061)
+
+ - glslc, libshaderc:
+   - Removed Singleton pattern around access to glslang (#1059)
+
+ - spvc:
+   - Added concept of comparison sampler to API (#1036)
+   - Added support for options.hlsl.nonwritable_uav_texture_as_srv (#1048)
+   - Support forcing storage buffers to be always declared as UAV. (#1076)
 
 v2020.0 2020-03-06
  - General:
