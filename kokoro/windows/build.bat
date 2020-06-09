@@ -41,9 +41,6 @@ if %VS_VERSION% == 2017 (
 ) else if %VS_VERSION% == 2015 (
   call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
   echo "Using VS 2015..."
-) else if %VS_VERSION% == 2013 (
-  call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
-  echo "Using VS 2013..."
 )
 
 :: #########################################
@@ -57,11 +54,6 @@ if "%KOKORO_GITHUB_COMMIT%." == "." (
 )
 
 set CMAKE_FLAGS=-DCMAKE_INSTALL_PREFIX=%KOKORO_ARTIFACTS_DIR%\install -DSHADERC_ENABLE_SPVC=ON -DRE2_BUILD_TESTING=OFF -GNinja -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe
-
-:: Skip building SPIRV-Tools tests for VS2013
-if %VS_VERSION% == 2013 (
-  set CMAKE_FLAGS=%CMAKE_FLAGS% -DSHADERC_SKIP_TESTS=ON -DSPIRV_SKIP_TESTS=ON
-)
 
 cmake %CMAKE_FLAGS% ..
 if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
@@ -83,13 +75,11 @@ echo "Build Completed %DATE% %TIME%"
 setlocal ENABLEDELAYEDEXPANSION
 
 :: ################################################
-:: Run the tests (We no longer run tests on VS2013)
+:: Run the tests
 :: ################################################
 echo "Running tests... %DATE% %TIME%"
-if %VS_VERSION% NEQ 2013 (
-  ctest -C %BUILD_TYPE% --output-on-failure -j4
-  if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
-)
+ctest -C %BUILD_TYPE% --output-on-failure -j4
+if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
 echo "Tests passed %DATE% %TIME%"
 
 :: ################################################
