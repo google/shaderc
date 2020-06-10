@@ -27,6 +27,11 @@ import sys
 from glslc_test_framework import GlslCTest
 from builtins import bytes
 
+GLSLANG_GENERATOR_VERSION=9
+SHADERC_GENERATOR_NUMBER=13
+SHADERC_GENERATOR_WORD=(SHADERC_GENERATOR_NUMBER << 16) + GLSLANG_GENERATOR_VERSION
+ASSEMBLER_GENERATOR_WORD=(7<<16)
+
 def convert_to_string(input):
     if type(input) is not str:
         if sys.version_info[0] == 2:
@@ -190,8 +195,8 @@ class CorrectBinaryLengthAndPreamble(GlslCTest):
             return False, 'Incorrect SPV binary: wrong version number'
         # Shaderc-over-Glslang (0x000d....) or
         # SPIRV-Tools (0x0007....) generator number
-        if read_word(preamble, 2, little_endian) != 0x000d0008 and \
-                read_word(preamble, 2, little_endian) != 0x00070000:
+        if read_word(preamble, 2, little_endian) != SHADERC_GENERATOR_WORD and \
+                read_word(preamble, 2, little_endian) != ASSEMBLER_GENERATOR_WORD:
             return False, ('Incorrect SPV binary: wrong generator magic '
                            'number')
         # reserved for instruction schema
