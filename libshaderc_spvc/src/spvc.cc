@@ -1044,6 +1044,15 @@ shaderc_spvc_status shaderc_spvc_get_binding_info(
     bindings->id = shader_resource.id;
     bindings->base_type_id = shader_resource.base_type_id;
 
+    if (binding_type == shaderc_spvc_binding_type_uniform_buffer ||
+        binding_type == shaderc_spvc_binding_type_storage_buffer) {
+      // Determine buffer size, with a minimum of 1 element in the runtime array
+      spirv_cross::SPIRType type =
+          compiler->get_type(shader_resource.base_type_id);
+      bindings->minimum_buffer_size =
+          compiler->get_declared_struct_size_runtime_array(type, 1);
+    }
+
     switch (binding_type) {
       case shaderc_spvc_binding_type_sampled_texture: {
         spirv_cross::SPIRType::ImageType imageType =
