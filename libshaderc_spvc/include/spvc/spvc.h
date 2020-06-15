@@ -242,6 +242,7 @@ typedef struct {
   shaderc_spvc_texture_format_type texture_component_type;
   bool multisampled;
   shaderc_spvc_storage_texture_format storage_texture_format;
+  uint64_t minimum_buffer_size;
 } shaderc_spvc_binding_info;
 
 typedef struct {
