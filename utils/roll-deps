@@ -14,8 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Attempts to roll all entries in DEPS to origin/master and create a
-# commit.
+# Attempts to roll all entries in DEPS to tip-of-tree and create a commit.
 #
 # Depends on roll-dep from depot_path being in PATH.
 
