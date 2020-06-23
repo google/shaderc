@@ -80,7 +80,7 @@ class OutputFileBinaryAvoidsCRLFTranslation(expect.ReturnCodeIsZero,
     # object file checks.
     SHADER_WITH_THREE_NEWLINES_IN_BINARY = """#version 450
        layout(location = 0) out uint ovar;
-       void main() { ovar = 10; }
+       void main() { ovar = 9; }
     """
 
     shader = FileShader(SHADER_WITH_THREE_NEWLINES_IN_BINARY, '.vert')
