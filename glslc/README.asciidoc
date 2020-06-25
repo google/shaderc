@@ -13,6 +13,7 @@ Clang-compatible arguments.
 
 ----
 glslc [--help]
+glslc [-h]
 
 glslc [--show-limits]
 
@@ -119,9 +120,9 @@ Otherwise,
 
 === Overall Options
 
-==== `--help`
+==== `--help`, `-h`
 
-`--help` tells the glslc compiler to display all available options and exit.
+Option `--help` or `-h` tells the glslc compiler to display all available options and exit.
 
 ==== `--show-limits`
 

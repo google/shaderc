@@ -129,6 +129,7 @@ Options:
                     tesc, tesseval, tese, geometry, geom, compute, and comp.
   -g                Generate source-level debug information.
                     Currently this option has no effect.
+  -h                Display available options.
   --help            Display available options.
   -I <value>        Add directory to include search path.
   -mfmt=<format>    Output SPIR-V binary code using the selected format. This
