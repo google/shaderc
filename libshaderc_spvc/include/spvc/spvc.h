@@ -458,6 +458,11 @@ SHADERC_EXPORT shaderc_spvc_status
 shaderc_spvc_compile_options_set_hlsl_point_coord_compat(
     shaderc_spvc_compile_options_t options, bool b);
 
+// If true, enable 16-bit types.  Default is false.
+SHADERC_EXPORT shaderc_spvc_status
+shaderc_spvc_compile_options_set_hlsl_enable_16bit_types(
+    shaderc_spvc_compile_options_t options, bool b);
+
 // If true, set non-writable storage images to be SRV, see spirv_hlsl.hpp in
 // SPIRV-Cross for more details.
 SHADERC_EXPORT shaderc_spvc_status

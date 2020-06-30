@@ -630,6 +630,14 @@ shaderc_spvc_status shaderc_spvc_compile_options_set_hlsl_point_coord_compat(
   return shaderc_spvc_status_success;
 }
 
+shaderc_spvc_status shaderc_spvc_compile_options_set_hlsl_enable_16bit_types(
+    shaderc_spvc_compile_options_t options, bool b) {
+  CHECK_OPTIONS(nullptr, options);
+
+  options->hlsl.enable_16bit_types = b;
+  return shaderc_spvc_status_success;
+}
+
 shaderc_spvc_status
 shaderc_spvc_compile_options_set_hlsl_nonwritable_uav_texture_as_srv(
     shaderc_spvc_compile_options_t options, bool b) {
