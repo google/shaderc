@@ -33,7 +33,6 @@ if(${SHADERC_ENABLE_TESTS})
 endif()
 
 set(OLD_PLATFORM_TOOLSET ${CMAKE_GENERATOR_TOOLSET})
-check_cxx_compiler_flag(-fPIC COMPILER_SUPPORTS_PIC)
 
 
 if (IS_DIRECTORY ${SHADERC_SPIRV_HEADERS_DIR})
@@ -65,17 +64,8 @@ endif()
 
 if (NOT TARGET glslang)
   if (IS_DIRECTORY ${SHADERC_GLSLANG_DIR})
-    # Add -fPIC to glslang build, if supported
-    if (COMPILER_SUPPORTS_PIC)
-      set(CXX_BACK ${CMAKE_CXX_FLAGS})
-      set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-fPIC")
-      # cmake inserts a semicolon, change it to a space.
-      string(REGEX REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-      add_subdirectory(${SHADERC_GLSLANG_DIR} glslang)
-      set(CMAKE_CXX_FLAGS ${CXX_BACK})
-    else()
-      add_subdirectory(${SHADERC_GLSLANG_DIR} glslang)
-    endif()
+    set(GLSLANG_BUILD_PIC 1)
+    add_subdirectory(${SHADERC_GLSLANG_DIR} glslang)
   endif()
   if (NOT TARGET glslang)
     message(FATAL_ERROR "glslang was not found - required for compilation")
@@ -93,6 +83,7 @@ if (SHADERC_ENABLE_SPVC)
   if (NOT TARGET spirv-cross-core)
     if (IS_DIRECTORY ${SHADERC_SPIRV_CROSS_DIR})
       # Add -fPIC to SPIRV-Cross build, if supported
+      check_cxx_compiler_flag(-fPIC COMPILER_SUPPORTS_PIC)
       if (COMPILER_SUPPORTS_PIC)
         set(CXX_BACK ${CMAKE_CXX_FLAGS})
         set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-fPIC")
