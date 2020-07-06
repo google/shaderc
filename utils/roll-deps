@@ -19,7 +19,7 @@
 # Depends on roll-dep from depot_path being in PATH.
 
 effcee_dir="third_party/effcee/"
-effcee_trunk="origin/master"
+effcee_trunk="origin/main"
 glslang_dir="third_party/glslang/"
 glslang_trunk="origin/master"
 googletest_dir="third_party/googletest/"
