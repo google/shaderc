@@ -125,6 +125,7 @@ Options:
                     tesc, tesseval, tese, geometry, geom, compute, and comp.
   -g                Generate source-level debug information.
                     Currently this option has no effect.
+  -h                Display available options.
   --help            Display available options.
   -I <value>        Add directory to include search path.
   -mfmt=<format>    Output SPIR-V binary code using the selected format. This
@@ -263,7 +264,7 @@ int main(int argc, char** argv) {
 
   for (int i = 1; i < argc; ++i) {
     const string_piece arg = argv[i];
-    if (arg == "--help") {
+    if (arg == "--help" || arg == "-h") {
       ::PrintHelp(&std::cout);
       return 0;
     } else if (arg == "--show-limits") {
@@ -310,7 +311,8 @@ int main(int argc, char** argv) {
       compiler.options().SetHlslIoMapping(true);
     } else if (arg == "-fhlsl-offsets") {
       compiler.options().SetHlslOffsets(true);
-    } else if (arg == "-fhlsl_functionality1" || arg == "-fhlsl-functionality1") {
+    } else if (arg == "-fhlsl_functionality1" ||
+               arg == "-fhlsl-functionality1") {
       compiler.options().SetHlslFunctionality1(true);
     } else if (arg == "-finvert-y") {
       compiler.options().SetInvertY(true);

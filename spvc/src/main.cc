@@ -38,6 +38,7 @@ Usage: spvc [options] file
 An input file of - represents standard input.
 
 Options:
+  -h                       Display available options.
   --help                   Display available options.
   -v                       Display compiler version information.
   -o <output file>         '-' means standard output.
@@ -184,7 +185,7 @@ int main(int argc, char** argv) {
   shaderc_spvc::CompileOptions options(source_env, target_env);
   for (int i = 1; i < argc; ++i) {
     const string_piece arg = argv[i];
-    if (arg == "--help") {
+    if (arg == "--help" || arg == "-h") {
       ::PrintHelp(&std::cout);
       return 0;
     } else if (arg == "-v") {
@@ -237,11 +238,11 @@ int main(int argc, char** argv) {
       }
     } else if (arg == "--remove-unused-variables") {
       options.SetRemoveUnusedVariables(true);
-    } else if (arg == "--no-validate"){
+    } else if (arg == "--no-validate") {
       options.SetValidate(false);
-    } else if (arg == "--no-optimize"){
+    } else if (arg == "--no-optimize") {
       options.SetOptimize(false);
-    } else if (arg == "--robust-buffer-access-pass"){
+    } else if (arg == "--robust-buffer-access-pass") {
       options.SetRobustBufferAccessPass(true);
     } else if (arg == "--vulkan-semantics") {
       options.SetVulkanSemantics(true);
