@@ -24,6 +24,7 @@ shaders-msl-no-opt/asm/temporary.zero-initialize.asm.frag,False
 shaders-msl-no-opt/comp/basic.dynamic-buffer.msl2.invalid.comp,False
 shaders-msl-no-opt/comp/int64.invalid.msl22.comp,False
 shaders-msl-no-opt/frag/force-active-resources.msl2.argument..force-active.discrete.frag,False
+shaders-msl-no-opt/frag/subpass-input-attachment-index-fallback.msl20.ios.framebuffer-fetch.frag,False
 shaders-msl-no-opt/frag/subpass-input-function-argument.framebuffer-fetch.ios.frag,False
 shaders-msl-no-opt/frag/variables.zero-initialize.frag,False
 shaders-msl-no-opt/vert/pass-array-by-value.force-native-array.vert,False
