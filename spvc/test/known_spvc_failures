@@ -48,6 +48,7 @@ shaders-msl-no-opt/frag/force-active-resources.msl2.argument..force-active.discr
 shaders-msl-no-opt/frag/fp16.desktop.invalid.frag,False
 shaders-msl-no-opt/frag/min-max-clamp.invalid.asm.frag,False
 shaders-msl-no-opt/frag/shadow-compare-global-alias.invalid.frag,False
+shaders-msl-no-opt/frag/subpass-input-attachment-index-fallback.msl20.ios.framebuffer-fetch.frag,False
 shaders-msl-no-opt/frag/subpass-input-function-argument.framebuffer-fetch.ios.frag,False
 shaders-msl-no-opt/frag/variables.zero-initialize.frag,False
 shaders-msl-no-opt/packing/array-of-vec3.comp,False
