@@ -65,17 +65,7 @@ endif()
 
 if (NOT TARGET glslang)
   if (IS_DIRECTORY ${SHADERC_GLSLANG_DIR})
-    # Add -fPIC to glslang build, if supported
-    if (COMPILER_SUPPORTS_PIC)
-      set(CXX_BACK ${CMAKE_CXX_FLAGS})
-      set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-fPIC")
-      # cmake inserts a semicolon, change it to a space.
-      string(REGEX REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-      add_subdirectory(${SHADERC_GLSLANG_DIR} glslang)
-      set(CMAKE_CXX_FLAGS ${CXX_BACK})
-    else()
-      add_subdirectory(${SHADERC_GLSLANG_DIR} glslang)
-    endif()
+    add_subdirectory(${SHADERC_GLSLANG_DIR} glslang)
   endif()
   if (NOT TARGET glslang)
     message(FATAL_ERROR "glslang was not found - required for compilation")
