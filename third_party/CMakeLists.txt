@@ -17,6 +17,8 @@ set(SHADERC_EFFCEE_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/effcee" CACHE STRING
   "Location of effcee source")
 set(SHADERC_RE2_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/re2" CACHE STRING
   "Location of re2 source")
+set(SHADERC_TINT_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/tint" CACHE STRING
+  "Location of tint source")
 
 set( SKIP_GLSLANG_INSTALL ${SHADERC_SKIP_INSTALL} )
 set( SKIP_SPIRV_TOOLS_INSTALL ${SHADERC_SKIP_INSTALL} )
@@ -99,3 +101,21 @@ if (SHADERC_ENABLE_SPVC)
     endif()
   endif()
 endif (SHADERC_ENABLE_SPVC)
+
+if (SHADERC_ENABLE_WGSL_OUTPUT)
+  # Use Google Tint for WGSL output.
+  if (NOT TARGET libtint)
+    if (IS_DIRECTORY ${SHADERC_TINT_DIR})
+      if (NOT IS_DIRECTORY ${SHADERC_TINT_DIR}/out/docs)
+        # The Tint Doxygen configuration assumes it can write to the out/docs
+        # source directory.
+        message(STATUS "Tint source directory out/docs does not exist. Disabling doc generation")
+        set(TINT_BUILD_DOCS OFF)
+      endif()
+      add_subdirectory(${SHADERC_TINT_DIR} tint)
+    endif()
+  endif()
+  if (NOT TARGET libtint)
+    message(FATAL_ERROR "Tint was not found - required for WGSL output")
+  endif()
+endif (SHADERC_ENABLE_WGSL_OUTPUT)
