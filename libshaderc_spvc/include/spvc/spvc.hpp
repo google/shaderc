@@ -78,6 +78,9 @@ class CompilationResult {
     uint32_t binary_length;
     status =
         shaderc_spvc_result_get_binary_length(result_.get(), &binary_length);
+    if (status != shaderc_spvc_status_success) {
+      return status;
+    }
     if (!binary_output || !binary_length) {
       *data = std::vector<uint32_t>();
     } else {
