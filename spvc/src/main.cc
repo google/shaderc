@@ -111,14 +111,15 @@ bool ReadFile(const std::string& path, std::vector<uint32_t>* out) {
   out->resize(ftell(file) / sizeof((*out)[0]));
   rewind(file);
 
+  bool status = true;
   if (fread(out->data(), sizeof((*out)[0]), out->size(), file) != out->size()) {
     std::cerr << "Failed to read SPIR-V file: " << path << std::endl;
     out->clear();
-    return false;
+    status = false;
   }
 
   fclose(file);
-  return true;
+  return status;
 }
 
 bool StringPieceToEnvEnum(const string_piece& str, shaderc_spvc_spv_env* env) {
@@ -325,7 +326,7 @@ int main(int argc, char** argv) {
   options.SetMSLDiscreteDescriptorSets(msl_discrete_descriptor);
 
   shaderc_spvc::CompilationResult result;
-  shaderc_spvc_status status = shaderc_spvc_status_configuration_error;
+  shaderc_spvc_status status;
 
   if (output_language == "glsl") {
     status = context.InitializeForGlsl((const uint32_t*)input.data(),
