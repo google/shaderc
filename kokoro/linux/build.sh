@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (C) 2017 Google Inc.
+# Copyright (C) 2020 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,94 +16,22 @@
 #
 # Linux Build Script.
 
+set -e # Fail on any error.
 
-# Fail on any error.
-set -e
-# Display commands being run.
-set -x
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd )"
+ROOT_DIR="$( cd "${SCRIPT_DIR}/../.." >/dev/null 2>&1 && pwd )"
 
-BUILD_ROOT=$PWD
-SRC=$PWD/github/shaderc
 CONFIG=$1
 COMPILER=$2
 
-SKIP_TESTS="False"
-BUILD_TYPE="Debug"
-
-CMAKE_C_CXX_COMPILER=""
-if [ $COMPILER = "clang" ]
-then
-  PATH=/usr/lib/llvm-3.8/bin:$PATH
-  CMAKE_C_CXX_COMPILER="-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"
-fi
-
-# Possible configurations are:
-# ASAN, COVERAGE, RELEASE, DEBUG, DEBUG_EXCEPTION, RELEASE_MINGW
-
-if [ $CONFIG = "RELEASE" ] || [ $CONFIG = "RELEASE_MINGW" ]
-then
-  BUILD_TYPE="RelWithDebInfo"
-fi
-
-ADDITIONAL_CMAKE_FLAGS=""
-if [ $CONFIG = "ASAN" ]
-then
-  ADDITIONAL_CMAKE_FLAGS="-DCMAKE_CXX_FLAGS=-fsanitize=address -DCMAKE_C_FLAGS=-fsanitize=address"
-  [ $COMPILER = "clang" ] || { echo "$CONFIG requires clang"; exit 1; }
-elif [ $CONFIG = "COVERAGE" ]
-then
-  ADDITIONAL_CMAKE_FLAGS="-DENABLE_CODE_COVERAGE=ON"
-  SKIP_TESTS="True"
-elif [ $CONFIG = "DEBUG_EXCEPTION" ]
-then
-  ADDITIONAL_CMAKE_FLAGS="-DDISABLE_EXCEPTIONS=ON -DDISABLE_RTTI=ON"
-elif [ $CONFIG = "RELEASE_MINGW" ]
-then
-  ADDITIONAL_CMAKE_FLAGS="-Dgtest_disable_pthreads=ON -DCMAKE_TOOLCHAIN_FILE=$SRC/cmake/linux-mingw-toolchain.cmake"
-  SKIP_TESTS="True"
-fi
-
-# Get NINJA.
-wget -q https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linux.zip
-unzip -q ninja-linux.zip
-export PATH="$PWD:$PATH"
-
-cd $SRC
-./utils/git-sync-deps
-
-mkdir build
-cd $SRC/build
-
-# Invoke the build.
-BUILD_SHA=${KOKORO_GITHUB_COMMIT:-$KOKORO_GITHUB_PULL_REQUEST_COMMIT}
-echo $(date): Starting build...
-cmake -GNinja -DCMAKE_INSTALL_PREFIX=$KOKORO_ARTIFACTS_DIR/install -DSHADERC_ENABLE_SPVC=ON -DRE2_BUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=$BUILD_TYPE $ADDITIONAL_CMAKE_FLAGS $CMAKE_C_CXX_COMPILER ..
-
-echo $(date): Build glslang...
-ninja glslangValidator
-
-echo $(date): Build everything...
-ninja
-echo $(date): Build completed.
-
-echo $(date): Check Shaderc for copyright notices...
-ninja check-copyright
-
-if [ $CONFIG = "COVERAGE" ]
-then
-  echo $(date): Check coverage...
-  ninja report-coverage
-  echo $(date): Check coverage completed.
-fi
-
-echo $(date): Starting ctest...
-if [ $SKIP_TESTS = "False" ]
-then
-  ctest --output-on-failure -j4
-fi
-echo $(date): ctest completed.
-
-# Package the build.
-ninja install
-cd $KOKORO_ARTIFACTS_DIR
-tar czf install.tgz install
+docker run --rm -i \
+  --volume "${ROOT_DIR}:${ROOT_DIR}" \
+  --volume "${KOKORO_ARTIFACTS_DIR}:${KOKORO_ARTIFACTS_DIR}" \
+  --workdir "${ROOT_DIR}" \
+  --env ROOT_DIR="${ROOT_DIR}" \
+  --env SCRIPT_DIR="${SCRIPT_DIR}" \
+  --env CONFIG="${CONFIG}" \
+  --env COMPILER="${COMPILER}" \
+  --env KOKORO_ARTIFACTS_DIR="${KOKORO_ARTIFACTS_DIR}" \
+  --entrypoint "${SCRIPT_DIR}/build-docker.sh" \
+  "gcr.io/shaderc-build/radial-build:latest"

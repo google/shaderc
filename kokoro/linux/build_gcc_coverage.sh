@@ -22,4 +22,4 @@ set -e
 set -x
 
 SCRIPT_DIR=`dirname "$BASH_SOURCE"`
-source $SCRIPT_DIR/build.sh COVERAGE gcc
+source $SCRIPT_DIR/build.sh COVERAGE "gcc-7" # gcc-8+ has issues with lcov
