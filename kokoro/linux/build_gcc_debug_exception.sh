@@ -22,4 +22,4 @@ set -e
 set -x
 
 SCRIPT_DIR=`dirname "$BASH_SOURCE"`
-source $SCRIPT_DIR/build.sh DEBUG_EXCEPTION gcc
+source $SCRIPT_DIR/build.sh DEBUG_EXCEPTION "gcc-9"
