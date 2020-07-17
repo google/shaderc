@@ -1,4 +1,6 @@
-# Copyright 2020 The Shaderc Authors. All rights reserved.
+#!/bin/bash
+
+# Copyright (C) 2020 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,5 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-LOCAL_PATH := $(call my-dir)
-include $(LOCAL_PATH)/../Android.mk
+set -e # Fail on any error.
+set -x # Display commands being run.
+
+license-checker --dir="$ROOT_DIR"
