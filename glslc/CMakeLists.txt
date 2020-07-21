@@ -44,11 +44,9 @@ endif(SHADERC_ENABLE_WGSL_OUTPUT)
 
 target_link_libraries(glslc PRIVATE
   glslang OSDependent OGLCompiler HLSL glslang SPIRV    # Glslang libraries
-  $<$<BOOL:SHADERC_ENABLE_WGSL_OUTPUT>:libtint>         # Tint libraries
+  $<$<BOOL:${SHADERC_ENABLE_WGSL_OUTPUT}>:libtint>      # Tint libraries, optional
   shaderc_util shaderc                                  # internal Shaderc libraries
   ${CMAKE_THREAD_LIBS_INIT})
-
-
 
 add_executable(glslc_exe src/main.cc)
 shaderc_default_compile_options(glslc_exe)
