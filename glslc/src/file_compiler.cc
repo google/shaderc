@@ -20,6 +20,10 @@
 #include <iostream>
 #include <sstream>
 
+#if SHADERC_ENABLE_WGSL_OUTPUT == 1
+#include "tint/tint.h"
+#endif  // SHADERC_ENABLE_WGSL_OUTPUT==1
+
 #include "file.h"
 #include "file_includer.h"
 #include "shader_stage.h"
@@ -246,6 +250,26 @@ bool FileCompiler::EmitCompiledResult(
           *out << "}" << std::endl;
         }
         break;
+      case SpirvBinaryEmissionFormat::WGSL: {
+#if SHADERC_ENABLE_WGSL_OUTPUT == 1
+        tint::Context ctx;
+        tint::reader::spirv::Parser spv_reader(
+            &ctx, std::vector<uint32_t>(result.begin(), result.end()));
+        if (!spv_reader.Parse()) {
+          std::cout << "error: failed to convert SPIR-V binary to WGSL: "
+                    << spv_reader.error() << std::endl;
+          return false;
+        }
+        tint::writer::wgsl::Generator wgsl_writer(spv_reader.module());
+        if (!wgsl_writer.Generate()) {
+          std::cout << "error: failed to convert to WGSL: "
+                    << wgsl_writer.error() << std::endl;
+          return false;
+        }
+        *out << wgsl_writer.result();
+#endif  // SHADERC_ENABLE_WGSL_OUTPUT==1
+        break;
+      }
     }
   }
 
@@ -344,12 +368,15 @@ bool FileCompiler::ValidateOptions(size_t num_files) {
         case SpirvBinaryEmissionFormat::CInitList:
           std::cerr << "C-style initializer list";
           break;
+        case SpirvBinaryEmissionFormat::WGSL:
+          std::cerr << "WGSL source program";
+          break;
         case SpirvBinaryEmissionFormat::Unspecified:
           // The compiler should never be here at runtime. This case is added to
           // complete the switch cases.
           break;
       }
-      std::cerr << " when the output is not SPIR-V binary code" << std::endl;
+      std::cerr << " when only preprocessing the source" << std::endl;
       return false;
     }
     if (dependency_info_dumping_handler_ &&
@@ -357,7 +384,17 @@ bool FileCompiler::ValidateOptions(size_t num_files) {
       std::cerr << "glslc: error: cannot dump dependency info when specifying "
                    "any binary output format"
                 << std::endl;
+      return false;
     }
+  }
+
+  if (binary_emission_format_ == SpirvBinaryEmissionFormat::WGSL) {
+#if SHADERC_ENABLE_WGSL_OUTPUT != 1
+    std::cerr << "glslc: error: can't output WGSL: glslc was built without "
+                 "WGSL output support"
+              << std::endl;
+    return false;
+#endif
   }
 
   return true;

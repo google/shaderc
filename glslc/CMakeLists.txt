@@ -31,9 +31,22 @@ add_library(glslc STATIC
 
 shaderc_default_compile_options(glslc)
 target_include_directories(glslc PUBLIC ${glslang_SOURCE_DIR})
-target_link_libraries(glslc PRIVATE glslang OSDependent OGLCompiler
-  HLSL glslang SPIRV ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(glslc PRIVATE shaderc_util shaderc)
+
+if (SHADERC_ENABLE_WGSL_OUTPUT)
+  if (IS_DIRECTORY "${tint_SOURCE_DIR}/include")
+    target_include_directories(glslc PRIVATE "${tint_SOURCE_DIR}/include")
+    target_include_directories(glslc PRIVATE "${tint_SOURCE_DIR}")
+  endif()
+  # Turn on features in the tint/tint.h header
+  add_definitions(-DTINT_BUILD_SPV_READER=1 -DTINT_BUILD_WGSL_WRITER=1)
+  add_definitions(-DSHADERC_ENABLE_WGSL_OUTPUT=1)
+endif(SHADERC_ENABLE_WGSL_OUTPUT)
+
+target_link_libraries(glslc PRIVATE
+  glslang OSDependent OGLCompiler HLSL glslang SPIRV    # Glslang libraries
+  $<$<BOOL:${SHADERC_ENABLE_WGSL_OUTPUT}>:libtint>      # Tint libraries, optional
+  shaderc_util shaderc                                  # internal Shaderc libraries
+  ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(glslc_exe src/main.cc)
 shaderc_default_compile_options(glslc_exe)

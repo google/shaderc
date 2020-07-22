@@ -43,8 +43,10 @@ class FileCompiler {
                   // code form.
     Binary,       // Emits SPIR-V binary code directly.
     Numbers,      // Emits SPIR-V binary code as a list of hex numbers.
-    CInitList,    // Emits SPIR-V bianry code as a C-style initializer list
+    CInitList,    // Emits SPIR-V binary code as a C-style initializer list
                   // of hex numbers.
+    WGSL,         // Emits SPIR-V module converted to WGSL source text.
+                  // Requires a build with Tint support.
   };
 
   FileCompiler()
