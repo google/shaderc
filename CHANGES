@@ -1,7 +1,21 @@
 Revision history for Shaderc
 
-v2020.2-dev 2020-06-09
- - Start v2020.2-dev
+v2020.2-dev 2020-07-23
+ - General:
+   - Remove VS2013 support
+   - Support both posix and non-posix MinGW toolchains
+   - Support optionally building Tint tooling for WGSL
+   - Add -h option to glslc, spvc; same as --help
+   - Add source file license checker
+   - BUILD.gn improvements
+
+ - glslc, libshaderc:
+   - Update to Glslang generator 9
+   - Add interface to support 16bit types in HLSL
+   - Add glslc hidden experimental option -mfmt=wgsl; requires Tint
+
+ - spvc:
+   - Add minimum buffer size for Dawn reflection
 
 v2020.1 2020-06-09
  This is the last version that officially supports VS2013.
