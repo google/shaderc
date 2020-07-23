@@ -1,6 +1,6 @@
 Revision history for Shaderc
 
-v2020.2-dev 2020-07-23
+v2020.2 2020-07-23
  - General:
    - Remove VS2013 support
    - Support both posix and non-posix MinGW toolchains
