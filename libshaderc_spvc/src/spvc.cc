@@ -606,6 +606,15 @@ shaderc_spvc_compile_options_set_msl_buffer_size_buffer_index(
   return shaderc_spvc_status_success;
 }
 
+shaderc_spvc_status
+shaderc_spvc_compile_options_set_msl_additional_fixed_sample_mask(
+    shaderc_spvc_compile_options_t options, uint32_t mask) {
+  CHECK_OPTIONS(nullptr, options);
+
+  options->msl.additional_fixed_sample_mask = mask;
+  return shaderc_spvc_status_success;
+}
+
 shaderc_spvc_status shaderc_spvc_compile_options_set_hlsl_shader_model(
     shaderc_spvc_compile_options_t options, uint32_t model) {
   CHECK_OPTIONS(nullptr, options);

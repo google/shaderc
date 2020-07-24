@@ -280,6 +280,12 @@ class CompileOptions {
         options_.get(), index);
   }
 
+  // Set the additional fixed sample mask for MSL
+  shaderc_spvc_status SetMSLAdditionalFixedSampleMask(uint32_t mask) {
+    return shaderc_spvc_compile_options_set_msl_additional_fixed_sample_mask(
+        options_.get(), mask);
+  }
+
   // Which HLSL shader model should be used.  Default is 30.
   shaderc_spvc_status SetHLSLShaderModel(uint32_t model) {
     return shaderc_spvc_compile_options_set_hlsl_shader_model(options_.get(),
