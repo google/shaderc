@@ -89,6 +89,7 @@ Options:
   --msl-domain-lower-left
   --msl-argument-buffers
   --msl-discrete-descriptor-set=<number>
+  --msl-additional-fixed-sample-mask=<number>
   --emit-line-directives
   --hlsl-enable-compat
   --shader-model=<model>
@@ -295,6 +296,17 @@ int main(int argc, char** argv) {
         return 1;
       }
       msl_discrete_descriptor.push_back(descriptor_num);
+    } else if (arg.starts_with("--msl-additional-fixed-sample-mask=")) {
+      string_piece sample_mask_str;
+      GetOptionArgument(argc, argv, &i,
+                        "--msl-additional-fixed-sample-mask=", &sample_mask_str);
+      uint32_t sample_mask_num;
+      if (!shaderc_util::ParseUint32(sample_mask_str.str(), &sample_mask_num)) {
+        std::cerr << "spvc: error: invalid value '" << sample_mask_str
+                  << "' in --msl-additional-fixed-sample-mask=" << std::endl;
+        return 1;
+      }
+      options.SetMSLAdditionalFixedSampleMask(sample_mask_num);
     } else if (arg == "--emit-line-directives") {
       options.SetEmitLineDirectives(true);
     } else if (arg.starts_with("--shader-model=")) {
