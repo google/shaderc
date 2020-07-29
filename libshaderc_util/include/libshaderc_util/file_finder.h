@@ -27,7 +27,7 @@ class FileFinder {
   // non-empty.  The search is attempted on filename prefixed by each element of
   // search_path() in turn.  The first hit is returned, or an empty string if
   // there are no hits.  Search attempts treat their argument the way
-  // std::fopen() treats its filename argument, blind to whether the path is
+  // std::fopen() treats its filename argument, ignoring whether the path is
   // absolute or relative.
   //
   // If a search_path() element is non-empty and not ending in a slash, then a

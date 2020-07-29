@@ -498,7 +498,7 @@ TEST_F(CompileStringWithOptionsTest, ValuelessMacroCompileOptionsNullPointer) {
 
 TEST_F(CompileStringWithOptionsTest, DisassemblyOption) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  // This should work with both the glslang native assembly format and the
+  // This should work with both the glslang assembly format and the
   // SPIR-V tools assembly format.
   const std::string disassembly_text =
       CompilationOutput(kMinimalShader, shaderc_glsl_vertex_shader,
