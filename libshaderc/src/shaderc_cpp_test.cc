@@ -363,7 +363,7 @@ TEST_F(CppInterface, D_DisassemblyOption) {
   const AssemblyCompilationResult result = compiler_.CompileGlslToSpvAssembly(
       kMinimalShader, shaderc_glsl_vertex_shader, "shader", options_);
   EXPECT_TRUE(CompilationResultIsSuccess(result));
-  // This should work with both the glslang native disassembly format and the
+  // This should work with both the glslang disassembly format and the
   // SPIR-V Tools assembly format.
   EXPECT_THAT(CompilerOutputAsString(result), HasSubstr("Capability Shader"));
   EXPECT_THAT(CompilerOutputAsString(result), HasSubstr("MemoryModel"));

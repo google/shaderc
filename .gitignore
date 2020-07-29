@@ -1,5 +1,6 @@
 build/
 build-*/
+out/
 *.pyc
 *.swp
 compile_commands.json
