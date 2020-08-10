@@ -122,6 +122,10 @@ shaders-msl/tesc/load-control-point-array-of-struct.multi-patch.tesc,False
 shaders-msl/tesc/load-control-point-array-of-struct.multi-patch.tesc,True
 shaders-msl/tesc/load-control-point-array.multi-patch.tesc,False
 shaders-msl/tesc/load-control-point-array.multi-patch.tesc,True
+shaders-msl/tesc/matrix-output.multi-patch.tesc,False
+shaders-msl/tesc/matrix-output.multi-patch.tesc,True
+shaders-msl/tesc/struct-output.multi-patch.tesc,False
+shaders-msl/tesc/struct-output.multi-patch.tesc,True
 shaders-msl/tesc/water_tess.multi-patch.tesc,False
 shaders-msl/tesc/water_tess.multi-patch.tesc,True
 shaders-msl/vert/basic.for-tess.vert,False
@@ -155,6 +159,7 @@ shaders-no-opt/frag/16bit-constants.invalid.frag,False
 shaders-no-opt/frag/fp16.invalid.desktop.frag,False
 shaders-no-opt/frag/multi-dimensional.desktop.invalid.flatten_dim.frag,False
 shaders-no-opt/frag/variables.zero-initialize.frag,False
+shaders-no-opt/vert/io-blocks.force-flattened-io.vert,False
 shaders-reflection/asm/aliased-entry-point-names.asm.multi,False
 shaders-reflection/asm/comp/pointer-to-array-of-physical-pointer.asm.comp,False
 shaders-reflection/asm/op-source-glsl-ssbo-1.asm.comp,False
