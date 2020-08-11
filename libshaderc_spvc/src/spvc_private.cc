@@ -29,6 +29,21 @@
 #define CATCH_IF_EXCEPTIONS_ENABLED(X) catch (X)
 #endif
 
+namespace {
+bool is_vulkan_env(spv_target_env env) {
+  switch (env) {
+    case SPV_ENV_VULKAN_1_0:
+    case SPV_ENV_VULKAN_1_1:
+    case SPV_ENV_VULKAN_1_1_SPIRV_1_4:
+    case SPV_ENV_VULKAN_1_2:
+      return true;
+    default:
+      return false;
+  }
+}
+
+}  // namespace
+
 namespace spvc_private {
 
 spv_target_env get_spv_target_env(shaderc_target_env env,
@@ -121,7 +136,9 @@ shaderc_spvc_status translate_spirv(shaderc_spvc_context* context,
     return shaderc_spvc_status_transformation_error;
   }
 
-  if (source_env == target_env) {
+  // TODO: Remove special case for SPIRV 1.0 once the deprecated options
+  // constructor with defaults is removed.
+  if (source_env == target_env && source_env != SPV_ENV_UNIVERSAL_1_0) {
     target->resize(source_len);
     memcpy(target->data(), source, source_len * sizeof(uint32_t));
     return shaderc_spvc_status_success;
@@ -132,11 +149,18 @@ shaderc_spvc_status translate_spirv(shaderc_spvc_context* context,
       consume_spirv_tools_message, context, std::placeholders::_1,
       std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
-  if (source_env == SPV_ENV_WEBGPU_0 && target_env == SPV_ENV_VULKAN_1_1) {
+  if (source_env == SPV_ENV_WEBGPU_0 && is_vulkan_env(target_env)) {
     opt.RegisterWebGPUToVulkanPasses();
-  } else if (source_env == SPV_ENV_VULKAN_1_1 &&
-             target_env == SPV_ENV_WEBGPU_0) {
+  } else if (is_vulkan_env(source_env) && target_env == SPV_ENV_WEBGPU_0) {
     opt.RegisterVulkanToWebGPUPasses();
+  } else if (source_env == SPV_ENV_UNIVERSAL_1_0 &&
+             target_env == SPV_ENV_UNIVERSAL_1_0) {
+    // Assuming that the default constructor in Dawn was used, thus the intent
+    // was to perform WebGPU->Vulkan conversion.
+    //
+    // TODO: Remove this case once deprecated options constructor with defaults
+    // is removed.
+    opt.RegisterWebGPUToVulkanPasses();
   } else {
     shaderc_spvc::ErrorLog(context)
         << "No defined transformation between source and target execution "
