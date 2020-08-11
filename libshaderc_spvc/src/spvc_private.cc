@@ -136,14 +136,6 @@ shaderc_spvc_status translate_spirv(shaderc_spvc_context* context,
     return shaderc_spvc_status_transformation_error;
   }
 
-  // TODO: Remove special case for SPIRV 1.0 once the deprecated options
-  // constructor with defaults is removed.
-  if (source_env == target_env && source_env != SPV_ENV_UNIVERSAL_1_0) {
-    target->resize(source_len);
-    memcpy(target->data(), source, source_len * sizeof(uint32_t));
-    return shaderc_spvc_status_success;
-  }
-
   spvtools::Optimizer opt(source_env);
   opt.SetMessageConsumer(std::bind(
       consume_spirv_tools_message, context, std::placeholders::_1,
