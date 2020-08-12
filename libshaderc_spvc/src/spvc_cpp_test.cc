@@ -25,6 +25,10 @@ namespace {
 
 class CompileTest : public testing::Test {
  public:
+  CompileTest()
+      : options_(shaderc_spvc_spv_env_vulkan_1_1,
+                 shaderc_spvc_spv_env_vulkan_1_1) {}
+
   Context context_;
   CompileOptions options_;
   CompilationResult result_;
