@@ -166,6 +166,7 @@ shaderc_spvc_status translate_spirv(shaderc_spvc_context* context,
   }
 
   if (options->robust_buffer_access_pass) {
+    registered_pass = true;
     opt.RegisterPass(spvtools::CreateGraphicsRobustAccessPass());
   }
 
