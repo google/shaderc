@@ -29,6 +29,21 @@
 #define CATCH_IF_EXCEPTIONS_ENABLED(X) catch (X)
 #endif
 
+namespace {
+bool is_vulkan_env(spv_target_env env) {
+  switch (env) {
+    case SPV_ENV_VULKAN_1_0:
+    case SPV_ENV_VULKAN_1_1:
+    case SPV_ENV_VULKAN_1_1_SPIRV_1_4:
+    case SPV_ENV_VULKAN_1_2:
+      return true;
+    default:
+      return false;
+  }
+}
+
+}  // namespace
+
 namespace spvc_private {
 
 spv_target_env get_spv_target_env(shaderc_target_env env,
@@ -115,29 +130,35 @@ shaderc_spvc_status translate_spirv(shaderc_spvc_context* context,
                                     const uint32_t* source, size_t source_len,
                                     shaderc_spvc_compile_options_t options,
                                     std::vector<uint32_t>* target) {
+  bool registered_pass = false;
   if (!target) {
     shaderc_spvc::ErrorLog(context)
         << "null provided for translation destination.";
     return shaderc_spvc_status_transformation_error;
   }
 
-  if (source_env == target_env) {
-    target->resize(source_len);
-    memcpy(target->data(), source, source_len * sizeof(uint32_t));
-    return shaderc_spvc_status_success;
-  }
-
   spvtools::Optimizer opt(source_env);
+  opt.SetValidateAfterAll(options->validate);
   opt.SetMessageConsumer(std::bind(
       consume_spirv_tools_message, context, std::placeholders::_1,
       std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
-  if (source_env == SPV_ENV_WEBGPU_0 && target_env == SPV_ENV_VULKAN_1_1) {
+  if (source_env == SPV_ENV_WEBGPU_0 && is_vulkan_env(target_env)) {
+    registered_pass = true;
     opt.RegisterWebGPUToVulkanPasses();
-  } else if (source_env == SPV_ENV_VULKAN_1_1 &&
-             target_env == SPV_ENV_WEBGPU_0) {
+  } else if (is_vulkan_env(source_env) && target_env == SPV_ENV_WEBGPU_0) {
+    registered_pass = true;
     opt.RegisterVulkanToWebGPUPasses();
-  } else {
+  } else if (source_env == SPV_ENV_UNIVERSAL_1_0 &&
+             target_env == SPV_ENV_UNIVERSAL_1_0) {
+    // Assuming that the default constructor in Dawn was used, thus the intent
+    // was to perform WebGPU->Vulkan conversion.
+    //
+    // TODO: Remove this case once deprecated options constructor with defaults
+    // is removed.
+    registered_pass = true;
+    opt.RegisterWebGPUToVulkanPasses();
+  } else if (source_env != target_env) {
     shaderc_spvc::ErrorLog(context)
         << "No defined transformation between source and target execution "
            "environments.";
@@ -145,10 +166,18 @@ shaderc_spvc_status translate_spirv(shaderc_spvc_context* context,
   }
 
   if (options->robust_buffer_access_pass) {
+    registered_pass = true;
     opt.RegisterPass(spvtools::CreateGraphicsRobustAccessPass());
   }
 
-  if (!opt.Run(source, source_len, target)) {
+  if (!registered_pass) {
+    target->resize(source_len);
+    memcpy(target->data(), source, source_len * sizeof(uint32_t));
+    return shaderc_spvc_status_success;
+  }
+
+  if (!opt.Run(source, source_len, target, spvtools::ValidatorOptions(),
+               options->validate)) {
     shaderc_spvc::ErrorLog(context) << "Transformations between source and "
                                        "target execution environments failed.";
     return shaderc_spvc_status_transformation_error;
