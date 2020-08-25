@@ -1,4 +1,5 @@
 shaders-hlsl-no-opt/asm/frag/phi.zero-initialize.asm.frag,False
+shaders-hlsl-no-opt/asm/frag/struct-packing-last-element-array-matrix-rule.invalid.asm.frag,False
 shaders-hlsl-no-opt/asm/frag/switch-block-case-fallthrough.asm.invalid.frag,False
 shaders-hlsl-no-opt/asm/temporary.zero-initialize.asm.frag,False
 shaders-hlsl-no-opt/frag/constant-buffer-array.invalid.sm51.frag,False

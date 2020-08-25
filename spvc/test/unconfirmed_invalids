@@ -1,3 +1,4 @@
+shaders-hlsl-no-opt/asm/frag/struct-packing-last-element-array-matrix-rule.invalid.asm.frag,False
 shaders-hlsl-no-opt/asm/frag/switch-block-case-fallthrough.asm.invalid.frag,False
 shaders-hlsl-no-opt/frag/constant-buffer-array.invalid.sm51.frag,False
 shaders-hlsl-no-opt/frag/fp16.invalid.desktop.frag,False
@@ -6,6 +7,13 @@ shaders-msl-no-opt/asm/packing/load-packed-no-forwarding-3.asm.comp,False
 shaders-msl-no-opt/asm/packing/load-packed-no-forwarding-5.asm.comp,False
 shaders-msl-no-opt/asm/packing/load-packed-no-forwarding.asm.comp,False
 shaders-msl-no-opt/asm/packing/packed-vector-extract-insert.asm.comp,False
+shaders-msl-no-opt/asm/packing/scalar-array-float2.asm.frag,False
+shaders-msl-no-opt/asm/packing/scalar-array-float3-one-element.asm.frag,False
+shaders-msl-no-opt/asm/packing/scalar-array-float3.asm.frag,False
+shaders-msl-no-opt/asm/packing/scalar-float2x2-col-major.invalid.asm.frag,False
+shaders-msl-no-opt/asm/packing/scalar-float2x3-col-major.invalid.asm.frag,False
+shaders-msl-no-opt/asm/packing/scalar-float3x2-col-major.invalid.asm.frag,False
+shaders-msl-no-opt/asm/packing/scalar-float3x3-col-major.invalid.asm.frag,False
 shaders-msl-no-opt/frag/16bit-constants.invalid.frag,False
 shaders-msl-no-opt/frag/fp16.desktop.invalid.frag,False
 shaders-msl-no-opt/frag/min-max-clamp.invalid.asm.frag,False
@@ -29,10 +37,3 @@ shaders-no-opt/asm/frag/switch-merge-to-continue.asm.invalid.frag,False
 shaders-no-opt/frag/16bit-constants.invalid.frag,False
 shaders-no-opt/frag/fp16.invalid.desktop.frag,False
 shaders-no-opt/frag/multi-dimensional.desktop.invalid.flatten_dim.frag,False
-shaders-msl-no-opt/asm/packing/scalar-array-float2.asm.frag,False
-shaders-msl-no-opt/asm/packing/scalar-array-float3-one-element.asm.frag,False
-shaders-msl-no-opt/asm/packing/scalar-array-float3.asm.frag,False
-shaders-msl-no-opt/asm/packing/scalar-float2x2-col-major.invalid.asm.frag,False
-shaders-msl-no-opt/asm/packing/scalar-float2x3-col-major.invalid.asm.frag,False
-shaders-msl-no-opt/asm/packing/scalar-float3x2-col-major.invalid.asm.frag,False
-shaders-msl-no-opt/asm/packing/scalar-float3x3-col-major.invalid.asm.frag,False
