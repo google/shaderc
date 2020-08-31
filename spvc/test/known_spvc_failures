@@ -109,6 +109,7 @@ shaders-msl/frag/sample-mask-not-used.fixed-sample-mask.frag,False
 shaders-msl/frag/sample-mask-not-used.fixed-sample-mask.frag,True
 shaders-msl/frag/sample-mask.fixed-sample-mask.frag,False
 shaders-msl/frag/sample-mask.fixed-sample-mask.frag,True
+shaders-msl/frag/shader-arithmetic-8bit.frag,True
 shaders-msl/frag/subgroup-builtins.msl22.frag,False
 shaders-msl/frag/subgroup-builtins.msl22.frag,True
 shaders-msl/frag/texture-cube-array.ios.emulate-cube-array.frag,False
