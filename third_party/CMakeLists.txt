@@ -9,8 +9,6 @@ set(SHADERC_SPIRV_TOOLS_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/spirv-tools" CACHE 
   "Location of spirv-tools source")
 set(SHADERC_SPIRV_HEADERS_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/spirv-headers" CACHE STRING
   "Location of spirv-headers source")
-set(SHADERC_SPIRV_CROSS_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/spirv-cross" CACHE STRING
-  "Location of SPIRV-Cross source")
 set(SHADERC_GLSLANG_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/glslang" CACHE STRING
   "Location of glslang source")
 set(SHADERC_EFFCEE_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/effcee" CACHE STRING
@@ -80,27 +78,6 @@ if (NOT TARGET glslang)
         "Platform Toolset" FORCE)
   endif()
 endif()
-
-if (SHADERC_ENABLE_SPVC)
-  if (NOT TARGET spirv-cross-core)
-    if (IS_DIRECTORY ${SHADERC_SPIRV_CROSS_DIR})
-      # Add -fPIC to SPIRV-Cross build, if supported
-      if (COMPILER_SUPPORTS_PIC)
-        set(CXX_BACK ${CMAKE_CXX_FLAGS})
-        set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-fPIC")
-        # cmake inserts a semicolon, change it to a space.
-        string(REGEX REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-        add_subdirectory(${SHADERC_SPIRV_CROSS_DIR} spirv-cross)
-        set(CMAKE_CXX_FLAGS ${CXX_BACK})
-      else()
-        add_subdirectory(${SHADERC_SPIRV_CROSS_DIR} spirv-cross)
-      endif()
-    endif()
-    if (NOT TARGET spirv-cross-core)
-      message(FATAL_ERROR "SPIRV-Cross was not found - required for compilation")
-    endif()
-  endif()
-endif (SHADERC_ENABLE_SPVC)
 
 if (SHADERC_ENABLE_WGSL_OUTPUT)
   # Use Google Tint for WGSL output.
