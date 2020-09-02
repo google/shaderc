@@ -1,5 +1,0 @@
-shaders-msl-no-opt/asm/comp/composite-construct-buffer-struct.asm.comp,False
-shaders-msl-no-opt/asm/comp/device-array-load-temporary.asm.comp,False
-shaders-msl-no-opt/asm/comp/device-constant-array-load-store.asm.comp,False
-shaders-no-opt/asm/frag/for-loop-dedicated-merge-block-inverted.asm.invalid.frag,False
-shaders-no-opt/asm/frag/for-loop-dedicated-merge-block-non-inverted.asm.invalid.frag,False
