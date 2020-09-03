@@ -23,7 +23,6 @@ endif()
 
 message(STATUS "Shaderc: build type is \"${CMAKE_BUILD_TYPE}\".")
 
-option(SHADERC_ENABLE_SPVC "Enable libshaderc_spvc" OFF)
 option(SHADERC_ENABLE_WGSL_OUTPUT "Enable WGSL output" OFF)
 
 option(SHADERC_SKIP_INSTALL "Skip installation" ${SHADERC_SKIP_INSTALL})
@@ -39,16 +38,6 @@ if(${SHADERC_ENABLE_TESTS})
   message(STATUS "Configuring Shaderc to build tests.")
 else()
   message(STATUS "Configuring Shaderc to avoid building tests.")
-endif()
-
-option(SHADERC_SPVC_ENABLE_DIRECT_LOGGING "Send logging messages from spvc directly to stdout/err" OFF)
-if (${SHADERC_SPVC_ENABLE_DIRECT_LOGGING})
-  add_definitions(-DSHADERC_SPVC_ENABLE_DIRECT_LOGGING)
-endif()
-
-option(SHADERC_SPVC_DISABLE_CONTEXT_LOGGING "Send logging messages from spvc to context object" OFF)
-if (${SHADERC_SPVC_DISABLE_CONTEXT_LOGGING})
-  add_definitions(-DSHADERC_SPVC_DISABLE_CONTEXT_LOGGING)
 endif()
 
 option(SHADERC_ENABLE_WERROR_COMPILE "Enable passing -Werror to compiler, if available" ON)
@@ -115,10 +104,6 @@ endif(MSVC)
 # We depend on these for later projects, so they should come first.
 add_subdirectory(third_party)
 
-if(SHADERC_ENABLE_SPVC)
-add_subdirectory(libshaderc_spvc)
-add_subdirectory(spvc)
-endif()
 add_subdirectory(libshaderc_util)
 add_subdirectory(libshaderc)
 add_subdirectory(glslc)
@@ -152,9 +137,6 @@ function(define_pkg_config_file NAME LIBS)
   endif()
 endfunction()
 
-if(SHADERC_ENABLE_SPVC)
-  set(EXTRA_STATIC_PKGCONFIG_LIBS -lshaderc_spvc)
-endif()
 define_pkg_config_file(shaderc -lshaderc_shared)
 define_pkg_config_file(shaderc_static "-lshaderc ${EXTRA_STATIC_PKGCONFIG_LIBS} -lshaderc_util")
 define_pkg_config_file(shaderc_combined -lshaderc_combined)

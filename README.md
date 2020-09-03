@@ -5,10 +5,6 @@ At the moment it includes:
 
 - [`glslc`](glslc), a command line compiler for GLSL/HLSL to SPIR-V, and
 - [`libshaderc`](libshaderc), a library API for accessing `glslc` functionality.
-- [`spvc`](spvc), a command line wrapper around the SPIR-V to GLSL/HLSL/MSL
-  compiler [SPIRV-Cross][spirv-cross], and
-- [`libshaderc_spvc`](libshaderc_spvc), a library API for accessing `spvc`
-  functionality.
 
 **Note:** The fact that that `libshaderc` is not named `libshaderc_glslc` is a
 quirk of history, and a known inconsistency. Changing it would require a
@@ -24,16 +20,6 @@ to provide:
 * an API supporting standard concurrency patterns across multiple
   operating systems
 * increased functionality such as file `#include` support
-
-`spvc` wraps around core functionality in [spirv-cross][spirv-cross]
-and [SPIRV-Tools][spirv-tools]. `spirv` and its library aims to
-provide:
-
-* validation and transformation of inputs before cross-compiling
-* an API designed around integration with specific projects like [Dawn][dawn]
-
-**Note:** `spvc` and its library are WIP and optional artifacts that are by
-default disabled in the build. How to enabled is detailed below.
 
 ## Downloads
 
@@ -233,14 +219,6 @@ $ docker run -i -t -v `pwd`/example:/code shaderc/shaderc
 test.vert
 /code $ glslc -c -o - test.vert | spirv-dis
 ```
-
-### Building spvc
-
-The value `SHADERC_ENABLE_SPVC` in `CMakeLists.txt` must be set to `ON` to
-enable building `spvc`.
-
-This can be achieved by either editing the file in your checkout, or passing
-`-DSHADERC_ENABLE_SPVC=ON` to `cmake` to set the value.
 
 ## Bug tracking
 

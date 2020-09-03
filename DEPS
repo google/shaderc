@@ -10,7 +10,6 @@ vars = {
   're2_revision': 'ca11026a032ce2a3de4b3c389ee53d2bdc8794d6',
   'spirv_headers_revision': '3fdabd0da2932c276b25b9b4a988ba134eba1aa6',
   'spirv_tools_revision': '8a0ebd40f86d1f18ad42ea96c6ac53915076c3c7',
-  'spirv_cross_revision': '685f86471e9d26b3eb7676695a2e2cefb4551ae9',
 }
 
 deps = {
@@ -31,7 +30,4 @@ deps = {
 
   'third_party/spirv-tools': Var('khronos_git') + '/SPIRV-Tools.git@' +
       Var('spirv_tools_revision'),
-
-  'third_party/spirv-cross': Var('khronos_git') + '/SPIRV-Cross.git@' +
-      Var('spirv_cross_revision'),
 }
