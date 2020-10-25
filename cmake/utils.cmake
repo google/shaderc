@@ -146,7 +146,18 @@ macro(shaderc_get_transitive_libs target out_list)
     get_target_property(libtype ${target} TYPE)
     # If this target is a static library, get anything it depends on.
     if ("${libtype}" STREQUAL "STATIC_LIBRARY")
-      list(INSERT ${out_list} 0 "${target}")
+      # Get the original library if this is an alias library. This is
+      # to avoid putting both the original library and the alias library
+      # in the list (given we are deduplicating according to target names).
+      # Otherwise, we may pack the same library twice, resulting in
+      # duplicated symbols.
+      get_target_property(aliased_target ${target} ALIASED_TARGET)
+      if (aliased_target)
+        list(INSERT ${out_list} 0 "${aliased_target}")
+      else()
+        list(INSERT ${out_list} 0 "${target}")
+      endif()
+
       get_target_property(libs ${target} LINK_LIBRARIES)
       if (libs)
         foreach(lib ${libs})
