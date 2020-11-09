@@ -203,9 +203,9 @@ class CompileOptions {
         [](void* user_data, const char* requested_source, int type,
            const char* requesting_source, size_t include_depth) {
           auto* sub_includer = static_cast<IncluderInterface*>(user_data);
-          return sub_includer->GetInclude(requested_source,
-                                      (shaderc_include_type)type,
-                                      requesting_source, include_depth);
+          return sub_includer->GetInclude(
+              requested_source, static_cast<shaderc_include_type>(type),
+              requesting_source, include_depth);
         },
         [](void* user_data, shaderc_include_result* include_result) {
           auto* sub_includer = static_cast<IncluderInterface*>(user_data);
