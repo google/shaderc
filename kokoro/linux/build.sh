@@ -18,6 +18,9 @@
 
 set -e # Fail on any error.
 
+echo "FAILING DELIBERATELY"
+exit 1
+
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd )"
 ROOT_DIR="$( cd "${SCRIPT_DIR}/../.." >/dev/null 2>&1 && pwd )"
 

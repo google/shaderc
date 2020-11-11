@@ -16,6 +16,9 @@
 #
 # MacOS Build Script.
 
+echo FAILING DELIBERATELY
+exit 1
+
 # Fail on any error.
 set -e
 # Display commands being run.

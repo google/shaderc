@@ -38,6 +38,8 @@ cd %SRC%\build
 if %VS_VERSION% == 2017 (
   call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
   echo "Using VS 2017..."
+  echo "FAILING DELIBERATELY"
+  exit /b 1
 ) else if %VS_VERSION% == 2015 (
   call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
   echo "Using VS 2015..."
