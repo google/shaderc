@@ -80,7 +80,7 @@ setlocal ENABLEDELAYEDEXPANSION
 :: Run the tests
 :: ################################################
 echo "Running tests... %DATE% %TIME%"
-ctest -C %BUILD_TYPE% --output-on-failure -j4
+ctest -VV -C %BUILD_TYPE% --output-on-failure -j4
 if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
 echo "Tests passed %DATE% %TIME%"
 
