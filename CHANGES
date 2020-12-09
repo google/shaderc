@@ -1,6 +1,6 @@
 Revision history for Shaderc
 
-v2020.4-dev 2020-12-09
+v2020.4 2020-12-09
  - Removed svpc
  - Fixed issues with embedders getting duplicate symbols
  - Converted C-style casts to static_cast
