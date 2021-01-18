@@ -76,7 +76,6 @@ class Compiler {
     Vulkan,        // Default to Vulkan 1.0
     OpenGL,        // Default to OpenGL 4.5
     OpenGLCompat,  // Deprecated.
-    WebGPU,
   };
 
   // Target environment versions.  These numbers match those used by Glslang.

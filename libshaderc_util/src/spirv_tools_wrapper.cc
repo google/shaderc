@@ -45,8 +45,6 @@ spv_target_env GetSpirvToolsTargetEnv(Compiler::TargetEnv env,
       return SPV_ENV_OPENGL_4_5;
     case Compiler::TargetEnv::OpenGLCompat:  // Deprecated
       return SPV_ENV_OPENGL_4_5;
-    case Compiler::TargetEnv::WebGPU:
-      return SPV_ENV_WEBGPU_0;
   }
   assert(false && "unexpected target environment or version");
   return SPV_ENV_VULKAN_1_0;
@@ -144,9 +142,6 @@ bool SpirvToolsOptimize(Compiler::TargetEnv env,
         break;
       case PassId::kSizePasses:
         optimizer.RegisterSizePasses();
-        break;
-      case PassId::kVulkanToWebGPUPasses:
-        optimizer.RegisterVulkanToWebGPUPasses();
         break;
       case PassId::kNullPass:
         // We actually don't need to do anything for null pass.
