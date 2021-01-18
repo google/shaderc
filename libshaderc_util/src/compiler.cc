@@ -84,7 +84,6 @@ EShMessages GetMessageRules(shaderc_util::Compiler::TargetEnv env,
     case Compiler::TargetEnv::OpenGL:
       result = static_cast<EShMessages>(result | EShMsgSpvRules);
       break;
-    case Compiler::TargetEnv::WebGPU:
     case Compiler::TargetEnv::Vulkan:
       result =
           static_cast<EShMessages>(result | EShMsgSpvRules | EShMsgVulkanRules);

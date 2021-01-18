@@ -29,6 +29,8 @@ typedef enum {
   shaderc_target_env_opengl_compat,  // SPIR-V under OpenGL semantics,
                                      // including compatibility profile
                                      // functions
+  shaderc_target_env_webgpu,         // Deprecated, SPIR-V under WebGPU
+                                     // semantics
   shaderc_target_env_default = shaderc_target_env_vulkan
 } shaderc_target_env;
 
@@ -43,6 +45,7 @@ typedef enum {
   // See glslang/Standalone/Standalone.cpp
   // TODO(dneto): Glslang doesn't accept a OpenGL client version of 460.
   shaderc_env_version_opengl_4_5 = 450,
+  shaderc_env_version_webgpu,  // Deprecated, WebGPU env never defined versions
 } shaderc_env_version;
 
 // The known versions of SPIR-V.

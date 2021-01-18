@@ -278,6 +278,8 @@ shaderc_util::Compiler::TargetEnv GetCompilerTargetEnv(shaderc_target_env env) {
       return shaderc_util::Compiler::TargetEnv::OpenGL;
     case shaderc_target_env_opengl_compat:
       return shaderc_util::Compiler::TargetEnv::OpenGLCompat;
+    case shaderc_target_env_webgpu:
+      assert(false);
     case shaderc_target_env_vulkan:
     default:
       break;

@@ -45,8 +45,6 @@ spv_target_env GetSpirvToolsTargetEnv(Compiler::TargetEnv env,
       return SPV_ENV_OPENGL_4_5;
     case Compiler::TargetEnv::OpenGLCompat:  // Deprecated
       return SPV_ENV_OPENGL_4_5;
-    case Compiler::TargetEnv::WebGPU:  // Deprecated
-      return SPV_ENV_WEBGPU_0;
   }
   assert(false && "unexpected target environment or version");
   return SPV_ENV_VULKAN_1_0;
