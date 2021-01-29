@@ -45,41 +45,72 @@ MessageType DeduceMessageType(string_piece* message) {
 }
 
 // Deduces a location specification from the given message. A location
-// specification is of the form "<source-name>:<line-number>:". If the deduction
-// is successful, returns true and updates source_name and line_number to the
-// deduced source name and line numer respectively. The prefix standing for the
-// location specification in message is skipped. Otherwise, returns false and
-// keeps all parameters untouched.
+// specification is of the form "<source-name>:<line-number>:" and a trailing
+// spaace.  If the deduction is successful, returns true and updates source_name
+// and line_number to the deduced source name and line numer respectively. The
+// prefix standing for the location specification in message is skipped.
+// Otherwise, returns false and keeps all parameters untouched.
 bool DeduceLocationSpec(string_piece* message, string_piece* source_name,
                         string_piece* line_number) {
-  // TODO(antiagainst): we use ':' as a delimiter here. It may be a valid
-  // character in the filename. Also be aware of other special characters,
-  // for example, ' '.
-  string_piece rest(*message);
-  size_t colon_after_source = rest.find_first_of(':');
-  if (colon_after_source == string_piece::npos) return false;
-
-  string_piece source = rest.substr(0, colon_after_source);
-  rest = rest.substr(colon_after_source + 1);
-  size_t colon_after_line = rest.find_first_of(':');
-  if (source.size() == 1 && ::isalpha(source.front()) && rest.size() > 0 &&
-      rest.front() == '\\') {
-    // Handle Windows path.
-    colon_after_source += colon_after_line + 1;
-    source = message->substr(0, colon_after_source);
-    rest = rest.substr(colon_after_line + 1);
-    colon_after_line = rest.find_first_of(':');
+  if (!message || message->empty()) {
+    return false;
   }
 
-  if (colon_after_line == string_piece::npos) return false;
-  const string_piece line = rest.substr(0, colon_after_line);
+  // When we find a pattern like this:
+  //     colon
+  //     digits
+  //     colon
+  //     space
+  // Then deduce that the source_name is the text before the first colon,
+  // the line number is the digits, and the message is the text after the
+  // second colon.
 
-  if (!std::all_of(line.begin(), line.end(), ::isdigit)) return false;
+  const size_t size = message->size();
+  if (size <= 4) {
+    // A valid message must have a colon, a digit, a colon, and a space.
+    return false;
+  }
+  // The last possible position of the first colon.
+  const size_t first_colon_cutoff = size - 4;
+  // The last possible position of the second colon.
+  const size_t next_colon_cutoff = size - 2;
 
-  *source_name = source;
-  *line_number = line;
-  *message = rest.substr(colon_after_line + 1).strip_whitespace();
-  return true;
+  for (size_t first_colon_pos = message->find_first_of(':'), next_colon_pos = 0;
+
+       // There is a first colon, and it's not too close to the end
+       (first_colon_pos != string_piece::npos) &&
+       (first_colon_pos <= first_colon_cutoff);
+
+       // Try the next pair of colons.
+       first_colon_pos = next_colon_pos) {
+    // We're guaranteed to have at least 3 more characters.
+    // Guarantee progress toward the end of the string.
+    next_colon_pos = message->find_first_of(':', first_colon_pos + 1);
+    if ((next_colon_pos == string_piece::npos) ||
+        (next_colon_pos > next_colon_cutoff)) {
+      // No valid solution.
+      return false;
+    }
+    if (first_colon_pos + 1 == next_colon_pos) {
+      // There is no room for digits.
+      continue;
+    }
+    if ((message->data()[next_colon_pos + 1] != ' ')) {
+      // There is no space character after the second colon.
+      continue;
+    }
+    if (message->find_first_not_of("0123456789", first_colon_pos + 1) ==
+        next_colon_pos) {
+      // We found the first solution.
+      *source_name = message->substr(0, first_colon_pos);
+      *line_number = message->substr(first_colon_pos + 1,
+                                     next_colon_pos - 1 - first_colon_pos);
+      *message = message->substr(next_colon_pos + 2);
+      return true;
+    }
+  }
+
+  return false;
 }
 
 // Returns true if the given message is a summary message.
@@ -114,6 +145,8 @@ MessageType ParseGlslangOutput(const string_piece& message,
   // <location-specification> is of the form:
   //   <filename-or-string-number>:<line-number>:
   // It doesn't exist if the warning/error message is a global one.
+  //
+  // See Glslang's TInfoSink class implementation for details.
 
   bool is_error = false;
 

@@ -135,6 +135,8 @@ TEST(ParseGlslangOutputTest, LocationSpecification) {
   string_piece line_number;
   string_piece rest;
 
+  // Glslang reading from strings can give string segment numbers as
+  // the filename part.
   EXPECT_EQ(
       MessageType::Error,
       ParseGlslangOutput("ERROR: 0:2: '#' : invalid directive: foo", false,
@@ -154,7 +156,7 @@ TEST(ParseGlslangOutputTest, LocationSpecification) {
             rest.str());
 }
 
-TEST(ParseGlslangOutputTest, FileName) {
+TEST(ParseGlslangOutputTest, FileName_BaseAndExtension) {
   string_piece source_name;
   string_piece line_number;
   string_piece rest;
@@ -165,6 +167,12 @@ TEST(ParseGlslangOutputTest, FileName) {
   EXPECT_EQ("shader.vert", source_name.str());
   EXPECT_EQ("5", line_number.str());
   EXPECT_EQ("something wrong", rest.str());
+}
+
+TEST(ParseGlslangOutputTest, FileName_BaseOnly) {
+  string_piece source_name;
+  string_piece line_number;
+  string_piece rest;
 
   EXPECT_EQ(MessageType::Warning,
             ParseGlslangOutput("WARNING: file:42: something wrong", false,
@@ -172,6 +180,12 @@ TEST(ParseGlslangOutputTest, FileName) {
   EXPECT_EQ("file", source_name.str());
   EXPECT_EQ("42", line_number.str());
   EXPECT_EQ("something wrong", rest.str());
+}
+
+TEST(ParseGlslangOutputTest, FileName_HexNumber) {
+  string_piece source_name;
+  string_piece line_number;
+  string_piece rest;
 
   EXPECT_EQ(MessageType::Warning,
             ParseGlslangOutput("WARNING: 0xdeedbeef:0: wa:ha:ha", false, false,
@@ -179,6 +193,60 @@ TEST(ParseGlslangOutputTest, FileName) {
   EXPECT_EQ("0xdeedbeef", source_name.str());
   EXPECT_EQ("0", line_number.str());
   EXPECT_EQ("wa:ha:ha", rest.str());
+}
+
+TEST(ParseGlslangOutputTest, FileName_ContainsColons) {
+  string_piece source_name;
+  string_piece line_number;
+  string_piece rest;
+
+  EXPECT_EQ(MessageType::Warning,
+            ParseGlslangOutput("WARNING:  foo:bar:0: wa:ha:ha", false, false,
+                               &source_name, &line_number, &rest));
+  EXPECT_EQ("foo:bar", source_name.str());
+  EXPECT_EQ("0", line_number.str());
+  EXPECT_EQ("wa:ha:ha", rest.str());
+}
+
+TEST(ParseGlslangOutputTest, NoFile) {
+  string_piece source_name;
+  string_piece line_number;
+  string_piece rest;
+
+  EXPECT_EQ(MessageType::Warning,
+            ParseGlslangOutput("WARNING:  :12: abc", false, false, &source_name,
+                               &line_number, &rest));
+  EXPECT_EQ("", source_name.str());
+  EXPECT_EQ("12", line_number.str());
+  EXPECT_EQ("abc", rest.str());
+}
+
+TEST(ParseGlslangOutputTest, NoLineNumber_InferredAsGlobalNoLocation) {
+  string_piece source_name;
+  string_piece line_number;
+  string_piece rest;
+
+  // No solution since there is no room for digits.
+  EXPECT_EQ(MessageType::GlobalWarning,
+            ParseGlslangOutput("WARNING:  foo:: abc", false, false,
+                               &source_name, &line_number, &rest));
+  EXPECT_EQ("", source_name.str());
+  EXPECT_EQ("", line_number.str());
+  EXPECT_EQ("foo:: abc", rest.str());
+}
+
+TEST(ParseGlslangOutputTest, NoSpaceAfterColon_InferredAsGlobalNoLocation) {
+  string_piece source_name;
+  string_piece line_number;
+  string_piece rest;
+
+  // No solution since there is no space after the line-number-and-colon.
+  EXPECT_EQ(MessageType::GlobalWarning,
+            ParseGlslangOutput("WARNING:  foo:12:abc", false, false,
+                               &source_name, &line_number, &rest));
+  EXPECT_EQ("", source_name.str());
+  EXPECT_EQ("", line_number.str());
+  EXPECT_EQ("foo:12:abc", rest.str());
 }
 
 TEST(ParseGlslangOutputTest, WindowsPath) {
