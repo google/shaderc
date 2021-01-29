@@ -53,6 +53,9 @@ enum class MessageType {
 //   source_name="", line_number="", rest="Message"
 // "ERROR: 2 errors found."
 //   source_name="2", line_number="", rest="errors found".
+//
+// Note that filenames can contain colons:
+//   "ERROR: foo:bar.comp.hlsl:2: 'a' : unknown variable"
 MessageType ParseGlslangOutput(const shaderc_util::string_piece& message,
                                bool warnings_as_errors, bool suppress_warnings,
                                shaderc_util::string_piece* source_name,
