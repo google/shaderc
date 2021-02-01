@@ -46,7 +46,7 @@ MessageType DeduceMessageType(string_piece* message) {
 
 // Deduces a location specification from the given message. A location
 // specification is of the form "<source-name>:<line-number>:" and a trailing
-// spaace.  If the deduction is successful, returns true and updates source_name
+// space.  If the deduction is successful, returns true and updates source_name
 // and line_number to the deduced source name and line numer respectively. The
 // prefix standing for the location specification in message is skipped.
 // Otherwise, returns false and keeps all parameters untouched.
