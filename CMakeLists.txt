@@ -40,6 +40,16 @@ else()
   message(STATUS "Configuring Shaderc to avoid building tests.")
 endif()
 
+option(SHADERC_SKIP_EXAMPLES "Skip building examples" ${SHADERC_SKIP_EXAMPLES})
+if(NOT ${SHADERC_SKIP_EXAMPLES})
+  set(SHADERC_ENABLE_EXAMPLES ON)
+endif()
+if(${SHADERC_ENABLE_EXAMPLES})
+  message(STATUS "Configuring Shaderc to build examples.")
+else()
+  message(STATUS "Configuring Shaderc to avoid building examples.")
+endif()
+
 option(SHADERC_ENABLE_WERROR_COMPILE "Enable passing -Werror to compiler, if available" ON)
 
 set (CMAKE_CXX_STANDARD 11)
@@ -107,7 +117,9 @@ add_subdirectory(third_party)
 add_subdirectory(libshaderc_util)
 add_subdirectory(libshaderc)
 add_subdirectory(glslc)
-add_subdirectory(examples)
+if(${SHADERC_ENABLE_EXAMPLES})
+    add_subdirectory(examples)
+endif()
 
 add_custom_target(build-version
   ${PYTHON_EXECUTABLE}
