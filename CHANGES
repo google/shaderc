@@ -1,7 +1,12 @@
 Revision history for Shaderc
 
-v2020.5-dev 2020-12-09
- - Start v2020.5-dev
+v2020.5 2021-02-19
+ - Refresh dependencies (in DEPS):
+   - SPIRV-Tools v2020.7 + 1 patch
+   - Glslang 11.1.0
+ - Add option to skip building examples
+ - Fixes:
+   #1153: Improve file+line parsing from Glslang messages
 
 v2020.4 2020-12-09
  - Removed svpc
