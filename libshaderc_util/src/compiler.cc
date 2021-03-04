@@ -22,7 +22,7 @@
 
 #include "SPIRV/GlslangToSpv.h"
 #include "libshaderc_util/format.h"
-#include "libshaderc_util/io.h"
+#include "libshaderc_util/io_shaderc.h"
 #include "libshaderc_util/message.h"
 #include "libshaderc_util/resources.h"
 #include "libshaderc_util/shader_stage.h"
