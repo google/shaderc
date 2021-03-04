@@ -18,7 +18,7 @@ add_library(shaderc_util STATIC
   include/libshaderc_util/counting_includer.h
   include/libshaderc_util/file_finder.h
   include/libshaderc_util/format.h
-  include/libshaderc_util/io.h
+  include/libshaderc_util/io_shaderc.h
   include/libshaderc_util/mutex.h
   include/libshaderc_util/message.h
   include/libshaderc_util/resources.h

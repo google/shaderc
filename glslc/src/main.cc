@@ -28,7 +28,7 @@
 #include "file_compiler.h"
 #include "libshaderc_util/args.h"
 #include "libshaderc_util/compiler.h"
-#include "libshaderc_util/io.h"
+#include "libshaderc_util/io_shaderc.h"
 #include "libshaderc_util/string_piece.h"
 #include "resource_parse.h"
 #include "shader_stage.h"

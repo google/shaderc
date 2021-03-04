@@ -28,7 +28,7 @@
 #include "file_includer.h"
 #include "shader_stage.h"
 
-#include "libshaderc_util/io.h"
+#include "libshaderc_util/io_shaderc.h"
 #include "libshaderc_util/message.h"
 
 namespace {
