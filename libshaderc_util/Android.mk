@@ -21,7 +21,7 @@ LOCAL_EXPORT_C_INCLUDES:=$(LOCAL_PATH)/include
 LOCAL_SRC_FILES:=src/args.cc \
                 src/compiler.cc \
 		src/file_finder.cc \
-		src/io.cc \
+		src/io_shaderc.cc \
 		src/message.cc \
 		src/resources.cc \
 		src/shader_stage.cc \
