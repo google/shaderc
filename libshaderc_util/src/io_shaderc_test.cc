@@ -14,17 +14,17 @@
 
 #include "libshaderc_util/io_shaderc.h"
 
-#include <fstream>
-
 #include <gmock/gmock.h>
+
+#include <fstream>
 
 namespace {
 
+using shaderc_util::GetBaseFileName;
+using shaderc_util::GetOutputStream;
 using shaderc_util::IsAbsolutePath;
 using shaderc_util::ReadFile;
 using shaderc_util::WriteFile;
-using shaderc_util::GetOutputStream;
-using shaderc_util::GetBaseFileName;
 using testing::Eq;
 using testing::HasSubstr;
 
@@ -90,8 +90,7 @@ TEST(GetBaseFileName, Windows) {
 
 TEST_F(ReadFileTest, CorrectContent) {
   ASSERT_TRUE(ReadFile("include_file.1", &read_data));
-  EXPECT_EQ("The quick brown fox jumps over a lazy dog.",
-            ToString(read_data));
+  EXPECT_EQ("The quick brown fox jumps over a lazy dog.", ToString(read_data));
 }
 
 TEST_F(ReadFileTest, EmptyContent) {
