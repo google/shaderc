@@ -329,6 +329,21 @@ class CompileOptions {
         options_, reg.c_str(), set.c_str(), binding.c_str());
   }
 
+  // Sets a descriptor set and binding for an HLSL register in the given stage.
+  // Copies the parameter strings.
+  void SetImplicitSetForStage(shaderc_shader_kind shader_kind,
+                              uint32_t set) {
+    shaderc_compile_options_set_implicit_set_for_stage(
+        options_, shader_kind, set);
+  }
+
+  // Sets a descriptor set and binding for an HLSL register in any stage.
+  // Copies the parameter strings.
+  void SetImplicitSet(uint32_t set) {
+    shaderc_compile_options_set_implicit_set(
+      options_, set);
+  }
+
   // Sets whether the compiler should enable extension
   // SPV_GOOGLE_hlsl_functionality1.
   void SetHlslFunctionality1(bool enable) {

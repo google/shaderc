@@ -328,6 +328,23 @@ class Compiler {
     hlsl_explicit_bindings_[static_cast<int>(stage)].push_back(binding);
   }
 
+  // Sets an implicit set for the given GLSL shader if no set has been provided in
+  // the qualifier
+  void SetImplicitSet(uint32_t set)
+  {
+    for (auto stage : stages()) {
+      SetImplicitSetForStage(stage, set);
+    }
+  }
+
+  // Sets an implicit set for the given GLSL shader stage if no set has been provided in
+  // the qualifier
+  void SetImplicitSetForStage(Stage stage, uint32_t set)
+  {
+    hlsl_explicit_bindings_[static_cast<int>(stage)].clear();
+    hlsl_explicit_bindings_[static_cast<int>(stage)].push_back(std::to_string(set));
+  }
+
   // Compiles the shader source in the input_source_string parameter.
   //
   // If the forced_shader stage parameter is not EShLangCount then

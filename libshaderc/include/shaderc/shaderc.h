@@ -451,6 +451,18 @@ SHADERC_EXPORT void shaderc_compile_options_set_hlsl_register_set_and_binding(
     shaderc_compile_options_t options, const char* reg, const char* set,
     const char* binding);
 
+// Sets an implicit descriptor set for an GLSL shader in the given stage,
+// if no set has been defined.
+// This method keeps a copy of the string data.
+SHADERC_EXPORT void shaderc_compile_options_set_implicit_set_for_stage(
+    shaderc_compile_options_t options, shaderc_shader_kind shader_kind,
+    uint32_t set);
+
+// Like shaderc_compile_options_set_glsl_implicit_set_for_stage,
+// but affects all shader stages.
+SHADERC_EXPORT void shaderc_compile_options_set_implicit_set(
+    shaderc_compile_options_t options, uint32_t set);
+
 // Sets whether the compiler should enable extension
 // SPV_GOOGLE_hlsl_functionality1.
 SHADERC_EXPORT void shaderc_compile_options_set_hlsl_functionality1(

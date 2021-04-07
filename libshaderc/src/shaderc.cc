@@ -538,6 +538,17 @@ void shaderc_compile_options_set_hlsl_register_set_and_binding(
   options->compiler.SetHlslRegisterSetAndBinding(reg, set, binding);
 }
 
+void shaderc_compile_options_set_implicit_set_for_stage(
+    shaderc_compile_options_t options, shaderc_shader_kind shader_kind,
+    uint32_t set) {
+  options->compiler.SetImplicitSetForStage(GetStage(shader_kind), set);
+}
+
+void shaderc_compile_options_set_implicit_set(
+    shaderc_compile_options_t options, uint32_t set) {
+      options->compiler.SetImplicitSet(set);
+}
+
 void shaderc_compile_options_set_hlsl_functionality1(
     shaderc_compile_options_t options, bool enable) {
   options->compiler.EnableHlslFunctionality1(enable);
