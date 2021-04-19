@@ -1,4 +1,5 @@
 // Copyright 2015 The Shaderc Authors. All rights reserved.
+// MODIFIED BY Robin Quint
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -307,6 +308,8 @@ int main(int argc, char** argv) {
       }
     } else if (arg == "-fauto-bind-uniforms") {
       compiler.options().SetAutoBindUniforms(true);
+    } else if (arg == "-fupgrade-textures") {
+      compiler.options().SetUpgradeTextures(true);
     } else if (arg == "-fauto-map-locations") {
       compiler.options().SetAutoMapLocations(true);
     } else if (arg == "-fhlsl-iomap") {

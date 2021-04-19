@@ -1,4 +1,5 @@
 // Copyright 2015 The Shaderc Authors. All rights reserved.
+// MODIFIED BY Robin Quint
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -272,6 +273,10 @@ class CompileOptions {
   // that aren't already explicitly bound in the shader source.
   void SetAutoBindUniforms(bool auto_bind) {
     shaderc_compile_options_set_auto_bind_uniforms(options_, auto_bind);
+  }
+
+  void SetUpgradeTextures(bool upgrade) {
+    shaderc_compile_options_set_upgrade_textures(options_, upgrade);
   }
 
   // Sets whether the compiler should use HLSL IO mapping rules for bindings.
