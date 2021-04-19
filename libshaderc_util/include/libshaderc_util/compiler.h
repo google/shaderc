@@ -1,4 +1,5 @@
 // Copyright 2015 The Shaderc Authors. All rights reserved.
+// MODIFIED BY Robin Quint
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -201,6 +202,7 @@ class Compiler {
         source_language_(SourceLanguage::GLSL),
         limits_(kDefaultTBuiltInResource),
         auto_bind_uniforms_(false),
+        upgrade_textures_(false),
         auto_binding_base_(),
         auto_map_locations_(false),
         hlsl_iomap_(false),
@@ -276,6 +278,8 @@ class Compiler {
   // Set whether the compiler automatically assigns bindings to
   // uniform variables that don't have explicit bindings.
   void SetAutoBindUniforms(bool auto_bind) { auto_bind_uniforms_ = auto_bind; }
+
+  void SetUpgradeTextures(bool upgrade) { upgrade_textures_ = upgrade; }
 
   // Sets the lowest binding number used when automatically assigning bindings
   // for uniform resources of the given type, for all shader stages.  The default
@@ -491,6 +495,8 @@ class Compiler {
   // True if the compiler should automatically bind uniforms that don't
   // have explicit bindings.
   bool auto_bind_uniforms_;
+
+  bool upgrade_textures_;
 
   // The base binding number per uniform type, per stage, used when automatically
   // binding uniforms that don't hzve explicit bindings in the shader source.

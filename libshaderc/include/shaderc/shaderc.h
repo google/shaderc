@@ -1,4 +1,5 @@
 // Copyright 2015 The Shaderc Authors. All rights reserved.
+// MODIFIED BY Robin Quint
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -406,6 +407,9 @@ SHADERC_EXPORT void shaderc_compile_options_set_limit(
 // that aren't already explicitly bound in the shader source.
 SHADERC_EXPORT void shaderc_compile_options_set_auto_bind_uniforms(
     shaderc_compile_options_t options, bool auto_bind);
+
+SHADERC_EXPORT void shaderc_compile_options_set_upgrade_textures(
+    shaderc_compile_options_t options, bool upgrade);
 
 // Sets whether the compiler should use HLSL IO mapping rules for bindings.
 // Defaults to false.

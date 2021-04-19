@@ -1,4 +1,5 @@
 // Copyright 2015 The Shaderc Authors. All rights reserved.
+// MODIFIED BY Robin Quint
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -495,6 +496,11 @@ void shaderc_compile_options_set_limit(shaderc_compile_options_t options,
 void shaderc_compile_options_set_auto_bind_uniforms(
     shaderc_compile_options_t options, bool auto_bind) {
   options->compiler.SetAutoBindUniforms(auto_bind);
+}
+
+void shaderc_compile_options_set_upgrade_textures(
+    shaderc_compile_options_t options, bool upgrade) {
+  options->compiler.SetUpgradeTextures(upgrade);
 }
 
 void shaderc_compile_options_set_hlsl_io_mapping(
