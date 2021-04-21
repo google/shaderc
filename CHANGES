@@ -1,7 +1,12 @@
 Revision history for Shaderc
 
-v2021.0-dev 2021-02-19
- - Start v2021.0-dev
+v2021.0 2021-04-21
+ - Refresh dependencies (in DEPS):
+   - SPIRV-Tools v2021.1
+   - SPIRV-Headers snapshot 2021-04-21
+   - Glslang 11.2.0, snapshot 2021-04-21
+ - Fixes:
+   #1174: Windows Bazel support: rename internal headers io.* to io_shaderc.*
 
 v2020.5 2021-02-19
  - Refresh dependencies (in DEPS):
