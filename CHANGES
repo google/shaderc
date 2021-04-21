@@ -1,5 +1,8 @@
 Revision history for Shaderc
 
+v2021.1-dev 2021-04-21
+ - Start v2021.1 development
+
 v2021.0 2021-04-21
  - Refresh dependencies (in DEPS):
    - SPIRV-Tools v2021.1
