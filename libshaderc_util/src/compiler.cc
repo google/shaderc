@@ -1,5 +1,4 @@
 // Copyright 2015 The Shaderc Authors. All rights reserved.
-// MODIFIED BY Robin Quint
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -265,7 +264,7 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   shader.setPreamble(preamble.c_str());
   shader.setEntryPoint(entry_point_name);
   shader.setAutoMapBindings(auto_bind_uniforms_);
-  if (upgrade_textures_) {
+  if (auto_sampled_textures_) {
     shader.setTextureSamplerTransformMode(EShTexSampTransUpgradeTextureRemoveSampler);
   }
   shader.setAutoMapLocations(auto_map_locations_);
