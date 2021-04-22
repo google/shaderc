@@ -275,9 +275,10 @@ class CompileOptions {
   }
 
   // Sets whether the compiler should automatically remove sampler variables
-  // and convert image variables to sampled image variables
+  // and convert image variables to combined image sampler variables.
   void SetAutoSampledTextures(bool auto_sampled) {
-    shaderc_compile_options_set_auto_sampled_textures(options_, auto_sampled);
+    shaderc_compile_options_set_auto_combined_image_sampler(options_,
+                                                            auto_sampled);
   }
 
   // Sets whether the compiler should use HLSL IO mapping rules for bindings.

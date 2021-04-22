@@ -408,8 +408,8 @@ SHADERC_EXPORT void shaderc_compile_options_set_auto_bind_uniforms(
     shaderc_compile_options_t options, bool auto_bind);
 
 // Sets whether the compiler should automatically remove sampler variables
-// and convert image variables to sampled image variables
-SHADERC_EXPORT void shaderc_compile_options_set_auto_sampled_textures(
+// and convert image variables to combined image-sampler variables.
+SHADERC_EXPORT void shaderc_compile_options_set_auto_combined_image_sampler(
     shaderc_compile_options_t options, bool upgrade);
 
 // Sets whether the compiler should use HLSL IO mapping rules for bindings.
