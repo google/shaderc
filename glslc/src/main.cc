@@ -61,9 +61,9 @@ Options:
                     Automatically assign locations to uniform variables that
                     don't have an explicit 'location' layout in the shader
                     source.
-  -fauto-sampled-textures
-                    Removes sampler variables and converts existing textures 
-                    to combined image-samplers
+  -fauto-combined-image-sampler
+                    Removes sampler variables and converts existing textures
+                    to combined image-samplers.
   -fentry-point=<name>
                     Specify the entry point name for HLSL compilation, for
                     all subsequent source files.  Default is "main".
@@ -310,7 +310,7 @@ int main(int argc, char** argv) {
       }
     } else if (arg == "-fauto-bind-uniforms") {
       compiler.options().SetAutoBindUniforms(true);
-    } else if (arg == "-fauto-sampled-textures") {
+    } else if (arg == "-fauto-combined-image-sampler") {
       compiler.options().SetAutoSampledTextures(true);
     } else if (arg == "-fauto-map-locations") {
       compiler.options().SetAutoMapLocations(true);

@@ -36,21 +36,21 @@ HLSL_SHADER_SEPARATE_IMAGE_SAMPLER = """
   }"""
 
 
-@inside_glslc_testsuite('OptionFAutoSampledTextures')
-class FAutoSampledTexturesCheckGLSL(expect.ValidAssemblyFileWithSubstr):
+@inside_glslc_testsuite('OptionFAutoCombinedImageSampler')
+class FAutoCombinedImageSamplerCheckGLSL(expect.ValidAssemblyFileWithSubstr):
     """Tests that the compiler combines GLSL sampler and texture2D objects."""
 
     exit(17)
 
     shader = FileShader(GLSL_SHADER_SEPARATE_IMAGE_SAMPLER, '.frag')
-    glslc_args = ['-S', '-fauto-sampled-textures', shader]
+    glslc_args = ['-S', '-fauto-combined-image-sampler', shader]
     expected_assembly_substr = "%11 = OpTypeSampledImage %10\n%_ptr_UniformConstant_11 = OpTypePointer UniformConstant %11\n      %u_Tex = OpVariable %_ptr_UniformConstant_11 UniformConstant"
 
-@inside_glslc_testsuite('OptionFAutoSampledTextures')
-class FAutoSampledTexturesCheckHLSL(expect.ValidAssemblyFileWithSubstr):
+@inside_glslc_testsuite('OptionFAutoCombinedImageSampler')
+class FAutoCombinedImageSamplerCheckHLSL(expect.ValidAssemblyFileWithSubstr):
     """Tests that the HLSL compiler combines HLSL Texture2D and SamplerState objects into SPIRV SampledImage."""
 
     shader = FileShader(HLSL_SHADER_SEPARATE_IMAGE_SAMPLER, '.hlsl')
-    glslc_args = ['-S', '-fshader-stage=frag', '-fentry-point=Frag', '-fauto-sampled-textures', shader]
+    glslc_args = ['-S', '-fshader-stage=frag', '-fentry-point=Frag', '-fauto-combined-image-sampler', shader]
     expected_assembly_substr = "%15 = OpTypeSampledImage %14\n%_ptr_UniformConstant_15 = OpTypePointer UniformConstant %15\n      %u_Tex = OpVariable %_ptr_UniformConstant_15 UniformConstant"
 
