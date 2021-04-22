@@ -339,10 +339,14 @@ def main():
                 continue
             sys.path = default_path
             sys.path.append(root)
-            mod = __import__(os.path.splitext(filename)[0])
-            for _, obj, in inspect.getmembers(mod):
-                if inspect.isclass(obj) and hasattr(obj, 'parent_testsuite'):
-                    manager.add_test(obj.parent_testsuite, obj())
+            try:
+                mod = __import__(os.path.splitext(filename)[0])
+                for _, obj, in inspect.getmembers(mod):
+                    if inspect.isclass(obj) and hasattr(obj, 'parent_testsuite'):
+                        manager.add_test(obj.parent_testsuite, obj())
+            except:
+                print("Failed to load " + filename)
+                raise
     manager.run_tests()
     if manager.num_failures > 0:
         sys.exit(-1)
