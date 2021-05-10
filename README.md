@@ -177,7 +177,7 @@ On Linux, the following tools should be installed:
 
 On Linux, if cross compiling to Windows:
 - [`mingw`](http://www.mingw.org): A GCC-based cross compiler targeting Windows
-    so that generated executables use the Micrsoft C runtime libraries.
+    so that generated executables use the Microsoft C runtime libraries.
 
 On Windows, the following tools should be installed and available on your path:
 
