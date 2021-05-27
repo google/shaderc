@@ -57,6 +57,8 @@ class string_piece {
     end_ = other.end_;
   }
 
+  string_piece& operator=(const string_piece& other) = default;
+
   // Clears the string_piece removing any reference to the original string.
   void clear() {
     begin_ = nullptr;
