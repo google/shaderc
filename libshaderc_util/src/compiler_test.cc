@@ -276,7 +276,7 @@ TEST_F(CompilerTest, RespectTargetEnvOnOpenGLShader) {
 }
 
 TEST_F(CompilerTest, RespectTargetEnvOnOpenGLShaderWhenDeducingStage) {
-  const EShLanguage stage = EShLangCount;
+  const EShLanguage stage = EShLangVertex;
 
   compiler_.SetTargetEnv(Compiler::TargetEnv::OpenGLCompat);
   EXPECT_TRUE(
