@@ -1165,15 +1165,23 @@ TEST_F(
                                   options_.get()));
 }
 
-TEST_F(CompileStringWithOptionsTest,
-       TargetEnvRespectedWhenCompilingOpenGLCoreShaderToBinary) {
-  // Confirm that kOpenGLVertexShader compiles when targeting OpenGL
-  // compatibility or core profiles.
+TEST_F(CompileStringWithOptionsTest, CompilingFailsWhenTargetingOpenGLCompat) {
+  // Confirm that kOpenGLVertexShader fails when targeting OpenGL
+  // compatibility profile.
 
   shaderc_compile_options_set_target_env(options_.get(),
                                          shaderc_target_env_opengl_compat, 0);
-  EXPECT_TRUE(CompilesToValidSpv(compiler_, kOpenGLVertexShader,
-                                 shaderc_glsl_vertex_shader, options_.get()));
+  EXPECT_FALSE(CompilesToValidSpv(compiler_, kOpenGLVertexShader,
+                                  shaderc_glsl_vertex_shader, options_.get()));
+  const std::string errors = CompilationErrors(
+      kOpenGLVertexShader, shaderc_glsl_vertex_shader, options_.get());
+  EXPECT_EQ(errors, "error: OpenGL compatibility profile is not supported");
+}
+
+TEST_F(CompileStringWithOptionsTest,
+       TargetEnvRespectedWhenCompilingOpenGLCoreShaderToBinary) {
+  // Confirm that kOpenGLVertexShader compiles when targeting OpenGL core
+  // profile.
 
   shaderc_compile_options_set_target_env(options_.get(),
                                          shaderc_target_env_opengl, 0);

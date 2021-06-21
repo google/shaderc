@@ -43,7 +43,9 @@ spv_target_env GetSpirvToolsTargetEnv(Compiler::TargetEnv env,
       break;
     case Compiler::TargetEnv::OpenGL:
       return SPV_ENV_OPENGL_4_5;
-    case Compiler::TargetEnv::OpenGLCompat:  // Deprecated
+    case Compiler::TargetEnv::OpenGLCompat:
+      // Errors out before getting here.  But the compiler wants us to handle
+      // enum anyway.
       return SPV_ENV_OPENGL_4_5;
   }
   assert(false && "unexpected target environment or version");

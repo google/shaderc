@@ -93,7 +93,7 @@ typedef enum {
   shaderc_profile_none,  // Used if and only if GLSL version did not specify
                          // profiles.
   shaderc_profile_core,
-  shaderc_profile_compatibility,
+  shaderc_profile_compatibility,  // Disabled. This generates an error
   shaderc_profile_es,
 } shaderc_profile;
 

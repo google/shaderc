@@ -80,6 +80,8 @@ EShMessages GetMessageRules(shaderc_util::Compiler::TargetEnv env,
   }
   switch (env) {
     case Compiler::TargetEnv::OpenGLCompat:
+      // The compiler will have already errored out before now.
+      // But we need to handle this enum.
       break;
     case Compiler::TargetEnv::OpenGL:
       result = static_cast<EShMessages>(result | EShMsgSpvRules);
@@ -724,7 +726,9 @@ GlslangClientInfo GetGlslangClientInfo(
              << int(env);
       }
       break;
-    case Compiler::TargetEnv::OpenGLCompat:  // TODO(dneto): remove this
+    case Compiler::TargetEnv::OpenGLCompat:
+      errs << "error: OpenGL compatibility profile is not supported";
+      break;
     case Compiler::TargetEnv::OpenGL:
       result.client = glslang::EShClientOpenGL;
       if (env_version == Compiler::TargetEnvVersion::Default ||

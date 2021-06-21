@@ -1,7 +1,7 @@
 Revision history for Shaderc
 
 v2021.1-dev 2021-04-21
- - Start v2021.1 development
+ - Disable --target-env=opengl_compat with an explicit error message
 
 v2021.0 2021-04-21
  - Refresh dependencies (in DEPS):

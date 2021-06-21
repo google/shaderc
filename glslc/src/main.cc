@@ -445,6 +445,9 @@ int main(int argc, char** argv) {
         version = shaderc_env_version_opengl_4_5;
       } else if (target_env_str == "opengl_compat") {
         target_env = shaderc_target_env_opengl_compat;
+        std::cerr << "glslc: error: opengl_compat is no longer supported"
+                  << std::endl;
+        return 1;
       } else {
         std::cerr << "glslc: error: invalid value '" << target_env_str
                   << "' in '--target-env=" << target_env_str << "'"

@@ -1033,10 +1033,9 @@ TEST_F(CppInterface, TargetEnvCompileOptionsOpenGLCompatibilityShadersFail) {
        }
   )";
 
-  EXPECT_THAT(
-      CompilationErrors(kGlslShader, shaderc_glsl_fragment_shader, options_),
-      HasSubstr(
-          "compilation for SPIR-V does not support the compatibility profile"));
+  const auto errors =
+      CompilationErrors(kGlslShader, shaderc_glsl_fragment_shader, options_);
+  EXPECT_EQ(errors, "error: OpenGL compatibility profile is not supported");
 }
 
 std::string BarrierComputeShader() {
