@@ -249,6 +249,7 @@ older versions of Shaderc and its dependencies.
 * **Rust:** [shaderc-rs][shaderc-rs]
 * **Go:** [gshaderc][gshaderc]
 * **.NET:** [shaderc.net][shadercdotnet]
+* **Common Lisp:** [shadercl][shaderccommonlisp]
 
 [khr-glslang]: https://github.com/KhronosGroup/glslang
 [spirv-tools]: https://github.com/KhronosGroup/SPIRV-Tools
@@ -259,3 +260,4 @@ older versions of Shaderc and its dependencies.
 [dawn]: https://dawn.googlesource.com/dawn
 [gshaderc]: https://github.com/celer/gshaderc
 [shadercdotnet]: https://github.com/jpbruyere/shaderc.net
+[shaderccommonlisp]: https://github.com/JolifantoBambla/shadercl
