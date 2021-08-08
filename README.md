@@ -95,7 +95,7 @@ See Glslang's `ENABLE_HLSL` CMake setting.)
 ```sh
 git clone https://github.com/google/shaderc $SOURCE_DIR
 cd $SOURCE_DIR
-./utils/git-sync-deps
+python ./utils/git-sync-deps.py
 cd $SOURCE_DIR/
 ```
 
