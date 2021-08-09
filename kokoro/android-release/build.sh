@@ -37,7 +37,7 @@ unzip -q android-ndk-r18b-linux-x86_64.zip
 NDK=$PWD/android-ndk-r18b
 
 cd $SRC
-./utils/git-sync-deps
+python ./utils/git-sync-deps.py
 
 mkdir build
 cd $SRC/build
