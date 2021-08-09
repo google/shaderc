@@ -25,7 +25,7 @@ set VS_VERSION=%2
 set PATH=C:\python36;%PATH%
 
 cd %SRC%
-python utils\git-sync-deps
+python utils\git-sync-deps.py
 
 cmake --version
 
