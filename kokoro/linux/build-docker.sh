@@ -58,7 +58,7 @@ then
 fi
 
 cd $ROOT_DIR
-./utils/git-sync-deps
+python ./utils/git-sync-deps.py
 
 mkdir build
 cd $ROOT_DIR/build
