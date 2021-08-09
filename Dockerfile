@@ -29,7 +29,7 @@ WORKDIR /root
 RUN git clone https://github.com/google/shaderc
 
 WORKDIR shaderc
-RUN ./utils/git-sync-deps
+RUN python ./utils/git-sync-deps.py
 
 WORKDIR build
 RUN cmake -GNinja \
