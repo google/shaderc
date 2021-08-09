@@ -36,7 +36,7 @@ export ANDROID_NDK=$PWD/android-ndk-r18b
 
 # Get shaderc dependencies.
 cd $SRC
-./utils/git-sync-deps
+python ./utils/git-sync-deps.py
 
 cd $SRC
 mkdir build
