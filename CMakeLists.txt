@@ -50,6 +50,16 @@ else()
   message(STATUS "Configuring Shaderc to avoid building examples.")
 endif()
 
+option(SHADERC_SKIP_COPYRIGHT_CHECK "Skip copyright check" ${SHADERC_SKIP_COPYRIGHT_CHECK})
+if(NOT ${SHADERC_SKIP_COPYRIGHT_CHECK})
+  set(SHADERC_ENABLE_COPYRIGHT_CHECK ON)
+endif()
+if(${SHADERC_ENABLE_COPYRIGHT_CHECK})
+  message(STATUS "Configuring Shaderc to check copyrights.")
+else()
+  message(STATUS "Configuring Shaderc to avoid checking copyrights.")
+endif()
+
 option(SHADERC_ENABLE_WERROR_COMPILE "Enable passing -Werror to compiler, if available" ON)
 
 set (CMAKE_CXX_STANDARD 11)
@@ -82,11 +92,13 @@ endif()
 
 find_host_package(PythonInterp 3 REQUIRED)
 
-add_custom_target(check-copyright ALL
-  ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/add_copyright.py
-  --check
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  COMMENT "Check copyright")
+if (SHADERC_ENABLE_COPYRIGHT_CHECK)
+  add_custom_target(check-copyright ALL
+    ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/add_copyright.py
+    --check
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Check copyright")
+endif()
 
 add_custom_target(add-copyright
   ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/add_copyright.py
