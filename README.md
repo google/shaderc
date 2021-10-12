@@ -96,7 +96,6 @@ See Glslang's `ENABLE_HLSL` CMake setting.)
 git clone https://github.com/google/shaderc $SOURCE_DIR
 cd $SOURCE_DIR
 ./utils/git-sync-deps
-cd $SOURCE_DIR/
 ```
 
 **Note:** The [known-good](https://github.com/google/shaderc/tree/known-good)
