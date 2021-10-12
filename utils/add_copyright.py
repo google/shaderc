@@ -62,7 +62,7 @@ def filtered_descendants(glob):
     """Returns glob-matching filenames under the current directory, but skips
     some irrelevant paths."""
     return find('.', glob, ['third_party', 'external', 'build*', 'out*',
-                            'CompilerIdCXX', '.venv'])
+                            'CompilerIdCXX', '.venv', 'glslang'])
 
 
 def skip(line):
