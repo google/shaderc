@@ -52,8 +52,8 @@ $(1)/combine.ar: $(addprefix $(1)/, $(ALL_LIBS))
 
 $(1)/libshaderc_combined.a: $(addprefix $(1)/, $(ALL_LIBS)) $(1)/combine.ar
 	@echo "[$(TARGET_ARCH_ABI)] Combine: libshaderc_combined.a <= $(ALL_LIBS)"
-	@cd $(1) && $(2)ar -M < combine.ar && cd $(ROOT_SHADERC_PATH)
-	@$(2)objcopy --strip-debug $(1)/libshaderc_combined.a
+	@cd $(1) && $(TARGET_AR) -M < combine.ar && cd $(ROOT_SHADERC_PATH)
+	@$(LLVM_TOOLCHAIN_PREFIX)llvm-objcopy$(HOST_EXEEXT) --strip-debug $(1)/libshaderc_combined.a
 
 $(NDK_APP_LIBS_OUT)/$(APP_STL)/$(TARGET_ARCH_ABI)/libshaderc.a: \
 		$(1)/libshaderc_combined.a
