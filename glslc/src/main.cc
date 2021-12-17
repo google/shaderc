@@ -170,7 +170,7 @@ Options:
                     the default for vulkan1.1 is spv1.3,
                     the default for vulkan1.2 is spv1.5.
                     Values are:
-                        spv1.0, spv1.1, spv1.2, spv1.3, spv1.4, spv1.5
+                        spv1.0, spv1.1, spv1.2, spv1.3, spv1.4, spv1.5, spv1.6
   --version         Display compiler version information.
   -w                Suppresses all warning messages.
   -Werror           Treat all warnings as errors.
@@ -470,6 +470,8 @@ int main(int argc, char** argv) {
         ver = shaderc_spirv_version_1_4;
       } else if (ver_str == "spv1.5") {
         ver = shaderc_spirv_version_1_5;
+      } else if (ver_str == "spv1.6") {
+        ver = shaderc_spirv_version_1_6;
       } else {
         std::cerr << "glslc: error: invalid value '" << ver_str
                   << "' in '--target-spv=" << ver_str << "'" << std::endl;

@@ -97,6 +97,7 @@ class Compiler {
     v1_3 = 0x010300u,
     v1_4 = 0x010400u,
     v1_5 = 0x010500u,
+    v1_6 = 0x010600u,
   };
 
   enum class OutputType {

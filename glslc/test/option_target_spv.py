@@ -78,6 +78,13 @@ class TestTargetSpv1p5(expect.ValidObjectFile1_5):
     glslc_args = ['--target-spv=spv1.5', '-c', shader]
 
 
+@inside_glslc_testsuite('OptionTargetSpv')
+class TestTargetSpv1p5(expect.ValidObjectFile1_6):
+    """Tests that compiling to spv1.6 succeeds and generates SPIR-V 1.6 binary."""
+    shader = FileShader(vulkan_vertex_shader(), '.vert')
+    glslc_args = ['--target-spv=spv1.6', '-c', shader]
+
+
 ### Option parsing error cases
 
 @inside_glslc_testsuite('OptionTargetSpv')
