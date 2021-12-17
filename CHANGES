@@ -1,7 +1,9 @@
 Revision history for Shaderc
 
 v2021.4-dev 2021-11-11
- - Start v2021.4 development
+ - Support targeting SPIR-V 1.6
+ - Updated copyright check: Excludes Glslang generated files when
+   building in source tree
 
 v2021.3 2021-11-11
  - Add build switch to disable copyright check

@@ -60,7 +60,8 @@ typedef enum {
   shaderc_spirv_version_1_2 = 0x010200u,
   shaderc_spirv_version_1_3 = 0x010300u,
   shaderc_spirv_version_1_4 = 0x010400u,
-  shaderc_spirv_version_1_5 = 0x010500u
+  shaderc_spirv_version_1_5 = 0x010500u,
+  shaderc_spirv_version_1_6 = 0x010600u
 } shaderc_spirv_version;
 
 #ifdef __cplusplus
