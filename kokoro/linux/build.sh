@@ -24,7 +24,10 @@ ROOT_DIR="$( cd "${SCRIPT_DIR}/../.." >/dev/null 2>&1 && pwd )"
 CONFIG=$1
 COMPILER=$2
 
+# --privileged is required for some sanitizer builds, as they seem to require
+# PTRACE privileges
 docker run --rm -i \
+  --privileged \
   --volume "${ROOT_DIR}:${ROOT_DIR}" \
   --volume "${KOKORO_ARTIFACTS_DIR}:${KOKORO_ARTIFACTS_DIR}" \
   --workdir "${ROOT_DIR}" \
