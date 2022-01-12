@@ -52,8 +52,8 @@ $(1)/combine.ar: $(addprefix $(1)/, $(ALL_LIBS))
 
 $(1)/libshaderc_combined.a: $(addprefix $(1)/, $(ALL_LIBS)) $(1)/combine.ar
 	@echo "[$(TARGET_ARCH_ABI)] Combine: libshaderc_combined.a <= $(ALL_LIBS)"
-	@cd $(1) && $(2)ar -M < combine.ar && cd $(ROOT_SHADERC_PATH)
-	@$(2)objcopy --strip-debug $(1)/libshaderc_combined.a
+	@cd $(1) && $(TARGET_AR) -M < combine.ar && cd $(ROOT_SHADERC_PATH)
+	@$(TARGET_STRIP) --strip-debug $(1)/libshaderc_combined.a
 
 $(NDK_APP_LIBS_OUT)/$(APP_STL)/$(TARGET_ARCH_ABI)/libshaderc.a: \
 		$(1)/libshaderc_combined.a
@@ -73,4 +73,4 @@ endef
 
 libshaderc_combined: $(SHADERC_HEADERS_IN_OUT_DIR)
 
-$(eval $(call gen_libshaderc,$(TARGET_OUT),$(TOOLCHAIN_PREFIX)))
+$(eval $(call gen_libshaderc,$(TARGET_OUT)))
