@@ -44,13 +44,21 @@ cd $SRC/build
 
 # Invoke the build.
 BUILD_SHA=${KOKORO_GITHUB_COMMIT:-$KOKORO_GITHUB_PULL_REQUEST_COMMIT}
-echo $(date): Starting ndk-build ...
-$ANDROID_NDK/ndk-build \
-  -C $SRC/android_test \
-  NDK_APP_OUT=`pwd` \
-  V=1 \
-  SPVTOOLS_LOCAL_PATH=$SRC/third_party/spirv-tools \
-  SPVHEADERS_LOCAL_PATH=$SRC/third_party/spirv-headers \
-  -j 8
+
+function do_ndk_build () {
+  echo $(date): Starting ndk-build $@...
+  $ANDROID_NDK/ndk-build \
+    -C $SRC/android_test \
+    NDK_APP_OUT=`pwd` \
+    V=1 \
+    SPVTOOLS_LOCAL_PATH=$SRC/third_party/spirv-tools \
+    SPVHEADERS_LOCAL_PATH=$SRC/third_party/spirv-headers \
+    -j 8 $@
+}
+
+do_ndk_build
+
+# Check that libshaderc_combined builds
+do_ndk_build libshaderc_combined
 
 echo $(date): ndk-build completed.
