@@ -1,5 +1,8 @@
 Revision history for Shaderc
 
+v2022.0-dev 2022-01-27
+- Start v2022.0 development
+
 v2021.4 2022-01-27
  - Support Vulkan 1.3
  - Support targeting SPIR-V 1.6, which is the default for Vulkan 1.3
