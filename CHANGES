@@ -1,9 +1,12 @@
 Revision history for Shaderc
 
-v2021.4-dev 2021-11-11
- - Support targeting SPIR-V 1.6
+v2021.4 2022-01-27
+ - Support Vulkan 1.3
+ - Support targeting SPIR-V 1.6, which is the default for Vulkan 1.3
  - Updated copyright check: Excludes Glslang generated files when
    building in source tree
+ - Fix Android.mk rules for building libshaderc_combined, to adapt to more
+   recent NDKs that have removed the GNU binutils.
 
 v2021.3 2021-11-11
  - Add build switch to disable copyright check
