@@ -163,6 +163,7 @@ Options:
                         vulkan1.0       # The default
                         vulkan1.1
                         vulkan1.2
+                        vulkan1.3
                         vulkan          # Same as vulkan1.0
                         opengl4.5
                         opengl          # Same as opengl4.5
@@ -173,6 +174,7 @@ Options:
                     For example, default for vulkan1.0 is spv1.0, and
                     the default for vulkan1.1 is spv1.3,
                     the default for vulkan1.2 is spv1.5.
+                    the default for vulkan1.3 is spv1.6.
                     Values are:
                         spv1.0, spv1.1, spv1.2, spv1.3, spv1.4, spv1.5, spv1.6
   --version         Display compiler version information.

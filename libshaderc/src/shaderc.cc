@@ -305,6 +305,10 @@ shaderc_util::Compiler::TargetEnvVersion GetCompilerTargetEnvVersion(
       version_number) {
     return Compiler::TargetEnvVersion::Vulkan_1_2;
   }
+  if (static_cast<uint32_t>(Compiler::TargetEnvVersion::Vulkan_1_3) ==
+      version_number) {
+    return Compiler::TargetEnvVersion::Vulkan_1_3;
+  }
   if (static_cast<uint32_t>(Compiler::TargetEnvVersion::OpenGL_4_5) ==
       version_number) {
     return Compiler::TargetEnvVersion::OpenGL_4_5;

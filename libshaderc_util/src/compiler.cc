@@ -720,6 +720,9 @@ GlslangClientInfo GetGlslangClientInfo(
       } else if (env_version == Compiler::TargetEnvVersion::Vulkan_1_2) {
         result.client_version = glslang::EShTargetVulkan_1_2;
         result.target_language_version = glslang::EShTargetSpv_1_5;
+      } else if (env_version == Compiler::TargetEnvVersion::Vulkan_1_3) {
+        result.client_version = glslang::EShTargetVulkan_1_3;
+        result.target_language_version = glslang::EShTargetSpv_1_6;
       } else {
         errs << "error:" << error_tag << ": Invalid target client version "
              << static_cast<uint32_t>(env_version) << " for Vulkan environment "
