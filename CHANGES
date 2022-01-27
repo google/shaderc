@@ -1,7 +1,7 @@
 Revision history for Shaderc
 
 v2022.0-dev 2022-01-27
-- Start v2022.0 development
+- Update to Glslang 11.8.0
 
 v2021.4 2022-01-27
  - Support Vulkan 1.3
