@@ -1,7 +1,9 @@
 Revision history for Shaderc
 
-v2022.1-dev 2022-01-27
- - Start v2022.1 development 
+v2022.1 2022-01-27
+ - Update DEPS to include two fixes on top of SPIRV-Tools v2022.1:
+    - Validator handles Nontemporal image operand
+    - Optimizer handles RayQueryKHR type
 
 v2022.0 2022-01-27
  - Update to Glslang 11.8.0
