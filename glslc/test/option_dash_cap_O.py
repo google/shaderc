@@ -43,6 +43,7 @@ ASSEMBLY_WITH_DEBUG_SOURCE = [
     '               OpName %main "main"\n',
     '       %void = OpTypeVoid\n',
     '          %4 = OpTypeFunction %void\n',
+    '               OpLine %1 2 11\n',
     '       %main = OpFunction %void None %4\n',
     '          %6 = OpLabel\n',
     '               OpReturn\n',
