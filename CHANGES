@@ -1,7 +1,7 @@
 Revision history for Shaderc
 
 v2022.2-dev 2022-02-03
- - Start v2022.2 development
+ - Update glslc tests for newer Glslang debug output
 
 v2022.1 2022-02-03
  - Update DEPS to include two fixes on top of SPIRV-Tools v2022.1:
