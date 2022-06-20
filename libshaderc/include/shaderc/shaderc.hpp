@@ -342,6 +342,11 @@ class CompileOptions {
     shaderc_compile_options_set_hlsl_functionality1(options_, enable);
   }
 
+  // Sets whether 16-bit types are supported in HLSL or not.
+  void SetHlsl16BitTypes(bool enable) {
+    shaderc_compile_options_set_hlsl_16bit_types(options_, enable);
+  }
+
   // Sets whether the compiler should invert position.Y output in vertex shader.
   void SetInvertY(bool enable) {
     shaderc_compile_options_set_invert_y(options_, enable);

@@ -552,6 +552,11 @@ void shaderc_compile_options_set_hlsl_functionality1(
   options->compiler.EnableHlslFunctionality1(enable);
 }
 
+void shaderc_compile_options_set_hlsl_16bit_types(
+    shaderc_compile_options_t options, bool enable) {
+  options->compiler.EnableHlsl16BitTypes(enable);
+}
+
 void shaderc_compile_options_set_invert_y(
     shaderc_compile_options_t options, bool enable) {
   options->compiler.EnableInvertY(enable);
