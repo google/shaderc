@@ -14,8 +14,10 @@
 
 cmake_minimum_required(VERSION 2.8.12)
 
-# Enable MSVC Runtime Library Property
-cmake_policy(SET CMP0091 NEW)
+if (POLICY CMP00091)
+  # Enable MSVC Runtime Library Property
+  cmake_policy(SET CMP0091 NEW)
+endif()
 
 project(shaderc)
 enable_testing()
