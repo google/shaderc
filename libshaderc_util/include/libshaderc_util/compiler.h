@@ -210,6 +210,7 @@ class Compiler {
         hlsl_offsets_(false),
         hlsl_legalization_enabled_(true),
         hlsl_functionality1_enabled_(false),
+        hlsl_16bit_types_enabled_(false),
         invert_y_enabled_(false),
         nan_clamp_(false),
         hlsl_explicit_bindings_() {}
@@ -227,6 +228,9 @@ class Compiler {
 
   // Enables or disables extension SPV_GOOGLE_hlsl_functionality1
   void EnableHlslFunctionality1(bool enable);
+
+  // Enables or disables HLSL 16-bit types.
+  void EnableHlsl16BitTypes(bool enable);
 
   // Enables or disables invert position.Y output in vertex shader.
   void EnableInvertY(bool enable);
@@ -527,6 +531,9 @@ class Compiler {
 
   // True if the compiler should support extension SPV_GOOGLE_hlsl_functionality1.
   bool hlsl_functionality1_enabled_;
+
+  // True if the compiler should support 16-bit HLSL types.
+  bool hlsl_16bit_types_enabled_;
 
   // True if the compiler should invert position.Y output in vertex shader.
   bool invert_y_enabled_;

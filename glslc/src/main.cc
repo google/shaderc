@@ -67,13 +67,15 @@ Options:
   -fentry-point=<name>
                     Specify the entry point name for HLSL compilation, for
                     all subsequent source files.  Default is "main".
+  -fhlsl-16bit-types
+                    Enable 16-bit type support for HLSL.
   -fhlsl_functionality1, -fhlsl-functionality1
                     Enable extension SPV_GOOGLE_hlsl_functionality1 for HLSL
                     compilation.
-  -finvert-y        Invert position.Y output in vertex shader.
   -fhlsl-iomap      Use HLSL IO mappings for bindings.
   -fhlsl-offsets    Use HLSL offset rules for packing members of blocks.
                     Affects only GLSL.  HLSL rules are always used for HLSL.
+  -finvert-y        Invert position.Y output in vertex shader.
   -flimit=<settings>
                     Specify resource limits. Each limit is specified by a limit
                     name followed by an integer value.  Tokens should be
@@ -322,6 +324,8 @@ int main(int argc, char** argv) {
     } else if (arg == "-fhlsl_functionality1" ||
                arg == "-fhlsl-functionality1") {
       compiler.options().SetHlslFunctionality1(true);
+    } else if (arg == "-fhlsl-16bit-types") {
+      compiler.options().SetHlsl16BitTypes(true);
     } else if (arg == "-finvert-y") {
       compiler.options().SetInvertY(true);
     } else if (arg == "-fnan-clamp") {

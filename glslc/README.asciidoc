@@ -20,6 +20,7 @@ glslc [--show-limits]
 glslc [-c|-S|-E]
       [-x ...] [-std=standard]
       [ ... options for resource bindings ... ]
+      [-fhlsl-16bit-types]
       [-fhlsl-offsets]
       [-fhlsl-functionality1]
       [-fentry-point=<name>]
@@ -376,6 +377,11 @@ specified) will trigger an error.
                  Content of output_file.txt: +
                  {0x07230203, 0x00010000, 0x00080001, 0x00000006...}
 |===
+
+[[option-fhlsl-16bit-types]]
+==== `-fhlsl-16bit-types`
+
+Enables 16bit types for HLSL compilation.
 
 [[option-fhlsl-offsets]]
 ==== `-fhlsl-offsets`

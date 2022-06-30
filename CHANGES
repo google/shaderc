@@ -1,6 +1,8 @@
 Revision history for Shaderc
 
 v2022.2-dev 2022-02-03
+ - Support 16bit types in HLSL, via glslc option -fhlsl-16bit-types
+   and associated library API methods. PR #1251
  - Update glslc tests for newer Glslang debug output
 
 v2022.1 2022-02-03
