@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (C) 2017 Google Inc.
+# Copyright (C) 2020-2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,46 +14,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Android Build Script.
+# Linux Build Script.
 
+set -e # Fail on any error.
 
-# Fail on any error.
-set -e
-# Display commands being run.
-set -x
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd )"
+ROOT_DIR="$( cd "${SCRIPT_DIR}/../.." >/dev/null 2>&1 && pwd )"
 
-BUILD_ROOT=$PWD
-SRC=$PWD/github/shaderc
-TARGET_ARCH=$1
+TARGET_ARCH="$1"
 
-# Get NINJA.
-wget -q https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linux.zip
-unzip -q ninja-linux.zip
-NINJA=$PWD/ninja
-
-# Get Android NDK.
-wget -q https://dl.google.com/android/repository/android-ndk-r18b-linux-x86_64.zip
-unzip -q android-ndk-r18b-linux-x86_64.zip
-NDK=$PWD/android-ndk-r18b
-
-cd $SRC
-./utils/git-sync-deps
-
-mkdir build
-cd $SRC/build
-
-# Invoke the build.
-BUILD_SHA=${KOKORO_GITHUB_COMMIT:-$KOKORO_GITHUB_PULL_REQUEST_COMMIT}
-echo $(date): Starting build...
-cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_MAKE_PROGRAM=$NINJA -DANDROID_ABI=$TARGET_ARCH -DSHADERC_SKIP_TESTS=ON -DSPIRV_SKIP_TESTS=ON -DCMAKE_TOOLCHAIN_FILE=$NDK/build/cmake/android.toolchain.cmake -DANDROID_NDK=$NDK ..
-
-echo $(date): Build glslang...
-$NINJA glslangValidator
-
-echo $(date): Build everything...
-$NINJA
-
-echo $(date): Check Shaderc for copyright notices...
-$NINJA check-copyright
-
-echo $(date): Build completed.
+# --privileged is required for some sanitizer builds, as they seem to require
+# PTRACE privileges
+docker run --rm -i \
+  --privileged \
+  --volume "${ROOT_DIR}:${ROOT_DIR}" \
+  --volume "${KOKORO_ARTIFACTS_DIR}:${KOKORO_ARTIFACTS_DIR}" \
+  --workdir "${ROOT_DIR}" \
+  --env ROOT_DIR="${ROOT_DIR}" \
+  --env SCRIPT_DIR="${SCRIPT_DIR}" \
+  --env TARGET_ARCH="${TARGET_ARCH}" \
+  --env KOKORO_ARTIFACTS_DIR="${KOKORO_ARTIFACTS_DIR}" \
+  --entrypoint "${SCRIPT_DIR}/build-docker.sh" \
+  "gcr.io/shaderc-build/radial-build:latest"

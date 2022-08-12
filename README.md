@@ -162,7 +162,8 @@ API in your project.
 For building, testing, and profiling Shaderc, the following tools should be
 installed regardless of your OS:
 
-- [CMake](http://www.cmake.org/): for generating compilation targets.
+- [CMake](http://www.cmake.org/) 3.14 or later: for generating compilation targets.
+    - Shaderc is tested with cmake 3.17.2
 - [Python 3](http://www.python.org/): for utility scripts and running the test suite.
 
 On Linux, the following tools should be installed:
