@@ -220,6 +220,20 @@ test.vert
 /code $ glslc -c -o - test.vert | spirv-dis
 ```
 
+### Building and installing Shaderc using vcpkg 
+
+Alternatively, you can build and install shaderc using [vcpkg](https://github.com/Microsoft/vcpkg/) dependency manager:
+
+```sh
+git clone https://github.com/Microsoft/vcpkg.git
+cd vcpkg
+./bootstrap-vcpkg.sh
+./vcpkg integrate install
+./vcpkg install shaderc
+```
+
+The shaderc port in vcpkg is kept up to date by Microsoft team members and community contributors. If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
+
 ## Bug tracking
 
 We track bugs using GitHub -- click on the "Issues" button on
