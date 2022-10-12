@@ -1,7 +1,8 @@
 Revision history for Shaderc
 
-v2022.3-dev 2022-08-11
- - Start v2022.3 development
+v2022.3 2022-10-12
+ - #1264: Implement defaults for SPV_EXT_mesh_shader builtins
+ - Update SPIRV-Tools to v2022.4
 
 v2022.2 2022-08-11
  - Require CMake 3.14 or later
