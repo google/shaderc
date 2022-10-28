@@ -92,7 +92,7 @@ class OutputFileBinaryAvoidsCRLFTranslation(expect.ReturnCodeIsZero,
         num_newlines = len(newlines)
         if num_newlines % 4 == 0:
             return False, "Bad test. Need nontrivial number of newlines"
-        if num_newlines != 3:
+        if num_newlines != 2:
             return False, ("Update this test. Expected 3 newlines in the "
                            "binary, but found {}").format(num_newlines)
         return self.verify_binary_length_and_header(bytes(status.stdout))
