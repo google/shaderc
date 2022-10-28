@@ -23,7 +23,7 @@ EMPTY_SHADER_IN_CWD = Directory('.', [File('shader.vert', MINIMAL_SHADER)])
 ASSEMBLY_WITH_DEBUG_SOURCE = [
     '; SPIR-V\n',
     '; Version: 1.0\n',
-    '; Generator: Google Shaderc over Glslang; 10\n',
+    '; Generator: Google Shaderc over Glslang; 11\n',
     '; Bound: 7\n',
     '; Schema: 0\n',
     '               OpCapability Shader\n',
@@ -52,7 +52,7 @@ ASSEMBLY_WITH_DEBUG_SOURCE = [
 ASSEMBLY_WITH_DEBUG = [
     '; SPIR-V\n',
     '; Version: 1.0\n',
-    '; Generator: Google Shaderc over Glslang; 10\n',
+    '; Generator: Google Shaderc over Glslang; 11\n',
     '; Bound: 6\n',
     '; Schema: 0\n',
     '               OpCapability Shader\n',
@@ -73,7 +73,7 @@ ASSEMBLY_WITH_DEBUG = [
 ASSEMBLY_WITHOUT_DEBUG = [
     '; SPIR-V\n',
     '; Version: 1.0\n',
-    '; Generator: Google Shaderc over Glslang; 10\n',
+    '; Generator: Google Shaderc over Glslang; 11\n',
     '; Bound: 6\n',
     '; Schema: 0\n',
     '               OpCapability Shader\n',
