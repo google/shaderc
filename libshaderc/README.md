@@ -7,8 +7,8 @@ A library for compiling shader strings into SPIR-V.
 There are two main shaderc libraries that are created during a CMake
 compilation. The first is `libshaderc`, which is a static library
 containing just the functionality exposed by libshaderc. It depends
-on other compilation targets `glslang`, `OSDependent`, `OGLCompiler`,
-`shaderc_util`, `SPIRV`, `HLSL`, `SPIRV-Tools`, and `SPIRV-Tools-opt`.
+on other compilation targets `glslang`, `shaderc_util`, `SPIRV`,
+`HLSL`, `SPIRV-Tools`, and `SPIRV-Tools-opt`.
 
 The other is `libshaderc_combined`, which is a static library containing
 libshaderc and all of its dependencies.
