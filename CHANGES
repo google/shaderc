@@ -1,5 +1,8 @@
 Revision history for Shaderc
 
+v2022.5-dev 2022-11-30
+ - Start v2022.5 development
+
 v2022.4 2022-11-30
  - Update to Glslang 11
  - Update SPIRV-Tools, SPIRV-Headers dependencies
