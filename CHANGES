@@ -1,7 +1,10 @@
 Revision history for Shaderc
 
-v2022.4-dev 2022-10-12
- - Start v2202.4 development
+v2022.4 2022-11-30
+ - Update to Glslang 11
+ - Update SPIRV-Tools, SPIRV-Headers dependencies
+ - Add Cmake BUNDLE DESTINATION option for target install
+ - The code coverage build is no longer being tested
 
 v2022.3 2022-10-12
  - #1264: Implement defaults for SPV_EXT_mesh_shader builtins
