@@ -166,15 +166,6 @@ installed regardless of your OS:
     - Shaderc is tested with cmake 3.17.2
 - [Python 3](http://www.python.org/): for utility scripts and running the test suite.
 
-On Linux, the following tools should be installed:
-
-- [`gcov`](https://gcc.gnu.org/onlinedocs/gcc/Gcov.html): for testing code
-    coverage, provided by the `gcc` package on Ubuntu.
-- [`lcov`](http://ltp.sourceforge.net/coverage/lcov.php): a graphical frontend
-    for `gcov`, provided by the `lcov` package on Ubuntu.
-- [`genhtml`](http://linux.die.net/man/1/genhtml): for creating reports in html
-    format from `lcov` output, provided by the `lcov` package on Ubuntu.
-
 On Linux, if cross compiling to Windows:
 - [`mingw`](http://www.mingw.org): A GCC-based cross compiler targeting Windows
     so that generated executables use the Microsoft C runtime libraries.
@@ -224,20 +215,6 @@ test.vert
 
 We track bugs using GitHub -- click on the "Issues" button on
 [the project's GitHub page](https://github.com/google/shaderc).
-
-## Test coverage
-
-On Linux, you can obtain test coverage as follows:
-
-```sh
-cd $BUILD_DIR
-cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DENABLE_CODE_COVERAGE=ON $SOURCE_DIR
-ninja
-ninja report-coverage
-```
-
-Then the coverage report can be found under the `$BUILD_DIR/coverage-report`
-directory.
 
 ## Bindings
 
