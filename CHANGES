@@ -2,6 +2,7 @@ Revision history for Shaderc
 
 v2022.5-dev 2022-11-30
  - Start v2022.5 development
+ - Removed support for GCC-based code coverage builds
 
 v2022.4 2022-11-30
  - Update to Glslang 11
