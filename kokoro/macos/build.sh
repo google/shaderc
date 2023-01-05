@@ -32,7 +32,7 @@ chmod +x ninja
 export PATH="$PWD:$PATH"
 
 cd $SRC
-./utils/git-sync-deps
+./utils/git-sync-deps --treeless
 
 mkdir build
 cd $SRC/build

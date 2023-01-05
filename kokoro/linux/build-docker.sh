@@ -58,7 +58,7 @@ then
 fi
 
 cd $ROOT_DIR
-./utils/git-sync-deps
+./utils/git-sync-deps --treeless
 
 mkdir build
 cd $ROOT_DIR/build
