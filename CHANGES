@@ -1,8 +1,11 @@
 Revision history for Shaderc
 
-v2022.5-dev 2022-11-30
- - Start v2022.5 development
- - Removed support for GCC-based code coverage builds
+v2023.1 2022-01-13
+ - General/Build
+   - Removed support for GCC-based code coverage builds
+   - Update minimum CMake to 3.17.2
+ - Fix C++20 compatibility: explicitly construct string_piece when
+   comparing to `char*`
 
 v2022.4 2022-11-30
  - Update to Glslang 11
