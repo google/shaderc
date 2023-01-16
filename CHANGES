@@ -1,5 +1,8 @@
 Revision history for Shaderc
 
+v2023.2-dev 2022-01-13
+ - Start v2023.2 development
+
 v2023.1 2022-01-13
  - General/Build
    - Removed support for GCC-based code coverage builds
