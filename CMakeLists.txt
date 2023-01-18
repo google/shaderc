@@ -68,7 +68,7 @@ endif()
 
 option(SHADERC_ENABLE_WERROR_COMPILE "Enable passing -Werror to compiler, if available" ON)
 
-set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_STANDARD 17)
 
 include(GNUInstallDirs)
 include(cmake/setup_build.cmake)
