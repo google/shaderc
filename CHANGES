@@ -1,5 +1,8 @@
 Revision history for Shaderc
 
+v2023.3-dev 2022-01-18
+ - Start Shaderc v2023.3 development
+
 v2023.2 2022-01-18
  - Update DEPS to pull in SPIRV-Tools bugfix #5049
 
