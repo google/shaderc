@@ -87,6 +87,9 @@ Options:
                     a NaN operand, the other operand is returned. Similarly,
                     the clamp builtin will favour the non-NaN operands, as if
                     clamp were implemented as a composition of max and min.
+  -fpreserve-bindings
+                    Preserve all binding declarations, even if those bindings
+                    are not used.
   -fresource-set-binding [stage] <reg0> <set0> <binding0>
                         [<reg1> <set1> <binding1>...]
                     Explicitly sets the descriptor set and binding for
@@ -330,6 +333,8 @@ int main(int argc, char** argv) {
       compiler.options().SetInvertY(true);
     } else if (arg == "-fnan-clamp") {
       compiler.options().SetNanClamp(true);
+    } else if (arg.starts_with("-fpreserve-bindings")) {
+      compiler.options().SetPreserveBindings(true);
     } else if (((u_kind = shaderc_uniform_kind_image),
                 (arg == "-fimage-binding-base")) ||
                ((u_kind = shaderc_uniform_kind_texture),
