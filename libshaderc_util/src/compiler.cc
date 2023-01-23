@@ -29,6 +29,7 @@
 #include "libshaderc_util/spirv_tools_wrapper.h"
 #include "libshaderc_util/string_piece.h"
 #include "libshaderc_util/version_profile.h"
+#include "spirv-tools/libspirv.hpp"
 
 namespace {
 using shaderc_util::string_piece;
@@ -348,9 +349,12 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
                     enabled_opt_passes_.end());
 
   if (!opt_passes.empty()) {
+    spvtools::OptimizerOptions opt_options;
+    opt_options.set_preserve_bindings(preserve_bindings_);
+
     std::string opt_errors;
-    if (!SpirvToolsOptimize(target_env_, target_env_version_,
-                            opt_passes, &spirv, &opt_errors)) {
+    if (!SpirvToolsOptimize(target_env_, target_env_version_, opt_passes,
+                            opt_options, &spirv, &opt_errors)) {
       *error_stream << "shaderc: internal error: compilation succeeded but "
                        "failed to optimize: "
                     << opt_errors << "\n";

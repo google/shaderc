@@ -437,6 +437,13 @@ layout(location = 1) in vec4 x;
 }
 ----
 
+[[option-fpreserve-bindings
+==== `-fpreserve-bindings`
+
+Directs the optimizer to preserve bindings declarations, even when those
+bindings are known to be unused.
+
+
 === Warning and Error Options
 
 ==== `-w`
