@@ -21,7 +21,7 @@
 effcee_dir="third_party/effcee/"
 effcee_trunk="origin/main"
 glslang_dir="third_party/glslang/"
-glslang_trunk="origin/master"
+glslang_trunk="origin/main"
 googletest_dir="third_party/googletest/"
 googletest_trunk="origin/master"
 re2_dir="third_party/re2/"
