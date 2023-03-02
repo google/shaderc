@@ -4,11 +4,11 @@ vars = {
   'google_git':  'https://github.com/google',
   'khronos_git': 'https://github.com/KhronosGroup',
 
-  'effcee_revision' : '35912e1b7778ec2ddcff7e7188177761539e59',
-  'glslang_revision': '1fb2f1d7896627d62a289439a2c3e750e551a7ab',
-  'googletest_revision': 'd9bb8412d60b993365abb53f00b6dad9b2c01b62',
-  're2_revision': '954656f47fe8fb505d4818da1e128417a79ea500',
-  'spirv_headers_revision': 'd13b52222c39a7e9a401b44646f0ca3a640fbd47',
+  'effcee_revision' : '66edefd2bb641de8a2f46b476de21f227fc03a28',
+  'glslang_revision': '2ca0ee3ba4ed94e95f16c3d5b500a0a76b133ed1',
+  'googletest_revision': 'd9c309fdab807b716c2cf4d4a42989b8c34f712a',
+  're2_revision': '3a8436ac436124a57a4e22d5c8713a2d42b381d7',
+  'spirv_headers_revision': '295cf5fb3bfe2454360e82b26bae7fc0de699abe',
   'spirv_tools_revision': '63de608daeb7e91fbea6d7477a50debe7cac57ce',
 }
 
