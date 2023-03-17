@@ -172,7 +172,7 @@ On Linux, if cross compiling to Windows:
 
 On Windows, the following tools should be installed and available on your path:
 
-- Visual Studio 2015 or later. Previous versions of Visual Studio may work but
+- Visual Studio 2017 or later. Previous versions of Visual Studio may work but
   are untested and unsupported.
 - Git - including the associated tools, Bash, `diff`.
 
