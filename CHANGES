@@ -1,7 +1,10 @@
 Revision history for Shaderc
 
-v2023.3-dev 2022-01-18
- - Start Shaderc v2023.3 development
+v2023.3 2022-03-17
+ - Shaderc now requires C++17
+ - Drop support for VS 2015
+ - Add glslc option -fpreserve-bindings
+ - Refresh Glslang, SPIRV-Tools
 
 v2023.2 2022-01-18
  - Update DEPS to pull in SPIRV-Tools bugfix #5049
