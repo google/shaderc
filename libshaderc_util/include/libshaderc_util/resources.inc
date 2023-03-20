@@ -105,3 +105,39 @@ RESOURCE(MaxTransformFeedbackInterleavedComponents,maxTransformFeedbackInterleav
 RESOURCE(MaxCullDistances,maxCullDistances,max_cull_distances)
 RESOURCE(MaxCombinedClipAndCullDistances,maxCombinedClipAndCullDistances,max_combined_clip_and_cull_distances)
 RESOURCE(MaxSamples,maxSamples,max_samples)
+RESOURCE(MaxMeshOutputVerticesNV, maxMeshOutputVerticesNV,
+         max_mesh_output_vertices_nv)
+RESOURCE(MaxMeshOutputPrimitivesNV, maxMeshOutputPrimitivesNV,
+         max_mesh_output_primitives_nv)
+RESOURCE(MaxMeshWorkGroupSizeX_NV, maxMeshWorkGroupSizeX_NV,
+         max_mesh_work_group_size_x_nv)
+RESOURCE(MaxMeshWorkGroupSizeY_NV, maxMeshWorkGroupSizeY_NV,
+         max_mesh_work_group_size_y_nv)
+RESOURCE(MaxMeshWorkGroupSizeZ_NV, maxMeshWorkGroupSizeZ_NV,
+         max_mesh_work_group_size_z_nv)
+RESOURCE(MaxTaskWorkGroupSizeX_NV, maxTaskWorkGroupSizeX_NV,
+         max_task_work_group_size_x_nv)
+RESOURCE(MaxTaskWorkGroupSizeY_NV, maxTaskWorkGroupSizeY_NV,
+         max_task_work_group_size_y_nv)
+RESOURCE(MaxTaskWorkGroupSizeZ_NV, maxTaskWorkGroupSizeZ_NV,
+         max_task_work_group_size_z_nv)
+RESOURCE(MaxMeshViewCountNV, maxMeshViewCountNV, max_mesh_view_count_nv)
+RESOURCE(MaxMeshOutputVerticesEXT, maxMeshOutputVerticesEXT,
+         max_mesh_output_vertices_ext)
+RESOURCE(MaxMeshOutputPrimitivesEXT, maxMeshOutputPrimitivesEXT,
+         max_mesh_output_primitives_ext)
+RESOURCE(MaxMeshWorkGroupSizeX_EXT, maxMeshWorkGroupSizeX_EXT,
+         max_mesh_work_group_size_x_ext)
+RESOURCE(MaxMeshWorkGroupSizeY_EXT, maxMeshWorkGroupSizeY_EXT,
+         max_mesh_work_group_size_y_ext)
+RESOURCE(MaxMeshWorkGroupSizeZ_EXT, maxMeshWorkGroupSizeZ_EXT,
+         max_mesh_work_group_size_z_ext)
+RESOURCE(MaxTaskWorkGroupSizeX_EXT, maxTaskWorkGroupSizeX_EXT,
+         max_task_work_group_size_x_ext)
+RESOURCE(MaxTaskWorkGroupSizeY_EXT, maxTaskWorkGroupSizeY_EXT,
+         max_task_work_group_size_y_ext)
+RESOURCE(MaxTaskWorkGroupSizeZ_EXT, maxTaskWorkGroupSizeZ_EXT,
+         max_task_work_group_size_z_ext)
+RESOURCE(MaxMeshViewCountEXT, maxMeshViewCountEXT, max_mesh_view_count_ext)
+RESOURCE(MaxDualSourceDrawBuffersEXT, maxDualSourceDrawBuffersEXT,
+         max_dual_source_draw_buffers_ext)

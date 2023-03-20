@@ -368,4 +368,23 @@ MaxTransformFeedbackInterleavedComponents 64
 MaxCullDistances 8
 MaxCombinedClipAndCullDistances 8
 MaxSamples 4
+MaxMeshOutputVerticesNV 256
+MaxMeshOutputPrimitivesNV 512
+MaxMeshWorkGroupSizeX_NV 32
+MaxMeshWorkGroupSizeY_NV 1
+MaxMeshWorkGroupSizeZ_NV 1
+MaxTaskWorkGroupSizeX_NV 32
+MaxTaskWorkGroupSizeY_NV 1
+MaxTaskWorkGroupSizeZ_NV 1
+MaxMeshViewCountNV 4
+MaxMeshOutputVerticesEXT 256
+MaxMeshOutputPrimitivesEXT 256
+MaxMeshWorkGroupSizeX_EXT 128
+MaxMeshWorkGroupSizeY_EXT 128
+MaxMeshWorkGroupSizeZ_EXT 128
+MaxTaskWorkGroupSizeX_EXT 128
+MaxTaskWorkGroupSizeY_EXT 128
+MaxTaskWorkGroupSizeZ_EXT 128
+MaxMeshViewCountEXT 4
+MaxDualSourceDrawBuffersEXT 1
 """
