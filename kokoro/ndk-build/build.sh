@@ -30,9 +30,9 @@ unzip -q ninja-linux.zip
 export PATH="$PWD:$PATH"
 
 # Get Android NDK.
-wget -q https://dl.google.com/android/repository/android-ndk-r18b-linux-x86_64.zip
-unzip -q android-ndk-r18b-linux-x86_64.zip
-export ANDROID_NDK=$PWD/android-ndk-r18b
+wget -q https://dl.google.com/android/repository/android-ndk-r21d-linux-x86_64.zip
+unzip -q android-ndk-r21d-linux-x86_64.zip
+export ANDROID_NDK=$PWD/android-ndk-r21d
 
 # Get shaderc dependencies.
 cd $SRC
