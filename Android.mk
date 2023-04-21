@@ -34,7 +34,7 @@ SHADERC_HEADERS_IN_OUT_DIR=$(foreach H,$(SHADERC_HEADERS),$(NDK_APP_LIBS_OUT)/..
 define gen_libshaderc_header
 $(NDK_APP_LIBS_OUT)/../include/shaderc/$(1) : \
 		$(ROOT_SHADERC_PATH)/libshaderc/include/shaderc/$(1)
-	$(call host-mkdir,$(NDK_APP_LIBS_OUT)/../include/shaderc)
+	$(call generate-file-dir,$@)
 	$(call host-cp,$(ROOT_SHADERC_PATH)/libshaderc/include/shaderc/$(1) \
 		,$(NDK_APP_LIBS_OUT)/../include/shaderc/$(1))
 
@@ -43,6 +43,7 @@ endef
 define gen_libshaderc
 
 $(1)/combine.ar: $(addprefix $(1)/, $(ALL_LIBS))
+	$(call generate-file-dir,$@)
 	@echo "create libshaderc_combined.a" > $(1)/combine.ar
 	$(foreach lib,$(ALL_LIBS),
 		@echo "addlib $(lib)" >> $(1)/combine.ar
@@ -57,7 +58,7 @@ $(1)/libshaderc_combined.a: $(addprefix $(1)/, $(ALL_LIBS)) $(1)/combine.ar
 
 $(NDK_APP_LIBS_OUT)/$(APP_STL)/$(TARGET_ARCH_ABI)/libshaderc.a: \
 		$(1)/libshaderc_combined.a
-	$(call host-mkdir,$(NDK_APP_LIBS_OUT)/$(APP_STL)/$(TARGET_ARCH_ABI))
+	$(call generate-file-dir,$@)
 	$(call host-cp,$(1)/libshaderc_combined.a \
 		,$(NDK_APP_LIBS_OUT)/$(APP_STL)/$(TARGET_ARCH_ABI)/libshaderc.a)
 
