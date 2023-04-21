@@ -32,45 +32,38 @@ SHADERC_HEADERS=shaderc.hpp shaderc.h env.h status.h visibility.h
 SHADERC_HEADERS_IN_OUT_DIR=$(foreach H,$(SHADERC_HEADERS),$(NDK_APP_LIBS_OUT)/../include/shaderc/$(H))
 
 define gen_libshaderc_header
+$(call generate-file-dir,$(NDK_APP_LIBS_OUT)/../include/shaderc/$(1))
 $(NDK_APP_LIBS_OUT)/../include/shaderc/$(1) : \
 		$(ROOT_SHADERC_PATH)/libshaderc/include/shaderc/$(1)
-	$(call host-mkdir,$(NDK_APP_LIBS_OUT)/../include/shaderc)
 	$(call host-cp,$(ROOT_SHADERC_PATH)/libshaderc/include/shaderc/$(1) \
 		,$(NDK_APP_LIBS_OUT)/../include/shaderc/$(1))
 
 endef
+# Generate headers
+$(eval $(foreach H,$(SHADERC_HEADERS),$(call gen_libshaderc_header,$(H))))
+libshaderc_headers: $(SHADERC_HEADERS_IN_OUT_DIR)
+.PHONY: libshaderc_headers
 
-define gen_libshaderc
 
-$(1)/combine.ar: $(addprefix $(1)/, $(ALL_LIBS))
-	@echo "create libshaderc_combined.a" > $(1)/combine.ar
-	$(foreach lib,$(ALL_LIBS),
-		@echo "addlib $(lib)" >> $(1)/combine.ar
-	)
-	@echo "save" >> $(1)/combine.ar
-	@echo "end" >> $(1)/combine.ar
+# Rules for combining library files to form a single libshader_combined.a.
+# It always goes into $(TARGET_OUT)
+$(call generate-file-dir,$(TARGET_OUT)/combine.ar)
+$(TARGET_OUT)/combine.ar: $(TARGET_OUT) $(addprefix $(TARGET_OUT)/, $(ALL_LIBS))
+	$(file >$(TARGET_OUT)/combine.ar,create libshaderc_combined.a)
+	$(foreach lib,$(ALL_LIBS),$(file >>$(TARGET_OUT)/combine.ar,addlib $(lib)))
+	$(file >>$(TARGET_OUT)/combine.ar,save)
+	$(file >>$(TARGET_OUT)/combine.ar,end)
 
-$(1)/libshaderc_combined.a: $(addprefix $(1)/, $(ALL_LIBS)) $(1)/combine.ar
+$(TARGET_OUT)/libshaderc_combined.a: $(addprefix $(TARGET_OUT)/, $(ALL_LIBS)) $(TARGET_OUT)/combine.ar
 	@echo "[$(TARGET_ARCH_ABI)] Combine: libshaderc_combined.a <= $(ALL_LIBS)"
-	@cd $(1) && $(TARGET_AR) -M < combine.ar && cd $(ROOT_SHADERC_PATH)
-	@$(TARGET_STRIP) --strip-debug $(1)/libshaderc_combined.a
+	@cd $(TARGET_OUT) && $(TARGET_AR) -M < combine.ar && cd $(ROOT_SHADERC_PATH)
+	@$(TARGET_STRIP) --strip-debug $(TARGET_OUT)/libshaderc_combined.a
 
+$(call generate-file-dir,$(NDK_APP_LIBS_OUT)/$(APP_STL)/$(TARGET_ARCH_ABI)/libshaderc.a)
 $(NDK_APP_LIBS_OUT)/$(APP_STL)/$(TARGET_ARCH_ABI)/libshaderc.a: \
-		$(1)/libshaderc_combined.a
-	$(call host-mkdir,$(NDK_APP_LIBS_OUT)/$(APP_STL)/$(TARGET_ARCH_ABI))
-	$(call host-cp,$(1)/libshaderc_combined.a \
+		$(TARGET_OUT)/libshaderc_combined.a
+	$(call host-cp,$(TARGET_OUT)/libshaderc_combined.a \
 		,$(NDK_APP_LIBS_OUT)/$(APP_STL)/$(TARGET_ARCH_ABI)/libshaderc.a)
 
-ifndef HEADER_TARGET
-HEADER_TARGET=1
-$(eval $(foreach H,$(SHADERC_HEADERS),$(call gen_libshaderc_header,$(H))))
-endif
-
-libshaderc_combined: \
+libshaderc_combined: libshaderc_headers \
 	$(NDK_APP_LIBS_OUT)/$(APP_STL)/$(TARGET_ARCH_ABI)/libshaderc.a
-
-endef
-
-libshaderc_combined: $(SHADERC_HEADERS_IN_OUT_DIR)
-
-$(eval $(call gen_libshaderc,$(TARGET_OUT)))
