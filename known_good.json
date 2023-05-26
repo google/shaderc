@@ -8,6 +8,13 @@
       "commit" : "9fbc561947f6b5275289a1985676fb7267273e09"
     },
     {
+      "name" : "abseil_cpp",
+      "site" : "github",
+      "subrepo" : "abseil/abseil-cpp",
+      "subdir" : "third_party/abseil_cpp",
+      "commit" : "79ca5d7aad63973c83a4962a66ab07cd623131ea"
+    },
+    {
       "name" : "re2",
       "site" : "github",
       "subrepo" : "google/re2",
