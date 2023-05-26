@@ -1,7 +1,7 @@
 Revision history for Shaderc
 
 v2023.5-dev 2022-05-24
- - Start development
+ - For testing, add a dependency on Abseil's C++ library
 
 v2023.4 2022-05-24
  - Refresh Glslang, SPIRV-Tools, SPIRV-Headers

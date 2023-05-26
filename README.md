@@ -69,8 +69,13 @@ Shaderc depends on glslang, the Khronos reference compiler for GLSL.
 Shaderc depends on [SPIRV-Tools][spirv-tools] for assembling, disassembling,
 and transforming SPIR-V binaries.
 
-Shaderc depends on the [Google Test](https://github.com/google/googletest)
-testing framework.
+For testing, Shaderc depends on:
+| Library | URL | Description |
+| -- | -- | -- |
+| Googletest | https://github.com/google/googletest | Testing framework |
+| Effcee | https://github.com/google/effcee | Stateful pattern matcher inspired by LLVM's FileCheck |
+| RE2 | https://github.com/google/re2 | Regular expression matcher |
+| Abseil | https://github.com/abseil/abseil-cpp | Common basic utilities in C++ |
 
 In the following sections, `$SOURCE_DIR` is the directory you intend to clone
 Shaderc into.
