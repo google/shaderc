@@ -15,4 +15,6 @@
 APP_ABI := all
 APP_BUILD_SCRIPT := Android.mk
 APP_STL := c++_static
-APP_PLATFORM := android-16
+# Vulkan was added at API level 24.
+# Android NDK 26 will drop support for APIs before 21.
+APP_PLATFORM := android-24
