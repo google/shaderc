@@ -58,9 +58,14 @@ function do_ndk_build () {
     -j8 $@
 }
 
+# Builds all the ABIs (see APP_ABI in jni/Application.mk)
 do_ndk_build
 
 # Check that libshaderc_combined builds
-do_ndk_build libshaderc_combined
+# Explicitly set each ABI, otherwise it will only pick x86.
+# It seems to be the behaviour when specifying an explicit target.
+for abi in x86 x86_64 armeabi-v7a arm64-v8a; do
+  do_ndk_build APP_ABI=$abi libshaderc_combined
+done
 
 echo $(date): ndk-build completed.
