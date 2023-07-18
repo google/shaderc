@@ -75,7 +75,7 @@ def deduce_software_version(directory):
     # Allow trailing whitespace in the checked-out source code has
     # unexpected carriage returns on a linefeed-only system such as
     # Linux.
-    pattern = re.compile(r'^(v\d+\.\d+(-dev)?) \d\d\d\d-\d\d-\d\d\s*$')
+    pattern = re.compile(r'^(v\d+\.\d+(-dev|[\.-]rc\d+)?) \d\d\d\d-\d\d-\d\d\s*$')
     changes_file = os.path.join(directory, 'CHANGES')
     with open(changes_file, errors='replace') as f:
         for line in f.readlines():
