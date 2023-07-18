@@ -27,7 +27,7 @@ set -x
 
 using cmake-3.17.2
 using ninja-1.10.0
-using ndk-r21d # Sets ANDROID_NDK_HOME, pointing at the NDK's root dir
+using ndk-r25c # Sets ANDROID_NDK_HOME, pointing at the NDK's root dir
 
 cd $ROOT_DIR
 ./utils/git-sync-deps
