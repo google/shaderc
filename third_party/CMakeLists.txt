@@ -65,6 +65,16 @@ if (NOT TARGET SPIRV-Tools)
       add_subdirectory(${SHADERC_EFFCEE_DIR} effcee)
     endif()
     add_subdirectory(${SHADERC_SPIRV_TOOLS_DIR} spirv-tools)
+    if (NOT "${SPIRV_SKIP_TESTS}")
+      if (MSVC)
+        if (${MSVC_VERSION} LESS 1920)
+	  # VS 2017 requires /bigobj on test_opt
+	  # https://github.com/google/shaderc/issues/1345
+	  # https://github.com/KhronosGroup/SPIRV-Tools/issues/5335
+	  target_compile_options(test_opt PRIVATE /bigobj)
+        endif()
+      endif()
+    endif()
   endif()
   if (NOT TARGET SPIRV-Tools)
     message(FATAL_ERROR "SPIRV-Tools was not found - required for compilation")
