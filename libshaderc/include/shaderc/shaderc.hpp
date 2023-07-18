@@ -311,6 +311,12 @@ class CompileOptions {
                                                        kind, base);
   }
 
+  // Sets whether the compiler should preserve all bindings, even when those
+  // bindings are not used.
+  void SetPreserveBindings(bool preserve_bindings) {
+    shaderc_compile_options_set_preserve_bindings(options_, preserve_bindings);
+  }
+
   // Sets whether the compiler automatically assigns locations to
   // uniform variables that don't have explicit locations.
   void SetAutoMapLocations(bool auto_map) {

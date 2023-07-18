@@ -206,6 +206,7 @@ class Compiler {
         auto_combined_image_sampler_(false),
         auto_binding_base_(),
         auto_map_locations_(false),
+        preserve_bindings_(false),
         hlsl_iomap_(false),
         hlsl_offsets_(false),
         hlsl_legalization_enabled_(true),
@@ -305,6 +306,12 @@ class Compiler {
   void SetAutoBindingBaseForStage(Stage stage, UniformKind kind,
                                   uint32_t base) {
     auto_binding_base_[static_cast<int>(stage)][static_cast<int>(kind)] = base;
+  }
+
+  // Sets whether the compiler should preserve all bindings, even when those
+  // bindings are not used.
+  void SetPreserveBindings(bool preserve_bindings) {
+    preserve_bindings_ = preserve_bindings;
   }
 
   // Sets whether the compiler automatically assigns locations to
@@ -517,6 +524,9 @@ class Compiler {
   // True if the compiler should automatically map uniforms that don't
   // have explicit locations.
   bool auto_map_locations_;
+
+  // True if the compiler should preserve all bindings, even when unused.
+  bool preserve_bindings_;
 
   // True if the compiler should use HLSL IO mapping rules when compiling HLSL.
   bool hlsl_iomap_;

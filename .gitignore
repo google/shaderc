@@ -6,6 +6,7 @@ out/
 compile_commands.json
 .ycm_extra_conf.py
 cscope.*
+third_party/abseil_cpp
 third_party/effcee
 third_party/glslang
 third_party/googletest

@@ -17,6 +17,8 @@ set(SHADERC_RE2_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/re2" CACHE STRING
   "Location of re2 source")
 set(SHADERC_TINT_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/tint" CACHE STRING
   "Location of tint source")
+set(SHADERC_ABSL_DIR "${SHADERC_THIRD_PARTY_ROOT_DIR}/abseil_cpp" CACHE STRING
+  "Location of re2 source")
 
 set( SKIP_GLSLANG_INSTALL ${SHADERC_SKIP_INSTALL} )
 set( SKIP_SPIRV_TOOLS_INSTALL ${SHADERC_SKIP_INSTALL} )
@@ -49,7 +51,13 @@ if (NOT TARGET SPIRV-Tools)
       # Also skip building tests in SPIRV-Tools.
       set(SPIRV_SKIP_TESTS ON CACHE BOOL "Skip building SPIRV-Tools tests")
     elseif(NOT "${SPIRV_SKIP_TESTS}")
-      # SPIRV-Tools requires effcee and re2 to build tests.
+      # SPIRV-Tools requires effcee, re2, and abseil to build tests.
+      # re2 depends on abseil, so abseil must be added first.
+      set(ABSL_INTERNAL_AT_LEAST_CXX17 ON)
+      set(ABSL_PROPAGATE_CXX_STD ON)
+      set(ABSL_ENABLE_INSTALL ON)
+      add_subdirectory(${SHADERC_ABSL_DIR} absl EXCLUDE_FROM_ALL)
+
       # re2 tests take a long time and do not add much value, since re2 is a
       # dependency of a dependency, so not running them.
       set(RE2_BUILD_TESTING OFF CACHE STRING "Run RE2 Tests")

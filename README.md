@@ -42,7 +42,7 @@ Shaderc has been shipping in the
 [Android NDK](https://developer.android.com/ndk/index.html) since version r12b.
 (The NDK build uses sources from https://android.googlesource.com/platform/external/shaderc/.
 Those repos are downstream from GitHub.)
-We currently require r18b.
+We currently require r25c.
 
 For licensing terms, please see the [`LICENSE`](LICENSE) file.  If interested in
 contributing to this project, please see [`CONTRIBUTING.md`](CONTRIBUTING.md).
@@ -69,8 +69,13 @@ Shaderc depends on glslang, the Khronos reference compiler for GLSL.
 Shaderc depends on [SPIRV-Tools][spirv-tools] for assembling, disassembling,
 and transforming SPIR-V binaries.
 
-Shaderc depends on the [Google Test](https://github.com/google/googletest)
-testing framework.
+For testing, Shaderc depends on:
+| Library | URL | Description |
+| -- | -- | -- |
+| Googletest | https://github.com/google/googletest | Testing framework |
+| Effcee | https://github.com/google/effcee | Stateful pattern matcher inspired by LLVM's FileCheck |
+| RE2 | https://github.com/google/re2 | Regular expression matcher |
+| Abseil | https://github.com/abseil/abseil-cpp | Common basic utilities in C++ |
 
 In the following sections, `$SOURCE_DIR` is the directory you intend to clone
 Shaderc into.
@@ -166,22 +171,13 @@ installed regardless of your OS:
     - Shaderc is tested with cmake 3.17.2
 - [Python 3](http://www.python.org/): for utility scripts and running the test suite.
 
-On Linux, the following tools should be installed:
-
-- [`gcov`](https://gcc.gnu.org/onlinedocs/gcc/Gcov.html): for testing code
-    coverage, provided by the `gcc` package on Ubuntu.
-- [`lcov`](http://ltp.sourceforge.net/coverage/lcov.php): a graphical frontend
-    for `gcov`, provided by the `lcov` package on Ubuntu.
-- [`genhtml`](http://linux.die.net/man/1/genhtml): for creating reports in html
-    format from `lcov` output, provided by the `lcov` package on Ubuntu.
-
 On Linux, if cross compiling to Windows:
 - [`mingw`](http://www.mingw.org): A GCC-based cross compiler targeting Windows
     so that generated executables use the Microsoft C runtime libraries.
 
 On Windows, the following tools should be installed and available on your path:
 
-- Visual Studio 2015 or later. Previous versions of Visual Studio may work but
+- Visual Studio 2017 or later. Previous versions of Visual Studio may work but
   are untested and unsupported.
 - Git - including the associated tools, Bash, `diff`.
 
@@ -224,20 +220,6 @@ test.vert
 
 We track bugs using GitHub -- click on the "Issues" button on
 [the project's GitHub page](https://github.com/google/shaderc).
-
-## Test coverage
-
-On Linux, you can obtain test coverage as follows:
-
-```sh
-cd $BUILD_DIR
-cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DENABLE_CODE_COVERAGE=ON $SOURCE_DIR
-ninja
-ninja report-coverage
-```
-
-Then the coverage report can be found under the `$BUILD_DIR/coverage-report`
-directory.
 
 ## Bindings
 

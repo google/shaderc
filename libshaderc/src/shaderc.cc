@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "shaderc/shaderc.h"
+
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
@@ -527,6 +529,11 @@ void shaderc_compile_options_set_binding_base_for_stage(
     shaderc_uniform_kind kind, uint32_t base) {
   options->compiler.SetAutoBindingBaseForStage(GetStage(shader_kind),
                                                GetUniformKind(kind), base);
+}
+
+void shaderc_compile_options_set_preserve_bindings(
+    shaderc_compile_options_t options, bool preserve_bindings) {
+  options->compiler.SetPreserveBindings(preserve_bindings);
 }
 
 void shaderc_compile_options_set_auto_map_locations(

@@ -21,15 +21,15 @@
 effcee_dir="third_party/effcee/"
 effcee_trunk="origin/main"
 glslang_dir="third_party/glslang/"
-glslang_trunk="origin/master"
+glslang_trunk="origin/main"
 googletest_dir="third_party/googletest/"
 googletest_trunk="origin/master"
 re2_dir="third_party/re2/"
-re2_trunk="origin/master"
+re2_trunk="origin/main"
 spirv_headers_dir="third_party/spirv-headers/"
-spirv_headers_trunk="origin/master"
+spirv_headers_trunk="origin/main"
 spirv_tools_dir="third_party/spirv-tools/"
-spirv_tools_trunk="origin/master"
+spirv_tools_trunk="origin/main"
 
 # This script assumes it's parent directory is the repo root.
 repo_path=$(dirname "$0")/..

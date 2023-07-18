@@ -91,6 +91,9 @@ Options:
                     a NaN operand, the other operand is returned. Similarly,
                     the clamp builtin will favour the non-NaN operands, as if
                     clamp were implemented as a composition of max and min.
+  -fpreserve-bindings
+                    Preserve all binding declarations, even if those bindings
+                    are not used.
   -fresource-set-binding [stage] <reg0> <set0> <binding0>
                         [<reg1> <set1> <binding1>...]
                     Explicitly sets the descriptor set and binding for
@@ -365,4 +368,23 @@ MaxTransformFeedbackInterleavedComponents 64
 MaxCullDistances 8
 MaxCombinedClipAndCullDistances 8
 MaxSamples 4
+MaxMeshOutputVerticesNV 256
+MaxMeshOutputPrimitivesNV 512
+MaxMeshWorkGroupSizeX_NV 32
+MaxMeshWorkGroupSizeY_NV 1
+MaxMeshWorkGroupSizeZ_NV 1
+MaxTaskWorkGroupSizeX_NV 32
+MaxTaskWorkGroupSizeY_NV 1
+MaxTaskWorkGroupSizeZ_NV 1
+MaxMeshViewCountNV 4
+MaxMeshOutputVerticesEXT 256
+MaxMeshOutputPrimitivesEXT 256
+MaxMeshWorkGroupSizeX_EXT 128
+MaxMeshWorkGroupSizeY_EXT 128
+MaxMeshWorkGroupSizeZ_EXT 128
+MaxTaskWorkGroupSizeX_EXT 128
+MaxTaskWorkGroupSizeY_EXT 128
+MaxTaskWorkGroupSizeZ_EXT 128
+MaxMeshViewCountEXT 4
+MaxDualSourceDrawBuffersEXT 1
 """

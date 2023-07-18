@@ -1,6 +1,5 @@
 #!/bin/bash
-
-# Copyright (C) 2017 Google Inc.
+# Copyright (c) 2021 Google LLC.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,47 +17,40 @@
 
 # Fail on any error.
 set -e
-# Display commands being run.
-set -x
 
-BUILD_ROOT=$PWD
-SRC=$PWD/github/shaderc
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd )"
+ROOT_DIR="$( cd "${SCRIPT_DIR}/../.." >/dev/null 2>&1 && pwd )"
 
-# Get NINJA.
-wget -q https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linux.zip
-unzip -q ninja-linux.zip
-export PATH="$PWD:$PATH"
-
-# Get Android NDK.
-wget -q https://dl.google.com/android/repository/android-ndk-r18b-linux-x86_64.zip
-unzip -q android-ndk-r18b-linux-x86_64.zip
-export ANDROID_NDK=$PWD/android-ndk-r18b
-
-# Get shaderc dependencies.
-cd $SRC
-./utils/git-sync-deps
-
-cd $SRC
-mkdir build
-cd $SRC/build
-
-# Invoke the build.
 BUILD_SHA=${KOKORO_GITHUB_COMMIT:-$KOKORO_GITHUB_PULL_REQUEST_COMMIT}
 
-function do_ndk_build () {
-  echo $(date): Starting ndk-build $@...
-  $ANDROID_NDK/ndk-build \
-    -C $SRC/android_test \
-    NDK_APP_OUT=`pwd` \
-    V=1 \
-    SPVTOOLS_LOCAL_PATH=$SRC/third_party/spirv-tools \
-    SPVHEADERS_LOCAL_PATH=$SRC/third_party/spirv-headers \
-    -j 8 $@
+# chown the given directory to the current user, if it exists.
+# Docker creates files with the root user - this can upset the Kokoro artifact copier.
+function chown_dir() {
+  dir=$1
+  if [[ -d "$dir" ]]; then
+    sudo chown -R "$(id -u):$(id -g)" "$dir"
+  fi
 }
 
-do_ndk_build
+set +e
+# Allow build failures
 
-# Check that libshaderc_combined builds
-do_ndk_build libshaderc_combined
+# "--privileged" is required to run ptrace in the asan builds.
+docker run --rm -i \
+  --privileged \
+  --volume "${ROOT_DIR}:${ROOT_DIR}" \
+  --volume "${KOKORO_ARTIFACTS_DIR}:${KOKORO_ARTIFACTS_DIR}" \
+  --workdir "${ROOT_DIR}" \
+  --env SCRIPT_DIR=${SCRIPT_DIR} \
+  --env ROOT_DIR=${ROOT_DIR} \
+  --env KOKORO_ARTIFACTS_DIR="${KOKORO_ARTIFACTS_DIR}" \
+  --env BUILD_SHA="${BUILD_SHA}" \
+  --entrypoint "${SCRIPT_DIR}/build-docker.sh" \
+  "gcr.io/shaderc-build/radial-build:latest"
+RESULT=$?
 
-echo $(date): ndk-build completed.
+# This is important. If the permissions are not fixed, kokoro will fail
+# to pull build artifacts, and put the build in tool-failure state, which
+# blocks the logs.
+chown_dir "${ROOT_DIR}/build"
+exit $RESULT
