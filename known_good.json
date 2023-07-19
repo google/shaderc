@@ -5,55 +5,55 @@
       "site" : "github",
       "subrepo" : "KhronosGroup/glslang",
       "subdir" : "third_party/glslang",
-      "commit" : "9fbc561947f6b5275289a1985676fb7267273e09"
+      "commit" : "a9a262541601fd08cc30a9a449dc7fba82303980"
     },
     {
       "name" : "abseil_cpp",
       "site" : "github",
       "subrepo" : "abseil/abseil-cpp",
       "subdir" : "third_party/abseil_cpp",
-      "commit" : "79ca5d7aad63973c83a4962a66ab07cd623131ea"
+      "commit" : "5be22f98733c674d532598454ae729253bc53e82"
     },
     {
       "name" : "re2",
       "site" : "github",
       "subrepo" : "google/re2",
       "subdir" : "third_party/re2",
-      "commit" : "7107ebc4fbf7205151d8d2a57b2fc6e7853125d4"
+      "commit" : "c9cba76063cf4235c1a15dd14a24a4ef8d623761"
     },
     {
       "name" : "effcee",
       "site" : "github",
       "subrepo" : "google/effcee",
       "subdir" : "third_party/effcee",
-      "commit" : "66edefd2bb641de8a2f46b476de21f227fc03a28"
+      "commit" : "19b4aa87af25cb4ee779a071409732f34bfc305c"
     },
     {
       "name" : "googletest",
       "site" : "github",
       "subrepo" : "google/googletest",
       "subdir" : "third_party/googletest",
-      "commit" : "d9c309fdab807b716c2cf4d4a42989b8c34f712a"
+      "commit" : "c541e7c11044b1e0303103ef8a47d7a9632c479b"
     },
     {
       "name" : "shaderc",
       "site" : "github",
       "subrepo" : "google/shaderc",
-      "commit" : "45b735dfddefe26a99b77e5a74e30d860713ac64"
+      "commit" : "5b892551dd02bbf8704adbc3fcde2fd645f333b2"
     },
     {
       "name" : "spirv-headers",
       "site" : "github",
       "subrepo" : "KhronosGroup/SPIRV-Headers",
       "subdir" : "third_party/spirv-tools/external/spirv-headers",
-      "commit" : "bdbfd019be6952fd8fa9bd5606a8798a7530c853"
+      "commit" : "f1ba373ef03752ee9f6f2b898bea1213f93e1ef2"
     },
     {
       "name" : "spirv-tools",
       "site" : "github",
       "subrepo" : "KhronosGroup/SPIRV-Tools",
       "subdir" : "third_party/spirv-tools",
-      "commit" : "e7c6084fd1d6d6f5ac393e842728d8be309688ca"
+      "commit" : "6c7e1acc5f9921b9a609dce62f30620bd6855764"
     }
   ]
 }
