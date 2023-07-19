@@ -59,7 +59,7 @@ cmake %CMAKE_FLAGS% ..
 if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 
 echo "Build glslang... %DATE% %TIME%"
-ninja glslangValidator
+ninja glslang-standalone
 if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 
 echo "Build everything... %DATE% %TIME%"
