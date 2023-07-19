@@ -1,6 +1,6 @@
 Revision history for Shaderc
 
-v2023.5-rc1 2022-07-18
+v2023.5 2022-07-19
  - Update dependencies
  - Update to Android NDK r25c
  - Update Android API level for test project (#1333)
