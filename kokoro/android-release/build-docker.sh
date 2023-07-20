@@ -49,7 +49,7 @@ cmake \
   -DANDROID_NDK=$ANDROID_NDK_HOME ..
 
 echo $(date): Build glslang...
-ninja glslangValidator
+ninja glslang-standalone
 
 echo $(date): Build everything...
 ninja
