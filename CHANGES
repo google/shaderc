@@ -1,7 +1,14 @@
 Revision history for Shaderc
 
-v2023.5-dev 2022-05-24
+v2023.6-dev 2022-07-19
+ - Start Shaderc v2023.6
+
+v2023.5 2022-07-19
+ - Update dependencies
+ - Update to Android NDK r25c
+ - Update Android API level for test project (#1333)
  - For testing, add a dependency on Abseil's C++ library
+ - Fix MSVC runtime library linking in CMake (#1339)
 
 v2023.4 2022-05-24
  - Refresh Glslang, SPIRV-Tools, SPIRV-Headers
