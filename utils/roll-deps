@@ -18,18 +18,23 @@
 #
 # Depends on roll-dep from depot_path being in PATH.
 
-effcee_dir="third_party/effcee/"
-effcee_trunk="origin/main"
-glslang_dir="third_party/glslang/"
-glslang_trunk="origin/main"
-googletest_dir="third_party/googletest/"
-googletest_trunk="origin/master"
-re2_dir="third_party/re2/"
-re2_trunk="origin/main"
-spirv_headers_dir="third_party/spirv-headers/"
-spirv_headers_trunk="origin/main"
-spirv_tools_dir="third_party/spirv-tools/"
-spirv_tools_trunk="origin/main"
+set -eo pipefail
+
+function ExitIfIsInterestingError() {
+  local return_code=$1
+  if [[ ${return_code} -ne 0 && ${return_code} -ne 2 ]]; then
+    exit ${return_code}
+  fi
+  return 0
+}
+
+dependencies=("third_party/effcee/"
+              "third_party/glslang/"
+              "third_party/googletest/"
+              "third_party/re2/"
+              "third_party/spirv-headers/"
+              "third_party/spirv-tools/")
+branch="origin/main"
 
 # This script assumes it's parent directory is the repo root.
 repo_path=$(dirname "$0")/..
@@ -41,13 +46,12 @@ if [[ $(git diff --stat) != '' ]]; then
     exit 1
 fi
 
-old_head=$(git rev-parse HEAD)
+echo "*** Ignore messages about running 'git cl upload' ***"
 
-roll-dep --ignore-dirty-tree --roll-to="${effcee_trunk}" "${effcee_dir}"
-roll-dep --ignore-dirty-tree --roll-to="${glslang_trunk}" "${glslang_dir}"
-roll-dep --ignore-dirty-tree --roll-to="${googletest_trunk}" "${googletest_dir}"
-roll-dep --ignore-dirty-tree --roll-to="${re2_trunk}" "${re2_dir}"
-roll-dep --ignore-dirty-tree --roll-to="${spirv_headers_trunk}" "${spirv_headers_dir}"
-roll-dep --ignore-dirty-tree --roll-to="${spirv_tools_trunk}" "${spirv_tools_dir}"
+set +e
 
-git rebase --interactive "${old_head}"
+for dep in ${dependencies[@]}; do
+  echo "Rolling $dep"
+  roll-dep --ignore-dirty-tree --roll-to="${branch}" "${dep}"
+  ExitIfIsInterestingError $?
+done
