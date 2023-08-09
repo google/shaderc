@@ -140,14 +140,11 @@ ctest -C {Release|Debug|MinSizeRel|RelWithDebInfo}
 ```
 
 4c) Or build with MinGW on Linux for Windows:
-(Skip building threaded unit tests due to
-[Googletest bug 606](https://github.com/google/googletest/issues/606))
 
 ```sh
 cd $BUILD_DIR
 cmake -GNinja -DCMAKE_BUILD_TYPE={Debug|Release|RelWithDebInfo} $SOURCE_DIR \
-   -DCMAKE_TOOLCHAIN_FILE=$SOURCE_DIR/cmake/linux-mingw-toolchain.cmake \
-   -Dgtest_disable_pthreads=ON
+   -DCMAKE_TOOLCHAIN_FILE=$SOURCE_DIR/cmake/linux-mingw-toolchain.cmake
 ninja
 ```
 
