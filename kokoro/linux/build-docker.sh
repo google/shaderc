@@ -53,7 +53,7 @@ then
   ADDITIONAL_CMAKE_FLAGS="-DDISABLE_EXCEPTIONS=ON -DDISABLE_RTTI=ON"
 elif [ $CONFIG = "RELEASE_MINGW" ]
 then
-  ADDITIONAL_CMAKE_FLAGS="-Dgtest_disable_pthreads=ON -DCMAKE_TOOLCHAIN_FILE=$ROOT_DIR/cmake/linux-mingw-toolchain.cmake"
+  ADDITIONAL_CMAKE_FLAGS="-DCMAKE_TOOLCHAIN_FILE=$ROOT_DIR/cmake/linux-mingw-toolchain.cmake"
   SKIP_TESTS="True"
 fi
 
