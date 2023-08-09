@@ -5,7 +5,7 @@
       "site" : "github",
       "subrepo" : "KhronosGroup/glslang",
       "subdir" : "third_party/glslang",
-      "commit" : "a9a262541601fd08cc30a9a449dc7fba82303980"
+      "commit" : "76b52ebf77833908dc4c0dd6c70a9c357ac720bd"
     },
     {
       "name" : "abseil_cpp",
@@ -39,21 +39,21 @@
       "name" : "shaderc",
       "site" : "github",
       "subrepo" : "google/shaderc",
-      "commit" : "5b892551dd02bbf8704adbc3fcde2fd645f333b2"
+      "commit" : "39aa522785f130130927cd4766a37e8813af6d66"
     },
     {
       "name" : "spirv-headers",
       "site" : "github",
       "subrepo" : "KhronosGroup/SPIRV-Headers",
       "subdir" : "third_party/spirv-tools/external/spirv-headers",
-      "commit" : "f1ba373ef03752ee9f6f2b898bea1213f93e1ef2"
+      "commit" : "124a9665e464ef98b8b718d572d5f329311061eb"
     },
     {
       "name" : "spirv-tools",
       "site" : "github",
       "subrepo" : "KhronosGroup/SPIRV-Tools",
       "subdir" : "third_party/spirv-tools",
-      "commit" : "6c7e1acc5f9921b9a609dce62f30620bd6855764"
+      "commit" : "e553b884c7c9febaa4e52334f683641fb5f196a0"
     }
   ]
 }
