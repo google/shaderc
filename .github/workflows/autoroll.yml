@@ -61,6 +61,6 @@ jobs:
         if: steps.update_dependencies.outputs.changed == 'true'
         run: |
           git push --force --set-upstream origin roll_deps
-          gh pr create --label 'kokoro:run' --base main -f
+          gh pr create --label 'kokoro:run' --base main -f || true
         env:
           GITHUB_TOKEN: ${{ github.token }}
