@@ -42,7 +42,7 @@ Shaderc has been shipping in the
 [Android NDK](https://developer.android.com/ndk/index.html) since version r12b.
 (The NDK build uses sources from https://android.googlesource.com/platform/external/shaderc/.
 Those repos are downstream from GitHub.)
-We currently require r21d.
+We currently require r25c.
 
 For licensing terms, please see the [`LICENSE`](LICENSE) file.  If interested in
 contributing to this project, please see [`CONTRIBUTING.md`](CONTRIBUTING.md).
@@ -140,14 +140,11 @@ ctest -C {Release|Debug|MinSizeRel|RelWithDebInfo}
 ```
 
 4c) Or build with MinGW on Linux for Windows:
-(Skip building threaded unit tests due to
-[Googletest bug 606](https://github.com/google/googletest/issues/606))
 
 ```sh
 cd $BUILD_DIR
 cmake -GNinja -DCMAKE_BUILD_TYPE={Debug|Release|RelWithDebInfo} $SOURCE_DIR \
-   -DCMAKE_TOOLCHAIN_FILE=$SOURCE_DIR/cmake/linux-mingw-toolchain.cmake \
-   -Dgtest_disable_pthreads=ON
+   -DCMAKE_TOOLCHAIN_FILE=$SOURCE_DIR/cmake/linux-mingw-toolchain.cmake
 ninja
 ```
 
@@ -167,6 +164,7 @@ API in your project.
 For building, testing, and profiling Shaderc, the following tools should be
 installed regardless of your OS:
 
+- A C++17 compiler. Recent versions of Clang, GCC, and MSVC work.
 - [CMake](http://www.cmake.org/) 3.14 or later: for generating compilation targets.
     - Shaderc is tested with cmake 3.17.2
 - [Python 3](http://www.python.org/): for utility scripts and running the test suite.
@@ -174,6 +172,7 @@ installed regardless of your OS:
 On Linux, if cross compiling to Windows:
 - [`mingw`](http://www.mingw.org): A GCC-based cross compiler targeting Windows
     so that generated executables use the Microsoft C runtime libraries.
+    The MinGW compiler must support C++17.
 
 On Windows, the following tools should be installed and available on your path:
 

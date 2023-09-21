@@ -545,7 +545,8 @@ TEST_F(CppInterface, CompileAndOptimizeForVulkan10Failure) {
               // TODO(antiagainst): the error message can be improved to be more
               // explicit regarding Vulkan 1.1
               HasSubstr("compilation succeeded but failed to optimize: "
-                        "Invalid capability operand"));
+                        "Capability GroupNonUniform is not allowed by Vulkan "
+                        "1.0 specification (or requires extension)"));
 }
 
 TEST_F(CppInterface, CompileAndOptimizeForVulkan11Success) {

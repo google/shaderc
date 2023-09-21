@@ -53,7 +53,7 @@ then
   ADDITIONAL_CMAKE_FLAGS="-DDISABLE_EXCEPTIONS=ON -DDISABLE_RTTI=ON"
 elif [ $CONFIG = "RELEASE_MINGW" ]
 then
-  ADDITIONAL_CMAKE_FLAGS="-Dgtest_disable_pthreads=ON -DCMAKE_TOOLCHAIN_FILE=$ROOT_DIR/cmake/linux-mingw-toolchain.cmake"
+  ADDITIONAL_CMAKE_FLAGS="-DCMAKE_TOOLCHAIN_FILE=$ROOT_DIR/cmake/linux-mingw-toolchain.cmake"
   SKIP_TESTS="True"
 fi
 
@@ -69,7 +69,7 @@ echo $(date): Starting build...
 cmake -GNinja -DCMAKE_INSTALL_PREFIX=$KOKORO_ARTIFACTS_DIR/install -DRE2_BUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=$BUILD_TYPE $ADDITIONAL_CMAKE_FLAGS ..
 
 echo $(date): Build glslang...
-ninja glslangValidator
+ninja glslang-standalone
 
 echo $(date): Build everything...
 ninja

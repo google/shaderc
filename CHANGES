@@ -1,9 +1,19 @@
 Revision history for Shaderc
 
-v2023.5-dev 2022-05-24
- - For testing, add a dependency on Abseil's C++ library
+v2023.7-dev 2023-08-09
+ - Start v2023.7 development
 
-v2023.4 2022-05-24
+v2023.6 2023-08-09
+ - Update dependencies, including SPIRV-Tools v2023.4.rc2
+
+v2023.5 2023-07-19
+ - Update dependencies
+ - Update to Android NDK r25c
+ - Update Android API level for test project (#1333)
+ - For testing, add a dependency on Abseil's C++ library
+ - Fix MSVC runtime library linking in CMake (#1339)
+
+v2023.4 2023-05-24
  - Refresh Glslang, SPIRV-Tools, SPIRV-Headers
  - Android.mk:
     - Require NDK 21d or later
@@ -12,16 +22,16 @@ v2023.4 2022-05-24
  - glslc and APIs:
     - Add options to control mesh shading limits
 
-v2023.3 2022-03-17
+v2023.3 2023-03-17
  - Shaderc now requires C++17
  - Drop support for VS 2015
  - Add glslc option -fpreserve-bindings
  - Refresh Glslang, SPIRV-Tools
 
-v2023.2 2022-01-18
+v2023.2 2023-01-18
  - Update DEPS to pull in SPIRV-Tools bugfix #5049
 
-v2023.1 2022-01-13
+v2023.1 2023-01-13
  - General/Build
    - Removed support for GCC-based code coverage builds
    - Update minimum CMake to 3.17.2
