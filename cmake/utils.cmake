@@ -59,7 +59,7 @@ endfunction(shaderc_default_c_compile_options)
 function(shaderc_default_compile_options TARGET)
   shaderc_default_c_compile_options(${TARGET})
   if (NOT "${MSVC}")
-    target_compile_options(${TARGET} PRIVATE -std=c++11)
+    target_compile_options(${TARGET} PRIVATE -std=c++17)
     if (NOT SHADERC_ENABLE_SHARED_CRT)
       if (WIN32)
         # For MinGW cross compile, statically link to the C++ runtime.
