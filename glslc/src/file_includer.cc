@@ -22,7 +22,7 @@
 namespace glslc {
 
 shaderc_include_result* MakeErrorIncludeResult(const char* message) {
-  return new shaderc_include_result{"", 0, message, strlen(message)};
+  return new shaderc_include_result{"", 0, message, strlen(message), 0};
 }
 
 FileIncluder::~FileIncluder() = default;
