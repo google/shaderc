@@ -36,7 +36,7 @@ class TestPoundVersion310InIncludingFile(
 #line 1 "a.vert"
 
 #line 1 "b.glsl"
-void main(){ }
+void main() { }
 #line 3 "a.vert"
 
 """
@@ -61,7 +61,7 @@ class TestPoundVersion150InIncludingFile(
 #line 0 "a.vert"
 
 #line 0 "b.glsl"
-void main(){ }
+void main() { }
 #line 2 "a.vert"
 
 """
@@ -138,7 +138,7 @@ class TestSpaceAroundPoundVersion310InIncludingFile(
 #line 1 "a.vert"
 
 #line 1 "b.glsl"
-void main(){ }
+void main() { }
 #line 3 "a.vert"
 
 """
@@ -161,7 +161,7 @@ class TestSpaceAroundPoundVersion150InIncludingFile(
 #line 0 "a.vert"
 
 #line 0 "b.glsl"
-void main(){ }
+void main() { }
 #line 2 "a.vert"
 
 """
@@ -183,7 +183,7 @@ class TestPoundLineWithForcedVersion310(
 """#extension GL_GOOGLE_include_directive : enable
 #line 1 "a.vert"
 #line 1 "b.glsl"
-void main(){ }
+void main() { }
 #line 2 "a.vert"
 
 """
@@ -205,7 +205,7 @@ class TestPoundLineWithForcedVersion150(
 """#extension GL_GOOGLE_include_directive : enable
 #line 0 "a.vert"
 #line 0 "b.glsl"
-void main(){ }
+void main() { }
 #line 1 "a.vert"
 
 """
@@ -230,7 +230,7 @@ class TestPoundLineWithForcedDifferentVersion(
 #line 1 "a.vert"
 
 #line 1 "b.glsl"
-void main(){ }
+void main() { }
 #line 3 "a.vert"
 
 """
@@ -288,14 +288,14 @@ int plus2(int a) { return a + 2; }
 #line 1 "a.vert"
 
 #line 10000 "injected.glsl"
-int plus1(int a){ return a + 1;}
+int plus1(int a) { return a + 1; }
 #line 1 "inc.glsl"
- int inc(int a){ return a + 1;}
+ int inc(int a) { return a + 1; }
 #line 10002 "injected.glsl"
- int plus2(int a){ return a + 2;}
+ int plus2(int a) { return a + 2; }
 #line 55555
 #line 1 "main.glsl"
- void main(){
+ void main() {
   gl_Position = vec4(1.);
 }
 #line 55556 "injected.glsl"

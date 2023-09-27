@@ -22,7 +22,7 @@ class TestDashCapENoDefs(expect.StdoutMatch):
     """Tests -E without any defines."""
 
     shader = FileShader('#version 140\nvoid main(){}', '.vert')
-    expected_stdout = '#version 140\nvoid main(){ }\n'
+    expected_stdout = '#version 140\nvoid main() { }\n'
     glslc_args = ['-E', shader]
 
 
@@ -31,7 +31,7 @@ class TestDashCapEGlslFileAccepted(expect.StdoutMatch):
     """Tests -E if we provide a .glsl file without an explicit stage."""
 
     shader = FileShader('#version 140\nvoid main(){}', '.glsl')
-    expected_stdout = '#version 140\nvoid main(){ }\n'
+    expected_stdout = '#version 140\nvoid main() { }\n'
     glslc_args = ['-E', shader]
 
 
@@ -40,7 +40,7 @@ class TestDashCapESingleDefine(expect.StdoutMatch):
     """Tests -E with command-line define."""
 
     shader = FileShader('#version 140\nvoid main(){ int a = X; }', '.vert')
-    expected_stdout = '#version 140\nvoid main(){ int a = 4;}\n'
+    expected_stdout = '#version 140\nvoid main() { int a = 4; }\n'
     glslc_args = ['-DX=4', '-E', shader]
 
 
@@ -57,7 +57,7 @@ void main() {
 
     expected_stdout = '''#version 140
 
-void main(){
+void main() {
   int a = 4;
 }
 '''
@@ -77,7 +77,7 @@ void main() {
 
     expected_stdout = '''#version 140
 
-void main(){
+void main() {
   int a = 4 + 1;
 }
 '''
@@ -96,7 +96,7 @@ void main() {
 
     expected_stdout = '''#version 140
 #pragma optimize(off)
-void main(){
+void main() {
 }
 '''
     glslc_args = ['-E', shader]
@@ -114,7 +114,7 @@ void main() {
 
     expected_stdout = '''#version 140
 #extension foo : require
-void main(){
+void main() {
 }
 '''
     glslc_args = ['-E', shader]
@@ -140,7 +140,7 @@ void main() {
 
 #line 2 3
 
-void main(){
+void main() {
 }
 '''
     glslc_args = ['-E', shader]
@@ -176,7 +176,7 @@ void main() {
 ''')
 
     expected_stdout = '''#version 140
-void main(){
+void main() {
 }
 '''
     glslc_args = ['-E', '-fshader-stage=vertex', shader]
@@ -193,7 +193,7 @@ void main() {
 ''')
 
     expected_stdout = '''#version 140
-void main(){
+void main() {
 }
 '''
     glslc_args = ['-E', shader]
@@ -212,10 +212,10 @@ void function() {
 }
 ''', '.vert')
     expected_stdout = '''#version 140
-void main(){
+void main() {
 }
 #version 140
-void function(){
+void function() {
 }
 '''
     glslc_args = ['-E', '-fshader-stage=vertex', shader, shader2]
@@ -235,10 +235,10 @@ void function() {
 }
 ''', '.glsl')
     expected_stdout = '''#version 140
-void main(){
+void main() {
 }
 #version 140
-void function(){
+void function() {
 }
 '''
     glslc_args = ['-E', shader, shader2]
@@ -253,7 +253,7 @@ void function() {
 }
 ''', '.vert')
     expected_file_contents = '''#version 140
-void function(){
+void function() {
 }
 '''
     target_filename = 'foo'
@@ -265,7 +265,7 @@ class TestDashCapEWithS(expect.StdoutMatch):
     """Tests -E in the presence of -S."""
 
     shader = FileShader('#version 140\nvoid main(){}', '.vert')
-    expected_stdout = '#version 140\nvoid main(){ }\n'
+    expected_stdout = '#version 140\nvoid main() { }\n'
     glslc_args = ['-E', '-S', shader]
 
 
@@ -274,7 +274,7 @@ class TestMultipileDashCapE(expect.StdoutMatch):
     """Tests that using -E multiple times works."""
 
     shader = FileShader('#version 140\nvoid main(){}', '.vert')
-    expected_stdout = '#version 140\nvoid main(){ }\n'
+    expected_stdout = '#version 140\nvoid main() { }\n'
     glslc_args = ['-E', '-E', shader, '-E']
 
 
@@ -283,7 +283,7 @@ class TestDashCapEAfterFile(expect.StdoutMatch):
     """Tests that using -E after the filename also works."""
 
     shader = FileShader('#version 140\nvoid main(){}', '.vert')
-    expected_stdout = '#version 140\nvoid main(){ }\n'
+    expected_stdout = '#version 140\nvoid main() { }\n'
     glslc_args = [shader, '-E']
 
 
@@ -300,10 +300,10 @@ void function() {
 }
 ''', '.vert')
     expected_stdout = '''#version 140
-void main(){
+void main() {
 }
 #version 140
-void function(){
+void function() {
 }
 '''
     glslc_args = ['-E', '-c', shader, shader2]

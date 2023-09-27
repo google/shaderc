@@ -665,7 +665,7 @@ TEST_F(CppInterface, PreprocessingOnlyOption) {
   const PreprocessedSourceCompilationResult result = compiler_.PreprocessGlsl(
       kMinimalShaderWithMacro, shaderc_glsl_vertex_shader, "shader", options_);
   EXPECT_TRUE(CompilationResultIsSuccess(result));
-  EXPECT_THAT(CompilerOutputAsString(result), HasSubstr("void main(){ }"));
+  EXPECT_THAT(CompilerOutputAsString(result), HasSubstr("void main() { }"));
 
   const std::string kMinimalShaderCloneOption =
       "#version 140\n"
@@ -678,7 +678,7 @@ TEST_F(CppInterface, PreprocessingOnlyOption) {
                                cloned_options);
   EXPECT_TRUE(CompilationResultIsSuccess(result_from_cloned_options));
   EXPECT_THAT(CompilerOutputAsString(result_from_cloned_options),
-              HasSubstr("void main(){ }"));
+              HasSubstr("void main() { }"));
 }
 
 // A shader kind test case needs: 1) A shader text with or without #pragma
