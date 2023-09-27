@@ -774,7 +774,7 @@ TEST_F(CompileStringWithOptionsTest, PreprocessingOnlyOption) {
   const std::string preprocessed_text =
       CompilationOutput(kMinimalShaderWithMacro, shaderc_glsl_vertex_shader,
                         options_.get(), OutputType::PreprocessedText);
-  EXPECT_THAT(preprocessed_text, HasSubstr("void main(){ }"));
+  EXPECT_THAT(preprocessed_text, HasSubstr("void main() { }"));
 
   const std::string kMinimalShaderWithMacroCloneOption =
       "#version 150\n"
@@ -785,7 +785,7 @@ TEST_F(CompileStringWithOptionsTest, PreprocessingOnlyOption) {
   const std::string preprocessed_text_cloned_options = CompilationOutput(
       kMinimalShaderWithMacroCloneOption, shaderc_glsl_vertex_shader,
       options_.get(), OutputType::PreprocessedText);
-  EXPECT_THAT(preprocessed_text_cloned_options, HasSubstr("void main(){ }"));
+  EXPECT_THAT(preprocessed_text_cloned_options, HasSubstr("void main() { }"));
 }
 
 // A shader kind test cases needs: 1) A shader text with or without #pragma

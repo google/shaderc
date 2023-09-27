@@ -552,8 +552,8 @@ class TestDashCapMDMultipleFilePreprocessingOnlyMode(expect.StdoutMatch,
     dependency_info_files_expected_contents.append([{'target': 'b.vert.spv',
                                                      'dependency': {'b.vert'}}
                                                     ])
-    expected_stdout = ("#version 140\nvoid main(){ }\n"
-                       "#version 140\nvoid main(){ }\n")
+    expected_stdout = ("#version 140\nvoid main() { }\n"
+                       "#version 140\nvoid main() { }\n")
 
 
 @inside_glslc_testsuite('OptionsCapM')

@@ -224,7 +224,7 @@ class TestDashCapDWithDashE(expect.ReturnCodeIsZero,
 
     expected_stdout =  [
         """
-        void main(){ return 3;}
+        void main() { return 3; }
 """]
 
 @inside_glslc_testsuite('OptionCapD')
@@ -239,18 +239,18 @@ class TestDashCapDWithDashEIfDef(expect.ReturnCodeIsZero,
         #else
           void f() { int x; }
         #endif
-        void main(){ return 3;}
+        void main(){ return 3; }
 """, '.vert')
     glslc_args = ['-DX', '-E', '-std=450core', shader]
 
     expected_stdout =  [
         """
 
-          void f(){ }
+          void f() { }
 
 
 
-        void main(){ return 3;}
+        void main() { return 3; }
 """]
 
 @inside_glslc_testsuite('OptionCapD')
@@ -265,7 +265,7 @@ class TestDashCapDWithDashEIfNDef(expect.ReturnCodeIsZero,
         #else
           void f() { int x; }
         #endif
-        void main(){ return 3;}
+        void main(){ return 3; }
 """, '.vert')
     glslc_args = ['-DX', '-E', '-std=450core', shader]
 
@@ -274,9 +274,9 @@ class TestDashCapDWithDashEIfNDef(expect.ReturnCodeIsZero,
 
 
 
-          void f(){ int x;}
+          void f() { int x; }
 
-        void main(){ return 3;}
+        void main() { return 3; }
 """]
 
 
@@ -292,18 +292,18 @@ class TestDashCapDWithDashEEqIfDef(expect.ReturnCodeIsZero,
         #else
           void f() { int x; }
         #endif
-        void main(){ return 3;}
+        void main() { return 3; }
 """, '.vert')
     glslc_args = ['-DX=', '-E', '-std=450core', shader]
 
     expected_stdout =  [
         """
 
-          void f(){ }
+          void f() { }
 
 
 
-        void main(){ return 3;}
+        void main() { return 3; }
 """]
 
 @inside_glslc_testsuite('OptionCapD')
@@ -318,7 +318,7 @@ class TestDashCapDWithDashEEqIfNDef(expect.ReturnCodeIsZero,
         #else
           void f() { int x; }
         #endif
-        void main(){ return 3;}
+        void main(){ return 3; }
 """, '.vert')
     glslc_args = ['-DX=', '-E', '-std=450core', shader]
 
@@ -327,9 +327,9 @@ class TestDashCapDWithDashEEqIfNDef(expect.ReturnCodeIsZero,
 
 
 
-          void f(){ int x;}
+          void f() { int x; }
 
-        void main(){ return 3;}
+        void main() { return 3; }
 """]
 
 @inside_glslc_testsuite('OptionCapD')
@@ -339,13 +339,13 @@ class TestDashCapDWithDashEFunctionMacro(expect.ReturnCodeIsZero,
 
     shader = FileShader(
         """
-        void main(){ return FOO(3);}
+        void main(){ return FOO(3); }
 """, '.vert')
     glslc_args = ['-DFOO(x)=(2*x+1)*x*x', '-E', '-std=450core', shader]
 
     expected_stdout =  [
         """
-        void main(){ return(2 * 3 + 1)* 3 * 3;}
+        void main() { return(2 * 3 + 1) * 3 * 3; }
 """]
 
 @inside_glslc_testsuite('OptionCapD')
@@ -355,11 +355,11 @@ class TestDashCapDWithDashENestedMacro(expect.ReturnCodeIsZero,
 
     shader = FileShader(
         """
-        void main(){ return X;}
+        void main() { return X; }
 """, '.vert')
     glslc_args = ['-DY=4', '-DX=Y', '-E', '-std=450core', shader]
 
     expected_stdout =  [
         """
-        void main(){ return 4;}
+        void main() { return 4; }
 """]
