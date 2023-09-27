@@ -16,7 +16,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE:=shaderc_util
-LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -fno-rtti -DENABLE_HLSL=1
+LOCAL_CXXFLAGS:=-std=c++17 -fno-exceptions -fno-rtti -DENABLE_HLSL=1
 LOCAL_EXPORT_C_INCLUDES:=$(LOCAL_PATH)/include
 LOCAL_SRC_FILES:=src/args.cc \
                 src/compiler.cc \
