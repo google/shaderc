@@ -1,6 +1,6 @@
 Revision history for Shaderc
 
-v2023.7-rc1 2023-10-12
+v2023.7 2023-10-12
  - Update dependencies
  - Finish converting build instructions and flags to always use C++17
  - Add GitHub CI to test more flows
