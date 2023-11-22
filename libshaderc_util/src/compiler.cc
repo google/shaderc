@@ -295,7 +295,7 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
     shader.setEnvTargetHlslFunctionality1();
   }
   if (vulkan_rules_relaxed_) {
-    glslang::EShSource language;
+    glslang::EShSource language = glslang::EShSourceNone;
     switch(source_language_) {
       case SourceLanguage::GLSL:
         language = glslang::EShSourceGlsl;
