@@ -353,6 +353,13 @@ class CompileOptions {
     shaderc_compile_options_set_hlsl_16bit_types(options_, enable);
   }
 
+  // Enables or disables relaxed Vulkan rules.
+  //
+  // This allows most OpenGL shaders to compile under Vulkan semantics.
+  void SetVulkanRulesRelaxed(bool enable) {
+    shaderc_compile_options_set_vulkan_rules_relaxed(options_, enable);
+  }
+
   // Sets whether the compiler should invert position.Y output in vertex shader.
   void SetInvertY(bool enable) {
     shaderc_compile_options_set_invert_y(options_, enable);

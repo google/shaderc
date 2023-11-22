@@ -18,3 +18,4 @@ third_party/tint
 android_test/libs
 android_test/include
 .DS_Store
+.vscode/

@@ -106,6 +106,18 @@ const char kGlslVertShaderExplicitLocation[] =
          gl_Position = my_mat * my_vec;
        })";
 
+// A GLSL fragment shader with the location defined for its non-opaque uniform
+// variable.
+const char kGlslFragShaderOpaqueUniforms[] =
+    R"(#version 320 es
+       precision lowp float;
+
+       layout(location = 0) out vec4 oColor;
+       layout(location = 0) uniform float a;
+       void main(void) {
+         oColor = vec4(1.0, 0.0, 0.0, a);
+       })";
+
 // A GLSL vertex shader without the location defined for its non-opaque uniform
 // variable.
 const char kGlslVertShaderNoExplicitLocation[] =
@@ -810,6 +822,18 @@ TEST_F(CompilerTest, HlslFunctionality1Enabled) {
   EXPECT_THAT(disassembly,
               HasSubstr("OpDecorateString %_entryPointOutput "
                         "UserSemantic \"SV_TARGET0\""))
+      << disassembly;
+}
+
+TEST_F(CompilerTest, RelaxedVulkanRulesEnabled) {
+  compiler_.SetSourceLanguage(Compiler::SourceLanguage::GLSL);
+  compiler_.SetAutoBindUniforms(true);  // Uniform variable needs a binding
+  compiler_.SetVulkanRulesRelaxed(true);
+  const auto words =
+      SimpleCompilationBinary(kGlslFragShaderOpaqueUniforms, EShLangFragment);
+  const auto disassembly = Disassemble(words);
+  EXPECT_THAT(disassembly,
+              HasSubstr("OpMemberName %gl_DefaultUniformBlock 0 \"a\""))
       << disassembly;
 }
 

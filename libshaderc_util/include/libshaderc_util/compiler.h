@@ -233,6 +233,11 @@ class Compiler {
   // Enables or disables HLSL 16-bit types.
   void EnableHlsl16BitTypes(bool enable);
 
+  // Enables or disables relaxed Vulkan rules.
+  //
+  // This allows most OpenGL shaders to compile under Vulkan semantics.
+  void SetVulkanRulesRelaxed(bool enable);
+
   // Enables or disables invert position.Y output in vertex shader.
   void EnableInvertY(bool enable);
 
@@ -544,6 +549,10 @@ class Compiler {
 
   // True if the compiler should support 16-bit HLSL types.
   bool hlsl_16bit_types_enabled_;
+
+  // True if the compiler should relax Vulkan rules to allow OGL shaders to
+  // compile.
+  bool vulkan_rules_relaxed_ = false;
 
   // True if the compiler should invert position.Y output in vertex shader.
   bool invert_y_enabled_;

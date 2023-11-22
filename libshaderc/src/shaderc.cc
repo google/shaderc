@@ -564,6 +564,11 @@ void shaderc_compile_options_set_hlsl_16bit_types(
   options->compiler.EnableHlsl16BitTypes(enable);
 }
 
+void shaderc_compile_options_set_vulkan_rules_relaxed(
+    shaderc_compile_options_t options, bool enable) {
+  options->compiler.SetVulkanRulesRelaxed(enable);
+}
+
 void shaderc_compile_options_set_invert_y(
     shaderc_compile_options_t options, bool enable) {
   options->compiler.EnableInvertY(enable);
