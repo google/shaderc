@@ -294,6 +294,22 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   if (hlsl_functionality1_enabled_) {
     shader.setEnvTargetHlslFunctionality1();
   }
+  if (vulkan_rules_relaxed_) {
+    glslang::EShSource language;
+    switch(source_language_) {
+      case SourceLanguage::GLSL:
+        language = glslang::EShSourceGlsl;
+        break;
+      case SourceLanguage::HLSL:
+        language = glslang::EShSourceHlsl;
+        break;
+    }
+    // This option will only be used if the Vulkan client is used.
+    // If new versions of GL_KHR_vulkan_glsl come out, it would make sense to
+    // let callers specify which version to use. For now, just use 100.
+    shader.setEnvInput(language, used_shader_stage, glslang::EShClientVulkan, 100);
+    shader.setEnvInputVulkanRulesRelaxed();
+  }
   shader.setInvertY(invert_y_enabled_);
   shader.setNanMinMaxClamp(nan_clamp_);
 
@@ -450,6 +466,10 @@ void Compiler::EnableHlslLegalization(bool hlsl_legalization_enabled) {
 
 void Compiler::EnableHlslFunctionality1(bool enable) {
   hlsl_functionality1_enabled_ = enable;
+}
+
+void Compiler::SetVulkanRulesRelaxed(bool enable) {
+  vulkan_rules_relaxed_ = enable;
 }
 
 void Compiler::EnableHlsl16BitTypes(bool enable) {
