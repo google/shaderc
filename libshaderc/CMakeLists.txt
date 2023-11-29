@@ -63,7 +63,7 @@ endif(SHADERC_ENABLE_INSTALL)
 
 find_package(Threads)
 set(SHADERC_LIBS
-  glslang OSDependent OGLCompiler glslang ${CMAKE_THREAD_LIBS_INIT}
+  glslang ${CMAKE_THREAD_LIBS_INIT}
   shaderc_util
   SPIRV # from glslang
   SPIRV-Tools
