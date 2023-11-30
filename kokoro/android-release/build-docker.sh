@@ -48,8 +48,8 @@ cmake \
   -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake \
   -DANDROID_NDK=$ANDROID_NDK_HOME ..
 
-echo $(date): Build glslang...
-ninja glslang-standalone
+echo $(date): Build glslang library...
+ninja glslang
 
 echo $(date): Build everything...
 ninja
