@@ -91,7 +91,11 @@ if (COMPILER_SUPPORTS_EXTRA_SEMI_WARNING)
     add_compile_options("-Wextra-semi")
 endif()
 
-find_host_package(PythonInterp 3 REQUIRED)
+if(${CMAKE_VERSION} VERSION_LESS_EQUAL "3.12")
+  find_package(PythonInterp 3 REQUIRED)
+else ()
+  find_package(Python COMPONENTS Interpreter REQUIRED)
+endif ()
 
 if (SHADERC_ENABLE_COPYRIGHT_CHECK)
   add_custom_target(check-copyright ALL
