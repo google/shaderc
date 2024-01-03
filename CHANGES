@@ -1,5 +1,8 @@
 Revision history for Shaderc
 
+v2024.0-dev 2024-01-03
+ - Start development
+
 v2023.8 2024-01-03
  - API: Expose rlaxed Vulkan rules from glslang
  - Update to Glslang 14.0.0
