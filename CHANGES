@@ -1,7 +1,11 @@
 Revision history for Shaderc
 
-v2023.8-dev 2023-10-12
- - Start development
+v2023.8 2024-01-03
+ - API: Expose rlaxed Vulkan rules from glslang
+ - Update to Glslang 14.0.0
+ - CMake:
+   - Comply with CMP0148: Use PythonInterp
+   - Use TARGET_OBJECTS to simplify creating the shaderc_shared library.
 
 v2023.7 2023-10-12
  - Update dependencies
