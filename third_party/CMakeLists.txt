@@ -83,6 +83,11 @@ endif()
 
 if (NOT TARGET glslang)
   if (IS_DIRECTORY ${SHADERC_GLSLANG_DIR})
+    if (SHADERC_ENABLE_TESTS)
+      # Glslang tests are off by default. Turn them on if testing Shaderc.
+      set(GLSLANG_TESTS ON)
+    endif()
+    set(GLSLANG_ENABLE_INSTALL $<NOT:${SKIP_GLSLANG_INSTALL}>)
     add_subdirectory(${SHADERC_GLSLANG_DIR} glslang)
   endif()
   if (NOT TARGET glslang)
