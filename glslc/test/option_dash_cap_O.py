@@ -21,71 +21,94 @@ MINIMAL_SHADER = '#version 310 es\nvoid main() {}'
 EMPTY_SHADER_IN_CWD = Directory('.', [File('shader.vert', MINIMAL_SHADER)])
 
 ASSEMBLY_WITH_DEBUG_SOURCE = [
-    '; SPIR-V\n',
-    '; Version: 1.0\n',
-    '; Generator: Google Shaderc over Glslang; 11\n',
-    '; Bound: 7\n',
-    '; Schema: 0\n',
-    '               OpCapability Shader\n',
-    '          %2 = OpExtInstImport "GLSL.std.450"\n',
-    '               OpMemoryModel Logical GLSL450\n',
-    '               OpEntryPoint Vertex %main "main"\n',
-    '          %1 = OpString "shader.vert"\n',
-    '               OpSource ESSL 310 %1 "// OpModuleProcessed entry-point main\n',
-    '// OpModuleProcessed client vulkan100\n',
-    '// OpModuleProcessed target-env vulkan1.0\n',
-    '// OpModuleProcessed entry-point main\n',
-    '#line 1\n',
-    '#version 310 es\n',
-    'void main() {}"\n',
-    '               OpSourceExtension "GL_GOOGLE_cpp_style_line_directive"\n',
-    '               OpSourceExtension "GL_GOOGLE_include_directive"\n',
-    '               OpName %main "main"\n',
-    '       %void = OpTypeVoid\n',
-    '          %4 = OpTypeFunction %void\n',
-    '               OpLine %1 2 11\n',
-    '       %main = OpFunction %void None %4\n',
-    '          %6 = OpLabel\n',
-    '               OpReturn\n',
-    '               OpFunctionEnd\n']
+    """; SPIR-V
+; Version: 1.0
+; Generator: Google Shaderc over Glslang; 11
+; Bound: 7
+; Schema: 0
+               OpCapability Shader
+          %2 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main"
+          %1 = OpString "shader.vert"
+               OpSource ESSL 310 %1 "// OpModuleProcessed entry-point main
+// OpModuleProcessed client vulkan100
+// OpModuleProcessed target-env vulkan1.0
+// OpModuleProcessed entry-point main
+#line 1
+#version 310 es
+void main() {}"
+               OpSourceExtension "GL_GOOGLE_cpp_style_line_directive"
+               OpSourceExtension "GL_GOOGLE_include_directive"
+               OpName %main "main"
+       %void = OpTypeVoid
+          %4 = OpTypeFunction %void
+               OpLine %1 2 11
+       %main = OpFunction %void None %4
+          %6 = OpLabel
+               OpLine %1 2 0
+               OpReturn
+               OpFunctionEnd
+"""
+]
 
-ASSEMBLY_WITH_DEBUG = [
-    '; SPIR-V\n',
-    '; Version: 1.0\n',
-    '; Generator: Google Shaderc over Glslang; 11\n',
-    '; Bound: 6\n',
-    '; Schema: 0\n',
-    '               OpCapability Shader\n',
-    '          %1 = OpExtInstImport "GLSL.std.450"\n',
-    '               OpMemoryModel Logical GLSL450\n',
-    '               OpEntryPoint Vertex %main "main"\n',
-    '               OpSource ESSL 310\n',
-    '               OpSourceExtension "GL_GOOGLE_cpp_style_line_directive"\n',
-    '               OpSourceExtension "GL_GOOGLE_include_directive"\n',
-    '               OpName %main "main"\n',
-    '       %void = OpTypeVoid\n',
-    '          %3 = OpTypeFunction %void\n',
-    '       %main = OpFunction %void None %3\n',
-    '          %5 = OpLabel\n',
-    '               OpReturn\n',
-    '               OpFunctionEnd\n']
+ASSEMBLY_O0 = [
+    """; SPIR-V
+; Version: 1.0
+; Generator: Google Shaderc over Glslang; 11
+; Bound: 6
+; Schema: 0
+               OpCapability Shader
+          %1 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main"
+               OpSource ESSL 310
+               OpSourceExtension "GL_GOOGLE_cpp_style_line_directive"
+               OpSourceExtension "GL_GOOGLE_include_directive"
+               OpName %main "main"
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+       %main = OpFunction %void None %3
+          %5 = OpLabel
+               OpReturn
+               OpFunctionEnd
+"""]
 
-ASSEMBLY_WITHOUT_DEBUG = [
-    '; SPIR-V\n',
-    '; Version: 1.0\n',
-    '; Generator: Google Shaderc over Glslang; 11\n',
-    '; Bound: 6\n',
-    '; Schema: 0\n',
-    '               OpCapability Shader\n',
-    '          %1 = OpExtInstImport "GLSL.std.450"\n',
-    '               OpMemoryModel Logical GLSL450\n',
-    '               OpEntryPoint Vertex %4 "main"\n',
-    '       %void = OpTypeVoid\n',
-    '          %3 = OpTypeFunction %void\n',
-    '          %4 = OpFunction %void None %3\n',  # %4 vs. %main
-    '          %5 = OpLabel\n',
-    '               OpReturn\n',
-    '               OpFunctionEnd\n']
+ASSEMBLY_O = [
+    """; SPIR-V
+; Version: 1.0
+; Generator: Google Shaderc over Glslang; 11
+; Bound: 6
+; Schema: 0
+               OpCapability Shader
+          %1 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %4 "main"
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+          %4 = OpFunction %void None %3
+          %5 = OpLabel
+               OpReturn
+               OpFunctionEnd
+"""]
+
+ASSEMBLY_Os = [
+    """; SPIR-V
+; Version: 1.0
+; Generator: Google Shaderc over Glslang; 11
+; Bound: 6
+; Schema: 0
+               OpCapability Shader
+          %1 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %4 "main"
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+          %4 = OpFunction %void None %3
+          %5 = OpLabel
+               OpReturn
+               OpFunctionEnd
+"""]
 
 
 @inside_glslc_testsuite('OptionDashCapO')
@@ -95,7 +118,8 @@ class TestDashCapO0(expect.ValidFileContents):
     environment = EMPTY_SHADER_IN_CWD
     glslc_args = ['-S', '-O0', 'shader.vert']
     target_filename = 'shader.vert.spvasm'
-    expected_file_contents = ASSEMBLY_WITH_DEBUG
+    expected_file_contents = ASSEMBLY_O0
+
 
 @inside_glslc_testsuite('OptionDashCapO')
 class TestDashCapOPerformance(expect.ValidFileContents):
@@ -104,7 +128,8 @@ class TestDashCapOPerformance(expect.ValidFileContents):
     environment = EMPTY_SHADER_IN_CWD
     glslc_args = ['-S', '-O', 'shader.vert']
     target_filename = 'shader.vert.spvasm'
-    expected_file_contents = ASSEMBLY_WITHOUT_DEBUG
+    expected_file_contents = ASSEMBLY_O
+
 
 @inside_glslc_testsuite('OptionDashCapO')
 class TestDashCapOs(expect.ValidFileContents):
@@ -113,7 +138,7 @@ class TestDashCapOs(expect.ValidFileContents):
     environment = EMPTY_SHADER_IN_CWD
     glslc_args = ['-S', '-Os', 'shader.vert']
     target_filename = 'shader.vert.spvasm'
-    expected_file_contents = ASSEMBLY_WITHOUT_DEBUG
+    expected_file_contents = ASSEMBLY_Os
 
 
 @inside_glslc_testsuite('OptionDashCapO')
@@ -123,7 +148,7 @@ class TestDashCapOOverriding(expect.ValidFileContents):
     environment = EMPTY_SHADER_IN_CWD
     glslc_args = ['-S', '-Os', '-O0', '-Os', '-O0', 'shader.vert']
     target_filename = 'shader.vert.spvasm'
-    expected_file_contents = ASSEMBLY_WITH_DEBUG
+    expected_file_contents = ASSEMBLY_O0
 
 
 @inside_glslc_testsuite('OptionDashCapO')
