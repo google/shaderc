@@ -91,22 +91,18 @@ if (COMPILER_SUPPORTS_EXTRA_SEMI_WARNING)
     add_compile_options("-Wextra-semi")
 endif()
 
-if(${CMAKE_VERSION} VERSION_LESS_EQUAL "3.12")
-  find_package(PythonInterp 3 REQUIRED)
-else ()
-  find_package(Python COMPONENTS Interpreter REQUIRED)
-endif ()
+find_package(Python COMPONENTS Interpreter REQUIRED)
 
 if (SHADERC_ENABLE_COPYRIGHT_CHECK)
   add_custom_target(check-copyright ALL
-    ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/add_copyright.py
+    ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/add_copyright.py
     --check
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Check copyright")
 endif()
 
 add_custom_target(add-copyright
-  ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/add_copyright.py
+  ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/add_copyright.py
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMENT "Add copyright")
 
@@ -134,7 +130,7 @@ if(${SHADERC_ENABLE_EXAMPLES})
 endif()
 
 add_custom_target(build-version
-  ${PYTHON_EXECUTABLE}
+  ${Python_EXECUTABLE}
   ${CMAKE_CURRENT_SOURCE_DIR}/utils/update_build_version.py
   ${shaderc_SOURCE_DIR} ${spirv-tools_SOURCE_DIR} ${glslang_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/build-version.inc
   COMMENT "Update build-version.inc in the Shaderc build directory (if necessary).")
