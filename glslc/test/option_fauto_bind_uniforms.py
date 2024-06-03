@@ -80,8 +80,10 @@ float4 main() : SV_Target0 {
    u6[2];
    u7;
    u8;
-   return float4(u8.Consume() + t2.SampleCmp(s2, 1.0, 2.0)) + t1.Sample(s1, 1.0)
-    + t6.Load(1);
+   // SampleCmp disabled due to https://github.com/KhronosGroup/glslang/issues/2444.
+   //return float4(u8.Consume() + t2.SampleCmp(s2, 1.0, 2.0)) + t1.Sample(s1, 1.0)
+   // + t6.Load(1);
+   return float4(u8.Consume()) + t1.Sample(s1, 1.0) + t6.Load(1);
 }
 """
 
@@ -340,7 +342,7 @@ class HlslFSamplerBindingBaseOptionRespected(expect.ValidAssemblyFileWithSubstr)
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap', shader,
                   '-fauto-bind-uniforms', '-fsampler-binding-base', '100']
-    expected_assembly_substr = "OpDecorate %s2 Binding 102"
+    expected_assembly_substr = "OpDecorate %s1 Binding 101"
 
 
 @inside_glslc_testsuite('OptionFAutoBindUniforms')
@@ -351,7 +353,7 @@ class HlslFSamplerBindingBaseForFragOptionRespected(expect.ValidAssemblyFileWith
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap', shader,
                   '-fauto-bind-uniforms', '-fsampler-binding-base', 'frag', '100']
-    expected_assembly_substr = "OpDecorate %s2 Binding 102"
+    expected_assembly_substr = "OpDecorate %s1 Binding 101"
 
 
 @inside_glslc_testsuite('OptionFAutoBindUniforms')
@@ -362,7 +364,7 @@ class HlslFSamplerBindingBaseForComputeOptionIgnoredWhenCompilingAsFrag(expect.V
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap', shader,
                   '-fauto-bind-uniforms', '-fsampler-binding-base', 'compute', '100']
-    expected_assembly_substr = "OpDecorate %s2 Binding 2"
+    expected_assembly_substr = "OpDecorate %s1 Binding 1"
 
 
 @inside_glslc_testsuite('OptionFAutoBindUniforms')
