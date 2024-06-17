@@ -38,9 +38,6 @@ cd %SRC%\build
 if %VS_VERSION% == 2019 (
   call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
   echo "Using VS 2019..."
-) else if %VS_VERSION% == 2017 (
-  call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
-  echo "Using VS 2017..."
 )
 
 :: #########################################
