@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright 2016 The Shaderc Authors. All rights reserved.
 #
@@ -20,8 +20,7 @@ repositories."""
 from operator import attrgetter
 import argparse
 import json
-import distutils.dir_util
-import os.path
+import os
 import subprocess
 import sys
 
@@ -73,7 +72,7 @@ class GoodCommit(object):
     def GetUrl(self, style='https'):
         """Returns the URL for the repository."""
         host = SITE_TO_HOST[self.site]
-        sep = '/' if (style is 'https') else ':'
+        sep = '/' if (style == 'https') else ':'
         return '{style}://{host}{sep}{subrepo}'.format(
             style=style,
             host=host,
@@ -93,7 +92,7 @@ class GoodCommit(object):
                                     cwd=self.subdir)
 
     def Clone(self):
-        distutils.dir_util.mkpath(self.subdir)
+        os.makedirs(self.subdir, exist_ok=True)
         command_output(['git', 'clone', self.GetUrl(), '.'], self.subdir)
 
     def Fetch(self):
@@ -126,7 +125,7 @@ def main():
 
     commits = GetGoodCommits(args.known_good_file)
 
-    distutils.dir_util.mkpath(args.dir)
+    os.makedirs(args.dir, exist_ok=True)
     print('Change directory to {d}'.format(d=args.dir))
     os.chdir(args.dir)
 
