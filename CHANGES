@@ -1,5 +1,8 @@
 Revision history for Shaderc
 
+v2024.3-dev
+ - Start development
+
 v2024.2
  - Update dependencies:
      Glslang: top of tree 2024-06-21
