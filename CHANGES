@@ -1,7 +1,12 @@
 Revision history for Shaderc
 
 v2024.2-dev
- - Start development
+ - Update dependencies:
+     Glslang: top of tree 2024-06-21
+     SPIRV-Header: top of tree 2024-06-21
+     SPIRV-Tools: v2024.3.rc1
+ - Build:
+    - Remove support for VS2017
 
 v2024.1
  - Update dependencies
