@@ -22,7 +22,7 @@ MINIMAL_SHADER = '#version 140\nvoid main() {}'
 # match exactly, and there should not be a trailing comma at the end of the
 # list. When -mfmt=c is specified, curly brackets should be presented.
 MINIMAL_SHADER_NUM_FORMAT_PATTERN = "^0x07230203.*[0-9a-f]$"
-MINIMAL_SHADER_C_FORMAT_PATTERN = "^\{0x07230203.*[0-9a-f]\}"
+MINIMAL_SHADER_C_FORMAT_PATTERN = "^\\{0x07230203.*[0-9a-f]\\}"
 ERROR_SHADER = '#version 140\n#error\nvoid main() {}'
 
 
