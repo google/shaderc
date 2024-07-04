@@ -38,10 +38,10 @@ class FRegisterSetBindingForFragRespected(expect.ValidAssemblyFileWithSubstr):
                   '-fresource-set-binding', 'frag',
                   't4', '9', '16',
                   't5', '17', '18']
-    expected_assembly_substr = """OpDecorate %t4 DescriptorSet 9
-               OpDecorate %t4 Binding 16
-               OpDecorate %t5 DescriptorSet 17
-               OpDecorate %t5 Binding 18"""
+    expected_assembly_substr = """OpDecorate %t4 Binding 16
+               OpDecorate %t4 DescriptorSet 9
+               OpDecorate %t5 Binding 18
+               OpDecorate %t5 DescriptorSet 17"""
 
 
 @inside_glslc_testsuite('OptionFRegisterSetBinding')
@@ -52,10 +52,10 @@ class FRegisterSetBindingForFragRespectedJustOneTriple(expect.ValidAssemblyFileW
     glslc_args = ['-S', '-x', 'hlsl', shader,
                   '-fresource-set-binding', 'frag',
                   't4', '9', '16']
-    expected_assembly_substr = """OpDecorate %t4 DescriptorSet 9
-               OpDecorate %t4 Binding 16
-               OpDecorate %t5 DescriptorSet 0
-               OpDecorate %t5 Binding 5"""
+    expected_assembly_substr = """OpDecorate %t4 Binding 16
+               OpDecorate %t4 DescriptorSet 9
+               OpDecorate %t5 Binding 5
+               OpDecorate %t5 DescriptorSet 0"""
 
 
 @inside_glslc_testsuite('OptionFRegisterSetBinding')
@@ -67,10 +67,10 @@ class FRegisterSetBindingForWrongStageIgnored(expect.ValidAssemblyFileWithSubstr
                   '-fresource-set-binding', 'vert',
                   't4', '9', '16',
                   't5', '17', '18']
-    expected_assembly_substr = """OpDecorate %t4 DescriptorSet 0
-               OpDecorate %t4 Binding 4
-               OpDecorate %t5 DescriptorSet 0
-               OpDecorate %t5 Binding 5"""
+    expected_assembly_substr = """OpDecorate %t4 Binding 4
+               OpDecorate %t4 DescriptorSet 0
+               OpDecorate %t5 Binding 5
+               OpDecorate %t5 DescriptorSet 0"""
 
 
 @inside_glslc_testsuite('OptionFRegisterSetBinding')
@@ -82,10 +82,10 @@ class FRegisterSetBindingForAllRespected(expect.ValidAssemblyFileWithSubstr):
                   '-fresource-set-binding',
                   't4', '9', '16',
                   't5', '17', '18']
-    expected_assembly_substr = """OpDecorate %t4 DescriptorSet 9
-               OpDecorate %t4 Binding 16
-               OpDecorate %t5 DescriptorSet 17
-               OpDecorate %t5 Binding 18"""
+    expected_assembly_substr = """OpDecorate %t4 Binding 16
+               OpDecorate %t4 DescriptorSet 9
+               OpDecorate %t5 Binding 18
+               OpDecorate %t5 DescriptorSet 17"""
 
 
 @inside_glslc_testsuite('OptionFRegisterSetBinding')
