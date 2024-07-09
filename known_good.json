@@ -5,7 +5,7 @@
       "site" : "github",
       "subrepo" : "KhronosGroup/glslang",
       "subdir" : "third_party/glslang",
-      "commit" : "f88e5824d2cfca5edc58c7c2101ec9a4ec36afac"
+      "commit" : "fa9c3deb49e035a8abcabe366f26aac010f6cbfb"
     },
     {
       "name" : "abseil_cpp",
