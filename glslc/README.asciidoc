@@ -249,8 +249,8 @@ Note: Support for OpenGL compatibility profile, `opengl_compat`, has been remove
 `--target-spv=<value>` lets you specify the SPIR-V version to be used by the generated
 module.  The default is to use the highest version of SPIR-V required to be supported
 by the target environment.  The defaults for specific Vulkan target environments are
-as follows: SPIR-V 1.0 for Vulkan 1.0, SPIR-V 1.3 for Vulkan 1.1, and SPIR-V 1.5 for
-Vulkan 1.2.
+as follows: SPIR-V 1.0 for Vulkan 1.0, SPIR-V 1.3 for Vulkan 1.1, SPIR-V 1.5 for Vulkan
+1.2, and SPIR-V 1.6 for Vulkan 1.3.
 
 The ``<value>`` can be one of the following:
 
