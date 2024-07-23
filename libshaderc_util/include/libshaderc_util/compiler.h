@@ -214,6 +214,8 @@ class Compiler {
         hlsl_16bit_types_enabled_(false),
         invert_y_enabled_(false),
         nan_clamp_(false),
+        default_uniform_block_set_(0),
+        default_uniform_block_binding_(0),
         hlsl_explicit_bindings_() {}
 
   // Requests that the compiler place debug information into the object code,
@@ -337,6 +339,13 @@ class Compiler {
     for (auto stage : stages()) {
       SetHlslRegisterSetAndBindingForStage(stage, reg, set, binding);
     }
+  }
+
+  // Sets the descriptor set and binding for the default uniform block in
+  // the relaxed Vulkan rules mode.
+  void SetDefaultUniformBlockSetAndBinding(uint32_t set, uint32_t binding) {
+    default_uniform_block_set_ = set;
+    default_uniform_block_binding_ = binding;
   }
 
   // Sets an explicit set and binding for the given HLSL register in the given
@@ -562,6 +571,12 @@ class Compiler {
   // builtin will favour the non-NaN operands, as if clamp were implemented
   // as a composition of max and min.
   bool nan_clamp_;
+
+  // Descriptor set for the default uniform block in relaxed Vulkan rules mode.
+  uint32_t default_uniform_block_set_;
+
+  // Binding for the default uniform block in relaxed Vulkan rules mode.
+  uint32_t default_uniform_block_binding_;
 
   // A sequence of triples, each triple representing a specific HLSL register
   // name, and the set and binding numbers it should be mapped to, but in

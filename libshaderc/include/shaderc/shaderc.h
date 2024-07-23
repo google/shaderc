@@ -506,6 +506,11 @@ SHADERC_EXPORT void shaderc_compile_options_set_invert_y(
 SHADERC_EXPORT void shaderc_compile_options_set_nan_clamp(
     shaderc_compile_options_t options, bool enable);
 
+// Sets the descriptor set and binding for the default uniform block in the
+// relaxed Vulkan rules mode.
+SHADERC_EXPORT void shaderc_compile_options_set_default_uniform_block_set_and_binding(
+    shaderc_compile_options_t options, uint32_t set, uint32_t binding);
+
 // An opaque handle to the results of a call to any shaderc_compile_into_*()
 // function.
 typedef struct shaderc_compilation_result* shaderc_compilation_result_t;
