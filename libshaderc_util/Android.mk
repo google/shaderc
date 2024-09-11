@@ -27,6 +27,6 @@ LOCAL_SRC_FILES:=src/args.cc \
 		src/shader_stage.cc \
 		src/spirv_tools_wrapper.cc \
 		src/version_profile.cc
-LOCAL_STATIC_LIBRARIES:=SPIRV SPIRV-Tools-opt
+LOCAL_STATIC_LIBRARIES:=SPIRV SPIRV-Tools-opt glslang
 LOCAL_C_INCLUDES:=$(LOCAL_PATH)/include
 include $(BUILD_STATIC_LIBRARY)
