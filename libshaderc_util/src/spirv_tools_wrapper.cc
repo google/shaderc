@@ -126,6 +126,11 @@ bool SpirvToolsOptimize(Compiler::TargetEnv env,
   val_opts.SetRelaxLogicalPointer(true);
   // This uses relaxed rules for pre-legalized HLSL.
   val_opts.SetBeforeHlslLegalization(true);
+  // Don't use friendly names when printing validation errors.
+  // It incurs a high startup cost whether or not there is an
+  // error. Validation failures are compiler bugs, and so they
+  // should be rare anyway.
+  val_opts.SetFriendlyNames(false);
 
   // Set additional optimizer options.
   optimizer_options.set_validator_options(val_opts);
