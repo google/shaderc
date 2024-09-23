@@ -1,7 +1,19 @@
 Revision history for Shaderc
 
-v2024.3-dev
- - Start development
+v2024.3
+ - Update dependencies: Glslang, SPRIV-Tools, SPIRV-Headers
+   - SPIRV-Tools is at v2024.4.rc1
+   - This incorporates a SPIRV-Tools fix which was limiting parallelism.
+     Validator friendly name generation was serializing on a mutex
+     protecting the locale object.
+ - During HLSL compilation or any optimizing compile, don't tell the
+   validator to use "friendly names".  This should save time spent in the
+   initial validation step of the optimization recipe.
+ - Adapt test golden results to Glslang changes which reorder
+   decorations by object enum value.
+ - Fix ndk-build library dependencies: libshaderc_util depends on glslang
+ - Use Python 3.12 on Linux CI bots
+ - Fix Python 3.12 warnings for string escapes
 
 v2024.2
  - Update dependencies:
