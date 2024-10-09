@@ -10,8 +10,8 @@ vars = {
   'glslang_revision': '9d00d6d6cad638bebc7cd852b1e6e1244de42679',
   'googletest_revision': '1d17ea141d2c11b8917d2c7d029f1c4e2b9769b2',
   're2_revision': '4a8cee3dd3c3d81b6fe8b867811e193d5819df07',
-  'spirv_headers_revision': 'a62b032007b2e7a69f24a195cbfbd0cf22d31bb0',
-  'spirv_tools_revision': '4310fd4edae21d711ab31f5183704ad320329419',
+  'spirv_headers_revision': '07ddb1c0f1ffa929262d4568481a692bb0fb1535',
+  'spirv_tools_revision': 'fcf994a619608c2bdb505189f6e325b1a6b4f294',
 }
 
 deps = {
