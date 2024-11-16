@@ -579,6 +579,11 @@ void shaderc_compile_options_set_nan_clamp(shaderc_compile_options_t options,
   options->compiler.SetNanClamp(enable);
 }
 
+void shaderc_compile_options_set_default_uniform_block_set_and_binding(
+    shaderc_compile_options_t options, uint32_t set, uint32_t binding) {
+  options->compiler.SetDefaultUniformBlockSetAndBinding(set, binding);
+}
+
 shaderc_compiler_t shaderc_compiler_initialize() {
   shaderc_compiler_t compiler = new (std::nothrow) shaderc_compiler;
   if (compiler) {
