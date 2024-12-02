@@ -24,10 +24,9 @@
 #include <unordered_map>
 #include <utility>
 
-#include "glslang/Public/ShaderLang.h"
-
 #include "counting_includer.h"
 #include "file_finder.h"
+#include "glslang/Public/ShaderLang.h"
 #include "mutex.h"
 #include "resources.h"
 #include "string_piece.h"
@@ -85,7 +84,8 @@ class Compiler {
     Vulkan_1_0 = ((1 << 22)),              // Vulkan 1.0
     Vulkan_1_1 = ((1 << 22) | (1 << 12)),  // Vulkan 1.1
     Vulkan_1_2 = ((1 << 22) | (2 << 12)),  // Vulkan 1.2
-    Vulkan_1_3 = ((1 << 22) | (3 << 12)),  // Vulkan 1.2
+    Vulkan_1_3 = ((1 << 22) | (3 << 12)),  // Vulkan 1.3
+    Vulkan_1_4 = ((1 << 22) | (4 << 12)),  // Vulkan 1.4
     // For OpenGL, use the numbering from #version in shaders.
     OpenGL_4_5 = 450,
   };
@@ -297,8 +297,8 @@ class Compiler {
   }
 
   // Sets the lowest binding number used when automatically assigning bindings
-  // for uniform resources of the given type, for all shader stages.  The default
-  // base is zero.
+  // for uniform resources of the given type, for all shader stages.  The
+  // default base is zero.
   void SetAutoBindingBase(UniformKind kind, uint32_t base) {
     for (auto stage : stages()) {
       SetAutoBindingBaseForStage(stage, kind, base);
@@ -343,8 +343,8 @@ class Compiler {
   // shader stage.  For example,
   //    SetHlslRegisterSetAndBinding(Stage::Fragment, "t1", "4", "5")
   // means register "t1" in a fragment shader should map to binding 5 in set 4.
-  // (Glslang wants this data as strings, not ints or enums.)  The string data is
-  // copied.
+  // (Glslang wants this data as strings, not ints or enums.)  The string data
+  // is copied.
   void SetHlslRegisterSetAndBindingForStage(Stage stage, const std::string& reg,
                                             const std::string& set,
                                             const std::string& binding) {
@@ -393,7 +393,8 @@ class Compiler {
                                       const string_piece& error_tag)>&
           stage_callback,
       CountingIncluder& includer, OutputType output_type,
-      std::ostream* error_stream, size_t* total_warnings, size_t* total_errors) const;
+      std::ostream* error_stream, size_t* total_warnings,
+      size_t* total_errors) const;
 
   static EShMessages GetDefaultRules() {
     return static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules |
@@ -521,9 +522,9 @@ class Compiler {
   // and convert image variables to combined image-sampler variables.
   bool auto_combined_image_sampler_;
 
-  // The base binding number per uniform type, per stage, used when automatically
-  // binding uniforms that don't hzve explicit bindings in the shader source.
-  // The default is zero.
+  // The base binding number per uniform type, per stage, used when
+  // automatically binding uniforms that don't hzve explicit bindings in the
+  // shader source. The default is zero.
   uint32_t auto_binding_base_[kNumStages][kNumUniformKinds];
 
   // True if the compiler should automatically map uniforms that don't
@@ -544,7 +545,8 @@ class Compiler {
   // source language is HLSL.
   bool hlsl_legalization_enabled_;
 
-  // True if the compiler should support extension SPV_GOOGLE_hlsl_functionality1.
+  // True if the compiler should support extension
+  // SPV_GOOGLE_hlsl_functionality1.
   bool hlsl_functionality1_enabled_;
 
   // True if the compiler should support 16-bit HLSL types.

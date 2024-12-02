@@ -14,9 +14,9 @@
 
 #include "libshaderc_util/compiler.h"
 
-#include <sstream>
-
 #include <gmock/gmock.h>
+
+#include <sstream>
 
 #include "death_test.h"
 #include "libshaderc_util/counting_includer.h"
@@ -353,16 +353,18 @@ TEST_F(CompilerTest, BadTargetEnvVulkanVersionFails) {
   compiler_.SetTargetEnv(Compiler::TargetEnv::Vulkan,
                          static_cast<Compiler::TargetEnvVersion>(123));
   EXPECT_FALSE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
-  EXPECT_THAT(errors_,
-              HasSubstr("Invalid target client version 123 for Vulkan environment 0"));
+  EXPECT_THAT(
+      errors_,
+      HasSubstr("Invalid target client version 123 for Vulkan environment 0"));
 }
 
 TEST_F(CompilerTest, BadTargetEnvOpenGLVersionFails) {
   compiler_.SetTargetEnv(Compiler::TargetEnv::OpenGL,
                          static_cast<Compiler::TargetEnvVersion>(123));
   EXPECT_FALSE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
-  EXPECT_THAT(errors_,
-              HasSubstr("Invalid target client version 123 for OpenGL environment 1"));
+  EXPECT_THAT(
+      errors_,
+      HasSubstr("Invalid target client version 123 for OpenGL environment 1"));
 }
 
 TEST_F(CompilerTest, SpirvTargetVersion1_0Succeeds) {
@@ -535,18 +537,17 @@ TEST_P(LimitTest, Sample) {
 
 #define CASE(LIMIT, DEFAULT, NEW) \
   { Compiler::Limit::LIMIT, DEFAULT, NEW }
-INSTANTIATE_TEST_SUITE_P(
-    CompilerTest, LimitTest,
-    // See resources.cc for the defaults.
-    testing::ValuesIn(std::vector<SetLimitCase>{
-        // clang-format off
+INSTANTIATE_TEST_SUITE_P(CompilerTest, LimitTest,
+                         // See resources.cc for the defaults.
+                         testing::ValuesIn(std::vector<SetLimitCase>{
+                             // clang-format off
         // This is just a sampling of the possible values.
         CASE(MaxLights, 8, 99),
         CASE(MaxClipPlanes, 6, 10929),
         CASE(MaxTessControlAtomicCounters, 0, 72),
         CASE(MaxSamples, 4, 8),
-        // clang-format on
-    }));
+                             // clang-format on
+                         }));
 #undef CASE
 
 // Returns a fragment shader accessing a texture with the given
@@ -819,9 +820,8 @@ TEST_F(CompilerTest, HlslFunctionality1Enabled) {
   EXPECT_THAT(disassembly,
               HasSubstr("OpExtension \"SPV_GOOGLE_hlsl_functionality1\""))
       << disassembly;
-  EXPECT_THAT(disassembly,
-              HasSubstr("OpDecorateString %_entryPointOutput "
-                        "UserSemantic \"SV_TARGET0\""))
+  EXPECT_THAT(disassembly, HasSubstr("OpDecorateString %_entryPointOutput "
+                                     "UserSemantic \"SV_TARGET0\""))
       << disassembly;
 }
 
@@ -926,6 +926,8 @@ INSTANTIATE_TEST_SUITE_P(
         // Unforced SPIR-V version. Success cases.
         {CASE_VK(1_0, 1_4), false, GCASE_VK("", 1_0, 1_0)},
         {CASE_VK(1_1, 1_4), false, GCASE_VK("", 1_1, 1_3)},
+        {CASE_VK(1_3, 1_6), false, GCASE_VK("", 1_3, 1_6)},
+        {CASE_VK(1_4, 1_6), false, GCASE_VK("", 1_4, 1_6)},
         {CASE_GL(4_5, 1_4), false, GCASE_GL("", 450, 1_0)},
     }));
 
@@ -941,6 +943,12 @@ INSTANTIATE_TEST_SUITE_P(
         {CASE_VK(1_1, 1_1), true, GCASE_VK("", 1_1, 1_1)},
         {CASE_VK(1_1, 1_2), true, GCASE_VK("", 1_1, 1_2)},
         {CASE_VK(1_1, 1_3), true, GCASE_VK("", 1_1, 1_3)},
+        {CASE_VK(1_3, 1_4), true, GCASE_VK("", 1_3, 1_4)},
+        {CASE_VK(1_3, 1_5), true, GCASE_VK("", 1_3, 1_5)},
+        {CASE_VK(1_3, 1_6), true, GCASE_VK("", 1_3, 1_6)},
+        {CASE_VK(1_4, 1_4), true, GCASE_VK("", 1_4, 1_4)},
+        {CASE_VK(1_4, 1_5), true, GCASE_VK("", 1_4, 1_5)},
+        {CASE_VK(1_4, 1_6), true, GCASE_VK("", 1_4, 1_6)},
         {CASE_GL(4_5, 1_0), true, GCASE_GL("", 450, 1_0)},
         {CASE_GL(4_5, 1_1), true, GCASE_GL("", 450, 1_1)},
         {CASE_GL(4_5, 1_2), true, GCASE_GL("", 450, 1_2)},

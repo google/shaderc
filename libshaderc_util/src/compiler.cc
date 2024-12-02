@@ -178,7 +178,8 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
                                     const string_piece& error_tag)>&
         stage_callback,
     CountingIncluder& includer, OutputType output_type,
-    std::ostream* error_stream, size_t* total_warnings, size_t* total_errors) const {
+    std::ostream* error_stream, size_t* total_warnings,
+    size_t* total_errors) const {
   // Compilation results to be returned:
   // Initialize the result tuple as a failed compilation. In error cases, we
   // should return result_tuple directly without setting its members.
@@ -192,8 +193,8 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
 
   // Check target environment.
   const auto target_client_info = GetGlslangClientInfo(
-      error_tag, target_env_, target_env_version_,
-      target_spirv_version_, target_spirv_version_is_forced_);
+      error_tag, target_env_, target_env_version_, target_spirv_version_,
+      target_spirv_version_is_forced_);
   if (!target_client_info.error.empty()) {
     *error_stream << target_client_info.error;
     *total_warnings = 0;
@@ -272,7 +273,8 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   shader.setEntryPoint(entry_point_name);
   shader.setAutoMapBindings(auto_bind_uniforms_);
   if (auto_combined_image_sampler_) {
-    shader.setTextureSamplerTransformMode(EShTexSampTransUpgradeTextureRemoveSampler);
+    shader.setTextureSamplerTransformMode(
+        EShTexSampTransUpgradeTextureRemoveSampler);
   }
   shader.setAutoMapLocations(auto_map_locations_);
   const auto& bases = auto_binding_base_[static_cast<int>(used_shader_stage)];
@@ -296,7 +298,7 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   }
   if (vulkan_rules_relaxed_) {
     glslang::EShSource language = glslang::EShSourceNone;
-    switch(source_language_) {
+    switch (source_language_) {
       case SourceLanguage::GLSL:
         language = glslang::EShSourceGlsl;
         break;
@@ -307,7 +309,8 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
     // This option will only be used if the Vulkan client is used.
     // If new versions of GL_KHR_vulkan_glsl come out, it would make sense to
     // let callers specify which version to use. For now, just use 100.
-    shader.setEnvInput(language, used_shader_stage, glslang::EShClientVulkan, 100);
+    shader.setEnvInput(language, used_shader_stage, glslang::EShClientVulkan,
+                       100);
     shader.setEnvInputVulkanRulesRelaxed();
   }
   shader.setInvertY(invert_y_enabled_);
@@ -494,8 +497,8 @@ std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
                                        &string_names, 1);
   shader.setPreamble(shader_preamble.data());
   auto target_client_info = GetGlslangClientInfo(
-      error_tag, target_env_, target_env_version_,
-      target_spirv_version_, target_spirv_version_is_forced_);
+      error_tag, target_env_, target_env_version_, target_spirv_version_,
+      target_spirv_version_is_forced_);
   if (!target_client_info.error.empty()) {
     return std::make_tuple(false, "", target_client_info.error);
   }
@@ -754,6 +757,9 @@ GlslangClientInfo GetGlslangClientInfo(
         result.target_language_version = glslang::EShTargetSpv_1_5;
       } else if (env_version == Compiler::TargetEnvVersion::Vulkan_1_3) {
         result.client_version = glslang::EShTargetVulkan_1_3;
+        result.target_language_version = glslang::EShTargetSpv_1_6;
+      } else if (env_version == Compiler::TargetEnvVersion::Vulkan_1_4) {
+        result.client_version = glslang::EShTargetVulkan_1_4;
         result.target_language_version = glslang::EShTargetSpv_1_6;
       } else {
         errs << "error:" << error_tag << ": Invalid target client version "

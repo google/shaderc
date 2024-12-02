@@ -103,12 +103,12 @@ class CppInterface : public testing::Test {
   // Compiles a shader, asserts compilation success, and returns the warning
   // messages.
   // The input file name is set to "shader" by default.
-  std::string CompilationWarnings(
-      const std::string& shader, shaderc_shader_kind kind,
-      // This could default to options_, but that can
-      // be easily confused with a no-options-provided
-      // case:
-      const CompileOptions& options) {
+  std::string CompilationWarnings(const std::string& shader,
+                                  shaderc_shader_kind kind,
+                                  // This could default to options_, but that
+                                  // can be easily confused with a
+                                  // no-options-provided case:
+                                  const CompileOptions& options) {
     const auto compilation_result =
         compiler_.CompileGlslToSpv(shader, kind, "shader", options);
     EXPECT_TRUE(CompilationResultIsSuccess(compilation_result)) << kind << '\n'
@@ -458,9 +458,8 @@ TEST_F(CppInterface, ForcedVersionProfileRedundantProfileStd) {
 
 TEST_F(CppInterface, GenerateDebugInfoBinary) {
   options_.SetGenerateDebugInfo();
-  const std::string binary_output =
-      CompilationOutput(kMinimalDebugInfoShader,
-                        shaderc_glsl_vertex_shader, options_);
+  const std::string binary_output = CompilationOutput(
+      kMinimalDebugInfoShader, shaderc_glsl_vertex_shader, options_);
   // The binary output should contain the name of the vector (debug_info_sample)
   // null-terminated, as well as the whole original source.
   std::string vector_name("debug_info_sample");
@@ -472,9 +471,8 @@ TEST_F(CppInterface, GenerateDebugInfoBinary) {
 TEST_F(CppInterface, GenerateDebugInfoBinaryClonedOptions) {
   options_.SetGenerateDebugInfo();
   CompileOptions cloned_options(options_);
-  const std::string binary_output =
-      CompilationOutput(kMinimalDebugInfoShader,
-                        shaderc_glsl_vertex_shader, cloned_options);
+  const std::string binary_output = CompilationOutput(
+      kMinimalDebugInfoShader, shaderc_glsl_vertex_shader, cloned_options);
   // The binary output should contain the name of the vector (debug_info_sample)
   // null-terminated, as well as the whole original source.
   std::string vector_name("debug_info_sample");
@@ -846,39 +844,39 @@ TEST_P(IncluderTests, SetIncluderClonedOptions) {
 }
 
 INSTANTIATE_TEST_SUITE_P(CppInterface, IncluderTests,
-                        testing::ValuesIn(std::vector<IncluderTestCase>{
-                            IncluderTestCase(
-                                // Fake file system.
-                                {
-                                    {"root",
-                                     "#version 150\n"
-                                     "void foo() {}\n"
-                                     "#include \"path/to/file_1\"\n"},
-                                    {"path/to/file_1", "content of file_1\n"},
-                                },
-                                // Expected output.
-                                "#line 0 \"path/to/file_1\"\n"
-                                " content of file_1\n"
-                                "#line 3"),
-                            IncluderTestCase(
-                                // Fake file system.
-                                {{"root",
-                                  "#version 150\n"
-                                  "void foo() {}\n"
-                                  "#include \"path/to/file_1\"\n"},
-                                 {"path/to/file_1",
-                                  "#include \"path/to/file_2\"\n"
-                                  "content of file_1\n"},
-                                 {"path/to/file_2", "content of file_2\n"}},
-                                // Expected output.
-                                "#line 0 \"path/to/file_1\"\n"
-                                "#line 0 \"path/to/file_2\"\n"
-                                " content of file_2\n"
-                                "#line 1 \"path/to/file_1\"\n"
-                                " content of file_1\n"
-                                "#line 3"),
+                         testing::ValuesIn(std::vector<IncluderTestCase>{
+                             IncluderTestCase(
+                                 // Fake file system.
+                                 {
+                                     {"root",
+                                      "#version 150\n"
+                                      "void foo() {}\n"
+                                      "#include \"path/to/file_1\"\n"},
+                                     {"path/to/file_1", "content of file_1\n"},
+                                 },
+                                 // Expected output.
+                                 "#line 0 \"path/to/file_1\"\n"
+                                 " content of file_1\n"
+                                 "#line 3"),
+                             IncluderTestCase(
+                                 // Fake file system.
+                                 {{"root",
+                                   "#version 150\n"
+                                   "void foo() {}\n"
+                                   "#include \"path/to/file_1\"\n"},
+                                  {"path/to/file_1",
+                                   "#include \"path/to/file_2\"\n"
+                                   "content of file_1\n"},
+                                  {"path/to/file_2", "content of file_2\n"}},
+                                 // Expected output.
+                                 "#line 0 \"path/to/file_1\"\n"
+                                 "#line 0 \"path/to/file_2\"\n"
+                                 " content of file_2\n"
+                                 "#line 1 \"path/to/file_1\"\n"
+                                 " content of file_1\n"
+                                 "#line 3"),
 
-                        }));
+                         }));
 
 TEST_F(CppInterface, WarningsOnLine) {
   // By default the compiler will emit a warning on line 2 complaining
@@ -1077,6 +1075,7 @@ TEST_F(CppInterface, TargetEnvCompileOptionsVulkan1_0EnvVulkan1_1ShaderFails) {
                                   shaderc_glsl_compute_shader, options_));
 }
 
+// Simple Vulkan 1.1 tests
 TEST_F(CppInterface,
        TargetEnvCompileOptionsVulkan1_1EnvVulkan1_0ShaderSucceeds) {
   options_.SetTargetEnvironment(shaderc_target_env_vulkan,
@@ -1092,6 +1091,59 @@ TEST_F(CppInterface,
   EXPECT_TRUE(CompilationSuccess(SubgroupBarrierComputeShader(),
                                  shaderc_glsl_compute_shader, options_));
 }
+
+// Simple Vulkan 1.2 tests
+TEST_F(CppInterface,
+       TargetEnvCompileOptionsVulkan1_2EnvVulkan1_0ShaderSucceeds) {
+  options_.SetTargetEnvironment(shaderc_target_env_vulkan,
+                                shaderc_env_version_vulkan_1_2);
+  EXPECT_TRUE(CompilationSuccess(BarrierComputeShader(),
+                                 shaderc_glsl_compute_shader, options_));
+}
+
+TEST_F(CppInterface,
+       TargetEnvCompileOptionsVulkan1_2EnvVulkan1_1ShaderSucceeds) {
+  options_.SetTargetEnvironment(shaderc_target_env_vulkan,
+                                shaderc_env_version_vulkan_1_2);
+  EXPECT_TRUE(CompilationSuccess(SubgroupBarrierComputeShader(),
+                                 shaderc_glsl_compute_shader, options_));
+}
+
+// Simple Vulkan 1.3 tests
+TEST_F(CppInterface,
+       TargetEnvCompileOptionsVulkan1_3EnvVulkan1_0ShaderSucceeds) {
+  options_.SetTargetEnvironment(shaderc_target_env_vulkan,
+                                shaderc_env_version_vulkan_1_3);
+  EXPECT_TRUE(CompilationSuccess(BarrierComputeShader(),
+                                 shaderc_glsl_compute_shader, options_));
+}
+
+TEST_F(CppInterface,
+       TargetEnvCompileOptionsVulkan1_3EnvVulkan1_1ShaderSucceeds) {
+  options_.SetTargetEnvironment(shaderc_target_env_vulkan,
+                                shaderc_env_version_vulkan_1_3);
+  EXPECT_TRUE(CompilationSuccess(SubgroupBarrierComputeShader(),
+                                 shaderc_glsl_compute_shader, options_));
+}
+
+// Simple Vulkan 1.4 tests
+TEST_F(CppInterface,
+       TargetEnvCompileOptionsVulkan1_4EnvVulkan1_0ShaderSucceeds) {
+  options_.SetTargetEnvironment(shaderc_target_env_vulkan,
+                                shaderc_env_version_vulkan_1_4);
+  EXPECT_TRUE(CompilationSuccess(BarrierComputeShader(),
+                                 shaderc_glsl_compute_shader, options_));
+}
+
+TEST_F(CppInterface,
+       TargetEnvCompileOptionsVulkan1_4EnvVulkan1_1ShaderSucceeds) {
+  options_.SetTargetEnvironment(shaderc_target_env_vulkan,
+                                shaderc_env_version_vulkan_1_4);
+  EXPECT_TRUE(CompilationSuccess(SubgroupBarrierComputeShader(),
+                                 shaderc_glsl_compute_shader, options_));
+}
+
+// Other tests
 
 TEST_F(CppInterface, BeginAndEndOnSpvCompilationResult) {
   const SpvCompilationResult compilation_result = compiler_.CompileGlslToSpv(
@@ -1432,8 +1484,9 @@ TEST_F(CppInterface, HlslFunctionality1SurvivesCloning) {
   // source. https://github.com/KhronosGroup/glslang/issues/1616
   options.SetAutoBindUniforms(true);
   CompileOptions cloned_options(options);
-  const std::string disassembly_text = AssemblyOutput(
-      kHlslShaderWithCounterBuffer, shaderc_glsl_fragment_shader, cloned_options);
+  const std::string disassembly_text =
+      AssemblyOutput(kHlslShaderWithCounterBuffer, shaderc_glsl_fragment_shader,
+                     cloned_options);
   EXPECT_THAT(disassembly_text, HasSubstr("OpDecorateString"));
 }
 
