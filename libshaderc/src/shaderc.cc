@@ -110,7 +110,7 @@ class StageDeducer {
  public:
   explicit StageDeducer(
       shaderc_shader_kind kind = shaderc_glsl_infer_from_source)
-      : kind_(kind), error_(false){}
+      : kind_(kind), error_(false) {}
   // The method that underlying glslang will call to determine the shader stage
   // to be used in current compilation. It is called only when there is neither
   // forced shader kind (or say stage, in the view of glslang), nor #pragma
@@ -203,9 +203,9 @@ class InternalFileIncluder : public shaderc_util::CountingIncluder {
                        void* user_data)
       : resolver_(resolver),
         result_releaser_(result_releaser),
-        user_data_(user_data){}
+        user_data_(user_data) {}
   InternalFileIncluder()
-      : resolver_(nullptr), result_releaser_(nullptr), user_data_(nullptr){}
+      : resolver_(nullptr), result_releaser_(nullptr), user_data_(nullptr) {}
 
  private:
   // Check the validity of the callbacks.
@@ -310,6 +310,10 @@ shaderc_util::Compiler::TargetEnvVersion GetCompilerTargetEnvVersion(
   if (static_cast<uint32_t>(Compiler::TargetEnvVersion::Vulkan_1_3) ==
       version_number) {
     return Compiler::TargetEnvVersion::Vulkan_1_3;
+  }
+  if (static_cast<uint32_t>(Compiler::TargetEnvVersion::Vulkan_1_4) ==
+      version_number) {
+    return Compiler::TargetEnvVersion::Vulkan_1_4;
   }
   if (static_cast<uint32_t>(Compiler::TargetEnvVersion::OpenGL_4_5) ==
       version_number) {
@@ -569,8 +573,8 @@ void shaderc_compile_options_set_vulkan_rules_relaxed(
   options->compiler.SetVulkanRulesRelaxed(enable);
 }
 
-void shaderc_compile_options_set_invert_y(
-    shaderc_compile_options_t options, bool enable) {
+void shaderc_compile_options_set_invert_y(shaderc_compile_options_t options,
+                                          bool enable) {
   options->compiler.EnableInvertY(enable);
 }
 
@@ -587,9 +591,7 @@ shaderc_compiler_t shaderc_compiler_initialize() {
   return compiler;
 }
 
-void shaderc_compiler_release(shaderc_compiler_t compiler) {
-  delete compiler;
-}
+void shaderc_compiler_release(shaderc_compiler_t compiler) { delete compiler; }
 
 namespace {
 shaderc_compilation_result_t CompileToSpecifiedOutputType(
@@ -629,7 +631,8 @@ shaderc_compilation_result_t CompileToSpecifiedOutputType(
       std::tie(compilation_succeeded, compilation_output_data,
                compilation_output_data_size_in_bytes) =
           additional_options->compiler.Compile(
-              source_string, forced_stage, input_file_name_str, entry_point_name,
+              source_string, forced_stage, input_file_name_str,
+              entry_point_name,
               // stage_deducer has a flag: error_, which we need to check later.
               // We need to make this a reference wrapper, so that std::function
               // won't make a copy for this callable object.
@@ -641,9 +644,9 @@ shaderc_compilation_result_t CompileToSpecifiedOutputType(
       std::tie(compilation_succeeded, compilation_output_data,
                compilation_output_data_size_in_bytes) =
           shaderc_util::Compiler().Compile(
-              source_string, forced_stage, input_file_name_str, entry_point_name,
-              std::ref(stage_deducer), includer, output_type, &errors,
-              &total_warnings, &total_errors);
+              source_string, forced_stage, input_file_name_str,
+              entry_point_name, std::ref(stage_deducer), includer, output_type,
+              &errors, &total_warnings, &total_errors);
     }
 
     result->messages = errors.str();

@@ -609,9 +609,8 @@ TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileRedundantProfileStd) {
 TEST_F(CompileStringWithOptionsTest, GenerateDebugInfoBinary) {
   shaderc_compile_options_set_generate_debug_info(options_.get());
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
-  const std::string binary_output =
-      CompilationOutput(kMinimalDebugInfoShader,
-                        shaderc_glsl_vertex_shader, options_.get());
+  const std::string binary_output = CompilationOutput(
+      kMinimalDebugInfoShader, shaderc_glsl_vertex_shader, options_.get());
   // The binary output should contain the name of the vector (debug_info_sample)
   // null-terminated, as well as the whole original source.
   std::string vector_name("debug_info_sample");
@@ -626,8 +625,8 @@ TEST_F(CompileStringWithOptionsTest, GenerateDebugInfoBinaryClonedOptions) {
       shaderc_compile_options_clone(options_.get()));
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   const std::string binary_output =
-      CompilationOutput(kMinimalDebugInfoShader,
-                        shaderc_glsl_vertex_shader, cloned_options.get());
+      CompilationOutput(kMinimalDebugInfoShader, shaderc_glsl_vertex_shader,
+                        cloned_options.get());
   // The binary output should contain the name of the vector (debug_info_sample)
   // null-terminated, as well as the whole original source.
   std::string vector_name("debug_info_sample");
@@ -984,39 +983,39 @@ TEST_P(IncluderTests, SetIncluderCallbacksClonedOptions) {
 }
 
 INSTANTIATE_TEST_SUITE_P(CompileStringTest, IncluderTests,
-                        testing::ValuesIn(std::vector<IncluderTestCase>{
-                            IncluderTestCase(
-                                // Fake file system.
-                                {
-                                    {"root",
-                                     "#version 150\n"
-                                     "void foo() {}\n"
-                                     "#include \"path/to/file_1\"\n"},
-                                    {"path/to/file_1", "content of file_1\n"},
-                                },
-                                // Expected output.
-                                "#line 0 \"path/to/file_1\"\n"
-                                " content of file_1\n"
-                                "#line 3"),
-                            IncluderTestCase(
-                                // Fake file system.
-                                {{"root",
-                                  "#version 150\n"
-                                  "void foo() {}\n"
-                                  "#include \"path/to/file_1\"\n"},
-                                 {"path/to/file_1",
-                                  "#include \"path/to/file_2\"\n"
-                                  "content of file_1\n"},
-                                 {"path/to/file_2", "content of file_2\n"}},
-                                // Expected output.
-                                "#line 0 \"path/to/file_1\"\n"
-                                "#line 0 \"path/to/file_2\"\n"
-                                " content of file_2\n"
-                                "#line 1 \"path/to/file_1\"\n"
-                                " content of file_1\n"
-                                "#line 3"),
+                         testing::ValuesIn(std::vector<IncluderTestCase>{
+                             IncluderTestCase(
+                                 // Fake file system.
+                                 {
+                                     {"root",
+                                      "#version 150\n"
+                                      "void foo() {}\n"
+                                      "#include \"path/to/file_1\"\n"},
+                                     {"path/to/file_1", "content of file_1\n"},
+                                 },
+                                 // Expected output.
+                                 "#line 0 \"path/to/file_1\"\n"
+                                 " content of file_1\n"
+                                 "#line 3"),
+                             IncluderTestCase(
+                                 // Fake file system.
+                                 {{"root",
+                                   "#version 150\n"
+                                   "void foo() {}\n"
+                                   "#include \"path/to/file_1\"\n"},
+                                  {"path/to/file_1",
+                                   "#include \"path/to/file_2\"\n"
+                                   "content of file_1\n"},
+                                  {"path/to/file_2", "content of file_2\n"}},
+                                 // Expected output.
+                                 "#line 0 \"path/to/file_1\"\n"
+                                 "#line 0 \"path/to/file_2\"\n"
+                                 " content of file_2\n"
+                                 "#line 1 \"path/to/file_1\"\n"
+                                 " content of file_1\n"
+                                 "#line 3"),
 
-                        }));
+                         }));
 
 TEST_F(CompileStringWithOptionsTest, WarningsOnLine) {
   // Some versions of Glslang will return an error, some will return just
@@ -1221,6 +1220,63 @@ TEST_F(CompileStringWithOptionsTest,
   shaderc_compile_options_set_target_env(options_.get(),
                                          shaderc_target_env_vulkan,
                                          shaderc_env_version_vulkan_1_1);
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kGlslShaderComputeSubgroupBarrier,
+                                 shaderc_glsl_compute_shader, options_.get()));
+}
+
+// Simple Vulkan 1.2 tests
+TEST_F(CompileStringWithOptionsTest,
+       TargetEnvRespectedWhenCompilingVulkan1_0ShaderToVulkan1_2Succeeds) {
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_vulkan,
+                                         shaderc_env_version_vulkan_1_2);
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kGlslShaderComputeBarrier,
+                                 shaderc_glsl_compute_shader, options_.get()));
+}
+
+TEST_F(CompileStringWithOptionsTest,
+       TargetEnvRespectedWhenCompilingVulkan1_1ShaderToVulkan1_2Succeeds) {
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_vulkan,
+                                         shaderc_env_version_vulkan_1_2);
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kGlslShaderComputeSubgroupBarrier,
+                                 shaderc_glsl_compute_shader, options_.get()));
+}
+
+// Simple Vulkan 1.3 tests
+TEST_F(CompileStringWithOptionsTest,
+       TargetEnvRespectedWhenCompilingVulkan1_0ShaderToVulkan1_3Succeeds) {
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_vulkan,
+                                         shaderc_env_version_vulkan_1_3);
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kGlslShaderComputeBarrier,
+                                 shaderc_glsl_compute_shader, options_.get()));
+}
+
+TEST_F(CompileStringWithOptionsTest,
+       TargetEnvRespectedWhenCompilingVulkan1_1ShaderToVulkan1_3Succeeds) {
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_vulkan,
+                                         shaderc_env_version_vulkan_1_3);
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kGlslShaderComputeSubgroupBarrier,
+                                 shaderc_glsl_compute_shader, options_.get()));
+}
+
+// Simple Vulkan 1.4 tests
+TEST_F(CompileStringWithOptionsTest,
+       TargetEnvRespectedWhenCompilingVulkan1_0ShaderToVulkan1_4Succeeds) {
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_vulkan,
+                                         shaderc_env_version_vulkan_1_4);
+  EXPECT_TRUE(CompilesToValidSpv(compiler_, kGlslShaderComputeBarrier,
+                                 shaderc_glsl_compute_shader, options_.get()));
+}
+
+TEST_F(CompileStringWithOptionsTest,
+       TargetEnvRespectedWhenCompilingVulkan1_1ShaderToVulkan1_4Succeeds) {
+  shaderc_compile_options_set_target_env(options_.get(),
+                                         shaderc_target_env_vulkan,
+                                         shaderc_env_version_vulkan_1_4);
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kGlslShaderComputeSubgroupBarrier,
                                  shaderc_glsl_compute_shader, options_.get()));
 }

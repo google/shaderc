@@ -40,6 +40,8 @@ spv_target_env GetSpirvToolsTargetEnv(Compiler::TargetEnv env,
           return SPV_ENV_VULKAN_1_2;
         case Compiler::TargetEnvVersion::Vulkan_1_3:
           return SPV_ENV_VULKAN_1_3;
+        case Compiler::TargetEnvVersion::Vulkan_1_4:
+          return SPV_ENV_VULKAN_1_4;
         default:
           break;
       }
