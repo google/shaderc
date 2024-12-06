@@ -1,7 +1,7 @@
 Revision history for Shaderc
 
-v2024.4-dev
- - Start development
+v2024.4
+ - Support Vulkan 1.4
 
 v2024.3
  - Update dependencies: Glslang, SPRIV-Tools, SPIRV-Headers
