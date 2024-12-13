@@ -25,7 +25,7 @@ set -e
 # Display commands being run.
 set -x
 
-using cmake-3.17.2
+using cmake-3.31.2
 using ninja-1.10.0
 using ndk-r25c # Sets ANDROID_NDK_HOME, pointing at the NDK's root dir
 

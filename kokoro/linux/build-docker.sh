@@ -25,7 +25,7 @@ set -x # Display commands being run.
 SKIP_TESTS="False"
 BUILD_TYPE="Debug"
 
-using cmake-3.17.2
+using cmake-3.31.2
 using ninja-1.10.0
 using python-3.12
 

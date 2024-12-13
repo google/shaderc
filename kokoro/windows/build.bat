@@ -23,6 +23,8 @@ set VS_VERSION=%2
 
 :: Force usage of python 3.6.
 set PATH=C:\python36;%PATH%
+:: Glslang requires cmake 3.27 or later
+set PATH=C:\cmake-3.31.2\bin;%PATH%
 
 cd %SRC%
 python utils\git-sync-deps
