@@ -21,8 +21,8 @@ set SRC=%cd%\github\shaderc
 set BUILD_TYPE=%1
 set VS_VERSION=%2
 
-:: Force usage of python 3.6.
-set PATH=C:\python36;%PATH%
+:: Force usage of python 3.12
+set PATH=C:\python312;%PATH%
 :: Glslang requires cmake 3.27 or later
 set PATH=C:\cmake-3.31.2\bin;%PATH%
 
