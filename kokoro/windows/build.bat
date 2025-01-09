@@ -20,6 +20,7 @@ set BUILD_ROOT=%cd%
 set SRC=%cd%\github\shaderc
 set BUILD_TYPE=%1
 set VS_VERSION=%2
+set ARCH=%3
 
 :: Force usage of python 3.12
 set PATH=C:\python312;%PATH%
@@ -38,8 +39,9 @@ cd %SRC%\build
 :: set up msvc build env
 :: #########################################
 if %VS_VERSION% == 2019 (
-  call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
-  echo "Using VS 2019..."
+  call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" %ARCH%
+) else if %VS_VERSION% == 2022 (
+  call "C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvarsall.bat" %ARCH%
 )
 
 :: #########################################
