@@ -22,4 +22,4 @@ set -e
 set -x
 
 SCRIPT_DIR=`dirname "$BASH_SOURCE"`
-source $SCRIPT_DIR/build.sh DEBUG "clang-10.0.0"
+source $SCRIPT_DIR/build.sh DEBUG "clang-13.0.1"
