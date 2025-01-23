@@ -22,4 +22,4 @@ set -e
 set -x
 
 SCRIPT_DIR=`dirname "$BASH_SOURCE"`
-source $SCRIPT_DIR/build.sh DEBUG "gcc-9"
+source $SCRIPT_DIR/build.sh DEBUG "gcc-13"
