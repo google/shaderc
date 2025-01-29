@@ -40,7 +40,7 @@ function clean_dir() {
 # Get source for dependencies, as specified in the DEPS file
 /usr/bin/python3 utils/git-sync-deps --treeless
 
-using ndk-r25c
+using ndk-r27c
 
 clean_dir "$ROOT_DIR/build"
 cd "$ROOT_DIR/build"
