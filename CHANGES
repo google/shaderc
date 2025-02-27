@@ -1,5 +1,8 @@
 Revision history for Shaderc
 
+v2025.2-dev
+ - Start v2025.2 development
+
 v2025.1
  - Update tools and compilers tested:
    - Clang 13
