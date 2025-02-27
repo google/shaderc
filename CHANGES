@@ -1,7 +1,15 @@
 Revision history for Shaderc
 
-v2024.5-dev
- - Start development
+v2025.1
+ - Update tools and compilers tested:
+   - Clang 13
+   - GCC 13
+   - VisualStudio 2022
+   - CMake 3.31.2
+   - Python 3.12
+   - NDK r27c
+ - Skip version numbers to match SPIRV-Tools, to avoid
+   confusion.
 
 v2024.4
  - Support Vulkan 1.4
