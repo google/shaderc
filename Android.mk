@@ -20,8 +20,7 @@ include $(ROOT_SHADERC_PATH)/libshaderc/Android.mk
 
 ALL_LIBS:=libglslang.a \
 	libshaderc.a \
-	libshaderc_util.a \
-	libSPIRV.a \
+	libshaderc_util.a 
 	libSPIRV-Tools.a \
 	libSPIRV-Tools-opt.a
 

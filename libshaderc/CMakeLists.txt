@@ -65,7 +65,6 @@ find_package(Threads)
 set(SHADERC_LIBS
   glslang ${CMAKE_THREAD_LIBS_INIT}
   shaderc_util
-  SPIRV # from glslang
   SPIRV-Tools
 )
 

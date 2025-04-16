@@ -43,7 +43,7 @@ if (SHADERC_ENABLE_WGSL_OUTPUT)
 endif(SHADERC_ENABLE_WGSL_OUTPUT)
 
 target_link_libraries(glslc PRIVATE
-  glslang SPIRV    # Glslang libraries
+  glslang                                               # Glslang library
   $<$<BOOL:${SHADERC_ENABLE_WGSL_OUTPUT}>:libtint>      # Tint libraries, optional
   shaderc_util shaderc                                  # internal Shaderc libraries
   ${CMAKE_THREAD_LIBS_INIT})

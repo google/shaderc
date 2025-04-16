@@ -46,8 +46,9 @@ add_definitions(-DENABLE_HLSL)
 
 find_package(Threads)
 target_link_libraries(shaderc_util PRIVATE
-  glslang SPIRV
-  SPIRV-Tools-opt ${CMAKE_THREAD_LIBS_INIT})
+  glslang
+  SPIRV-Tools-opt
+  ${CMAKE_THREAD_LIBS_INIT})
 
 shaderc_add_tests(
   TEST_PREFIX shaderc_util
