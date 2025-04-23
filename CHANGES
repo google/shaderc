@@ -1,5 +1,8 @@
 Revision history for Shaderc
 
+v2025.3-dev
+ - Start development
+
 v2025.2
  - Update dependencies: Glslang, SPIRV-Tools, SPIRV-Headers
  - Supports BFloat16 floating point types
