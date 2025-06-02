@@ -32,8 +32,8 @@ add_library(glslc STATIC
 shaderc_default_compile_options(glslc)
 target_include_directories(glslc PUBLIC ${glslang_SOURCE_DIR})
 
-if(SHADERC_ENABLE_WGSL_OUTPUT)
-  if(IS_DIRECTORY "${tint_SOURCE_DIR}/include")
+if (SHADERC_ENABLE_WGSL_OUTPUT)
+  if (IS_DIRECTORY "${tint_SOURCE_DIR}/include")
     target_include_directories(glslc PRIVATE "${tint_SOURCE_DIR}/include")
     target_include_directories(glslc PRIVATE "${tint_SOURCE_DIR}")
   endif()
@@ -43,27 +43,27 @@ if(SHADERC_ENABLE_WGSL_OUTPUT)
 endif(SHADERC_ENABLE_WGSL_OUTPUT)
 
 target_link_libraries(glslc PRIVATE
-  glslang SPIRV # Glslang libraries
-  $<$<BOOL:${SHADERC_ENABLE_WGSL_OUTPUT}>:libtint> # Tint libraries, optional
-  shaderc_util shaderc # internal Shaderc libraries
+  glslang SPIRV    # Glslang libraries
+  $<$<BOOL:${SHADERC_ENABLE_WGSL_OUTPUT}>:libtint>      # Tint libraries, optional
+  shaderc_util shaderc                                  # internal Shaderc libraries
   ${CMAKE_THREAD_LIBS_INIT})
 
-if(SHADERC_ENABLE_INSTALL)
+if(SHADERC_ENABLE_EXECUTABLES)
   add_executable(glslc_exe src/main.cc)
   shaderc_default_compile_options(glslc_exe)
   target_include_directories(glslc_exe PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/.. ${spirv-tools_SOURCE_DIR}/include)
   set_target_properties(glslc_exe PROPERTIES OUTPUT_NAME glslc)
   target_link_libraries(glslc_exe PRIVATE glslc shaderc_util shaderc)
   add_dependencies(glslc_exe build-version)
-endif(SHADERC_ENABLE_INSTALL)
+endif(SHADERC_ENABLE_EXECUTABLES)
 
 shaderc_add_tests(
   TEST_PREFIX glslc
   LINK_LIBS glslc shaderc_util shaderc
   TEST_NAMES
-  file
-  resource_parse
-  stage)
+    file
+    resource_parse
+    stage)
 
 shaderc_add_asciidoc(glslc_doc_README README)
 
