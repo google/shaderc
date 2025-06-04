@@ -55,7 +55,7 @@ option(SHADERC_SKIP_EXECUTABLES "Skip building executables." ${SHADERC_SKIP_EXEC
 if(NOT ${SHADERC_SKIP_EXECUTABLES})
   set(SHADERC_ENABLE_EXECUTABLES ON)
 endif()
-if (${SHADERC_SKIP_EXECUTABLES})
+if (${SHADERC_ENABLE_EXECUTABLES})
   message(STATUS "Configuring Shaderc to build executables.")
 else()
   message(STATUS "Configuring Shaderc to avoid building executables.")
