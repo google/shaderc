@@ -1,5 +1,8 @@
 Revision history for Shaderc
 
+v2025.4-dev
+ - Start development
+
 v2025.3
  - Update dependencies
  - CMake updates:
