@@ -7,11 +7,11 @@ Download the latest builds.
 ## Release
 | Windows | Linux | MacOS |
 | --- | --- | --- |
-| [MSVC 2019](https://storage.googleapis.com/shaderc/badges/build_link_windows_vs2019_release.html) | [clang](https://storage.googleapis.com/shaderc/badges/build_link_linux_clang_release.html) | [clang](https://storage.googleapis.com/shaderc/badges/build_link_macos_clang_release.html) |
+| [VS 2022](https://storage.googleapis.com/shaderc/badges/build_link_windows_vs2022_amd64_release.html) | [clang](https://storage.googleapis.com/shaderc/badges/build_link_linux_clang_release.html) | [clang](https://storage.googleapis.com/shaderc/badges/build_link_macos_clang_release.html) |
 | | [gcc](https://storage.googleapis.com/shaderc/badges/build_link_linux_gcc_release.html) | |
 
 ## Debug
 | Windows | Linux | MacOS |
 | --- | --- | --- |
-| [MSVC 2019](https://storage.googleapis.com/shaderc/badges/build_link_windows_vs2019_debug.html) | [clang](https://storage.googleapis.com/shaderc/badges/build_link_linux_clang_debug.html) | [clang](https://storage.googleapis.com/shaderc/badges/build_link_macos_clang_debug.html) |
+| [VS 2022](https://storage.googleapis.com/shaderc/badges/build_link_windows_vs2022_amd64_debug.html) | [clang](https://storage.googleapis.com/shaderc/badges/build_link_linux_clang_debug.html) | [clang](https://storage.googleapis.com/shaderc/badges/build_link_macos_clang_debug.html) |
 | | [gcc](https://storage.googleapis.com/shaderc/badges/build_link_linux_gcc_debug.html) | |
