@@ -38,9 +38,7 @@ cd %SRC%\build
 :: #########################################
 :: set up msvc build env
 :: #########################################
-if %VS_VERSION% == 2019 (
-  call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" %ARCH%
-) else if %VS_VERSION% == 2022 (
+if %VS_VERSION% == 2022 (
   call "C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvarsall.bat" %ARCH%
 )
 
