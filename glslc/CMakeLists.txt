@@ -55,6 +55,12 @@ if(SHADERC_ENABLE_EXECUTABLES)
   set_target_properties(glslc_exe PROPERTIES OUTPUT_NAME glslc)
   target_link_libraries(glslc_exe PRIVATE glslc shaderc_util shaderc)
   add_dependencies(glslc_exe build-version)
+
+  if(SHADERC_ENABLE_INSTALL)
+    install(TARGETS glslc_exe
+      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+      BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR})
+  endif(SHADERC_ENABLE_INSTALL)
 endif(SHADERC_ENABLE_EXECUTABLES)
 
 shaderc_add_tests(
@@ -66,11 +72,5 @@ shaderc_add_tests(
     stage)
 
 shaderc_add_asciidoc(glslc_doc_README README)
-
-if(SHADERC_ENABLE_INSTALL)
-  install(TARGETS glslc_exe
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR})
-endif(SHADERC_ENABLE_INSTALL)
 
 add_subdirectory(test)
