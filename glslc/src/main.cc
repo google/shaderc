@@ -338,6 +338,15 @@ int main(int argc, char** argv) {
       compiler.options().SetNanClamp(true);
     } else if (arg.starts_with("-fpreserve-bindings")) {
       compiler.options().SetPreserveBindings(true);
+    } else if (arg.starts_with("-fmax-id-bound=")) {
+      const string_piece value_str = arg.substr(std::strlen("-fmax-id-bound="));
+      uint32_t bound = 0;
+      if (!shaderc_util::ParseUint32(value_str.str(), &bound)) {
+        std::cerr << "glslc: error: invalid value '" << value_str << "' in '"
+                  << arg << "'" << std::endl;
+        return 1;
+      }
+      compiler.options().SetMaxIdBound(bound);
     } else if (((u_kind = shaderc_uniform_kind_image),
                 (arg == "-fimage-binding-base")) ||
                ((u_kind = shaderc_uniform_kind_texture),

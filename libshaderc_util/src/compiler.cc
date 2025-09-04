@@ -370,6 +370,7 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   if (!opt_passes.empty()) {
     spvtools::OptimizerOptions opt_options;
     opt_options.set_preserve_bindings(preserve_bindings_);
+    opt_options.set_max_id_bound(max_id_bound_);
 
     std::string opt_errors;
     if (!SpirvToolsOptimize(target_env_, target_env_version_, opt_passes,

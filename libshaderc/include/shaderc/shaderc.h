@@ -463,6 +463,9 @@ SHADERC_EXPORT void shaderc_compile_options_set_binding_base_for_stage(
 SHADERC_EXPORT void shaderc_compile_options_set_preserve_bindings(
     shaderc_compile_options_t options, bool preserve_bindings);
 
+SHADERC_EXPORT void shaderc_compile_options_set_max_id_bound(
+    shaderc_compile_options_t options, uint32_t max_id_bound);
+
 // Sets whether the compiler should automatically assign locations to
 // uniform variables that don't have explicit locations in the shader source.
 SHADERC_EXPORT void shaderc_compile_options_set_auto_map_locations(

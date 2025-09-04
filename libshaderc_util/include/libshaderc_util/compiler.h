@@ -319,6 +319,8 @@ class Compiler {
     preserve_bindings_ = preserve_bindings;
   }
 
+  void SetMaxIdBound(uint32_t max_id_bound) { max_id_bound_ = max_id_bound; }
+
   // Sets whether the compiler automatically assigns locations to
   // uniform variables that don't have explicit locations.
   void SetAutoMapLocations(bool auto_map) { auto_map_locations_ = auto_map; }
@@ -533,6 +535,8 @@ class Compiler {
 
   // True if the compiler should preserve all bindings, even when unused.
   bool preserve_bindings_;
+
+  uint32_t max_id_bound_ = 0x3FFFFF;
 
   // True if the compiler should use HLSL IO mapping rules when compiling HLSL.
   bool hlsl_iomap_;

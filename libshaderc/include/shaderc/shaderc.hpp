@@ -317,6 +317,10 @@ class CompileOptions {
     shaderc_compile_options_set_preserve_bindings(options_, preserve_bindings);
   }
 
+  void SetMaxIdBound(uint32_t max_id_bound) {
+    shaderc_compile_options_set_max_id_bound(options_, max_id_bound);
+  }
+
   // Sets whether the compiler automatically assigns locations to
   // uniform variables that don't have explicit locations.
   void SetAutoMapLocations(bool auto_map) {
