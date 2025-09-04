@@ -21,10 +21,14 @@ if(${SHADERC_ENABLE_TESTS})
           COMMAND ${Python_EXECUTABLE} -m unittest glslc_test_framework_unittest.py
           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
-  add_test(NAME glslc_tests
-    COMMAND ${Python_EXECUTABLE}
-    ${CMAKE_CURRENT_SOURCE_DIR}/glslc_test_framework.py
-    $<TARGET_FILE:glslc_exe> $<TARGET_FILE:spirv-dis>
-    --test-dir ${CMAKE_CURRENT_SOURCE_DIR})
-    
+  # These tests use the glslc executable, so they can only run if
+  # glslc has been built.
+  if(${SHADERC_ENABLE_EXECUTABLES})
+    add_test(NAME glslc_tests
+      COMMAND ${Python_EXECUTABLE}
+      ${CMAKE_CURRENT_SOURCE_DIR}/glslc_test_framework.py
+      $<TARGET_FILE:glslc_exe> $<TARGET_FILE:spirv-dis>
+      --test-dir ${CMAKE_CURRENT_SOURCE_DIR})
+  endif()
+
 endif()
