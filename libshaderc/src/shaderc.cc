@@ -540,6 +540,11 @@ void shaderc_compile_options_set_preserve_bindings(
   options->compiler.SetPreserveBindings(preserve_bindings);
 }
 
+void shaderc_compile_options_set_max_id_bound(shaderc_compile_options_t options,
+                                              uint32_t max_id_bound) {
+  options->compiler.SetMaxIdBound(max_id_bound);
+}
+
 void shaderc_compile_options_set_auto_map_locations(
     shaderc_compile_options_t options, bool auto_map) {
   options->compiler.SetAutoMapLocations(auto_map);
