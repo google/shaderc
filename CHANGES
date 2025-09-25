@@ -1,6 +1,6 @@
 Revision history for Shaderc
 
-v2025.4-dev
+v2025.4
  - Update dependencies
  - Add option to set max SPIR-V ID bound.
     glslc: -fmax-id-bound
