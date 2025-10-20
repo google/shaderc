@@ -20,6 +20,7 @@ RUN apk add --update \
     build-base \
     cmake \
     git \
+    linux-headers \
     ninja \
     python3 \
     py-pip \
