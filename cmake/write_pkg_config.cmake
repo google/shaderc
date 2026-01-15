@@ -16,12 +16,12 @@
 file(STRINGS ${CHANGES_FILE} CHANGES_CONTENT)
 string(
 REGEX
-  MATCH "v[0-9]+(.[0-9]+)?(-dev)? [0-9]+-[0-9]+-[0-9]+"
+  MATCH "v[0-9]+(.[0-9]+)?(-dev)?"
   FIRST_VERSION_LINE
   ${CHANGES_CONTENT})
 string(
 REGEX
-  REPLACE "^v([^ ]+) .+$" "\\1"
+  REPLACE "^v([^ ]+)$" "\\1"
   CURRENT_VERSION
   "${FIRST_VERSION_LINE}")
 # If this is a development version, replace "-dev" by ".0" as pkg-config nor
