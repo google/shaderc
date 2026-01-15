@@ -28,4 +28,6 @@ REGEX
 # CMake support "-dev" in the version.
 # If it's not a "-dev" version then ensure it ends with ".1"
 string(REGEX REPLACE "-dev.1" ".0" CURRENT_VERSION "${CURRENT_VERSION}.1")
+cmake_path(APPEND PKG_CONFIG_LIBDIR "\${exec_prefix}" "${CMAKE_INSTALL_LIBDIR}")
+cmake_path(APPEND PKG_CONFIG_INCLUDEDIR "\${prefix}" "${CMAKE_INSTALL_INCLUDEDIR}")
 configure_file(${TEMPLATE_FILE} ${OUT_FILE} @ONLY)
