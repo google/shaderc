@@ -72,14 +72,16 @@ def deduce_software_version(directory):
     """
 
     # Match the first well-formed version-and-date line.
+    # It must be on the third line, and it must have an ISO date.
     # Allow trailing whitespace in the checked-out source code has
     # unexpected carriage returns on a linefeed-only system such as
     # Linux.
     pattern = re.compile(r'^(v\d+\.\d+(-dev|[\.-]rc\d+)?) \d\d\d\d-\d\d-\d\d\s*$')
     changes_file = os.path.join(directory, 'CHANGES')
     with open(changes_file, errors='replace') as f:
-        for line in f.readlines():
-            match = pattern.match(line)
+        lines = f.readlines()[2:]
+        if len(lines) > 0:
+            match = pattern.match(lines[0])
             if match:
                 return match.group(1)
     raise Exception('No version number found in {}'.format(changes_file))
