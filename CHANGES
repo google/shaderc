@@ -1,12 +1,12 @@
 Revision history for Shaderc
 
-v2025.6-dev
+v2025.6-dev 2025-11-27
  - Start development
 
-v2025.5
+v2025.5 2025-11-27
  - Update dependencies
 
-v2025.4
+v2025.4 2025-09-25
  - Update dependencies
  - Add option to set max SPIR-V ID bound.
     glslc: -fmax-id-bound
@@ -14,17 +14,17 @@ v2025.4
     don't try to install it.
  - Remove testing of VS 2019
 
-v2025.3
+v2025.3 2025-06-24
  - Update dependencies
  - CMake updates:
     - Actually disable all tests when specified
     - Add a way to disable building glslc
 
-v2025.2
+v2025.2 2025-04-23
  - Update dependencies: Glslang, SPIRV-Tools, SPIRV-Headers
  - Supports BFloat16 floating point types
 
-v2025.1
+v2025.1 2025-02-27
  - Update tools and compilers tested:
    - Clang 13
    - GCC 13
@@ -35,10 +35,10 @@ v2025.1
  - Skip version numbers to match SPIRV-Tools, to avoid
    confusion.
 
-v2024.4
+v2024.4 2024-12-06
  - Support Vulkan 1.4
 
-v2024.3
+v2024.3 2024-09-23
  - Update dependencies: Glslang, SPRIV-Tools, SPIRV-Headers
    - SPIRV-Tools is at v2024.4.rc1
    - This incorporates a SPIRV-Tools fix which was limiting parallelism.
@@ -53,7 +53,7 @@ v2024.3
  - Use Python 3.12 on Linux CI bots
  - Fix Python 3.12 warnings for string escapes
 
-v2024.2
+v2024.2 2024-06-21
  - Update dependencies:
      Glslang: top of tree 2024-06-21
      SPIRV-Header: top of tree 2024-06-21
@@ -61,11 +61,11 @@ v2024.2
  - Build:
     - Remove support for VS2017
 
-v2024.1
+v2024.1 2024-04-30
  - Update dependencies
  - Propagate test/install options to Glslang
 
-v2024.0
+v2024.0 2024-03-08
  - Update dependencies
  - Utilities:
     - Use Python3 explicitly in utility scripts
