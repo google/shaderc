@@ -1,7 +1,14 @@
 Revision history for Shaderc
 
-v2025.6-dev 2025-11-27
- - Start development
+v2026.1 2026-01-23
+ - Update dependencies:
+    - Glslang 16.2.0
+    - SPIRV-Tools v2026.1rc1.
+    - SPIRV-Headers top of tree
+   Supports VK_EXT_descriptor_heap and other extensions.
+ - Require the CHANGES file to have a valid date on its version lines
+   This avoid the problem of stale version information in the
+   pkg-config configuration files.
 
 v2025.5 2025-11-27
  - Update dependencies
