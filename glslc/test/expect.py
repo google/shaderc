@@ -242,7 +242,7 @@ class CorrectAssemblyFilePreamble(GlslCTest):
             line3 = assembly_file.readline()
 
         if (line1 != '; SPIR-V\n' or
-            line2 != '; Version: 1.0\n' or
+            (not line2.startswith('; Version: 1.')) or
             (not line3.startswith('; Generator: Google Shaderc over Glslang;'))):
             return False, 'Incorrect SPV assembly'
 
@@ -427,10 +427,13 @@ class ValidAssemblyFileWithSubstr(ValidAssemblyFile):
     """Mixin class for checking that every input file generates a valid assembly
     file following the assembly file naming rule, there is no output on
     stdout/stderr, and all assembly files have the given substring specified
-    by expected_assembly_substr.
+    as self.expected_assembly_substr (if present) and substrings specified
+    by the list strings in self.expected_assembly_substrings (if present).
+    At least one string must be specified.
 
-    To mix in this class, subclasses need to provde expected_assembly_substr
-    as the expected substring.
+    To mix in this class, subclasses need to provide
+    self.expected_assembly_substr as the expected substring, or a list of
+    strings in self.expected_assembly_substrings.
     """
 
     def check_assembly_with_substr(self, status):
@@ -441,11 +444,22 @@ class ValidAssemblyFileWithSubstr(ValidAssemblyFile):
             if not success:
                 return False, message
             with open(assembly_filename, 'r') as f:
-                content = f.read()
-                if self.expected_assembly_substr not in convert_to_unix_line_endings(content):
-                   return False, ('Incorrect assembly output:\n{asm}\n'
-                                  'Expected substring not found:\n{exp}'.format(
-                                  asm=content, exp=self.expected_assembly_substr))
+                content = convert_to_unix_line_endings(f.read())
+                expected_strs = []
+                if 'expected_assembly_substrings' in dir(self):
+                    expected_strs.extend(self.expected_assembly_substrings)
+                if 'expected_assembly_substr' in dir(self):
+                    expected_strs.append(self.expected_assembly_substr)
+                assert(type(expected_strs) is list)
+                assert(len(expected_strs) > 0)
+                for es in expected_strs:
+                    assert(type(es) is str)
+
+                for es in expected_strs:
+                    if es not in content:
+                        return False, ('Incorrect assembly output:\n{asm}\n'
+                                       'Expected substring not found:\n{exp}'.format(
+                                        asm=content, exp=es))
         return True, ''
 
 
