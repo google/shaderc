@@ -315,6 +315,8 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   }
   shader.setInvertY(invert_y_enabled_);
   shader.setNanMinMaxClamp(nan_clamp_);
+  shader.setGlobalUniformSet(default_uniform_block_set_);
+  shader.setGlobalUniformBinding(default_uniform_block_binding_);
 
   const EShMessages rules =
       GetMessageRules(target_env_, source_language_, hlsl_offsets_,
