@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (C) 2020 Google Inc.
+# Copyright (C) 2020-2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,14 +13,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# Linux Build Script.
 
 set -e # Fail on any error.
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd )"
-ROOT_DIR="$( cd "${SCRIPT_DIR}/../.." >/dev/null 2>&1 && pwd )"
+ROOT_DIR="$( cd "${SCRIPT_DIR}/../../.." >/dev/null 2>&1 && pwd )"
 
-CONFIG=$1
-COMPILER=$2
+TARGET_ARCH="$1"
 
 # --privileged is required for some sanitizer builds, as they seem to require
 # PTRACE privileges
@@ -31,8 +32,7 @@ docker run --rm -i \
   --workdir "${ROOT_DIR}" \
   --env ROOT_DIR="${ROOT_DIR}" \
   --env SCRIPT_DIR="${SCRIPT_DIR}" \
-  --env CONFIG="${CONFIG}" \
-  --env COMPILER="${COMPILER}" \
+  --env TARGET_ARCH="${TARGET_ARCH}" \
   --env KOKORO_ARTIFACTS_DIR="${KOKORO_ARTIFACTS_DIR}" \
   --entrypoint "${SCRIPT_DIR}/build-docker.sh" \
   us-east4-docker.pkg.dev/shaderc-build/radial-docker/ubuntu-24.04-amd64/cpp-builder
