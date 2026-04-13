@@ -811,6 +811,38 @@ class TestIncluder : public shaderc::CompileOptions::IncluderInterface {
 
 using IncluderTests = testing::TestWithParam<IncluderTestCase>;
 
+class LifetimeTrackedIncluder
+    : public shaderc::CompileOptions::IncluderInterface {
+ public:
+  LifetimeTrackedIncluder(std::shared_ptr<bool> alive, const FakeFS& fake_fs)
+      : alive_(std::move(alive)), fake_fs_(fake_fs), responses_({}) {
+    *alive_ = true;
+  }
+
+  ~LifetimeTrackedIncluder() override { *alive_ = false; }
+
+  shaderc_include_result* GetInclude(const char* requested_source,
+                                     shaderc_include_type type,
+                                     const char* requesting_source,
+                                     size_t include_depth) override {
+    (void)type;
+    (void)requesting_source;
+    (void)include_depth;
+    responses_.emplace_back(shaderc_include_result{
+        requested_source, strlen(requested_source),
+        fake_fs_.at(std::string(requested_source)).c_str(),
+        fake_fs_.at(std::string(requested_source)).size()});
+    return &responses_.back();
+  }
+
+  void ReleaseInclude(shaderc_include_result*) override {}
+
+ private:
+  std::shared_ptr<bool> alive_;
+  const FakeFS& fake_fs_;
+  std::vector<shaderc_include_result> responses_;
+};
+
 // Parameterized tests for includer.
 TEST_P(IncluderTests, SetIncluder) {
   const IncluderTestCase& test_case = GetParam();
@@ -841,6 +873,58 @@ TEST_P(IncluderTests, SetIncluderClonedOptions) {
   // Checks the existence of the expected string.
   EXPECT_THAT(CompilerOutputAsString(compilation_result),
               HasSubstr(test_case.expected_substring()));
+}
+
+TEST_F(CppInterface, CopiedOptionsKeepIncluderAliveAfterSourceDestroyed) {
+  const FakeFS fs = {
+      {"root",
+       "#version 150\n"
+       "void foo() {}\n"
+       "#include \"path/to/file_1\"\n"},
+      {"path/to/file_1", "content of file_1\n"},
+  };
+  const std::string& shader = fs.at("root");
+  auto alive = std::make_shared<bool>(false);
+  std::unique_ptr<CompileOptions> cloned_options;
+
+  {
+    CompileOptions options;
+    options.SetIncluder(std::unique_ptr<LifetimeTrackedIncluder>(
+        new LifetimeTrackedIncluder(alive, fs)));
+    cloned_options.reset(new CompileOptions(options));
+  }
+
+  ASSERT_TRUE(*alive);
+  const auto compilation_result = compiler_.PreprocessGlsl(
+      shader.c_str(), shaderc_glsl_vertex_shader, "shader", *cloned_options);
+  EXPECT_THAT(CompilerOutputAsString(compilation_result),
+              HasSubstr("content of file_1"));
+}
+
+TEST_F(CppInterface, MovedOptionsKeepIncluderAliveAfterSourceDestroyed) {
+  const FakeFS fs = {
+      {"root",
+       "#version 150\n"
+       "void foo() {}\n"
+       "#include \"path/to/file_1\"\n"},
+      {"path/to/file_1", "content of file_1\n"},
+  };
+  const std::string& shader = fs.at("root");
+  auto alive = std::make_shared<bool>(false);
+  std::unique_ptr<CompileOptions> moved_options;
+
+  {
+    CompileOptions options;
+    options.SetIncluder(std::unique_ptr<LifetimeTrackedIncluder>(
+        new LifetimeTrackedIncluder(alive, fs)));
+    moved_options.reset(new CompileOptions(std::move(options)));
+  }
+
+  ASSERT_TRUE(*alive);
+  const auto compilation_result = compiler_.PreprocessGlsl(
+      shader.c_str(), shaderc_glsl_vertex_shader, "shader", *moved_options);
+  EXPECT_THAT(CompilerOutputAsString(compilation_result),
+              HasSubstr("content of file_1"));
 }
 
 INSTANTIATE_TEST_SUITE_P(CppInterface, IncluderTests,
