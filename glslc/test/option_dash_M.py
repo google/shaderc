@@ -752,3 +752,13 @@ class TestErrorMissingDependencyTargetName(expect.StderrMatch):
     glslc_args = ['target', 'shader.vert', '-c', '-MT']
     expected_stderr = ['glslc: error: '
                        'missing dependency info target after \'-MT\'\n']
+
+
+@inside_glslc_testsuite('OptionsCapM')
+class TestErrorDashMFUnwritableFile(expect.ErrorMessageSubstr):
+    """Tests that when we fail to make an output dependency file, glslc
+    fails gracefully and emits an error message instead of crashing."""
+    environment = EMPTY_SHADER_IN_CURDIR
+    bad_file = '/file/should/not/exist/today.d'
+    glslc_args = ['-MD', '-MF', bad_file, 'shader.vert']
+    expected_error_substr = ['cannot open output file']
