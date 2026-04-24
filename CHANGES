@@ -1,7 +1,7 @@
 Revision history for Shaderc
 
-v2026.2-dev 2026-01-22
- - Start development
+v2026.2 2026-04-24
+ - Test GL_EXT_descriptor_heap
 
 v2026.1 2026-01-23
  - Update dependencies:
