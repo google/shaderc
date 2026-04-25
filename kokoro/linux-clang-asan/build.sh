@@ -16,4 +16,4 @@
 
 set -e -x
 SCRIPT_DIR=`dirname "$BASH_SOURCE"`
-source $SCRIPT_DIR/../scripts/linux/build.sh ASAN "clang-13.0.1"
+source $SCRIPT_DIR/../scripts/linux/build.sh ASAN "clang-18"
