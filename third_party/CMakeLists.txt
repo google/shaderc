@@ -56,6 +56,11 @@ if (NOT TARGET SPIRV-Tools)
       set(ABSL_INTERNAL_AT_LEAST_CXX17 ON)
       set(ABSL_PROPAGATE_CXX_STD ON)
       set(ABSL_ENABLE_INSTALL ON)
+      if (BUILD_SHARED_LIBS)
+        set(ABSL_MSVC_STATIC_RUNTIME OFF)
+      else()
+        set(ABSL_MSVC_STATIC_RUNTIME ON)
+      endif()
       add_subdirectory(${SHADERC_ABSL_DIR} absl EXCLUDE_FROM_ALL)
 
       # re2 tests take a long time and do not add much value, since re2 is a
