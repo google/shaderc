@@ -22,6 +22,7 @@ function (shaderc_use_gmock TARGET)
 endfunction(shaderc_use_gmock)
 
 function(shaderc_default_c_compile_options TARGET)
+  target_compile_definitions(${TARGET} PRIVATE SHADERC_ENABLE_HLSL=$<BOOL:${SHADERC_ENABLE_HSLS}>)
   if (NOT "${MSVC}")
     if (SHADERC_ENABLE_WERROR_COMPILE)
       target_compile_options(${TARGET} PRIVATE -Wall -Werror -fvisibility=hidden)
