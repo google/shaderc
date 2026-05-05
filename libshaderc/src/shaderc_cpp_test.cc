@@ -789,6 +789,10 @@ class TestIncluder : public shaderc::CompileOptions::IncluderInterface {
   explicit TestIncluder(const FakeFS& fake_fs)
       : fake_fs_(fake_fs), responses_({}) {}
 
+  shaderc::CompileOptions::IncluderInterface* Clone() const override {
+    return new TestIncluder(fake_fs_);
+  }
+
   // Get path and content from the fake file system.
   shaderc_include_result* GetInclude(const char* requested_source,
                                      shaderc_include_type type,
