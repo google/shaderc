@@ -26,6 +26,11 @@ message(STATUS "Shaderc: build type is \"${CMAKE_BUILD_TYPE}\".")
 
 option(SHADERC_ENABLE_WGSL_OUTPUT "Enable WGSL output" OFF)
 
+# Glslang's HLSL front end is deprecated and will eventually be removed.
+# https://github.com/KhronosGroup/glslang/issues/4210
+# Default this to ON now, then OFF, then remove support.
+option(SHADERC_ENABLE_HLSL "Enable HLSL compilation" ON)
+
 option(SHADERC_SKIP_INSTALL "Skip installation" ${SHADERC_SKIP_INSTALL})
 if(NOT ${SHADERC_SKIP_INSTALL})
   set(SHADERC_ENABLE_INSTALL ON)

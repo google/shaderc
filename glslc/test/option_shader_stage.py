@@ -74,6 +74,7 @@ class TestShaderStageWithGlslExtension(expect.ValidObjectFile):
 class TestShaderStageWithHlslExtension(expect.ValidObjectFile):
     """Tests -fshader-stage with .hlsl extension."""
 
+    uses_hlsl = True
     shader = FileShader(simple_hlsl_vertex_shader(), '.hlsl')
     glslc_args = ['-c', '-fshader-stage=vertex', shader]
 
@@ -205,6 +206,7 @@ class TestShaderStageHlslExtensionMissingShaderStage(expect.ErrorMessage):
     """Tests that missing -fshader-stage for .hlsl extension results in
     an error."""
 
+    uses_hlsl = True
     shader = FileShader(simple_hlsl_vertex_shader(), '.hlsl')
     glslc_args = ['-c', '-x', 'hlsl', shader]
     expected_error = [

@@ -199,9 +199,10 @@ def inside_glslc_testsuite(testsuite_name):
 class TestManager:
     """Manages and runs a set of tests."""
 
-    def __init__(self, executable_path, disassembler_path):
+    def __init__(self, executable_path, disassembler_path, has_hlsl):
         self.executable_path = executable_path
         self.disassembler_path = disassembler_path
+        self.has_hlsl = has_hlsl # Does the compiler support HLSL
         self.num_successes = 0
         self.num_failures = 0
         self.num_tests = 0
@@ -238,6 +239,7 @@ class TestCase:
     def __init__(self, test, test_manager):
         self.test = test
         self.test_manager = test_manager
+        self.has_hlsl = test_manager.has_hlsl
         self.inputs = []  # inputs, as PlaceHolder objects.
         self.file_shaders = []  # filenames of shader files.
         self.stdin_shader = None  # text to be passed to glslc as stdin
@@ -287,28 +289,33 @@ class TestCase:
         self.setUp()
         success = False
         message = ''
-        try:
-            self.command = [self.test_manager.executable_path]
-            self.command.extend(self.test.glslc_args)
 
-            process = subprocess.Popen(
-                args=self.command, stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                cwd=self.directory)
-            output = process.communicate(self.stdin_shader)
-            test_status = TestStatus(
-                self.test_manager,
-                process.returncode, output[0], output[1],
-                self.directory, self.inputs, self.file_shaders)
-            run_results = [getattr(self.test, test_method)(test_status)
-                           for test_method in get_all_test_methods(
-                               self.test.__class__)]
-            success, message = list(zip(*run_results))
-            success = all(success)
-            message = '\n'.join(message)
-        except Exception as e:
-            success = False
-            message = str(e)
+        if getattr(self.test, "uses_hlsl", False) and not self.has_hlsl:
+            success = True;
+            message = 'skip test using HLSL'
+        else:
+            try:
+                self.command = [self.test_manager.executable_path]
+                self.command.extend(self.test.glslc_args)
+
+                process = subprocess.Popen(
+                    args=self.command, stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                    cwd=self.directory)
+                output = process.communicate(self.stdin_shader)
+                test_status = TestStatus(
+                    self.test_manager,
+                    process.returncode, output[0], output[1],
+                    self.directory, self.inputs, self.file_shaders)
+                run_results = [getattr(self.test, test_method)(test_status)
+                               for test_method in get_all_test_methods(
+                                   self.test.__class__)]
+                success, message = list(zip(*run_results))
+                success = all(success)
+                message = '\n'.join(message)
+            except Exception as e:
+                success = False
+                message = str(e)
         self.test_manager.notify_result(self, success, message)
         self.tearDown()
 
@@ -323,12 +330,14 @@ def main():
                         help='Do not clean up temporary directories')
     parser.add_argument('--test-dir', nargs=1,
                         help='Directory to gather the tests from')
+    parser.add_argument('--has-hlsl', default=False, action='store_true',
+                        help='If used, the compiler supports HLSL')
     args = parser.parse_args()
     default_path = sys.path
     root_dir = os.getcwd()
     if args.test_dir:
         root_dir = args.test_dir[0]
-    manager = TestManager(args.glslc[0], args.spirvdis[0])
+    manager = TestManager(args.glslc[0], args.spirvdis[0], args.has_hlsl)
     if args.leave_output:
         manager.leave_output = True
     for root, _, filenames in os.walk(root_dir):

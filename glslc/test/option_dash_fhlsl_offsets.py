@@ -39,6 +39,7 @@ class StandardOffsetsByDefault(expect.ValidAssemblyFileWithSubstr):
 class HlslOffsetsWhenRequested(expect.ValidAssemblyFileWithSubstr):
     """Tests that standard GLSL packign is used by default."""
 
+    uses_hlsl = True
     shader = FileShader(GLSL_SHADER, '.vert')
     glslc_args = ['-S', '-fhlsl-offsets', shader]
     expected_assembly_substr = "OpMemberDecorate %B 1 Offset 4"

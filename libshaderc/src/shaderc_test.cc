@@ -685,6 +685,7 @@ TEST_F(CompileStringWithOptionsTest, CompileAndOptimizeWithLevelSize) {
   EXPECT_THAT(disassembly_text, Not(HasSubstr("OpSource")));
 }
 
+#if SHADERC_ENABLE_HLSL
 TEST_F(CompileStringWithOptionsTest, CompileAndOptimizeForVulkan10Failure) {
   shaderc_compile_options_set_source_language(options_.get(),
                                               shaderc_source_language_hlsl);
@@ -712,6 +713,7 @@ TEST_F(CompileStringWithOptionsTest, CompileAndOptimizeForVulkan11Success) {
       OutputType::SpirvAssemblyText);
   EXPECT_THAT(disassembly_text, HasSubstr("OpGroupNonUniformIAdd"));
 }
+#endif
 
 TEST_F(CompileStringWithOptionsTest, FollowingOptLevelOverridesPreviousOne) {
   shaderc_compile_options_set_optimization_level(
@@ -1588,8 +1590,9 @@ TEST_F(CompileStringTest, LangHlslOnGlslVertexFails) {
 TEST_F(CompileStringTest, LangHlslOnHlslVertexSucceeds) {
   shaderc_compile_options_set_source_language(options_.get(),
                                               shaderc_source_language_hlsl);
-  EXPECT_TRUE(CompilationSuccess(kHlslVertexShader, shaderc_glsl_vertex_shader,
-                                 options_.get()));
+  EXPECT_EQ(!!SHADERC_ENABLE_HLSL,
+            CompilationSuccess(kHlslVertexShader, shaderc_glsl_vertex_shader,
+                               options_.get()));
 }
 
 TEST(EntryPointTest,
@@ -1606,6 +1609,7 @@ TEST(EntryPointTest,
       << std::string(shaderc_result_get_bytes(compilation.result()));
 }
 
+#if SHADERC_ENABLE_HLSL
 TEST(EntryPointTest, LangHlslOnHlslVertexSucceedsWithGivenEntryPointName) {
   Compiler compiler;
   Options options;
@@ -1620,6 +1624,7 @@ TEST(EntryPointTest, LangHlslOnHlslVertexSucceedsWithGivenEntryPointName) {
               HasSubstr("OpEntryPoint Vertex %EntryPoint \"EntryPoint\""))
       << std::string(shaderc_result_get_bytes(compilation.result()));
 }
+#endif
 
 // Returns a fragment shader accessing a texture with the given
 // offset.
@@ -1848,6 +1853,7 @@ TEST_F(CompileStringWithOptionsTest, HlslOffsetsOptionDisableRespected) {
   EXPECT_THAT(disassembly_text, HasSubstr("OpMemberDecorate %B 1 Offset 16"));
 }
 
+#if SHADERC_ENABLE_HLSL
 TEST_F(CompileStringWithOptionsTest, HlslOffsetsOptionEnableRespected) {
   shaderc_compile_options_set_hlsl_offsets(options_.get(), true);
   const std::string disassembly_text =
@@ -1905,6 +1911,7 @@ TEST_F(CompileStringWithOptionsTest, HlslFlexibleMemoryLayoutAllowed) {
   EXPECT_TRUE(CompilesToValidSpv(compiler_, kHlslMemLayoutResourceSelect,
                                  shaderc_fragment_shader, options_.get()));
 }
+#endif
 
 TEST_F(CompileStringWithOptionsTest, ClampMapsToFClampByDefault) {
   const std::string disassembly_text =

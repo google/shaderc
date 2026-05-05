@@ -135,6 +135,7 @@ const char kGlslShaderWeirdPacking[] =
        buffer B { float x; vec3 foo; } my_ssbo;
        void main() { my_ssbo.x = 1.0; })";
 
+#if SHADERC_ENABLE_HLSL
 const char kHlslShaderForLegalizationTest[] = R"(
 struct CombinedTextureSampler {
  Texture2D tex;
@@ -165,6 +166,7 @@ float4 main() : SV_Target0 {
   return float4(Ainc.IncrementCounter(), 0, 0, 0);
 }
 )";
+#endif
 
 const char kGlslShaderWithClamp[] = R"(#version 450
 layout(location=0) in vec4 i;
@@ -253,6 +255,7 @@ class CompilerTest : public testing::Test {
           [](std::ostream*, const shaderc_util::string_piece&) {
             return EShLangCount;
           };
+  const bool supports_hlsl_ = SHADERC_ENABLE_HLSL != 0;
 };
 
 TEST_F(CompilerTest, SimpleVertexShaderCompilesSuccessfullyToBinary) {
@@ -488,7 +491,7 @@ TEST_F(CompilerTest, SetSourceLanguageToGLSLFailsOnHLSL) {
 
 TEST_F(CompilerTest, SetSourceLanguageToHLSLSucceeds) {
   compiler_.SetSourceLanguage(Compiler::SourceLanguage::HLSL);
-  EXPECT_TRUE(SimpleCompilationSucceeds(kHlslVertexShader, EShLangVertex))
+  EXPECT_EQ(supports_hlsl_, SimpleCompilationSucceeds(kHlslVertexShader, EShLangVertex))
       << errors_;
 }
 
@@ -497,6 +500,7 @@ TEST_F(CompilerTest, SetSourceLanguageToHLSLFailsOnGLSL) {
   EXPECT_FALSE(SimpleCompilationSucceeds(kVulkanVertexShader, EShLangVertex));
 }
 
+#if SHADERC_ENABLE_HLSL
 TEST_F(CompilerTest, EntryPointParameterTakesEffectForHLSL) {
   compiler_.SetSourceLanguage(Compiler::SourceLanguage::HLSL);
   std::stringstream errors;
@@ -517,6 +521,7 @@ TEST_F(CompilerTest, EntryPointParameterTakesEffectForHLSL) {
               HasSubstr("OpEntryPoint Vertex %EntryPoint \"EntryPoint\""))
       << assembly;
 }
+#endif
 
 // A test case for setting resource limits.
 struct SetLimitCase {
@@ -773,6 +778,7 @@ TEST_F(CompilerTest, HlslOffsetsOptionDisableRespected) {
       << disassembly;
 }
 
+#if SHADERC_ENABLE_HLSL
 TEST_F(CompilerTest, HlslOffsetsOptionEnableRespected) {
   compiler_.SetHlslOffsets(true);
   const auto words =
@@ -781,7 +787,9 @@ TEST_F(CompilerTest, HlslOffsetsOptionEnableRespected) {
   EXPECT_THAT(disassembly, HasSubstr("OpMemberDecorate %B 1 Offset 4"))
       << disassembly;
 }
+#endif
 
+#if SHADERC_ENABLE_HLSL
 TEST_F(CompilerTest, HlslLegalizationEnabledNoSizeOpt) {
   compiler_.SetSourceLanguage(Compiler::SourceLanguage::HLSL);
   const auto words =
@@ -824,6 +832,7 @@ TEST_F(CompilerTest, HlslFunctionality1Enabled) {
                                      "UserSemantic \"SV_TARGET0\""))
       << disassembly;
 }
+#endif
 
 TEST_F(CompilerTest, RelaxedVulkanRulesEnabled) {
   compiler_.SetSourceLanguage(Compiler::SourceLanguage::GLSL);

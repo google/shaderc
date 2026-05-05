@@ -50,6 +50,7 @@ class FAutoCombinedImageSamplerCheckGLSL(expect.ValidAssemblyFileWithSubstr):
 class FAutoCombinedImageSamplerCheckHLSL(expect.ValidAssemblyFileWithSubstr):
     """Tests that the HLSL compiler combines HLSL Texture2D and SamplerState objects into SPIRV SampledImage."""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_SHADER_SEPARATE_IMAGE_SAMPLER, '.hlsl')
     glslc_args = ['-S', '-fshader-stage=frag', '-fentry-point=Frag', '-fauto-combined-image-sampler', shader]
     expected_assembly_substr = """%14 = OpTypeImage %float 2D 0 0 0 1 Unknown

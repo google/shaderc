@@ -33,6 +33,7 @@ NEED_THREE_ARGS_ERR = "error: Option -fresource-set-binding requires at least 3 
 class FRegisterSetBindingForFragRespected(expect.ValidAssemblyFileWithSubstr):
     """Tests -fresource-set-binding on specific shader two textures"""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_SHADER, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', shader,
                   '-fresource-set-binding', 'frag',
@@ -48,6 +49,7 @@ class FRegisterSetBindingForFragRespected(expect.ValidAssemblyFileWithSubstr):
 class FRegisterSetBindingForFragRespectedJustOneTriple(expect.ValidAssemblyFileWithSubstr):
     """Tests -fresource-set-binding on specific shader just one texture specified."""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_SHADER, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', shader,
                   '-fresource-set-binding', 'frag',
@@ -62,6 +64,7 @@ class FRegisterSetBindingForFragRespectedJustOneTriple(expect.ValidAssemblyFileW
 class FRegisterSetBindingForWrongStageIgnored(expect.ValidAssemblyFileWithSubstr):
     """Tests -fresource-set-binding on wrong shader ignored"""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_SHADER, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', shader,
                   '-fresource-set-binding', 'vert',
@@ -77,6 +80,7 @@ class FRegisterSetBindingForWrongStageIgnored(expect.ValidAssemblyFileWithSubstr
 class FRegisterSetBindingForAllRespected(expect.ValidAssemblyFileWithSubstr):
     """Tests -fresource-set-binding on all stages respected"""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_SHADER, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', shader,
                   '-fresource-set-binding',
@@ -92,6 +96,7 @@ class FRegisterSetBindingForAllRespected(expect.ValidAssemblyFileWithSubstr):
 class FRegisterSetBindingTooFewArgs(expect.ErrorMessageSubstr):
     """Tests -fresource-set-binding with too few arguments"""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_SHADER, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', shader,
                   '-fresource-set-binding', 'frag',
@@ -103,6 +108,7 @@ class FRegisterSetBindingTooFewArgs(expect.ErrorMessageSubstr):
 class FRegisterSetBindingInvalidSetNumber(expect.ErrorMessageSubstr):
     """Tests -fresource-set-binding with inavlid set number"""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_SHADER, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', shader,
                   '-fresource-set-binding', 'frag',
@@ -114,6 +120,7 @@ class FRegisterSetBindingInvalidSetNumber(expect.ErrorMessageSubstr):
 class FRegisterSetBindingInvalidBindingNumber(expect.ErrorMessageSubstr):
     """Tests -fresource-set-binding with inavlid binding number"""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_SHADER, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', shader,
                   '-fresource-set-binding', 'frag',

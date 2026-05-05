@@ -33,6 +33,7 @@ float4 main() : SV_Target0 {
 class TestHlslFunctionality1MentionsExtension(expect.ValidAssemblyFileWithSubstr):
     """Tests that -fhlsl_functionality1 enabled SPV_GOOGLE_hlsl_functionality1."""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_VERTEX_SHADER_WITH_COUNTER_BUFFER, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl_functionality1',
                   '-fauto-bind-uniforms', shader]
@@ -43,6 +44,7 @@ class TestHlslFunctionality1MentionsExtension(expect.ValidAssemblyFileWithSubstr
 class TestHlslFunctionality1DecoratesCounter(expect.ValidAssemblyFileWithSubstr):
     """Tests that -fhlsl_functionality1 decorates the output target"""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_VERTEX_SHADER_WITH_COUNTER_BUFFER, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl_functionality1',
                   '-fauto-bind-uniforms', shader]
@@ -55,6 +57,7 @@ class TestHlslFunctionality1DecoratesCounter(expect.ValidAssemblyFileWithSubstr)
 class TestHlslHyphenFunctionality1MentionsExtension(expect.ValidAssemblyFileWithSubstr):
     """Tests that -fhlsl-functionality1 enabled SPV_GOOGLE_hlsl_functionality1."""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_VERTEX_SHADER_WITH_COUNTER_BUFFER, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl_functionality1',
                   '-fauto-bind-uniforms', shader]
@@ -65,6 +68,7 @@ class TestHlslHyphenFunctionality1MentionsExtension(expect.ValidAssemblyFileWith
 class TestHlslHyphenFunctionality1DecoratesCounter(expect.ValidAssemblyFileWithSubstr):
     """Tests that -fhlsl-functionality1 decorates the output target"""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_VERTEX_SHADER_WITH_COUNTER_BUFFER, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl_functionality1',
                   '-fauto-bind-uniforms', shader]
