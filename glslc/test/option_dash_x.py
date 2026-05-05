@@ -48,6 +48,7 @@ class TestDashXGlslOnGlslShader(expect.ValidObjectFile):
 class TestDashXGlslOnHlslShader(expect.ErrorMessageSubstr):
     """Tests -x glsl on an HLSL shader."""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_VERTEX_SHADER, '.vert')
     glslc_args = ['-x', 'glsl', '-c', shader]
     expected_error_substr = ["error: #version: Desktop shaders for Vulkan SPIR-V"
@@ -58,6 +59,7 @@ class TestDashXGlslOnHlslShader(expect.ErrorMessageSubstr):
 class TestDashXHlslOnGlslShader(expect.ErrorMessageSubstr):
     """Tests -x hlsl on a GLSL shader."""
 
+    uses_hlsl = True
     shader = FileShader(GLSL_VERTEX_SHADER, '.vert')
     glslc_args = ['-x', 'hlsl', '-c', shader]
     expected_error_substr = ["error: '#version' : invalid preprocessor command\n"]
@@ -66,7 +68,8 @@ class TestDashXHlslOnGlslShader(expect.ErrorMessageSubstr):
 @inside_glslc_testsuite('OptionDashX')
 class TestDashXHlslOnGlslShaderWithoutVertex(expect.ErrorMessageSubstr):
     """Tests -x hlsl on a GLSL shader without leading #version."""
-
+ 
+    uses_hlsl = True
     shader = FileShader(GLSL_VERTEX_SHADER_WITHOUT_VERSION, '.vert')
     glslc_args = ['-x', 'hlsl', '-c', shader]
     expected_error_substr = ["error: 'vec4' : no matching overloaded function found\n"]
@@ -93,6 +96,7 @@ class TestMultipleDashX(expect.ValidObjectFile):
 class TestMultipleDashXMixedLanguages(expect.ValidObjectFile):
     """Tests that multiple -x works with different languages."""
 
+    uses_hlsl = True
     glsl_shader = FileShader(GLSL_VERTEX_SHADER, '.vert')
     hlsl_shader = FileShader(HLSL_VERTEX_SHADER, '.vert')
     glslc_args = ['-c', '-x', 'hlsl', hlsl_shader,

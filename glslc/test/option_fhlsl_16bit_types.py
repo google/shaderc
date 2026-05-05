@@ -32,6 +32,7 @@ float4 main() : SV_Target0 {
 class TestHlsl16BitTypes_EnablesCapability(expect.ValidAssemblyFileWithSubstr):
     """Tests that -fhlsl_16bit_types enables the 16bit floating point capability."""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_SHADER_WITH_HALF_TYPE, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-16bit-types', '-fauto-bind-uniforms', shader]
     expected_assembly_substr = 'OpCapability Float16';
@@ -41,6 +42,7 @@ class TestHlsl16BitTypes_EnablesCapability(expect.ValidAssemblyFileWithSubstr):
 class TestHlsl16BitTypes_CreatesType(expect.ValidAssemblyFileWithSubstr):
     """Tests that -fhlsl_16bit_types creates the 16bit floating point capability."""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_SHADER_WITH_HALF_TYPE, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-16bit-types', '-fauto-bind-uniforms', shader]
     expected_assembly_substr = '= OpTypeFloat 16';

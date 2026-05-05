@@ -72,7 +72,7 @@ class FAutoMapLocationsGeneratesLocationsCheckOutput0(expect.ValidAssemblyFileWi
 @inside_glslc_testsuite('OptionFAutoMapLocations')
 class HLSLCompilerGeneratesLocationsCheckInput0(expect.ValidAssemblyFileWithSubstr):
     """Tests that the HLSL compiler generates locations automatically: Input 0."""
-
+    uses_hlsl = True
     shader = FileShader(HLSL_SHADER_IO_WITHOUT_LOCATIONS, '.hlsl')
     glslc_args = ['-S', '-fshader-stage=frag', '-fentry-point=Foo', shader]
     expected_assembly_substr = "OpDecorate %a Location 0"
@@ -81,7 +81,7 @@ class HLSLCompilerGeneratesLocationsCheckInput0(expect.ValidAssemblyFileWithSubs
 @inside_glslc_testsuite('OptionFAutoMapLocations')
 class HLSLCompilerGeneratesLocationsCheckOutput(expect.ValidAssemblyFileWithSubstr):
     """Tests that the HLSL compiler generates locations automatically: Output."""
-
+    uses_hlsl = True
     shader = FileShader(HLSL_SHADER_IO_WITHOUT_LOCATIONS, '.hlsl')
     glslc_args = ['-S', '-fshader-stage=frag', '-fentry-point=Foo', shader]
     expected_assembly_substr = "OpDecorate %_entryPointOutput Location 0"

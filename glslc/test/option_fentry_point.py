@@ -43,6 +43,7 @@ class TestEntryPointDefaultsToMainForGlsl(expect.ValidAssemblyFileWithSubstr):
 class TestEntryPointDefaultsToMainForHlsl(expect.ValidAssemblyFileWithSubstr):
     """Tests that entry point name defaults to "main" in an HLSL shader."""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_VERTEX_SHADER_WITH_MAIN, '.vert')
     glslc_args = ['-x', 'hlsl', '-S', shader]
     expected_assembly_substr = ASSEMBLY_MAIN
@@ -62,6 +63,7 @@ class TestFEntryPointMainOnHlslShaderNotMatchingSource(expect.ValidObjectFileWit
     """Tests -x hlsl on an HLSL shader with -fentry-point=main
     not matching the source."""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_VERTEX_SHADER, '.vert')
     glslc_args = ['-x', 'hlsl', '-fentry-point=main', '-c', shader]
     expected_warning = [shader,
@@ -74,6 +76,7 @@ class TestFEntryPointSpecifiedOnHlslShaderInDisassembly(expect.ValidObjectFileWi
     """Tests -x hlsl on an HLSL shader with -fentry-point=EntryPoint
     matching source."""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_VERTEX_SHADER, '.vert', assembly_substr=ASSEMBLY_ENTRY_POINT)
     glslc_args = ['-x', 'hlsl', '-fentry-point=EntryPoint', '-c', shader]
 
@@ -82,6 +85,7 @@ class TestFEntryPointSpecifiedOnHlslShaderInDisassembly(expect.ValidObjectFileWi
 class TestFEntryPointAffectsSubsequentShaderFiles(expect.ValidObjectFileWithAssemblySubstr):
     """Tests -x hlsl affects several subsequent shader source files."""
 
+    uses_hlsl = True
     shader1 = FileShader(HLSL_VERTEX_SHADER, '.vert', assembly_substr=ASSEMBLY_ENTRY_POINT)
     shader2 = FileShader(HLSL_VERTEX_SHADER, '.vert', assembly_substr=ASSEMBLY_ENTRY_POINT)
     glslc_args = ['-x', 'hlsl', '-fentry-point=EntryPoint', '-c', shader1, shader2]
@@ -91,6 +95,7 @@ class TestFEntryPointAffectsSubsequentShaderFiles(expect.ValidObjectFileWithAsse
 class TestFEntryPointOverridesItself(expect.ValidObjectFileWithAssemblySubstr):
     """Tests that a later -fentry-point option overrides an earlier use."""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_VERTEX_SHADER, '.vert', assembly_substr=ASSEMBLY_ENTRY_POINT)
     glslc_args = ['-x', 'hlsl', '-fentry-point=foobar', '-fentry-point=EntryPoint',
                   '-c', shader]
@@ -102,6 +107,7 @@ class TestFEntryPointDefaultAndTwoOthers(expect.ValidObjectFileWithAssemblySubst
     with default entry point processing, and the remaining shaders get their
     own -fentry-point argument."""
 
+    uses_hlsl = True
     shaderMain = FileShader(HLSL_VERTEX_SHADER_WITH_MAIN, '.vert',
                             assembly_substr=ASSEMBLY_MAIN)
     shaderEntryPoint = FileShader(HLSL_VERTEX_SHADER, '.vert',

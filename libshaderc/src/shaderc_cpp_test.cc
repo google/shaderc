@@ -532,6 +532,7 @@ TEST_F(CppInterface, CompileAndOptimizeWithLevelSize) {
   EXPECT_THAT(disassembly_text, Not(HasSubstr("OpSource")));
 }
 
+#if SHADERC_ENABLE_HLSL
 TEST_F(CppInterface, CompileAndOptimizeForVulkan10Failure) {
   options_.SetSourceLanguage(shaderc_source_language_hlsl);
   options_.SetTargetEnvironment(shaderc_target_env_vulkan,
@@ -557,6 +558,7 @@ TEST_F(CppInterface, CompileAndOptimizeForVulkan11Success) {
       kHlslWaveActiveSumeComputeShader, shaderc_compute_shader, options_);
   EXPECT_THAT(disassembly_text, HasSubstr("OpGroupNonUniformIAdd"));
 }
+#endif
 
 TEST_F(CppInterface, FollowingOptLevelOverridesPreviousOne) {
   options_.SetOptimizationLevel(shaderc_optimization_level_size);
@@ -1203,10 +1205,12 @@ TEST_F(CppInterface, SourceLangHlslMinimalGlslVertexShaderFails) {
 
 TEST_F(CppInterface, SourceLangHlslMinimalHlslVertexShaderSucceeds) {
   options_.SetSourceLanguage(shaderc_source_language_hlsl);
-  EXPECT_TRUE(CompilationSuccess(kMinimalHlslShader, shaderc_glsl_vertex_shader,
-                                 options_));
+  EXPECT_EQ(!!SHADERC_ENABLE_HLSL,
+            CompilationSuccess(kMinimalHlslShader, shaderc_glsl_vertex_shader,
+                               options_));
 }
 
+#if SHADERC_ENABLE_HLSL
 TEST(
     EntryPointTest,
     SourceLangHlslMinimalHlslVertexShaderAsConstCharPtrSucceedsWithEntryPointName) {
@@ -1266,6 +1270,7 @@ TEST(
   EXPECT_THAT(std::string(assembly.begin(), assembly.end()),
               HasSubstr("OpEntryPoint Vertex %EntryPoint \"EntryPoint\""));
 }
+#endif
 
 // Returns a fragment shader accessing a texture with the given
 // offset.
@@ -1413,6 +1418,7 @@ TEST_F(CppInterface, HlslOffsetsOptionDisableRespected) {
   EXPECT_THAT(disassembly_text, HasSubstr("OpMemberDecorate %B 1 Offset 16"));
 }
 
+#if SHADERC_ENABLE_HLSL
 TEST_F(CppInterface, HlslOffsetsOptionEnableRespected) {
   CompileOptions options;
   options.SetHlslOffsets(true);
@@ -1420,7 +1426,9 @@ TEST_F(CppInterface, HlslOffsetsOptionEnableRespected) {
       kGlslShaderWeirdPacking, shaderc_glsl_vertex_shader, options);
   EXPECT_THAT(disassembly_text, HasSubstr("OpMemberDecorate %B 1 Offset 4"));
 }
+#endif
 
+#if SHADERC_ENABLE_HLSL
 TEST_F(CppInterface, HlslRegSetBindingForFragmentRespected) {
   CompileOptions options;
   options.SetSourceLanguage(shaderc_source_language_hlsl);
@@ -1489,6 +1497,7 @@ TEST_F(CppInterface, HlslFunctionality1SurvivesCloning) {
                      cloned_options);
   EXPECT_THAT(disassembly_text, HasSubstr("OpDecorateString"));
 }
+#endif
 
 TEST_F(CppInterface, NanClampDefaultsOff) {
   CompileOptions options;

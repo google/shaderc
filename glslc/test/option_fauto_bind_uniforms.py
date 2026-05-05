@@ -328,6 +328,7 @@ class FSsboBindingBaseForFragOptionIgnoredOnSsboCompileAsVert(expect.ValidAssemb
 class AutomaticHlslIoMapping(expect.ValidAssemblyFileWithSubstr):
     """Tests that HLSL IO Mapping uses the register values in the source code."""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap',
                   '-fauto-bind-uniforms', shader]
@@ -339,6 +340,7 @@ class HlslFSamplerBindingBaseOptionRespected(expect.ValidAssemblyFileWithSubstr)
     """Tests that -fsampler-binding-base sets binding base for samplers in HLSL
     compilation."""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap', shader,
                   '-fauto-bind-uniforms', '-fsampler-binding-base', '100']
@@ -350,6 +352,7 @@ class HlslFSamplerBindingBaseForFragOptionRespected(expect.ValidAssemblyFileWith
     """Tests that -fsampler-binding-base for frag sets binding base for samplers
     in HLSL compilation."""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap', shader,
                   '-fauto-bind-uniforms', '-fsampler-binding-base', 'frag', '100']
@@ -361,6 +364,7 @@ class HlslFSamplerBindingBaseForComputeOptionIgnoredWhenCompilingAsFrag(expect.V
     """Tests that -fsampler-binding-base for compute is ignored when compiling
     as a fragment shader."""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap', shader,
                   '-fauto-bind-uniforms', '-fsampler-binding-base', 'compute', '100']
@@ -372,6 +376,7 @@ class HlslFTextureBindingBaseOptionRespected(expect.ValidAssemblyFileWithSubstr)
     """Tests that -ftexture-binding-base sets binding base for textures in HLSL
     compilation."""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap', shader,
                   '-fauto-bind-uniforms', '-ftexture-binding-base', '100']
@@ -383,6 +388,7 @@ class HlslFTextureBindingBaseForFragOptionRespected(expect.ValidAssemblyFileWith
     """Tests that -ftexture-binding-base for frag sets binding base for textures
     in HLSL compilation."""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap', shader,
                   '-fauto-bind-uniforms', '-ftexture-binding-base', 'frag', '100']
@@ -394,6 +400,7 @@ class HlslFTextureBindingBaseForComputeOptionIgnoredWhenCompilingAsFrag(expect.V
     """Tests that -ftexture-binding-base for compute is ignored when compiling
     as a fragment shader."""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap', shader,
                   '-fauto-bind-uniforms', '-ftexture-binding-base', 'compute', '100']
@@ -405,6 +412,7 @@ class HlslFUavBindingBaseOptionRespected(expect.ValidAssemblyFileWithSubstr):
     """Tests that -fuav-binding-base sets binding base for UAVs in HLSL
     compilation."""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap', shader,
                   '-fauto-bind-uniforms', '-fuav-binding-base', '100']
@@ -416,6 +424,7 @@ class HlslFUavBindingBaseForFragOptionRespected(expect.ValidAssemblyFileWithSubs
     """Tests that -fuav-binding-base for frag sets binding base for UAVs in HLSL
     compilation."""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap', shader,
                   '-fauto-bind-uniforms', '-fuav-binding-base', 'frag', '100']
@@ -427,6 +436,7 @@ class HlslFUavBindingBaseForComputeOptionIgnoredWhenCompilingAsFrag(expect.Valid
     """Tests that -fuav-binding-base for compute is ignored when compiling
     as a fragment shader."""
 
+    uses_hlsl = True
     shader = FileShader(HLSL_SHADER_WITHOUT_BINDINGS, '.frag')
     glslc_args = ['-S', '-x', 'hlsl', '-fhlsl-iomap', shader,
                   '-fauto-bind-uniforms', '-fuav-binding-base', 'compute', '100']

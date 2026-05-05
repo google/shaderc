@@ -104,6 +104,7 @@ class TestESSL320(expect.ValidObjectFile):
 class TestStdIgnoredInHlsl(expect.ValidObjectFile):
     """Tests HLSL compilation ignores -std."""
 
+    uses_hlsl = True
     # Compute shaders are not available in OpenGL 150
     shader = FileShader(hlsl_compute_shader_with_barriers(), '.comp')
     glslc_args = ['-c', '-x', 'hlsl', '-std=150', shader]
