@@ -202,6 +202,19 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
     return result_tuple;
   }
 
+#if !SHADERC_ENABLE_HLSL
+  if (source_language_ == SourceLanguage::HLSL) {
+    std::string err =
+        "Shaderc was built without HLSL support. See "
+        "https://github.com/KhronosGroup/glslang/issues/4210";
+    *error_stream << err << '\n';
+    succeeded = false;
+    compilation_output_data = ConvertStringToVector(err);
+    compilation_output_data_size_in_bytes = err.size();
+    return result_tuple;
+  }
+#endif
+
   EShLanguage used_shader_stage = forced_shader_stage;
   const std::string macro_definitions =
       shaderc_util::format(predefined_macros_, "#define ", " ", "\n");
@@ -286,7 +299,9 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
       bases[static_cast<int>(UniformKind::StorageBuffer)]);
   shader.setShiftUavBinding(
       bases[static_cast<int>(UniformKind::UnorderedAccessView)]);
+#if SHADERC_ENABLE_HLSL
   shader.setHlslIoMapping(hlsl_iomap_);
+#endif
   shader.setResourceSetBinding(
       hlsl_explicit_bindings_[static_cast<int>(used_shader_stage)]);
   shader.setEnvClient(target_client_info.client,
