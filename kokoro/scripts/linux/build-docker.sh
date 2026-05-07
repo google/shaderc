@@ -24,6 +24,7 @@ set -x # Display commands being run.
 
 SKIP_TESTS="False"
 BUILD_TYPE="Debug"
+KOKORO_ARTIFACTS_DIR=${KOKORO_ARTIFACTS_DIR:-$HOME}
 
 using cmake-3.31.2
 using ninja-1.10.0
@@ -34,7 +35,8 @@ if [ ! -z "$COMPILER" ]; then
 fi
 
 # Possible configurations are:
-# ASAN, COVERAGE, RELEASE, DEBUG, DEBUG_EXCEPTION, RELEASE_MINGW
+# ASAN, COVERAGE, RELEASE, DEBUG, DEBUG_EXCEPTION, RELEASE_MINGW,
+# SHADERC_ENABLE_HLSL
 
 if [ $CONFIG = "RELEASE" ] || [ $CONFIG = "RELEASE_MINGW" ]
 then
@@ -58,6 +60,10 @@ then
   SKIP_TESTS="True"
 fi
 
+if [[ -n "$SHADERC_ENABLE_HLSL" ]]; then
+  ADDITIONAL_CMAKE_FLAGS="$ADDITIONAL_CMAKE_FLAGS -DSHADERC_ENABLE_HLSL=$SHADERC_ENABLE_HLSL"
+fi
+
 git config --global --add safe.directory '*'
 
 cd $ROOT_DIR
@@ -65,6 +71,10 @@ cd $ROOT_DIR
 
 [ -d build ] || mkdir build
 cd $ROOT_DIR/build
+
+# This helps when testing locally. Avoid using your local and likely
+# incompatible CMake cache.
+rm -f CMakeCache.txt
 
 # Invoke the build.
 BUILD_SHA=${KOKORO_GITHUB_COMMIT:-$KOKORO_GITHUB_PULL_REQUEST_COMMIT}

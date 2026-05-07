@@ -35,6 +35,7 @@ docker run --rm -i \
   --env SCRIPT_DIR="${SCRIPT_DIR}" \
   --env CONFIG="${CONFIG}" \
   --env COMPILER="${COMPILER}" \
+  --env SHADERC_ENABLE_HLSL="${SHADERC_ENABLE_HLSL}" \
   --env KOKORO_ARTIFACTS_DIR="${KOKORO_ARTIFACTS_DIR}" \
   --entrypoint "${SCRIPT_DIR}/build-docker.sh" \
   us-east4-docker.pkg.dev/shaderc-build/radial-docker/ubuntu-24.04-amd64/cpp-builder
