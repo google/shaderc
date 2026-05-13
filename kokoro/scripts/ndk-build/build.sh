@@ -15,6 +15,9 @@
 #
 # Linux Build Script.
 
+# Enable Glslang's backend? ON or OFF
+SHADERC_ENABLE_HLSL=${1:-ON}
+
 # Fail on any error.
 set -e
 
@@ -45,6 +48,7 @@ docker run --rm -i \
   --env ROOT_DIR=${ROOT_DIR} \
   --env KOKORO_ARTIFACTS_DIR="${KOKORO_ARTIFACTS_DIR}" \
   --env BUILD_SHA="${BUILD_SHA}" \
+  --env SHADERC_ENABLE_HLSL="${SHADERC_ENABLE_HLSL}" \
   --entrypoint "${SCRIPT_DIR}/build-docker.sh" \
   us-east4-docker.pkg.dev/shaderc-build/radial-docker/ubuntu-24.04-amd64/cpp-builder
 RESULT=$?
