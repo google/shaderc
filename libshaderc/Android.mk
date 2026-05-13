@@ -23,7 +23,13 @@ LOCAL_SRC_FILES:=src/shaderc.cc
 # or delegates that responsibility to SPIRV-Tools' Android.mk.
 LOCAL_C_INCLUDES:=$(LOCAL_PATH)/include $(SPVHEADERS_LOCAL_PATH)/include
 LOCAL_STATIC_LIBRARIES:=shaderc_util SPIRV-Tools-opt
-LOCAL_CXXFLAGS:=-std=c++17 -fno-exceptions -fno-rtti -DENABLE_HLSL=1
+LOCAL_CXXFLAGS:=-std=c++17 -fno-exceptions -fno-rtti
+ifneq ($(SHADERC_ENABLE_HLSL),0)
+  # ENABLE_HLSL is for Glslang includes
+  LOCAL_CXXFLAGS+=-DSHADERC_ENABLE_HLSL=1 -DENABLE_HLSL
+else
+  LOCAL_CXXFLAGS+=-DSHADERC_ENABLE_HLSL=0
+endif
 LOCAL_EXPORT_CPPFLAGS:=-std=c++17
 LOCAL_EXPORT_LDFLAGS:=-latomic
 include $(BUILD_STATIC_LIBRARY)
