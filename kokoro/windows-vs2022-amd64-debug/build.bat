@@ -20,4 +20,5 @@
 set SCRIPT_DIR=%~dp0
 
 :: Call with correct parameter
-call %SCRIPT_DIR%\..\scripts\windows\build.bat Debug 2022 amd64
+set SHADERC_ENABLE_HLSL=ON
+call %SCRIPT_DIR%\..\scripts\windows\build.bat Debug 2022 amd64 %SHADERC_ENABLE_HLSL%

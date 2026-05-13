@@ -1,4 +1,4 @@
-:: Copyright (C) 2025 Google Inc.
+:: Copyright 2026 Google LLC.
 ::
 :: Licensed under the Apache License, Version 2.0 (the "License");
 :: you may not use this file except in compliance with the License.
@@ -18,5 +18,5 @@
 set SCRIPT_DIR=%~dp0
 
 :: Call with correct parameter
-set SHADERC_ENABLE_HLSL=ON
+set SHADERC_ENABLE_HLSL=OFF
 call %SCRIPT_DIR%\..\scripts\windows\build.bat RelWithDebInfo 2022 amd64 %SHADERC_ENABLE_HLSL%
