@@ -16,7 +16,13 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE:=shaderc_util
-LOCAL_CXXFLAGS:=-std=c++17 -fno-exceptions -fno-rtti -DENABLE_HLSL=1
+LOCAL_CXXFLAGS:=-std=c++17 -fno-exceptions -fno-rtti
+ifneq ($(SHADERC_ENABLE_HLSL),0)
+  # ENABLE_HLSL is for Glslang includes
+  LOCAL_CXXFLAGS+=-DSHADERC_ENABLE_HLSL=1 -DENABLE_HLSL
+else
+  LOCAL_CXXFLAGS+=-DSHADERC_ENABLE_HLSL=0
+endif
 LOCAL_EXPORT_C_INCLUDES:=$(LOCAL_PATH)/include
 LOCAL_SRC_FILES:=src/args.cc \
                 src/compiler.cc \

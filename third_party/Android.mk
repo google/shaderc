@@ -4,6 +4,11 @@ THIRD_PARTY_PATH := $(call my-dir)
 ifeq ($(GLSLANG_LOCAL_PATH),)
 	GLSLANG_LOCAL_PATH:=$(THIRD_PARTY_PATH)/glslang
 endif
+ifneq ($(SHADERC_ENABLE_HLSL),0)
+  GLSLANG_ENABLE_HLSL:=1
+else
+  GLSLANG_ENABLE_HLSL:=0
+endif
 include $(GLSLANG_LOCAL_PATH)/Android.mk
 
 # Set the location of SPIRV-Tools.
