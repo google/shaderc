@@ -25,6 +25,8 @@ set -x
 git config --global --add safe.directory '*'
 
 . /bin/using.sh # Declare the bash `using` function for configuring toolchains.
+using python-3.12.4
+using ndk-r29
 
 cd $ROOT_DIR
 
@@ -37,21 +39,20 @@ function clean_dir() {
 }
 
 # Get source for dependencies, as specified in the DEPS file
-/usr/bin/python3 utils/git-sync-deps --treeless
-
-using ndk-r29
+python3 utils/git-sync-deps --treeless
 
 clean_dir "$ROOT_DIR/build"
 cd "$ROOT_DIR/build"
 
 function do_ndk_build () {
+  rm -rf $ROOT_DIR/android_test/app $ROOT_DIR/android_test/libs
   echo $(date): Starting ndk-build $@...
   $ANDROID_NDK_HOME/ndk-build \
     -C $ROOT_DIR/android_test \
     NDK_PROJECT_PATH=. \
     NDK_LIBS_OUT=./libs \
     NDK_APP_OUT=./app \
-    V=1 \
+    SHADERC_ENABLE_HLSL=$SHADERC_ENABLE_HLSL \
     SPVTOOLS_LOCAL_PATH=$ROOT_DIR/third_party/spirv-tools \
     SPVHEADERS_LOCAL_PATH=$ROOT_DIR/third_party/spirv-headers \
     -j8 $@
