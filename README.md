@@ -6,10 +6,10 @@ At the moment it includes:
 - [`glslc`](glslc), a command line compiler for GLSL/HLSL to SPIR-V, and
 - [`libshaderc`](libshaderc), a library API for accessing `glslc` functionality.
 
-**Note:** The fact that that `libshaderc` is not named `libshaderc_glslc` is a
-quirk of history, and a known inconsistency. Changing it would require a
-significant amount of renaming and breaking of downstream projects, so it is
-being left as is.
+***NOTE*** The ability to compile HLSL is *deprecated*, since it is
+deprecated in Glslang.
+See Glslang [issue #4210](https://github.com/KhronosGroup/glslang/issues/4210).
+This ability will be removed at a future date.
 
 `glslc` wraps around core functionality in [glslang][khr-glslang]
 and [SPIRV-Tools][spirv-tools]. `glslc` and its library aims to
@@ -158,6 +158,18 @@ cmake configure line.
 
 See [the libshaderc README](libshaderc/README.md) for more on using the library
 API in your project.
+
+#### HLSL deprecation
+
+As noted above, Glslang has deprecated support for compiling HLSL, and will
+remove it at some point in the future.
+
+You can build Shaderc today without HLSL support.
+To do so:
+
+- For the CMake build, invoke `cmake` with option `-DSHADERC_ENABLE_HLSL=OFF`, or `-DSHADERC_ENABLE_HLSL=0`.
+- For the Android `ndk-build`, set environment variable `SHADERC_ENABLE_HLSL` to
+  `0` when invoking `ndk-build`
 
 ### Tools you'll need
 

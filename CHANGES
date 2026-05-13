@@ -1,7 +1,9 @@
 Revision history for Shaderc
 
 v2026.3-dev 2026-04-24
- - Start development
+ - Deprecate HLSL compilation.
+     - Add build option SHADERC_ENABLE_HLSL to build Shaderc without
+       HLSL support.
 
 v2026.2 2026-04-24
  - Test GL_EXT_descriptor_heap
