@@ -7,11 +7,11 @@ vars = {
 
   'abseil_revision': '630e92d5d51d73a1f60ddd7654980ca2eae91582',
   'effcee_revision': '63394054b5afa14aee3e32bd12b227eb7225b871',
-  'glslang_revision': '5ccb61590f533d4c8b12921ead86bf1e2d35e0e9',
+  'glslang_revision': '452adc51372e2598bd9710183af2058ca084e2dc',
   'googletest_revision': '52eb8108c5bdec04579160ae17225d66034bd723',
   're2_revision': '927f5d53caf8111721e734cf24724686bb745f55',
-  'spirv_headers_revision': '126038020c2bd47efaa942ccc364ca5353ffccde',
-  'spirv_tools_revision': '4c2ec2a09b7fbeff1dc64cb9f857d77403a3c25f',
+  'spirv_headers_revision': '98c842bd561ac67c5ff98d599c8c960ba9edb7fd',
+  'spirv_tools_revision': '18b08af19b08515d5a1749adbdb05bc4369a57ed',
 }
 deps = {
   'third_party/abseil_cpp':
