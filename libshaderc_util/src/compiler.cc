@@ -308,9 +308,11 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
                       target_client_info.client_version);
   shader.setEnvTarget(target_client_info.target_language,
                       target_client_info.target_language_version);
+#if SHADERC_ENABLE_HLSL
   if (hlsl_functionality1_enabled_) {
     shader.setEnvTargetHlslFunctionality1();
   }
+#endif
   if (vulkan_rules_relaxed_) {
     glslang::EShSource language = glslang::EShSourceNone;
     switch (source_language_) {
@@ -520,9 +522,11 @@ std::tuple<bool, std::string, std::string> Compiler::PreprocessShader(
   }
   shader.setEnvClient(target_client_info.client,
                       target_client_info.client_version);
+#if SHADERC_ENABLE_HLSL
   if (hlsl_functionality1_enabled_) {
     shader.setEnvTargetHlslFunctionality1();
   }
+#endif
   shader.setInvertY(invert_y_enabled_);
   shader.setNanMinMaxClamp(nan_clamp_);
 
