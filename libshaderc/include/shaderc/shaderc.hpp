@@ -143,10 +143,18 @@ class CompileOptions {
   ~CompileOptions() { shaderc_compile_options_release(options_); }
   CompileOptions(const CompileOptions& other) {
     options_ = shaderc_compile_options_clone(other.options_);
+    if (other.includer_) {
+      if (auto* cloned_includer = other.includer_->Clone()) {
+        SetIncluder(std::unique_ptr<IncluderInterface>(cloned_includer));
+      } else {
+        shaderc_compile_options_set_include_callbacks(options_, nullptr, nullptr, nullptr);
+      }
+    }
   }
   CompileOptions(CompileOptions&& other) {
     options_ = other.options_;
     other.options_ = nullptr;
+    includer_ = std::move(other.includer_);
   }
 
   // Adds a predefined macro to the compilation options. It behaves the same as
@@ -191,6 +199,9 @@ class CompileOptions {
     virtual void ReleaseInclude(shaderc_include_result* data) = 0;
 
     virtual ~IncluderInterface() = default;
+
+    // Returns a copy of the includer interface. To be overriden by subclass.
+    virtual IncluderInterface* Clone() const { return nullptr; }
   };
 
   // Sets the includer instance for libshaderc to call during compilation, as
