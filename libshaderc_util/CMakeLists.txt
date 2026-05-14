@@ -40,9 +40,11 @@ add_library(shaderc_util STATIC
 shaderc_default_compile_options(shaderc_util)
 target_include_directories(shaderc_util
   PUBLIC include PRIVATE ${glslang_SOURCE_DIR})
-# We use parts of Glslang's HLSL compilation interface, which
-# now requires this preprocessor definition.
-add_definitions(-DENABLE_HLSL)
+if(${SHADERC_ENABLE_HLSL})
+  # We use parts of Glslang's HLSL compilation interface, which
+  # now requires this preprocessor definition.
+  target_compile_definitions(shaderc_util PRIVATE -DENABLE_HLSL)
+endif()
 
 find_package(Threads)
 target_link_libraries(shaderc_util PRIVATE
