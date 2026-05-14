@@ -16,5 +16,5 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd )"
 ROOT_DIR="$( cd "${SCRIPT_DIR}/../.." >/dev/null 2>&1 && pwd )"
 
-SHADERC_ENABLE_HLSL=ON
+SHADERC_ENABLE_HLSL=1
 exec ${ROOT_DIR}/kokoro/scripts/ndk-build/build.sh $SHADERC_ENABLE_HLSL
