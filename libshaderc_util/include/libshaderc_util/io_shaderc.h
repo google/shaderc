@@ -15,6 +15,7 @@
 #ifndef LIBSHADERC_UTIL_IO_H_
 #define LIBSHADERC_UTIL_IO_H_
 
+#include <fstream>
 #include <string>
 #include <vector>
 
