@@ -5,13 +5,13 @@ vars = {
   'google_git':  'https://github.com/google',
   'khronos_git': 'https://github.com/KhronosGroup',
 
-  'abseil_revision': '630e92d5d51d73a1f60ddd7654980ca2eae91582',
-  'effcee_revision': '63394054b5afa14aee3e32bd12b227eb7225b871',
-  'glslang_revision': 'a19eba618709aabfc015069dc3b4a892ffea0f82',
+  'abseil_revision': 'dbf88f932096c7f7714356e919f04749eb87c3e9',
+  'effcee_revision': '910ed15722d5d05c9d71ecf36c1a22243cb79b02',
+  'glslang_revision': 'c8e5e6ff66a2cb943363acfdde5240a9c24bfb4f',
   'googletest_revision': '52eb8108c5bdec04579160ae17225d66034bd723',
   're2_revision': '927f5d53caf8111721e734cf24724686bb745f55',
   'spirv_headers_revision': '1e770e7de8373a8dd49f23416cf7ca4001d01040',
-  'spirv_tools_revision': '605a0154c7743ed4239c0eb7f3c61f17ffde4fd0',
+  'spirv_tools_revision': 'aff64c5dfd79937ab28c7affa24b9d1c3438c033',
 }
 deps = {
   'third_party/abseil_cpp':
