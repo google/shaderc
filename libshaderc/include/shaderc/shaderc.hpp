@@ -139,14 +139,17 @@ using PreprocessedSourceCompilationResult = CompilationResult<char>;
 // Contains any options that can have default values for a compilation.
 class CompileOptions {
  public:
-  CompileOptions() { options_ = shaderc_compile_options_initialize(); }
+  CompileOptions() : options_(shaderc_compile_options_initialize()) {}
   ~CompileOptions() { shaderc_compile_options_release(options_); }
-  CompileOptions(const CompileOptions& other) {
-    options_ = shaderc_compile_options_clone(other.options_);
+  CompileOptions(const CompileOptions& other)
+      : options_(shaderc_compile_options_clone(other.options_)),
+        includer_(other.includer_) {
+    if (includer_) RegisterIncluderCallbacks();
   }
-  CompileOptions(CompileOptions&& other) {
-    options_ = other.options_;
+  CompileOptions(CompileOptions&& other)
+      : options_(other.options_), includer_(std::move(other.includer_)) {
     other.options_ = nullptr;
+    if (includer_) RegisterIncluderCallbacks();
   }
 
   // Adds a predefined macro to the compilation options. It behaves the same as
@@ -198,20 +201,12 @@ class CompileOptions {
   // are routed to this includer's methods.
   void SetIncluder(std::unique_ptr<IncluderInterface>&& includer) {
     includer_ = std::move(includer);
-    shaderc_compile_options_set_include_callbacks(
-        options_,
-        [](void* user_data, const char* requested_source, int type,
-           const char* requesting_source, size_t include_depth) {
-          auto* sub_includer = static_cast<IncluderInterface*>(user_data);
-          return sub_includer->GetInclude(
-              requested_source, static_cast<shaderc_include_type>(type),
-              requesting_source, include_depth);
-        },
-        [](void* user_data, shaderc_include_result* include_result) {
-          auto* sub_includer = static_cast<IncluderInterface*>(user_data);
-          return sub_includer->ReleaseInclude(include_result);
-        },
-        includer_.get());
+    if (includer_) {
+      RegisterIncluderCallbacks();
+    } else {
+      shaderc_compile_options_set_include_callbacks(options_, nullptr, nullptr,
+                                                    nullptr);
+    }
   }
 
   // Forces the GLSL language version and profile to a given pair. The version
@@ -378,9 +373,26 @@ class CompileOptions {
   }
 
  private:
+  void RegisterIncluderCallbacks() {
+    shaderc_compile_options_set_include_callbacks(
+        options_,
+        [](void* user_data, const char* requested_source, int type,
+           const char* requesting_source, size_t include_depth) {
+          auto* sub_includer = static_cast<IncluderInterface*>(user_data);
+          return sub_includer->GetInclude(
+              requested_source, static_cast<shaderc_include_type>(type),
+              requesting_source, include_depth);
+        },
+        [](void* user_data, shaderc_include_result* include_result) {
+          auto* sub_includer = static_cast<IncluderInterface*>(user_data);
+          return sub_includer->ReleaseInclude(include_result);
+        },
+        includer_.get());
+  }
+
   CompileOptions& operator=(const CompileOptions& other) = delete;
   shaderc_compile_options_t options_;
-  std::unique_ptr<IncluderInterface> includer_;
+  std::shared_ptr<IncluderInterface> includer_;
 
   friend class Compiler;
 };
