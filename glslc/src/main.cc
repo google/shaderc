@@ -130,7 +130,9 @@ Options:
   -fshader-stage=<stage>
                     Treat subsequent input files as having stage <stage>.
                     Valid stages are vertex, vert, fragment, frag, tesscontrol,
-                    tesc, tesseval, tese, geometry, geom, compute, and comp.
+                    tesc, tesseval, tese, geometry, geom, compute, comp, raygen,
+                    rgen, anyhit, rahit, closest, rchit, miss, rmiss, intersect,
+                    rint, callable, rcall, task, and mesh.
   -g                Generate source-level debug information.
   -h                Display available options.
   --help            Display available options.
