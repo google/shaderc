@@ -56,7 +56,13 @@ inline std::string GetLineDirective(int line, const string_piece& filename) {
 // canonicalized #line directive.
 std::pair<int, string_piece> DecodeLineDirective(string_piece directive) {
   const string_piece kLineDirective = "#line ";
-  assert(directive.starts_with(kLineDirective));
+  // The caller (GetShaderStageFromSourceCode) only checks for the "#line" prefix
+  // without the trailing space, so `directive` may be one character shorter than
+  // kLineDirective. The precondition that it is a canonical "#line " directive was
+  // enforced only by an assert, which is compiled out in release builds; a line
+  // equal to exactly "#line" would then make substr() below advance past the end.
+  // Verify the full canonical prefix at runtime and bail out otherwise.
+  if (!directive.starts_with(kLineDirective)) return std::make_pair(0, string_piece());
   directive = directive.substr(kLineDirective.size());
 
   const int line = std::atoi(directive.data());
