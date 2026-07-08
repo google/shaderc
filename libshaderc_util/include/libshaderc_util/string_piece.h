@@ -32,9 +32,10 @@ class string_piece {
   typedef const char* iterator;
   static const size_t npos = -1;
 
-  string_piece() {}
+  constexpr string_piece() {}
 
-  string_piece(const char* begin, const char* end) : begin_(begin), end_(end) {
+  constexpr string_piece(const char* begin, const char* end)
+      : begin_(begin), end_(end) {
     assert((begin == nullptr) == (end == nullptr) &&
            "either both begin and end must be nullptr or neither must be");
   }
