@@ -75,6 +75,7 @@ class string_piece {
 
   // Returns a string_piece that points to a substring in the original string.
   string_piece substr(size_t pos, size_t len = npos) const {
+    assert(pos <= size());
     assert(len == npos || pos + len <= size());
     return string_piece(begin_ + pos, len == npos ? end_ : begin_ + pos + len);
   }
