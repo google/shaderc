@@ -172,6 +172,16 @@ class CompileOptions {
     shaderc_compile_options_set_generate_debug_info(options_);
   }
 
+  // Emits NonSemantic.Shader.DebugInfo.100 (function/call-site info).
+  void SetGenerateNonSemanticDebugInfo() {
+    shaderc_compile_options_set_generate_nonsemantic_debug_info(options_);
+  }
+
+  // Additionally embeds source in the NonSemantic debug info; implies info.
+  void SetGenerateNonSemanticDebugSource() {
+    shaderc_compile_options_set_generate_nonsemantic_debug_source(options_);
+  }
+
   // Sets the compiler optimization level to the given level. Only the last one
   // takes effect if multiple calls of this function exist.
   void SetOptimizationLevel(shaderc_optimization_level level) {
