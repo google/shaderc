@@ -6,12 +6,12 @@ vars = {
   'khronos_git': 'https://github.com/KhronosGroup',
 
   'abseil_revision': 'dbf88f932096c7f7714356e919f04749eb87c3e9',
-  'effcee_revision': '910ed15722d5d05c9d71ecf36c1a22243cb79b02',
-  'glslang_revision': '2ee090f606ace31e07f584b1c1b9ddf4909ce202',
+  'effcee_revision': 'f8e8a164822d4f65e757bff66bc00e1567959aa0',
+  'glslang_revision': '23076b376e06a99b4c765df5c9836d127c8bbbfc',
   'googletest_revision': '52eb8108c5bdec04579160ae17225d66034bd723',
-  're2_revision': '927f5d53caf8111721e734cf24724686bb745f55',
-  'spirv_headers_revision': '942fe4b988359a0750b79f0ae7ed735994d3147d',
-  'spirv_tools_revision': 'f589ef005c49f6f19c8e78eb5269104ba293beb4',
+  're2_revision': '972a15cedd008d846f1a39b2e88ce48d7f166cbd',
+  'spirv_headers_revision': '0d25db97cb9b8f725e4c95e4553001710e7fc39d',
+  'spirv_tools_revision': 'b964f44901ad6396d3b46307ef1ce66eaef3bb83',
 }
 deps = {
   'third_party/abseil_cpp':
