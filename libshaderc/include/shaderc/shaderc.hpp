@@ -143,8 +143,11 @@ class CompileOptions {
   ~CompileOptions() { shaderc_compile_options_release(options_); }
   CompileOptions(const CompileOptions& other) {
     options_ = shaderc_compile_options_clone(other.options_);
+
+    // Clear the includer callbacks on the new object as it is not copyable.
+    shaderc_compile_options_set_include_callbacks(options_, nullptr, nullptr, nullptr);
   }
-  CompileOptions(CompileOptions&& other) {
+  CompileOptions(CompileOptions&& other) : includer_(std::move(other.includer_)) {
     options_ = other.options_;
     other.options_ = nullptr;
   }
