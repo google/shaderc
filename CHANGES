@@ -1,7 +1,7 @@
 Revision history for Shaderc
 
 v2026.4-dev 2026-07-15
- - Start v2026.4 development
+ - Incorporate fixes for SPV_KHR_abort abortEXT(...)
 
 v2026.3 2026-07-15
  - Deprecate HLSL compilation.
