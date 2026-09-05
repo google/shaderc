@@ -647,6 +647,25 @@ TEST_F(CompileStringWithOptionsTest, GenerateDebugInfoDisassembly) {
       HasSubstr("debug_info_sample"));
 }
 
+TEST_F(CompileStringWithOptionsTest, GenerateNonSemanticDebugInfoDisassembly) {
+  shaderc_compile_options_set_generate_nonsemantic_debug_info(options_.get());
+  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  EXPECT_THAT(
+      CompilationOutput(kMinimalDebugInfoShader, shaderc_glsl_vertex_shader,
+                        options_.get(), OutputType::SpirvAssemblyText),
+      HasSubstr("NonSemantic.Shader.DebugInfo.100"));
+}
+
+TEST_F(CompileStringWithOptionsTest, GenerateNonSemanticDebugSourceDisassembly) {
+  shaderc_compile_options_set_generate_nonsemantic_debug_source(options_.get());
+  ASSERT_NE(nullptr, compiler_.get_compiler_handle());
+  const std::string disassembly_text =
+      CompilationOutput(kMinimalDebugInfoShader, shaderc_glsl_vertex_shader,
+                        options_.get(), OutputType::SpirvAssemblyText);
+  EXPECT_THAT(disassembly_text, HasSubstr("NonSemantic.Shader.DebugInfo.100"));
+  EXPECT_THAT(disassembly_text, HasSubstr("debug_info_sample"));
+}
+
 TEST_F(CompileStringWithOptionsTest, CompileAndOptimizeWithLevelZero) {
   shaderc_compile_options_set_optimization_level(
       options_.get(), shaderc_optimization_level_zero);
