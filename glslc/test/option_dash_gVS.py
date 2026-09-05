@@ -12,20 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
+
 import expect
+from environment import File, Directory
 from glslc_test_framework import inside_glslc_testsuite
-from placeholder import FileShader
 
+MINIMAL_SHADER = '#version 310 es\nvoid main() {}\n'
 
-def debug_info_sample_shader():
-    return '#version 140\n void main() { vec4 debug_info_sample; }\n'
+EMPTY_SHADER_IN_CWD = Directory('.', [File('shader.vert', MINIMAL_SHADER)])
+
+# -gVS emits the NonSemantic import and a DebugSource carrying a second
+# operand (the embedded source OpString), which -gV alone does not.
+NONSEMANTIC_SOURCE_RE = re.compile(
+    r'OpExtInstImport "NonSemantic\.Shader\.DebugInfo\.100"'
+    r'[\s\S]*DebugSource %\w+ %\w+')
 
 
 @inside_glslc_testsuite('OptionGVS')
-class TestDashGVSEmitsNonSemanticWithSource(expect.ValidAssemblyFileWithSubstr):
+class TestDashGVSEmitsNonSemanticWithSource(expect.ValidFileContents):
     """Tests that -gVS emits NonSemantic debug info with embedded source."""
 
-    shader = FileShader(debug_info_sample_shader(), '.vert')
-    glslc_args = ['-S', '-gVS', shader]
-    expected_assembly_substrings = ['NonSemantic.Shader.DebugInfo.100',
-                                    'debug_info_sample']
+    environment = EMPTY_SHADER_IN_CWD
+    glslc_args = ['-S', '-gVS', 'shader.vert']
+    target_filename = 'shader.vert.spvasm'
+    expected_file_contents = NONSEMANTIC_SOURCE_RE
