@@ -195,6 +195,8 @@ class Compiler {
         warnings_as_errors_(false),
         suppress_warnings_(false),
         generate_debug_info_(false),
+        generate_nonsemantic_debug_info_(false),
+        generate_nonsemantic_debug_source_(false),
         enabled_opt_passes_(),
         target_env_(TargetEnv::Vulkan),
         target_env_version_(TargetEnvVersion::Default),
@@ -219,6 +221,12 @@ class Compiler {
   // Requests that the compiler place debug information into the object code,
   // such as identifier names and line numbers.
   void SetGenerateDebugInfo();
+
+  // Requests NonSemantic.Shader.DebugInfo.100 (function/call-site info).
+  void SetGenerateNonSemanticDebugInfo();
+
+  // Requests embedded source in the NonSemantic debug info; implies info.
+  void SetGenerateNonSemanticDebugSource();
 
   // Sets the optimization level to the given level. Only the last one takes
   // effect if multiple calls of this method exist.
@@ -470,6 +478,9 @@ class Compiler {
   std::pair<int, EProfile> GetVersionProfileFromSourceCode(
       const std::string& preprocessed_shader) const;
 
+  // Neutralizes any queued kStripDebugInfo pass so requested debug info survives optimization.
+  void RemoveStripDebugInfoPass();
+
   // Version to use when force_version_profile_ is true.
   int default_version_;
   // Profile to use when force_version_profile_ is true.
@@ -488,6 +499,13 @@ class Compiler {
   // When true, compilation will generate debug info with the binary SPIR-V
   // output.
   bool generate_debug_info_;
+
+  // When true, emit NonSemantic.Shader.DebugInfo.100 (glslang -gV).
+  bool generate_nonsemantic_debug_info_;
+
+  // When true, also embed source in the NonSemantic debug info (glslang -gVS).
+  // Only takes effect when generate_nonsemantic_debug_info_ is also true.
+  bool generate_nonsemantic_debug_source_;
 
   // Optimization passes to be applied.
   std::vector<PassId> enabled_opt_passes_;

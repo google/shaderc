@@ -491,6 +491,21 @@ TEST_F(CppInterface, GenerateDebugInfoDisassembly) {
               HasSubstr("debug_info_sample"));
 }
 
+TEST_F(CppInterface, GenerateNonSemanticDebugInfoDisassembly) {
+  options_.SetGenerateNonSemanticDebugInfo();
+  EXPECT_THAT(AssemblyOutput(kMinimalDebugInfoShader,
+                             shaderc_glsl_vertex_shader, options_),
+              HasSubstr("NonSemantic.Shader.DebugInfo.100"));
+}
+
+TEST_F(CppInterface, GenerateNonSemanticDebugSourceDisassembly) {
+  options_.SetGenerateNonSemanticDebugSource();
+  const std::string disassembly_text = AssemblyOutput(
+      kMinimalDebugInfoShader, shaderc_glsl_vertex_shader, options_);
+  EXPECT_THAT(disassembly_text, HasSubstr("NonSemantic.Shader.DebugInfo.100"));
+  EXPECT_THAT(disassembly_text, HasSubstr("debug_info_sample"));
+}
+
 TEST_F(CppInterface, GenerateDebugInfoDisassemblyClonedOptions) {
   options_.SetGenerateDebugInfo();
   // Generate debug info mode should be carried to the cloned options.
