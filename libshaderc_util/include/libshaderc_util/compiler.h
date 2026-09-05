@@ -479,7 +479,7 @@ class Compiler {
       const std::string& preprocessed_shader) const;
 
   // Neutralizes any queued kStripDebugInfo pass so requested debug info survives optimization.
-  void UnstripDebugInfoPasses();
+  void RemoveStripDebugInfoPass();
 
   // Version to use when force_version_profile_ is true.
   int default_version_;

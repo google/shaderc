@@ -456,7 +456,7 @@ void Compiler::SetForcedVersionProfile(int version, EProfile profile) {
 
 void Compiler::SetWarningsAsErrors() { warnings_as_errors_ = true; }
 
-void Compiler::UnstripDebugInfoPasses() {
+void Compiler::RemoveStripDebugInfoPass() {
   for (auto& pass : enabled_opt_passes_) {
     if (pass == PassId::kStripDebugInfo) {
       pass = PassId::kNullPass;
@@ -466,18 +466,18 @@ void Compiler::UnstripDebugInfoPasses() {
 
 void Compiler::SetGenerateDebugInfo() {
   generate_debug_info_ = true;
-  UnstripDebugInfoPasses();
+  RemoveStripDebugInfoPass();
 }
 
 void Compiler::SetGenerateNonSemanticDebugInfo() {
   generate_nonsemantic_debug_info_ = true;
-  UnstripDebugInfoPasses();
+  RemoveStripDebugInfoPass();
 }
 
 void Compiler::SetGenerateNonSemanticDebugSource() {
   generate_nonsemantic_debug_info_ = true;
   generate_nonsemantic_debug_source_ = true;
-  UnstripDebugInfoPasses();
+  RemoveStripDebugInfoPass();
 }
 
 void Compiler::SetOptimizationLevel(Compiler::OptimizationLevel level) {
