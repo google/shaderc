@@ -48,4 +48,24 @@ TEST(ConvertSpecificStage, Exhaustive) {
   EXPECT_EQ(shaderc_util::Compiler::Stage::MeshNV,
             shaderc_convert_specific_stage(shaderc_mesh_shader));
 }
+
+TEST(BinaryResult, GetBytesBeforeSetData) {
+  shaderc_compilation_result_spv_binary b;
+  EXPECT_EQ(nullptr, b.GetBytes());
+}
+
+TEST(BinaryResult, GetBytesYieldsRecentlySetData) {
+  uint32_t arr[10] = {0};
+  spv_binary_t spvb = { arr, 10 };
+  shaderc_compilation_result_spv_binary b;
+
+  b.SetOutputData(&spvb);
+  EXPECT_EQ(reinterpret_cast<const char*>(arr), b.GetBytes());
+
+  // Do null last because the destructor will call spvBinaryDestroy
+  // on it.
+  b.SetOutputData(nullptr);
+  EXPECT_EQ(nullptr, b.GetBytes());
+}
+
 }  // anonymous namespace
