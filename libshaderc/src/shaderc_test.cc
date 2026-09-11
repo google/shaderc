@@ -1938,4 +1938,29 @@ TEST_F(CompileStringWithOptionsTest, NanClampSurvivesCloning) {
   EXPECT_THAT(disassembly_text, HasSubstr("OpExtInst %v4float %1 NClamp"));
 }
 
+TEST(NullResultObj, GetLength) {
+  EXPECT_EQ(0u, shaderc_result_get_length(nullptr));
+}
+
+TEST(NullResultObj, GetNumWarnings) {
+  EXPECT_EQ(0u, shaderc_result_get_num_warnings(nullptr));
+}
+
+TEST(NullResultObj, GetNumErrors) {
+  EXPECT_EQ(0u, shaderc_result_get_num_errors(nullptr));
+}
+
+TEST(NullResultObj, GetBytes) {
+  EXPECT_EQ(nullptr, shaderc_result_get_bytes(nullptr));
+}
+
+TEST(NullResultObj, GetErrorMessage) {
+  EXPECT_EQ(nullptr, shaderc_result_get_error_message(nullptr));
+}
+
+TEST(NullResultObj, GetCompilationStatus) {
+  EXPECT_EQ(shaderc_compilation_status_null_result_object,
+            shaderc_result_get_compilation_status(nullptr));
+}
+
 }  // anonymous namespace

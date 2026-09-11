@@ -282,13 +282,13 @@ typedef struct shaderc_compile_options* shaderc_compile_options_t;
 // Any function operating on shaderc_compile_options_t must offer the
 // basic thread-safety guarantee.
 SHADERC_EXPORT shaderc_compile_options_t
-    shaderc_compile_options_initialize(void);
+shaderc_compile_options_initialize(void);
 
 // Returns a copy of the given shaderc_compile_options_t.
 // If NULL is passed as the parameter the call is the same as
 // shaderc_compile_options_init.
-SHADERC_EXPORT shaderc_compile_options_t shaderc_compile_options_clone(
-    const shaderc_compile_options_t options);
+SHADERC_EXPORT shaderc_compile_options_t
+shaderc_compile_options_clone(const shaderc_compile_options_t options);
 
 // Releases the compilation options. It is invalid to use the given
 // shaderc_compile_options_t object in any future calls. It is safe to pass
@@ -398,8 +398,7 @@ SHADERC_EXPORT void shaderc_compile_options_set_suppress_warnings(
 // a value listed in shaderc_env_version.  The 0 value maps to Vulkan 1.0 if
 // |target| is Vulkan, and it maps to OpenGL 4.5 if |target| is OpenGL.
 SHADERC_EXPORT void shaderc_compile_options_set_target_env(
-    shaderc_compile_options_t options,
-    shaderc_target_env target,
+    shaderc_compile_options_t options, shaderc_target_env target,
     uint32_t version);
 
 // Sets the target SPIR-V version. The generated module will use this version
@@ -447,8 +446,7 @@ SHADERC_EXPORT void shaderc_compile_options_set_hlsl_offsets(
 // automatically assigned number.  For HLSL compilation, the regsiter number
 // assigned to the resource is added to this specified base.
 SHADERC_EXPORT void shaderc_compile_options_set_binding_base(
-    shaderc_compile_options_t options,
-    shaderc_uniform_kind kind,
+    shaderc_compile_options_t options, shaderc_uniform_kind kind,
     uint32_t base);
 
 // Like shaderc_compile_options_set_binding_base, but only takes effect when
@@ -473,7 +471,8 @@ SHADERC_EXPORT void shaderc_compile_options_set_auto_map_locations(
 
 // Sets a descriptor set and binding for an HLSL register in the given stage.
 // This method keeps a copy of the string data.
-SHADERC_EXPORT void shaderc_compile_options_set_hlsl_register_set_and_binding_for_stage(
+SHADERC_EXPORT void
+shaderc_compile_options_set_hlsl_register_set_and_binding_for_stage(
     shaderc_compile_options_t options, shaderc_shader_kind shader_kind,
     const char* reg, const char* set, const char* binding);
 
@@ -510,7 +509,7 @@ SHADERC_EXPORT void shaderc_compile_options_set_nan_clamp(
     shaderc_compile_options_t options, bool enable);
 
 // An opaque handle to the results of a call to any shaderc_compile_into_*()
-// function.
+// function.  It can be null when an allocation failed.
 typedef struct shaderc_compilation_result* shaderc_compilation_result_t;
 
 // Takes a GLSL source string and the associated shader kind, input file
@@ -549,7 +548,8 @@ SHADERC_EXPORT shaderc_compilation_result_t shaderc_compile_into_spv_assembly(
 
 // Like shaderc_compile_into_spv, but the result contains preprocessed source
 // code instead of a SPIR-V binary module
-SHADERC_EXPORT shaderc_compilation_result_t shaderc_compile_into_preprocessed_text(
+SHADERC_EXPORT shaderc_compilation_result_t
+shaderc_compile_into_preprocessed_text(
     const shaderc_compiler_t compiler, const char* source_text,
     size_t source_text_size, shaderc_shader_kind shader_kind,
     const char* input_file_name, const char* entry_point_name,
@@ -577,43 +577,50 @@ SHADERC_EXPORT shaderc_compilation_result_t shaderc_assemble_into_spv(
 SHADERC_EXPORT void shaderc_result_release(shaderc_compilation_result_t result);
 
 // Returns the number of bytes of the compilation output data in a result
-// object.
-SHADERC_EXPORT size_t shaderc_result_get_length(const shaderc_compilation_result_t result);
+// object. Returns 0 if result is null.
+SHADERC_EXPORT size_t
+shaderc_result_get_length(const shaderc_compilation_result_t result);
 
-// Returns the number of warnings generated during the compilation.
-SHADERC_EXPORT size_t shaderc_result_get_num_warnings(
-    const shaderc_compilation_result_t result);
+// Returns the number of warnings generated during the compilation. Returns 0 if
+// result is null.
+SHADERC_EXPORT size_t
+shaderc_result_get_num_warnings(const shaderc_compilation_result_t result);
 
-// Returns the number of errors generated during the compilation.
-SHADERC_EXPORT size_t shaderc_result_get_num_errors(const shaderc_compilation_result_t result);
+// Returns the number of errors generated during the compilation. Returns 0 if
+// result is null.
+SHADERC_EXPORT size_t
+shaderc_result_get_num_errors(const shaderc_compilation_result_t result);
 
 // Returns the compilation status, indicating whether the compilation succeeded,
 // or failed due to some reasons, like invalid shader stage or compilation
-// errors.
-SHADERC_EXPORT shaderc_compilation_status shaderc_result_get_compilation_status(
-    const shaderc_compilation_result_t);
+// errors. Returns shaderc_compilation_status_null_result_object if the argument
+// is null.
+SHADERC_EXPORT shaderc_compilation_status
+shaderc_result_get_compilation_status(const shaderc_compilation_result_t);
 
 // Returns a pointer to the start of the compilation output data bytes, either
 // SPIR-V binary or char string. When the source string is compiled into SPIR-V
 // binary, this is guaranteed to be castable to a uint32_t*. If the result
 // contains assembly text or preprocessed source text, the pointer will point to
-// the resulting array of characters.
-SHADERC_EXPORT const char* shaderc_result_get_bytes(const shaderc_compilation_result_t result);
+// the resulting array of characters. Returns null if the result is null.
+SHADERC_EXPORT const char* shaderc_result_get_bytes(
+    const shaderc_compilation_result_t result);
 
 // Returns a null-terminated string that contains any error messages generated
-// during the compilation.
+// during the compilation. Returns null if the result is null.
 SHADERC_EXPORT const char* shaderc_result_get_error_message(
     const shaderc_compilation_result_t result);
 
 // Provides the version & revision of the SPIR-V which will be produced
-SHADERC_EXPORT void shaderc_get_spv_version(unsigned int* version, unsigned int* revision);
+SHADERC_EXPORT void shaderc_get_spv_version(unsigned int* version,
+                                            unsigned int* revision);
 
 // Parses the version and profile from a given null-terminated string
 // containing both version and profile, like: '450core'. Returns false if
 // the string can not be parsed. Returns true when the parsing succeeds. The
 // parsed version and profile are returned through arguments.
 SHADERC_EXPORT bool shaderc_parse_version_profile(const char* str, int* version,
-                                   shaderc_profile* profile);
+                                                  shaderc_profile* profile);
 
 #ifdef __cplusplus
 }
