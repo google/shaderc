@@ -31,6 +31,7 @@ struct shaderc_compilation_result {
   virtual ~shaderc_compilation_result() {}
 
   // Returns the data from this compilation as a sequence of bytes.
+  // It can return null in certain error cases.
   virtual const char* GetBytes() const = 0;
 
   // The size of the output data in term of bytes.
@@ -79,7 +80,8 @@ class shaderc_compilation_result_spv_binary
   void SetOutputData(spv_binary data) { output_data_ = data; }
 
   const char* GetBytes() const override {
-    return reinterpret_cast<const char*>(output_data_->code);
+    return output_data_ ? reinterpret_cast<const char*>(output_data_->code)
+                        : nullptr;
   }
 
  private:
