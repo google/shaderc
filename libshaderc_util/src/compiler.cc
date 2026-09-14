@@ -363,6 +363,8 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   std::vector<uint32_t>& spirv = compilation_output_data;
   glslang::SpvOptions options;
   options.generateDebugInfo = generate_debug_info_;
+  options.emitNonSemanticShaderDebugInfo = generate_nonsemantic_debug_info_;
+  options.emitNonSemanticShaderDebugSource = generate_nonsemantic_debug_source_;
   options.disableOptimizer = true;
   options.optimizeSize = false;
   // Note the call to GlslangToSpv also populates compilation_output_data.
@@ -454,13 +456,28 @@ void Compiler::SetForcedVersionProfile(int version, EProfile profile) {
 
 void Compiler::SetWarningsAsErrors() { warnings_as_errors_ = true; }
 
-void Compiler::SetGenerateDebugInfo() {
-  generate_debug_info_ = true;
-  for (size_t i = 0; i < enabled_opt_passes_.size(); ++i) {
-    if (enabled_opt_passes_[i] == PassId::kStripDebugInfo) {
-      enabled_opt_passes_[i] = PassId::kNullPass;
+void Compiler::RemoveStripDebugInfoPass() {
+  for (auto& pass : enabled_opt_passes_) {
+    if (pass == PassId::kStripDebugInfo) {
+      pass = PassId::kNullPass;
     }
   }
+}
+
+void Compiler::SetGenerateDebugInfo() {
+  generate_debug_info_ = true;
+  RemoveStripDebugInfoPass();
+}
+
+void Compiler::SetGenerateNonSemanticDebugInfo() {
+  generate_nonsemantic_debug_info_ = true;
+  RemoveStripDebugInfoPass();
+}
+
+void Compiler::SetGenerateNonSemanticDebugSource() {
+  generate_nonsemantic_debug_info_ = true;
+  generate_nonsemantic_debug_source_ = true;
+  RemoveStripDebugInfoPass();
 }
 
 void Compiler::SetOptimizationLevel(Compiler::OptimizationLevel level) {
@@ -469,13 +486,13 @@ void Compiler::SetOptimizationLevel(Compiler::OptimizationLevel level) {
 
   switch (level) {
     case OptimizationLevel::Size:
-      if (!generate_debug_info_) {
+      if (!generate_debug_info_ && !generate_nonsemantic_debug_info_) {
         enabled_opt_passes_.push_back(PassId::kStripDebugInfo);
       }
       enabled_opt_passes_.push_back(PassId::kSizePasses);
       break;
     case OptimizationLevel::Performance:
-      if (!generate_debug_info_) {
+      if (!generate_debug_info_ && !generate_nonsemantic_debug_info_) {
         enabled_opt_passes_.push_back(PassId::kStripDebugInfo);
       }
       enabled_opt_passes_.push_back(PassId::kPerformancePasses);
