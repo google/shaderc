@@ -32,7 +32,7 @@ bool ParseVersionProfile(const std::string& version_profile, int* version,
                          EProfile* profile) {
   if (version_profile.size() < kMinVersionProfileLength ||
       version_profile.size() > kMaxVersionProfileLength ||
-      !::isdigit(version_profile.front()))
+      !::isdigit(static_cast<unsigned char>(version_profile.front())))
     return false;
 
   std::string profile_string;
