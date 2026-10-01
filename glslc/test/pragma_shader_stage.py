@@ -540,6 +540,38 @@ class TestPSSMultipleErrors(expect.ErrorMessage):
 
 
 @inside_glslc_testsuite('PragmaShaderStage')
+class TestPSSExcessStageConflictReportingCutoffAt3(expect.ErrorMessage):
+    """Tests that if there are more than 3 shader-stage pragma
+    stage conflicts, the details are only provided for three of
+    them, with an additional trailing count of how many more exist."""
+
+    shader = FileShader(
+        """#version 310 es
+        #pragma shader_stage(idontknow)
+        #pragma shader_stage(vertex)
+        void main() {
+            gl_Position = vec4(1.);
+        }
+        #pragma shader_stage(fragment)
+        #pragma shader_stage(fragment)
+        #pragma shader_stage(fragment)
+        #pragma shader_stage(fragment)
+        """, '.glsl')
+    glslc_args = ['-c', shader]
+    expected_error = [
+        shader, ":2: error: '#pragma': invalid stage for 'shader_stage' "
+        "#pragma: 'idontknow'\n",
+        shader, ":3: error: '#pragma': conflicting stages for 'shader_stage' "
+        "#pragma: 'vertex' (was 'idontknow' at ", shader, ':2)\n',
+        shader, ":7: error: '#pragma': conflicting stages for 'shader_stage' "
+        "#pragma: 'fragment' (was 'idontknow' at ", shader, ':2)\n',
+        shader, ":8: error: '#pragma': conflicting stages for 'shader_stage' "
+        "#pragma: 'fragment' (was 'idontknow' at ", shader, ':2)\n',
+        "error: ... 2 more conflicting 'shader_stage' pragmas\n",
+    ]
+
+
+@inside_glslc_testsuite('PragmaShaderStage')
 class TestSpacesAroundPSS(expect.ValidObjectFile):
     """Tests that spaces around #pragma shader_stage() works."""
 
