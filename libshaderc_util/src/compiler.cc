@@ -14,6 +14,7 @@
 
 #include "libshaderc_util/compiler.h"
 
+#include <climits>
 #include <cstdint>
 #include <iomanip>
 #include <sstream>
@@ -194,6 +195,16 @@ std::tuple<bool, std::vector<uint32_t>, size_t> Compiler::Compile(
   bool& succeeded = std::get<0>(result_tuple);
   std::vector<uint32_t>& compilation_output_data = std::get<1>(result_tuple);
   size_t& compilation_output_data_size_in_bytes = std::get<2>(result_tuple);
+
+  // glslang takes source lengths as int; a size_t that does not fit would be
+  // truncated (negative -> glslang falls back to strlen() on a buffer that is
+  // not required to be NUL-terminated). Reject oversized inputs up front.
+  if (input_source_string.size() > static_cast<size_t>(INT_MAX)) {
+    *error_stream << error_tag
+                  << ": error: shader source exceeds INT_MAX bytes\n";
+    *total_errors = 1;
+    return result_tuple;
+  }
 
   // Check target environment.
   const auto target_client_info = GetGlslangClientInfo(
