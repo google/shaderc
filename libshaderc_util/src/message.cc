@@ -119,7 +119,12 @@ bool IsSummaryMessage(const string_piece& message) {
   if (space_loc == string_piece::npos) return false;
   const string_piece number = message.substr(0, space_loc);
   const string_piece rest = message.substr(space_loc + 1);
-  if (!std::all_of(number.begin(), number.end(), ::isdigit)) return false;
+  if (!std::all_of(number.begin(), number.end(), [](char c) {
+        // Cast to unsigned char to avoid undefined behaviour in ::isdigit.
+
+        return ::isdigit(static_cast<unsigned char>(c));
+      }))
+    return false;
   if (!rest.starts_with("compilation errors.")) return false;
   return true;
 }
