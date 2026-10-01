@@ -703,19 +703,29 @@ std::pair<EShLanguage, std::string> Compiler::GetShaderStageFromSourceCode(
         first_pragma_stage.str() + "'\n";
   }
 
+  constexpr size_t kMaxReportedConflicts = 3;
+  size_t num_conflicts = 0;
   for (size_t i = 1; i < stages.size(); ++i) {
     const string_piece& current_stage = std::get<2>(stages[i]);
     if (current_stage != first_pragma_stage) {
-      const string_piece& current_filename = std::get<0>(stages[i]);
-      const std::string current_line = std::to_string(std::get<1>(stages[i]));
-      error_message += current_filename.str() + ":" + current_line +
-                       ": error: '#pragma': conflicting stages for "
-                       "'shader_stage' #pragma: '" +
-                       current_stage.str() + "' (was '" +
-                       first_pragma_stage.str() + "' at " +
-                       first_pragma_filename.str() + ":" + first_pragma_line +
-                       ")\n";
+      ++num_conflicts;
+      if (num_conflicts <= kMaxReportedConflicts) {
+        const string_piece& current_filename = std::get<0>(stages[i]);
+        const std::string current_line = std::to_string(std::get<1>(stages[i]));
+        error_message += current_filename.str() + ":" + current_line +
+                         ": error: '#pragma': conflicting stages for "
+                         "'shader_stage' #pragma: '" +
+                         current_stage.str() + "' (was '" +
+                         first_pragma_stage.str() + "' at " +
+                         first_pragma_filename.str() + ":" + first_pragma_line +
+                         ")\n";
+      }
     }
+  }
+  if (num_conflicts > kMaxReportedConflicts) {
+    error_message += "error: ... " +
+                     std::to_string(num_conflicts - kMaxReportedConflicts) +
+                     " more conflicting 'shader_stage' pragmas\n";
   }
 
   return std::make_pair(error_message.empty() ? stage : EShLangCount,
