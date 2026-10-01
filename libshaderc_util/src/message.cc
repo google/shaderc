@@ -199,6 +199,20 @@ MessageType ParseGlslangOutput(const string_piece& message,
   return MessageType::Unknown;
 }
 
+// Returns a sanitized version of the given filename, to avoid a potential
+// memory allocation blowup when processing messages later:
+//  - Cut the name off at the first newline, if any
+//  - The name is at most 1Kb.
+string_piece SanitizeFilenameForMessages(const string_piece& file_name) {
+  constexpr size_t kMaxLength = 1024;
+  size_t safe_len = file_name.find_first_of('\n');
+  if (safe_len == string_piece::npos) {
+    safe_len = file_name.size();
+  }
+  safe_len = std::min(safe_len, kMaxLength);
+  return file_name.substr(0, safe_len);
+}
+
 bool PrintFilteredErrors(const string_piece& file_name,
                          std::ostream* error_stream, bool warnings_as_errors,
                          bool suppress_warnings, const char* error_list,
@@ -223,7 +237,17 @@ bool PrintFilteredErrors(const string_piece& file_name,
       "Linked tessellation evaluation stage:", "Linked geometry stage:",
       "Linked compute stage:", ""};
   size_t existing_total_errors = *total_errors;
+
+  // Use a sanitized filename fallback.  The fallback is emitted once per
+  // '\n'-split fragment of |error_list|, but glslang embeds |file_name|
+  // verbatim (including any '\n' bytes) into |error_list|. A newline-bearing
+  // |file_name| of length L therefore yields O(L) fragments each emitting
+  // O(L) bytes -> O(L^2) output.  Cap the fallback to the first line
+  // and to a reasonably short length.
+  auto safe_file_name = SanitizeFilenameForMessages(file_name);
+
   string_piece error_messages(error_list);
+
   for (const string_piece& message : error_messages.get_fields('\n')) {
     if (std::find(std::begin(ignored_error_strings),
                   std::end(ignored_error_strings),
@@ -234,7 +258,7 @@ bool PrintFilteredErrors(const string_piece& file_name,
       const MessageType type =
           ParseGlslangOutput(message, warnings_as_errors, suppress_warnings,
                              &source_name, &line_number, &rest);
-      string_piece name = file_name;
+      string_piece name = safe_file_name;
       if (!source_name.empty()) {
         // -1 is the string number for the preamble injected by us.
         name = source_name == "-1" ? "<command line>" : source_name;
