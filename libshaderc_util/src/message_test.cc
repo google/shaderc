@@ -19,7 +19,10 @@
 // a dependency on a fake compiler.
 #include "libshaderc_util/message.h"
 
-#include <gtest/gtest.h>
+#include <gmock/gmock.h>
+
+#include <ostream>
+#include <vector>
 
 using shaderc_util::MessageType;
 using shaderc_util::ParseGlslangOutput;
@@ -277,5 +280,58 @@ TEST(ParseGlslangOutputTest, WindowsPath) {
   EXPECT_EQ("0", line_number.str());
   EXPECT_EQ("wa:ha:ha", rest.str());
 }
+
+struct PrintFilteredErrorsCase {
+  std::string errors;
+  std::string filename;
+  std::string expected;
+  size_t expected_err_count = 0;
+  size_t expected_warning_count = 0;
+};
+
+using PrintFilteredErrorsTest =
+    ::testing::TestWithParam<PrintFilteredErrorsCase>;
+
+TEST_P(PrintFilteredErrorsTest, FallbackName) {
+  const auto param = GetParam();
+  size_t err_count = 0;
+  size_t warning_count = 0;
+  std::ostringstream os;
+  constexpr bool kWarningsAsErrors = false;
+  constexpr bool kSuppressWarnings = false;
+  bool result = shaderc_util::PrintFilteredErrors(
+      param.filename, &os, kWarningsAsErrors, kSuppressWarnings,
+      param.errors.c_str(), &warning_count, &err_count);
+
+  EXPECT_EQ(result, 0 == param.expected_err_count)
+      << "error count: " << err_count
+      << " vs. expected_err_count: " << param.expected_err_count;
+
+  EXPECT_EQ(warning_count, param.expected_warning_count);
+  const std::string got = os.str();
+  EXPECT_THAT(got, ::testing::StrEq(param.expected))
+      << "got: '" << got << "' expected: '" << param.expected << "'";
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    Samples, PrintFilteredErrorsTest,
+    ::testing::ValuesIn(std::vector<PrintFilteredErrorsCase>{
+        {"", "abc", ""},
+        // With Glslang's expected file and line number format
+        {"ERROR: abc:123: bah", "abc", "abc:123: error: bah\n", 1},
+        {"ERROR: abc:123: bah", "def", "abc:123: error: bah\n", 1},
+        {"ERROR: -1:123: bah", "def", "<command line>:123: error: bah\n", 1},
+        // Use the fallback name
+        {"no problem", "abc", "abc: no problem\n"},
+        // Fallback name sanitization: cut at newline
+        {"cut at newline", "abc\ndef", "abc: cut at newline\n"},
+        {"ERROR: cut at newline", "abc\ndef", "abc: error: cut at newline\n",
+         1},
+        // Fallback name sanitization: cut at 1k length
+        {"cut at 1k", std::string(5555, 'x'),
+         std::string(1024, 'x') + ": cut at 1k\n"},
+        {"ERROR: cut at 1k", std::string(5555, 'x'),
+         std::string(1024, 'x') + ": error: cut at 1k\n", 1},
+    }));
 
 }  // anonymous namespace
