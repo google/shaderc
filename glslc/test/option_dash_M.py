@@ -762,3 +762,41 @@ class TestErrorDashMFUnwritableFile(expect.ErrorMessageSubstr):
     bad_file = '/file/should/not/exist/today.d'
     glslc_args = ['-MD', '-MF', bad_file, 'shader.vert']
     expected_error_substr = ['cannot open output file']
+
+
+@inside_glslc_testsuite('OptionsCapM')
+class TestDashCapMTMakeSpecialEscaping(expect.StdoutMatch):
+    """Tests that -MT escapes make-special characters ($, space, tab, #, :, \\, [, ])."""
+    environment = EMPTY_SHADER_IN_CURDIR
+    glslc_args = ['-M', 'shader.vert', '-MT', 'out target$#[1]:\\\t']
+    expected_stdout = r'out\ target$$\#\[1\]\:\\\ : shader.vert' + '\n'
+
+
+@inside_glslc_testsuite('OptionsCapM')
+class TestDashCapMDEscapedIncludes(expect.ValidFileContents,
+                                   expect.ValidNamedObjectFile):
+    """Tests that -MD escapes make-special characters in #include paths."""
+    environment = Directory('.', [
+        File('a.vert', '#version 140\n#include "h space$#.glsl"\nvoid main(){}\n'),
+        File('h space$#.glsl', 'void foo(){}\n'),
+    ])
+    glslc_args = ['-MD', 'a.vert']
+    expected_object_filenames = ('a.spv', )
+    target_filename = 'a.vert.spv.d'
+    expected_file_contents = ['a.vert.spv: a.vert h\\ space$$\\#.glsl\n']
+
+
+@inside_glslc_testsuite('OptionsCapM')
+class TestErrorDashMTargetContainsNewline(expect.ErrorMessageSubstr):
+    """Tests that -MT with a newline character is rejected with a diagnostic error."""
+    environment = EMPTY_SHADER_IN_CURDIR
+    glslc_args = ['-M', 'shader.vert', '-MT', 'bad\ntarget']
+    expected_error_substr = 'glslc: error: dependency path contains unrepresentable newline'
+
+
+@inside_glslc_testsuite('OptionsCapM')
+class TestErrorDashMTargetContainsCarriageReturn(expect.ErrorMessageSubstr):
+    """Tests that -MT with a carriage return character is rejected with a diagnostic error."""
+    environment = EMPTY_SHADER_IN_CURDIR
+    glslc_args = ['-M', 'shader.vert', '-MT', 'bad\rtarget']
+    expected_error_substr = 'glslc: error: dependency path contains unrepresentable newline'

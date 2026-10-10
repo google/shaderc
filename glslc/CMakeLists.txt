@@ -61,6 +61,7 @@ shaderc_add_tests(
   TEST_PREFIX glslc
   LINK_LIBS glslc shaderc_util shaderc
   TEST_NAMES
+    dependency_info
     file
     resource_parse
     stage)
