@@ -15,11 +15,21 @@
 #ifndef GLSLC_DEPENDENCY_INFO_H
 #define GLSLC_DEPENDENCY_INFO_H
 
+#include <iosfwd>
+#include <string>
 #include <unordered_set>
-#include <string>
-#include <string>
 
 namespace glslc {
+
+// Escapes a path for GNU make depfile consumers, following GCC's
+// munge() (libcpp/mkdeps.cc) and glslang's writeEscapedDepString().
+// Make-special characters ($, space, tab, #, :, \, [, ]) are escaped.
+// Unrepresentable newline characters (\n, \r) return false.
+bool WriteEscapedDepPath(std::ostream& out, const std::string& path);
+
+// Convenience wrapper that escapes path into escaped_path.
+// Returns false if path contains unrepresentable newline characters (\n, \r).
+bool EscapeDepPath(const std::string& path, std::string* escaped_path);
 
 // An object to handle everything about dumping dependency info. Internally it
 // has two valid dumping mode: 1) Dump to extra dependency info files, such as
