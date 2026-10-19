@@ -411,7 +411,7 @@ TEST_F(CppInterface, ForcedVersionProfileInvalidModule) {
   options_.SetForcedVersionProfile(310, shaderc_profile_es);
   EXPECT_THAT(CompilationErrors(kCoreVertShaderWithoutVersion,
                                 shaderc_glsl_vertex_shader, options_),
-              HasSubstr("error: 'gl_ClipDistance' : undeclared identifier\n"));
+              HasSubstr("error: 'gl_ClipDistance' : required extension not requested"));
 }
 
 TEST_F(CppInterface, ForcedVersionProfileConflictingStd) {
