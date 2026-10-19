@@ -550,7 +550,7 @@ TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileInvalidModule) {
   ASSERT_NE(nullptr, compiler_.get_compiler_handle());
   EXPECT_THAT(CompilationErrors(kCoreVertShaderWithoutVersion,
                                 shaderc_glsl_vertex_shader, options_.get()),
-              HasSubstr("error: 'gl_ClipDistance' : undeclared identifier\n"));
+              HasSubstr("error: 'gl_ClipDistance' : required extension not requested"));
 }
 
 TEST_F(CompileStringWithOptionsTest, ForcedVersionProfileConflictingStd) {
