@@ -51,10 +51,6 @@ class GlslangInitializer {
 
  private:
   static unsigned int initialize_count_;
-
-  // Using a bare pointer here to avoid any global class construction at the
-  // beginning of the execution.
-  static std::mutex* glslang_mutex_;
 };
 
 // Maps macro names to their definitions.  Stores string_pieces, so the
