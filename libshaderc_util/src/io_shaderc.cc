@@ -16,7 +16,7 @@
 
 #include "libshaderc_util/universal_unistd.h"
 
-#if _WIN32
+#ifdef _WIN32
 // Need _fileno from stdio.h
 // Need _O_BINARY and _O_TEXT from fcntl.h
 #include <fcntl.h>
@@ -131,14 +131,14 @@ bool WriteFile(std::ostream* stream, const string_piece& output_data) {
 
 void FlushAndSetBinaryModeOnStdout() {
   std::fflush(stdout);
-#if _WIN32
+#ifdef _WIN32
   _setmode(_fileno(stdout), _O_BINARY);
 #endif
 }
 
 void FlushAndSetTextModeOnStdout() {
   std::fflush(stdout);
-#if _WIN32
+#ifdef _WIN32
   _setmode(_fileno(stdout), _O_TEXT);
 #endif
 }
