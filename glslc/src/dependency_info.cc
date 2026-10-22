@@ -23,6 +23,43 @@
 
 namespace glslc {
 
+bool WriteEscapedDepPath(std::ostream& out, const std::string& path) {
+  for (char c : path) {
+    switch (c) {
+      case '$':
+        out << "$$";
+        break;
+      case ' ':
+      case '\t':
+        out << "\\ ";
+        break;
+      case '#':
+      case ':':
+      case '[':
+      case ']':
+      case '\\':
+        out << '\\' << c;
+        break;
+      case '\n':
+      case '\r':
+        return false;
+      default:
+        out << c;
+        break;
+    }
+  }
+  return true;
+}
+
+bool EscapeDepPath(const std::string& path, std::string* escaped_path) {
+  std::ostringstream ss;
+  if (!WriteEscapedDepPath(ss, path)) {
+    return false;
+  }
+  *escaped_path = ss.str();
+  return true;
+}
+
 DependencyInfoDumpingHandler::DependencyInfoDumpingHandler() : mode_(not_set) {}
 
 bool DependencyInfoDumpingHandler::DumpDependencyInfo(
@@ -36,11 +73,24 @@ bool DependencyInfoDumpingHandler::DumpDependencyInfo(
   // Dump everything to a string stream first, then dump its content to either
   // a file or compilation output string, depends on current dumping mode.
   std::stringstream dep_string_stream;
-  // dump target label and the source_file_name.
-  dep_string_stream << dep_target_label << ": " << source_file_name;
-  // dump the dependent file names.
+  if (!WriteEscapedDepPath(dep_string_stream, dep_target_label)) {
+    std::cerr << "glslc: error: dependency path contains unrepresentable newline: '"
+              << dep_target_label << "'" << std::endl;
+    return false;
+  }
+  dep_string_stream << ": ";
+  if (!WriteEscapedDepPath(dep_string_stream, source_file_name)) {
+    std::cerr << "glslc: error: dependency path contains unrepresentable newline: '"
+              << source_file_name << "'" << std::endl;
+    return false;
+  }
   for (auto& dependent_file_name : dependent_files) {
-    dep_string_stream << " " << dependent_file_name;
+    dep_string_stream << " ";
+    if (!WriteEscapedDepPath(dep_string_stream, dependent_file_name)) {
+      std::cerr << "glslc: error: dependency path contains unrepresentable newline: '"
+                << dependent_file_name << "'" << std::endl;
+      return false;
+    }
   }
   dep_string_stream << std::endl;
 
