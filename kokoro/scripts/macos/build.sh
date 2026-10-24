@@ -25,12 +25,6 @@ BUILD_ROOT=$PWD
 SRC=$PWD/github/shaderc
 BUILD_TYPE=$1
 
-# Get NINJA.
-wget -q https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-mac.zip
-unzip -q ninja-mac.zip
-chmod +x ninja
-export PATH="$PWD:$PATH"
-
 cd $SRC
 ./utils/git-sync-deps
 
