@@ -60,6 +60,25 @@ def process_test_specified_dependency_info_rules(test_specified_rules):
         rule['dependency'] = dependent_file_name_set
 
 
+def unescape_make_dep_path(token):
+    r"""Unescapes make-special characters (\ , \:, \#, \[, \], \\, and $$)
+    emitted by glslc into a dependency file or stdout."""
+    res = []
+    i = 0
+    n = len(token)
+    while i < n:
+        if token[i] == '$' and i + 1 < n and token[i + 1] == '$':
+            res.append('$')
+            i += 2
+        elif token[i] == '\\' and i + 1 < n:
+            res.append(token[i + 1])
+            i += 2
+        else:
+            res.append(token[i])
+            i += 1
+    return ''.join(res)
+
+
 def parse_text_rules(text_lines):
     """ A helper function to read text lines and construct and returns a list of
     dependency rules which can be used for comparison.
@@ -72,9 +91,29 @@ def parse_text_rules(text_lines):
     for line in text_lines:
         if line.strip() == "":
             continue
-        rule = {'target': line.split(': ')[0].strip(),
-                'dependency': set(line.split(': ')[-1].strip().split(' '))}
-        rules.append(rule)
+        parts = line.split(': ')
+        target = unescape_make_dep_path(parts[0].strip())
+        deps_str = ': '.join(parts[1:]).strip()
+
+        tokens = []
+        cur = []
+        i = 0
+        n = len(deps_str)
+        while i < n:
+            if deps_str[i] == '\\' and i + 1 < n and deps_str[i + 1] == ' ':
+                cur.append(r'\ ')
+                i += 2
+            elif deps_str[i] == ' ':
+                if cur:
+                    tokens.append(unescape_make_dep_path(''.join(cur)))
+                    cur = []
+                i += 1
+            else:
+                cur.append(deps_str[i])
+                i += 1
+        if cur:
+            tokens.append(unescape_make_dep_path(''.join(cur)))
+        rules.append({'target': target, 'dependency': set(tokens)})
     return rules
 
 
@@ -762,3 +801,41 @@ class TestErrorDashMFUnwritableFile(expect.ErrorMessageSubstr):
     bad_file = '/file/should/not/exist/today.d'
     glslc_args = ['-MD', '-MF', bad_file, 'shader.vert']
     expected_error_substr = ['cannot open output file']
+
+
+@inside_glslc_testsuite('OptionsCapM')
+class TestDashCapMTMakeSpecialEscaping(expect.StdoutMatch):
+    """Tests that -MT escapes make-special characters ($, space, tab, #, :, \\, [, ])."""
+    environment = EMPTY_SHADER_IN_CURDIR
+    glslc_args = ['-M', 'shader.vert', '-MT', 'out target$#[1]:\\\t']
+    expected_stdout = r'out\ target$$\#\[1\]\:\\\ : shader.vert' + '\n'
+
+
+@inside_glslc_testsuite('OptionsCapM')
+class TestDashCapMDEscapedIncludes(expect.ValidFileContents,
+                                   expect.ValidNamedObjectFile):
+    """Tests that -MD escapes make-special characters in #include paths."""
+    environment = Directory('.', [
+        File('a.vert', '#version 140\n#include "h space$#.glsl"\nvoid main(){}\n'),
+        File('h space$#.glsl', 'void foo(){}\n'),
+    ])
+    glslc_args = ['-MD', 'a.vert']
+    expected_object_filenames = ('a.spv', )
+    target_filename = 'a.vert.spv.d'
+    expected_file_contents = ['a.vert.spv: a.vert h\\ space$$\\#.glsl\n']
+
+
+@inside_glslc_testsuite('OptionsCapM')
+class TestErrorDashMTargetContainsNewline(expect.ErrorMessageSubstr):
+    """Tests that -MT with a newline character is rejected with a diagnostic error."""
+    environment = EMPTY_SHADER_IN_CURDIR
+    glslc_args = ['-M', 'shader.vert', '-MT', 'bad\ntarget']
+    expected_error_substr = 'glslc: error: dependency path contains unrepresentable newline'
+
+
+@inside_glslc_testsuite('OptionsCapM')
+class TestErrorDashMTargetContainsCarriageReturn(expect.ErrorMessageSubstr):
+    """Tests that -MT with a carriage return character is rejected with a diagnostic error."""
+    environment = EMPTY_SHADER_IN_CURDIR
+    glslc_args = ['-M', 'shader.vert', '-MT', 'bad\rtarget']
+    expected_error_substr = 'glslc: error: dependency path contains unrepresentable newline'
