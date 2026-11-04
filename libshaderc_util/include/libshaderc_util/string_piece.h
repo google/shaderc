@@ -149,7 +149,7 @@ class string_piece {
   size_t find_last_of(const string_piece& to_search, size_t pos = npos) const {
     if (empty()) return npos;
     if (pos >= size()) {
-      pos = size();
+      pos = size() - 1;
     }
     auto it = begin_ + pos + 1;
     do {
@@ -175,7 +175,7 @@ class string_piece {
                           size_t pos = npos) const {
     if (empty()) return npos;
     if (pos >= size()) {
-      pos = size();
+      pos = size() - 1;
     }
     auto it = begin_ + pos + 1;
     do {
@@ -189,7 +189,7 @@ class string_piece {
 
   // Returns find_last_not_of(str, pos) where str is a string_piece
   // containing only to_search.
-  size_t find_last_not_of(char to_search, size_t pos = 0) const {
+  size_t find_last_not_of(char to_search, size_t pos = npos) const {
     return find_last_not_of(string_piece(&to_search, &to_search + 1), pos);
   }
 
