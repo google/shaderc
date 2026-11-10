@@ -4,6 +4,11 @@ Download the latest builds.
 **Note: These binaries are just the artifacts of the builders and have not
   undergone any QA, thus they should be considered unsupported.**
 
+If the Windows build artifacts are unavailable, the
+[Windows Vulkan SDK](https://vulkan.lunarg.com/doc/view/latest/windows/getting_started.html)
+includes `glslc`. To get Shaderc from a specific revision, follow the
+[build-from-source instructions](README.md#getting-and-building-shaderc).
+
 ## Release
 | Windows | Linux | MacOS |
 | --- | --- | --- |
