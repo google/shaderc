@@ -16,6 +16,7 @@ import expect
 import os.path
 from glslc_test_framework import inside_glslc_testsuite
 from placeholder import FileShader, StdinShader
+from environment import File, Directory
 
 
 def simple_vertex_shader():
@@ -163,3 +164,15 @@ class TestDashCapSWithStdOut(
 
     expected_stdout = True
     expected_stderr = ''
+
+
+@inside_glslc_testsuite('OptionDashCapS')
+class TestDashCapSExtensionlessFileInDottedDirectory(
+        expect.ValidNamedAssemblyFile):
+    """Tests that a '.' in a directory name is not taken as the extension of
+    an extensionless input file."""
+
+    environment = Directory('.', [
+        Directory('shaders.v2', [File('shader', simple_vertex_shader())])])
+    glslc_args = ['-S', '-fshader-stage=vert', 'shaders.v2/shader']
+    expected_assembly_filenames = ('shader.spvasm',)
