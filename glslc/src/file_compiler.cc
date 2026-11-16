@@ -424,12 +424,11 @@ std::string FileCompiler::GetCandidateOutputFileName(
     extension = ".spv";
   }
 
-  std::string candidate_output_file_name =
-      IsStageFile(input_filename)
-          ? shaderc_util::GetBaseFileName(input_filename) + extension
-          : shaderc_util::GetBaseFileName(
-                input_filename.substr(0, input_filename.find_last_of('.')) +
-                extension);
-  return candidate_output_file_name;
+  const std::string base_name = shaderc_util::GetBaseFileName(input_filename);
+  // Only a '.' in the file's own name starts an extension; a '.' in a
+  // directory name (e.g. "./foo" or "shaders.v2/foo") does not.
+  return IsStageFile(input_filename)
+             ? base_name + extension
+             : base_name.substr(0, base_name.find_last_of('.')) + extension;
 }
 }  // namesapce glslc

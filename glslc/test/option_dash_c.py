@@ -15,6 +15,7 @@
 import expect
 from glslc_test_framework import inside_glslc_testsuite
 from placeholder import FileShader
+from environment import File, Directory
 
 
 def empty_es_310_shader():
@@ -53,3 +54,27 @@ class TestMultipleDashC(expect.ValidObjectFile):
     shader1 = FileShader(empty_es_310_shader(), '.vert')
     shader2 = FileShader(empty_es_310_shader(), '.vert')
     glslc_args = ['-c', shader1, '-c', '-c', shader2]
+
+
+@inside_glslc_testsuite('OptionC')
+class TestDashCExtensionlessFileInDottedDirectory(expect.ValidNamedObjectFile):
+    """Tests that a '.' in a directory name is not taken as the extension of
+    an extensionless input file."""
+
+    environment = Directory('.', [
+        Directory('shaders.v2', [File('shader', empty_es_310_shader())])])
+    glslc_args = ['-c', '-fshader-stage=vert', 'shaders.v2/shader']
+    expected_object_filenames = ('shader.spv',)
+
+
+@inside_glslc_testsuite('OptionC')
+class TestDashCExtensionlessFilesWithDotSlashPrefix(
+        expect.ValidNamedObjectFile):
+    """Tests that extensionless inputs given as ./dir/name each get their own
+    object file named after the input file."""
+
+    environment = Directory('.', [
+        Directory('kern', [File('blur', empty_es_310_shader()),
+                           File('sharpen', empty_es_310_shader())])])
+    glslc_args = ['-c', '-fshader-stage=vert', './kern/blur', './kern/sharpen']
+    expected_object_filenames = ('blur.spv', 'sharpen.spv')
