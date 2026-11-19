@@ -39,10 +39,29 @@ set +e
 # Allow build failures
 
 # "--privileged" is required to run ptrace in the asan builds.
+# Translate a path under KOKORO_ROOT_DIR to the corresponding host VM path under
+# KOKORO_HOST_ROOT_DIR when running Docker sibling containers on Kokoro Instances.
+function to_host_path() {
+  local path="$1"
+  if [ -n "${KOKORO_HOST_ROOT_DIR:-}" ] && [ -n "${KOKORO_ROOT_DIR:-}" ]; then
+    local container_root="${KOKORO_ROOT_DIR%/}"
+    local host_root="${KOKORO_HOST_ROOT_DIR%/}"
+    if [ "${path}" = "${container_root}" ]; then
+      echo "${host_root}"
+    elif [[ "${path}" == "${container_root}/"* ]]; then
+      echo "${host_root}${path#${container_root}}"
+    else
+      echo "${path}"
+    fi
+  else
+    echo "${path}"
+  fi
+}
+
 docker run --rm -i \
   --privileged \
-  --volume "${ROOT_DIR}:${ROOT_DIR}" \
-  --volume "${KOKORO_ARTIFACTS_DIR}:${KOKORO_ARTIFACTS_DIR}" \
+  --volume "$(to_host_path "${ROOT_DIR}"):${ROOT_DIR}" \
+  --volume "$(to_host_path "${KOKORO_ARTIFACTS_DIR}"):${KOKORO_ARTIFACTS_DIR}" \
   --workdir "${ROOT_DIR}" \
   --env SCRIPT_DIR=${SCRIPT_DIR} \
   --env ROOT_DIR=${ROOT_DIR} \
