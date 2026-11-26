@@ -241,6 +241,43 @@ TEST(string_piece, find_last_of) {
   EXPECT_EQ(npos, string_piece(" ").find_last_of('a'));
   EXPECT_EQ(npos, string_piece("").find_last_of('a'));
   EXPECT_EQ(npos, string_piece("").find_last_of("ae"));
+
+  // The search must not look past the end of the piece.
+  const std::string with_dot("abc.def");
+  const string_piece abc = string_piece(with_dot).substr(0, 3);
+  EXPECT_EQ(npos, abc.find_last_of('.'));
+  EXPECT_EQ(npos, abc.find_last_of(".", 3));
+  EXPECT_EQ(npos, abc.find_last_of(".x", npos));
+  EXPECT_EQ(2u, abc.find_last_of("c."));
+  const char not_terminated[] = {'a', 'b', 'c'};
+  EXPECT_EQ(npos,
+            string_piece(not_terminated, not_terminated + 2).find_last_of('c'));
+}
+
+TEST(string_piece, find_last_not_of) {
+  size_t npos = string_piece::npos;
+  string_piece my_string("aaaaaa b");
+  EXPECT_EQ(7u, my_string.find_last_not_of('a'));
+  EXPECT_EQ(7u, my_string.find_last_not_of("a"));
+  EXPECT_EQ(6u, my_string.find_last_not_of('b'));
+  EXPECT_EQ(5u, my_string.find_last_not_of(" b"));
+  EXPECT_EQ(npos, my_string.find_last_not_of("ab "));
+  EXPECT_EQ(4u, my_string.find_last_not_of('b', 4));
+  EXPECT_EQ(npos, my_string.find_last_not_of('a', 5));
+  EXPECT_EQ(npos, string_piece("").find_last_not_of('a'));
+  EXPECT_EQ(npos, string_piece("").find_last_not_of(""));
+  EXPECT_EQ(1u, string_piece("ab").find_last_not_of(""));
+
+  // The search must not look past the end of the piece.
+  const std::string aab("aab");
+  const string_piece aa = string_piece(aab).substr(0, 2);
+  EXPECT_EQ(npos, aa.find_last_not_of('a'));
+  EXPECT_EQ(npos, aa.find_last_not_of("a"));
+  EXPECT_EQ(npos, aa.find_last_not_of("a", 2));
+  const char not_terminated[] = {'a', 'a', 'b'};
+  EXPECT_EQ(
+      npos,
+      string_piece(not_terminated, not_terminated + 2).find_last_not_of('a'));
 }
 
 TEST(string_piece, begin_end) {
